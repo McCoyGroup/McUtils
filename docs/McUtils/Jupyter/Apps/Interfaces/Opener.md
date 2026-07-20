@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.Opener">Opener</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1064)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1064?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1923)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1923?message=Update%20Docs)]
 </div>
 
 
@@ -27,9 +27,20 @@ theme: dict
 __init__(self, items, base_name=None, open=False, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1075)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1075?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1934)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1934?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A collapsible opener (a simpler, single-level accordion-style disclosure).
+  - `items`: `Any`
+    > the `{label: content}` items
+  - `base_name`: `Any`
+    > the id prefix
+  - `open`: `bool`
+    > start expanded
+  - `attrs`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Opener.create_item" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +48,20 @@ __init__(self, items, base_name=None, open=False, **attrs):
 create_item(self, item, open=None, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Opener.py#L1083)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Opener.py#L1083?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Opener.py#L1953)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Opener.py#L1953?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build an opener item (header plus collapsible body).
+  - `item`: `Any`
+    > the item spec
+  - `open`: `Any`
+    > start expanded
+  - `kw`: `Any`
+    > extra options
+  - `:returns`: `_`
+    > the item element
  </div>
 </div>
 
@@ -93,7 +115,7 @@ create_item(self, item, open=None, **kw):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/Opener.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/Opener.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1064?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1923?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

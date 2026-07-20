@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.Redirects.OutputRedirect">OutputRedirect</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L143)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L143?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L155)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L155?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, redirect=True, stdout=None, stderr=None, capture_output=False, capture_errors=None, file_handles=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L144)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L144?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L156)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L156?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -51,8 +51,8 @@ in-memory buffers, files, or discarding them.
 get_handle(cls, handles=None, file_handles=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L184)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L184?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L196)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L196?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -72,8 +72,8 @@ or `None` (for a file handle to be created later).
 get_temp_stream(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L204)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L204?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L216)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L216?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -87,8 +87,8 @@ Open and enter a writable named temporary file to capture output into.
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/OutputRedirect.py#L215)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/OutputRedirect.py#L215?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/OutputRedirect.py#L227)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/OutputRedirect.py#L227?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -101,8 +101,8 @@ files, given streams/paths, or the null device), saving the originals.
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/OutputRedirect.py#L259)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/OutputRedirect.py#L259?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/OutputRedirect.py#L271)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/OutputRedirect.py#L271?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -167,7 +167,7 @@ entry.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/Redirects/OutputRedirect.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/Redirects/OutputRedirect.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L143?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L155?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

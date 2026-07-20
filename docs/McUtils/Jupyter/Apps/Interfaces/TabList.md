@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.TabList">TabList</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L912)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L912?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1647)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1647?message=Update%20Docs)]
 </div>
 
 
@@ -27,9 +27,20 @@ theme: dict
 __init__(self, *args, base_name=None, role='tablist', **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L921)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L921?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1656)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1656?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The tab-buttons list of a tabbed interface.
+  - `args`: `Any`
+    > the tab specs
+  - `base_name`: `Any`
+    > the shared id prefix
+  - `role`: `str`
+    > the ARIA role
+  - `kwargs`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.TabList.create_item" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +48,20 @@ __init__(self, *args, base_name=None, role='tablist', **kwargs):
 create_item(self, item, cls=None, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/TabList.py#L927)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/TabList.py#L927?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/TabList.py#L1673)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/TabList.py#L1673?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a tab-button element.
+  - `item`: `Any`
+    > the tab spec
+  - `cls`: `Any`
+    > extra CSS classes
+  - `kw`: `Any`
+    > extra options
+  - `:returns`: `_`
+    > the tab button
  </div>
 </div>
 
@@ -93,7 +115,7 @@ create_item(self, item, cls=None, **kw):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/TabList.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/TabList.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L912?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1647?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

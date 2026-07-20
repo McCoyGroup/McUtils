@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.OpenerHeader">OpenerHeader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1038)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1038?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1870)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1870?message=Update%20Docs)]
 </div>
 
 
@@ -27,9 +27,18 @@ theme: dict
 __init__(self, key, base_name=None, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1047)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1047?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1879)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1879?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+An opener's clickable header (toggle).
+  - `key`: `Any`
+    > the opener id
+  - `base_name`: `Any`
+    > the id prefix
+  - `kw`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.OpenerHeader.create_item" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +46,18 @@ __init__(self, key, base_name=None, **kw):
 create_item(self, i, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/OpenerHeader.py#L1050)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/OpenerHeader.py#L1050?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/OpenerHeader.py#L1891)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/OpenerHeader.py#L1891?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build the opener header element.
+  - `i`: `Any`
+    > the header content
+  - `kw`: `Any`
+    > extra options
+  - `:returns`: `_`
+    > the header element
  </div>
 </div>
 
@@ -93,7 +111,7 @@ create_item(self, i, **kw):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/OpenerHeader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/OpenerHeader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1038?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1870?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Controls.Selector">Selector</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L236)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L236?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L513)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L513?message=Update%20Docs)]
 </div>
 
 
@@ -36,9 +36,22 @@ base(*elements, **styles):
 __init__(self, var, options=None, value=None, multiple=False, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L239)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L239?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L516)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L516?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A `<select>` dropdown control, single- or multi-select.
+  - `var`: `Any`
+    > the bound variable
+  - `options`: `Any`
+    > the selectable options
+  - `value`: `Any`
+    > the initial value (defaults to the first option)
+  - `multiple`: `bool`
+    > allow multiple selections
+  - `attrs`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Controls.Selector.multiple" class="docs-object-method">&nbsp;</a> 
@@ -47,9 +60,14 @@ __init__(self, var, options=None, value=None, multiple=False, **attrs):
 multiple(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Selector.py#L246)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Selector.py#L246?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Selector.py#L535)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Selector.py#L535?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Whether the selector allows multiple selections.
+  - `:returns`: `bool`
+    > the multi-select flag
 
 
 <a id="McUtils.Jupyter.Apps.Controls.Selector.get_value" class="docs-object-method">&nbsp;</a> 
@@ -57,9 +75,14 @@ multiple(self):
 get_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Selector.py#L256)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Selector.py#L256?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Selector.py#L553)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Selector.py#L553?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Read the selection, splitting the multi-select value into a list.
+  - `:returns`: `_`
+    > the selected value(s)
 
 
 <a id="McUtils.Jupyter.Apps.Controls.Selector.set_value" class="docs-object-method">&nbsp;</a> 
@@ -67,9 +90,12 @@ get_value(self):
 set_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Selector.py#L267)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Selector.py#L267?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Selector.py#L571)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Selector.py#L571?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Push the variable's selection into the widget (joining a multi-select list).
 
 
 <a id="McUtils.Jupyter.Apps.Controls.Selector.canonicalize_options" class="docs-object-method">&nbsp;</a> 
@@ -78,9 +104,16 @@ set_value(self):
 canonicalize_options(cls, options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L276)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L276?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L585)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L585?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Normalize the options into `(label, value)` pairs.
+  - `options`: `Any`
+    > the options (strings or `(label, value)` pairs)
+  - `:returns`: `tuple`
+    > the canonicalized options
 
 
 <a id="McUtils.Jupyter.Apps.Controls.Selector.to_jhtml" class="docs-object-method">&nbsp;</a> 
@@ -88,9 +121,14 @@ canonicalize_options(cls, options):
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Selector.py#L301)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Selector.py#L301?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Selector.py#L627)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Selector.py#L627?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render the select element with its options.
+  - `:returns`: `_`
+    > the JHTML element
  </div>
 </div>
 
@@ -144,7 +182,7 @@ to_jhtml(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/Selector.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/Selector.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L236?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L513?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

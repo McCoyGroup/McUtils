@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Controls.DropdownSelect">DropdownSelect</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L490)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L490?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L1049)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L1049?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,22 @@ menu_type: Dropdown
 __init__(self, var, options, name=None, menu_type=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L492)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L492?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L1051)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L1051?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A control that selects a value from a dropdown menu.
+  - `var`: `Any`
+    > the bound variable
+  - `options`: `Any`
+    > the dropdown options
+  - `name`: `Any`
+    > the dropdown label (defaults to the variable name)
+  - `menu_type`: `Any`
+    > the dropdown component class
+  - `attrs`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Controls.DropdownSelect.get_value" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +49,14 @@ __init__(self, var, options, name=None, menu_type=None, **attrs):
 get_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L502)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L502?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L1072)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L1072?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the selected value (from the inner menu selector).
+  - `:returns`: `_`
+    > the value
 
 
 <a id="McUtils.Jupyter.Apps.Controls.DropdownSelect.set_value" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +64,12 @@ get_value(self):
 set_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L504)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L504?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L1081)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L1081?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Sync the inner menu selector to the variable's value.
 
 
 <a id="McUtils.Jupyter.Apps.Controls.DropdownSelect.update" class="docs-object-method">&nbsp;</a> 
@@ -56,9 +77,14 @@ set_value(self):
 update(self, e): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L506)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L506?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L1088)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L1088?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Update the inner menu selector (a change handler).
+  - `e`: `Any`
+    > the change event
 
 
 <a id="McUtils.Jupyter.Apps.Controls.DropdownSelect.to_jhtml" class="docs-object-method">&nbsp;</a> 
@@ -66,9 +92,14 @@ update(self, e):
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L508)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L508?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L1097)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/DropdownSelect.py#L1097?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render the dropdown with its menu selector.
+  - `:returns`: `_`
+    > the JHTML element
  </div>
 </div>
 
@@ -122,7 +153,7 @@ to_jhtml(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/DropdownSelect.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/DropdownSelect.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L490?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L1049?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.ToastContainer">ToastContainer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1375)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1375?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L2399)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2399?message=Update%20Docs)]
 </div>
 
 
@@ -27,9 +27,16 @@ theme: dict
 __init__(self, items=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1382)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1382?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L2406)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2406?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A positioned container that holds toast notifications.
+  - `items`: `Any`
+    > the initial toasts
+  - `kwargs`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.ToastContainer.create_toast" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +44,22 @@ __init__(self, items=None, **kwargs):
 create_toast(self, header=None, body=None, hidden=False, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/ToastContainer.py#L1386)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/ToastContainer.py#L1386?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/ToastContainer.py#L2418)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/ToastContainer.py#L2418?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Create and add a toast to the container.
+  - `header`: `Any`
+    > the toast header
+  - `body`: `Any`
+    > the toast body
+  - `hidden`: `bool`
+    > start hidden
+  - `kwargs`: `Any`
+    > extra toast options
+  - `:returns`: `_`
+    > the toast
  </div>
 </div>
 
@@ -93,7 +113,7 @@ create_toast(self, header=None, body=None, hidden=False, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/ToastContainer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/ToastContainer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1375?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2399?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

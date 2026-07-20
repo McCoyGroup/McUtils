@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Controls.Slider">Slider</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L137)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L137?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L292)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L292?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,22 @@ base_cls: list
 __init__(self, var, type='range', value=None, range=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L139)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L139?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L294)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L294?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A range-slider control, deriving min/max/step from a `range` spec when given.
+  - `var`: `Any`
+    > the bound variable
+  - `type`: `str`
+    > the input type
+  - `value`: `Any`
+    > the initial value
+  - `range`: `Any`
+    > a `(min, max[, step])` range spec
+  - `attrs`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Controls.Slider.get_value" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +49,14 @@ __init__(self, var, type='range', value=None, range=None, **attrs):
 get_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Slider.py#L160)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Slider.py#L160?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Slider.py#L327)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Slider.py#L327?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Read the slider value, coercing it to an int or float when possible.
+  - `:returns`: `_`
+    > the numeric value
 
 
 <a id="McUtils.Jupyter.Apps.Controls.Slider.set_value" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +64,12 @@ get_value(self):
 set_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Slider.py#L171)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Slider.py#L171?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Slider.py#L345)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Slider.py#L345?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Push the variable's value into the slider (as a string).
  </div>
 </div>
 
@@ -102,7 +123,7 @@ set_value(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/Slider.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/Slider.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L137?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L292?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

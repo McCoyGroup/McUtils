@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.Redirects.StreamRedirect">StreamRedirect</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L10)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L10?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L22)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L22?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, logger, base_stream=None, line_join=True, strip_empty=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L11)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L11?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects.py#L23)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L23?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -46,8 +46,8 @@ logger.
 write(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L31)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L31?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L43)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L43?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -62,8 +62,8 @@ Forward written data to the logger, skipping whitespace-only data when
 writelines(self, lines): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L44)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L44?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L56)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L56?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -78,8 +78,8 @@ Forward multiple lines to the logger, joining them with the configured joiner
 flush(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L64)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L64?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L76)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L76?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -91,8 +91,8 @@ Flush the underlying base stream, if any.
 seek(self, offset: int, whence: int = 0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L72)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L72?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L84)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L84?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -110,8 +110,8 @@ Seek on the underlying base stream, if any.
 seekable(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L88)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L88?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L100)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L100?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -125,8 +125,8 @@ Whether the underlying base stream is seekable.
 read(self, size): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L101)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L101?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L113)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L113?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -142,8 +142,8 @@ Read from the underlying base stream, if any.
 readline(self, limit: int = -1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L114)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L114?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L126)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L126?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -159,8 +159,8 @@ Read a line from the underlying base stream, if any.
 readlines(self, hint: int = -1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L128)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L128?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/Redirects/StreamRedirect.py#L140)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects/StreamRedirect.py#L140?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -222,7 +222,7 @@ Read all lines from the underlying base stream, if any.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/Redirects/StreamRedirect.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/Redirects/StreamRedirect.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L10?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/Redirects.py#L22?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

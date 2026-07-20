@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DPrimitive">X3DPrimitive</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L739)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L739?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1152)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1152?message=Update%20Docs)]
 </div>
 
 
@@ -28,9 +28,14 @@ tag_class: NoneType
 get_new_id(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L742)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L742?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1155)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1155?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Generate a fresh `x3d-obj-`-prefixed id.
+  - `:returns`: `str`
+    > the id
 
 
 <a id="McUtils.Plots.X3DInterface.X3DPrimitive.__init__" class="docs-object-method">&nbsp;</a> 
@@ -38,9 +43,18 @@ get_new_id(cls):
 __init__(self, *children, id=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L745)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L745?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1166)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1166?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set up a primitive holding its child objects and options (under an id).
+  - `children`: `Any`
+    > the child objects
+  - `id`: `Any`
+    > the primitive id (auto-generated if omitted)
+  - `opts`: `Any`
+    > the primitive options
 
 
 <a id="McUtils.Plots.X3DInterface.X3DPrimitive.id" class="docs-object-method">&nbsp;</a> 
@@ -49,9 +63,14 @@ __init__(self, *children, id=None, **opts):
 id(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L753)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L753?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L1183)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L1183?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The primitive's id.
+  - `:returns`: `str`
+    > the id
 
 
 <a id="McUtils.Plots.X3DInterface.X3DPrimitive.split_opts" class="docs-object-method">&nbsp;</a> 
@@ -59,9 +78,16 @@ id(self):
 split_opts(self, opts: 'dict'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L759)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L759?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L1205)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L1205?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Split options into the non-appearance options and the material/appearance/line/point options.
+  - `opts`: `dict`
+    > the options
+  - `:returns`: `tuple`
+    > `(object_opts, appearance_opts)`
 
 
 <a id="McUtils.Plots.X3DInterface.X3DPrimitive.get_appearance" class="docs-object-method">&nbsp;</a> 
@@ -69,9 +95,16 @@ split_opts(self, opts: 'dict'):
 get_appearance(self, appearance_options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L768)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L768?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L1224)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L1224?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build the appearance node from the appearance options (or `None` if there are none).
+  - `appearance_options`: `dict`
+    > the appearance options
+  - `:returns`: `_`
+    > the appearance element (or `None`)
 
 
 <a id="McUtils.Plots.X3DInterface.X3DPrimitive.to_x3d" class="docs-object-method">&nbsp;</a> 
@@ -79,9 +112,14 @@ get_appearance(self, appearance_options):
 to_x3d(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L773)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L773?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L1238)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L1238?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render the primitive to its X3D DOM element, wrapping its children and appearance under the tag/wrapper classes.
+  - `:returns`: `_`
+    > the X3D element
 
 
 <a id="McUtils.Plots.X3DInterface.X3DPrimitive.resolve_prop_attr" class="docs-object-method">&nbsp;</a> 
@@ -90,9 +128,16 @@ to_x3d(self):
 resolve_prop_attr(self, prop_name): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L792)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L792?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1264)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1264?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Map a property name to its attribute, routing appearance properties through the appearance node.
+  - `prop_name`: `Any`
+    > the property name
+  - `:returns`: `_`
+    > the attribute name
 
 
 <a id="McUtils.Plots.X3DInterface.X3DPrimitive.get_prop_node_id" class="docs-object-method">&nbsp;</a> 
@@ -100,9 +145,16 @@ resolve_prop_attr(self, prop_name):
 get_prop_node_id(self, prop_name): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L805)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L805?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L1285)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L1285?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the node id carrying a property, routing appearance properties to the appearance node.
+  - `prop_name`: `Any`
+    > the property name
+  - `:returns`: `str`
+    > the node id
 
 
 <a id="McUtils.Plots.X3DInterface.X3DPrimitive.get_children" class="docs-object-method">&nbsp;</a> 
@@ -110,9 +162,14 @@ get_prop_node_id(self, prop_name):
 get_children(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L816)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L816?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L1305)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DPrimitive.py#L1305?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the primitive's child objects.
+  - `:returns`: `list`
+    > the children
  </div>
 </div>
 
@@ -166,7 +223,7 @@ get_children(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DPrimitive.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DPrimitive.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L739?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1152?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

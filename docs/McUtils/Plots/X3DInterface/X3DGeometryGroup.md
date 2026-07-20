@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DGeometryGroup">X3DGeometryGroup</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1046)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1046?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1703)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1703?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,18 @@
 prep_geometry_opts(self, *args, **opts) -> 'list[dict]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1047)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1047?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1704)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1704?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Abstract: build a list of per-instance geometry option dicts for this (possibly batched) shape.
+  - `args`: `Any`
+    > the shape arguments
+  - `opts`: `Any`
+    > extra options
+  - `:returns`: `list`
+    > the per-instance geometry options
 
 
 <a id="McUtils.Plots.X3DInterface.X3DGeometryGroup.get_interpolated_attributes" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +43,14 @@ prep_geometry_opts(self, *args, **opts) -> 'list[dict]':
 get_interpolated_attributes(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1050)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1050?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1717)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1717?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the first instance's geometry plus material attributes used for animation.
+  - `:returns`: `dict`
+    > the attributes
 
 
 <a id="McUtils.Plots.X3DInterface.X3DGeometryGroup.prep_vecs" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +58,18 @@ get_interpolated_attributes(self):
 prep_vecs(self, vecs, nstruct=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1052)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1052?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1727)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1727?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Broadcast a vector (or `None`) across `nstruct` instances.
+  - `vecs`: `Any`
+    > the vector(s) (or `None`)
+  - `nstruct`: `int | None`
+    > the number of instances
+  - `:returns`: `np.ndarray | list`
+    > the per-instance vectors
 
 
 <a id="McUtils.Plots.X3DInterface.X3DGeometryGroup.prep_mats" class="docs-object-method">&nbsp;</a> 
@@ -54,9 +77,18 @@ prep_vecs(self, vecs, nstruct=None):
 prep_mats(self, mats, nstruct=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1062)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1062?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1748)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1748?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Broadcast a matrix (or `None`) across `nstruct` instances.
+  - `mats`: `Any`
+    > the matrix/matrices (or `None`)
+  - `nstruct`: `int | None`
+    > the number of instances
+  - `:returns`: `np.ndarray | list`
+    > the per-instance matrices
 
 
 <a id="McUtils.Plots.X3DInterface.X3DGeometryGroup.prep_const" class="docs-object-method">&nbsp;</a> 
@@ -64,9 +96,18 @@ prep_mats(self, mats, nstruct=None):
 prep_const(self, const, nstruct): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1072)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1072?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1769)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1769?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Broadcast a scalar constant (or `None`) across `nstruct` instances.
+  - `const`: `Any`
+    > the constant (or `None`)
+  - `nstruct`: `int`
+    > the number of instances
+  - `:returns`: `np.ndarray | list`
+    > the per-instance constants
 
 
 <a id="McUtils.Plots.X3DInterface.X3DGeometryGroup.to_x3d" class="docs-object-method">&nbsp;</a> 
@@ -74,9 +115,14 @@ prep_const(self, const, nstruct):
 to_x3d(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1081)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1081?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1789)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DGeometryGroup.py#L1789?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render every instance to its X3D element (wrapped in appearance/transform), grouping them under a single group node.
+  - `:returns`: `_`
+    > the X3D element
  </div>
 </div>
 
@@ -130,7 +176,7 @@ to_x3d(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DGeometryGroup.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DGeometryGroup.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1046?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1703?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -219,10 +219,10 @@ Provides utilities for working with objects, defaults, etc. to abstract away com
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Schema](Devutils/Schema/Schema.md)   
+[temporary_sys_path_insert](Devutils/Redirects/temporary_sys_path_insert.md)   
 </div>
    <div class="col" markdown="1">
-   
+[Schema](Devutils/Schema/Schema.md)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Variables.VariableNamespace">VariableNamespace</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables.py#L133)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L133?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables.py#L342)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L342?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,17 @@
 __init__(self, name=None, dedupe=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables.py#L135)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L135?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables.py#L344)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L344?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A named namespace of variables, optionally deduplicated so the same name reuses a
+shared variable cache.
+  - `name`: `Any`
+    > the namespace name (a uuid if omitted)
+  - `dedupe`: `bool`
+    > share the variable cache with an existing namespace of the same name
 
 
 <a id="McUtils.Jupyter.Apps.Variables.VariableNamespace.__repr__" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +42,14 @@ __init__(self, name=None, dedupe=True):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L148)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L148?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L367)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L367?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return a representation showing the name and cached variables.
+  - `:returns`: `str`
+    > the representation
 
 
 <a id="McUtils.Jupyter.Apps.Variables.VariableNamespace.create" class="docs-object-method">&nbsp;</a> 
@@ -45,9 +58,17 @@ __repr__(self):
 create(cls, name): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L154)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L154?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L381)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L381?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Resolve a namespace name (or namespace) to a cached `VariableNamespace`, creating
+and caching it if needed.
+  - `name`: `Any`
+    > the namespace name or object
+  - `:returns`: `VariableNamespace`
+    > the namespace
 
 
 <a id="McUtils.Jupyter.Apps.Variables.VariableNamespace.__contains__" class="docs-object-method">&nbsp;</a> 
@@ -55,9 +76,16 @@ create(cls, name):
 __contains__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L163)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L163?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L400)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L400?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Test whether a variable name is in the namespace.
+  - `item`: `Any`
+    > the variable name
+  - `:returns`: `bool`
+    > whether it's present
 
 
 <a id="McUtils.Jupyter.Apps.Variables.VariableNamespace.__getitem__" class="docs-object-method">&nbsp;</a> 
@@ -65,9 +93,16 @@ __contains__(self, item):
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L165)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L165?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L411)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L411?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Get a variable from the namespace by name.
+  - `item`: `Any`
+    > the variable name
+  - `:returns`: `_`
+    > the variable
 
 
 <a id="McUtils.Jupyter.Apps.Variables.VariableNamespace.__setitem__" class="docs-object-method">&nbsp;</a> 
@@ -75,9 +110,16 @@ __getitem__(self, item):
 __setitem__(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L167)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L167?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L421)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L421?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Store a variable in the namespace under a name.
+  - `key`: `Any`
+    > the variable name
+  - `value`: `Any`
+    > the variable
 
 
 <a id="McUtils.Jupyter.Apps.Variables.VariableNamespace.__enter__" class="docs-object-method">&nbsp;</a> 
@@ -85,9 +127,12 @@ __setitem__(self, key, value):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L169)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L169?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L431)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L431?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Activate this namespace as the current one, saving the previous.
 
 
 <a id="McUtils.Jupyter.Apps.Variables.VariableNamespace.__exit__" class="docs-object-method">&nbsp;</a> 
@@ -95,9 +140,18 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L172)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L172?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L439)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/VariableNamespace.py#L439?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Restore the previously active namespace.
+  - `exc_type`: `Any`
+    > the exception type, if any
+  - `exc_val`: `Any`
+    > the exception value, if any
+  - `exc_tb`: `Any`
+    > the traceback, if any
  </div>
 </div>
 
@@ -151,7 +205,7 @@ __exit__(self, exc_type, exc_val, exc_tb):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Variables/VariableNamespace.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Variables/VariableNamespace.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L133?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L342?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

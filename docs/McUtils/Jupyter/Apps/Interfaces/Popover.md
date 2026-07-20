@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.Popover">Popover</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1504)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1504?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L2558)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2558?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,24 @@ modifiers: dict
 __init__(self, base=None, body='', data_bs_trigger='hover focus', data_bs_html=None, title=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1604)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1604?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L2658)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2658?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A modifier that attaches a Bootstrap popover to a base element.
+  - `base`: `Any`
+    > the base element
+  - `body`: `Any`
+    > the popover body
+  - `data_bs_trigger`: `str`
+    > the trigger events
+  - `data_bs_html`: `Any`
+    > allow HTML in the popover
+  - `title`: `Any`
+    > the popover title
+  - `kwargs`: `Any`
+    > extra attributes
  </div>
 </div>
 
@@ -82,7 +97,7 @@ __init__(self, base=None, body='', data_bs_trigger='hover focus', data_bs_html=N
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/Popover.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/Popover.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1504?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2558?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.Container">Container</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L475)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L475?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L889)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L889?message=Update%20Docs)]
 </div>
 
 Extends the base `WrapperComponent` to include a final
@@ -29,9 +29,19 @@ theme: dict
 __init__(self, items: Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType, McUtils.Jupyter.Apps.types.IPyHTMLableType, McUtils.Jupyter.Apps.types.ImageableType, Tuple[Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType, McUtils.Jupyter.Apps.types.IPyHTMLableType, McUtils.Jupyter.Apps.types.ImageableType], Mapping], NoneType, Iterable[Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType, McUtils.Jupyter.Apps.types.IPyHTMLableType, McUtils.Jupyter.Apps.types.ImageableType, Tuple[Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType, McUtils.Jupyter.Apps.types.IPyHTMLableType, McUtils.Jupyter.Apps.types.ImageableType], Mapping]]]], wrappers: dict = None, **attrs) -> None: 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L483)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L483?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L897)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L897?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A `WrapperComponent` with an outer wrapper plus a per-item element (e.g. a list
+group with a `list-group` wrapper and `list-item` children).
+  - `items`: `Any`
+    > the item bodies
+  - `wrappers`: `dict | None`
+    > the wrapper-plus-item element classes
+  - `attrs`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Container.items" class="docs-object-method">&nbsp;</a> 
@@ -40,9 +50,15 @@ __init__(self, items: Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableTyp
 items(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L521)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L521?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L946)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L946?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The wrapped items, each built via `create_item`. Assigning is disallowed once
+initialized.
+  - `:returns`: `list`
+    > the built items
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Container.create_item" class="docs-object-method">&nbsp;</a> 
@@ -50,9 +66,19 @@ items(self):
 create_item(self, i, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L544)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L544?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L1005)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L1005?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build an item element from a spec: pass a `raw` element through, expand a dict
+body, or wrap a bare body.
+  - `i`: `Any`
+    > the item spec
+  - `kw`: `Any`
+    > extra per-item options
+  - `:returns`: `_`
+    > the item element
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Container.update_widget_child" class="docs-object-method">&nbsp;</a> 
@@ -60,9 +86,16 @@ create_item(self, i, **kw):
 update_widget_child(self, key, value): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L558)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L558?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L1029)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L1029?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Rebuild an item and push it into the live widget cache.
+  - `key`: `Any`
+    > the item index
+  - `value`: `Any`
+    > the new item spec
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Container.insert_widget_child" class="docs-object-method">&nbsp;</a> 
@@ -70,9 +103,16 @@ update_widget_child(self, key, value):
 insert_widget_child(self, where, child): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L560)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L560?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L1039)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Container.py#L1039?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build an item and insert it into the live widget cache.
+  - `where`: `Any`
+    > the index
+  - `child`: `Any`
+    > the item spec
  </div>
 </div>
 
@@ -126,7 +166,7 @@ insert_widget_child(self, where, child):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/Container.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/Container.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L475?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L889?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

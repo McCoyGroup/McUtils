@@ -5,12 +5,12 @@
 </div>
 
 ```python
-matrix_transform_from_eigs(evals, evecs, tf): 
+matrix_transform_from_eigs(evals, evecs, tf, order='col'): 
 ```
 **LLM Docstring**
 
 Apply a scalar function to the eigenvalues of a matrix and reassemble it in the
-original eigenbasis (`Vᵀ diag(f(evals)) V`).
+original eigenbasis
   - `evals`: `np.ndarray`
     > the eigenvalues
   - `evecs`: `np.ndarray`

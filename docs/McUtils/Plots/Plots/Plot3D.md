@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Plots.Plot3D">Plot3D</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1636)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1636?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1640)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1640?message=Update%20Docs)]
 </div>
 
 A base class for 3D plots
@@ -30,8 +30,8 @@ plot_classes: dict
 __init__(self, *params, plot_style=None, method=None, colorbar=None, figure=None, axes=None, subplot_kw=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1643)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1643?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L1647)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1647?message=Update%20Docs)]
 </div>
 
   - `params`: `Any`
@@ -57,8 +57,8 @@ __init__(self, *params, plot_style=None, method=None, colorbar=None, figure=None
 plot(self, *params, **plot_style): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/Plot3D.py#L1739)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/Plot3D.py#L1739?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/Plot3D.py#L1743)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/Plot3D.py#L1743?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -77,8 +77,8 @@ the first call.
 add_colorbar(self, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/Plot3D.py#L1755)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/Plot3D.py#L1755?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/Plot3D.py#L1759)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/Plot3D.py#L1759?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -95,8 +95,8 @@ Add a colorbar to the 3-D plot (deferring until the figure is initialized).
 resolve_method(cls, mpl_name): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1771)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1771?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1775)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1775?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -113,8 +113,8 @@ Look up the registered 3-D plot class for a backend method name.
 register(cls, plot_class): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1787)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1787?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1791)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1791?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -177,7 +177,7 @@ class name if already registered). Usable as a decorator.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/Plot3D.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/Plot3D.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1636?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L1640?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

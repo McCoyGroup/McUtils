@@ -43,6 +43,17 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[JHTMLDocumentationEngine](Docs/HTMLDocs/JHTMLDocumentationEngine.md)   
+</div>
+   <div class="col" markdown="1">
+[static_doc](Docs/HTMLDocs/static_doc.md)   
+</div>
+   <div class="col" markdown="1">
+[StubSummaryBuilder](Docs/Stubs/StubSummaryBuilder.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
 [ExamplesParser](Docs/ExamplesParser/ExamplesParser.md)   
 </div>
    <div class="col" markdown="1">
@@ -74,9 +85,9 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-717d69" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-717d69"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-353155" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-353155"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-717d69" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-353155" markdown="1">
  - [McUtilsDoc](#McUtilsDoc)
 - [PsienceDoc](#PsienceDoc)
 - [ParseExamples](#ParseExamples)
@@ -84,9 +95,9 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-319049" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-319049"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-347e3e" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-347e3e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-319049" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-347e3e" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

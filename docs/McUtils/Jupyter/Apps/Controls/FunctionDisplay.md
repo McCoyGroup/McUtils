@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Controls.FunctionDisplay">FunctionDisplay</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L327)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L327?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L699)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L699?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,29 @@
 __init__(self, fn, vars, pane=None, autoclear=True, debounce=None, delay_time=0.1, namespace=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L328)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L328?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L700)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L700?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A component that re-runs a function (over a set of variables) and displays its
+result whenever an input changes, with optional debouncing.
+  - `fn`: `Callable`
+    > the function to run
+  - `vars`: `Any`
+    > the input variables
+  - `pane`: `Any`
+    > the output pane (created if omitted)
+  - `autoclear`: `bool`
+    > clear the pane before each update
+  - `debounce`: `Any`
+    > the debounce interval (seconds)
+  - `delay_time`: `float`
+    > the minimum time between calls
+  - `namespace`: `Any`
+    > the variable namespace
+  - `attrs`: `Any`
+    > extra pane attributes
 
 
 <a id="McUtils.Jupyter.Apps.Controls.FunctionDisplay.link_vars" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +54,13 @@ __init__(self, fn, vars, pane=None, autoclear=True, debounce=None, delay_time=0.
 link_vars(self, *var): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L340)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L340?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L730)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L730?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Link the display's update handler to every input variable (and to future
+variable additions).
 
 
 <a id="McUtils.Jupyter.Apps.Controls.FunctionDisplay.to_widget" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +68,17 @@ link_vars(self, *var):
 to_widget(self, parent=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L346)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L346?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L742)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L742?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render to a widget, linking the input variables on first construction (with a
+temporarily relaxed debounce).
+  - `parent`: `Any`
+    > the parent component
+  - `:returns`: `_`
+    > the widget
 
 
 <a id="McUtils.Jupyter.Apps.Controls.FunctionDisplay.observe" class="docs-object-method">&nbsp;</a> 
@@ -54,9 +86,18 @@ to_widget(self, parent=None):
 observe(self, fn, names=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L360)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L360?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L765)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L765?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Observe changes on the underlying widget.
+  - `fn`: `Any`
+    > the change handler
+  - `names`: `Any`
+    > the trait name(s)
+  - `:returns`: `_`
+    > the observation handle
 
 
 <a id="McUtils.Jupyter.Apps.Controls.FunctionDisplay.unobserve" class="docs-object-method">&nbsp;</a> 
@@ -64,9 +105,16 @@ observe(self, fn, names=None):
 unobserve(self, fn, names=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L364)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L364?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L779)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L779?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Remove a change observer.
+  - `fn`: `Any`
+    > the handler
+  - `names`: `Any`
+    > the trait name(s)
 
 
 <a id="McUtils.Jupyter.Apps.Controls.FunctionDisplay.update" class="docs-object-method">&nbsp;</a> 
@@ -74,9 +122,16 @@ unobserve(self, fn, names=None):
 update(self, event): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L371)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L371?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L802)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L802?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Handle an input change: run the update immediately or schedule a debounced
+execution, honoring the minimum delay between calls and reporting errors to the
+pane.
+  - `event`: `Any`
+    > the change event
 
 
 <a id="McUtils.Jupyter.Apps.Controls.FunctionDisplay.to_jhtml" class="docs-object-method">&nbsp;</a> 
@@ -84,9 +139,14 @@ update(self, event):
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L393)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L393?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L840)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L840?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render the display, running the function once to populate the pane.
+  - `:returns`: `_`
+    > the output pane
  </div>
 </div>
 
@@ -140,7 +200,7 @@ to_jhtml(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/FunctionDisplay.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/FunctionDisplay.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L327?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L699?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

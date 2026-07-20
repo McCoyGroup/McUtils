@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Controls.Switch">Switch</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L198)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L198?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L410)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L410?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,20 @@ base_cls: list
 __init__(self, var, type='checkbox', role='switch', **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L200)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L200?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L412)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L412?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A toggle-switch control (a checkbox with a `switch` role).
+  - `var`: `Any`
+    > the bound variable
+  - `type`: `str`
+    > the input type
+  - `role`: `str`
+    > the ARIA role
+  - `attrs`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Controls.Switch.get_value" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +47,14 @@ __init__(self, var, type='checkbox', role='switch', **attrs):
 get_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Switch.py#L202)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Switch.py#L202?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Switch.py#L426)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Switch.py#L426?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Read the switch as a bool (from its inner checkbox).
+  - `:returns`: `bool`
+    > the toggled state
 
 
 <a id="McUtils.Jupyter.Apps.Controls.Switch.set_value" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +62,12 @@ get_value(self):
 set_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Switch.py#L206)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Switch.py#L206?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Switch.py#L438)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Switch.py#L438?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set the switch's inner checkbox from the variable's truthiness.
 
 
 <a id="McUtils.Jupyter.Apps.Controls.Switch.to_jhtml" class="docs-object-method">&nbsp;</a> 
@@ -56,9 +75,14 @@ set_value(self):
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Switch.py#L212)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Switch.py#L212?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Switch.py#L449)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Switch.py#L449?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render the switch (wrapping the checkbox in a `form-switch` div).
+  - `:returns`: `_`
+    > the JHTML element
  </div>
 </div>
 
@@ -112,7 +136,7 @@ to_jhtml(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/Switch.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/Switch.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L198?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L410?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

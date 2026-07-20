@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.Toast">Toast</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1313)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1313?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L2300)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2300?message=Update%20Docs)]
 </div>
 
 
@@ -27,9 +27,16 @@ theme: dict
 __init__(self, header=None, body=None, role='alert', hidden=True, cls=None, id=None, javascript_handles=None, onevents=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1320)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1320?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L2307)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2307?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A Bootstrap toast notification (header/body).
+  - `args`: `Any`
+    > the toast content
+  - `attrs`: `Any`
+    > extra attributes and per-section options
 
 
 <a id="McUtils.Jupyter.JHTML.JHTML.JHTML.Bootstrap.Button" class="docs-object-method">&nbsp;</a> 
@@ -47,9 +54,24 @@ trigger_class(*elements, **styles):
 get_trigger(self, *items, trigger_class=None, data_bs_toggle='toast', data_bs_target=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Toast.py#L1354)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Toast.py#L1354?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Toast.py#L2349)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Toast.py#L2349?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a trigger element that shows the toast.
+  - `items`: `Any`
+    > the trigger content
+  - `trigger_class`: `Any`
+    > the trigger's CSS class
+  - `data_bs_toggle`: `Any`
+    > the Bootstrap toggle type
+  - `data_bs_target`: `Any`
+    > the toast target id
+  - `attrs`: `Any`
+    > extra attributes
+  - `:returns`: `_`
+    > the trigger element
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Toast.close_button" class="docs-object-method">&nbsp;</a> 
@@ -58,9 +80,14 @@ get_trigger(self, *items, trigger_class=None, data_bs_toggle='toast', data_bs_ta
 close_button(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1366)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1366?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2373)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2373?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a toast close button.
+  - `:returns`: `_`
+    > the close button
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Toast.show" class="docs-object-method">&nbsp;</a> 
@@ -68,9 +95,12 @@ close_button(self):
 show(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Toast.py#L1369)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Toast.py#L1369?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Toast.py#L2383)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Toast.py#L2383?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Show the toast.
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Toast.hide" class="docs-object-method">&nbsp;</a> 
@@ -78,9 +108,12 @@ show(self):
 hide(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Toast.py#L1372)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Toast.py#L1372?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Toast.py#L2391)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Toast.py#L2391?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Hide the toast.
  </div>
 </div>
 
@@ -134,7 +167,7 @@ hide(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/Toast.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/Toast.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1313?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2300?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

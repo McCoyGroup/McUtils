@@ -27,6 +27,13 @@ __init__(self, *str, **opts):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L20)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L20?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Hold a value together with a dict of styling options.
+  - `str`: `Any`
+    > the value(s) (optionally a `(value, opts_dict)` pair)
+  - `opts`: `Any`
+    > styling options
 
 
 <a id="McUtils.Plots.Styling.Styled.could_be" class="docs-object-method">&nbsp;</a> 
@@ -35,9 +42,17 @@ __init__(self, *str, **opts):
 could_be(cls, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L26)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L26?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L34)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L34?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Test whether a piece of data is a `(value, opts_dict)` pair that could be a
+`Styled`.
+  - `data`: `Any`
+    > the data to test
+  - `:returns`: `bool`
+    > whether it looks like a styled value
 
 
 <a id="McUtils.Plots.Styling.Styled.construct" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +61,16 @@ could_be(cls, data):
 construct(cls, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L29)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L29?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L47)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L47?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a `Styled` from a `(value, opts_dict)` pair.
+  - `data`: `Any`
+    > the `(value, opts_dict)` pair
+  - `:returns`: `Styled`
+    > the styled value
 
 
 <a id="McUtils.Plots.Styling.Styled.__repr__" class="docs-object-method">&nbsp;</a> 
@@ -56,9 +78,14 @@ construct(cls, data):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling/Styled.py#L32)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling/Styled.py#L32?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling/Styled.py#L59)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling/Styled.py#L59?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return a representation showing the value and options.
+  - `:returns`: `str`
+    > the representation
  </div>
 </div>
 

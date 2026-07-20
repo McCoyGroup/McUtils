@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DMaterial">X3DMaterial</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L512)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L512?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L815)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L815?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,16 @@ conversion_map: dict
 prep_attrs(self, attrs: 'dict'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L528)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L528?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L831)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L831?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Canonicalize the material attributes (resolving the color into components/transparency) before rendering.
+  - `attrs`: `dict`
+    > the attributes
+  - `:returns`: `dict`
+    > the canonicalized attributes
 
 
 <a id="McUtils.Plots.X3DInterface.X3DMaterial.to_x3d" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +43,14 @@ prep_attrs(self, attrs: 'dict'):
 to_x3d(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L538)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L538?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L851)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L851?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render the material to its X3D DOM element.
+  - `:returns`: `_`
+    > the X3D element
  </div>
 </div>
 
@@ -92,7 +104,7 @@ to_x3d(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DMaterial.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DMaterial.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L512?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L815?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

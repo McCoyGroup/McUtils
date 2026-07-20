@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DSphere">X3DSphere</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1103)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1103?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1818)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1818?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,20 @@ tag_class: Sphere
 prep_geometry_opts(self, centers, radius=1, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DSphere.py#L1106)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DSphere.py#L1106?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DSphere.py#L1821)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DSphere.py#L1821?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build the per-instance geometry options for spheres at the given centers.
+  - `centers`: `Any`
+    > the sphere centers
+  - `radius`: `Any`
+    > the sphere radius/radii
+  - `opts`: `Any`
+    > extra options
+  - `:returns`: `list`
+    > the per-instance geometry options
  </div>
 </div>
 
@@ -82,7 +93,7 @@ prep_geometry_opts(self, centers, radius=1, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DSphere.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DSphere.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1103?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1818?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

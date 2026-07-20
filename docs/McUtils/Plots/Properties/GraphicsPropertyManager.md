@@ -31,6 +31,19 @@ __init__(self, graphics, figure, axes, managed=False):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties.py#L22)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties.py#L22?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set up the property manager that backs a `Graphics` object's styling/layout
+properties, holding references to the graphics, figure, and axes and initializing
+the cached property values.
+  - `graphics`: `GraphicsBase`
+    > the owning graphics object
+  - `figure`: `Any`
+    > the backend figure
+  - `axes`: `Any`
+    > the backend axes
+  - `managed`: `bool`
+    > whether an external manager owns the layout (e.g. a grid panel)
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.figure_label" class="docs-object-method">&nbsp;</a> 
@@ -39,9 +52,16 @@ __init__(self, graphics, figure, axes, managed=False):
 figure_label(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L48)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L48?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L62)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L62?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The overall figure label. The getter returns the cached value (reading it from the backend axes when
+unset); the setter caches it and pushes it to the backend axes (unwrapping any
+`Styled` value).
+  - `:returns`: `_`
+    > the figure label
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.plot_label" class="docs-object-method">&nbsp;</a> 
@@ -50,9 +70,16 @@ figure_label(self):
 plot_label(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L62)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L62?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L94)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L94?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The plot title/label. The getter returns the cached value (reading it from the backend axes when
+unset); the setter caches it and pushes it to the backend axes (unwrapping any
+`Styled` value).
+  - `:returns`: `_`
+    > the plot label
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.style_list" class="docs-object-method">&nbsp;</a> 
@@ -61,9 +88,15 @@ plot_label(self):
 style_list(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L78)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L78?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L128)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L128?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The per-series style cycle. The getter returns the cached styles; the setter
+merges in new styles and pushes them to the backend axes when anything changed.
+  - `:returns`: `_`
+    > the style cycle
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.plot_legend" class="docs-object-method">&nbsp;</a> 
@@ -72,9 +105,15 @@ style_list(self):
 plot_legend(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L101)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L101?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L167)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L167?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The plot legend. The setter coerces legend-like values into a `PlotLegend`
+(accepting `True` to keep an inferred legend).
+  - `:returns`: `_`
+    > the legend
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.legend_style" class="docs-object-method">&nbsp;</a> 
@@ -83,9 +122,16 @@ plot_legend(self):
 legend_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L132)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L132?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L216)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L216?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The legend styling options. The getter returns the cached value (reading it from the backend axes when
+unset); the setter caches it and pushes it to the backend axes (unwrapping any
+`Styled` value).
+  - `:returns`: `_`
+    > the legend style
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.axes_labels" class="docs-object-method">&nbsp;</a> 
@@ -94,9 +140,15 @@ legend_style(self):
 axes_labels(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L149)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L149?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L251)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L251?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The `(x, y)` axis labels. The setter fills the missing side from the cached
+labels and pushes each to the backend axes (unwrapping `Styled` values).
+  - `:returns`: `_`
+    > the axis labels
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.plot_range" class="docs-object-method">&nbsp;</a> 
@@ -105,9 +157,16 @@ axes_labels(self):
 plot_range(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L182)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L182?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L300)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L300?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The plotted `(x, y)` data range. The getter reads (and sorts) the backend limits
+when unset; the setter caches the range and pushes each axis's limits (unwrapping
+`Styled` values).
+  - `:returns`: `_`
+    > the plot range
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.absolute_plot_range" class="docs-object-method">&nbsp;</a> 
@@ -116,9 +175,14 @@ plot_range(self):
 absolute_plot_range(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L225)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L225?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L361)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L361?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The plot range with any unset axis filled in from the backend limits.
+  - `:returns`: `_`
+    > the absolute plot range
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.ticks" class="docs-object-method">&nbsp;</a> 
@@ -127,9 +191,15 @@ absolute_plot_range(self):
 ticks(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L235)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L235?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L378)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L378?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The tick specification. The getter returns the cached value; the setter applies
+the x/y tick specs via the tick-setting helpers.
+  - `:returns`: `_`
+    > the tick specification
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.ticks_style" class="docs-object-method">&nbsp;</a> 
@@ -138,9 +208,15 @@ ticks(self):
 ticks_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L386)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L386?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L579)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L579?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The tick styling. The getter returns the cached value; the setter applies the
+x/y tick styles to the backend axes.
+  - `:returns`: `_`
+    > the tick styling
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.frame_style" class="docs-object-method">&nbsp;</a> 
@@ -149,9 +225,15 @@ ticks_style(self):
 frame_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L416)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L416?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L625)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L625?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The frame (spine) styling. The getter returns the cached value; the setter
+applies it to the backend axes.
+  - `:returns`: `_`
+    > the frame styling
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.clean_tick_label_styles" class="docs-object-method">&nbsp;</a> 
@@ -160,9 +242,17 @@ frame_style(self):
 clean_tick_label_styles(cls, k): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L453)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L453?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L678)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L678?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Normalize a tick-label style key: strip/add the `label` prefix as appropriate and
+apply the style-name remapping.
+  - `k`: `str`
+    > the style key
+  - `:returns`: `str`
+    > the normalized key
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.ticks_label_style" class="docs-object-method">&nbsp;</a> 
@@ -171,9 +261,15 @@ clean_tick_label_styles(cls, k):
 ticks_label_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L462)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L462?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L698)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L698?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The tick-label styling. The getter returns the cached value; the setter applies
+the cleaned label styles to the backend axes.
+  - `:returns`: `_`
+    > the tick-label styling
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.aspect_ratio" class="docs-object-method">&nbsp;</a> 
@@ -182,9 +278,15 @@ ticks_label_style(self):
 aspect_ratio(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L484)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L484?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L736)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L736?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The axes aspect ratio. The getter returns the cached value; the setter pushes it
+to the backend axes (accepting a `(value, opts)` pair).
+  - `:returns`: `_`
+    > the aspect ratio
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.image_size" class="docs-object-method">&nbsp;</a> 
@@ -193,9 +295,16 @@ aspect_ratio(self):
 image_size(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L504)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L504?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L781)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L781?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The figure image size in pixels. The getter resolves `'auto'` to the computed
+inset size; the setter caches the size (filling a missing dimension from the
+aspect ratio) and resizes the backend figure (in inches) unless managed/inset.
+  - `:returns`: `_`
+    > the image size
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.axes_bbox" class="docs-object-method">&nbsp;</a> 
@@ -204,9 +313,15 @@ image_size(self):
 axes_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L554)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L554?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L849)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L849?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The axes bounding box. The getter reads it from the backend axes; the setter
+pushes a new bbox.
+  - `:returns`: `_`
+    > the axes bbox
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.background" class="docs-object-method">&nbsp;</a> 
@@ -215,9 +330,15 @@ axes_bbox(self):
 background(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L564)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L564?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L875)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L875?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The background/face color. The getter returns the cached value; the setter
+applies it to the backend axes (and figure).
+  - `:returns`: `_`
+    > the background color
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.frame" class="docs-object-method">&nbsp;</a> 
@@ -226,9 +347,15 @@ background(self):
 frame(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L581)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L581?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L908)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L908?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Which frame (spine) edges are drawn. The getter returns the cached value; the
+setter applies the visibility spec to the backend axes.
+  - `:returns`: `_`
+    > the frame visibility
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.scale" class="docs-object-method">&nbsp;</a> 
@@ -237,9 +364,15 @@ frame(self):
 scale(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L603)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L603?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L946)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L946?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The per-axis scaling (e.g. linear/log). The getter returns the cached value; the
+setter applies the x/y scales to the backend axes.
+  - `:returns`: `_`
+    > the axis scaling
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.padding" class="docs-object-method">&nbsp;</a> 
@@ -248,9 +381,15 @@ scale(self):
 padding(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L632)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L632?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L991)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L991?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The figure padding on each side. The getter returns the cached value; the setter
+caches it and pushes it to the backend.
+  - `:returns`: `_`
+    > the padding
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.padding_left" class="docs-object-method">&nbsp;</a> 
@@ -259,9 +398,15 @@ padding(self):
 padding_left(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L670)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L670?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L1045)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L1045?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The left figure padding. The getter returns the cached value; the setter updates
+just the left component of the padding.
+  - `:returns`: `_`
+    > the left padding
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.padding_right" class="docs-object-method">&nbsp;</a> 
@@ -270,9 +415,15 @@ padding_left(self):
 padding_right(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L678)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L678?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L1069)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L1069?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The right figure padding. The getter returns the cached value; the setter updates
+just the right component of the padding.
+  - `:returns`: `_`
+    > the right padding
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.padding_top" class="docs-object-method">&nbsp;</a> 
@@ -281,9 +432,15 @@ padding_right(self):
 padding_top(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L686)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L686?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L1093)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L1093?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The top figure padding. The getter returns the cached value; the setter updates
+just the top component of the padding.
+  - `:returns`: `_`
+    > the top padding
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.padding_bottom" class="docs-object-method">&nbsp;</a> 
@@ -292,9 +449,15 @@ padding_top(self):
 padding_bottom(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L694)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L694?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L1117)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L1117?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The bottom figure padding. The getter returns the cached value; the setter updates
+just the bottom component of the padding.
+  - `:returns`: `_`
+    > the bottom padding
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.spacings" class="docs-object-method">&nbsp;</a> 
@@ -303,9 +466,16 @@ padding_bottom(self):
 spacings(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L703)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L703?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L1142)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L1142?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The inter-panel spacings. The getter returns `[0, 0]` for a managed/inset axes,
+else the cached value; the setter converts fractional spacings to absolute sizes
+(from the panel bboxes) and pushes them to the figure.
+  - `:returns`: `_`
+    > the spacings
 
 
 <a id="McUtils.Plots.Properties.GraphicsPropertyManager.colorbar" class="docs-object-method">&nbsp;</a> 
@@ -314,9 +484,15 @@ spacings(self):
 colorbar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L747)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L747?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L1204)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager.py#L1204?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The colorbar specification. The getter returns the cached value; the setter
+records it and adds a colorbar to the graphics (from `True` or an options dict).
+  - `:returns`: `_`
+    > the colorbar spec
  </div>
 </div>
 

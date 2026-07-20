@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DBox">X3DBox</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1111)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1111?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1837)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1837?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,24 @@ tag_class: Box
 prep_geometry_opts(self, starts, ends, normal=None, rotation=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DBox.py#L1114)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DBox.py#L1114?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DBox.py#L1840)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DBox.py#L1840?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build the per-instance geometry options for boxes spanning the given corner pairs.
+  - `starts`: `Any`
+    > the min corners
+  - `ends`: `Any`
+    > the max corners
+  - `normal`: `Any`
+    > a normal to orient the boxes toward
+  - `rotation`: `Any`
+    > a base rotation
+  - `opts`: `Any`
+    > extra options
+  - `:returns`: `list`
+    > the per-instance geometry options
  </div>
 </div>
 
@@ -82,7 +97,7 @@ prep_geometry_opts(self, starts, ends, normal=None, rotation=None, **opts):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DBox.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DBox.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1111?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1837?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,14 +1,22 @@
 # <a id="McUtils.Jupyter.Apps.Variables.Var">Var</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables.py#L253)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L253?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables.py#L610)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L610?message=Update%20Docs)]
 </div>
 
 ```python
 Var(name, namespace=None): 
 ```
+**LLM Docstring**
 
-
+Resolve a name (or synchronizer) to a `VariableSynchronizer`, optionally within a
+named namespace.
+  - `name`: `Any`
+    > the variable name or synchronizer
+  - `namespace`: `Any`
+    > the namespace name/object (the current one if omitted)
+  - `:returns`: `VariableSynchronizer`
+    > the variable
 
 
 
@@ -59,7 +67,7 @@ Var(name, namespace=None):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Variables/Var.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Variables/Var.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L253?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L610?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Controls.ProgressBar">ProgressBar</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L398)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L398?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L852)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L852?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,18 @@
 __init__(self, var, bar=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L399)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L399?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L853)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L853?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A control that drives a progress bar from a variable.
+  - `var`: `Any`
+    > the bound variable (the percentage)
+  - `bar`: `Any`
+    > the progress bar component (created if omitted)
+  - `attrs`: `Any`
+    > extra bar attributes
 
 
 <a id="McUtils.Jupyter.Apps.Controls.ProgressBar.get_value" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +43,14 @@ __init__(self, var, bar=None, **attrs):
 get_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L404)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L404?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L867)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L867?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the variable's value, coercing empty/None to 0 and strings to ints.
+  - `:returns`: `_`
+    > the progress percentage
 
 
 <a id="McUtils.Jupyter.Apps.Controls.ProgressBar.set_value" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +58,12 @@ get_value(self):
 set_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L411)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L411?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L881)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L881?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set the bar's width from the current percentage.
 
 
 <a id="McUtils.Jupyter.Apps.Controls.ProgressBar.update" class="docs-object-method">&nbsp;</a> 
@@ -54,9 +71,14 @@ set_value(self):
 update(self, e): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L413)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L413?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L888)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L888?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Re-render the bar (a change handler).
+  - `e`: `Any`
+    > the change event
 
 
 <a id="McUtils.Jupyter.Apps.Controls.ProgressBar.to_jhtml" class="docs-object-method">&nbsp;</a> 
@@ -64,9 +86,14 @@ update(self, e):
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L415)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L415?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L897)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/ProgressBar.py#L897?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render the progress bar widget.
+  - `:returns`: `_`
+    > the widget
  </div>
 </div>
 
@@ -120,7 +147,7 @@ to_jhtml(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/ProgressBar.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/ProgressBar.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L398?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L852?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

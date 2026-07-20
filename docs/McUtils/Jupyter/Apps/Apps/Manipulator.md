@@ -29,6 +29,22 @@ __init__(self, func, *controls, debounce=None, autoclear=True, namespace=None, *
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps.py#L61)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps.py#L61?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build an interactive `Card` that re-runs a function over a set of controls
+(ipywidgets-`interact`-style), laying out the output above the controls.
+  - `func`: `Callable`
+    > the function driven by the controls
+  - `controls`: `Any`
+    > the control specs (values, ranges, or existing controls)
+  - `debounce`: `Any`
+    > the debounce interval for updates
+  - `autoclear`: `bool`
+    > clear the output before each update
+  - `namespace`: `Any`
+    > the variable namespace (a fresh one if omitted)
+  - `etc`: `Any`
+    > extra `Card` options
 
 
 <a id="McUtils.Jupyter.Apps.Apps.Manipulator.canonicalize_control" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +53,20 @@ __init__(self, func, *controls, debounce=None, autoclear=True, namespace=None, *
 canonicalize_control(cls, settings, namespace=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L78)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L78?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L93)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L93?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Normalize a control spec into a `Control`: pass existing controls through, else
+build one from a `(var, settings)` pair (inferring a `range`/`value` settings dict
+and the control type).
+  - `settings`: `Any`
+    > the control spec
+  - `namespace`: `Any`
+    > the variable namespace
+  - `:returns`: `Control`
+    > the control
 
 
 <a id="McUtils.Jupyter.Apps.Apps.Manipulator.initialize" class="docs-object-method">&nbsp;</a> 
@@ -47,9 +74,12 @@ canonicalize_control(cls, settings, namespace=None):
 initialize(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/Manipulator.py#L97)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/Manipulator.py#L97?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/Manipulator.py#L124)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/Manipulator.py#L124?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Run the function once (with no event) to populate the output.
  </div>
 </div>
 

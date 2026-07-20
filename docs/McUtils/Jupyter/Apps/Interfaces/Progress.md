@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.Progress">Progress</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L687)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L687?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1272)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1272?message=Update%20Docs)]
 </div>
 
 
@@ -27,9 +27,20 @@ theme: dict
 __init__(self, value=0, label=None, wrappers=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L690)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L690?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1275)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1275?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A Bootstrap progress bar.
+  - `value`: `Any`
+    > the initial percentage
+  - `label`: `Any`
+    > the bar label
+  - `wrappers`: `Any`
+    > the wrapper element classes
+  - `attrs`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Progress.container" class="docs-object-method">&nbsp;</a> 
@@ -38,9 +49,14 @@ __init__(self, value=0, label=None, wrappers=None, **attrs):
 container(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Progress.py#L709)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Progress.py#L709?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Progress.py#L1304)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Progress.py#L1304?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The progress bar's outer container element.
+  - `:returns`: `_`
+    > the container
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Progress.bar" class="docs-object-method">&nbsp;</a> 
@@ -49,9 +65,14 @@ container(self):
 bar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Progress.py#L712)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Progress.py#L712?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Progress.py#L1314)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Progress.py#L1314?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The progress bar's inner (filled) element.
+  - `:returns`: `_`
+    > the bar
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Progress.update_widget_attr" class="docs-object-method">&nbsp;</a> 
@@ -59,9 +80,16 @@ bar(self):
 update_widget_attr(self, attr, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Progress.py#L715)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Progress.py#L715?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Progress.py#L1324)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Progress.py#L1324?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Push an attribute change into the bar's live widget.
+  - `attr`: `Any`
+    > the attribute name
+  - `val`: `Any`
+    > the value
  </div>
 </div>
 
@@ -115,7 +143,7 @@ update_widget_attr(self, attr, val):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/Progress.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/Progress.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L687?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1272?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

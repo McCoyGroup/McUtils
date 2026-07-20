@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Controls.Checkbox">Checkbox</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L178)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L178?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L357)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L357?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,18 @@ base_cls: list
 __init__(self, var, type='checkbox', **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L180)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L180?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L359)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L359?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A checkbox control.
+  - `var`: `Any`
+    > the bound variable
+  - `type`: `str`
+    > the input type
+  - `attrs`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Controls.Checkbox.get_value" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +45,14 @@ __init__(self, var, type='checkbox', **attrs):
 get_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Checkbox.py#L182)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Checkbox.py#L182?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Checkbox.py#L371)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Checkbox.py#L371?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Read the checkbox as a bool (from its `'true'`/`'false'` string).
+  - `:returns`: `bool`
+    > the checked state
 
 
 <a id="McUtils.Jupyter.Apps.Controls.Checkbox.set_value" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +60,12 @@ get_value(self):
 set_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Checkbox.py#L186)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Checkbox.py#L186?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/Checkbox.py#L383)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/Checkbox.py#L383?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set the checkbox's `'true'`/`'false'` string from the variable's truthiness.
  </div>
 </div>
 
@@ -102,7 +119,7 @@ set_value(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/Checkbox.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/Checkbox.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L178?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L357?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

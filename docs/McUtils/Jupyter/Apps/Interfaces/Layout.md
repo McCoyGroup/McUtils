@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.Layout">Layout</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1696)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1696?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L2787)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2787?message=Update%20Docs)]
 </div>
 
 
@@ -36,9 +36,22 @@ wrapper(*elements, **styles):
 __init__(self, elements, wrapper=None, item_attrs=None, style=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1699)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1699?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L2790)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2790?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A container that arranges its elements via CSS layout styles.
+  - `elements`: `Any`
+    > the elements to arrange
+  - `wrapper`: `Any`
+    > the wrapper element class
+  - `item_attrs`: `dict | None`
+    > default per-item attributes
+  - `style`: `Any`
+    > extra container styles
+  - `attrs`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Layout.wrap_item" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +59,18 @@ __init__(self, elements, wrapper=None, item_attrs=None, style=None, **attrs):
 wrap_item(self, e, attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L1709)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L1709?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L2812)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L2812?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Wrap an element as a layout `Item`.
+  - `e`: `Any`
+    > the element
+  - `attrs`: `Any`
+    > the item attributes
+  - `:returns`: `_`
+    > the layout item
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Layout.setup_layout" class="docs-object-method">&nbsp;</a> 
@@ -56,9 +78,18 @@ wrap_item(self, e, attrs):
 setup_layout(self, elements, item_attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L1711)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L1711?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L2823)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L2823?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Prepare the layout: wrap each element as an item, returning `(layout_settings, items)`.
+  - `elements`: `Any`
+    > the elements
+  - `item_attrs`: `Any`
+    > the per-item attributes
+  - `:returns`: `tuple`
+    > `(settings, items)`
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Layout.get_layout_styles" class="docs-object-method">&nbsp;</a> 
@@ -66,9 +97,16 @@ setup_layout(self, elements, item_attrs):
 get_layout_styles(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L1713)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L1713?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L2835)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L2835?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Abstract: return the CSS styles for the container.
+  - `kwargs`: `Any`
+    > layout parameters
+  - `:returns`: `dict`
+    > the styles
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Layout.styles" class="docs-object-method">&nbsp;</a> 
@@ -77,9 +115,14 @@ get_layout_styles(self, **kwargs):
 styles(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L1716)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L1716?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L2847)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L2847?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+The container's combined explicit and computed layout styles.
+  - `:returns`: `dict`
+    > the styles
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Layout.to_jhtml" class="docs-object-method">&nbsp;</a> 
@@ -87,9 +130,14 @@ styles(self):
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L1719)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L1719?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L2858)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Layout.py#L2858?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render the layout container with its items and styles.
+  - `:returns`: `_`
+    > the JHTML element
  </div>
 </div>
 
@@ -143,7 +191,7 @@ to_jhtml(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/Layout.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/Layout.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1696?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2787?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

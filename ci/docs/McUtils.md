@@ -8,7 +8,7 @@ A growing package of assorted functionality that finds use across many different
 provide a single unified interface for doing certain types of projects.
 
 All of the McUtils packages stand mostly on their own, but there will be little calls into one another here and there,
-especially pieces using `Numputils`
+especially pieces using `Numputils` or `Devutils`
 
 The more scientifically-focused `Psience` package makes significant use of `McUtils` as do various packages that have
 been written over the years.
@@ -65,6 +65,17 @@ been written over the years.
 </div>
    <div class="col" markdown="1">
 [Devutils](McUtils/Devutils.md)   
+</div>
+   <div class="col" markdown="1">
+[Combinatorics](McUtils/Combinatorics.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[Graphs](McUtils/Graphs.md)   
+</div>
+   <div class="col" markdown="1">
+[Iterators](McUtils/Iterators.md)   
 </div>
    <div class="col" markdown="1">
 [Docs](McUtils/Docs.md)   

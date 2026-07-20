@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.DelayedResult">DelayedResult</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L2070)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2070?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L3460)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L3460?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,24 @@ NoResult: str
 __init__(self, func, *args, output=None, callback=None, parent=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L2074)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2074?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L3464)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L3464?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Run a function on a background thread and display its result when ready.
+  - `func`: `Callable`
+    > the function to run
+  - `args`: `Any`
+    > positional arguments for the function
+  - `output`: `Any`
+    > the output area (created if omitted)
+  - `callback`: `Any`
+    > a `(result, error, runner)` completion callback
+  - `parent`: `Any`
+    > the parent interface
+  - `kwargs`: `Any`
+    > keyword arguments for the function
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.DelayedResult.get_output_area" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +51,16 @@ __init__(self, func, *args, output=None, callback=None, parent=None, **kwargs):
 get_output_area(self, output=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L2088)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L2088?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L3491)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L3491?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the output area (creating one if none is given).
+  - `output`: `Any`
+    > an explicit output area
+  - `:returns`: `_`
+    > the output area
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.DelayedResult.__enter__" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +68,14 @@ get_output_area(self, output=None):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L2093)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L2093?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L3504)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L3504?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Enter the output area's context.
+  - `:returns`: `DelayedResult`
+    > self
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.DelayedResult.__exit__" class="docs-object-method">&nbsp;</a> 
@@ -56,9 +83,18 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L2097)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L2097?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L3516)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L3516?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Exit the output area's context.
+  - `exc_type`: `Any`
+    > the exception type, if any
+  - `exc_val`: `Any`
+    > the exception value, if any
+  - `exc_tb`: `Any`
+    > the traceback, if any
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.DelayedResult.start_process" class="docs-object-method">&nbsp;</a> 
@@ -66,9 +102,14 @@ __exit__(self, exc_type, exc_val, exc_tb):
 start_process(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L2127)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L2127?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L3561)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L3561?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Start the background thread running the function (once).
+  - `:returns`: `_`
+    > the thread
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.DelayedResult.to_widget" class="docs-object-method">&nbsp;</a> 
@@ -76,9 +117,14 @@ start_process(self):
 to_widget(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L2133)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L2133?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L3574)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/DelayedResult.py#L3574?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Start the background process and return the output area widget.
+  - `:returns`: `_`
+    > the output area
  </div>
 </div>
 
@@ -132,7 +178,7 @@ to_widget(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/DelayedResult.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/DelayedResult.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2070?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L3460?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

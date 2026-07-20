@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Controls.MenuSelect">MenuSelect</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L419)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L419?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L908)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L908?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,21 @@ menu_type: ListGroup
 __init__(self, var, options, menu_type=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L421)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L421?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls.py#L910)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L910?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A control that selects a value by activating an item in a menu component (e.g. a
+list group).
+  - `var`: `Any`
+    > the bound variable
+  - `options`: `Any`
+    > the menu options
+  - `menu_type`: `Any`
+    > the menu component class
+  - `attrs`: `Any`
+    > extra menu attributes
 
 
 <a id="McUtils.Jupyter.Apps.Controls.MenuSelect.get_value" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +48,14 @@ __init__(self, var, options, menu_type=None, **attrs):
 get_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L428)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L428?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L928)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L928?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the value mapped to the currently active item.
+  - `:returns`: `_`
+    > the value
 
 
 <a id="McUtils.Jupyter.Apps.Controls.MenuSelect.set_value" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +63,12 @@ get_value(self):
 set_value(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L431)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L431?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L938)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L938?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Activate the menu item matching the variable's value.
 
 
 <a id="McUtils.Jupyter.Apps.Controls.MenuSelect.update" class="docs-object-method">&nbsp;</a> 
@@ -56,9 +76,14 @@ set_value(self):
 update(self, e): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L433)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L433?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L945)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L945?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Activate the item matching the current value (a change handler).
+  - `e`: `Any`
+    > the change event
 
 
 <a id="McUtils.Jupyter.Apps.Controls.MenuSelect.set_active" class="docs-object-method">&nbsp;</a> 
@@ -66,9 +91,14 @@ update(self, e):
 set_active(self, v): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L435)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L435?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L954)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L954?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Activate the menu item whose mapped value equals `v`.
+  - `v`: `Any`
+    > the value to select
 
 
 <a id="McUtils.Jupyter.Apps.Controls.MenuSelect.set_active_key" class="docs-object-method">&nbsp;</a> 
@@ -76,9 +106,14 @@ set_active(self, v):
 set_active_key(self, k): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L443)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L443?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L969)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L969?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Activate the menu item with the given key, deactivating the previously active one.
+  - `k`: `Any`
+    > the item key
 
 
 <a id="McUtils.Jupyter.Apps.Controls.MenuSelect.onclick" class="docs-object-method">&nbsp;</a> 
@@ -86,9 +121,18 @@ set_active_key(self, k):
 onclick(self, e, i, v): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L456)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L456?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L989)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L989?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Handle a menu-item click: set the variable and activate the item.
+  - `e`: `Any`
+    > the click event
+  - `i`: `Any`
+    > the item id
+  - `v`: `Any`
+    > the item's value
 
 
 <a id="McUtils.Jupyter.Apps.Controls.MenuSelect.canonicalize_options" class="docs-object-method">&nbsp;</a> 
@@ -96,9 +140,17 @@ onclick(self, e, i, v):
 canonicalize_options(self, options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L461)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L461?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L1003)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L1003?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Normalize the menu options into item dicts (with ids and click handlers) and a
+`{id: value}` value map.
+  - `options`: `Any`
+    > the options
+  - `:returns`: `tuple`
+    > `(value_map, item_dicts)`
 
 
 <a id="McUtils.Jupyter.Apps.Controls.MenuSelect.to_jhtml" class="docs-object-method">&nbsp;</a> 
@@ -106,9 +158,14 @@ canonicalize_options(self, options):
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L484)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L484?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L1036)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/MenuSelect.py#L1036?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render the menu widget and activate the initial item.
+  - `:returns`: `_`
+    > the widget
  </div>
 </div>
 
@@ -162,7 +219,7 @@ to_jhtml(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Controls/MenuSelect.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Controls/MenuSelect.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L419?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls.py#L908?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.Carousel">Carousel</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L833)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L833?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1501)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1501?message=Update%20Docs)]
 </div>
 
 
@@ -27,9 +27,20 @@ theme: dict
 __init__(self, items, include_controls=True, data_bs_ride='carousel', include_indicators=False, overlap_controls=False, interval=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L845)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L845?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1513)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1513?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A Bootstrap carousel.
+  - `items`: `Any`
+    > the carousel slides
+  - `include_controls`: `bool`
+    > include the prev/next controls
+  - `data_bs_ride`: `Any`
+    > the Bootstrap auto-ride mode
+  - `attrs`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Carousel.create_item" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +48,22 @@ __init__(self, items, include_controls=True, data_bs_ride='carousel', include_in
 create_item(self, item, cls=None, data_bs_interval=None, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L862)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L862?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L1541)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L1541?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build a carousel slide element.
+  - `item`: `Any`
+    > the slide spec
+  - `cls`: `Any`
+    > extra CSS classes
+  - `data_bs_interval`: `Any`
+    > the slide interval
+  - `kw`: `Any`
+    > extra options
+  - `:returns`: `_`
+    > the slide element
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Carousel.next_button" class="docs-object-method">&nbsp;</a> 
@@ -47,9 +71,18 @@ create_item(self, item, cls=None, data_bs_interval=None, **kw):
 next_button(self, body=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L881)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L881?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L1582)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L1582?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build the carousel's next-slide button.
+  - `body`: `Any`
+    > the button content
+  - `kwargs`: `Any`
+    > extra options
+  - `:returns`: `_`
+    > the button
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Carousel.prev_button" class="docs-object-method">&nbsp;</a> 
@@ -57,9 +90,18 @@ next_button(self, body=None, **kwargs):
 prev_button(self, body=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L883)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L883?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L1593)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L1593?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build the carousel's previous-slide button.
+  - `body`: `Any`
+    > the button content
+  - `kwargs`: `Any`
+    > extra options
+  - `:returns`: `_`
+    > the button
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Carousel.indicators" class="docs-object-method">&nbsp;</a> 
@@ -67,9 +109,16 @@ prev_button(self, body=None, **kwargs):
 indicators(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L885)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L885?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L1604)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L1604?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build the carousel's slide-indicator elements.
+  - `kwargs`: `Any`
+    > extra options
+  - `:returns`: `_`
+    > the indicators
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Carousel.wrap_items" class="docs-object-method">&nbsp;</a> 
@@ -77,9 +126,16 @@ indicators(self, **kwargs):
 wrap_items(self, items): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L896)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L896?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L1623)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Carousel.py#L1623?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Wrap the slides (and controls/indicators) into the carousel element.
+  - `items`: `Any`
+    > the slides
+  - `:returns`: `_`
+    > the carousel element
  </div>
 </div>
 
@@ -133,7 +189,7 @@ wrap_items(self, items):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/Carousel.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/Carousel.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L833?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1501?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

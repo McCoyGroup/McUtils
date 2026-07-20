@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DScene">X3DScene</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L819)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L819?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1316)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1316?message=Update%20Docs)]
 </div>
 
 
@@ -31,9 +31,20 @@ default_view_distance: int
 __init__(self, *children: 'X3DPrimitive', background=None, viewpoint=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L823)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L823?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1320)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1320?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Set up a scene primitive with an optional background and viewpoint.
+  - `children`: `Any`
+    > the scene's child primitives
+  - `background`: `Any`
+    > the background specification
+  - `viewpoint`: `Any`
+    > the viewpoint specification
+  - `opts`: `Any`
+    > extra scene options
 
 
 <a id="McUtils.Plots.X3DInterface.X3DScene.get_view_settings" class="docs-object-method">&nbsp;</a> 
@@ -42,9 +53,19 @@ __init__(self, *children: 'X3DPrimitive', background=None, viewpoint=None, **opt
 get_view_settings(cls, up_vector=None, view_vector=None, right_vector=None, view_distance=None, view_center=None, view_matrix=None, view_position=None, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L839)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L839?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1346)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1346?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build viewpoint settings (position/orientation/etc.) from a flexible view
+specification.
+  - `args`: `Any`
+    > positional view arguments
+  - `kwargs`: `Any`
+    > view options
+  - `:returns`: `dict`
+    > the viewpoint settings
  </div>
 </div>
 
@@ -98,7 +119,7 @@ get_view_settings(cls, up_vector=None, view_vector=None, right_vector=None, view
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DScene.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DScene.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L819?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1316?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

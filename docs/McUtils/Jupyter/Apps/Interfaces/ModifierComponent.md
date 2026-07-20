@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.ModifierComponent">ModifierComponent</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L595)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L595?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1121)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1121?message=Update%20Docs)]
 </div>
 
 
@@ -27,9 +27,17 @@ blacklist: set
 __init__(self, base=None, **modifiers): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L597)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L597?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1123)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1123?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A component that modifies an existing base element's attributes rather than
+wrapping new content.
+  - `base`: `Any`
+    > the base element to modify
+  - `modifiers`: `Any`
+    > the attribute modifiers to apply
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.ModifierComponent.__call__" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +45,17 @@ __init__(self, base=None, **modifiers):
 __call__(self, base): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/ModifierComponent.py#L604)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/ModifierComponent.py#L604?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/ModifierComponent.py#L1139)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/ModifierComponent.py#L1139?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Bind a base element to the modifier (callable form), erroring if one is already
+bound.
+  - `base`: `Any`
+    > the base element
+  - `:returns`: `ModifierComponent`
+    > self
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.ModifierComponent.to_jhtml" class="docs-object-method">&nbsp;</a> 
@@ -47,9 +63,14 @@ __call__(self, base):
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/ModifierComponent.py#L613)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/ModifierComponent.py#L613?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/ModifierComponent.py#L1159)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/ModifierComponent.py#L1159?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Render the base element with the modifier attributes applied.
+  - `:returns`: `_`
+    > the JHTML element
  </div>
 </div>
 
@@ -103,7 +124,7 @@ to_jhtml(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/ModifierComponent.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/ModifierComponent.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L595?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1121?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

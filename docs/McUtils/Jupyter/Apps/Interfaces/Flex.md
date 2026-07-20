@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.Flex">Flex</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L2007)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2007?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L3349)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L3349?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,26 @@ Item: FlexItem
 __init__(self, elements, direction=None, wrap=None, alignment=None, justification=None, content_alignment=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L2009)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2009?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L3351)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L3351?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A flexbox layout of elements.
+  - `elements`: `Any`
+    > the elements to arrange
+  - `direction`: `Any`
+    > the flex direction
+  - `wrap`: `Any`
+    > the flex-wrap mode
+  - `alignment`: `Any`
+    > the cross-axis item alignment
+  - `justification`: `Any`
+    > the main-axis justification
+  - `content_alignment`: `Any`
+    > the multi-line content alignment
+  - `attrs`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Flex.get_flex_styles" class="docs-object-method">&nbsp;</a> 
@@ -37,9 +54,24 @@ __init__(self, elements, direction=None, wrap=None, alignment=None, justificatio
 get_flex_styles(cls, direction=None, wrap=None, alignment=None, justification=None, content_alignment=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2022)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2022?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L3377)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L3377?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Compute the CSS flex-container styles from the direction/wrap/alignment.
+  - `direction`: `Any`
+    > the flex direction
+  - `wrap`: `Any`
+    > the flex-wrap mode
+  - `alignment`: `Any`
+    > the item alignment
+  - `justification`: `Any`
+    > the justification
+  - `content_alignment`: `Any`
+    > the content alignment
+  - `:returns`: `dict`
+    > the styles
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Flex.get_layout_styles" class="docs-object-method">&nbsp;</a> 
@@ -47,9 +79,14 @@ get_flex_styles(cls, direction=None, wrap=None, alignment=None, justification=No
 get_layout_styles(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Flex.py#L2040)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Flex.py#L2040?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Flex.py#L3408)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Flex.py#L3408?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the flex container's styles.
+  - `:returns`: `dict`
+    > the styles
  </div>
 </div>
 
@@ -103,7 +140,7 @@ get_layout_styles(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/Flex.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/Flex.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L2007?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L3349?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

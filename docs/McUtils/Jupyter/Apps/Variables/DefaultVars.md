@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Variables.DefaultVars">DefaultVars</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables.py#L119)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L119?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables.py#L295)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L295?message=Update%20Docs)]
 </div>
 
 
@@ -24,9 +24,14 @@
 __init__(self, vars: McUtils.Jupyter.Apps.Variables.InterfaceVars = None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables.py#L121)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L121?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables.py#L297)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L297?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Context manager holding a default `InterfaceVars` set to activate.
+  - `vars`: `InterfaceVars | None`
+    > the variable set (a fresh one if omitted)
 
 
 <a id="McUtils.Jupyter.Apps.Variables.DefaultVars.__enter__" class="docs-object-method">&nbsp;</a> 
@@ -34,9 +39,14 @@ __init__(self, vars: McUtils.Jupyter.Apps.Variables.InterfaceVars = None):
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/DefaultVars.py#L123)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/DefaultVars.py#L123?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/DefaultVars.py#L307)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/DefaultVars.py#L307?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Push this default onto the stack and activate its variable set.
+  - `:returns`: `InterfaceVars`
+    > the variable set
 
 
 <a id="McUtils.Jupyter.Apps.Variables.DefaultVars.__exit__" class="docs-object-method">&nbsp;</a> 
@@ -44,9 +54,18 @@ __enter__(self):
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/DefaultVars.py#L127)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/DefaultVars.py#L127?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Variables/DefaultVars.py#L319)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables/DefaultVars.py#L319?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Pop this default off the stack and deactivate its variable set.
+  - `exc_type`: `Any`
+    > the exception type, if any
+  - `exc_val`: `Any`
+    > the exception value, if any
+  - `exc_tb`: `Any`
+    > the traceback, if any
 
 
 <a id="McUtils.Jupyter.Apps.Variables.DefaultVars.resolve" class="docs-object-method">&nbsp;</a> 
@@ -55,9 +74,14 @@ __exit__(self, exc_type, exc_val, exc_tb):
 resolve(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L130)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L130?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L331)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L331?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Return the current default variable set (a fresh one if none is active).
+  - `:returns`: `InterfaceVars`
+    > the variable set
  </div>
 </div>
 
@@ -111,7 +135,7 @@ resolve(cls):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Variables/DefaultVars.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Variables/DefaultVars.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L119?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Variables.py#L295?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

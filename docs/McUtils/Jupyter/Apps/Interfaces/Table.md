@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.Table">Table</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1887)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1887?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L3154)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L3154?message=Update%20Docs)]
 </div>
 
 
@@ -26,9 +26,39 @@ Item: TableItem
 __init__(self, elements, rows=None, cols=None, alignment=None, justification=None, row_spacing=None, col_spacing=None, item_attrs=None, row_height='1fr', column_width='1fr', table_headings=None, striped=True, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L1889)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1889?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L3156)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L3156?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+A table rendered as a CSS grid (`display: contents` rows), optionally with headings
+and striping.
+  - `elements`: `Any`
+    > the table rows of cells
+  - `rows`: `Any`
+    > the number of rows
+  - `cols`: `Any`
+    > the number of columns
+  - `alignment`: `Any`
+    > the cell alignment
+  - `justification`: `Any`
+    > the cell justification
+  - `row_spacing`: `Any`
+    > the row gap
+  - `col_spacing`: `Any`
+    > the column gap
+  - `item_attrs`: `Any`
+    > default per-cell attributes
+  - `row_height`: `Any`
+    > the row track sizing
+  - `column_width`: `Any`
+    > the column track sizing
+  - `table_headings`: `Any`
+    > the header row cells
+  - `striped`: `bool`
+    > use striped rows
+  - `attrs`: `Any`
+    > extra attributes
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Table.wrapper" class="docs-object-method">&nbsp;</a> 
@@ -36,9 +66,20 @@ __init__(self, elements, rows=None, cols=None, alignment=None, justification=Non
 wrapper(self, *elems, cls=None, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Table.py#L1914)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Table.py#L1914?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Table.py#L3202)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Table.py#L3202?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Wrap the rows in a `<table>` (with header/body sections and striping).
+  - `elems`: `Any`
+    > the table rows
+  - `cls`: `Any`
+    > extra CSS classes
+  - `attrs`: `Any`
+    > extra attributes
+  - `:returns`: `_`
+    > the table element
 
 
 <a id="McUtils.Jupyter.Apps.Interfaces.Table.setup_layout" class="docs-object-method">&nbsp;</a> 
@@ -46,9 +87,18 @@ wrapper(self, *elems, cls=None, **attrs):
 setup_layout(self, grid, attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Table.py#L1932)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Table.py#L1932?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/Table.py#L3230)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/Table.py#L3230?message=Update%20Docs)]
 </div>
+**LLM Docstring**
+
+Build the table rows (including an optional heading row) and infer the row/column counts.
+  - `grid`: `Any`
+    > the grid of cells
+  - `attrs`: `Any`
+    > the per-cell attributes
+  - `:returns`: `tuple`
+    > `(settings, rows)`
  </div>
 </div>
 
@@ -102,7 +152,7 @@ setup_layout(self, grid, attrs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/Table.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/Table.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L1887?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L3154?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
