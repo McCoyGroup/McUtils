@@ -20,7 +20,7 @@ git push -u $repo gh-pages
 ## run the test script
 cd /home
 
-for i in {1..3}
+for i in {1..3}; do
 if [[ "$1" == "tests" ]]; then
   shift;
   run_tests=true
@@ -33,7 +33,7 @@ if [[ "$1" == "stubs" ]]; then
   shift;
   build_stubs=true
 fi
-do
+done
 
 if [[ "$run_test" == "true" ]]; then
   if [[ "$branch" == "master" ]]; then
