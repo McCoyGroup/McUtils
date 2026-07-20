@@ -8,41 +8,41 @@
 Parameters
 ----------
 root_src_dir : str or None
-Path to the root module's source directory (the folder
-containing its __init__.py). If None, the root module must be
-importable and its location is resolved from that import.
+    Path to the root module's source directory (the folder
+    containing its __init__.py). If None, the root module must be
+    importable and its location is resolved from that import.
 out_dir : str
-Output directory. Stub trees are written to
-`<out_dir>/<root_module_name>/<pkg_name>/...`, summaries to
-`<out_dir>/summaries/<pkg_name>.md`, and the graph index to
-`<out_dir>/summaries/index.md`.
+    Output directory. Stub trees are written to
+    `<out_dir>/<root_module_name>/<pkg_name>/...`, summaries to
+    `<out_dir>/summaries/<pkg_name>.md`, and the graph index to
+    `<out_dir>/summaries/index.md`.
 max_doc_len : int
-Cap on class docstrings in summaries: first paragraph or this
-many characters, whichever comes first.
+    Cap on class docstrings in summaries: first paragraph or this
+    many characters, whichever comes first.
 min_words : int
-For one-line descriptions: skip docstring lines with this many
-words or fewer (filters out short placeholder lines), using the
-first line that exceeds it.
+    For one-line descriptions: skip docstring lines with this many
+    words or fewer (filters out short placeholder lines), using the
+    first line that exceeds it.
 write_sidecar_file : bool
-If True, externalized large literals are written to a shared
-`_registry_data.json` (+ loader module) under out_dir, and stubs
-get a loader call to fetch them. If False (default), only a
-key/shape summary comment is left in the stub and the raw data
-is dropped entirely.
+    If True, externalized large literals are written to a shared
+    `_registry_data.json` (+ loader module) under out_dir, and stubs
+    get a loader call to fetch them. If False (default), only a
+    key/shape summary comment is left in the stub and the raw data
+    is dropped entirely.
 
 Overridable methods
 --------------------
 Every step is a plain instance method, so a subclass can override
 any piece of the pipeline, e.g.:
 
-class MyBuilder(StubSummaryBuilder):
-def discover_top_level_packages(self, root_module_name):
-# custom discovery logic, e.g. a hardcoded package list
-...
+    class MyBuilder(StubSummaryBuilder):
+        def discover_top_level_packages(self, root_module_name):
+            # custom discovery logic, e.g. a hardcoded package list
+            ...
 
-def build_package_summary(self, src_dir, out_file):
-# custom summary format
-...
+        def build_package_summary(self, src_dir, out_file):
+            # custom summary format
+            ...
 
 
 

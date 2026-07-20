@@ -301,9 +301,9 @@ empty_array(self, shape=None, num_elements=None):
 Creates empty arrays with (potentially) default elements
 
 The shape handling rules operate like this:
-if shape is None, we assume we'll initialize this as an array with a single element to be filled out
-if shape is (None,) or (n,) we'll initialize this as an array with multiple elments to be filled out
-otherwise we'll just take the specified shape
+    if shape is None, we assume we'll initialize this as an array with a single element to be filled out
+    if shape is (None,) or (n,) we'll initialize this as an array with multiple elments to be filled out
+    otherwise we'll just take the specified shape
   - `num_elements`: `Any`
     > 
   - `:returns`: `_`

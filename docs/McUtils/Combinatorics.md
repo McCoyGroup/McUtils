@@ -166,9 +166,9 @@ SymmetricGroupGenerator(9).get_terms([1, 2, 3, 4])
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-0d800b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-0d800b"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-bd7ef2" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-bd7ef2"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-0d800b" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-bd7ef2" markdown="1">
  - [lemherCodes](#lemherCodes)
 - [YT](#YT)
 - [PrimeFactorization](#PrimeFactorization)
@@ -192,9 +192,9 @@ SymmetricGroupGenerator(9).get_terms([1, 2, 3, 4])
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-ea145f" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ea145f"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-828a74" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-828a74"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ea145f" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-828a74" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

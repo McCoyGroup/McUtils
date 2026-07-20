@@ -31,7 +31,7 @@ The easiest way to install is via `pip`, as
 pip install mccoygroup-mcutils
 ```
 
-This should install all dependencies.
+This should install all dependencies. 
 The major requirement is that Python 3.9+ is required due to use of features in the `types` module.
 For safety, it is best to install this in a [virtual environment](https://docs.python.org/3.8/tutorial/venv.html), which we can make like
 
@@ -90,7 +90,7 @@ python -m pip install  git+https://github.com/McCoyGroup/McUtils.git
 
 Some integrations have additional dependencies, such as Jupyter, `ipywidgets`,
 RDKit, ASE, Open Babel, or MPI. Install these only when you need the
-corresponding package.
+corresponding package. 
 
 To initialize the richer `JHTML` notebook support, run:
 
@@ -128,7 +128,7 @@ from McUtils.Numputils import vec_crosses, vec_dots, vec_norms, vec_normalize, p
 
 # Build a local frame from three atoms in a molecular geometry.
 oxygen, hydrogen_1, hydrogen_2 = np.array([
-[0.000, 0.000, 0.000], [0.958, 0.000, 0.000], [-0.240, 0.927, 0.000]
+    [0.000, 0.000, 0.000], [0.958, 0.000, 0.000], [-0.240, 0.927, 0.000]
 ])
 # direct vectorized embedding calculations
 oh_1, oh_2 = hydrogen_1 - oxygen, hydrogen_2 - oxygen
@@ -176,10 +176,10 @@ import numpy as np
 from McUtils.Zachary import FiniteDifferenceDerivative
 
 def morse_potential(r, de=0.20, a=1.5, re=1.0):
-return de * (1 - np.exp(-a * (r - re))) ** 2
+    return de * (1 - np.exp(-a * (r - re))) ** 2
 
 derivatives = FiniteDifferenceDerivative(morse_potential, stencil=7)(
-np.array([1.0]), mesh_spacing=0.005
+    np.array([1.0]), mesh_spacing=0.005
 )
 gradient = derivatives[0]
 force_constant = derivatives[0, 0]
@@ -202,10 +202,10 @@ atoms = mol.atoms
 coords = mol.coords * angstrom_to_bohr
 surface = SphereUnionSurface.from_xyz(atoms, coords, samples=250)
 mesh = surface.get_triangulation(
-method="isosurface",
-probe_type="ses",
-probe_radius=1.4 * angstrom_to_bohr,
-grid_samples=60
+    method="isosurface", 
+    probe_type="ses",
+    probe_radius=1.4 * angstrom_to_bohr,
+    grid_samples=60
 )
 print(f"SES area: {mesh.surface_area() / angstrom_to_bohr**2:.2f} Å²")
 figure = surface.plot()
@@ -231,7 +231,7 @@ import numpy as np
 from McUtils.Coordinerds import CoordinateSet, CartesianCoordinates3D, ZMatrixCoordinates
 
 water = CoordinateSet([
-[0.0, 0.0, 0.0], [0.96, 0.0, 0.0], [-0.24, 0.93, 0.0]
+    [0.0, 0.0, 0.0], [0.96, 0.0, 0.0], [-0.24, 0.93, 0.0]
 ], system=CartesianCoordinates3D)
 ordering = [[0, -1, -1, -1], [1, 0, -1, -1], [2, 0, 1, -1]]
 internals = water.convert(ZMatrixCoordinates, ordering=ordering)
@@ -261,7 +261,7 @@ from McUtils.Combinatorics import IntegerPartitioner, UniquePermutations
 _, partitions = IntegerPartitioner.partitions(4, pad=True, return_lens=True, max_len=3)
 states = []
 for partition in partitions:
-states.extend(UniquePermutations(partition).permutations())
+    states.extend(UniquePermutations(partition).permutations())
 states = np.unique(np.asarray(states), axis=0)
 space = UniquePermutations([2, 1, 1])
 indices = space.index_permutations(space.permutations())
@@ -281,7 +281,7 @@ from McUtils.Graphs import EdgeGraph
 # Represent ethanol as a labeled molecular graph.
 labels = ["C", "C", "O", "H", "H", "H", "H", "H", "H"]
 edges = [(0, 1), (1, 2), (0, 3), (0, 4), (0, 5),
-(1, 6), (1, 7), (2, 8)]
+         (1, 6), (1, 7), (2, 8)]
 ethanol = EdgeGraph(labels, edges)
 print("fragments:", ethanol.get_fragments(return_labels=True))
 print("C-C-O path:", ethanol.get_path(0, 2))
@@ -303,9 +303,9 @@ from McUtils.Symmetry import CharacterTable
 
 c2v = CharacterTable.point_group("Cv", 2)
 water = np.array([
-[0.000, 0.000, 0.126],
-[1.437, 0.000, -0.999],
-[-1.437, 0.000, -0.999]
+    [0.000, 0.000, 0.126],
+    [1.437, 0.000, -0.999],
+    [-1.437, 0.000, -0.999]
 ])
 reduction = c2v.coordinate_mode_reduction(water)
 print(c2v.format())
@@ -357,14 +357,14 @@ from McUtils.ExternalPrograms import SLURMExecutionEngine, ExecutionStatus
 # The execution layer can swap local processes for Slurm without changing callers.
 engine = SLURMExecutionEngine()
 future = engine.submit_job(
-"frequency.sbatch",
-watch_dir="frequency-job",
-results_file="results.json",
-poll_time=5
+    "frequency.sbatch",
+    watch_dir="frequency-job",
+    results_file="results.json",
+    poll_time=5
 )
 print("submitted:", future.job_id, "status:", future.get_status())
 if future.get_status() is ExecutionStatus.COMPLETED:
-print(future.get_result())
+    print(future.get_result())
 ```
 
 RDKit integration supports conformer generation, force-field optimization,
@@ -376,10 +376,10 @@ from McUtils.ExternalPrograms import RDMolecule
 
 # RDKit is optional; generate an MMFF-optimized butane conformer ensemble.
 conformers = RDMolecule.from_smiles(
-"C(C)(C)(C)COOC(c1ccccc1)", add_implicit_hydrogens=True,
-num_confs=5,
-optimize=True,
-take_min=False
+    "C(C)(C)(C)COOC(c1ccccc1)", add_implicit_hydrogens=True,
+    num_confs=5, 
+    optimize=True,
+    take_min=False
 )
 energies = np.array([conf.calculate_energy() for conf in conformers])
 best = conformers[np.argmin(energies)].copy()
@@ -419,12 +419,12 @@ higher derivative tensors. New program-neutral work generally belongs in
 from McUtils.GaussianInterface import GaussianLogReader
 
 with GaussianLogReader("frequency.log") as reader:
-parsed = reader.parse([
-"StandardCartesianCoordinates",
-"DipoleMoments",
-"NormalModes",
-"ScanEnergies"
-])
+    parsed = reader.parse([
+        "StandardCartesianCoordinates",
+        "DipoleMoments",
+        "NormalModes",
+        "ScanEnergies"
+    ])
 atoms, geometries = parsed["StandardCartesianCoordinates"]
 dipoles = parsed["DipoleMoments"]
 print(f"read {len(geometries)} geometries for {len(atoms)} atoms")
@@ -448,8 +448,8 @@ from McUtils.Parsers import Number, Whitespace, Optional, StringParser
 
 # Parse a Gaussian-style line into a numeric array without hand-written regex.
 eigenvalues = RegexPattern(
-("Eigenvalues --", Repeating(Capturing(Number), suffix=Optional(Whitespace))),
-joiner=Whitespace
+    ("Eigenvalues --", Repeating(Capturing(Number), suffix=Optional(Whitespace))),
+    joiner=Whitespace
 )
 parser = StringParser(eigenvalues)
 line = "Eigenvalues --  -0.1423  0.0781  0.2114"
@@ -479,9 +479,9 @@ x = np.linspace(0, 2 * np.pi, 40)
 observations = np.sin(x) + np.random.default_rng(4).normal(0, 0.08, x.shape)
 plot = Plot(x, np.sin(x), plot_label="model", plot_style={"color": "navy"})
 ScatterPlot(
-x, observations, figure=plot,
-plot_label="measurements",
-plot_style={"color": "crimson", "s": 18}
+    x, observations, figure=plot,
+    plot_label="measurements",
+    plot_style={"color": "crimson", "s": 18}
 )
 plot.axes_labels = ["phase / rad", "signal"]
 plot.plot_label = "Model and measurements"
@@ -503,14 +503,14 @@ from McUtils.Jupyter import JHTML
 
 table = [["Method", "Energy / Eh"], ["HF", -75.983], ["CCSD(T)", -76.241]]
 panel = JHTML.Bootstrap.Card(
-JHTML.Bootstrap.Table(table, cls=["table-striped", "table-hover"]),
-header="Water calculation"
+    JHTML.Bootstrap.Table(table, cls=["table-striped", "table-hover"]),
+    header="Water calculation"
 )
 layout = JHTML.Div(
-JHTML.HTML.Header("Electronic-structure summary"),
-panel,
-JHTML.HTML.P("Values update as calculations finish."),
-cls="container p-3"
+    JHTML.HTML.Header("Electronic-structure summary"),
+    panel,
+    JHTML.HTML.P("Values update as calculations finish."),
+    cls="container p-3"
 )
 layout.display()
 ```
@@ -558,13 +558,13 @@ from McUtils.Parallelizers import SerialNonParallelizer
 
 # The same function can receive an MPI or multiprocessing backend later.
 def block_energy(points, *, parallelizer=None):
-return np.sum(points * points)
+    return np.sum(points * points)
 
 geometries = np.arange(36.0).reshape(4, 3, 3)
 parallelizer = SerialNonParallelizer()
 energies = parallelizer.map(
-block_energy, geometries,
-extra_kwargs={"parallelizer": parallelizer}, aggregate=True
+    block_energy, geometries,
+    extra_kwargs={"parallelizer": parallelizer}, aggregate=True
 )
 print("batch energies:", energies)
 ```
@@ -581,15 +581,15 @@ import numpy as np
 from McUtils.Extensions import FunctionSignature, Argument, ArrayType, RealType, IntType
 
 gradient_signature = FunctionSignature(
-"evaluate_gradient",
-Argument("natoms", IntType),
-Argument("coordinates", ArrayType(RealType, ctypes_spec="double")),
-Argument("gradient", ArrayType(RealType, ctypes_spec="double")),
-return_type=None
+    "evaluate_gradient",
+    Argument("natoms", IntType),
+    Argument("coordinates", ArrayType(RealType, ctypes_spec="double")),
+    Argument("gradient", ArrayType(RealType, ctypes_spec="double")),
+    return_type=None
 )
 coordinates = np.zeros((3, 3))
 prepared = gradient_signature.prep_args(
-(), {"natoms": 3, "coordinates": coordinates, "gradient": np.empty_like(coordinates)}
+    (), {"natoms": 3, "coordinates": coordinates, "gradient": np.empty_like(coordinates)}
 )
 print(gradient_signature.cpp_signature)
 print("prepared coordinate shape:", prepared[1].shape)
@@ -611,8 +611,8 @@ l = TeX.Symbol(TeX.bold("L"))
 omega = TeX.Symbol("omega")
 equation = (f * l).Equals(l * (omega ** 2))
 document = TeX.Equation(
-equation,
-label="eq:normal-modes"
+    equation,
+    label="eq:normal-modes"
 )
 print(document.format_tex())
 ```
@@ -632,8 +632,8 @@ from IPython.display import display
 # Extract test-backed examples and open rich API documentation in a notebook.
 examples = ExamplesParser.from_file("ci/tests/ZacharyTests.py")
 finite_difference_examples = [
-name for name in examples.functions
-if "Deriv" in name or "FiniteDifference" in name
+    name for name in examples.functions
+    if "Deriv" in name or "FiniteDifference" in name
 ]
 print("available examples:", finite_difference_examples)
 documentation = jdoc(FiniteDifferenceDerivative, max_depth=2)
@@ -652,7 +652,7 @@ output redirection, and explicit singleton sentinels for values such as
 from McUtils.Devutils import OptionsSet, is_dict_like, is_list_like
 
 def run_calculation(*, method, basis="cc-pVDZ", charge=0):
-return method, basis, charge
+    return method, basis, charge
 
 options = OptionsSet(method="CCSD(T)", basis="aug-cc-pVTZ", charge=0, memory="8GB")
 accepted, extra = options.split(run_calculation)
@@ -675,7 +675,7 @@ from McUtils.Iterators import chunked, counts, delete_duplicates, flatten
 
 # Turn a nested stream of calculation records into coherent work batches.
 records = [[("water", -76.1), ("water", -76.2)],
-[("ammonia", -56.2), ("methane", -40.4), ("methane", -40.5)]]
+           [("ammonia", -56.2), ("methane", -40.4), ("methane", -40.5)]]
 records = list(flatten(records, atomic_types=(tuple,)))
 batch_sizes = counts(record[0] for record in records)
 batches = list(chunked(records, 2))
@@ -699,7 +699,7 @@ import numpy as np
 rng = np.random.default_rng(7)
 vectors = rng.normal(size=(100_000, 3))
 with Timer("100k vector dot products", rounding=4) as timer:
-norms_squared = vec_dots(vectors, vectors)
+    norms_squared = vec_dots(vectors, vectors)
 timer.start()
 normalized = vectors / np.sqrt(norms_squared[:, None])
 normalization_time = timer.stop()
@@ -719,7 +719,7 @@ from McUtils.Misc import Abstract
 
 x, np_symbol = Abstract.vars("x", "np")
 potential = Abstract.Lambda(x)(
-0.5 * np_symbol.sum(x * x, axis=-1)
+    0.5 * np_symbol.sum(x * x, axis=-1)
 )
 energy = potential.compile({"np": np})
 points = np.array([[1.0, 2.0, 3.0], [0.5, 0.5, 0.5]])
@@ -733,7 +733,7 @@ print("generated AST:", potential.to_eval_expr())
 
 If you'd like to help out with this, we'd love contributions.
 The easiest way to get started with it is to try it out.
-When you find bugs, please [report them](https://github.com/McCoyGroup/McUtils/issues/new?title=Bug%20Found:&labels=bug).
+When you find bugs, please [report them](https://github.com/McCoyGroup/McUtils/issues/new?title=Bug%20Found:&labels=bug). 
 If there are things you'd like added [let us know](https://github.com/McCoyGroup/McUtils/issues/new?title=Feature%20Request:&labels=enhancement), and we'll try to help you get the context you need to add them yourself.
 One of the biggest places where people can help out, though, is in improving the quality of the documentation.
 As you try things out, add them as examples, either to the [main page](https://mccoygroup.github.io/References/Documentation/McUtils.html#examples) or to a [child page](https://mccoygroup.github.io/References/Documentation/McUtils/Plots/Plots/Plot.html#examples).

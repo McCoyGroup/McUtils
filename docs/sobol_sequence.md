@@ -6,7 +6,7 @@
 First N points of the d-dimensional Sobol sequence (Bratley-Fox
 direction numbers), via the direct formula
 
-x_n = XOR_{c : bit c of gray(n+1) is set} V[:, c]     (n = 0..N-1)
+    x_n = XOR_{c : bit c of gray(n+1) is set} V[:, c]     (n = 0..N-1)
 
 where gray(k) = k XOR (k >> 1). This 0-indexed convention matches the
 classic Fortran/MATLAB/Python reference implementations (Burkardt et

@@ -9,14 +9,14 @@ An entirely standalone package which is used extensively by `GaussianInterface`.
 Three main threads are handled:
 
 1. A `FileStreamer` interface which allows for efficient searching for blocks of text
-in large files with no pattern matching
+   in large files with no pattern matching
 2. A `Regex` interface that provides declarative tools for building and manipulating a regular expression
-as a python tree
+   as a python tree
 3. A `StringParser`/`StructuredTypeArray` interface that takes the `Regex` tools and allows for automatic
-construction of complicated `NumPy`-backed arrays from the parsed data. Generally works well but the
-problem is complicated and there are no doubt many unhandled edge cases.
-This is used extensively with (1.) to provide efficient parsing of data from Gaussian `.log` files by
-using a streamer to match chunks and a parser to extract data from the matched chunks.
+   construction of complicated `NumPy`-backed arrays from the parsed data. Generally works well but the
+   problem is complicated and there are no doubt many unhandled edge cases.
+   This is used extensively with (1.) to provide efficient parsing of data from Gaussian `.log` files by
+   using a streamer to match chunks and a parser to extract data from the matched chunks.
 
 ### Members
 <div class="container alert alert-secondary bg-light">
@@ -353,9 +353,9 @@ We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-1be2cd" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-1be2cd"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-56fc25" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-56fc25"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-1be2cd" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-56fc25" markdown="1">
  - [RegexGroups](#RegexGroups)
 - [OptScan](#OptScan)
 - [XYZ](#XYZ)
@@ -365,9 +365,9 @@ We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-bf5fd0" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-bf5fd0"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-ed8177" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ed8177"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-bf5fd0" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ed8177" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

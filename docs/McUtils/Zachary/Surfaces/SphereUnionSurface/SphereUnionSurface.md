@@ -541,7 +541,7 @@ SDF dilate -> redistance -> erode.
 Returns
 -------
 F_final : float ndarray
-Signed distance field whose zero level set is the closed surface.
+    Signed distance field whose zero level set is the closed surface.
 
 
 <a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.solvent_surface_distance" class="docs-object-method">&nbsp;</a> 

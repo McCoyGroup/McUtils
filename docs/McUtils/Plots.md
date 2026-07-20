@@ -10,15 +10,15 @@ names have been chosen to be the same.
 Difficulties with `matplotlib` prevent a perfect mirror but the design is consistent.
 There are a few primary divisions:
 1. `Graphics`/`Graphics3D`/`GraphicsGrid` provide basic access to `matplotlib.figure` and `matplotlib.axes`
-they also hold a `GraphicsPropertyManager`/`GraphicsPropertyManager3D` that manages all properties
-(`image_size`, `axes_label`, `ticks_style`, etc.).
-The full lists can be found on the relevant reference pages and are bound as `properties` on the
-`Graphics`/`Graphics3D` instances.
+    they also hold a `GraphicsPropertyManager`/`GraphicsPropertyManager3D` that manages all properties
+    (`image_size`, `axes_label`, `ticks_style`, etc.).
+    The full lists can be found on the relevant reference pages and are bound as `properties` on the
+    `Graphics`/`Graphics3D` instances.
 2. `Plot/Plot3D` and everything in the `Plots` subpackage provide concrete instances of common plots
-with nice names/consistent with Mathematica for discoverability but primarily fall back onto
-`matplotlib` built-in methods and then allow for restyling/data reuse, etc.
+    with nice names/consistent with Mathematica for discoverability but primarily fall back onto
+    `matplotlib` built-in methods and then allow for restyling/data reuse, etc.
 3. `Primitives` provide direct access to the shapes that are actually plotted on screen (i.e. `matplotlib.Patch` objects)
-in a convenient way to add on to existing plots
+    in a convenient way to add on to existing plots
 4. `Styling` provides access to theme management/construction
 
 Image/animation support and other back end support for 3D graphics (`VTK`) are provided at the experimental level.
@@ -531,9 +531,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-b56c95" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-b56c95"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-5a9447" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-5a9447"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-b56c95" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-5a9447" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -561,9 +561,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-028ae0" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-028ae0"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-a1da09" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-a1da09"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-028ae0" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-a1da09" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

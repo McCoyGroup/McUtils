@@ -88,11 +88,11 @@ It's _super_ roughly done so...yeah generally better to pass the base class you 
 But in the absence of that we can do this ?_?
 
 Basic strategy:
-1. look for options that go with specific methods
-2. look at data structures to guess
-i.   gradient as the first data arg + all data args are ndarrays -> Taylor Series
-ii.  callables as second arg -> Linear expansion or Linear fit
-iii. just like...one big array -> Interpolatin
+    1. look for options that go with specific methods
+    2. look at data structures to guess
+        i.   gradient as the first data arg + all data args are ndarrays -> Taylor Series
+        ii.  callables as second arg -> Linear expansion or Linear fit
+        iii. just like...one big array -> Interpolatin
   - `data`: `tuple`
     > 
   - `opts`: `dict`

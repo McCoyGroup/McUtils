@@ -109,8 +109,8 @@ generate_tree(self, rules, max_len=None, track_positions=True):
 </div>
 We take the combo of the specified rules, where we take successive products of 1D rules with the
 current set of rules following the pattern that
-1. a 1D change can apply to any index in an existing rule
-2. a 1D change can be appended to an existing rule
+    1. a 1D change can apply to any index in an existing rule
+    2. a 1D change can be appended to an existing rule
 
 We ensure at each step that the rules remain sorted & duplicates are removed so as to keep the rule sets compact.
 This is done in simple python loops, because doing it with arrayops seemed harder & not worth it for a relatively cheap operation.

@@ -10,12 +10,12 @@ convert_cartesian_to_zmatrix(coords, *, ordering, use_rad=True, return_derivs=No
 The ordering should be specified like:
 
 [
-[n1],
-[n2, n1]
-[n3, n1/n2, n1/n2]
-[n4, n1/n2/n3, n1/n2/n3, n1/n2/n3]
-[n5, ...]
-...
+    [n1],
+    [n2, n1]
+    [n3, n1/n2, n1/n2]
+    [n4, n1/n2/n3, n1/n2/n3, n1/n2/n3]
+    [n5, ...]
+    ...
 ]
   - `coords`: `np.ndarray`
     > array of cartesian coordinates

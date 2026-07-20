@@ -17,7 +17,7 @@ implementations of the interactive backends for examples.
 Attributes
 ----------
 figure : `~matplotlib.figure.Figure`
-A high-level Figure instance
+    A high-level Figure instance
 
 
 

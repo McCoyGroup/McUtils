@@ -9,15 +9,15 @@ convert_zmatrix_to_cartesians(coordlist, *, ordering, origins=None, axes=None, u
 ```
 Expects to get a list of configurations
 These will look like:
-[
-[dist, angle, dihedral]
-...
-]
+    [
+        [dist, angle, dihedral]
+        ...
+    ]
 and ordering will be
-[
-[pos, point, line, plane]
-...
-]
+    [
+        [pos, point, line, plane]
+        ...
+    ]
 **For efficiency it is assumed that all configurations have the same length**
   - `coordlist`: `Any`
     > 

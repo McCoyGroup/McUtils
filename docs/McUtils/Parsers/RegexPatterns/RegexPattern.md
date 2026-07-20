@@ -208,8 +208,8 @@ Returns the StructuredType for the matched object
 
 The basic thing we do is build the type from the contained child dtypes
 The process effectively works like this:
-If there's a single object, we use its dtype no matter what
-Otherwise, we add together our type objects one by one, allowing the StructuredType to handle the calculus
+    If there's a single object, we use its dtype no matter what
+    Otherwise, we add together our type objects one by one, allowing the StructuredType to handle the calculus
 
 After we've built our raw types, we compute the shape on top of these, using the assigned repetitions object
 One thing I realize now I failed to do is to include the effects of sub-repetitions... only a single one will

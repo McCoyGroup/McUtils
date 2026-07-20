@@ -9,15 +9,15 @@ We'd like to be able to also support the NWChem and Psi4 packages, but haven't h
 
 Two main avenues of support are provided:
 
-1. importing Gaussian results
-2. setting up Gaussian jobs
+    1. importing Gaussian results
+    2. setting up Gaussian jobs
 
 The first is likely to be more useful to you, but we're hoping to be able to hook (2.) into the `Psience.Molecools` package.
 The goal there is to provide automated support for setting up scans of molecular vibrations & the like.
 
 There are already direct hooks into (1.) in `Psience.Data` through the `DipoleSurface` and `PotentialSurface` objects.
 These are still in the prototype stage, but hopefully will allow us to unify strands of our Gaussian support,
-and also make it easy to unify support for Psi4 and NWChem data, once we have the basic interface down.
+ and also make it easy to unify support for Psi4 and NWChem data, once we have the basic interface down.
 
 
 
@@ -328,9 +328,9 @@ Support is also provided for the automatic generation of Gaussian job files (`.g
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-ca2f98" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-ca2f98"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-63e97c" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-63e97c"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-ca2f98" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-63e97c" markdown="1">
  - [GetLogInfo](#GetLogInfo)
 - [DefaultLogParse](#DefaultLogParse)
 - [GetDipoles](#GetDipoles)
@@ -352,9 +352,9 @@ Support is also provided for the automatic generation of Gaussian job files (`.g
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-fddc79" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-fddc79"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-51f9ab" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-51f9ab"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-fddc79" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-51f9ab" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

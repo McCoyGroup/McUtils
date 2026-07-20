@@ -10,9 +10,9 @@ uv_mapping(uv):
 Map points on [0,1]^2 onto the unit sphere S^2 via the cylindrical
 equal-area (Lambert / "hat-box") projection:
 
-z   = 2v - 1
-phi = 2*pi*u
-x,y = sqrt(1-z^2)*cos(phi), sqrt(1-z^2)*sin(phi)
+    z   = 2v - 1
+    phi = 2*pi*u
+    x,y = sqrt(1-z^2)*cos(phi), sqrt(1-z^2)*sin(phi)
 
 By Archimedes' hat-box theorem, orthogonal projection of the sphere
 onto its circumscribing cylinder is area-preserving, so this map is
