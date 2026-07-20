@@ -2190,12 +2190,12 @@ def maximum_similarity_transformation(basis, target, apply_transformation=True):
     else:
         return tf
 
-def matrix_transform_from_eigs(evals, evecs, tf):
+def matrix_transform_from_eigs(evals, evecs, tf, order='col'):
     """
     **LLM Docstring**
 
     Apply a scalar function to the eigenvalues of a matrix and reassemble it in the
-    original eigenbasis (`Vᵀ diag(f(evals)) V`).
+    original eigenbasis
 
     :param evals: the eigenvalues
     :type evals: np.ndarray
@@ -2206,7 +2206,10 @@ def matrix_transform_from_eigs(evals, evecs, tf):
     :return: the transformed matrix
     :rtype: np.ndarray
     """
-    return np.moveaxis(evecs, -1, -2) @ vec_tensordiag(tf(evals), extra_dims=evals.ndim-1) @ evecs
+    if order == 'row':
+        return np.moveaxis(evecs, -1, -2) @ vec_tensordiag(tf(evals), extra_dims=evals.ndim-1) @ evecs
+    else:
+        return evecs @ vec_tensordiag(tf(evals)) @ np.moveaxis(evecs, -1, -2)
 
 def symmetric_matrix_exp(mats):
     """

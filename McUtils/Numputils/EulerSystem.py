@@ -99,6 +99,12 @@ def euler_matrix(angles, ordering="xyz"):
     s = np.sin(angles)
     return mat_gen(c, s)
 
+euler_ang_map = {
+    "zyz" : zyz_angles,
+    "xyz" : xyz_angles,
+    "zyx" : zyx_angles
+}
+
 def euler_angles(basis, ordering="xyz"):
     """Calculates the Euler angles for the basis
 
@@ -106,7 +112,7 @@ def euler_angles(basis, ordering="xyz"):
     :type basis: np.ndarray
     """
     if ordering in euler_mat_map:
-        ang_gen = euler_mat_map[ordering]
+        ang_gen = euler_ang_map[ordering]
     else:
         raise KeyError("Euler matrix for orientation '{}' not yet supported".format(ordering))
     return ang_gen(basis)
