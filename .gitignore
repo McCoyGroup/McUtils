@@ -1,7 +1,8 @@
 # Misc
 
 _ci/tests/test_results
-Tests/TestData
+ci/tests/test_results
+ci/stubs/
 .DS_Store
 .idea
 .vscode
