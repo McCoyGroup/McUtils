@@ -1,0 +1,17 @@
+### `core.py`
+- `is_fixed_size(iterable)` — Check whether an iterable exposes a `__len__` attribute.
+- `consume(iterable, n, return_values=True)` — Advance an iterable by at most `n` items.
+- `chunked(a, upto)` — Yield consecutive chunks from a fixed-size, sliceable object.
+- `split(a, test=None)` — Split an iterable whenever adjacent values satisfy a boundary test.
+- `split_by(a, canonicalizer)` — Split values when the result of a canonicalization function changes.
+- `take_lists(a, splits)` — Partition an iterable according to a sequence of requested lengths.
+- `counts(iterable, test=None, hashable=True)` — Count values after optionally mapping them through a key function.
+- `dict_diff(iterable1, iterable2)` — Build the asymmetric value difference between two mappings.
+- `transpose_iter(data, default=None)` — Transpose a collection of iterators while padding exhausted inputs.
+- `transpose(data, default=None, pad=False)` — Transpose nested data, optionally padding shorter fixed-size rows.
+- `riffle(a, b, *extras)` — Interleave corresponding values from multiple iterables.
+- `flatten(iterable, atomic_types=None)` — Recursively yield leaf values from nested iterables.
+- `delete_duplicates(iterable, key=None, hashable=None, cache=None)` — Yield the first item associated with each distinct key.
+- `unique_product(*iterables, key=None, filter=None)` — Generate Cartesian-product tuples subject to a uniqueness filter.
+- `zigzag_product(*iterables, iterator_lengths=None, return_index=False)` — Enumerate a Cartesian product while reversing selected axes to create a serpentine order.
+- `first(iterable, key=None, default=None)` — Return the first value satisfying an optional predicate.

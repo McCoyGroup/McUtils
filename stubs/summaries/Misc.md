@@ -1,0 +1,256 @@
+### `DebugTools.py` — Misc utilities for debugging
+  - **class `ModificationType`** (enum.Enum)
+    > Real access pattern: ModificationType.<MemberName> (this is an enum with 8 members, e.g. ModificationType.GetAttr == '__getattr__'). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:
+  - **class `ModificationTypeHandler`** (enum.Enum)
+  - **class `ModificationTracker`**
+    > A simple class to wrap an object to track when it is accessed or
+    > modified
+    - `__init__(obj, handlers=ModificationTypeHandler.Log, logger=None)`
+    - `handler_dispatch()`
+    - `log_modification(obj, handler_type, *args, **kwargs)` — Logs on modification
+    - `raise_modification(obj, handler_type, *args, **kwargs)` — Raises an error on modification
+
+### `Decorators.py`
+  - **class `mixedmethod`**
+    - `__init__(wrapped_fn)`
+
+### `NumbaTools.py` — Provides a set of decorators that allow code to be agnostic to whether Numba exists or not
+  - **class `NumbaState`**
+  - **class `without_numba`**
+    - `__init__()`
+- `load_numba(warn=False)`
+- `njit(*args, warn=False, **kwargs)`
+- `jit(*args, warn=False, nopython=False, **kwargs)`
+- `numba_decorator(*args, method=None, warn=False, **kwargs)`
+- `type_spec(t, warn=False)`
+- `import_from_numba(name, default)`
+  - **class `_noop_context`**
+    - `__init__(*args, **kwargs)`
+
+### `Symbolics.py`
+  - **class `ASTUtils`**
+    > Provides utilities for writing easier AST expressions
+    > by essentially allowing for the creation of an alternate,
+    > less-annotated tree that can be manipulated naturally using
+    > python operations and then can record and replay those ops
+    - `ast_var(var)`
+    - `ast_attr(obj, attr)`
+    - `astify(val)`
+    - `prep_args(args)`
+    - `ast_call(fn, *args, **kwargs)`
+    - `ast_arglist(spec)`
+    - `ast_const(value)`
+    - `ast_iterable(otype, values)`
+    - `ast_list(*values)`
+    - `ast_tuple(*values)`
+    - `ast_set(*values)`
+    - `ast_dict(**key_pairs)`
+    - `ast_comprehension(var, iterable, filter=None)`
+    - `ast_type_comprehension(otype, expr, comprehension, iterable=None, filter=None)`
+    - `ast_generator(expr, comprehension, iterable=None, filter=None)`
+    - `ast_list_comprehension(expr, comprehension, iterable=None, filter=None)`
+    - `ast_set_comprehension(expr, comprehension, iterable=None, filter=None)`
+    - `ast_dict_comprehension(key_expr, value_expr, comprehension, iterable=None, filter=None)`
+    - `ast_lambda(spec, body)`
+    - **class `ContextModifier`** (ast.NodeTransformer)
+      - `__init__(ctx)`
+      - `generic_visit(node)`
+    - `ast_assign(targets, value)`
+    - `ast_boolop(op, left, right, *extra)`
+    - `ast_and(left, right, *extra)`
+    - `ast_or(left, right, *extra)`
+    - `ast_binop(op, left, right)`
+    - `ast_add(left, right)`
+    - `ast_sub(left, right)`
+    - `ast_mult(left, right)`
+    - `ast_div(left, right)`
+    - `ast_matmult(left, right)`
+    - `ast_floordiv(left, right)`
+    - `ast_pow(left, right)`
+    - `ast_mod(left, right)`
+    - `ast_bitxor(left, right)`
+    - `ast_bitand(left, right)`
+    - `ast_bitor(left, right)`
+    - `ast_comp(op, left, right, *extra)`
+    - `ast_eq(left, right, *extra)`
+    - `ast_ne(left, right, *extra)`
+    - `ast_lt(left, right, *extra)`
+    - `ast_gt(left, right, *extra)`
+    - `ast_lte(left, right, *extra)`
+    - `ast_gte(left, right, *extra)`
+    - `ast_in(left, right, *extra)`
+    - `ast_ni(left, right, *extra)`
+    - `ast_is(left, right, *extra)`
+    - `ast_isnt(left, right, *extra)`
+    - `ast_unop(op, val)`
+    - `ast_not(val)`
+    - `ast_inv(val)`
+    - `ast_pos(val)`
+    - `ast_neg(val)`
+    - `ast_star(iterable)`
+    - `ast_ternary(test, body, orelse)`
+    - `ast_subscript(value, index)`
+    - `ast_index(value)`
+    - `ast_slice(start=None, stop=None, step=None)`
+    - `convert(val)`
+  - **class `AbstractExpr`**
+    - `to_ast()`
+    - `to_eval_expr()`
+    - `compile(namespace=None)`
+    - `transmogrify(converter_dispatch)`
+    - `keys()`
+    - `Equals(right)`
+    - `LessThan(right)`
+    - `LessEquals(right)`
+    - `GreaterThan(right)`
+    - `GreaterEquals(right)`
+    - `And(right)`
+    - `Or(right)`
+    - `Is(other)`
+    - `IsNot(other)`
+    - `generator(expr, var, filter=None)`
+    - `list_comp(expr, var, filter=None)`
+    - `set_comp(expr, var, filter=None)`
+    - `dict_comp(key_expr, value_expr, var, filter=None)`
+    - `if_test(test, else_expr=None)`
+    - `if_self(expr, else_expr=None)`
+  - **class `AbstractName`** (AbstractExpr)
+    - `__init__(name)`
+    - `to_ast()`
+  - **class `AbstractConstant`** (AbstractExpr)
+    - `__init__(value)`
+    - `to_ast()`
+  - **class `AbstractCall`** (AbstractExpr)
+    - `__init__(fn, *args, **kwargs)`
+    - `to_ast()`
+  - **class `AbstractAttribute`** (AbstractExpr)
+    - `__init__(obj, attr)`
+    - `to_ast()`
+  - **class `AbstractBinOp`** (AbstractExpr)
+    - `__init__(left, right)`
+  - **class `AbstractAdd`** (AbstractBinOp)
+    - `to_ast()`
+  - **class `AbstractSub`** (AbstractBinOp)
+    - `to_ast()`
+  - **class `AbstractMult`** (AbstractBinOp)
+    - `to_ast()`
+  - **class `AbstractDiv`** (AbstractBinOp)
+    - `to_ast()`
+  - **class `AbstractMatMult`** (AbstractBinOp)
+    - `to_ast()`
+  - **class `AbstractFloorDiv`** (AbstractBinOp)
+    - `to_ast()`
+  - **class `AbstractPow`** (AbstractBinOp)
+    - `to_ast()`
+  - **class `AbstractMod`** (AbstractBinOp)
+    - `to_ast()`
+  - **class `AbstractBitXOr`** (AbstractBinOp)
+    - `to_ast()`
+  - **class `AbstractBitOr`** (AbstractBinOp)
+    - `to_ast()`
+  - **class `AbstractBitAnd`** (AbstractBinOp)
+    - `to_ast()`
+  - **class `AbstractUnOp`** (AbstractExpr)
+    - `__init__(operand)`
+  - **class `AbstractNot`** (AbstractUnOp)
+    - `to_ast()`
+  - **class `AbstractInv`** (AbstractUnOp)
+    - `to_ast()`
+  - **class `AbstractPos`** (AbstractUnOp)
+    - `to_ast()`
+  - **class `AbstractNeg`** (AbstractUnOp)
+    - `to_ast()`
+  - **class `AbstractComp`** (AbstractExpr)
+    - `__init__(left, right, *extra)`
+  - **class `AbstractEq`** (AbstractComp)
+    - `to_ast()`
+  - **class `AbstractNotEq`** (AbstractComp)
+    - `to_ast()`
+  - **class `AbstractLt`** (AbstractComp)
+    - `to_ast()`
+  - **class `AbstractGt`** (AbstractComp)
+    - `to_ast()`
+  - **class `AbstractLtE`** (AbstractComp)
+    - `to_ast()`
+  - **class `AbstractGtE`** (AbstractComp)
+    - `to_ast()`
+  - **class `AbstractIn`** (AbstractComp)
+    - `to_ast()`
+  - **class `AbstractNotIn`** (AbstractComp)
+    - `to_ast()`
+  - **class `AbstractIs`** (AbstractComp)
+    - `to_ast()`
+  - **class `AbstractIsNot`** (AbstractComp)
+    - `to_ast()`
+  - **class `AbstractSubscript`** (AbstractExpr)
+    - `__init__(obj, index)`
+    - `to_ast()`
+  - **class `AbstractBoolOp`** (AbstractExpr)
+    - `__init__(left, right, *extra)`
+  - **class `AbstractAnd`** (AbstractComp)
+    - `to_ast()`
+  - **class `AbstractOr`** (AbstractComp)
+    - `to_ast()`
+  - **class `AbstractImportModule`** (AbstractCall)
+    - `__init__(mod)`
+  - **class `AbstractAbs`** (AbstractCall)
+    - `__init__(val)`
+  - **class `AbstractFloor`** (AbstractCall)
+    - `__init__(val)`
+  - **class `AbstractCeil`** (AbstractCall)
+    - `__init__(val)`
+  - **class `AbstractIter`** (AbstractCall)
+    - `__init__(val)`
+  - **class `AbstractStar`** (AbstractExpr)
+    - `__init__(iterable)`
+    - `to_ast()`
+  - **class `AbstractStarOrIter`** (AbstractExpr)
+    - `__init__(val)`
+    - `to_iter()`
+    - `to_star()`
+    - `to_ast()`
+  - **class `AbstractUnwrapKeys`** (str)
+    - `__init__(val)`
+    - `to_iter()`
+    - `to_starstar()`
+    - `to_ast()`
+  - **class `AbstractStarStar`** (AbstractExpr)
+    - `__init__(var)`
+    - `to_ast()`
+  - **class `AbstractList`** (AbstractExpr)
+    - `__init__(*args)`
+    - `to_ast()`
+  - **class `AbstractTuple`** (AbstractExpr)
+    - `__init__(*args)`
+    - `to_ast()`
+  - **class `AbstractSet`** (AbstractExpr)
+    - `__init__(*args)`
+    - `to_ast()`
+  - **class `AbstractDict`** (AbstractExpr)
+    - `__init__(**kwargs)`
+    - `to_ast()`
+  - **class `AbstractListComp`** (AbstractExpr)
+    - `__init__(expr, var, iterable, filter=None)`
+    - `to_ast()`
+  - **class `AbstractGenerator`** (AbstractExpr)
+    - `__init__(expr, var, iterable, filter=None)`
+    - `to_ast()`
+  - **class `AbstractSetComp`** (AbstractExpr)
+    - `__init__(expr, var, iterable, filter=None)`
+    - `to_ast()`
+  - **class `AbstractDictComp`** (AbstractExpr)
+    - `__init__(key_expr, value_expr, var, iterable, filter=None)`
+    - `to_ast()`
+  - **class `AbstractArgSpec`** (AbstractExpr)
+    - `__init__(*args, **kwargs)`
+    - `to_ast()`
+  - **class `AbstractLambda`** (AbstractExpr)
+    - `__init__(*args, **kwargs)`
+    - `to_ast()`
+  - **class `AbstractIfExp`** (AbstractExpr)
+    - `__init__(test, body, orelse=None)`
+    - `orelse(orelse)`
+    - `to_ast()`
+  - **class `Abstract`**
+    > Provides a namespace for the different abstract classes
+    - `vars(*spec, symbol_type=None)`

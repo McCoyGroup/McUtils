@@ -1,0 +1,40 @@
+"""
+Convenience functions that are inefficient, but are maybe a bit easier to work with?
+"""
+from collections import namedtuple
+import numpy as np
+from .CoordinateSystems import *
+__all__ = ['cartesian_to_zmatrix', 'zmatrix_to_cartesian']
+zm_type = namedtuple('zms', ['coords', 'ordering', 'origins', 'axes'])
+
+def cartesian_to_zmatrix(coords, ordering=None, use_rad=True):
+    """
+    Converts Cartesians to Z-Matrix coords and returns the underlying arrays
+
+    :param coords: input Cartesians
+    :type coords: np.ndarray
+    :param ordering: the Z-matrix ordering as a list of lists
+    :type ordering:
+    :return: Z-matrix coords
+    :rtype: Iterable[np.ndarray | list]
+    """
+    ...
+
+def zmatrix_to_cartesian(coords, ordering=None, origins=None, axes=None, use_rad=True):
+    """
+    Converts Z-maztrix coords to Cartesians
+
+    :param coords:
+    :type coords: np.ndarray
+    :param ordering:
+    :type ordering:
+    :param origins:
+    :type origins:
+    :param axes:
+    :type axes:
+    :param use_rad:
+    :type use_rad:
+    :return:
+    :rtype:
+    """
+    ...
