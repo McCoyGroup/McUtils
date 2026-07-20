@@ -383,9 +383,9 @@ for working in Jupyter (primarily JupterLab) environments
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-0afcf4" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-0afcf4"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-01ac4b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-01ac4b"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-0afcf4" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-01ac4b" markdown="1">
  - [HTML](#HTML)
 - [Styles](#Styles)
 - [WidgetConstruction](#WidgetConstruction)
@@ -394,9 +394,9 @@ for working in Jupyter (primarily JupterLab) environments
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-b83c5e" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-b83c5e"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-1dac32" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-1dac32"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-b83c5e" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-1dac32" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
