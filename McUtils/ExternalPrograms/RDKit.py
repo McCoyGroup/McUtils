@@ -3196,6 +3196,7 @@ class RDMolecule(ExternalMolecule):
                             ]
                         coords_2d = coords_2d * (default_view_distance / dist)
                     coords = coords_2d
+                conf_id = -1
 
             elif view_settings is not None:
                 coords_3d = self.coords
@@ -4778,7 +4779,7 @@ class RDMolecule(ExternalMolecule):
         if conf_id is None:
             conf_id = self.mol.GetId()
         mol = Chem.Mol(self.rdmol, confId=conf_id)
-        conf = mol.GetConformer(0)
+        conf = mol.GetConformer(conf_id)
 
         if force_field_generator is None:
             force_field_generator = self.get_force_field
