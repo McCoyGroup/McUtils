@@ -2736,6 +2736,27 @@ class GraphicsGrid(GraphicsBase):
             """
             pass
 
+        def prep_show(self):
+            """
+            **LLM Docstring**
+
+            No-op satisfying `GraphicsBase._prep_show`'s `self.axes.prep_show()` call
+            for a `GraphicsGrid`.
+
+            A grid's panels are each independent `Graphics` objects registered as
+            children of the shared figure (see `GraphicsBase.children`), so
+            `GraphicsBase.prep_show` already iterates `self.children` and calls
+            `_prep_show` on every panel directly -- and *that* call reaches each
+            panel's own single-axes wrapper and invokes `prep_show` there. This
+            `GraphicsStack` (the grid's stand-in for a single `axes`) therefore has
+            nothing further to prepare; it exists only so the grid's own
+            `_prep_show`, which treats `self.axes` like any other axes wrapper,
+            has something to call instead of raising `AttributeError`.
+
+            :return: `None`
+            """
+            pass
+
         def __iter__(self):
             """
             **LLM Docstring**

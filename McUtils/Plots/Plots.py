@@ -782,6 +782,7 @@ class ScatterPlot(Plot):
 
         return super().prep_styles(prep_colors=prep_colors, cmap=cmap, c=c, facecolors=facecolors, edgecolors=edgecolors, **etc)
 
+@Plot.register
 class ListScatterPlot(ScatterPlot):
     """
     Inherits from `Plot`.
@@ -808,6 +809,7 @@ class ErrorBarPlot(Plot):
     known_styles = {"yerr", "xerr", "fmt", "ecolor", "elinewidth", "capsize", "barsabove",
     "lolims", "uplims", "xlolims", "xuplims", "errorevery", "capthick", "data"} | Plot.known_styles
     method = "errorbar"
+@Plot.register
 class ListErrorBarPlot(ErrorBarPlot):
     """A Plot that pulls the errorbar data from a list"""
     def __init__(self, griddata, **opts):
@@ -931,6 +933,8 @@ class PiePlot(Plot):
                     'shadow', 'labeldistance', 'startangle', 'radius', 'counterclock',
                     'wedgeprops', 'textprops', 'center', 'frame', 'rotatelabels', 'normalize',
                     'data'} | Plot.patch_parms
+    def _get_plot_data(self, data):
+        return data,
 @Plot.register
 class StackPlot(Plot):
     method = 'stackplot'
@@ -1669,7 +1673,7 @@ class Plot3D(Graphics3D):  # basically a mimic of the Plot class but inheriting 
         if method is None:
            method = self.method
         if isinstance(method, str):
-            method = getattr(self.axes, method)
+            method = self.axes.get_plotter(method)
         self._method = method
 
         # we're gonna set things up so that we can have delayed evaluation of the plotting.
