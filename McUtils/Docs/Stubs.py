@@ -33,6 +33,8 @@ import sys
 from .. import Devutils as dev
 from ..Formatters import TemplateHandler
 
+from .ExamplesParser import ExamplesParser
+
 __all__ = [
     "StubSummaryBuilder"
 ]
@@ -97,6 +99,16 @@ class StubSummaryBuilder:
     SIDECAR_LOADER_FILENAME = SIDECAR_MODULE_NAME + ".py"
     SIDECAR_LOADER_FUNC_NAME = "_load_registry_data"
     DEPENDENCY_GRAPH_FILENAME = "dependency_graph.json"
+    EXAMPLES_DIRNAME = "examples"
+    USAGE_GRAPH_FILENAME = "usage_graph.json"
+    TEST_FILENAME_TEMPLATE = "{package_name}Tests.py"
+    EXAMPLE_FILENAME_TEMPLATE = "{example_name}.py"
+    EXAMPLE_FILE_HEADER_TEMPLATE = (
+        '"""Extracted from {class_name}.{method_name} via '
+        'McUtils.Docs.ExamplesParser -- not the original file, and may '
+        'reference test-only setup/state. Run with: '
+        'python -m unittest {class_name}.{method_name}"""\n\n'
+    )
 
     # ------------------------------------------------------------------
     # Dependency-graph blacklist -- top-level package names excluded from
@@ -284,6 +296,12 @@ ground truth.
         "[INFO] real import of {root_module_name!r} failed ({error}); "
         "falling back to static __all__ parsing."
     )
+    EXAMPLES_PARSER_UNAVAILABLE_WARNING = (
+        "[INFO] McUtils.Docs.ExamplesParser not importable -- skipping example extraction."
+    )
+    EXAMPLES_PARSE_ERROR_TEMPLATE = (
+        "[WARN] failed to parse tests for {package_name!r} ({test_file}): {error}"
+    )
 
     NO_PACKAGES_DISCOVERED_ERROR = (
         "No packages discovered yet -- call discover_top_level_packages(root_module_name) "
@@ -303,7 +321,7 @@ ground truth.
 
     def __init__(self, root_src_dir=None, out_dir="stubs",
                  max_doc_len=800, min_words=5, write_sidecar_file=False,
-                 verbose=False, allow_static_mode=True):
+                 verbose=False, allow_static_mode=True, tests_directory=None):
         self.root_src_dir = root_src_dir
         self.out_dir = out_dir
         self.max_doc_len = max_doc_len
@@ -314,6 +332,7 @@ ground truth.
         self.verbose = verbose
         self.dependency_blacklist = set(self.DEFAULT_DEPENDENCY_BLACKLIST)
         self.allow_static_mode = allow_static_mode
+        self.tests_directory = tests_directory
 
     @property
     def root_module_name(self):
@@ -336,6 +355,9 @@ ground truth.
     @property
     def dependency_graph(self):
         return self._current_module.dependency_graph
+    @property
+    def usage_graph(self):
+        return self._current_module.usage_graph
 
     # ==================================================================
     # Section 1: stub generation
@@ -733,6 +755,182 @@ ground truth.
         }
         payload = {"packages": packages_out, "entities": entities_out}
         path = os.path.join(self.out_dir, self.DEPENDENCY_GRAPH_FILENAME)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2, sort_keys=True)
+        return os.path.getsize(path)
+
+    # ------------------------------------------------------------------
+    # Examples extraction (McUtils.Docs.ExamplesParser) + usage graph
+    # ------------------------------------------------------------------
+
+    def locate_test_file(self, package_name, tests_directory):
+        """Mirrors McUtils.Docs.DocBuilder's `tests_directory` convention:
+        a flat directory containing one `<PackageName>Tests.py` file per
+        top-level package (e.g. `ci/tests/CombinatoricsTests.py`).
+        Returns None if tests_directory is falsy or the file doesn't
+        exist."""
+        if not tests_directory:
+            return None
+        path = os.path.join(
+            tests_directory, self.TEST_FILENAME_TEMPLATE.format(package_name=package_name))
+        return path if os.path.isfile(path) else None
+
+    def _build_test_file_import_context(self, tree):
+        """Like _build_static_import_map, but for a standalone test
+        file using absolute imports (test files aren't part of the
+        package tree, so relative-import resolution doesn't apply).
+        Also returns star_targets (dotted modules imported via `from X
+        import *`), since test files commonly do `from
+        McUtils.Combinatorics import *` and the names that brings in are
+        exactly the ones worth tracking in the usage graph."""
+        import_map = {}
+        star_targets = []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    local = alias.asname or alias.name.split(".")[0]
+                    import_map[local] = alias.name
+            elif isinstance(node, ast.ImportFrom) and not node.level:
+                base = node.module or ""
+                for alias in node.names:
+                    if alias.name == "*":
+                        if base:
+                            star_targets.append(base)
+                        continue
+                    local = alias.asname or alias.name
+                    import_map[local] = f"{base}.{alias.name}" if base else alias.name
+        return import_map, star_targets
+
+    def _resolve_via_static_and_dynamic(self, name, import_map, star_targets):
+        """Resolve a bare name referenced in a test file to a
+        fully-qualified origin: first a static guess (direct import, or
+        -- only when dynamic_mode makes the target loaded -- membership
+        in a wildcard-imported module), then refined via live
+        introspection the same way record_module_dependencies does, so
+        re-export chains resolve to the class/function's true defining
+        module rather than wherever it happened to be imported from."""
+        origin = import_map.get(name)
+        if origin is None and self.dynamic_mode:
+            for star_base in star_targets:
+                mod = sys.modules.get(star_base)
+                if mod is not None and hasattr(mod, name):
+                    origin = f"{star_base}.{name}"
+                    break
+        if origin is None:
+            return None
+        if not self.dynamic_mode:
+            return origin
+
+        parts = origin.split(".")
+        for i in range(len(parts), 0, -1):
+            mod = sys.modules.get(".".join(parts[:i]))
+            if mod is None:
+                continue
+            obj = mod
+            for p in parts[i:]:
+                obj = getattr(obj, p, None)
+                if obj is None:
+                    break
+            if obj is not None:
+                mod_attr = getattr(obj, "__module__", None)
+                qual = getattr(obj, "__qualname__", None)
+                if mod_attr:
+                    return f"{mod_attr}.{qual}" if qual else mod_attr
+            break  # found the deepest loaded prefix; no point checking shorter ones
+        return origin
+
+    def build_usage_graph_for_package(self, package_name, parser):
+        """Combine ExamplesParser.functions_map (bare name -> example
+        names referencing it) with our own name resolution to produce
+        {fully_qualified_name: {example_ids}}, applying
+        self.dependency_blacklist exactly as record_module_dependencies
+        does. Does not mutate self.usage_graph -- caller merges it in,
+        so this can also be inspected/tested standalone."""
+        import_map, star_targets = self._build_test_file_import_context(parser.ast)
+        usage = {}
+        for bare_name, example_names in parser.functions_map.items():
+            origin = self._resolve_via_static_and_dynamic(bare_name, import_map, star_targets)
+            if not origin or self._dep_top_level_label(origin) in self.dependency_blacklist:
+                continue
+            example_ids = {f"{package_name}::{ex}" for ex in example_names}
+            usage.setdefault(origin, set()).update(example_ids)
+        return usage
+
+    def _write_examples(self, parser, examples_dir):
+        """Write each example (a `test_`-prefixed method, per
+        ExamplesParser) to its own file under examples_dir. Each file
+        reconstructs a minimal version of the original test class --
+        module-level setup, class-level setup (e.g. setUp, helper
+        classes), and just that one test method -- via ast.unparse
+        rather than raw text splicing, so indentation/assembly is
+        always correct. Returns the number of examples written."""
+        os.makedirs(examples_dir, exist_ok=True)
+        class_node, class_setup_nodes = parser.class_spec
+        base_setup_nodes = parser.setup
+        n_written = 0
+        for name, test_node in parser.functions.items():
+            new_class = ast.ClassDef(
+                name=class_node.name, bases=list(class_node.bases),
+                keywords=list(class_node.keywords),
+                body=list(class_setup_nodes) + [test_node], decorator_list=[])
+            module_node = ast.Module(body=list(base_setup_nodes) + [new_class], type_ignores=[])
+            ast.fix_missing_locations(module_node)
+            try:
+                source = ast.unparse(module_node)
+            except Exception:
+                continue
+            header = self.EXAMPLE_FILE_HEADER_TEMPLATE.format(
+                class_name=class_node.name, method_name=test_node.name)
+            out_path = os.path.join(
+                examples_dir, self.EXAMPLE_FILENAME_TEMPLATE.format(example_name=name))
+            with open(out_path, "w", encoding="utf-8") as f:
+                f.write(header + source + "\n")
+            n_written += 1
+        return n_written
+
+    def extract_examples(self, package_name, tests_directory=None):
+        """For one top-level package: locate its test file (see
+        locate_test_file), parse it with McUtils.Docs.ExamplesParser,
+        write each example under
+        <out_dir>/<root_module_name>/<package_name>/examples/, and
+        merge its usage into self.usage_graph. Safe to call even when
+        no test file exists, ExamplesParser isn't importable, or
+        parsing fails -- returns 0 and (for the latter two) prints a
+        warning rather than raising, since example extraction is a
+        best-effort bonus on top of the stubs/summaries, not something
+        that should block the rest of the pipeline.
+
+        Returns the number of examples written.
+        """
+        if tests_directory is None:
+            tests_directory = self.tests_directory
+        test_file = self.locate_test_file(package_name, tests_directory)
+        if test_file is None:
+            return 0
+
+        try:
+            parser = ExamplesParser.from_file(test_file)
+            _ = parser.functions  # trigger walk_tree() now so parse errors surface here
+        except Exception as e:
+            print(self.EXAMPLES_PARSE_ERROR_TEMPLATE.format(
+                package_name=package_name, test_file=test_file, error=e), file=sys.stderr)
+            return 0
+
+        examples_dir = os.path.join(self.out_dir, self.EXAMPLES_DIRNAME, package_name)
+        n_written = self._write_examples(parser, examples_dir)
+
+        usage = self.build_usage_graph_for_package(package_name, parser)
+        for origin, example_ids in usage.items():
+            self.usage_graph.setdefault(origin, set()).update(example_ids)
+
+        return n_written
+
+    def write_usage_graph(self):
+        """Write usage_graph.json at the root of out_dir: {fully
+        qualified name: [example ids that use it]}, blacklist-filtered
+        the same way as dependency_graph.json."""
+        payload = {name: sorted(ids) for name, ids in self.usage_graph.items()}
+        path = os.path.join(self.out_dir, self.USAGE_GRAPH_FILENAME)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(payload, f, indent=2, sort_keys=True)
         return os.path.getsize(path)
@@ -1158,6 +1356,7 @@ ground truth.
             self.report = {}
             self.dynamic_mode = dynamic_mode
             self.dependency_graph = {"packages": {}, "entities": {}}
+            self.usage_graph = {}
 
         def __enter__(self):
             self.parent._module_stack.append(self.parent._current_module)
@@ -1203,6 +1402,10 @@ ground truth.
 
             n_sections = self.build_package_summary(pkg_stub_out, pkg_summary_out)
 
+            n_examples = 0
+            if self.tests_directory is not None:
+                n_examples = self.extract_examples(package_name)
+
             orig_total = sum(s[1] for s in stats)
             stub_total = sum(s[2] for s in stats)
             summary_size = os.path.getsize(pkg_summary_out)
@@ -1213,6 +1416,7 @@ ground truth.
                 "stub_bytes": stub_total,
                 "summary_bytes": summary_size,
                 "n_summary_sections": n_sections,
+                "n_examples": n_examples,
             }
         return info
 
@@ -1263,6 +1467,7 @@ ground truth.
         sidecar_size = self.write_sidecar_files()
         self.write_index()
         dependency_graph_size = self.write_dependency_graph()
+        usage_graph_size = self.write_usage_graph()
         self.write_llm_readme()
 
         total_orig = sum(r["orig_bytes"] for r in self.report.values())
@@ -1284,6 +1489,7 @@ ground truth.
             'sidecar_size': sidecar_size,
             'summary_size': total_summary,
             'dependency_graph_size': dependency_graph_size,
+            'usage_graph_size': usage_graph_size,
         }
         return summary
 

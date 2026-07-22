@@ -6,4 +6,7 @@ sys.path.insert(0, root)
 
 if __name__ == "__main__":
     from McUtils.Docs import *
-    StubSummaryBuilder(verbose=True, out_dir=target).generate_all("McUtils")
+    StubSummaryBuilder(
+        verbose=True, out_dir=target,
+        tests_directory=os.path.join(root, "ci", "tests")
+    ).generate_all("McUtils")
