@@ -246,7 +246,9 @@ class GaussianRestBlock(GaussianOptionsBlock):
         """
         ...
 
+@ExternalProgramJob.register('gaussian')
 class GaussianJob(ExternalProgramJob):
+    extension = 'gjf'
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'gaussian_job.gjf')
     blocks = [GaussianLinkBlock, GaussianLOTBlock, GaussianRouteBlock, GaussianSystemBlock, GaussianRestBlock]
 

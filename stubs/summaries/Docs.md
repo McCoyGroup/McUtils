@@ -183,7 +183,7 @@
     >     first line that exceeds it.
     > write_sidecar_file : bool…
     > *(truncated — see stub for full docstring)*
-    - `__init__(root_src_dir=None, out_dir='stubs', max_doc_len=800, min_words=5, write_sidecar_file=False, verbose=False)`
+    - `__init__(root_src_dir=None, out_dir='stubs', max_doc_len=800, min_words=5, write_sidecar_file=False, verbose=False, allow_static_mode=True, tests_directory=None)`
     - `root_module_name()`
     - `resolved_root_dir()`
     - `packages()`
@@ -191,6 +191,7 @@
     - `report()`
     - `dynamic_mode()`
     - `dependency_graph()`
+    - `usage_graph()`
     - `collapse_scalar_assign_runs(body, min_group=6, context=None)`
     - `is_collapsed_registry(node)`
     - `externalize_large_literal(node, module_key)`
@@ -199,6 +200,10 @@
     - `resolve_dynamic_all(package_name, rel_path=None)` — If we're in dynamic_mode (the root module was really
     - `record_module_dependencies(source, package_name, rel_path=None)` — Parse the ORIGINAL (pre-stub) source of one module and record,
     - `write_dependency_graph()` — Write dependency_graph.json at the root of out_dir.
+    - `locate_test_file(package_name, tests_directory)` — a flat directory containing one `<PackageName>Tests.py` file per
+    - `build_usage_graph_for_package(package_name, parser)` — Combine ExamplesParser.functions_map (bare name -> example
+    - `extract_examples(package_name, tests_directory=None)` — For one top-level package: locate its test file (see
+    - `write_usage_graph()` — Write usage_graph.json at the root of out_dir: {fully
     - `stub_function(node)`
     - `stub_class(node)`
     - `stub_module(source, module_key, dynamic_all=None)`

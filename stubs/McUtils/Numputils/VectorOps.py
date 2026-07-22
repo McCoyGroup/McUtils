@@ -1038,12 +1038,12 @@ def maximum_similarity_transformation(basis, target, apply_transformation=True):
     """
     ...
 
-def matrix_transform_from_eigs(evals, evecs, tf):
+def matrix_transform_from_eigs(evals, evecs, tf, order='col'):
     """
     **LLM Docstring**
 
     Apply a scalar function to the eigenvalues of a matrix and reassemble it in the
-    original eigenbasis (`Vᵀ diag(f(evals)) V`).
+    original eigenbasis
 
     :param evals: the eigenvalues
     :type evals: np.ndarray

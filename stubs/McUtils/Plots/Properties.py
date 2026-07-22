@@ -510,6 +510,22 @@ class GraphicsPropertyManager:
         ...
 
     @property
+    def grid(self):
+        ...
+
+    @grid.setter
+    def grid(self, gr):
+        ...
+
+    @property
+    def grid_style(self):
+        ...
+
+    @grid_style.setter
+    def grid_style(self, g_style):
+        ...
+
+    @property
     def scale(self):
         """
         **LLM Docstring**

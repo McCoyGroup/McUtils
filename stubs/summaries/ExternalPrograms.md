@@ -575,6 +575,10 @@
     - `fmt_orca_zmat(atoms, zmat, ordering=None, float_fmt='{:11.8f}')` — Format a Z-matrix in ORCA's column order (all reference-atom indices, then all
     - `format_bonds_block()` — Format the block's explicit bond list (pairs, optionally with a bond order) into
   - **class `ExternalProgramJob`**
+    - `register(name, method=None)`
+    - `resolve(job_class)`
+    - `get_mol_options(mol, units=None, use_internals=False)`
+    - `from_mol(mol, *args, use_internals=False, **etc)`
     - `__init__(**opts)`
     - `get_block_types()` — Abstract: return the ordered list of `OptionsBlock` types making up this job.
     - `load_template()` — Abstract: return the top-level job template.

@@ -452,7 +452,7 @@ class VariableSynchronizer:
         ...
 
     @classmethod
-    def create_var(cls, var, namespace=None):
+    def create_var(cls, var, namespace=None, **opts):
         """
         **LLM Docstring**
 
@@ -535,7 +535,7 @@ class VariableSynchronizer:
         """
         ...
 
-def Var(name, namespace=None):
+def Var(name, namespace=None, **opts):
     """
     **LLM Docstring**
 

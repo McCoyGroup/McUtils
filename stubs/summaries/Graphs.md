@@ -99,7 +99,7 @@
   - **class `TreeCallOrder`** (enum.Enum)
   - **class `TreeSentinels`** (enum.Enum)
 - `tree_traversal(tree, callback, root=None, get_item=None, get_children=None, visited=None, check_visited=None, traversal_ordering='bfs', call_order='post')` — Traverse a tree or graph-like object and invoke a callback before visiting, after marking, or after…
-- `tree_iter(tree, root=None, get_item=None, get_children=None, visited=None, check_visited=None, traversal_ordering='bfs', yield_paths=False, per_path_visited=False, enable_disconnectivity=False)` — Yield nodes or root-to-node paths from a configurable breadth-first or depth-first traversal.
+- `tree_iter(tree, root=None, get_item=None, get_children=None, visited=None, check_visited=None, traversal_ordering='bfs', yield_paths=False, use_child_paths=None, per_path_visited=False, enable_disconnectivity=False)` — Yield nodes or root-to-node paths from a configurable breadth-first or depth-first traversal.
 - `graph_iter(graph, root=None, get_item=None, get_children=None, visited=None, traversal_ordering='bfs', yield_paths=False, enable_disconnectivity=False)` — Adapt an adjacency mapping to `tree_iter`, enabling cycle-safe graph traversal and optional path en…
   - **class `TreeWrapper`**
     - `__init__(tree)`

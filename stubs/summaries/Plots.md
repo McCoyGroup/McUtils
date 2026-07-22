@@ -33,6 +33,10 @@
     - `set_frame_visible(frame_spec)` — Set which frame (spine) edges are drawn.
     - `get_frame_style()` — **LLM Docstring**
     - `set_frame_style(frame_spec)` — **LLM Docstring**
+    - `get_grid_visible()`
+    - `set_grid_visible(grid_spec)`
+    - `get_grid_style()`
+    - `set_grid_style(grid_spec)`
     - `get_xlabel()` — **LLM Docstring**
     - `set_xlabel(val, **style)` — **LLM Docstring**
     - `get_ylabel()` — **LLM Docstring**
@@ -110,7 +114,8 @@
     - `get_mime_bundle()` — Return the figure's MIME bundle for rich display.
     - `tight_layout()` — Tighten the figure layout to remove excess whitespace.
   - **class `GraphicsBackend`**
-    - `create_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend.
+    - `create_figure(*args, **kwargs)`
+    - `create_raw_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend.
     - `create_axes(figure, *args, **kwargs)` — Create a new axes within the figure at the given grid position.
     - `create_inset(figure, *args, **kw)` — Create an inset axes at the given bounding box.
     - `close_figure(figure)` — Close a figure via the backend.
@@ -124,8 +129,10 @@
     - `to_widget(figure)` — Render the figure as an interactive widget.
     - `get_available_themes()` — Return the themes available for this backend.
     - **class `ThemeContextManager`**
-      - `__init__(theme_parents, theme_spec)`
+      - `__init__(theme_parents, theme_spec, backend)`
       - `canonicalize_theme_opts(theme_parents, theme_spec)` — Normalize theme options into the backend's canonical form.
+      - `begin_context()` — Enter the context, applying the theme.
+      - `end_context(exc_type, exc_val, exc_tb)` — Exit the context, restoring the previous theme.
     - `theme_context(theme_parents, spec)` — Return a context manager that applies a theme for this backend.
     - **class `DefaultBackends`** (enum.Enum)
       > Real access pattern: DefaultBackends.<MemberName> (this is an enum with 11 members, e.g. DefaultBackends.MPL == 'matplotlib'). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:
@@ -171,6 +178,10 @@
     - `set_frame_visible(frame_spec)` — Set which frame (spine) edges are drawn (matplotlib backend).
     - `get_frame_style()` — Return the frame (spine) styling (matplotlib backend).
     - `set_frame_style(frame_spec)` — Set the frame (spine) styling (matplotlib backend).
+    - `get_grid_visible()`
+    - `set_grid_visible(grid_spec)`
+    - `get_grid_style()`
+    - `set_grid_style(grid_spec)`
     - `get_xlabel()` — Return the x-axis label (matplotlib backend).
     - `set_xlabel(val, **style)` — Set the x-axis label (matplotlib backend).
     - `get_ylabel()` — Return the y-axis label (matplotlib backend).
@@ -211,6 +222,8 @@
     - `get_autoscale()` — Return the autoscale setting (matplotlib backend).
     - `set_autoscale(autoscale)` — Set the autoscale setting (matplotlib backend).
     - `set_frame_visible(frame_spec)` — Set which frame (spine) edges are drawn (matplotlib backend).
+    - `get_zlabel()` — Return the z-axis label (matplotlib backend).
+    - `set_zlabel(val, **style)` — Set the z-axis label (matplotlib backend).
     - `get_zlim()` — Return the z-axis limits (matplotlib backend).
     - `set_zlim(val, **opts)` — Set the z-axis limits (matplotlib backend).
     - `get_zticks()` — Return the z-axis tick locations (matplotlib backend).
@@ -255,11 +268,13 @@
   - **class `MPLBackend`** (GraphicsBackend)
     - `plt()` — **LLM Docstring**
     - `mpl()` — **LLM Docstring**
-    - `create_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (matplotlib backend).
+    - `create_raw_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (matplotlib backend).
     - `show_all()` — **LLM Docstring**
     - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
-      - `__init__(theme_parents, theme_spec)`
+      - `__init__(theme_parents, theme_spec, backend)`
       - `canonicalize_theme_opts(theme_parents, theme_opts)` — Normalize theme options into the backend's canonical form (matplotlib backend).
+      - `begin_context()` — Enter the context, applying the theme.
+      - `end_context(exc_type, exc_val, exc_tb)` — Exit the context, restoring the previous theme.
     - `show_figure(graphics, autoclose=True, reshow=None)` — Display a figure via the backend (matplotlib backend).
     - `to_widget(figure, autoclose=True)` — Render the figure as an interactive widget (matplotlib backend).
     - `get_interactive_status()` — Return whether interactive mode is on (matplotlib backend).
@@ -269,7 +284,7 @@
   - **class `MPLFigure3D`** (MPLFigure)
     - `create_axes(rows, cols, spans, projection='3d', **kw)` — Create a new axes within the figure at the given grid position (matplotlib backend).
   - **class `MPLBackend3D`** (MPLBackend)
-    - `create_figure(*args, subplot_kw=None, **kwargs)` — Create a new figure (and its initial axes) for this backend (matplotlib backend).
+    - `create_raw_figure(*args, subplot_kw=None, **kwargs)` — Create a new figure (and its initial axes) for this backend (matplotlib backend).
   - **class `PlotlyAxes`** (GraphicsAxes)
     - `__init__(elements=None, xaxis=None, yaxis=None, annotations=None, **opts)`
     - `clear(*, backend=None)` — Clear the drawn content from this axes/figure (Plotly backend).
@@ -352,6 +367,7 @@
     - `to_widget(format=None, autoclose=True)` — Render the figure as an interactive widget (Plotly backend).
     - `animate_frames(frames, **animation_opts)` — Animate a sequence of frames (Plotly backend).
   - **class `PlotlyBackend`** (GraphicsBackend)
+    - `create_raw_figure(*args, **kwargs)`
     - `create_figure(*args, template=None, **kwargs)` — Create a new figure (and its initial axes) for this backend (Plotly backend).
     - `prep_color(v)` — Parse a color string and re-encode it as a Plotly-compatible RGB(A) code.
     - `remap_property(name, value, context=None)` — Recursively translate a canonical style property (and value) into Plotly
@@ -360,6 +376,8 @@
       - `get_axes_theme()` — Return the axes theme (Plotly backend).
       - `prep_spec()` — Assemble the Plotly layout template (and leftover properties) from the theme
       - `current_theme()` — Return the current theme (Plotly backend).
+      - `begin_context()` — Enter the context, applying the theme.
+      - `end_context(exc_type, exc_val, exc_tb)` — Exit the context, restoring the previous theme.
     - `show_figure(graphics, reshow=None)` — Display a figure via the backend (Plotly backend).
     - `get_interactive_status()` — Return whether interactive mode is on (Plotly backend).
     - `disable_interactivity()` — **LLM Docstring**
@@ -485,9 +503,11 @@
     - `to_widget(**opts)` — Render the figure as an interactive widget (SVG backend).
     - `get_mime_bundle()` — Return the figure's MIME bundle for rich display (SVG backend).
   - **class `SVGBackend`** (GraphicsBackend)
-    - `create_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (SVG backend).
+    - `create_raw_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (SVG backend).
     - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
       - `canonicalize_theme_opts(theme_parents, theme_spec)` — Normalize theme options into the backend's canonical form (SVG backend).
+      - `begin_context()` — Enter the context, applying the theme.
+      - `end_context(exc_type, exc_val, exc_tb)` — Exit the context, restoring the previous theme.
     - `show_figure(graphics, reshow=None)` — Display a figure via the backend (SVG backend).
     - `get_interactive_status()` — Return whether interactive mode is on (SVG backend).
     - `disable_interactivity()` — **LLM Docstring**
@@ -687,9 +707,11 @@
     - `set_facecolor(fg)` — Set the background/face color (VPython backend).
     - `savefig(file, **opts)` — Save the figure to a file (VPython backend).
   - **class `VPythonBackend`** (GraphicsBackend)
-    - `create_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (VPython backend).
+    - `create_raw_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (VPython backend).
     - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
       - `canonicalize_theme_opts(theme_parents, theme_spec)` — Normalize theme options into the backend's canonical form (VPython backend).
+      - `begin_context()` — Enter the context, applying the theme.
+      - `end_context(exc_type, exc_val, exc_tb)` — Exit the context, restoring the previous theme.
     - `show_figure(graphics, reshow=None)` — Display a figure via the backend (VPython backend).
     - `get_interactive_status()` — Return whether interactive mode is on (VPython backend).
     - `disable_interactivity()` — **LLM Docstring**
@@ -759,7 +781,7 @@
     - `set_facecolor(fg)` — Set the background/face color (VPython backend).
     - `savefig(file, **opts)` — Save the figure to a file (VPython backend).
   - **class `VPythonBackend3D`** (GraphicsBackend)
-    - `create_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (VPython backend).
+    - `create_raw_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (VPython backend).
     - **class `ThemeContextManager`** (VPythonBackend.ThemeContextManager)
     - `show_figure(graphics, reshow=None)` — Display a figure via the backend (VPython backend).
     - `get_interactive_status()` — Return whether interactive mode is on (VPython backend).
@@ -846,9 +868,11 @@
     - `to_html()` — Render the figure to HTML (X3D backend).
     - `animate_frames(frames, mode=None, **animation_opts)` — Animate a sequence of frames (X3D backend).
   - **class `X3DBackend`** (GraphicsBackend)
-    - `create_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (X3D backend).
+    - `create_raw_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (X3D backend).
     - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
       - `canonicalize_theme_opts(theme_parents, theme_spec)` — Normalize theme options into the backend's canonical form (X3D backend).
+      - `begin_context()` — Enter the context, applying the theme.
+      - `end_context(exc_type, exc_val, exc_tb)` — Exit the context, restoring the previous theme.
     - `show_figure(graphics, reshow=None)` — Display a figure via the backend (X3D backend).
     - `get_interactive_status()` — Return whether interactive mode is on (X3D backend).
     - `disable_interactivity()` — **LLM Docstring**
@@ -923,9 +947,11 @@
     - `to_json(**opts)` — Serialize the whole figure (its axes and options) to the scene-JSON
     - `animate_frames(frames, **animation_opts)` — Animate a sequence of frames (SceneJSON backend).
   - **class `SceneJSONBackend`** (GraphicsBackend)
-    - `create_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (SceneJSON backend).
+    - `create_raw_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (SceneJSON backend).
     - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
       - `canonicalize_theme_opts(theme_parents, theme_spec)` — Normalize theme options into the backend's canonical form (SceneJSON backend).
+      - `begin_context()` — Enter the context, applying the theme.
+      - `end_context(exc_type, exc_val, exc_tb)` — Exit the context, restoring the previous theme.
     - `show_figure(graphics, reshow=None)` — Display a figure via the backend (SceneJSON backend).
     - `get_interactive_status()` — Return whether interactive mode is on (SceneJSON backend).
     - `disable_interactivity()` — **LLM Docstring**
@@ -966,10 +992,12 @@
     - `hsv_to_rgb(h, s, v)` — Convert a color from HSV to RGB (via HSL).
     - `xyz_to_lab(x, y, z, scaling=None)` — Convert a color from CIE XYZ to CIE Lab.
     - `lab_to_xyz(l, a, b, scaling=None)` — Convert a color from CIE Lab to CIE XYZ.
-    - `lab_to_lch(l, a, b)` — Convert a color from CIE Lab to CIE LCh.
-    - `lch_to_lab(l, c, h)` — Convert a color from CIE LCh to CIE Lab.
     - `rgb_to_lab(r, g, b, xyz_scaling=None)` — Convert a color from RGB to CIE Lab (via XYZ).
     - `lab_to_rgb(l, a, b, xyz_scaling=None)` — Convert a color from CIE Lab to RGB (via XYZ).
+    - `lab_to_lch(l, a, b)` — Convert a color from CIE Lab to CIE LCh.
+    - `lch_to_lab(l, c, h)` — Convert a color from CIE LCh to CIE Lab.
+    - `rgb_to_lch(r, g, b, xyz_scaling=None)`
+    - `lch_to_rgb(l, a, b, xyz_scaling=None)`
 - `prep_color(base=None, palette=None, blending=None, index=None, lighten=None, saturate=None, modifier=None, shift=False, absolute=False, clip=True, color_space='rgb', modification_space='lab', return_color_code=True, alpha=None, cycle=None)` — Module-level shortcut for `ColorPalette.prep_color`: compose a color from a base
 
 ### `Graphics.py` — Provides Graphics base classes that can be extended upon
@@ -998,7 +1026,7 @@
     - `bind_events(*handlers, **events)` — Bind interactive event handlers to the figure.
     - `create_animation(*args, **opts)` — Create (and start) an animator for the figure from the given frame
     - `animate_frames(frames, **opts)` — Prepare the figure and animate the supplied frames via the backend.
-    - `set_options(event_handlers=None, animated=None, prolog=None, epilog=None, strict=True, **opts)` — Sets options for the plot
+    - `set_options(event_handlers=None, animated=None, prolog=None, epilog=None, strict=True, theme=None, **opts)` — Sets options for the plot
     - `prolog()` — The prolog graphics primitives drawn before the main content.
     - `prolog(p)` — The prolog graphics primitives drawn before the main content.
     - `epilog()` — The epilog graphics primitives drawn after the main content.
@@ -1018,10 +1046,10 @@
     - `add_colorbar(graphics=None, norm=None, cmap=None, size=None, orientation='vertical', origin=None, tick_padding=40, colorbar_axes=None, cax=None, **kw)` — Add a colorbar to the figure, creating (and tracking) a dedicated colorbar axis
     - `create_inset(bbox, coordinates='scaled', graphics_class=None, **opts)` — Create an inset graphics object within this figure, converting the bbox from the
   - **class `Graphics`** (GraphicsBase)
-    - `set_options(axes_labels=None, plot_label=None, style_list=None, plot_range=None, plot_legend=None, legend_style=None, frame=None, frame_style=None, ticks=None, scale=None, padding=None, spacings=None, ticks_style=None, ticks_label_style=None, image_size=None, axes_bbox=None, aspect_ratio=None, background=None, colorbar=None, prolog=None, epilog=None, **parent_opts)` — Set the plot's styling and layout options (labels, legend, frame, ticks, range,
+    - `set_options(axes_labels=None, plot_label=None, style_list=None, plot_range=None, plot_legend=None, legend_style=None, frame=None, frame_style=None, grid=None, grid_style=None, ticks=None, scale=None, padding=None, spacings=None, ticks_style=None, ticks_label_style=None, image_size=None, axes_bbox=None, aspect_ratio=None, background=None, colorbar=None, prolog=None, epilog=None, theme=None, **parent_opts)` — Set the plot's styling and layout options (labels, legend, frame, ticks, range,
     - `get_plot_label_padding(plot_label)` — Return the extra padding needed to fit a plot label (top padding when a label is
     - `get_axes_label_padding(axes_labels)` — Return the extra padding needed to fit the axis labels (left/bottom padding for
-    - `resolve_default_padding(padding, modifications=None)` — Resolve the final padding by filling unset sides from the default style and
+    - `resolve_default_padding(padding, modifications=None, theme=None)` — Resolve the final padding by filling unset sides from the default style and
     - `artists()` — The plot's artist objects (empty for the base `Graphics`).
     - `plot_label()` — The plot title/label.
     - `plot_label(value)` — The plot title/label.
@@ -1037,6 +1065,10 @@
     - `frame(value)` — Which frame (spine) edges are drawn.
     - `frame_style()` — The frame styling options.
     - `frame_style(value)` — The frame styling options.
+    - `grid()` — Which frame (spine) edges are drawn.
+    - `grid(value)` — Which frame (spine) edges are drawn.
+    - `grid_style()` — The frame styling options.
+    - `grid_style(value)` — The frame styling options.
     - `plot_range()` — The plotted data range per axis.
     - `plot_range(value)` — The plotted data range per axis.
     - `ticks()` — The tick locations/specification.
@@ -1097,6 +1129,7 @@
       - `get_bbox()` — Return the bounding box enclosing all panels.
       - `get_padding()` — Compute the grid's outer padding from the panels' paddings.
       - `set_facecolor(fg)` — No-op face-color setter (panels manage their own backgrounds).
+      - `prep_show()` — A grid's panels are each independent `Graphics` objects registered as
     - `initialize_figure_and_axes(figure, axes, *, nrows=None, ncols=None, graphics_class=None, fig_kw=None, subplot_kw=None, padding=None, spacings=None, subimage_size=None, subimage_aspect_ratio=None, **kw)` — Initializes the subplots for the Graphics object
     - `set_options(padding=None, spacings=None, background=None, colorbar=None, figure_label=None, **parent_opts)` — Set the grid-level options (figure label, padding, spacings, background,
     - `set_image(pos, val, **opts)` — Place a graphics object into the panel at `pos`, re-hosting it onto the grid's
@@ -1414,6 +1447,10 @@
     - `background(bg)` — The background/face color.
     - `frame()` — Which frame (spine) edges are drawn.
     - `frame(fr)` — Which frame (spine) edges are drawn.
+    - `grid()`
+    - `grid(gr)`
+    - `grid_style()`
+    - `grid_style(g_style)`
     - `scale()` — The per-axis scaling (e.g.
     - `scale(scales)` — The per-axis scaling (e.g.
     - `padding()` — The figure padding on each side.

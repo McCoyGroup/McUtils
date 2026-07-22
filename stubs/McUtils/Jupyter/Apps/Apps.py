@@ -10,7 +10,7 @@ __reload_hook__ = ['..JHTML', '.Interfaces', '.Controls', '.Variables']
 class Manipulator(Card):
     theme = Card.merge_themes(Card.theme, {'controls': {}, 'output': {}})
 
-    def __init__(self, func, *controls, debounce=None, autoclear=True, namespace=None, **etc):
+    def __init__(self, func, *controls, debounce=None, autoclear=True, namespace=None, layout_function=None, control_layout_function=None, **etc):
         """
         **LLM Docstring**
 
@@ -26,6 +26,14 @@ class Manipulator(Card):
         :param namespace: the variable namespace (a fresh one if omitted)
         :param etc: extra `Card` options
         """
+        ...
+
+    @classmethod
+    def default_layout(cls, self):
+        ...
+
+    @classmethod
+    def default_control_layout(cls, self):
         ...
 
     @classmethod
@@ -75,7 +83,7 @@ class App(Component):
         """
         ...
 
-    def __init__(self, body=None, header=None, footer=None, sidebar=None, toolbar=None, theme='primary', layout='grid', cls='app border', output=None, capture_output=None, vars=None, **attrs):
+    def __init__(self, body=None, header=None, footer=None, sidebar=None, toolbar=None, theme='primary', layout='grid', cls='app border', output=None, capture_output=None, namespace=None, vars=None, **attrs):
         """
         **LLM Docstring**
 

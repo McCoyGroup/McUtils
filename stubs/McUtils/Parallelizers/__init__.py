@@ -10,7 +10,7 @@ the same API so fewer special cases need to be checked.
 Any function that supports parallelism should take the `parallelizer` keyword, which will be fed
 the `Parallelizer` object itself.
 """
-__all__ = ['Parallelizer', 'MultiprocessingParallelizer', 'MPIParallelizer', 'SerialNonParallelizer', 'SendRecieveParallelizer', 'ClientServerRunner', 'SharedObjectManager', 'SharedMemoryDict', 'SharedMemoryList']
+__all__ = ['Parallelizer', 'MultiprocessingParallelizer', 'MPIParallelizer', 'SerialNonParallelizer', 'SendRecieveParallelizer', 'ClientServerRunner', 'SharedObjectManager', 'SharedMemoryDict', 'SharedMemoryList', 'SharedMemoryNDarray']
 from .Parallelizers import *
 from .Runner import *
 from .SharedMemory import *

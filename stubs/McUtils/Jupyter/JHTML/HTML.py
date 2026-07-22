@@ -782,8 +782,8 @@ class CSS:
         :param sty: A CSS declaration string or complete rule block.
         :type sty: object
 
-        :return: The value produced by the implemented operation.
-        :rtype: object
+        :return: a set of CSS ops
+        :rtype: list[CSS]
         """
         ...
 

@@ -240,14 +240,14 @@
     > the inclusion of standard Bootstrap HTML elements
     > alongside the classic formatting
     - **class `frozendict`** (dict)
-    - `__init__(templates)`
+    - `__init__(templates=None)`
     - `format_parameters()` — Return the parameter mapping for the innermost active formatting operation.
     - `templates()` — **LLM Docstring**
     - `special_callbacks()` — Map special format-field markers to evaluation, directive, comment, raw, and assignment handlers.
     - `callback_map()` — Combine special markers with every registered directive marker.
     - `apply_eval_tree(_, spec)` — Parse and evaluate a cleaned Python expression or statement block against the active parameters.
     - `apply_directive_tree(_, spec)` — Evaluate a directive expression after wrapping it in parentheses.
-    - `apply_assignment(key, spec)` — Assign the literal right-hand text from an inline assignment into the active parameter mapping.
+    - `apply_assignment(_, spec, eval=False)` — Assign the literal right-hand text from an inline assignment into the active parameter mapping.
     - `apply_raw(key, spec)` — :param key: the lookup, assignment, or formatting key
     - `apply_comment(key, spec)` — :param key: the lookup, assignment, or formatting key
     - `apply_directive(key, spec)` — Convert a directive marker and argument text into an evaluable directive call.
