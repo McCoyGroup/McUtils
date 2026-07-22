@@ -1,6 +1,6 @@
-# LLM Examples
+**LLM Examples**
 
-## Analyze a molecular graph
+### Analyze a molecular graph
 
 ```python
 from McUtils.Graphs import EdgeGraph
@@ -14,7 +14,7 @@ print("fragments:", ethanol.get_fragments(return_labels=True))
 print("three-bond neighborhood:", list(ethanol.neighbor_iterator(0, num=3)))
 ```
 
-## Detect rings and break a bond
+### Detect rings and break a bond
 
 ```python
 from McUtils.Graphs import EdgeGraph
@@ -28,7 +28,7 @@ print("ring:", rings[0])
 print("opened-chain distances:", opened.get_distances(0))
 ```
 
-## Traverse nested scientific data
+### Traverse nested scientific data
 
 ```python
 from McUtils.Graphs import tree_iter
@@ -42,7 +42,7 @@ for path, is_term in tree_iter(workflow, yield_paths='terminal', traversal_order
     print(*riffle(path, [" / "] * len(path)))
 ```
 
-## Compare two labeled graphs
+### Compare two labeled graphs
 
 ```python
 from McUtils.Graphs import EdgeGraph
@@ -54,7 +54,7 @@ aligned = second.take(permutation)
 print("alignment:", permutation, aligned.labels)
 ```
 
-## Compute a graph layout and plot it
+### Compute a graph layout and plot it
 
 ```python
 from McUtils.Graphs import EdgeGraph
@@ -67,7 +67,7 @@ figure = graph.plot(method="kamada_kawai")
 figure.show()
 ```
 
-## Test generic rigidity
+### Test generic rigidity
 
 ```python
 import numpy as np

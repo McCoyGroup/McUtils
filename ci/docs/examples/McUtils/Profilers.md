@@ -1,7 +1,7 @@
 
-# LLM Examples
+**LLM Examples**
 
-## Time a numerical block
+### Time a numerical block
 
 ```python
 import numpy as np
@@ -14,7 +14,7 @@ with Timer("100k vector norms", rounding=4):
 print("mean norm:", norms.mean())
 ```
 
-## Use a timer as a decorator
+### Use a timer as a decorator
 
 ```python
 import numpy as np
@@ -30,7 +30,7 @@ matrix = matrix + matrix.T
 values, vectors = diagonalize(matrix)
 ```
 
-## Profile a calculation block
+### Profile a calculation block
 
 ```python
 import numpy as np
@@ -43,7 +43,7 @@ with BlockProfiler.profiler("matrix multiplication", mode="deterministic"):
     product = left @ right
 ```
 
-## Record explicit laps
+### Record explicit laps
 
 ```python
 import numpy as np
@@ -59,7 +59,7 @@ elapsed = timer.stop()
 print("lap count:", len(timer.laps), "total:", elapsed)
 ```
 
-## Select a profiler backend dynamically
+### Select a profiler backend dynamically
 
 ```python
 from McUtils.Profilers import BlockProfiler
@@ -73,7 +73,7 @@ with profiler:
     values = [sum(i * j for j in range(100)) for i in range(1000)]
 ```
 
-## Disable profiling without branching
+### Disable profiling without branching
 
 ```python
 from McUtils.Profilers import BlockProfiler

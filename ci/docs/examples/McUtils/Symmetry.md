@@ -1,6 +1,6 @@
-# LLM Examples
+**LLM Examples**
 
-## Inspect a point-group character table
+### Inspect a point-group character table
 
 ```python
 from McUtils.Symmetry import CharacterTable
@@ -12,7 +12,7 @@ decomposition = table.decompose_representation(axis_rep)
 print("Cartesian-axis representation:", decomposition)
 ```
 
-## Reduce the Cartesian modes of water
+### Reduce the Cartesian modes of water
 
 ```python
 import numpy as np
@@ -25,7 +25,7 @@ assert np.allclose(reduction, [2, 0, 1, 0])
 print("3N representation by irrep:", reduction)
 ```
 
-## Generate symmetry operations
+### Generate symmetry operations
 
 ```python
 import numpy as np
@@ -38,7 +38,7 @@ print("number of operations:", len(elements))
 print("class sizes:", [len(c) for c in classes])
 ```
 
-## Decompose a custom representation
+### Decompose a custom representation
 
 ```python
 import numpy as np
@@ -50,7 +50,7 @@ multiplicities = table.decompose_representation(representation)
 print("irrep multiplicities:", np.rint(multiplicities).astype(int))
 ```
 
-## Compare common molecular point groups
+### Compare common molecular point groups
 
 ```python
 from McUtils.Symmetry import CharacterTable
@@ -62,7 +62,7 @@ for fixed in ["Td", "Oh"]:
     print(fixed, CharacterTable.point_group(fixed).table.shape)
 ```
 
-## Identify symmetry-related coordinate modes
+### Identify symmetry-related coordinate modes
 
 ```python
 import numpy as np

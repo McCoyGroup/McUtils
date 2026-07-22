@@ -1,6 +1,6 @@
-# LLM Examples
+**LLM Examples**
 
-## Enumerate vibrational basis states
+### Enumerate vibrational basis states
 
 ```python
 import numpy as np
@@ -15,7 +15,7 @@ print("basis size:", len(states))
 print("first excited states:", states[np.sum(states, axis=1) == 1])
 ```
 
-## Rank and unrank multiset permutations
+### Rank and unrank multiset permutations
 
 ```python
 import numpy as np
@@ -30,7 +30,7 @@ assert np.array_equal(space.permutations_from_indices(indices), permutations)
 print(selected)
 ```
 
-## Generate standard Young tableaux
+### Generate standard Young tableaux
 
 ```python
 from McUtils.Combinatorics import YoungTableauxGenerator
@@ -45,7 +45,7 @@ print("hook lengths:", hooks)
 generator.print_tableaux(tableaux)
 ```
 
-## Encode and decode arbitrary permutations
+### Encode and decode arbitrary permutations
 
 ```python
 import numpy as np
@@ -58,7 +58,7 @@ assert np.array_equal(restored, permutations)
 print("Lehmer codes:", codes)
 ```
 
-## Generate low-discrepancy integration points
+### Generate low-discrepancy integration points
 
 ```python
 from McUtils.Combinatorics import halton_sequence, sobol_sequence
@@ -70,7 +70,7 @@ print("Halton centroid:", halton.mean(axis=0))
 print("Sobol centroid:", sobol.mean(axis=0))
 ```
 
-## Traverse lattice-path rules
+### Traverse lattice-path rules
 
 ```python
 from McUtils.Combinatorics import LatticePathGenerator

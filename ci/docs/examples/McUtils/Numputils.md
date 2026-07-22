@@ -1,8 +1,8 @@
-# LLM Examples
+**LLM Examples**
 
 These examples focus on the heavily reused vector, geometry, transformation, and sparse-array APIs.
 
-## Build molecular coordinate frames
+### Build molecular coordinate frames
 
 ```python
 import numpy as np
@@ -15,7 +15,7 @@ assert np.allclose(frame @ frame.T, np.eye(3))
 print(local_coords)
 ```
 
-## Apply and invert a rigid transformation
+### Apply and invert a rigid transformation
 
 ```python
 import numpy as np
@@ -31,7 +31,7 @@ restored = (np.linalg.inv(transform) @ np.pad(moved, ((0, 0), (0, 1)), constant_
 assert np.allclose(restored, coords)
 ```
 
-## Store a block-sparse operator
+### Store a block-sparse operator
 
 ```python
 import numpy as np
@@ -47,7 +47,7 @@ assert np.allclose(subblock, np.diag(diagonal[:3]))
 print("sparse shape:", operator.shape)
 ```
 
-## Measure batched molecular geometry
+### Measure batched molecular geometry
 
 ```python
 import numpy as np
@@ -61,7 +61,7 @@ dihedral = pts_dihedrals(trajectory[:, 0], trajectory[:, 1],
 print(bond.mean(), np.degrees(angle).mean(), np.degrees(dihedral).std())
 ```
 
-## Rotate vectors between directions
+### Rotate vectors between directions
 
 ```python
 import numpy as np
@@ -79,7 +79,7 @@ target2 = source @ rotation
 assert np.allclose(target2, target)
 ```
 
-## Deduplicate rows with vectorized set operations
+### Deduplicate rows with vectorized set operations
 
 ```python
 import numpy as np
