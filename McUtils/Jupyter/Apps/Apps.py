@@ -58,7 +58,10 @@ class Manipulator(Card):
             'output': {}
         }
     )
-    def __init__(self, func, *controls, debounce=None, autoclear=True, namespace=None, **etc):
+    def __init__(self, func, *controls, debounce=None, autoclear=True, namespace=None,
+                 layout_function=None,
+                 control_layout_function=None,
+                 **etc):
         """
         **LLM Docstring**
 
@@ -82,14 +85,24 @@ class Manipulator(Card):
         self.output = FunctionDisplay(func, vars, debounce=debounce, autoclear=autoclear,
                                       namespace=namespace,
                                       **self.theme.get('output', {}))
-        body = Flex(
+        if control_layout_function is None:
+            control_layout_function = self.default_control_layout
+        self.control_panel = control_layout_function(self)
+        if layout_function is None:
+            layout_function = self.default_layout
+        self.component_args['body'] = layout_function(self)
+    @classmethod
+    def default_layout(cls, self):
+        return (Flex(
             [
                 self.output,
-                Flex(self.controls, direction='column', **self.theme.get('controls', {}))
+                self.control_panel
             ],
             direction='column'
-        )
-        self.component_args['body'] = (body,)
+        ),)
+    @classmethod
+    def default_control_layout(cls, self):
+        return Flex(self.controls, direction='column', **self.theme.get('controls', {}))
     @classmethod
     def canonicalize_control(cls, settings, namespace=None):
         """
@@ -196,6 +209,7 @@ class App(Component):
                  cls='app border',
                  output=None,
                  capture_output=None,
+                 namespace=None,
                  vars=None,
                  **attrs
                  ):

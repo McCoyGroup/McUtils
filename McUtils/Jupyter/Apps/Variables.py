@@ -184,7 +184,7 @@ class InterfaceVars:
         :param callbacks: callbacks fired when a variable is added
         :param namespace: the variable namespace
         """
-        vars = [Var(x, namespace=namespace) for x in vars]
+        vars = [Var(x, namespace=namespace) if isinstance(x, str) else x for x in vars]
         self._var_set = set(vars)
         self.var_list = vars
         self.callbacks = set(callbacks) if callbacks is not None else set()
@@ -487,7 +487,7 @@ class VariableSynchronizer:
             self._value
         )
     @classmethod
-    def create_var(cls, var, namespace=None):
+    def create_var(cls, var, namespace=None, **opts):
         """
         **LLM Docstring**
 
@@ -509,7 +509,7 @@ class VariableSynchronizer:
             return var
         else:
             if var not in namespace:
-                this_var = VariableSynchronizer(var, namespace=namespace)
+                this_var = VariableSynchronizer(var, namespace=namespace, **opts)
                 namespace[var] = this_var
             if var_cache is not None:
                 var_cache.add(namespace[var])
@@ -607,7 +607,7 @@ class VariableSynchronizer:
             except ValueError:
                 ...
         self._watchers.pop(widget, None)
-def Var(name, namespace=None):
+def Var(name, namespace=None, **opts):
     """
     **LLM Docstring**
 
@@ -621,9 +621,9 @@ def Var(name, namespace=None):
     """
     if namespace is not None:
         with VariableNamespace.create(namespace) as ns:
-            return VariableSynchronizer.create_var(name, namespace=ns)
+            return VariableSynchronizer.create_var(name, namespace=ns, **opts)
     else:
-        return VariableSynchronizer.create_var(name)
+        return VariableSynchronizer.create_var(name, **opts)
 class WidgetControl:
     def __init__(self, var, control_type=None, widget=None, **settings):
         """

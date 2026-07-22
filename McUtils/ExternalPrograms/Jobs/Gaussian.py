@@ -437,6 +437,7 @@ class GaussianRestBlock(GaussianOptionsBlock):
             return {"rest":{s.strip("{").strip("}"):[] for s in t.split()}}
         return cls._json
 
+@ExternalProgramJob.register("gaussian")
 class GaussianJob(ExternalProgramJob):
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'gaussian_job.gjf')
     blocks = [
