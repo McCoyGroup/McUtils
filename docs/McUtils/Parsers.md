@@ -340,6 +340,75 @@ Named(
 Here `StringParser.array_handler(dtype=float)` provides efficient parsing of data through `np.loadtxt` with a `float` as the target `dtype`.
 We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
+# LLM Examples
+
+## Build a declarative parser for numerical records
+
+```python
+from McUtils.Parsers import RegexPattern, Repeating, Capturing
+from McUtils.Parsers import Number, Whitespace, Optional, StringParser
+
+pattern = RegexPattern(
+    ("Eigenvalues --", Repeating(Capturing(Number), suffix=Optional(Whitespace))),
+    joiner=Whitespace
+)
+parser = StringParser(pattern)
+values = parser.parse("Eigenvalues --  -0.1423  0.0781  0.2114")
+print(values.array)
+```
+
+## Stream structures from an XYZ trajectory
+
+```python
+from McUtils.Parsers import XYZParser
+
+with XYZParser("trajectory.xyz") as parser:
+    structures = parser.parse()
+for comment, atoms, coords in structures:
+    print(comment, len(atoms), coords.shape)
+first_geometry = structures[0][2]
+```
+
+## Parse selected fields from a CIF
+
+```python
+from McUtils.ExternalPrograms import CIFParser, CIFConverter
+
+fields = ["cell_length_a", "cell_length_b", "cell_length_c",
+          "atom_site_label", "atom_site_fract_x", "atom_site_fract_y", "atom_site_fract_z"]
+with CIFParser("crystal.cif", fields=fields) as parser:
+    blocks = parser.parse()
+crystal = CIFConverter(blocks)
+atoms, coordinates = crystal.atoms()
+print("cell:", crystal.cell_properties())
+print("expanded structure:", len(atoms), coordinates.shape)
+```
+
+## Compose named fields into structured data
+
+```python
+from McUtils.Parsers import RegexPattern, Named, Number, VariableName, Whitespace
+from McUtils.Parsers import StringParser
+
+record = RegexPattern((Named(VariableName, "label"), Named(Number, "value")),
+                      joiner=Whitespace)
+parser = StringParser(record)
+parsed = parser.parse("Energy -76.2413")
+print(parsed["label"].array, parsed["value"].array)
+```
+
+## Search a large file without loading it all
+
+```python
+from McUtils.Parsers import FileStreamReader, FileStreamerTag
+
+with FileStreamReader("large-output.log") as stream:
+    tag = FileStreamerTag("Standard orientation:", follow_ups=["-----"])
+    block = stream.get_tagged_block("geometry", tag)
+print("matched block length:", len(block))
+```
+
+
 
 
 
@@ -353,9 +422,9 @@ We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-882e71" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-882e71"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-987a3e" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-987a3e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-882e71" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-987a3e" markdown="1">
  - [RegexGroups](#RegexGroups)
 - [OptScan](#OptScan)
 - [XYZ](#XYZ)
@@ -365,9 +434,9 @@ We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-b1a152" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-b1a152"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-bb474a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-bb474a"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-b1a152" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-bb474a" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

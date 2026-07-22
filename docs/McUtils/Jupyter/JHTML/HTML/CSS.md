@@ -229,8 +229,8 @@ Parse either inline declarations or selector blocks into one or more `CSS` objec
   - `sty`: `object`
     > A CSS declaration string or complete rule block.
 
-  - `:returns`: `object`
-    > The value produced by the implemented operation.
+  - `:returns`: `list[CSS]`
+    > a set of CSS ops
 
 
 <a id="McUtils.Jupyter.JHTML.HTML.CSS.tostring" class="docs-object-method">&nbsp;</a> 
@@ -238,8 +238,8 @@ Parse either inline declarations or selector blocks into one or more `CSS` objec
 tostring(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L1275)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L1275?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L1276)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L1276?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -253,8 +253,8 @@ Serialize the stored CSS rule as either a selector block or an inline declaratio
 validate(self, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L1293)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L1293?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L1294)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/CSS.py#L1294?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 

@@ -70,6 +70,84 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 
 
 ## Examples
+# LLM Examples
+
+## Display rich API documentation in Jupyter
+
+```python
+from McUtils.Docs import jdoc
+from McUtils.Zachary import FiniteDifferenceDerivative
+
+documentation = jdoc(
+    FiniteDifferenceDerivative,
+    max_depth=2,
+    verbose=False
+)
+documentation.display()
+```
+
+## Extract examples from a test module
+
+```python
+from McUtils.Docs import ExamplesParser
+
+examples = ExamplesParser.from_file("ci/tests/ZacharyTests.py")
+names = list(examples.functions)
+finite_difference_examples = [name for name in names if "Deriv" in name]
+print("all documented functions:", len(names))
+print("finite-difference examples:", finite_difference_examples)
+```
+
+## Build package stubs and summaries
+
+```python
+from McUtils.Docs import StubSummaryBuilder
+
+builder = StubSummaryBuilder(
+    root_src_dir="McUtils",
+    out_dir="stubs"
+)
+summary = builder.generate_all("McUtils")
+print("stub bytes:", summary["stub_size"])
+print("summary bytes:", summary["summary_size"])
+```
+
+## Render static HTML documentation
+
+```python
+from McUtils.Docs import static_doc
+from McUtils.Combinatorics import UniquePermutations
+
+html = static_doc(
+    UniquePermutations, max_depth=2,
+    title="Unique permutation API", return_string=True
+)
+print("generated HTML characters:", len(html))
+```
+
+## Walk an object hierarchy
+
+```python
+from McUtils.Docs import DocWalker
+from McUtils import Numputils
+
+walker = DocWalker(description="Numerical utility API")
+documentation = walker.visit_root(Numputils, max_depth=1)
+print(documentation)
+```
+
+## Build a documentation site
+
+```python
+from McUtils.Docs import DocBuilder
+
+builder = DocBuilder(
+    root=".", target="build/docs", readme="README.md",
+    packages=[{"id": "McUtils", "tests_root": "ci/tests"}],
+    config={"title": "McUtils API", "path": "McUtils"}
+)
+builder.build()
+```
 
 
 
@@ -85,9 +163,9 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-eff98b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-eff98b"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-fce8c2" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-fce8c2"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-eff98b" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-fce8c2" markdown="1">
  - [McUtilsDoc](#McUtilsDoc)
 - [PsienceDoc](#PsienceDoc)
 - [ParseExamples](#ParseExamples)
@@ -95,9 +173,9 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-e8cd85" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e8cd85"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-686efc" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-686efc"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e8cd85" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-686efc" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

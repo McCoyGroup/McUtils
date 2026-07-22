@@ -1,7 +1,7 @@
 # <a id="McUtils.Graphs.Trees.graph_iter">graph_iter</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees.py#L347)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees.py#L347?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees.py#L360)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees.py#L360?message=Update%20Docs)]
 </div>
 
 ```python
@@ -86,7 +86,7 @@ Adapt an adjacency mapping to `tree_iter`, enabling cycle-safe graph traversal a
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Graphs/Trees/graph_iter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Graphs/Trees/graph_iter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees.py#L347?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees.py#L360?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

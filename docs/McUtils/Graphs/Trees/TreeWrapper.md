@@ -1,8 +1,8 @@
 ## <a id="McUtils.Graphs.Trees.TreeWrapper">TreeWrapper</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees.py#L407)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees.py#L407?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees.py#L420)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees.py#L420?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, tree): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees.py#L408)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees.py#L408?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees.py#L421)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees.py#L421?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -42,8 +42,8 @@ Wrap a nested mapping or sequence with traversal and path-indexing conveniences.
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L422)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L422?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L435)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L435?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -57,8 +57,8 @@ Format the wrapped tree using `pprint.pformat`.
 __len__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L434)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L434?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L447)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L447?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -72,8 +72,8 @@ Return the number of top-level entries in the wrapped tree.
 __iter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L444)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L444?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L457)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L457?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -87,8 +87,8 @@ Iterate over the wrapped container.
 condense_subtrees(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L454)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L454?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L467)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L467?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -102,8 +102,8 @@ Merge a top-level sequence of mapping subtrees into one mapping when every eleme
 keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L472)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L472?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L485)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L485?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -117,8 +117,8 @@ Return mapping keys when the wrapped tree is mapping-like; otherwise return `Non
 values(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L485)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L485?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L498)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L498?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -132,8 +132,8 @@ Return mapping values or the sequence itself for non-mapping trees.
 find_subtree(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L498)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L498?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L511)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L511?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -151,8 +151,8 @@ Find the first direct subtree associated with one of the requested keys.
 get_tree_item(cls, tree, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L521)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L521?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L534)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L534?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -172,8 +172,8 @@ Follow a path through nested mappings and sequences, translating integer positio
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L565)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L565?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L578)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L578?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -190,8 +190,8 @@ Resolve a nested path through the wrapped tree.
 bfs(self, callback, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L578)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L578?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L591)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L591?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -211,8 +211,8 @@ Run `tree_traversal` in breadth-first order.
 dfs(self, callback, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L595)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L595?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/Trees/TreeWrapper.py#L608)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees/TreeWrapper.py#L608?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -278,7 +278,7 @@ Run `tree_traversal` in depth-first order.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Graphs/Trees/TreeWrapper.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Graphs/Trees/TreeWrapper.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees.py#L407?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/Trees.py#L420?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

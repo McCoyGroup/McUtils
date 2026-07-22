@@ -1,8 +1,8 @@
 ## <a id="McUtils.Graphs.EdgeGraph.GraphSearcher">GraphSearcher</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph.py#L2630)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph.py#L2630?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph.py#L2633)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph.py#L2633?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, data=None, track_components=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph.py#L2632)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph.py#L2632?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph.py#L2635)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph.py#L2635?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -45,8 +45,8 @@ Initialize union-find parent, rank, and optional component-member tables.
 copy(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2652)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2652?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2655)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2655?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -60,8 +60,8 @@ Create an independent copy of the union-find state.
 add(self, node) -> 'None': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2672)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2672?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2675)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2675?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -78,8 +78,8 @@ Insert a node as a singleton component if needed and return its current root.
 find(self, node): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2691)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2691?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2694)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2694?message=Update%20Docs)]
 </div>
 Find root with path-halving compression.
 
@@ -89,8 +89,8 @@ Find root with path-halving compression.
 same_component(self, u, v) -> 'bool': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2699)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2699?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2702)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2702?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -110,8 +110,8 @@ Test whether two nodes have the same union-find root.
 union(self, u, v): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2716)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2716?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2719)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2719?message=Update%20Docs)]
 </div>
 Merge the two components (union by rank).
 
@@ -121,8 +121,8 @@ Merge the two components (union by rank).
 component(self, node): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2731)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2731?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2734)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/GraphSearcher.py#L2734?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -185,7 +185,7 @@ Return the tracked member set for a node’s component, or `None` when tracking 
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Graphs/EdgeGraph/GraphSearcher.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Graphs/EdgeGraph/GraphSearcher.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph.py#L2630?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph.py#L2633?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

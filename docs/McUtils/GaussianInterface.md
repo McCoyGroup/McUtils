@@ -315,6 +315,94 @@ then we return the `array` from that which contains the matched dipole moment.
 
 Support is also provided for the automatic generation of Gaussian job files (`.gjf`) through the `GaussianJob` class.
 
+# LLM Examples
+
+## Extract geometries and energies from a scan
+
+```python
+import numpy as np
+from McUtils.GaussianInterface import GaussianLogReader
+
+with GaussianLogReader("scan.log") as reader:
+    parsed = reader.parse(["StandardCartesianCoordinates", "ScanEnergies"])
+atoms, geometries = parsed["StandardCartesianCoordinates"]
+scan_energies = np.asarray(parsed["ScanEnergies"])
+relative = (scan_energies - scan_energies.min()) * 627.509
+print("atoms:", atoms)
+print("scan range / kcal mol^-1:", relative.ptp())
+minimum_geometry = geometries[np.argmin(scan_energies)]
+```
+
+## Read dipoles along a trajectory
+
+```python
+import numpy as np
+from McUtils.GaussianInterface import GaussianLogReader
+
+with GaussianLogReader("optimization.log") as reader:
+    parsed = reader.parse(["DipoleMoments", "StandardCartesianCoordinates"])
+dipoles = np.asarray(parsed["DipoleMoments"])
+atoms, geometries = parsed["StandardCartesianCoordinates"]
+magnitudes = np.linalg.norm(dipoles, axis=-1)
+print("initial and final dipoles:", magnitudes[[0, -1]])
+print("number of optimization structures:", len(geometries))
+```
+
+## Inspect formatted-checkpoint derivatives
+
+```python
+from McUtils.GaussianInterface import GaussianFChkReader
+
+with GaussianFChkReader("frequency.fchk") as reader:
+    data = reader.parse(["Coordinates", "Gradient", "ForceConstants"])
+coords = data["Coordinates"].reshape(-1, 3)
+gradient = data["Gradient"].reshape(-1, 3)
+force_constants = data["ForceConstants"]
+print("geometry shape:", coords.shape)
+print("gradient norm:", (gradient**2).sum() ** .5)
+print("force-constant data shape:", force_constants.shape)
+```
+
+## Read normal modes and frequencies
+
+```python
+import numpy as np
+from McUtils.GaussianInterface import GaussianLogReader
+
+with GaussianLogReader("frequency.log") as reader:
+    parsed = reader.parse("NormalModes")
+modes = parsed["NormalModes"]
+frequencies = np.asarray(modes.freqs)
+displacements = np.asarray(modes.modes)
+print("frequency range:", frequencies.min(), frequencies.max())
+print("normal-mode tensor:", displacements.shape)
+```
+
+## Limit parsing to the final structures
+
+```python
+from McUtils.GaussianInterface import GaussianLogReader
+
+with GaussianLogReader("optimization.log") as reader:
+    parsed = reader.parse("StandardCartesianCoordinates", num=5)
+atoms, structures = parsed["StandardCartesianCoordinates"]
+for index, geometry in enumerate(structures):
+    print(index, geometry.shape)
+final_geometry = structures[-1]
+```
+
+## Inspect the Gaussian job header
+
+```python
+from McUtils.GaussianInterface import GaussianLogReader
+
+with GaussianLogReader("calculation.log") as reader:
+    header = reader.parse("Header")["Header"]
+print("job type:", header.job)
+print("method:", header.method)
+print("basis:", header.basis)
+```
+
 
 
 
@@ -328,9 +416,9 @@ Support is also provided for the automatic generation of Gaussian job files (`.g
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-4fdf05" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-4fdf05"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-b8e301" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-b8e301"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-4fdf05" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-b8e301" markdown="1">
  - [GetLogInfo](#GetLogInfo)
 - [DefaultLogParse](#DefaultLogParse)
 - [GetDipoles](#GetDipoles)
@@ -352,9 +440,9 @@ Support is also provided for the automatic generation of Gaussian job files (`.g
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-e2eeae" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e2eeae"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-446f3a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-446f3a"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e2eeae" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-446f3a" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

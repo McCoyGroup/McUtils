@@ -553,8 +553,8 @@ modification space.
 __len__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L820)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L820?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L827)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L827?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -568,8 +568,8 @@ The number of colors in the palette.
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L830)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L830?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L837)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L837?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -587,8 +587,8 @@ slice/array (a sub-palette).
 rgb_code(cls, rgb, padding=2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L853)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L853?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L860)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L860?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -607,8 +607,8 @@ Format an RGB value (or list of them) as a hex color code.
 parse_rgb_code(cls, code, padding=None, return_padding=False, num_channels=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L873)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L873?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L880)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L880?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -631,8 +631,8 @@ Parse a hex color code into an RGB(A) value, inferring the per-channel padding.
 color_convert(self, color, original_space, target_space): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L926)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L926?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L933)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L933?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -654,8 +654,8 @@ Convert a color between two color spaces, routing through the intermediate space
 xyz_to_rgb(self, x, y, z): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L977)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L977?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L984)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L984?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -676,8 +676,8 @@ Convert a color from CIE XYZ to sRGB.
 rgb_to_xyz(self, r, g, b): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1007)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1007?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1014)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1014?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -698,8 +698,8 @@ Convert a color from sRGB to CIE XYZ.
 rgb_to_hsl(self, r, g, b): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1065)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1065?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1072)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1072?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -720,8 +720,8 @@ Convert a color from RGB to HSL.
 hsl_to_rgb(cls, h, s, l): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1143)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1143?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1150)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1150?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -742,8 +742,8 @@ Convert a color from HSL to RGB.
 rgb_to_hsv(self, r, g, b): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1190)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1190?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1197)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1197?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -764,8 +764,8 @@ Convert a color from RGB to HSV.
 hsv_to_hsl(cls, h, s, v): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1232)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1232?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1239)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1239?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -786,8 +786,8 @@ Convert a color from HSV to HSL.
 hsv_to_rgb(cls, h, s, v): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1274)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1274?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1281)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1281?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -808,8 +808,8 @@ Convert a color from HSV to RGB (via HSL).
 xyz_to_lab(cls, x, y, z, scaling=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1290)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1290?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1297)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1297?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -832,8 +832,8 @@ Convert a color from CIE XYZ to CIE Lab.
 lab_to_xyz(cls, l, a, b, scaling=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1333)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1333?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1340)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1340?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -850,58 +850,14 @@ Convert a color from CIE Lab to CIE XYZ.
     > the XYZ color
 
 
-<a id="McUtils.Plots.Colors.ColorPalette.lab_to_lch" class="docs-object-method">&nbsp;</a> 
-```python
-@classmethod
-lab_to_lch(cls, l, a, b): 
-```
-<div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1376)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1376?message=Update%20Docs)]
-</div>
-**LLM Docstring**
-
-Convert a color from CIE Lab to CIE LCh.
-  - `l`: `Any`
-    > the lightness channel
-  - `a`: `Any`
-    > the a channel
-  - `b`: `Any`
-    > the b channel
-  - `:returns`: `np.ndarray`
-    > the LCh color
-
-
-<a id="McUtils.Plots.Colors.ColorPalette.lch_to_lab" class="docs-object-method">&nbsp;</a> 
-```python
-@classmethod
-lch_to_lab(cls, l, c, h): 
-```
-<div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1392)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1392?message=Update%20Docs)]
-</div>
-**LLM Docstring**
-
-Convert a color from CIE LCh to CIE Lab.
-  - `l`: `Any`
-    > the lightness channel
-  - `c`: `Any`
-    > the chroma channel
-  - `h`: `Any`
-    > the hue channel
-  - `:returns`: `np.ndarray`
-    > the Lab color
-
-
 <a id="McUtils.Plots.Colors.ColorPalette.rgb_to_lab" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 rgb_to_lab(cls, r, g, b, xyz_scaling=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1410)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1410?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1382)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1382?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -924,8 +880,8 @@ Convert a color from RGB to CIE Lab (via XYZ).
 lab_to_rgb(cls, l, a, b, xyz_scaling=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1425)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1425?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1397)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1397?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -940,6 +896,72 @@ Convert a color from CIE Lab to RGB (via XYZ).
     > the white-point scaling
   - `:returns`: `np.ndarray`
     > the RGB color
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.lab_to_lch" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+lab_to_lch(cls, l, a, b): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1413)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1413?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Convert a color from CIE Lab to CIE LCh.
+  - `l`: `Any`
+    > the lightness channel
+  - `a`: `Any`
+    > the a channel
+  - `b`: `Any`
+    > the b channel
+  - `:returns`: `np.ndarray`
+    > the LCh color
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.lch_to_lab" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+lch_to_lab(cls, l, c, h): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1429)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1429?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Convert a color from CIE LCh to CIE Lab.
+  - `l`: `Any`
+    > the lightness channel
+  - `c`: `Any`
+    > the chroma channel
+  - `h`: `Any`
+    > the hue channel
+  - `:returns`: `np.ndarray`
+    > the Lab color
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.rgb_to_lch" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+rgb_to_lch(cls, r, g, b, xyz_scaling=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1447)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1447?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.lch_to_rgb" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+lch_to_rgb(cls, l, a, b, xyz_scaling=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1450)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1450?message=Update%20Docs)]
+</div>
  </div>
 </div>
 

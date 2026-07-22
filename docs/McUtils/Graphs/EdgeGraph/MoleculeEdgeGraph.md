@@ -1,8 +1,8 @@
 ## <a id="McUtils.Graphs.EdgeGraph.MoleculeEdgeGraph">MoleculeEdgeGraph</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph.py#L1717)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph.py#L1717?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph.py#L1720)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph.py#L1720?message=Update%20Docs)]
 </div>
 
 
@@ -30,8 +30,8 @@ light_atoms: set
 get_rings(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L1719)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L1719?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L1722)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L1722?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -45,8 +45,8 @@ Use RDKit cycle perception on a carbon-labeled graph with dummy coordinates.
 categorize_ring(self, ring): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2095)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2095?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2098)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2098?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -63,8 +63,8 @@ Match a ring and its external valencies against known ring templates, accounting
 match_functional_group(self, root, neighbor_lists, cache=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2157)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2157?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2160)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2160?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -87,8 +87,8 @@ Test a root atom’s nested neighbor pattern against known functional-group temp
 find_functional_groups(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2198)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2198?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2201)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2201?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -102,8 +102,8 @@ Locate known functional groups and collect the atom indices consumed by each mat
 get_label_types(self, label_constructor=None, use_ring_identifiers=True, use_functional_group_identifiers=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2276)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2276?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2279)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2279?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -126,8 +126,8 @@ Generate structured chemical identifiers for every node using optional ring and 
 get_heavy_atom_framework_graph(self, heavy_atoms=None, light_atoms=None, included_atoms=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2320)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2320?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2323)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2323?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -150,8 +150,8 @@ Extract a subgraph containing selected heavy atoms and return its original node 
 find_longest_chain(self, rings=None, root=None, use_highest_valencies=True, heavy_atoms=True, light_atoms=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2360)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2360?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2363)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2363?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -180,8 +180,8 @@ Find a longest chain in the heavy-atom framework and map it back to original ind
 segment_by_chains(self, root=None, rings=None, use_highest_valencies=True, heavy_atoms=True, light_atoms=None, backbone=None, validate=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2426)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2426?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2429)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.py#L2429?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -262,7 +262,7 @@ Segment the heavy-atom framework into chains and restore original atom indices.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Graphs/EdgeGraph/MoleculeEdgeGraph.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph.py#L1717?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph.py#L1720?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

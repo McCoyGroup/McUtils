@@ -40,8 +40,8 @@ Compound: Compound
 manage_class(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1308)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1308?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1309)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1309?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -58,8 +58,8 @@ Normalize a class specification into a list of class-name strings.
 manage_style(styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1334)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1334?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1335)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1335?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -76,8 +76,8 @@ Convert mappings or strings into a `CSS` object while leaving existing style obj
 extract_styles(attrs, style_props=None, ignored_styles=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1425)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1425?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1426)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1426?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -98,8 +98,8 @@ Remove recognized style properties from an attribute mapping and return them sep
 manage_attrs(attrs, sanitize=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1401)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1401?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1402)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML/HTMLManager.py#L1402?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 

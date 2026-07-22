@@ -5,7 +5,7 @@
 </div>
 
 ```python
-tree_iter(tree, root=None, get_item=None, get_children=None, visited: set = None, check_visited=None, traversal_ordering='bfs', yield_paths=False, per_path_visited=False, enable_disconnectivity=False): 
+tree_iter(tree, root=None, get_item=None, get_children=None, visited: set = None, check_visited=None, traversal_ordering='bfs', yield_paths=False, use_child_paths=None, per_path_visited=False, enable_disconnectivity=False): 
 ```
 **LLM Docstring**
 

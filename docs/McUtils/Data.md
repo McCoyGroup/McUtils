@@ -116,6 +116,86 @@ assert UnitsData.convert("AtomicMassUnits", "AtomicUnitOfMass") == UnitsData.con
 assert UnitsData.convert("Wavenumbers", "AtomicUnitOfEnergy") == UnitsData.convert("Wavenumbers", "Hartrees")
 ```
 
+# LLM Examples
+
+## Look up atomic and bond data
+
+```python
+from McUtils.Data import AtomData, BondData
+
+for atom in ["H", "D", "C", "O"]:
+    print(atom, "mass:", AtomData[atom, "Mass"])
+oh_length = BondData["O", "H", 1]
+co_length = BondData["C", "O", 2]
+print("reference O-H length:", oh_length)
+print("reference C=O length:", co_length)
+```
+
+## Convert spectroscopic units
+
+```python
+import numpy as np
+from McUtils.Data import UnitsData
+
+frequencies_hartree = np.array([.0054, .0167, .0171])
+to_wavenumbers = UnitsData.convert("Hartrees", "Wavenumbers")
+frequencies_cm = frequencies_hartree * to_wavenumbers
+energies_ev = frequencies_hartree * UnitsData.convert("Hartrees", "ElectronVolts")
+print("frequencies / cm^-1:", frequencies_cm)
+print("energies / eV:", energies_ev)
+```
+
+## Estimate an isotope shift
+
+```python
+from McUtils.Data import AtomData
+
+m_h = AtomData["Hydrogen", "Mass"]
+m_d = AtomData["Deuterium", "Mass"]
+m_o = AtomData["Oxygen", "Mass"]
+mu_oh = m_h * m_o / (m_h + m_o)
+mu_od = m_d * m_o / (m_d + m_o)
+oh_frequency = 3657.0
+od_frequency = oh_frequency * (mu_oh / mu_od) ** .5
+print(f"estimated O-D frequency: {od_frequency:.1f} cm^-1")
+```
+
+## Inspect named colors
+
+```python
+from McUtils.Data import ColorData
+
+for name in ["red", "navy", "forestgreen", "gold"]:
+    try:
+        print(name, ColorData[name])
+    except KeyError:
+        print(name, "is not present in this color table")
+```
+
+## Compare isotope records
+
+```python
+from McUtils.Data import AtomData, DataRecord
+
+protium = AtomData["H1"]
+deuterium = AtomData["H2"]
+tritium = AtomData["T"]
+assert all(isinstance(record, DataRecord) for record in [protium, deuterium, tritium])
+print([record["Mass"] for record in [protium, deuterium, tritium]])
+```
+
+## Traverse a chain of unit conversions
+
+```python
+from McUtils.Data import UnitsData
+
+hartree_to_ev = UnitsData.convert("Hartrees", "ElectronVolts")
+ev_to_wavenumbers = UnitsData.convert("ElectronVolts", "Wavenumbers")
+direct = UnitsData.convert("Hartrees", "Wavenumbers")
+assert abs(hartree_to_ev * ev_to_wavenumbers - direct) < 1e-8
+print("1 Eh =", direct, "cm^-1")
+```
+
 
 
 
@@ -132,9 +212,9 @@ assert UnitsData.convert("Wavenumbers", "AtomicUnitOfEnergy") == UnitsData.conve
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-b47334" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-b47334"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-753205" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-753205"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-b47334" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-753205" markdown="1">
  - [AtomData](#AtomData)
 - [AtomMasses](#AtomMasses)
 - [Conversions](#Conversions)
@@ -143,9 +223,9 @@ assert UnitsData.convert("Wavenumbers", "AtomicUnitOfEnergy") == UnitsData.conve
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-9bddf3" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-9bddf3"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-1da9e9" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-1da9e9"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-9bddf3" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-1da9e9" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

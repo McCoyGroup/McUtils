@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Properties.GraphicsPropertyManager3D">GraphicsPropertyManager3D</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties.py#L1237)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties.py#L1237?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties.py#L1271)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties.py#L1271?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, graphics, figure, axes, managed=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties.py#L1238)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties.py#L1238?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties.py#L1272)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties.py#L1272?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -47,8 +47,8 @@ values.
 axes_labels(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1256)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1256?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1290)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1290?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -64,8 +64,8 @@ labels and pushes each to the backend 3D axes (unwrapping `Styled` values).
 box_ratios(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1315)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1315?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1349)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1349?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -82,8 +82,8 @@ axes.
 projection_type(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1349)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1349?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1383)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1383?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -98,8 +98,8 @@ The 3D projection type, read from / written to the backend axes.
 autoscale(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1370)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1370?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1404)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1404?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -114,8 +114,8 @@ The 3D autoscale setting, read from / written to the backend axes.
 plot_range(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1391)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1391?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1425)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1425?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -132,8 +132,8 @@ unset; the setter fills missing axes from the cache and pushes each axis's limit
 absolute_plot_range(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1456)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1456?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1490)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1490?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -148,8 +148,8 @@ The 3D plot range with any unset axis filled in from the backend limits.
 frame(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1490)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1490?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1524)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1524?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -165,8 +165,8 @@ applies the visibility spec to the backend 3D axes.
 frame_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1532)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1532?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1566)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1566?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -182,8 +182,8 @@ to the backend 3D axes.
 ticks(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1586)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1586?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1622)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1622?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -199,8 +199,8 @@ the x/y/z tick specs.
 ticks_style(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1621)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1621?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1657)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1657?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -216,8 +216,8 @@ x/y/z tick styles to the backend axes.
 view_settings(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1662)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1662?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1698)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties/GraphicsPropertyManager3D.py#L1698?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -277,7 +277,7 @@ The 3D camera/view settings, read from / written to the backend axes.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Properties/GraphicsPropertyManager3D.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Properties/GraphicsPropertyManager3D.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties.py#L1237?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Properties.py#L1271?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
