@@ -63,7 +63,7 @@ class ParallelizerTests(TestCase):
         else:
             data = None
         return parallelizer.map(self.mapped_func, data, vectorized=True)
-    @debugTest
+    @validationTest
     def test_MapMultiprocessing(self):
         from McUtils.Profilers import Timer
         with MultiprocessingParallelizer(initialization_timeout=1) as par:
@@ -166,3 +166,15 @@ class ParallelizerTests(TestCase):
          my_data = my_data.unshare()
          self.assertIsInstance(my_data, dict)
          self.assertIsInstance(my_data['a'], np.ndarray)
+
+    @debugTest
+    def test_SimpleSharedDict(self):
+        from McUtils.Parallelizers import SharedMemoryDict
+
+        state = SharedMemoryDict({"iteration": 0, "energy": 0.0})
+        try:
+            state["iteration"] = 12
+            state["energy"] = -76.2413
+            print(dict(state.items()))
+        finally:
+            state.close()

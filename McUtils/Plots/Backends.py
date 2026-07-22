@@ -318,6 +318,16 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
         :param frame_spec: the frame styling
         """
         ...
+
+    def get_grid_visible(self):
+        raise NotImplementedError(...)
+    def set_grid_visible(self, grid_spec):
+        raise NotImplementedError(...)
+    def get_grid_style(self):
+        raise NotImplementedError(...)
+    def set_grid_style(self, grid_spec):
+        raise NotImplementedError(...)
+
     @abc.abstractmethod
     def get_xlabel(self):
         """
@@ -1126,8 +1136,12 @@ class GraphicsFigure(metaclass=abc.ABCMeta):
 
 class GraphicsBackend(metaclass=abc.ABCMeta):
     Figure = GraphicsFigure
+    figure_defaults = {}
+    def create_figure(self, *args, **kwargs):
+        kwargs = self.figure_defaults | kwargs
+        return self.create_raw_figure(*args, **kwargs)
     @abc.abstractmethod
-    def create_figure(self, *args, **kwargs) -> 'tuple[GraphicsFigure, tuple[GraphicsAxes]]':
+    def create_raw_figure(self, *args, **kwargs) -> 'tuple[GraphicsFigure, tuple[GraphicsAxes]]':
         """
         **LLM Docstring**
 
@@ -1138,6 +1152,7 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
         :return: the result
         """
         ...
+    axes_defaults = {}
     def create_axes(self, figure:'GraphicsFigure', *args, **kwargs):
         """
         **LLM Docstring**
@@ -1149,7 +1164,9 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
         :param kwargs: extra keyword options
         :return: the result
         """
+        kwargs = self.axes_defaults | kwargs
         return figure.create_axes(*args, **kwargs, backend=self)
+    inset_defaults = {}
     def create_inset(self, figure, *args, **kw) -> 'GraphicsAxes':
         """
         **LLM Docstring**
@@ -1161,6 +1178,7 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
         :param kw: extra keyword options
         :return: the result
         """
+        kw = self.inset_defaults | kw
         return figure.create_inset(*args, **kw)
     def close_figure(self, figure:'GraphicsFigure'):
         """
@@ -1259,7 +1277,7 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
         """
         ...
     class ThemeContextManager(metaclass=abc.ABCMeta):
-        def __init__(self, theme_parents, theme_spec):
+        def __init__(self, theme_parents, theme_spec, backend):
             """
             **LLM Docstring**
 
@@ -1268,7 +1286,9 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
             :param theme_parents: the parent themes
             :param theme_spec: the theme specification
             """
-            self.spec = self.canonicalize_theme_opts(theme_parents, theme_spec)
+            self.backend = backend
+            self.spec, self.opts = self.canonicalize_theme_opts(theme_parents, theme_spec)
+            self.backend_theme_stack = []
 
         @classmethod
         @abc.abstractmethod
@@ -1282,8 +1302,21 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
             :param theme_spec: the theme specification
             """
             ...
-        @abc.abstractmethod
         def __enter__(self):
+            self.backend_theme_stack.append((
+                self.backend.figure_defaults,
+                self.backend.axes_defaults,
+                self.backend.inset_defaults
+            ))
+            spec = self.opts.copy()
+            axes_defaults = spec.pop('axes', {})
+            inset_defaults = spec.pop('inset', {})
+            self.backend.figure_defaults = self.backend.figure_defaults | spec
+            self.backend.axes_defaults = self.backend.axes_defaults | axes_defaults
+            self.backend.inset_defaults = self.backend.inset_defaults | inset_defaults
+            return self.begin_context()
+        @abc.abstractmethod
+        def begin_context(self):
             """
             **LLM Docstring**
 
@@ -1292,7 +1325,7 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
             """
             ...
         @abc.abstractmethod
-        def __exit__(self, exc_type, exc_val, exc_tb):
+        def end_context(self, exc_type, exc_val, exc_tb):
             """
             **LLM Docstring**
 
@@ -1303,6 +1336,12 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
             :param exc_tb: the traceback, if any
             """
             ...
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            figure_defaults, axes_defaults, inset_defaults = self.backend_theme_stack.pop()
+            self.backend.figure_defaults = figure_defaults
+            self.backend.axes_defaults = axes_defaults
+            self.backend.inset_defaults = inset_defaults
+            return self.end_context(exc_type, exc_val, exc_tb)
     def theme_context(self, theme_parents, spec):
         """
         **LLM Docstring**
@@ -1312,7 +1351,7 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
         :param theme_parents: the parent themes
         :param spec: the theme specification
         """
-        return self.ThemeContextManager(theme_parents, spec)
+        return self.ThemeContextManager(theme_parents, spec, self)
 
     class DefaultBackends(enum.Enum):
         MPL = 'matplotlib'
@@ -1954,10 +1993,8 @@ class MPLAxes(GraphicsAxes):
 
         :param frame_spec: the per-edge visibility spec
         """
-        if frame_spec is True:
+        if frame_spec is True or frame_spec is False:
             self.obj.set_frame_on(frame_spec)
-        elif frame_spec is False:
-            self.obj.set_frame_off(frame_spec)
         else:
             lr, bt = frame_spec
             if lr is None:
@@ -2025,6 +2062,45 @@ class MPLAxes(GraphicsAxes):
             ['top', t]
         ]:
             if v is not None: self.obj.spines[k].set(**v)
+
+    def get_grid_visible(self):
+        x, y = (
+            self.xaxis.get_tick_params()["gridOn"],
+            self.yaxis.get_tick_params()["gridOn"]
+        )
+        if x and y:
+            return True
+        elif (not x) and (not y):
+            return False
+        else:
+            return (x, y)
+    def set_grid_visible(self, grid_spec):
+        if grid_spec is True:
+            self.obj.grid(True)
+        elif grid_spec is False:
+            self.obj.grid(False)
+        else:
+            x, y = grid_spec
+            if x:
+                self.obj.grid(True, axis='x')
+            if y:
+                self.obj.grid(True, axis='y')
+    def get_grid_style(self):
+        import matplotlib.pyplot as plt
+        styles = {}
+        for k,v in plt.rcParams.items():
+            if k.startswith('grid.'):
+                styles[k[5:]] = v
+        return styles
+    def set_grid_style(self, grid_spec):
+        if dev.is_dict_like(grid_spec):
+            self.obj.grid(True, **grid_spec)
+        else:
+            x, y = grid_spec
+            if dev.is_dict_like(x):
+                self.obj.grid(axis='x', **x)
+            if y:
+                self.obj.grid(axis='y', **y)
 
     def get_xlabel(self):
         """
@@ -3013,6 +3089,27 @@ class MPLAxes3D(MPLAxes):
             self.obj.set_axis_on()
         elif frame_spec is False:
             self.obj.set_axis_off()
+
+    def get_zlabel(self):
+        """
+        **LLM Docstring**
+
+        Return the z-axis label (matplotlib backend).
+
+        :return: the result
+        """
+        return self.obj.get_zlabel()
+    def set_zlabel(self, val, **style):
+        """
+        **LLM Docstring**
+
+        Set the z-axis label (matplotlib backend).
+
+        :param val: the label text
+        :param style: label styling options
+        """
+        self.obj.set_zlabel(val, **style)
+
 
     def get_zlim(self):
         """
@@ -4650,7 +4747,7 @@ class MPLBackend(GraphicsBackend):
         :return: the `matplotlib` module
         """
         return MPLManager.mpl_api()
-    def create_figure(self, *args, **kwargs):
+    def create_raw_figure(self, *args, **kwargs):
         """
         **LLM Docstring**
 
@@ -4679,7 +4776,7 @@ class MPLBackend(GraphicsBackend):
         self.plt.show()
 
     class ThemeContextManager(GraphicsBackend.ThemeContextManager):
-        def __init__(self, theme_parents, theme_spec):
+        def __init__(self, theme_parents, theme_spec, backend):
             """
             **LLM Docstring**
 
@@ -4688,7 +4785,7 @@ class MPLBackend(GraphicsBackend):
             :param args: positional theme arguments
             :param kwargs: theme options
             """
-            super().__init__(theme_parents, theme_spec)
+            super().__init__(theme_parents, theme_spec, backend)
             self.context = MPLManager.plt_api().style.context(self.spec)
 
         @classmethod
@@ -4702,19 +4799,29 @@ class MPLBackend(GraphicsBackend):
             :param theme_opts: the `theme_opts`
             """
             from cycler import cycler
+            from .Graphics import Graphics
 
+            rem_opts = {}
             theme_dict = {}
             for k,v in theme_opts.items():
+                if k in (
+                        Graphics.opt_keys
+                        | Graphics.axes_keys
+                        | Graphics.figure_keys
+                ):
+                    continue
                 if isinstance(v, dict):
                     for sk,sv in v.items():
                         if isinstance(sv, dict):
                             sv = cycler(**sv)
                         theme_dict[k+'.'+sk] = sv
                 # else:
+                #     rem_opts[k] = v
+                # else:
                 #     theme_dict[k] = v
-            return theme_parents + [theme_dict]
+            return theme_parents + [theme_dict], rem_opts
 
-        def __enter__(self):
+        def begin_context(self):
             """
             **LLM Docstring**
 
@@ -4722,7 +4829,7 @@ class MPLBackend(GraphicsBackend):
 
             """
             return self.context.__enter__()
-        def __exit__(self, exc_type, exc_val, exc_tb):
+        def end_context(self, exc_type, exc_val, exc_tb):
             """
             **LLM Docstring**
 
@@ -4830,7 +4937,7 @@ class MPLFigure3D(MPLFigure):
         return super().create_axes(rows, cols, spans, projection=projection, **kw)
 class MPLBackend3D(MPLBackend):
     Figure = MPLFigure3D
-    def create_figure(self, *args, subplot_kw=None, **kwargs):
+    def create_raw_figure(self, *args, subplot_kw=None, **kwargs):
         """
         **LLM Docstring**
 
@@ -6235,6 +6342,10 @@ class PlotlyFigure(GraphicsFigure):
         raise NotImplementedError(...)
 class PlotlyBackend(GraphicsBackend):
     Figure = PlotlyFigure
+    def create_raw_figure(self, *args, **kwargs):
+        fig = self.Figure(*args, **kwargs)
+        ax = fig.create_axes()
+        return fig, ax
     def create_figure(self, *args, template=None, **kwargs):
         """
         **LLM Docstring**
@@ -6248,9 +6359,7 @@ class PlotlyBackend(GraphicsBackend):
         if template is None:
             template, others = self.ThemeContextManager.current_theme()
             kwargs = others | kwargs
-        fig = self.Figure(*args, template=dict(layout=template), **kwargs)
-        ax = fig.create_axes()
-        return fig, ax
+        return self.create_raw_figure(*args, template=dict(layout=template), **kwargs)
 
     @classmethod
     def prep_color(cls, v):
@@ -6319,12 +6428,21 @@ class PlotlyBackend(GraphicsBackend):
         elif name in {'patch'}:
             return {}, {}
         elif name == 'padding':
+            if nput.is_numeric(value):
+                value = [value, value]
+            lr, bt = value
+            if nput.is_numeric(lr):
+                lr = [lr, lr]
+            if nput.is_numeric(bt):
+                bt = [bt, bt]
+            l, r = lr
+            b, t = bt
             return {
                 'margin': {
-                    'l':value,
-                    'r':value,
-                    'b':value,
-                    't':value
+                    'l':l,
+                    'r':r,
+                    'b':b,
+                    't':t
                 }
             }, {}
         elif name == 'figsize':
@@ -6340,6 +6458,10 @@ class PlotlyBackend(GraphicsBackend):
             else:
                 ax = 'font'
             return {ax:{key:value}}, {}
+        elif name in {
+            'frame'
+        }:
+            return {}, {}
         else:
             return {name:value}, {}
 
@@ -6376,7 +6498,7 @@ class PlotlyBackend(GraphicsBackend):
             #             theme_dict[k + '.' + sk] = sv
             #     # else:
             #     #     theme_dict[k] = v
-            return theme_parents + [theme_opts]
+            return theme_parents + [theme_opts], theme_opts
         def get_axes_theme(self):
             """
             **LLM Docstring**
@@ -6399,6 +6521,7 @@ class PlotlyBackend(GraphicsBackend):
             :return: `(layout, other_props)`
             :rtype: tuple
             """
+            from .Graphics import Graphics
             layout = self.base_theme | self.get_axes_theme()
             others = {
 
@@ -6423,7 +6546,7 @@ class PlotlyBackend(GraphicsBackend):
             else:
                 return cls.theme_stack[-1]
 
-        def __enter__(self):
+        def begin_context(self):
             """
             **LLM Docstring**
 
@@ -6432,7 +6555,7 @@ class PlotlyBackend(GraphicsBackend):
             """
             self.theme_stack.append(self.prep_spec())
 
-        def __exit__(self, exc_type, exc_val, exc_tb):
+        def end_context(self, exc_type, exc_val, exc_tb):
             """
             **LLM Docstring**
 
@@ -8771,7 +8894,7 @@ class SVGFigure(GraphicsFigure):
 
 class SVGBackend(GraphicsBackend):
     Figure = SVGFigure
-    def create_figure(self, *args, **kwargs):
+    def create_raw_figure(self, *args, **kwargs):
         """
         **LLM Docstring**
 
@@ -8798,9 +8921,9 @@ class SVGBackend(GraphicsBackend):
             :param theme_parents: the parent themes
             :param theme_spec: the theme specification
             """
-            return []
+            return [], {}
 
-        def __enter__(self):
+        def begin_context(self):
             """
             **LLM Docstring**
 
@@ -8809,7 +8932,7 @@ class SVGBackend(GraphicsBackend):
             """
             return self
 
-        def __exit__(self, exc_type, exc_val, exc_tb):
+        def end_context(self, exc_type, exc_val, exc_tb):
             """
             **LLM Docstring**
 
@@ -11035,7 +11158,7 @@ class VPythonFigure(GraphicsFigure):
 
 class VPythonBackend(GraphicsBackend):
     Figure = VPythonFigure
-    def create_figure(self, *args, **kwargs):
+    def create_raw_figure(self, *args, **kwargs):
         """
         **LLM Docstring**
 
@@ -11062,8 +11185,8 @@ class VPythonBackend(GraphicsBackend):
             :param theme_parents: the parent themes
             :param theme_spec: the theme specification
             """
-            return []
-        def __enter__(self):
+            return [], {}
+        def begin_context(self):
             """
             **LLM Docstring**
 
@@ -11071,7 +11194,7 @@ class VPythonBackend(GraphicsBackend):
 
             """
             return self
-        def __exit__(self, exc_type, exc_val, exc_tb):
+        def end_context(self, exc_type, exc_val, exc_tb):
             """
             **LLM Docstring**
 
@@ -11781,7 +11904,7 @@ class VPythonFigure3D(GraphicsFigure):
 
 class VPythonBackend3D(GraphicsBackend):
     Figure = VPythonFigure3D
-    def create_figure(self, *args, **kwargs):
+    def create_raw_figure(self, *args, **kwargs):
         """
         **LLM Docstring**
 
@@ -13371,7 +13494,7 @@ class X3DFigure(GraphicsFigure):
 
 class X3DBackend(GraphicsBackend):
     Figure = X3DFigure
-    def create_figure(self, *args, **kwargs):
+    def create_raw_figure(self, *args, **kwargs):
         """
         **LLM Docstring**
 
@@ -13398,9 +13521,9 @@ class X3DBackend(GraphicsBackend):
             :param theme_parents: the parent themes
             :param theme_spec: the theme specification
             """
-            return []
+            return [], {}
 
-        def __enter__(self):
+        def begin_context(self):
             """
             **LLM Docstring**
 
@@ -13409,7 +13532,7 @@ class X3DBackend(GraphicsBackend):
             """
             return self
 
-        def __exit__(self, exc_type, exc_val, exc_tb):
+        def end_context(self, exc_type, exc_val, exc_tb):
             """
             **LLM Docstring**
 
@@ -14339,7 +14462,7 @@ class SceneJSONFigure(GraphicsFigure):
 
 class SceneJSONBackend(GraphicsBackend):
     Figure = SceneJSONFigure
-    def create_figure(self, *args, **kwargs):
+    def create_raw_figure(self, *args, **kwargs):
         """
         **LLM Docstring**
 
@@ -14366,9 +14489,9 @@ class SceneJSONBackend(GraphicsBackend):
             :param theme_parents: the parent themes
             :param theme_spec: the theme specification
             """
-            return []
+            return [], {}
 
-        def __enter__(self):
+        def begin_context(self):
             """
             **LLM Docstring**
 
@@ -14377,7 +14500,7 @@ class SceneJSONBackend(GraphicsBackend):
             """
             return self
 
-        def __exit__(self, exc_type, exc_val, exc_tb):
+        def end_context(self, exc_type, exc_val, exc_tb):
             """
             **LLM Docstring**
 

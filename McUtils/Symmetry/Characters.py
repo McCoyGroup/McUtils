@@ -365,7 +365,7 @@ def dihedral_group_classes(n):
         ]
     else:
         classes = [np.array([0])] + [
-            np.array([i + 1, n - i])
+            np.array([i + 1, n - (i + 1)])
             for i in range((n - 1) // 2)
         ] + [np.array([n//2])] + [
             np.arange(n, 2 * n, 2),

@@ -58,6 +58,8 @@ class GraphicsPropertyManager:
         self._colorbar = None
         self._cbar_obj = None
         self._spacings = None
+        self._grid = None
+        self._grid_style = None
 
     @property
     def figure_label(self):
@@ -647,14 +649,16 @@ class GraphicsPropertyManager:
             self._frame_style = ((None, None), (None, None))
         if isinstance(f_style, dict):
             f_style = ((f_style, f_style), (f_style, f_style))
+        elif f_style is None:
+            f_style = ((None, None), (None, None))
 
         try:
             x, y = f_style
         except ValueError:
             x, y = f_style = (f_style, f_style)
-        if isinstance(y, dict):
+        if isinstance(y, dict) or y is None:
             y = (y, y)
-        if isinstance(x, dict):
+        if isinstance(x, dict) or x is None:
             x = (x, x)
         if len(y) == 2:
             b, t = y
@@ -888,6 +892,8 @@ class GraphicsPropertyManager:
                 self.fe_background = self.axes.get_facecolor()
             else:
                 self._background = self.figure.get_facecolor()
+        if self._background == (1.0, 1.0, 1.0, 1.0):
+            self._background = None
         return self._background
     @background.setter
     def background(self, bg):
@@ -942,6 +948,34 @@ class GraphicsPropertyManager:
             self.axes.set_frame_visible(
                 ((l, r), (b, t))
             )
+
+    @property
+    def grid(self):
+        return self._grid
+    @grid.setter
+    def grid(self, gr):
+        self._grid = gr
+        self.axes.set_grid_visible(gr)
+
+    @property
+    def grid_style(self):
+        return self._grid_style
+    @grid_style.setter
+    def grid_style(self, g_style):
+        if self.grid_style is None:
+            self._frame_style = (None, None)
+        if isinstance(g_style, dict):
+            g_style = (g_style, g_style)
+
+        try:
+            x, y = g_style
+        except ValueError:
+            x, y = (g_style, g_style)
+
+        self._grid_style = (x, y)
+        self.axes.set_grid_style(
+            self._grid_style
+        )
 
     @property
     def scale(self):
@@ -1554,16 +1588,18 @@ class GraphicsPropertyManager3D(GraphicsPropertyManager):
             self._frame_style = ((None, None), (None, None), (None, None))
         if isinstance(f_style, dict):
             f_style = ((f_style, f_style), (f_style, f_style), (f_style, f_style))
+        elif f_style is None:
+            f_style = ((None, None), (None, None), (None, None))
 
         try:
             x, y, z = f_style
         except ValueError:
             x, y, z = f_style = (f_style, f_style, f_style)
-        if isinstance(y, dict):
+        if isinstance(y, dict) or y is None:
             y = (y, y)
-        if isinstance(x, dict):
+        if isinstance(x, dict) or x is None:
             x = (x, x)
-        if isinstance(z, dict):
+        if isinstance(z, dict) or z is None:
             z = (z, z)
         if len(y) == 2:
             b, t = y
