@@ -1581,11 +1581,29 @@ def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_fail
 
     a = vec_expansion[0]
     r = np.linalg.norm(a, axis=-1)
-    if r < Options.zero_threshold:
-        if raise_on_failure:
-            raise ValueError("can't get derivatives of zero vector")
+    mask_pos = r < Options.zero_threshold
+    multdim = a.ndim > 1
+
+    if not multdim:
+        if mask_pos:
+            if raise_on_failure:
+                raise ValueError("can't get derivatives of zero vector")
+            else:
+                return None, None
         else:
-            return None, None
+            bad_pos = None
+    else:
+        bad_pos = np.where(mask_pos)
+        if len(bad_pos[0]) > 0:
+            if raise_on_failure:
+                raise ValueError("can't get derivatives of zero vector")
+            else:
+                good_pos = np.where(~mask_pos)
+                a = a[good_pos]
+                r = r[good_pos]
+        else:
+            bad_pos = None
+
     a_expansion = [a, vec_ops.identity_tensors(a.shape[:-1], a.shape[-1])]
 
     if not is_numeric(order):
@@ -1618,6 +1636,8 @@ def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_fail
             t += factor * pref
         base_expansion.append(t)
 
+    if bad_pos is not None:
+        raise NotImplementedError("need vectorization cleanup for bad structs")
     # if base_expansion is None:
     #     a = vec_expansion[0]
     #     r = np.linalg.norm(a, axis=-1)

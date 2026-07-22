@@ -598,8 +598,8 @@ class ReflectionElement(SymmetryElement):
         :return: The Cartesian transformation matrix.
         :rtype: np.ndarray
         """
-        tf = nput.view_matrix(self.axis)
-        return tf @ np.diag([1, -1, 1]) @ tf.T
+        tf = nput.view_matrix(self.axis, output_order=(0, 2, 1))
+        return tf @ np.diag([1, 1, -1]) @ tf.T
     def inverse(self):
         """
         **LLM Docstring**

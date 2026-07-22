@@ -534,7 +534,8 @@ def translation_rotation_eigenvectors(coords,
 def frame_displacement_projector(tr_modes, masses,
                                  mass_weighted=False,
                                  orthonormal=True,
-                                 pre_weighted=False):
+                                 pre_weighted=False,
+                                 direction='forward'):
     """
     **LLM Docstring**
 
@@ -562,7 +563,10 @@ def frame_displacement_projector(tr_modes, masses,
     """
     if not mass_weighted:
         if pre_weighted:
-            g12 = np.diag(np.repeat(np.sqrt(masses), 3)) # sqrt factor already applied
+            if direction == 'forward':
+                g12 = np.diag(np.repeat(np.sqrt(masses), 3)) # sqrt factor already applied
+            else:
+                g12 = np.diag(np.repeat(np.sqrt(1/masses), 3))
             inv = np.tensordot(tr_modes, g12, axes=[-2, -1])
         else:
             inv = np.moveaxis(tr_modes, -2, -1)
@@ -570,7 +574,10 @@ def frame_displacement_projector(tr_modes, masses,
         if pre_weighted:
             inv = np.moveaxis(tr_modes, -2, -1)
         else:
-            g12 = np.diag(np.repeat(1/np.sqrt(masses), 3))
+            if direction == 'forward':
+                g12 = np.diag(np.repeat(np.sqrt(1/masses), 3))
+            else:
+                g12 = np.diag(np.repeat(np.sqrt(masses), 3))
             inv = np.tensordot(tr_modes, g12, axes=[-2, -1])
     if orthonormal:
         projector = vec_ops.orthogonal_projection_matrix(tr_modes, inverse=inv, orthonormal=True)
@@ -581,7 +588,7 @@ def frame_displacement_projector(tr_modes, masses,
     return projector
 
 def translation_rotation_projector(coords, masses=None, mass_weighted=False, return_modes=False,
-                                   orthonormal=True
+                                   orthonormal=False, direction='forward'
                                    ):
     """
     **LLM Docstring**
@@ -615,7 +622,8 @@ def translation_rotation_projector(coords, masses=None, mass_weighted=False, ret
         tr_modes, masses,
         mass_weighted=mass_weighted,
         orthonormal=orthonormal,
-        pre_weighted=True
+        pre_weighted=True,
+        direction=direction
     )
 
     if return_modes:
