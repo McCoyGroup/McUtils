@@ -402,41 +402,44 @@ class GraphicsBase(metaclass=ABCMeta):
         self.managed = managed
         self._inset = None
 
-        interactive = self._get_def_opt('interactive', interactive, theme)
-        self.interactive = interactive
+        with self.theme_manager.from_spec(self.theme, backend=self.backend) as manager:
+            theme = manager.current_theme[1]
+            interactive = self._get_def_opt('interactive', interactive, theme)
+            self.interactive = interactive
 
-        reshowable = self._get_def_opt('reshowable', reshowable, theme)
-        self.reshowable = reshowable
+            reshowable = self._get_def_opt('reshowable', reshowable, theme)
+            self.reshowable = reshowable
 
-        theme_parent = parent if inherit_layout else None
-        aspect_ratio = self._get_def_opt('aspect_ratio', aspect_ratio,  theme, theme_parent)
-        image_size = self._get_def_opt('image_size', image_size, theme, theme_parent)
-        padding = self._get_def_opt('padding', padding, theme, theme_parent)
-        if figure is None and image_size is not None and 'figsize' not in subplot_kw:
-            try:
-                w, h = image_size
-            except TypeError:
-                w = image_size
-                asp = aspect_ratio
-                if asp is None or isinstance(asp, str):
-                    asp = 4.8/6.4
-                h = w * asp
-            if padding is not None:
-                if dev.is_number(padding):
-                    padding = [padding, padding]
-                pw, ph = padding
+            theme_parent = parent if inherit_layout else None
+            aspect_ratio = self._get_def_opt('aspect_ratio', aspect_ratio,  theme, theme_parent)
+            image_size = self._get_def_opt('image_size', image_size, theme, theme_parent)
+            padding = self._get_def_opt('padding', padding, theme, theme_parent)
+            if figure is None and image_size is not None and 'figsize' not in subplot_kw:
                 try:
-                    pwx, pwy = pw
-                except (TypeError, ValueError):
-                    pwx = pwy = pw
-                try:
-                    phx, phy = ph
-                except (TypeError, ValueError):
-                    phx = phy = ph
-                w += pwx + pwy
-                h += phx + phy
-                image_size = (w, h)
-            subplot_kw['figsize'] = (w/DPI_SCALING, h/DPI_SCALING)
+                    w, h = image_size
+                except TypeError:
+                    w = image_size
+                    asp = aspect_ratio
+                    if asp is None or isinstance(asp, str):
+                        asp = 4.8/6.4
+                    h = w * asp
+                if padding is not None:
+                    if dev.is_number(padding):
+                        padding = [padding, padding]
+                    pw, ph = padding
+                    try:
+                        pwx, pwy = pw
+                    except (TypeError, ValueError):
+                        pwx = pwy = pw
+                    try:
+                        phx, phy = ph
+                    except (TypeError, ValueError):
+                        phx = phy = ph
+                    w += pwx + pwy
+                    h += phx + phy
+                    image_size = (w, h)
+                subplot_kw['figsize'] = (w/DPI_SCALING, h/DPI_SCALING)
+        del theme
 
         self.subplot_kw = subplot_kw
         with self.theme_manager.from_spec(self.theme, backend=self.backend):
@@ -456,7 +459,10 @@ class GraphicsBase(metaclass=ABCMeta):
             prop_manager = prop_manager(self, self.figure, self.axes, managed=managed)
         self._prop_manager = prop_manager
         self._colorbar_axis = None
-        self.set_options(padding=padding, aspect_ratio=aspect_ratio, image_size=image_size, strict=strict, **opts)
+        with self.theme_manager.from_spec(self.theme, backend=self.backend) as manager:
+            self.set_options(padding=padding, aspect_ratio=aspect_ratio, image_size=image_size, strict=strict,
+                             theme=manager.current_theme[1],
+                             **opts)
 
         self.event_handler = None
         self._shown = False
@@ -663,6 +669,7 @@ class GraphicsBase(metaclass=ABCMeta):
                     prolog=None,
                     epilog=None,
                     strict=True,
+                    theme=None,
                     **opts
                     ):
         """Sets options for the plot
@@ -855,7 +862,11 @@ class GraphicsBase(metaclass=ABCMeta):
         :return: self
         :rtype: GraphicsBase
         """
-        self.set_options(**self.opts)  # matplotlib is dumb so it makes sense to just reset these again...
+        with self.theme_manager.from_spec(self.theme, backend=self.backend) as manager:
+            theme = manager.current_theme[1]
+            self.set_options(
+                **(self.opts | dict(theme=theme))
+            )  # matplotlib is dumb so it makes sense to just reset these again...
         if self.prolog is not None:
             self._prolog_graphics = [p.plot(self.axes, graphics=self) for p in self.prolog] # not sure this is doing what it should...
         if self.epilog is not None:
@@ -1310,12 +1321,9 @@ class Graphics(GraphicsBase):
 
     default_style = dict(
         theme='mccoy',
-        frame=((True, False), (True, False)),
         image_size=(370, 345),
-        padding=((60, 10), (35, 10)),
         interactive=False,
         reshowable=False,
-        aspect_ratio='auto'
     )
 
     axes_keys = {
@@ -1326,6 +1334,8 @@ class Graphics(GraphicsBase):
         'axes_labels',
         'frame',
         'frame_style',
+        'grid',
+        'grid_style',
         'plot_range',
         'ticks',
         'ticks_style',
@@ -1352,6 +1362,8 @@ class Graphics(GraphicsBase):
                     legend_style=None,
                     frame=None,
                     frame_style=None,
+                    grid=None,
+                    grid_style=None,
                     ticks=None,
                     scale=None,
                     padding=None,
@@ -1365,7 +1377,7 @@ class Graphics(GraphicsBase):
                     colorbar=None,
                     prolog=None,
                     epilog=None,
-
+                    theme=None,
                     **parent_opts
                     ):
         """
@@ -1399,12 +1411,16 @@ class Graphics(GraphicsBase):
         :param parent_opts: options forwarded to the base class
         """
 
-        super().set_options(prolog=prolog, epilog=epilog, **parent_opts)
+        super().set_options(prolog=prolog, epilog=epilog, theme=theme, **parent_opts)
+
+        if theme is None:
+            theme = {}
 
         if self is self.parent:
             plot_label_padding = self.get_plot_label_padding(plot_label)
             axes_label_padding = self.get_axes_label_padding(axes_labels)
-            padding = self.resolve_default_padding(padding, [plot_label_padding, axes_label_padding])
+            padding = self.resolve_default_padding(padding, [plot_label_padding, axes_label_padding],
+                                                   theme=theme)
         opts = (
             ('plot_label', plot_label),
             ('style_list', style_list),
@@ -1413,6 +1429,8 @@ class Graphics(GraphicsBase):
             ('axes_labels', axes_labels),
             ('frame', frame),
             ('frame_style', frame_style),
+            ('grid', grid),
+            ('grid_style', grid_style),
             ('plot_range', plot_range),
             ('ticks', ticks),
             ('ticks_style', ticks_style),
@@ -1427,7 +1445,7 @@ class Graphics(GraphicsBase):
             ('colorbar', colorbar)
         )
         for oname, oval in opts:
-            oval = self._get_def_opt(oname, oval, {})
+            oval = self._get_def_opt(oname, oval, theme)
             if oval is not None:
                 setattr(self, oname, oval)
 
@@ -1469,7 +1487,7 @@ class Graphics(GraphicsBase):
                 [None, None] if x is None or len(x) == 0 else [p, None]
             ]
 
-    def resolve_default_padding(self, padding, modifications=None):
+    def resolve_default_padding(self, padding, modifications=None, theme=None):
         """
         **LLM Docstring**
 
@@ -1482,11 +1500,21 @@ class Graphics(GraphicsBase):
         :return: the resolved `((left, right), (bottom, top))` padding
         :rtype: tuple
         """
-        base_padding = self._get_def_opt('padding', None, {})
+        base_padding = self._get_def_opt('padding', None, theme)
         if padding is None:
             padding = base_padding
             if modifications is not None:
-                ((l,r), (b, t)) = padding
+                if padding is None:
+                    padding = 0
+                if dev.is_number(padding):
+                    padding = [[padding, padding], [padding, padding]]
+                lr, bt = padding
+                if lr is None or dev.is_number(lr):
+                    lr = [lr, lr]
+                if bt is None or dev.is_number(bt):
+                    bt = [bt, bt]
+                l, r = lr
+                b, t = bt
                 for mods in modifications:
                     ((l_m,r_m), (b_m, t_m)) = mods
                     l = l + (l_m if l_m is not None else 0)
@@ -1712,6 +1740,54 @@ class Graphics(GraphicsBase):
         """
         self._update_copy_opt('frame_style', value)
         self._prop_manager.frame_style = value
+
+    @property
+    def grid(self):
+        """
+        **LLM Docstring**
+
+        Which frame (spine) edges are drawn. Getter/setter delegate to the property manager (the setter also records
+        the change for copying).
+
+        :return: the frame value
+        """
+        return self._prop_manager.grid
+    @grid.setter
+    def grid(self, value):
+        """
+        **LLM Docstring**
+
+        Which frame (spine) edges are drawn. Getter/setter delegate to the property manager (the setter also records
+        the change for copying).
+
+        :return: the frame value
+        """
+        self._update_copy_opt('grid', value)
+        self._prop_manager.grid = value
+
+    @property
+    def grid_style(self):
+        """
+        **LLM Docstring**
+
+        The frame styling options. Getter/setter delegate to the property manager (the setter also records
+        the change for copying).
+
+        :return: the frame style value
+        """
+        return self._prop_manager.grid_style
+    @grid_style.setter
+    def grid_style(self, value):
+        """
+        **LLM Docstring**
+
+        The frame styling options. Getter/setter delegate to the property manager (the setter also records
+        the change for copying).
+
+        :return: the frame style value
+        """
+        self._update_copy_opt('grid_style', value)
+        self._prop_manager.grid_style = value
 
     @property
     def plot_range(self):
@@ -2487,8 +2563,7 @@ class GraphicsGrid(GraphicsBase):
     """
     default_style = dict(
         theme='mccoy',
-        spacings=(50, 0),
-        padding=((50, 10), (50, 10))
+        spacings=(50, 0)
     )
     layout_keys = GraphicsBase.layout_keys | {'nrows', 'ncols'}
     known_keys = GraphicsBase.known_keys | {'graphics_class'}
@@ -2811,6 +2886,7 @@ class GraphicsGrid(GraphicsBase):
                 w = ncols * dw
                 h = nrows * dh
                 if padding is not None:
+                    if dev.is_number(padding): padding = [padding, padding]
                     pw, ph = padding
                     try:
                         pwx, pwy = pw

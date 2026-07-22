@@ -1471,6 +1471,7 @@ class RDMolecule(ExternalMolecule):
             }
             raise ValueError(f"failed to generate conformers for {embedding_mol} with settings {conf_opts}")
         if optimize:
+            cls._prep_mol(embedding_mol)
             rdForceFieldHelpers = RDKitInterface.submodule("Chem.rdForceFieldHelpers")
             if force_field_type == 'mmff':
                 rdForceFieldHelpers.MMFFOptimizeMoleculeConfs(embedding_mol)
@@ -3605,7 +3606,7 @@ class RDMolecule(ExternalMolecule):
 
         opts = dict(dict(confId=conf_id, size=image_size),
                     **{self._camel_case(k): v for k, v in opts.items()})
-        return IPythonConsole.drawMol3D(self.rdmol, confId=self.mol, **opts)
+        return IPythonConsole.drawMol3D(self.rdmol, **opts)
 
     @classmethod
     def _plain_encode(cls, flat_z, byte_size):

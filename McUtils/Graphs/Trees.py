@@ -165,6 +165,7 @@ def tree_iter(tree,
               check_visited=None,
               traversal_ordering='bfs',
               yield_paths=False,
+              use_child_paths=None,
               per_path_visited=False,
               enable_disconnectivity=False
               ):
@@ -207,21 +208,25 @@ def tree_iter(tree,
     :rtype: collections.abc.Iterator
     """
     if get_children is None and get_item is None:
+        if use_child_paths is None: use_child_paths = True
         get_children, get_item = _get_tree_children, _get_tree_item
     elif get_children is not None and get_item is None:
         raise ValueError("`get_item` must be implemented if `get_children` is provided")
     elif get_children is None and get_item is not None:
         raise ValueError("`get_children` must be implemented if `get_item` is provided")
+    else:
+        if use_child_paths is None: use_child_paths = False
 
     if root is dev.default:
         root = get_children(tree)[0]
-    if root in visited:
-        return
 
     if check_visited is None:
         check_visited = visited is not None
     if check_visited and visited is None:
         visited = set()
+
+    if visited is not None and root in visited:
+        return
 
     queue = collections.deque([[None, root, [], visited]])
     if isinstance(traversal_ordering, str):
@@ -256,16 +261,21 @@ def tree_iter(tree,
             else:
                 visited.add(head)
 
-        children = list(get_children(head))
+        subtree = tree if head is None else head
+        children = list(get_children(subtree))
         if check_visited:
             children = [
                 h for h in children
                 if h not in visited
             ]
         if yield_paths or enable_disconnectivity:
-            path = path + [head]
+            if not use_child_paths:
+                path = path + [head]
         if len(children) > 0:
-            extend([head, get_item(head, h), path, visited] for h in children)
+            if use_child_paths:
+                extend([head, get_item(subtree, h), path + [h], visited] for h in children)
+            else:
+                extend([head, get_item(subtree, h), path, visited] for h in children)
         elif yield_paths or enable_disconnectivity:
             if enable_disconnectivity:
                 # walk down the path from the start to find the first possible branch
@@ -282,7 +292,10 @@ def tree_iter(tree,
                         if h not in path
                     ]
                     if len(children) > 0:
-                        extend([p, get_item(p, h), path, visited] for h in children)
+                        if use_child_paths:
+                            extend([p, get_item(p, h), path + [h], visited] for h in children)
+                        else:
+                            extend([p, get_item(p, h), path, visited] for h in children)
                         break
                 else:
                     yield (path, True)

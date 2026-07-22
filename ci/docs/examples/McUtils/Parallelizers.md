@@ -157,3 +157,97 @@ array([0.5852531 , 0.63836097, 0.40315219, 0.04769397, 0.5226616 ,
 </div>
 
 To support MPI-style calling, a `ClientServerRunner` is also provided.
+
+# `McUtils.Parallelizers` examples
+
+## Write backend-independent numerical code
+
+```python
+import numpy as np
+from McUtils.Parallelizers import SerialNonParallelizer
+
+def energy(geometry, *, parallelizer=None):
+    return np.sum(geometry**2)
+
+geometries = np.arange(36.).reshape(4, 3, 3)
+parallelizer = SerialNonParallelizer()
+energies = parallelizer.map(energy, geometries,
+                            extra_kwargs={"parallelizer": parallelizer},
+                            vectorized=False, aggregate=True)
+print(energies)
+```
+
+## Switch to multiprocessing
+
+```python
+import numpy as np
+from McUtils.Parallelizers import MultiprocessingParallelizer
+
+def norm(vector):
+    return np.linalg.norm(vector)
+
+vectors = np.random.default_rng(4).normal(size=(1000, 3))
+with MultiprocessingParallelizer(nprocs=4) as parallelizer:
+    norms = parallelizer.map(norm, vectors, vectorized=False, aggregate=True)
+print("mean norm:", np.mean(norms))
+```
+
+## Share a NumPy array between processes
+
+```python
+import numpy as np
+from multiprocessing.shared_memory import SharedMemory
+from McUtils.Parallelizers import SharedMemoryNDarray
+
+array = np.arange(24., dtype=float).reshape(8, 3)
+buffer = SharedMemory(create=True, size=array.nbytes)
+shared = SharedMemoryNDarray.from_array(array, buffer, autoclose=False)
+try:
+    view = shared.array
+    view[:, 0] *= -1
+    assert np.shares_memory(view, shared.array)
+finally:
+    shared.close()
+    shared.unlink()
+```
+
+## Use one parallelizer contract for serial and MPI execution
+
+```python
+from McUtils.Parallelizers import Parallelizer
+
+parallelizer = Parallelizer.lookup("serial")
+with parallelizer:
+    rank = parallelizer.id
+    size = parallelizer.nprocs
+    value = parallelizer.broadcast({"method": "CCSD(T)"})
+print(rank, size, value)
+```
+
+## Scatter and gather array blocks
+
+```python
+import numpy as np
+from McUtils.Parallelizers import SerialNonParallelizer
+
+data = np.arange(24).reshape(8, 3)
+parallelizer = SerialNonParallelizer()
+local = parallelizer.scatter(data)
+local = local**2
+combined = parallelizer.gather(local)
+assert np.allclose(combined, data**2)
+```
+
+## Share structured state
+
+```python
+from McUtils.Parallelizers import SharedMemoryDict
+
+state = SharedMemoryDict({"iteration": 0, "energy": 0.0})
+try:
+    state["iteration"] = 12
+    state["energy"] = -76.2413
+    print(dict(state.items()))
+finally:
+    state.close()
+```

@@ -271,8 +271,9 @@ class ThemeManager:
                 'patch': {'facecolor': '#001C7F'},
                 'xtick': {'labelsize': 13},
                 'ytick': {'labelsize': 13},
-                'padding': 50,
-                'aspect_ratio': 'auto'
+                'frame': ((True, False), (True, False)),
+                'padding': ((60, 10), (35, 10)),
+                'aspect_ratio': 'auto',
             }
         )
 
@@ -299,6 +300,7 @@ class ThemeManager:
         if backend is None: backend = GraphicsBackend.lookup('matplotlib')
         self.backend = backend
         self.context_manager = None
+        self.current_theme = None
     @classmethod
     def from_spec(cls, theme, backend=None):
         """
@@ -386,7 +388,9 @@ class ThemeManager:
         # opts = {k:v for k,v in theme[1].items() if self._test_rcparam(k)}
 
         self.context_manager = self.backend.theme_context(name_list, theme[1])
-        return self.context_manager.__enter__()
+        self.current_theme = theme_props
+        self.context_manager.__enter__()
+        return self
         # don't currently support any other backends...
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
@@ -401,6 +405,7 @@ class ThemeManager:
         if self.context_manager is not None:
             self.context_manager.__exit__(exc_type, exc_val, exc_tb)
             self.context_manager = None
+        self.current_theme = None
     @property
     def theme(self):
         """
@@ -426,6 +431,7 @@ class ThemeManager:
         :return:
         :rtype:
         """
+        self._resolved_theme_cache.pop(theme_name, None)
         self.extra_themes[theme_name] = (base_theme, extra_styles)
     @classmethod
     def resolve_theme(self, theme_name, *base_themes, **extra_styles):
@@ -450,7 +456,7 @@ class ThemeManager:
                     remainder_themes = []
                     for theme in theme_list:
                         if theme in self.extra_themes:
-                            t, s = self.resolve_theme(theme_name)
+                            t, s = self.resolve_theme(theme)
                             theme_stack.appendleft(t)
                             style_stack.append(s)
                         else:

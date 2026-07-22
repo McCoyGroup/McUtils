@@ -13,7 +13,8 @@ from ..Scaffolding import BaseObjectManager, NDarrayMarshaller
 __all__ = [
     "SharedObjectManager",
     "SharedMemoryDict",
-    "SharedMemoryList"
+    "SharedMemoryList",
+    "SharedMemoryNDarray"
 ]
 
 class SharedMemoryInterface(typing.Protocol):
@@ -503,6 +504,15 @@ class SharedMemoryPrimitive:
         # self.buffers = {} if buffers is None else buffers
         self.parallelizer = parallelizer
 
+    def _set_tree_array_entry(self, tree, name, arr, cur):
+        if arr.ndim == 0:
+            tree[name] = arr.tolist()
+        else:
+            if isinstance(cur, SharedMemoryNDarray):
+                tree[name] = self.allocator.update_shared_array(tree[name], arr)
+            else:
+                tree[name] = self.allocator.create_shared_array(arr)
+
     def _save_to_buffer(self, tree, name, data):
         """
         Saves `data` to a series of `SharedNDarrays` by
@@ -523,22 +533,16 @@ class SharedMemoryPrimitive:
         if isinstance(arr, np.ndarray):
             if hasattr(tree, 'keys'):
                 # add the array as an attr
-                if name in tree and isinstance(tree[name], SharedMemoryNDarray):
-                    tree[name] = self.allocator.update_shared_array(tree[name], arr)
-                else:
-                    tree[name] = self.allocator.create_shared_array(arr)
+                self._set_tree_array_entry(tree, name, arr, tree[name])
             elif isinstance(name, (int, np.integer)):
                 # add the array as a list element
                 if len(tree) < name:
-                    if isinstance(tree[name], SharedMemoryNDarray):
-                        tree[name] = self.allocator.update_shared_array(tree[name], arr)
-                    else:
-                        tree[name] = self.allocator.create_shared_array(arr)
+                    self._set_tree_array_entry(tree, name, arr, tree[name])
                 else:
                     # expand the tree to just the necessary space
                     padding = len(tree) - name - 1
                     tree = tree + [None] * padding
-                    tree[name] = self.allocator.create_shared_array(arr)
+                    self._set_tree_array_entry(tree, name, arr, None)
             else:
                 raise ValueError("cannot save {} into {}".format(arr, tree))
         else:
@@ -703,6 +707,10 @@ class SharedMemoryPrimitive:
         """
         return "{}({})".format(type(self).__name__, self.buffers)
 
+    @abc.abstractmethod
+    def close(self):
+        ...
+
 class SharedMemoryList(SharedMemoryPrimitive):
     """
         Implements a shared dict that uses
@@ -855,6 +863,10 @@ class SharedMemoryList(SharedMemoryPrimitive):
         for i,a in enumerate(v):
             self.buffers[base_len+i] = v
 
+    def close(self):
+        for b in self.buffers:
+            b.close()
+
 class SharedMemoryDict(SharedMemoryPrimitive):
     """
     Implements a shared dict that uses
@@ -937,7 +949,7 @@ class SharedMemoryDict(SharedMemoryPrimitive):
         :return: None.
         :rtype: None
         """
-        if self.parallelizer.on_main:
+        if self.parallelizer is not None and self.parallelizer.on_main:
             try:
                 for k in self.keys():
                     del self[k]
@@ -996,6 +1008,11 @@ class SharedMemoryDict(SharedMemoryPrimitive):
         self.buffers.update({k:None for k in v.keys()})
         for k,a in v.items():
             self[k] = a
+
+    def close(self):
+        for b in self.values():
+            if hasattr(b, 'close'):
+                b.close()
 
 class SharedAttribute:
     def __init__(self, name, manager):

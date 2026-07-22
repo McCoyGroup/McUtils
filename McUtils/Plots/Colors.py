@@ -710,7 +710,7 @@ class ColorPalette:
         :return: the lightened color
         :raises ValueError: for an unsupported modification space
         """
-        if modification_space == 'lab':
+        if modification_space in {'lab', 'lch'}:
             if shift:
                 percentage = 100*percentage
                 conversion = lambda l,a,b:[l+percentage, a, b]
@@ -810,6 +810,13 @@ class ColorPalette:
                     return [l, r * percentage, percentage]
             else:
                 conversion = lambda l,a,b:[l, a*(1+percentage), b*(1+percentage)]
+        elif modification_space == 'lch':
+            if shift:
+                conversion = lambda l, c, h: [l, c + percentage, h]
+            elif absolute:
+                conversion = lambda l, c, h: [l, percentage, h]
+            else:
+                conversion = lambda l, c, h: [l, c * (1 + percentage), h]
         else:
             raise ValueError(f"can't saturate color in modification_space `{modification_space}`")
 
@@ -1372,6 +1379,36 @@ class ColorPalette:
             xyz = xyz[:, 0]
 
         return xyz
+    @classmethod
+    def rgb_to_lab(cls, r, g, b, xyz_scaling=None):
+        """
+        **LLM Docstring**
+
+        Convert a color from RGB to CIE Lab (via XYZ).
+
+        :param r: the red channel
+        :param g: the green channel
+        :param b: the blue channel
+        :param xyz_scaling: the white-point scaling
+        :return: the Lab color
+        :rtype: np.ndarray
+        """
+        return cls.xyz_to_lab(*cls.rgb_to_xyz(r, g, b), scaling=xyz_scaling)
+    @classmethod
+    def lab_to_rgb(cls, l, a, b, xyz_scaling=None):
+        """
+        **LLM Docstring**
+
+        Convert a color from CIE Lab to RGB (via XYZ).
+
+        :param l: the lightness channel
+        :param a: the a channel
+        :param b: the b channel
+        :param xyz_scaling: the white-point scaling
+        :return: the RGB color
+        :rtype: np.ndarray
+        """
+        return cls.xyz_to_rgb(*cls.lab_to_xyz(l, a, b, scaling=xyz_scaling))
 
     @classmethod
     def lab_to_lch(cls, l, a, b):
@@ -1408,35 +1445,11 @@ class ColorPalette:
             np.sin(h) * c
         ])
     @classmethod
-    def rgb_to_lab(cls, r, g, b, xyz_scaling=None):
-        """
-        **LLM Docstring**
-
-        Convert a color from RGB to CIE Lab (via XYZ).
-
-        :param r: the red channel
-        :param g: the green channel
-        :param b: the blue channel
-        :param xyz_scaling: the white-point scaling
-        :return: the Lab color
-        :rtype: np.ndarray
-        """
-        return cls.xyz_to_lab(*cls.rgb_to_xyz(r, g, b), scaling=xyz_scaling)
+    def rgb_to_lch(cls, r, g, b, xyz_scaling=None):
+        return cls.lab_to_lch(*cls.rgb_to_lab(r, g, b, xyz_scaling=xyz_scaling))
     @classmethod
-    def lab_to_rgb(cls, l, a, b, xyz_scaling=None):
-        """
-        **LLM Docstring**
-
-        Convert a color from CIE Lab to RGB (via XYZ).
-
-        :param l: the lightness channel
-        :param a: the a channel
-        :param b: the b channel
-        :param xyz_scaling: the white-point scaling
-        :return: the RGB color
-        :rtype: np.ndarray
-        """
-        return cls.xyz_to_rgb(*cls.lab_to_xyz(l, a, b, scaling=xyz_scaling))
+    def lch_to_rgb(cls, l, a, b, xyz_scaling=None):
+        return cls.lab_to_rgb(*cls.lch_to_lab(l, a, b), xyz_scaling=xyz_scaling)
 
 def prep_color(
         base=None,

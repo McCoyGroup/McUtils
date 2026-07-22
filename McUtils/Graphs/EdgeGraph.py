@@ -186,8 +186,11 @@ class EdgeGraph:
             method_opts = {}
         coords = self.layout(method, **method_opts)
         c = np.array(list(coords.values()))
-        i = np.argsort([c[1] for c in coords])
-        xy = c[i]
+        if all(isinstance(c, tuple) and nput.is_int(c[1]) for c in coords.keys()):
+            i = np.argsort([c[1] for c in coords.keys()])
+            xy = c[i]
+        else:
+            xy = c
 
         return GraphPlotter(self, xy).plot(**opts)
 
@@ -567,7 +570,7 @@ class EdgeGraph:
         atoms2 = graph2.get_label_strings()
         if (
                 len(atoms1) != len(atoms2)
-                or atoms1[0] != atoms2[0]
+                # or atoms1[0] != atoms2[0]
                 or len(graph1.edges) != len(graph2.edges)
                 or list(sorted(atoms1)) != list(sorted(atoms2))
                 or list(sorted(len(v) for v in graph1.map.values())) != list(sorted(len(v) for v in graph2.map.values()))
