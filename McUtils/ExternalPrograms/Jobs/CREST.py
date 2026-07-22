@@ -177,6 +177,7 @@ class CRESTSystemBlock(SystemBlock):
             base_opts[self.fmt_key + "system"] = self.format_coordinate_block()
         return base_opts
 
+@ExternalProgramJob.register("crest")
 class CRESTJob(ExternalProgramJob):
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'crest_job.sh')
     blocks = [

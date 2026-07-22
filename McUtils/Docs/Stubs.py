@@ -303,7 +303,7 @@ ground truth.
 
     def __init__(self, root_src_dir=None, out_dir="stubs",
                  max_doc_len=800, min_words=5, write_sidecar_file=False,
-                 verbose=False):
+                 verbose=False, allow_static_mode=True):
         self.root_src_dir = root_src_dir
         self.out_dir = out_dir
         self.max_doc_len = max_doc_len
@@ -313,6 +313,7 @@ ground truth.
         self._current_module = None
         self.verbose = verbose
         self.dependency_blacklist = set(self.DEFAULT_DEPENDENCY_BLACKLIST)
+        self.allow_static_mode = allow_static_mode
 
     @property
     def root_module_name(self):
@@ -1102,15 +1103,26 @@ ground truth.
         else:
             src_dir = os.path.dirname(src_dir)
 
-        if try_dynamic:
-            with dev.temporary_sys_path_insert(src_dir):
-                try:
+        if not isinstance(root_module_name, str):
+            module = root_module_name
+            root_module_name = module.__name__
+            all_names = list(getattr(module, "__all__", []) or [])
+            resolved_root_dir = os.path.dirname(os.path.abspath(module.__file__))
+        else:
+            if not self.allow_static_mode:
+                with dev.temporary_sys_path_insert(src_dir):
                     module = importlib.import_module(root_module_name)
                     all_names = list(getattr(module, "__all__", []) or [])
                     resolved_root_dir = os.path.dirname(os.path.abspath(module.__file__))
-                except (ImportError,AttributeError) as e:
-                    print(self.IMPORT_FALLBACK_INFO_TEMPLATE.format(
-                        root_module_name=root_module_name, error=e), file=sys.stderr)
+            elif try_dynamic:
+                with dev.temporary_sys_path_insert(src_dir):
+                    try:
+                        module = importlib.import_module(root_module_name)
+                        all_names = list(getattr(module, "__all__", []) or [])
+                        resolved_root_dir = os.path.dirname(os.path.abspath(module.__file__))
+                    except (ImportError,AttributeError) as e:
+                        print(self.IMPORT_FALLBACK_INFO_TEMPLATE.format(
+                            root_module_name=root_module_name, error=e), file=sys.stderr)
 
         if resolved_root_dir is None:
             raise ValueError(self.ROOT_DIR_NOT_FOUND_ERROR)
@@ -1129,7 +1141,7 @@ ground truth.
             elif os.path.isfile(pkg_file):
                 discovered[name] = pkg_file
 
-        return resolved_root_dir, discovered, dynamic
+        return root_module_name, resolved_root_dir, discovered, dynamic
 
     # ==================================================================
     # Section 4: orchestration
@@ -1156,7 +1168,7 @@ ground truth.
 
     def generate(self, package_name, root_module_name=None, update_current=False):
         if update_current or self._current_module is None:
-            root_dir, packages, dyanmic_mode = self.discover_top_level_packages(root_module_name)
+            root_module_name, root_dir, packages, dyanmic_mode = self.discover_top_level_packages(root_module_name)
             module_data = self.ModuleData(self, package_name, root_dir, packages, dyanmic_mode)
         else:
             module_data = self._current_module
@@ -1205,7 +1217,7 @@ ground truth.
         return info
 
     def generate_all(self, root_module_name):
-        root_dir, packages, dyanmic_mode = self.discover_top_level_packages(root_module_name)
+        root_module_name, root_dir, packages, dyanmic_mode = self.discover_top_level_packages(root_module_name)
         with self.ModuleData(self, root_module_name, root_dir, packages, dyanmic_mode):
             if not self.packages:
                 raise ValueError(self.NO_TOP_LEVEL_PACKAGES_ERROR_TEMPLATE.format(

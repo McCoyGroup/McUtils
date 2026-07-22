@@ -40,7 +40,7 @@ class Control(Component):
         :param var: the variable (name or synchronizer) the control drives
         :param namespace: the variable namespace
         """
-        self.var = Var(var, namespace=namespace)
+        self.var = Var(var, namespace=namespace) if isinstance(var, str) else var
         self._widget_cache = None
         super().__init__()
     def to_widget(self, parent=None):
@@ -724,7 +724,11 @@ class FunctionDisplay(Component):
         self.debounce = debounce
         self._delayed_executor = None
         # self._executions = []
-        self.vars = InterfaceVars(*vars, namespace=namespace) if not isinstance(vars, InterfaceVars) else vars
+        self.vars = (
+            InterfaceVars(*vars, namespace=namespace)
+                if not isinstance(vars, InterfaceVars) else
+            vars
+        )
         self._prev_call = None
         self.delay_time = delay_time
     def link_vars(self, *var):

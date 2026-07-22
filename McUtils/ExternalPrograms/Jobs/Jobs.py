@@ -1,5 +1,8 @@
 import abc
+from ... import Devutils as dev
+from ... import Coordinerds as coordops
 from ...Formatters import OptionalTemplate
+from ...Data import UnitsData
 
 __all__ = [
     "OptionsBlock",
@@ -523,6 +526,66 @@ class SystemBlock(OptionsBlock):
 class ExternalProgramJob(metaclass=abc.ABCMeta):
     # blocks: 'tuple[OptionsBlock]' = []
     # base_template = None
+    extension: str
+
+    registry = {}
+    @classmethod
+    def register(cls, name, method=None):
+        if method is None and hasattr(name, 'name'):
+            method = name
+            name = method.name
+        if method is not None:
+            cls.registry[name] = method
+            return method
+        else:
+            def register(method, name=name):
+                return cls.register(name, method)
+            return register
+
+    @classmethod
+    def resolve(cls, job_class):
+        if isinstance(job_class, str):
+            job_class = {'method':job_class}
+        if dev.is_dict_like(job_class):
+            opts = job_class.copy()
+            job_class = opts.pop('method')
+        else:
+            opts = {}
+        if isinstance(job_class, str):
+            job_class = cls.registry[job_class]
+        return job_class, opts
+
+    distance_units = 'Angstroms'
+    @classmethod
+    def get_mol_options(cls, mol, units=None, use_internals=False) -> dict:
+        opts = {
+            'atoms':mol.atoms,
+            'bonds':mol.bonds
+        }
+        spin = mol.spin
+        if spin is not None:
+            opts['multiplicity'] = spin
+        charge = mol.charge
+        if charge is not None:
+            opts['charge'] = charge
+        if units is None:
+            units = cls.distance_units
+        if use_internals and mol.internals is not None:
+            opts['zmatrix'] = mol.internals['zmatrix']
+            opts['internals'] = coordops.zmatrix_unit_convert(
+                mol.internal_coordinates,
+                UnitsData.convert("BohrRadius", units)
+            )
+        else:
+            opts['cartesians'] = mol.coords * UnitsData.convert("BohrRadius", units)
+        return opts
+    @classmethod
+    def from_mol(cls, mol, *args, use_internals=False, **etc):
+        return  cls(
+            *args,
+            **(cls.get_mol_options(mol, use_internals=use_internals) | etc)
+        )
+
     def __init__(self, **opts):
         """
         **LLM Docstring**

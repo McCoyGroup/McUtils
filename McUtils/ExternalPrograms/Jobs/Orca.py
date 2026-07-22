@@ -310,7 +310,9 @@ class OrcaSystemBlock(SystemBlock):
                 base_opts[self.fmt_key + "bonds"] = self.format_bonds_block()
         return base_opts
 
+@ExternalProgramJob.register("orca")
 class OrcaJob(ExternalProgramJob):
+    extension = ".inp"
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'orca_job.inp')
     blocks = [
         OrcaKeywordsBlock,
