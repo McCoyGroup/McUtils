@@ -6,7 +6,7 @@ import abc, os, numpy as np, typing, weakref, mmap
 from dataclasses import dataclass
 from multiprocessing import Manager
 from ..Scaffolding import BaseObjectManager, NDarrayMarshaller
-__all__ = ['SharedObjectManager', 'SharedMemoryDict', 'SharedMemoryList']
+__all__ = ['SharedObjectManager', 'SharedMemoryDict', 'SharedMemoryList', 'SharedMemoryNDarray']
 
 class SharedMemoryInterface(typing.Protocol):
 
@@ -336,6 +336,9 @@ class SharedMemoryPrimitive:
         """
         ...
 
+    def _set_tree_array_entry(self, tree, name, arr, cur):
+        ...
+
     def _save_to_buffer(self, tree, name, data):
         """
         Saves `data` to a series of `SharedNDarrays` by
@@ -467,6 +470,10 @@ class SharedMemoryPrimitive:
         :return: The value produced by the implementation; see the summary for its exact semantics.
         :rtype: Any
         """
+        ...
+
+    @abc.abstractmethod
+    def close(self):
         ...
 
 class SharedMemoryList(SharedMemoryPrimitive):
@@ -606,6 +613,9 @@ class SharedMemoryList(SharedMemoryPrimitive):
         """
         ...
 
+    def close(self):
+        ...
+
 class SharedMemoryDict(SharedMemoryPrimitive):
     """
     Implements a shared dict that uses
@@ -730,6 +740,9 @@ class SharedMemoryDict(SharedMemoryPrimitive):
         :return: None.
         :rtype: None
         """
+        ...
+
+    def close(self):
         ...
 
 class SharedAttribute:

@@ -192,6 +192,7 @@
     > Provides basic support for storing shared memory arrays
     - `__init__(sync_buffer, allocator=None, marshaller=None, parallelizer=None)`
     - `load_item(item)` — Reconstruct and return a process-local copy of an item from its shared-buffer tree.
+    - `close()`
   - **class `SharedMemoryList`** (SharedMemoryPrimitive)
     > Implements a shared dict that uses
     > a managed dict to synchronize array metainfo
@@ -202,6 +203,7 @@
     - `insert(k, v)` — Insert an empty slot and then marshal the supplied value into that position.
     - `append(v)` — Append a placeholder and store the supplied value through the synchronized list.
     - `extend(v)` — Reserve slots for all values and populate them.
+    - `close()`
   - **class `SharedMemoryDict`** (SharedMemoryPrimitive)
     > Implements a shared dict that uses
     > a managed dict to synchronize array metainfo
@@ -212,6 +214,7 @@
     - `items()` — Return the backing dictionary's dynamic item view.
     - `unshare()` — Reconstruct all entries into a process-local dictionary.
     - `update(v)` — Reserve the incoming keys and marshal each incoming value into shared storage.
+    - `close()`
   - **class `SharedAttribute`**
     - `__init__(name, manager)`
   - **class `PrimitiveTypeHolder`**

@@ -10,7 +10,7 @@ from .. import Numputils as nput
 from . import Colors as colops
 import numpy as np
 import itertools
-__all__ = ['Plot', 'DataPlot', 'ArrayPlot', 'TensorPlot', 'Plot2D', 'ListPlot2D', 'Plot3D', 'ListPlot3D', 'CompositePlot', 'resolve_plotter', 'plot_generic', 'plot_multi', 'FilledPlot', 'ScatterPlot', 'ErrorBarPlot', 'StickPlot', 'DatePlot', 'StepPlot', 'LogLogPlot', 'SemiLogXPlot', 'SemilogYPlot', 'HorizontalFilledPlot', 'BarPlot', 'HorizontalBarPlot', 'EventPlot', 'PiePlot', 'StackPlot', 'BrokenHorizontalBarPlot', 'VerticalLinePlot', 'HorizontalLinePlot', 'PolygonPlot', 'AxisHorizontalLinePlot', 'AxisHorizontalSpanPlot', 'AxisVerticalLinePlot', 'AxisVeticalSpanPlot', 'AxisLinePlot', 'StairsPlot', 'HistogramPlot', 'HistogramPlot2D', 'SpectrogramPlot', 'AutocorrelationPlot', 'AngleSpectrumPlot', 'CoherencePlot', 'CrossSpectralDensityPlot', 'MagnitudeSpectrumPlot', 'PhaseSpectrumPlot', 'PowerSpectralDensityPlot', 'CrossCorrelationPlot', 'BoxPlot', 'ViolinPlot', 'BoxAndWhiskerPlot', 'HexagonalHistogramPlot', 'QuiverPlot', 'StreamPlot', 'MatrixPlot', 'SparsityPlot', 'ContourPlot', 'ContourLinePlot', 'DensityPlot', 'HeatmapPlot', 'TriPlot', 'TriDensityPlot', 'TriContourLinesPlot', 'TriContourPlot', 'ListContourPlot', 'ListDensityPlot', 'ListTriContourPlot', 'ListTriDensityPlot', 'ScatterPlot3D', 'WireframePlot3D', 'ContourPlot3D', 'ListTriPlot3D']
+__all__ = ['Plot', 'DataPlot', 'ArrayPlot', 'TensorPlot', 'Plot2D', 'ListPlot2D', 'Plot3D', 'ListPlot3D', 'CompositePlot', 'resolve_plotter', 'plot_generic', 'plot_multi', 'FilledPlot', 'ScatterPlot', 'ListScatterPlot', 'ErrorBarPlot', 'ListErrorBarPlot', 'StickPlot', 'DatePlot', 'StepPlot', 'LogLogPlot', 'SemiLogXPlot', 'SemilogYPlot', 'HorizontalFilledPlot', 'BarPlot', 'HorizontalBarPlot', 'EventPlot', 'PiePlot', 'StackPlot', 'BrokenHorizontalBarPlot', 'VerticalLinePlot', 'HorizontalLinePlot', 'PolygonPlot', 'AxisHorizontalLinePlot', 'AxisHorizontalSpanPlot', 'AxisVerticalLinePlot', 'AxisVeticalSpanPlot', 'AxisLinePlot', 'StairsPlot', 'HistogramPlot', 'HistogramPlot2D', 'SpectrogramPlot', 'AutocorrelationPlot', 'AngleSpectrumPlot', 'CoherencePlot', 'CrossSpectralDensityPlot', 'MagnitudeSpectrumPlot', 'PhaseSpectrumPlot', 'PowerSpectralDensityPlot', 'CrossCorrelationPlot', 'BoxPlot', 'ViolinPlot', 'BoxAndWhiskerPlot', 'HexagonalHistogramPlot', 'QuiverPlot', 'StreamPlot', 'MatrixPlot', 'SparsityPlot', 'ContourPlot', 'ContourLinePlot', 'DensityPlot', 'HeatmapPlot', 'TriPlot', 'TriDensityPlot', 'TriContourLinesPlot', 'TriContourPlot', 'ListContourPlot', 'ListDensityPlot', 'ListTriContourPlot', 'ListTriDensityPlot', 'ScatterPlot3D', 'WireframePlot3D', 'ContourPlot3D', 'ListTriPlot3D']
 
 def _apply_f(f, grid):
     """
@@ -445,6 +445,7 @@ class ScatterPlot(Plot):
         """
         ...
 
+@Plot.register
 class ListScatterPlot(ScatterPlot):
     """
     Inherits from `Plot`.
@@ -471,6 +472,7 @@ class ErrorBarPlot(Plot):
     """
     method = 'errorbar'
 
+@Plot.register
 class ListErrorBarPlot(ErrorBarPlot):
     """A Plot that pulls the errorbar data from a list"""
 
@@ -559,6 +561,9 @@ class EventPlot(Plot):
 @Plot.register
 class PiePlot(Plot):
     method = 'pie'
+
+    def _get_plot_data(self, data):
+        ...
 
 @Plot.register
 class StackPlot(Plot):

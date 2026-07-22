@@ -802,7 +802,7 @@
 - `unitarize_transformation(tf)` — Return the nearest unitary (orthogonal) matrix to a transformation, via its
 - `polar_decomposition(tf, order='scale-first')` — Compute the polar decomposition of a transformation into a symmetric
 - `maximum_similarity_transformation(basis, target, apply_transformation=True)` — Find the unitary transformation that best maps a basis onto a target (in the
-- `matrix_transform_from_eigs(evals, evecs, tf)` — Apply a scalar function to the eigenvalues of a matrix and reassemble it in the
+- `matrix_transform_from_eigs(evals, evecs, tf, order='col')` — Apply a scalar function to the eigenvalues of a matrix and reassemble it in the
 - `symmetric_matrix_exp(mats)` — Matrix exponential of a symmetric matrix, computed by exponentiating its
 - `imaginary_symmetric_matrix_exp(mats)` — Real and imaginary parts of `exp(i A)` for a symmetric matrix `A`, obtained by
 - `symmetric_matrix_log(mats)` — Matrix logarithm of a symmetric matrix, computed by taking the log of its

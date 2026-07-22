@@ -337,7 +337,7 @@ class GraphicsBase(metaclass=ABCMeta):
         """
         ...
 
-    def set_options(self, event_handlers=None, animated=None, prolog=None, epilog=None, strict=True, **opts):
+    def set_options(self, event_handlers=None, animated=None, prolog=None, epilog=None, strict=True, theme=None, **opts):
         """Sets options for the plot
         :param event_handlers:
         :param animated:
@@ -674,11 +674,12 @@ class GraphicsBase(metaclass=ABCMeta):
         ...
 
 class Graphics(GraphicsBase):
+    default_style = dict(theme='mccoy', image_size=(370, 345), interactive=False, reshowable=False)
     figure_keys = {'scale', 'aspect_ratioimage_size', 'padding', 'spacings', 'background', 'colorbar'}
     layout_keys = axes_keys | figure_keys | GraphicsBase.layout_keys
     known_keys = layout_keys
 
-    def set_options(self, axes_labels=None, plot_label=None, style_list=None, plot_range=None, plot_legend=None, legend_style=None, frame=None, frame_style=None, ticks=None, scale=None, padding=None, spacings=None, ticks_style=None, ticks_label_style=None, image_size=None, axes_bbox=None, aspect_ratio=None, background=None, colorbar=None, prolog=None, epilog=None, **parent_opts):
+    def set_options(self, axes_labels=None, plot_label=None, style_list=None, plot_range=None, plot_legend=None, legend_style=None, frame=None, frame_style=None, grid=None, grid_style=None, ticks=None, scale=None, padding=None, spacings=None, ticks_style=None, ticks_label_style=None, image_size=None, axes_bbox=None, aspect_ratio=None, background=None, colorbar=None, prolog=None, epilog=None, theme=None, **parent_opts):
         """
         **LLM Docstring**
 
@@ -738,7 +739,7 @@ class Graphics(GraphicsBase):
         """
         ...
 
-    def resolve_default_padding(self, padding, modifications=None):
+    def resolve_default_padding(self, padding, modifications=None, theme=None):
         """
         **LLM Docstring**
 
@@ -923,6 +924,54 @@ class Graphics(GraphicsBase):
 
     @frame_style.setter
     def frame_style(self, value):
+        """
+        **LLM Docstring**
+
+        The frame styling options. Getter/setter delegate to the property manager (the setter also records
+        the change for copying).
+
+        :return: the frame style value
+        """
+        ...
+
+    @property
+    def grid(self):
+        """
+        **LLM Docstring**
+
+        Which frame (spine) edges are drawn. Getter/setter delegate to the property manager (the setter also records
+        the change for copying).
+
+        :return: the frame value
+        """
+        ...
+
+    @grid.setter
+    def grid(self, value):
+        """
+        **LLM Docstring**
+
+        Which frame (spine) edges are drawn. Getter/setter delegate to the property manager (the setter also records
+        the change for copying).
+
+        :return: the frame value
+        """
+        ...
+
+    @property
+    def grid_style(self):
+        """
+        **LLM Docstring**
+
+        The frame styling options. Getter/setter delegate to the property manager (the setter also records
+        the change for copying).
+
+        :return: the frame style value
+        """
+        ...
+
+    @grid_style.setter
+    def grid_style(self, value):
         """
         **LLM Docstring**
 
@@ -1566,7 +1615,7 @@ class GraphicsGrid(GraphicsBase):
     Supports themes & direct, easy access to the panels, among other things.
     Builds off of `GraphicsBase`.
     """
-    default_style = dict(theme='mccoy', spacings=(50, 0), padding=((50, 10), (50, 10)))
+    default_style = dict(theme='mccoy', spacings=(50, 0))
     layout_keys = GraphicsBase.layout_keys | {'nrows', 'ncols'}
     known_keys = GraphicsBase.known_keys | {'graphics_class'}
 
@@ -1701,6 +1750,27 @@ class GraphicsGrid(GraphicsBase):
             No-op face-color setter (panels manage their own backgrounds).
 
             :param fg: the (ignored) face color
+            """
+            ...
+
+        def prep_show(self):
+            """
+            **LLM Docstring**
+
+            No-op satisfying `GraphicsBase._prep_show`'s `self.axes.prep_show()` call
+            for a `GraphicsGrid`.
+
+            A grid's panels are each independent `Graphics` objects registered as
+            children of the shared figure (see `GraphicsBase.children`), so
+            `GraphicsBase.prep_show` already iterates `self.children` and calls
+            `_prep_show` on every panel directly -- and *that* call reaches each
+            panel's own single-axes wrapper and invokes `prep_show` there. This
+            `GraphicsStack` (the grid's stand-in for a single `axes`) therefore has
+            nothing further to prepare; it exists only so the grid's own
+            `_prep_show`, which treats `self.axes` like any other axes wrapper,
+            has something to call instead of raising `AttributeError`.
+
+            :return: `None`
             """
             ...
 

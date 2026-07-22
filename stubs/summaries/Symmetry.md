@@ -1,0 +1,213 @@
+### `Characters.py`
+- `check_boundary_strip_sst(vals, sst)` — Test whether a labeled skew tableau forms valid connected boundary strips without any `2 x 2` block.
+- `symmetric_group_class_sizes(n, partitions=None)` — Compute conjugacy-class sizes for every supplied partition of `S_n`.
+- `symmetric_group_character_table(n, tableaux=None, partitions=None, return_partitions=False, return_weights=False)` — Construct the symmetric-group character table with the Murnaghan–Nakayama rule over standard Young…
+- `cyclic_group_character_table(n)` — Construct the hard-coded or analytic character table for the `cyclic_group` group family.
+- `cyclic_permutations(n)` — Generate permutation representatives for the requested cyclic action.
+- `cyclic_group_classes(n)` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `cyclic_group_operation_representation(n, elements=None, check_mod=True)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `cyclic_group_irrep_names(n)` — Generate irreducible-representation labels in the same order as the corresponding character table.
+- `dihedral_group_character_table(n)` — Construct the hard-coded or analytic character table for the `dihedral_group` group family.
+- `dihedral_group_classes(n)` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `dihedral_group_operation_representation(n, elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `cv_group_irrep_names(n)` — Generate irreducible-representation labels in the same order as the corresponding character table.
+- `d_group_matrices(n, elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `dh_group_character_table(n)` — Construct the hard-coded or analytic character table for the `dh_group` group family.
+- `dh_group_classes(n)` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `dh_group_matrices(n, elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `dh_group_names(n)` — Generate irreducible-representation labels in the same order as the corresponding character table.
+- `dd_group_character_table(n)` — Construct the hard-coded or analytic character table for the `dd_group` group family.
+- `dd_group_classes(n)` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `dd_group_matrices(n, elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `dd_group_names(n)` — Generate irreducible-representation labels in the same order as the corresponding character table.
+- `cycle_decomposition_permutation_product(n)` — Construct a permutation representation from cyclic factors derived from the prime factorization of…
+- `improper_rotation_group_character_table(n)` — Construct the hard-coded or analytic character table for the `improper_rotation_group` group family.
+- `improper_rotation_group_classes(n)` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `improper_rotation_group_operation_representation(n, elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `improper_rotation_group_names(n)` — Generate irreducible-representation labels in the same order as the corresponding character table.
+- `ch_group_character_table(n)` — Construct the hard-coded or analytic character table for the `ch_group` group family.
+- `ch_group_classes(n)` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `ch_group_matrices(n, elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `ch_group_names(n)` — Generate irreducible-representation labels in the same order as the corresponding character table.
+- `parametrized_point_group_character_table(key, n, **etc)` — Construct the hard-coded or analytic character table for the `parametrized_point_group` group famil…
+- `parametrized_point_group_classes(key, n, **etc)` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `parametrized_point_group_matrices(key, n, **etc)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `I_point_group()` — Construct the hard-coded or analytic character table for the `I` group family.
+- `I_group_classes()` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `I_group_matrices(elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `I_group_names()` — Generate irreducible-representation labels in the same order as the corresponding character table.
+- `Ih_point_group()` — Construct the hard-coded or analytic character table for the `Ih` group family.
+- `Ih_group_classes()` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `Ih_group_matrices(elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `Ih_group_names()` — Generate irreducible-representation labels in the same order as the corresponding character table.
+- `O_point_group()` — Construct the hard-coded or analytic character table for the `O` group family.
+- `O_group_classes()` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `O_group_matrices(elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `O_group_names()` — Generate irreducible-representation labels in the same order as the corresponding character table.
+- `Oh_point_group()` — Construct the hard-coded or analytic character table for the `Oh` group family.
+- `Oh_group_classes()` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `Oh_group_matrices(elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `Oh_group_names()` — Generate irreducible-representation labels in the same order as the corresponding character table.
+- `T_point_group()` — Construct the hard-coded or analytic character table for the `T` group family.
+- `T_group_classes()` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `T_group_matrices(elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `T_group_names()` — Generate irreducible-representation labels in the same order as the corresponding character table.
+- `Td_point_group()` — Construct the hard-coded or analytic character table for the `Td` group family.
+- `Td_group_classes()` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `Td_group_matrices(elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `Td_group_names()` — Generate irreducible-representation labels in the same order as the corresponding character table.
+- `Th_point_group()` — Construct the hard-coded or analytic character table for the `Th` group family.
+- `Th_group_classes()` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `Th_group_matrices(elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `Th_group_names()` — Generate irreducible-representation labels in the same order as the corresponding character table.
+- `fixed_size_point_group_character_table(key, **etc)` — Construct the hard-coded or analytic character table for the `fixed_size_point_group` group family.
+- `fixed_size_point_group_classes(key, **etc)` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
+- `fixed_size_point_group_matrices(key, **etc)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `point_group_data(key, n=None, prop=None, **etc)` — Look up fixed-size or parametrized point-group generators and optionally evaluate one requested pro…
+  - **class `CharacterTable`**
+    - `__init__(characters, group_name=None, class_names=None, irrep_names=None, permutations=None, classes=None, matrices=None)`
+    - `symmetric_group(n)` — Construct a `CharacterTable` for the requested symmetric group using the module-level generators.
+    - `cyclic_group(n)` — Construct a `CharacterTable` for the requested cyclic group using the module-level generators.
+    - `dihedral_group(n)` — Construct a `CharacterTable` for the requested dihedral group using the module-level generators.
+    - `improper_rotation_group(n)` — Construct a `CharacterTable` for the requested improper rotation group using the module-level gener…
+    - `point_group(key, n=None)` — Construct a `CharacterTable` for the requested point group using the module-level generators.
+    - `fixed_size_point_group(key)` — Construct the hard-coded or analytic character table for the `fixed_size` group family.
+    - `format_character_table(table, group_name=None, classes=None, irrep_names=None)` — Construct the hard-coded or analytic character table for the `format` group family.
+    - `group_key()` — Convert stored group metadata into a compact point-group key such as `C3v`.
+    - `symmetry_symbol(primary_axis, secondary_axis, type, axis, root, order)` — Translate a classified Cartesian transformation into a conventional symmetry-operation symbol.
+    - `get_class_symbols()` — Classify representative matrices and produce display symbols for each conjugacy class.
+    - `format(classes=None, irrep_names=None, group_name=None)` — Format this table using stored metadata unless explicit labels are supplied.
+    - `character_basis()` — Return the class-weighted, group-order-normalized character basis used for projections.
+    - `extend_class_representation(rep)` — Expand class-level representation values to one value per concrete group element.
+    - `get_extended_character_table()` — Construct the hard-coded or analytic character table for the `get_extended` group family.
+    - `decompose_representation(rep)` — Project a representation onto irreducible characters using the weighted character inner product.
+    - `space_representation(mats, symms=None)` — Compute traces of transformation matrices, optionally after combining them with supplied symmetry o…
+    - `matrix_from_representation(vec)` — Form a matrix as a linear combination of the full group-operation matrices.
+    - `inverse_character_representation(chars)` — Map irreducible-character coefficients back into class-representation values.
+    - `symmetry_permutations(coords)` — Generate permutation representatives for the requested cyclic action.
+    - `axis_representation(include_rotations=True)` — Build the translational, and optionally rotational, Cartesian character representation from operati…
+    - `fixed_permutation_representation(base_rep, perms)` — Combine a base representation with permutation matrices by applying the same Cartesian block to eac…
+    - `coordinate_representation(coords)` — Build the full Cartesian coordinate representation induced by molecular symmetry permutations.
+    - `coordinate_mode_reduction(coords)` — Decompose the Cartesian coordinate representation and subtract translational/rotational content.
+    - `get_full_matrices()` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+
+### `Elements.py`
+  - **class `SymmetryElement`**
+    - `get_transformation()` — Return the `3 x 3` Cartesian matrix implementing this symmetry operation.
+    - `inverse()` — Return the symmetry element whose transformation reverses this operation.
+    - `compose(other)` — Compose this symmetry operation with another, using algebraic simplifications in concrete subclasse…
+    - `from_transformation_matrix(x, max_rotation_order=60)` — Classify a Cartesian matrix and instantiate the corresponding identity, inversion, rotation, reflec…
+    - `transform(tf)` — Express the symmetry element in a transformed Cartesian basis.
+    - `plot(figure, **graphics_options)` — Add graphical primitives representing this symmetry element to a figure.
+  - **class `ComposedSymmetryElement`** (SymmetryElement)
+    - `__init__(*bits)`
+    - `get_transformation()` — Return the `3 x 3` Cartesian matrix implementing this symmetry operation.
+    - `inverse()` — Return the symmetry element whose transformation reverses this operation.
+    - `transform(tf)` — Express the symmetry element in a transformed Cartesian basis.
+    - `plot(figure, **graphics_options)` — Add graphical primitives representing this symmetry element to a figure.
+  - **class `IdentityElement`** (SymmetryElement)
+    - `get_transformation()` — Return the `3 x 3` Cartesian matrix implementing this symmetry operation.
+    - `compose(other)` — Compose this symmetry operation with another, using algebraic simplifications in concrete subclasse…
+    - `inverse()` — Return the symmetry element whose transformation reverses this operation.
+    - `transform(tf)` — Express the symmetry element in a transformed Cartesian basis.
+    - `plot(figure, **graphics_options)` — Identity elements have no graphical primitive; this stub intentionally performs no action.
+  - **class `InversionElement`** (SymmetryElement)
+    - `get_transformation()` — Return the `3 x 3` Cartesian matrix implementing this symmetry operation.
+    - `inverse()` — Return the symmetry element whose transformation reverses this operation.
+    - `transform(tf)` — Express the symmetry element in a transformed Cartesian basis.
+    - `compose(other)` — Compose this symmetry operation with another, using algebraic simplifications in concrete subclasse…
+    - `plot(figure, *, origin=None, point_type=None, radius=0.1, color='red', **graphics_options)` — Add graphical primitives representing this symmetry element to a figure.
+  - **class `RotationElement`** (SymmetryElement)
+    - `__init__(order, axis, root=1)`
+    - `inverse()` — Return the symmetry element whose transformation reverses this operation.
+    - `transform(tf)` — Express the symmetry element in a transformed Cartesian basis.
+    - `compose(other)` — Compose this symmetry operation with another, using algebraic simplifications in concrete subclasse…
+    - `get_transformation()` — Return the `3 x 3` Cartesian matrix implementing this symmetry operation.
+    - `plot(figure, *, origin=None, line_type=None, disk_type=None, color='black', radius=2, spoke_radius=0.3, disk_color='black', disk_transparency=0.8, **graphics_options)` — Add graphical primitives representing this symmetry element to a figure.
+  - **class `ReflectionElement`** (SymmetryElement)
+    - `__init__(axis)`
+    - `get_transformation()` — Return the `3 x 3` Cartesian matrix implementing this symmetry operation.
+    - `inverse()` — Return the symmetry element whose transformation reverses this operation.
+    - `transform(tf)` — Express the symmetry element in a transformed Cartesian basis.
+    - `compose(other)` — Compose this symmetry operation with another, using algebraic simplifications in concrete subclasse…
+    - `plot(figure, *, origin=None, disk_type=None, color='black', radius=2, disk_transparency=0.8, **graphics_options)` — Add graphical primitives representing this symmetry element to a figure.
+  - **class `ImproperRotationElement`** (SymmetryElement)
+    - `__init__(order, axis, root=1)`
+    - `inverse()` — Return the symmetry element whose transformation reverses this operation.
+    - `transform(tf)` — Express the symmetry element in a transformed Cartesian basis.
+    - `compose(other)` — Compose this symmetry operation with another, using algebraic simplifications in concrete subclasse…
+    - `get_transformation()` — Return the `3 x 3` Cartesian matrix implementing this symmetry operation.
+    - `plot(figure, *, origin=None, line_type=None, disk_type=None, color='black', line_style='dashed', size=2, spoke_radius=0.3, disk_color='black', disk_transparency=0.8, **graphics_options)` — Add graphical primitives representing this symmetry element to a figure.
+
+### `PointGroups.py`
+  - **class `NamedPointGroups`** (enum.Enum)
+    > Real access pattern: NamedPointGroups.<MemberName> (this is an enum with 8 members, e.g. NamedPointGroups.Ih == 'Ih'). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:
+  - **class `ParametrizedPointGroups`** (enum.Enum)
+    > Real access pattern: ParametrizedPointGroups.<MemberName> (this is an enum with 7 members, e.g. ParametrizedPointGroups.C == 'C'). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:
+  - **class `PointGroup`**
+    - `__init__(character_table=None, elements=None, axes=None)`
+    - `get_modification_kwargs(character_table=dev.default, elements=dev.default, axes=dev.default)` — Resolve modification sentinels into a complete constructor argument mapping.
+    - `modify(character_table=dev.default, elements=dev.default, axes=dev.default)` — Return a new point-group object with selected cached data or axes replaced.
+    - `get_name()` — **LLM Docstring**
+    - `name()` — **LLM Docstring**
+    - `from_name(key, n=None, **etc)` — Parse fixed and parametrized point-group names and construct the corresponding concrete group objec…
+    - `get_symmetry_element_primary_rotation(elements)` — Select a highest-order proper rotation element and report how many elements share that order.
+    - `from_symmetry_elements(elements, tol=0.01)` — Infer a low- or axial-symmetry point-group family from supplied symmetry elements; high-symmetry br…
+    - `get_symmetry_elements(only_class_representatives=True)` — Convert representative or full operation matrices into symmetry-element objects and embed them in r…
+    - `character_table()` — Lazily construct and cache the group character table.
+    - `elements()` — Lazily construct and cache representative symmetry elements.
+    - `get_character_table()` — Construct the hard-coded or analytic character table for the `get` group family.
+    - `get_all_character_matrices()` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+    - `get_axes_from_symmetry_elements(elements)` — Choose primary and secondary molecular axes from rotations and reflection planes, then build an ort…
+    - `get_axes(elements=None, base_axes=False)` — Determine embedding axes from supplied, cached, or base representative elements.
+    - `axes()` — Lazily determine and cache the embedded or canonical point-group axes.
+    - `base_axes()` — Lazily determine and cache the embedded or canonical point-group axes.
+    - `align(axes)` — Return a copy aligned to explicitly supplied axes, transforming cached elements consistently.
+    - `transform(tf)` — Express the symmetry element in a transformed Cartesian basis.
+    - `get_matrices(only_class_representatives=True)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+    - `plot(figure=None, elements=None, origin=None, inversion_styles=None, rotation_styles=None, reflection_styles=None, improper_rotation_styles=None, **opts)` — Add graphical primitives representing this symmetry element to a figure.
+  - **class `NamedPointGroup`** (PointGroup)
+    - `__init__(name, character_table=None, elements=None, axes=None)`
+    - `modify(character_table=dev.default, elements=dev.default, axes=dev.default)` — Return a new point-group object with selected cached data or axes replaced.
+    - `get_name()` — **LLM Docstring**
+    - `get_character_table()` — Construct the hard-coded or analytic character table for the `get` group family.
+    - `get_all_character_matrices()` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+  - **class `ParametrizedPointGroup`** (PointGroup)
+    - `__init__(name, n, character_table=None, elements=None, axes=None)`
+    - `modify(character_table=dev.default, elements=dev.default, axes=dev.default)` — Return a new point-group object with selected cached data or axes replaced.
+    - `get_name()` — **LLM Docstring**
+    - `get_character_table()` — Construct the hard-coded or analytic character table for the `get` group family.
+    - `get_all_character_matrices()` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+
+### `Rotors.py`
+  - **class `RotorTypes`** (enum.Enum)
+    > Real access pattern: RotorTypes.<MemberName> (this is an enum with 7 members, e.g. RotorTypes.Atom == 'atom'). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:
+- `identify_rotor_type(moms, tol=1e-08, zero_tol=1e-06)` — Classify principal moments as atomic, linear, spherical, oblate, prolate, or asymmetric and indepen…
+
+### `Symmetrizer.py`
+- `prep_symmetry_operations(symmetry_elements)` — Normalize point groups, symmetry elements, and raw matrices into a list of Cartesian transformation…
+- `symmetrize_structure(coords, symmetry_elements, labels=None, masses=None, groups=None, tol=0.1, mass_tol=1, expand=True)` — Reduce each chemically equivalent coordinate group under supplied operations and optionally expand…
+- `symmetrized_coordinate_coefficients(point_group, coords, masses=None, permutation_basis=None, as_characters=True, normalize=False, perms=None, ops=None, return_basis=None, merge_equivalents=None, drop_empty_modes=None, realign=True, permutation_tol=0.01, **pg_tols)` — Build Cartesian or custom permutation representations, optionally project them into character block…
+- `get_internal_permutation_symmetry_matrices(internals, permutations)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+- `symmetrize_internals(point_group, internals, cartesians=None, *, masses=None, as_characters=True, normalize=None, perms=None, return_expansions=False, return_base_expansion=False, ops=None, atom_selection=None, reduce_redundant_coordinates=None, **etc)` — Generate symmetry-adapted internal-coordinate coefficients and optionally Cartesian expansion tenso…
+- `symmetrized_internal_coordinate_expansions(coeffs, cartesians, full_basis, order=1, masses=None, return_inverse=False, normalized_coefficients=True, return_base_expansion=False)` — Transform internal-coordinate derivative tensors into each symmetry-adapted coefficient block, opti…
+
+### `SymmetryIdentifier.py`
+  - **class `SymmetryEquivalentAtomData`**
+    - `__init__(coords, moms, com, axes, rotor_type, planar)`
+- `identify_symmetry_equivalent_atoms(coords, masses=None, base_groups=None, mass_tol=1, tol=0.01)` — Partition atoms into groups with matching masses and sorted intragroup distance profiles.
+  - **class `PointGroupIdentifier`**
+    - `__init__(coords, masses=None, groups=None, tol=0.01, mass_tol=1, mom_tol=1, grouping_tol=0.01, verbose=False)`
+    - `get_groups(coords, base_groups)` — Refine supplied atom groups by matching sorted distance profiles and merging overlapping equivalenc…
+    - `get_rotor_type(moms)` — Classify principal moments using the identifier moment tolerance.
+    - `get_group_orders()` — Derive candidate proper-rotation orders from common factors of equivalent-atom group sizes.
+    - `check_element(elem, verbose=False)` — Test whether a candidate operation maps every equivalent-atom group onto itself within coordinate t…
+    - `get_groups_from_masses(masses)` — Group atom indices by rounded mass values.
+    - `prep_coords(coords, masses=None)` — Center coordinates, diagonalize the inertia tensor, rotate into principal axes, and classify rotor…
+    - `rotation_axis_iterator()` — Yield candidate rotation axes from Cartesian basis axes, atom directions, and pair midpoints while…
+    - `reflection_plane_iterator()` — Yield candidate reflection-plane normals from Cartesian axes and pairwise coordinate differences.
+    - `rotation_face_iterator()` — Yield normals to equilateral-like faces formed by triples of equivalent atoms.
+    - `embed_point_group(point_group)` — Construct the hard-coded or analytic character table for the `embed` group family.
+    - `find_point_group_alignment_axes(point_group)` — Match defining rotations or reflection planes from a reference group to molecular symmetry elements…
+    - `identify_point_group(realign=True)` — Construct the hard-coded or analytic character table for the `identify` group family.
+- `identify_point_group(coords, masses=None, groups=None, tol=1e-08, mass_tol=1, mom_tol=1, grouping_tol=0.01, realign=True, verbose=False)` — Construct the hard-coded or analytic character table for the `identify` group family.

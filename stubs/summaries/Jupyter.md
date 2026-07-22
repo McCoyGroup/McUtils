@@ -580,14 +580,16 @@
 
 ### `Apps/Apps.py`
   - **class `Manipulator`** (Card)
-    - `__init__(func, *controls, debounce=None, autoclear=True, namespace=None, **etc)`
+    - `__init__(func, *controls, debounce=None, autoclear=True, namespace=None, layout_function=None, control_layout_function=None, **etc)`
+    - `default_layout(self)`
+    - `default_control_layout(self)`
     - `canonicalize_control(settings, namespace=None)` — Normalize a control spec into a `Control`: pass existing controls through, else
     - `initialize()` — Run the function once (with no event) to populate the output.
   - **class `App`** (Component)
     > Provides a framework for making Jupyter Apps with the
     > elements built out in the Interfaces package
     - `merge_themes(theme_1, theme_2)` — Recursively merge two theme dicts (the second overriding/extending the first).
-    - `__init__(body=None, header=None, footer=None, sidebar=None, toolbar=None, theme='primary', layout='grid', cls='app border', output=None, capture_output=None, vars=None, **attrs)`
+    - `__init__(body=None, header=None, footer=None, sidebar=None, toolbar=None, theme='primary', layout='grid', cls='app border', output=None, capture_output=None, namespace=None, vars=None, **attrs)`
     - `body()` — The app's body component, constructed lazily (within the app context) from the
     - `body(b)` — The app's body component, constructed lazily (within the app context) from the
     - `header()` — The app's header component, constructed lazily (within the app context) from the
@@ -954,14 +956,14 @@
     - `create(name)` — Resolve a namespace name (or namespace) to a cached `VariableNamespace`, creating
   - **class `VariableSynchronizer`**
     - `__init__(name, namespace=None, value=None, callbacks=(), output_pane=None, autounlink=True)`
-    - `create_var(var, namespace=None)` — Resolve a name (or synchronizer) to a `VariableSynchronizer` in the namespace,
+    - `create_var(var, namespace=None, **opts)` — Resolve a name (or synchronizer) to a `VariableSynchronizer` in the namespace,
     - `name()` — **LLM Docstring**
     - `value()` — The variable's current value.
     - `value(v)` — The variable's current value.
     - `set_value(v, caller=None)` — Set the value (if changed), firing the change callbacks and propagating to every
     - `link(widget)` — Link a widget to the variable: seed the variable from the widget's value, observe
     - `unlink(widget)` — Unlink a widget from the variable, removing its change observers.
-- `Var(name, namespace=None)` — Resolve a name (or synchronizer) to a `VariableSynchronizer`, optionally within a
+- `Var(name, namespace=None, **opts)` — Resolve a name (or synchronizer) to a `VariableSynchronizer`, optionally within a
   - **class `WidgetControl`**
     - `__init__(var, control_type=None, widget=None, **settings)`
     - `to_widget()` — Link the variable to the widget and return the widget.

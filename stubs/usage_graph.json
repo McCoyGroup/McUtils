@@ -1,0 +1,657 @@
+{
+  "McUtils.Combinatorics.Permutations.CompleteSymmetricGroupSpace": [
+    "Combinatorics::FullBasis",
+    "Combinatorics::StateGraph"
+  ],
+  "McUtils.Combinatorics.Permutations.IntegerPartitionPermutations": [
+    "Combinatorics::IntegerPartitionPermutations"
+  ],
+  "McUtils.Combinatorics.Permutations.IntegerPartitioner": [
+    "Combinatorics::IntegerPartitions",
+    "Combinatorics::UniquePartitionPermutations"
+  ],
+  "McUtils.Combinatorics.Permutations.LatticePathGenerator": [
+    "Combinatorics::SelRules"
+  ],
+  "McUtils.Combinatorics.Permutations.PermutationRelationGraph": [
+    "Combinatorics::BigStateGraph",
+    "Combinatorics::StateGraph"
+  ],
+  "McUtils.Combinatorics.Permutations.SymmetricGroupGenerator": [
+    "Combinatorics::BigStateGraph",
+    "Combinatorics::DirectSumExclusion",
+    "Combinatorics::DirectSumExtra",
+    "Combinatorics::DirectSumIndices",
+    "Combinatorics::DirectSumIndicesLarge",
+    "Combinatorics::SymmetricGroupGenerator"
+  ],
+  "McUtils.Combinatorics.Permutations.UniquePermutations": [
+    "Combinatorics::UniquePartitionPermutations",
+    "Combinatorics::YoungTableaux"
+  ],
+  "McUtils.Combinatorics.Permutations.lehmer_decode": [
+    "Combinatorics::lemherCodes"
+  ],
+  "McUtils.Combinatorics.Permutations.lehmer_encode": [
+    "Combinatorics::lemherCodes"
+  ],
+  "McUtils.Combinatorics.Sequences.prime_factorize": [
+    "Combinatorics::PrimeFactorization"
+  ],
+  "McUtils.Combinatorics.Sequences.prime_list": [
+    "Combinatorics::PrimeFactorization"
+  ],
+  "McUtils.Combinatorics.YoungTableaux.YoungTableauxGenerator": [
+    "Combinatorics::YT"
+  ],
+  "McUtils.Coordinerds": [
+    "Coordinerds::InternalInterConversion",
+    "Coordinerds::NewZMatConversions",
+    "Coordinerds::SmoothCoordinateInterpolation",
+    "Numputils::DerivPerf",
+    "Symmetry::InternalSymmetries"
+  ],
+  "McUtils.Coordinerds.CoordinateSystems.CommonCoordinateSystems.ZMatrixCoordinateSystem": [
+    "Coordinerds::CH5ZMatJacobian",
+    "Coordinerds::CartesianToZMatrixJacobian",
+    "Coordinerds::PsiAnglesToZMatrixAndBack"
+  ],
+  "McUtils.Coordinerds.CoordinateSystems.CompositeCoordinateSystems.CompositeCoordinateSystem": [
+    "Coordinerds::ChainCustomConversion",
+    "Coordinerds::CustomConversion"
+  ],
+  "McUtils.Coordinerds.CoordinateSystems.CoordinateSet.CoordinateSet": [
+    "Coordinerds::CH5ZMatJacobian",
+    "Coordinerds::CartesianToZMatrix",
+    "Coordinerds::CartesianToZMatrixAndBack",
+    "Coordinerds::CartesianToZMatrixJacobian",
+    "Coordinerds::CartesianToZMatrixJacobian2",
+    "Coordinerds::CartesianToZMatrixJacobian2Planar",
+    "Coordinerds::CartesianToZMatrixMulti",
+    "Coordinerds::CartesianToZMatrixMultiJacobian",
+    "Coordinerds::CartesianToZMatrixMultiJacobian1",
+    "Coordinerds::CartesianToZMatrixMultiJacobian10",
+    "Coordinerds::CartesianToZMatrixMultiJacobian2",
+    "Coordinerds::CartesianToZMatrixMultiJacobian2Timing10",
+    "Coordinerds::CartesianToZMatrixMultiJacobian3",
+    "Coordinerds::CartesianToZMatrixMultiJacobian3Timing1",
+    "Coordinerds::CartesianToZMatrixMultiJacobian3Timing10",
+    "Coordinerds::CartesianToZMatrixMultiJacobianTargeted",
+    "Coordinerds::ChainCustomConversion",
+    "Coordinerds::CoordinateSet",
+    "Coordinerds::CustomConversion",
+    "Coordinerds::ExpansionCoordinates",
+    "Coordinerds::GenericInternals",
+    "Coordinerds::PsiAnglesToZMatrixAndBack",
+    "Coordinerds::SphericalCoords"
+  ],
+  "McUtils.Coordinerds.CoordinateSystems.CoordinateSystem.CoordinateSystem": [
+    "Coordinerds::CartExpanded",
+    "Coordinerds::ExpansionCoordinates"
+  ],
+  "McUtils.Coordinerds.CoordinateSystems.CoordinateSystemConverter.CoordinateSystemConverters": [
+    "Coordinerds::Loader"
+  ],
+  "McUtils.Coordinerds.Internals.InternalSpec": [
+    "Coordinerds::NewInternalCoordinateSet"
+  ],
+  "McUtils.Coordinerds.Internals.get_internal_cartesian_conversion": [
+    "Coordinerds::InternalInterConversion"
+  ],
+  "McUtils.Coordinerds.Internals.get_internal_distance_conversion": [
+    "Coordinerds::DistsFromInternals"
+  ],
+  "McUtils.Coordinerds.Internals.internal_distance_convert": [
+    "Coordinerds::DistsFromInternals"
+  ],
+  "McUtils.Coordinerds.ZMatrices.extract_zmatrix_internals": [
+    "Coordinerds::GenerateZMatrix",
+    "Coordinerds::Permutations"
+  ],
+  "McUtils.Coordinerds.ZMatrices.functionalized_zmatrix": [
+    "Coordinerds::fragmentZMatrix"
+  ],
+  "McUtils.Data": [
+    "Scaffolding::HDF5Checkpointing",
+    "Scaffolding::HDF5CheckpointingPsuedopickle",
+    "Scaffolding::JSONCheckpointing",
+    "Scaffolding::JSONCheckpointingCanonicalKeyed",
+    "Scaffolding::JSONCheckpointingKeyed",
+    "Scaffolding::NumPyCheckpointing"
+  ],
+  "McUtils.Data.AtomData": [
+    "Coordinerds::SmoothCoordinateInterpolation"
+  ],
+  "McUtils.Data.ConstantsData": [
+    "Coordinerds::DistsFromInternals",
+    "Coordinerds::SmoothCoordinateInterpolation",
+    "Zachary::FiniteDifferenceParallelism"
+  ],
+  "McUtils.Devutils": [
+    "Coordinerds::SmoothCoordinateInterpolation",
+    "Parsers::ParseBib",
+    "Parsers::ParseTex",
+    "Scaffolding::Schema"
+  ],
+  "McUtils.Devutils.Loggers.Logger": [
+    "Scaffolding::BasicLogging",
+    "Scaffolding::InformedLogging"
+  ],
+  "McUtils.Docs.DocsBuilder.DocBuilder": [
+    "Docs::McUtilsDoc",
+    "Docs::PsienceDoc"
+  ],
+  "McUtils.Docs.ExamplesParser": [
+    "Docs::ParseExamples"
+  ],
+  "McUtils.Extensions.ArgumentSignature.FunctionSignature": [
+    "Extensions::BasicTypeSig"
+  ],
+  "McUtils.Extensions.FFI.Module.FFIModule": [
+    "Extensions::FFI",
+    "Extensions::FFI_threaded"
+  ],
+  "McUtils.Extensions.SharedLibraryManager.SharedLibrary": [
+    "Extensions::SharedLibrary"
+  ],
+  "McUtils.Extensions.SharedLibraryManager.SharedLibraryFunction": [
+    "Extensions::SOSig",
+    "Extensions::SharedLibraryFunction"
+  ],
+  "McUtils.ExternalPrograms.ChemicalResourceAPIs.PubChemAPI": [
+    "ExternalPrograms::PubChemAPI"
+  ],
+  "McUtils.ExternalPrograms.Containers.DockerLauncher": [
+    "ExternalPrograms::DockerRun"
+  ],
+  "McUtils.ExternalPrograms.Containers.SingularityLauncher": [
+    "ExternalPrograms::SingularityRun"
+  ],
+  "McUtils.ExternalPrograms.CubeProp.CubePropEvaluator": [
+    "ExternalPrograms::CubeParser"
+  ],
+  "McUtils.ExternalPrograms.ManagedJobQueues.sbatch_python_job": [
+    "ExternalPrograms::SBatchFromPython"
+  ],
+  "McUtils.ExternalPrograms.OpenBabel.OBMolecule": [
+    "ExternalPrograms::OBGen3D"
+  ],
+  "McUtils.ExternalPrograms.Parsers.CIFParser.CIFConverter": [
+    "ExternalPrograms::CIFFiles"
+  ],
+  "McUtils.ExternalPrograms.Parsers.Crest.CRESTParser": [
+    "ExternalPrograms::CRESTParse"
+  ],
+  "McUtils.ExternalPrograms.QM9": [
+    "ExternalPrograms::QM9"
+  ],
+  "McUtils.ExternalPrograms.RDKit.RDMolecule": [
+    "Coordinerds::NewZMatConversions"
+  ],
+  "McUtils.ExternalPrograms.SMILES.SMILESSupplier": [
+    "ExternalPrograms::SMIVendor"
+  ],
+  "McUtils.ExternalPrograms.SMILES.match_smiles_supplier": [
+    "ExternalPrograms::SMIVendor"
+  ],
+  "McUtils.ExternalPrograms.Servers.EvaluationServer.EvaluationClient": [
+    "ExternalPrograms::EvaluationServer"
+  ],
+  "McUtils.ExternalPrograms.Servers.NodeCommServer.NodeCommClient": [
+    "ExternalPrograms::EvaluationServer"
+  ],
+  "McUtils.ExternalPrograms.Servers.SLURMServer.SLURMClient": [
+    "ExternalPrograms::ServerPackage"
+  ],
+  "McUtils.Jupyter": [
+    "Jupyter::WidgetConstruction"
+  ],
+  "McUtils.Jupyter.JHTML": [
+    "Jupyter::HTML",
+    "Jupyter::SVG",
+    "Jupyter::Styles"
+  ],
+  "McUtils.Misc.NumbaTools.njit": [
+    "Zachary::Symbolics"
+  ],
+  "McUtils.Misc.Symbolics.Abstract": [
+    "Misc::Symbolics"
+  ],
+  "McUtils.Numputils": [
+    "Combinatorics::DirectSumExclusion",
+    "Combinatorics::DirectSumExtra",
+    "Combinatorics::DirectSumIndices",
+    "Coordinerds::DistsFromInternals",
+    "Coordinerds::InternalInterConversion",
+    "Coordinerds::NewInternalCoordinateSet",
+    "Coordinerds::SmoothCoordinateInterpolation",
+    "Numputils::AltCoords",
+    "Numputils::Arc",
+    "Numputils::Bezier",
+    "Numputils::ConvertInternals",
+    "Numputils::DerivPerf",
+    "Numputils::EigenvectroDerivs",
+    "Numputils::FrameDerivs",
+    "Numputils::InternalTensorsFixedAtoms",
+    "Numputils::MoreGeometry",
+    "Numputils::RenderMatrix",
+    "Numputils::RotDerivs",
+    "Numputils::TransrotExpansion",
+    "Symmetry::Transformations",
+    "Zachary::InternalReexpansions"
+  ],
+  "McUtils.Numputils.CoordOps.angle_basis": [
+    "Numputils::coordBases"
+  ],
+  "McUtils.Numputils.CoordOps.angle_deriv": [
+    "Numputils::PtsAngleDeriv"
+  ],
+  "McUtils.Numputils.CoordOps.dihed_deriv": [
+    "Numputils::ProblemPtsAllDerivs",
+    "Numputils::PtsDihedralsDeriv"
+  ],
+  "McUtils.Numputils.CoordOps.dihed_vec": [
+    "Numputils::DihedralDerivativeComparison"
+  ],
+  "McUtils.Numputils.CoordOps.dist_deriv": [
+    "Numputils::PtsDistDeriv"
+  ],
+  "McUtils.Numputils.CoordOps.internal_coordinate_tensors": [
+    "Numputils::DihedralDerivativeComparison"
+  ],
+  "McUtils.Numputils.CoordOps.inverse_coordinate_solve": [
+    "Numputils::DihedralDerivativeComparison"
+  ],
+  "McUtils.Numputils.CoordinateFrames.moments_of_inertia": [
+    "Numputils::EigenvectroDerivs"
+  ],
+  "McUtils.Numputils.Geometry.parametric_path_points": [
+    "Numputils::ParametricPath"
+  ],
+  "McUtils.Numputils.Geometry.triangle_convert": [
+    "Numputils::TriangleConversions",
+    "Numputils::TriangleDerivs"
+  ],
+  "McUtils.Numputils.Optimization.iterative_step_minimize": [
+    "Numputils::NEB",
+    "Numputils::OptimizeClassic"
+  ],
+  "McUtils.Numputils.Optimization.jacobi_maximize": [
+    "Numputils::BoysLocalize"
+  ],
+  "McUtils.Numputils.Options": [
+    "Numputils::ProblemPtsAllDerivs"
+  ],
+  "McUtils.Numputils.SetOps.contained": [
+    "Numputils::SetOps"
+  ],
+  "McUtils.Numputils.SetOps.difference": [
+    "Numputils::SetOps"
+  ],
+  "McUtils.Numputils.SetOps.intersection": [
+    "Numputils::SetOps"
+  ],
+  "McUtils.Numputils.SetOps.unique": [
+    "Numputils::SetOps"
+  ],
+  "McUtils.Numputils.Sparse.SparseArray": [
+    "Numputils::Sparse",
+    "Numputils::SparseArray",
+    "Numputils::SparseBroadcast",
+    "Numputils::SparseConstructor",
+    "Scaffolding::HDF5PseudoPickleSerialization",
+    "Scaffolding::JSONPseudoPickleSerialization",
+    "Scaffolding::Pseudopickle",
+    "Zachary::SparseArrayPoly",
+    "Zachary::SparseConvolve"
+  ],
+  "McUtils.Numputils.TensorDerivatives.tensor_reexpand": [
+    "Numputils::Symmetrization",
+    "Numputils::mixedShapeExpansions"
+  ],
+  "McUtils.Numputils.TransformationMatrices.cartesian_transformation_from_data": [
+    "Numputils::TransformationMatrices"
+  ],
+  "McUtils.Numputils.TransformationMatrices.identify_cartesian_transformation_type": [
+    "Numputils::TransformationMatrices"
+  ],
+  "McUtils.Numputils.TransformationMatrices.reflection_matrix": [
+    "Numputils::TransformationMatrices"
+  ],
+  "McUtils.Numputils.TransformationMatrices.rotation_matrix": [
+    "Numputils::AngleDerivScan",
+    "Numputils::TransformationMatrices"
+  ],
+  "McUtils.Numputils.TransformationMatrices.rotation_matrix_skew": [
+    "Numputils::BoysLocalize",
+    "Numputils::OptimizeClassic",
+    "Numputils::skewRotationMatrix"
+  ],
+  "McUtils.Numputils.VectorOps.distance_matrix": [
+    "Numputils::DihedralConversions",
+    "Numputils::DihedralDerivs",
+    "Numputils::TriangleConversions",
+    "Numputils::TriangleDerivs"
+  ],
+  "McUtils.Numputils.VectorOps.pts_angles": [
+    "Numputils::DihedralConversions",
+    "Numputils::TriangleConversions"
+  ],
+  "McUtils.Numputils.VectorOps.pts_dihedrals": [
+    "Coordinerds::GetDihedrals",
+    "Numputils::PtsDihedralsDeriv"
+  ],
+  "McUtils.Numputils.VectorOps.vec_angles": [
+    "Numputils::AngleDerivs",
+    "Numputils::PtsAngleDeriv"
+  ],
+  "McUtils.Numputils.VectorOps.vec_dots": [
+    "Numputils::BoysLocalize"
+  ],
+  "McUtils.Numputils.VectorOps.vec_normalize": [
+    "Numputils::NEB",
+    "Numputils::OptimizeClassic",
+    "Numputils::TransformationMatrices",
+    "Numputils::VecOps"
+  ],
+  "McUtils.Numputils.VectorOps.vec_norms": [
+    "Numputils::NormDerivs",
+    "Numputils::PtsDistDeriv"
+  ],
+  "McUtils.Numputils.VectorOps.vec_tensordiag": [
+    "Numputils::VecDiag"
+  ],
+  "McUtils.Parallelizers.Parallelizers.MultiprocessingParallelizer": [
+    "Parallelizers::BasicMultiprocessing",
+    "Parallelizers::DistributedDict",
+    "Parallelizers::MapMultiprocessingDataSmall",
+    "Parallelizers::MiscProblems",
+    "Parallelizers::ScatterGatherMultiprocessing",
+    "Parallelizers::ScatterGatherMultiprocessingDataSmall"
+  ],
+  "McUtils.Parallelizers.Parallelizers.SerialNonParallelizer": [
+    "Parallelizers::BasicMultiprocessing",
+    "Parallelizers::MapMultiprocessing",
+    "Parallelizers::MapMultiprocessingDataSmall",
+    "Parallelizers::ScatterGatherMultiprocessing",
+    "Parallelizers::ScatterGatherMultiprocessingDataSmall"
+  ],
+  "McUtils.Parallelizers.SharedMemory.SharedMemoryDict": [
+    "Parallelizers::SimpleSharedDict"
+  ],
+  "McUtils.Parallelizers.SharedMemory.SharedObjectManager": [
+    "Parallelizers::MakeSharedMem"
+  ],
+  "McUtils.Parsers": [
+    "Scaffolding::InformedLogging"
+  ],
+  "McUtils.Parsers.RegexPatterns.RegexPattern": [
+    "Parsers::BasicParse",
+    "Parsers::OptScan",
+    "Parsers::RegexGroups"
+  ],
+  "McUtils.Parsers.StringParser": [
+    "Parsers::BasicParse",
+    "Parsers::OptScan"
+  ],
+  "McUtils.Parsers.XYZParser": [
+    "Parsers::XYZ"
+  ],
+  "McUtils.Plots": [
+    "Numputils::Arc",
+    "Numputils::Bezier",
+    "Numputils::ParametricPath",
+    "Scaffolding::CLI",
+    "Zachary::CoordinateFunctions",
+    "Zachary::RBFForms"
+  ],
+  "McUtils.Plots.Colors.ColorPalette": [
+    "Plots::ColorPalettes"
+  ],
+  "McUtils.Plots.Graphics": [
+    "Plots::MPLPath",
+    "Plots::SVGBackend2D"
+  ],
+  "McUtils.Plots.Graphics.Graphics3D": [
+    "Plots::Plotly3D",
+    "Plots::SVGBackend3D",
+    "Plots::X3D",
+    "Plots::X3DMathText"
+  ],
+  "McUtils.Plots.Graphics.GraphicsGrid": [
+    "Coordinerds::CartesianToZMatrixJacobian",
+    "Plots::GraphicsGrid",
+    "Plots::PlotGridStyling",
+    "Zachary::ExpandFunction",
+    "Zachary::InterpolatorExtrapolator2D"
+  ],
+  "McUtils.Plots.Plots.ArrayPlot": [
+    "Coordinerds::CartesianToZMatrixJacobian"
+  ],
+  "McUtils.Plots.Plots.ContourPlot": [
+    "Plots::ColorMaps",
+    "Plots::GraphicsGrid",
+    "Plots::PlotGridStyling",
+    "Zachary::ExpandFunction",
+    "Zachary::InterpolatorExtrapolator2D"
+  ],
+  "McUtils.Plots.Plots.ListContourPlot": [
+    "Plots::ListContourPlot"
+  ],
+  "McUtils.Plots.Plots.ListTriContourPlot": [
+    "Plots::Animation",
+    "Plots::ListTriContourPlot"
+  ],
+  "McUtils.Plots.Plots.ListTriDensityPlot": [
+    "Plots::ListTriDensityPlot"
+  ],
+  "McUtils.Plots.Plots.ListTriPlot3D": [
+    "Plots::ListTriPlot3D"
+  ],
+  "McUtils.Plots.Plots.Plot": [
+    "Plots::ColorPalettes",
+    "Plots::Plot",
+    "Plots::PlotDelayed",
+    "Plots::PlotStyling",
+    "Plots::PlotlyBackend",
+    "Zachary::ExpandFunction"
+  ],
+  "McUtils.Plots.Plots.Plot3D": [
+    "Plots::Plot3D",
+    "Plots::Plot3DDelayed"
+  ],
+  "McUtils.Plots.Plots.ScatterPlot": [
+    "Plots::Scatter",
+    "Zachary::InterpolatorExtrapolator2D"
+  ],
+  "McUtils.Plots.Plots.StickPlot": [
+    "Plots::PropertySetting"
+  ],
+  "McUtils.Plots.Primitives.Path": [
+    "Plots::MPLPath",
+    "Plots::SVGBackend3D"
+  ],
+  "McUtils.Plots.Primitives.Rectangle": [
+    "Plots::SVGBackend2D"
+  ],
+  "McUtils.Plots.Primitives.Sphere": [
+    "Plots::Plotly3D",
+    "Plots::X3D"
+  ],
+  "McUtils.Plots.Primitives.Text": [
+    "Plots::X3DMathText"
+  ],
+  "McUtils.Plots.SVG.SVGFigure": [
+    "Plots::BaseSVG"
+  ],
+  "McUtils.Profilers.Timer": [
+    "Parallelizers::MapMultiprocessing"
+  ],
+  "McUtils.Scaffolding.CLIs.CLI": [
+    "Scaffolding::CLI"
+  ],
+  "McUtils.Scaffolding.Checkpointing.Checkpointer": [
+    "Scaffolding::HDF5Problems"
+  ],
+  "McUtils.Scaffolding.Jobs.JobManager": [
+    "Scaffolding::CurrentJob",
+    "Scaffolding::JobInit",
+    "Scaffolding::Jobbing"
+  ],
+  "McUtils.Scaffolding.Persistence.PersistenceManager": [
+    "Scaffolding::Persistence"
+  ],
+  "McUtils.Scaffolding.Serializers.HDF5Serializer": [
+    "Scaffolding::HDF5PseudoPickleSerialization",
+    "Scaffolding::HDF5Serialization"
+  ],
+  "McUtils.Scaffolding.Serializers.JSONSerializer": [
+    "Scaffolding::JSONPseudoPickleSerialization",
+    "Scaffolding::JSONSerialization"
+  ],
+  "McUtils.Scaffolding.Serializers.NumPySerializer": [
+    "Scaffolding::NumPySerialization"
+  ],
+  "McUtils.Scaffolding.Serializers.PseudoPickler": [
+    "Scaffolding::Pseudopickle"
+  ],
+  "McUtils.Scaffolding.Serializers.flatten_tree": [
+    "Scaffolding::TreeFlattening"
+  ],
+  "McUtils.Scaffolding.Serializers.read_flat_tree": [
+    "Scaffolding::TreeFlattening"
+  ],
+  "McUtils.Scaffolding.Serializers.unflatten_tree": [
+    "Scaffolding::TreeFlattening"
+  ],
+  "McUtils.Scaffolding.Serializers.write_flat_tree": [
+    "Scaffolding::TreeFlattening"
+  ],
+  "McUtils.Symmetry.Characters.CharacterTable": [
+    "Symmetry::CharacterDecomposition",
+    "Symmetry::CharacterSymmetries",
+    "Symmetry::Characters",
+    "Symmetry::InternalSymmetries"
+  ],
+  "McUtils.Symmetry.Characters.point_group_data": [
+    "Symmetry::Characters"
+  ],
+  "McUtils.Symmetry.Characters.symmetric_group_character_table": [
+    "Symmetry::Characters"
+  ],
+  "McUtils.Symmetry.Elements.SymmetryElement": [
+    "Symmetry::Composition"
+  ],
+  "McUtils.Symmetry.PointGroups.PointGroup": [
+    "Symmetry::PointGroupAlignments",
+    "Symmetry::PointGroupElements",
+    "Symmetry::Visualization"
+  ],
+  "McUtils.Symmetry.Symmetrizer.symmetrize_internals": [
+    "Symmetry::InternalSymmetries"
+  ],
+  "McUtils.Symmetry.Symmetrizer.symmetrized_coordinate_coefficients": [
+    "Symmetry::InternalSymmetries"
+  ],
+  "McUtils.Zachary.Interpolator": [
+    "Zachary::Interpolator1D",
+    "Zachary::InterpolatorExtrapolator1D",
+    "Zachary::InterpolatorExtrapolator2D",
+    "Zachary::IrregularInterpolator3D",
+    "Zachary::ParametricCurveInterpolation",
+    "Zachary::RegularInterpolator3D"
+  ],
+  "McUtils.Zachary.Interpolator.ProductGridInterpolator": [
+    "Zachary::RegularGridInterpolatorND"
+  ],
+  "McUtils.Zachary.Mesh": [
+    "Zachary::LinSpaceMesh",
+    "Zachary::MeshFromList",
+    "Zachary::MeshGridMesh",
+    "Zachary::RegMeshSubgrids",
+    "Zachary::RegularMesh",
+    "Zachary::SemiStructuredMesh",
+    "Zachary::StructuredMesh",
+    "Zachary::UnstructuredMesh"
+  ],
+  "McUtils.Zachary.NeighborBasedInterpolators.RBFDInterpolator": [
+    "Zachary::RBFForms",
+    "Zachary::RBFInterp1D",
+    "Zachary::RBFInterpolator",
+    "Zachary::RBFInterpolatorResiliance",
+    "Zachary::RBFTiming"
+  ],
+  "McUtils.Zachary.Polynomials.DensePolynomial": [
+    "Zachary::Polys",
+    "Zachary::SparseArrayPoly"
+  ],
+  "McUtils.Zachary.Polynomials.SparsePolynomial": [
+    "Zachary::Polys",
+    "Zachary::SparseShifts"
+  ],
+  "McUtils.Zachary.Symbolic.ElementaryFunctions.Symbols": [
+    "Zachary::HigherElementaryDerivs",
+    "Zachary::RBFForms",
+    "Zachary::Symbolics"
+  ],
+  "McUtils.Zachary.Symbolic.TensorExpressions.TensorDerivativeConverter": [
+    "Zachary::TensorConversion"
+  ],
+  "McUtils.Zachary.Symbolic.TensorExpressions.TensorExpansionTerms": [
+    "Zachary::PseudopotentialTerms",
+    "Zachary::TensorConversion",
+    "Zachary::TensorTerms"
+  ],
+  "McUtils.Zachary.Symbolic.TensorExpressions.TensorExpression": [
+    "Zachary::TensorDerivatives",
+    "Zachary::TensorExpressionEfficiency"
+  ],
+  "McUtils.Zachary.Taylor.Derivatives.FiniteDifferenceDerivative": [
+    "Numputils::AngleDerivScan",
+    "Numputils::AngleDerivs",
+    "Numputils::EigenvectroDerivs",
+    "Numputils::NormDerivs",
+    "Numputils::PtsAngleDeriv",
+    "Numputils::PtsDihedralsDeriv",
+    "Numputils::PtsDistDeriv",
+    "Numputils::SinCosDerivs",
+    "Zachary::FDDeriv",
+    "Zachary::FDDeriv2",
+    "Zachary::FiniteDifferenceParallelism"
+  ],
+  "McUtils.Zachary.Taylor.FiniteDifferenceFunction.IrregularGridFiniteDifference": [
+    "Zachary::uneven_weights"
+  ],
+  "McUtils.Zachary.Taylor.FiniteDifferenceFunction.RegularGridFiniteDifference": [
+    "Zachary::fd_weights",
+    "Zachary::uneven_weights"
+  ],
+  "McUtils.Zachary.Taylor.FiniteDifferenceFunction.finite_difference": [
+    "Zachary::FD2D",
+    "Zachary::FD2D_multi",
+    "Zachary::finite_difference"
+  ],
+  "McUtils.Zachary.Taylor.FunctionExpansions.FunctionExpansion": [
+    "Zachary::ExpandFunction",
+    "Zachary::ExpansionDerivs",
+    "Zachary::ExplicitPoly",
+    "Zachary::MultiExpansion"
+  ],
+  "Peeves.Timer.Timer": [
+    "Extensions::FFI_threaded",
+    "Zachary::RBFTiming"
+  ],
+  "Psience.Molecools.Molecule": [
+    "Coordinerds::GenericInternals",
+    "Coordinerds::NewInternalCoordinateSet",
+    "ExternalPrograms::CRESTJob",
+    "ExternalPrograms::CubeParser",
+    "ExternalPrograms::OBGen3D",
+    "Jupyter::WidgetConstruction",
+    "Jupyter::WidgetInteractivity",
+    "Numputils::ConvertInternals",
+    "Numputils::DerivPerf",
+    "Numputils::DihedralDerivativeComparison",
+    "Numputils::FailingCarts"
+  ]
+}

@@ -1,5 +1,8 @@
 import abc
+from ... import Devutils as dev
+from ... import Coordinerds as coordops
 from ...Formatters import OptionalTemplate
+from ...Data import UnitsData
 __all__ = ['OptionsBlock', 'ExternalProgramJob']
 
 class JobBlockBase(metaclass=abc.ABCMeta):
@@ -303,6 +306,25 @@ class SystemBlock(OptionsBlock):
         ...
 
 class ExternalProgramJob(metaclass=abc.ABCMeta):
+    extension: str
+    registry = {}
+
+    @classmethod
+    def register(cls, name, method=None):
+        ...
+
+    @classmethod
+    def resolve(cls, job_class):
+        ...
+    distance_units = 'Angstroms'
+
+    @classmethod
+    def get_mol_options(cls, mol, units=None, use_internals=False) -> dict:
+        ...
+
+    @classmethod
+    def from_mol(cls, mol, *args, use_internals=False, **etc):
+        ...
 
     def __init__(self, **opts):
         """

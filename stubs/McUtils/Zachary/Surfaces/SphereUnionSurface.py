@@ -563,7 +563,7 @@ class SphereUnionSurface:
         ...
     default_triangulation_method = 'hull-union'
 
-    def get_triangulation(self, occlusion_type='auto', deduplicate_points=None, point_gen_options=None, add_intersection_circles=True, extend_intersection_points=False, method=None, bbox_scaling=1.2, grid_samples=20, probe_radius=None, probe_type='sas', **surface_opts):
+    def get_triangulation(self, occlusion_type='auto', deduplicate_points=None, point_gen_options=None, add_intersection_circles=True, extend_intersection_points=False, method=None, bbox_scaling=1.2, grid_samples=20, probe_radius=None, probe_type='sas', bbox=None, **surface_opts):
         """
         **LLM Docstring**
 

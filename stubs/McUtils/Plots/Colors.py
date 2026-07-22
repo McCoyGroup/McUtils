@@ -665,6 +665,38 @@ class ColorPalette:
         ...
 
     @classmethod
+    def rgb_to_lab(cls, r, g, b, xyz_scaling=None):
+        """
+        **LLM Docstring**
+
+        Convert a color from RGB to CIE Lab (via XYZ).
+
+        :param r: the red channel
+        :param g: the green channel
+        :param b: the blue channel
+        :param xyz_scaling: the white-point scaling
+        :return: the Lab color
+        :rtype: np.ndarray
+        """
+        ...
+
+    @classmethod
+    def lab_to_rgb(cls, l, a, b, xyz_scaling=None):
+        """
+        **LLM Docstring**
+
+        Convert a color from CIE Lab to RGB (via XYZ).
+
+        :param l: the lightness channel
+        :param a: the a channel
+        :param b: the b channel
+        :param xyz_scaling: the white-point scaling
+        :return: the RGB color
+        :rtype: np.ndarray
+        """
+        ...
+
+    @classmethod
     def lab_to_lch(cls, l, a, b):
         """
         **LLM Docstring**
@@ -695,35 +727,11 @@ class ColorPalette:
         ...
 
     @classmethod
-    def rgb_to_lab(cls, r, g, b, xyz_scaling=None):
-        """
-        **LLM Docstring**
-
-        Convert a color from RGB to CIE Lab (via XYZ).
-
-        :param r: the red channel
-        :param g: the green channel
-        :param b: the blue channel
-        :param xyz_scaling: the white-point scaling
-        :return: the Lab color
-        :rtype: np.ndarray
-        """
+    def rgb_to_lch(cls, r, g, b, xyz_scaling=None):
         ...
 
     @classmethod
-    def lab_to_rgb(cls, l, a, b, xyz_scaling=None):
-        """
-        **LLM Docstring**
-
-        Convert a color from CIE Lab to RGB (via XYZ).
-
-        :param l: the lightness channel
-        :param a: the a channel
-        :param b: the b channel
-        :param xyz_scaling: the white-point scaling
-        :return: the RGB color
-        :rtype: np.ndarray
-        """
+    def lch_to_rgb(cls, l, a, b, xyz_scaling=None):
         ...
 
 def prep_color(base=None, palette=None, blending=None, index=None, lighten=None, saturate=None, modifier=None, shift=False, absolute=False, clip=True, color_space='rgb', modification_space='lab', return_color_code=True, alpha=None, cycle=None):

@@ -3288,6 +3288,13 @@
       ],
       "kind": "method"
     },
+    "McUtils.Docs.Stubs.StubSummaryBuilder.extract_examples": {
+      "depends_on": [
+        "McUtils.Docs.ExamplesParser.ExamplesParser",
+        "McUtils.Docs.ExamplesParser.ExamplesParser.from_file"
+      ],
+      "kind": "method"
+    },
     "McUtils.Extensions.ArgumentSignature.Argument": {
       "depends_on": [
         "McUtils.Extensions.ArgumentSignature"
@@ -4083,6 +4090,22 @@
     "McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob.format": {
       "depends_on": [
         "McUtils.Formatters.TemplateWriter.OptionalTemplate"
+      ],
+      "kind": "method"
+    },
+    "McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob.get_mol_options": {
+      "depends_on": [
+        "McUtils.Coordinerds",
+        "McUtils.Coordinerds.zmatrix_unit_convert",
+        "McUtils.Data.ConstantsData",
+        "McUtils.Data.ConstantsData.convert"
+      ],
+      "kind": "method"
+    },
+    "McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob.resolve": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.is_dict_like"
       ],
       "kind": "method"
     },
@@ -6191,7 +6214,9 @@
       "depends_on": [
         "McUtils.Devutils",
         "McUtils.Devutils.is_dict_like",
-        "McUtils.Graphs.Layout.GraphPlotter"
+        "McUtils.Graphs.Layout.GraphPlotter",
+        "McUtils.Numputils",
+        "McUtils.Numputils.is_int"
       ],
       "kind": "method"
     },
@@ -6831,7 +6856,6 @@
     "McUtils.Jupyter.Apps.Apps.Manipulator.__init__": {
       "depends_on": [
         "McUtils.Jupyter.Apps.Controls.FunctionDisplay",
-        "McUtils.Jupyter.Apps.Interfaces.Flex",
         "McUtils.Jupyter.Apps.Variables.InterfaceVars",
         "McUtils.Jupyter.Apps.Variables.InterfaceVars.unique_namespace"
       ],
@@ -6842,6 +6866,18 @@
         "McUtils.Jupyter.Apps.Controls.Control",
         "McUtils.Jupyter.Apps.Controls.Control.construct",
         "McUtils.Jupyter.Apps.Variables.WidgetControl"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Jupyter.Apps.Apps.Manipulator.default_control_layout": {
+      "depends_on": [
+        "McUtils.Jupyter.Apps.Interfaces.Flex"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Jupyter.Apps.Apps.Manipulator.default_layout": {
+      "depends_on": [
+        "McUtils.Jupyter.Apps.Interfaces.Flex"
       ],
       "kind": "method"
     },
@@ -16976,7 +17012,7 @@
       ],
       "kind": "method"
     },
-    "McUtils.Parallelizers.SharedMemory.SharedMemoryPrimitive._save_to_buffer": {
+    "McUtils.Parallelizers.SharedMemory.SharedMemoryPrimitive._set_tree_array_entry": {
       "depends_on": [
         "McUtils.Parallelizers.SharedMemory.SharedMemoryNDarray"
       ],
@@ -18383,6 +18419,13 @@
       ],
       "kind": "method"
     },
+    "McUtils.Plots.Backends.MPLAxes.set_grid_style": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.is_dict_like"
+      ],
+      "kind": "method"
+    },
     "McUtils.Plots.Backends.MPLAxes.svg_to_mpl_path": {
       "depends_on": [
         "McUtils.Numputils",
@@ -18569,7 +18612,16 @@
       ],
       "kind": "method"
     },
-    "McUtils.Plots.Backends.MPLBackend.create_figure": {
+    "McUtils.Plots.Backends.MPLBackend.ThemeContextManager.canonicalize_theme_opts": {
+      "depends_on": [
+        "McUtils.Plots.Graphics.Graphics",
+        "McUtils.Plots.Graphics.Graphics.axes_keys",
+        "McUtils.Plots.Graphics.Graphics.figure_keys",
+        "McUtils.Plots.Graphics.Graphics.opt_keys"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Plots.Backends.MPLBackend.create_raw_figure": {
       "depends_on": [
         "McUtils.Plots.Backends.MPLManager",
         "McUtils.Plots.Backends.MPLManager.plt_api"
@@ -18801,6 +18853,13 @@
         "McUtils.Plots.Colors.ColorPalette",
         "McUtils.Plots.Colors.ColorPalette.parse_color_string",
         "McUtils.Plots.Colors.ColorPalette.rgb_code"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Plots.Backends.PlotlyBackend.remap_property": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.is_numeric"
       ],
       "kind": "method"
     },
@@ -19752,6 +19811,8 @@
     },
     "McUtils.Plots.Graphics.GraphicsGrid.initialize_figure_and_axes": {
       "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.is_number",
         "McUtils.Plots.Backends.DPI_SCALING",
         "McUtils.Plots.Graphics.GraphicsGrid"
       ],
@@ -21927,6 +21988,31 @@
       ],
       "kind": "method"
     },
+    "McUtils.Profilers.Profiler.BlockProfiler.mode_dispatch": {
+      "depends_on": [
+        "McUtils.Profilers.Profiler.CProfileBlockProfiler",
+        "McUtils.Profilers.Profiler.PyinstrumentBlockProfiler"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Profilers.Profiler.CProfileBlockProfiler": {
+      "depends_on": [
+        "McUtils.Profilers.Profiler.BlockProfiler"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Profilers.Profiler.PyinstrumentBlockProfiler": {
+      "depends_on": [
+        "McUtils.Profilers.Profiler.BlockProfiler"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Profilers.Profiler.PyinstrumentBlockProfiler.__init__": {
+      "depends_on": [
+        "pyinstrument.Profiler"
+      ],
+      "kind": "method"
+    },
     "McUtils.Scaffolding.CLIs.CommandGroup._get_commands": {
       "depends_on": [
         "McUtils.Scaffolding.CLIs.Command"
@@ -22437,6 +22523,803 @@
     "McUtils.Scaffolding.Serializers.write_flat_tree": {
       "depends_on": [
         "McUtils.Scaffolding.Serializers.flatten_tree"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable.__init__": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.vec_dots"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable._ipython_display_": {
+      "depends_on": [
+        "McUtils.Jupyter.NoLineWrapFormatter"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable.axis_representation": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.vec_tensordiag"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable.cyclic_group": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.cyclic_group_character_table",
+        "McUtils.Symmetry.Characters.cyclic_group_classes",
+        "McUtils.Symmetry.Characters.cyclic_group_operation_representation"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable.dihedral_group": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.dihedral_group_character_table",
+        "McUtils.Symmetry.Characters.dihedral_group_classes",
+        "McUtils.Symmetry.Characters.dihedral_group_operation_representation"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable.format_character_table": {
+      "depends_on": [
+        "McUtils.Formatters.TableFormatter"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable.get_class_symbols": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.TransformationTypes",
+        "McUtils.Numputils.TransformationTypes.Rotation",
+        "McUtils.Numputils.identify_cartesian_transformation_type"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable.get_full_matrices": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.point_group_data"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable.group_key": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.is_int"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable.improper_rotation_group": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.improper_rotation_group_character_table",
+        "McUtils.Symmetry.Characters.improper_rotation_group_classes",
+        "McUtils.Symmetry.Characters.improper_rotation_group_operation_representation"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable.point_group": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.point_group_data"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable.space_representation": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.affine_matrix",
+        "McUtils.Numputils.diag_indices",
+        "McUtils.Numputils.vec_block_diag"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable.symmetric_group": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.symmetric_group_character_table"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable.symmetry_permutations": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.symmetry_permutation"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.CharacterTable.symmetry_symbol": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.TransformationTypes",
+        "McUtils.Numputils.TransformationTypes.Identity",
+        "McUtils.Numputils.TransformationTypes.ImproperRotation",
+        "McUtils.Numputils.TransformationTypes.Inversion",
+        "McUtils.Numputils.TransformationTypes.Reflection",
+        "McUtils.Numputils.TransformationTypes.Rotation"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Characters.Ih_group_names": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.I_group_names"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.Oh_group_names": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.O_group_names"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.Th_group_names": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.T_group_names"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters._group_size": {
+      "depends_on": [
+        "McUtils.Combinatorics",
+        "McUtils.Combinatorics.stable_factorial_ratio"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.ch_group_classes": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.cycle_decomposition_permutation_product"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.ch_group_matrices": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.cyclic_group_operation_representation"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.ch_group_names": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.cyclic_group_irrep_names"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.check_boundary_strip_sst": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.distance_matrix"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.cycle_decomposition_permutation_product": {
+      "depends_on": [
+        "McUtils.Combinatorics",
+        "McUtils.Combinatorics.prime_factorize",
+        "McUtils.Symmetry.Characters._permutation_product",
+        "McUtils.Symmetry.Characters.cyclic_permutations"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.cyclic_group_classes": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.cyclic_permutations"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.d_group_matrices": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.cyclic_group_operation_representation"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.dd_group_character_table": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.dh_group_character_table",
+        "McUtils.Symmetry.Characters.dihedral_group_character_table"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.dd_group_classes": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.dihedral_group_classes"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.dd_group_matrices": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.improper_rotation_group_operation_representation"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.dd_group_names": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.cv_group_irrep_names"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.dh_group_classes": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters._permutation_product",
+        "McUtils.Symmetry.Characters.cyclic_permutations",
+        "McUtils.Symmetry.Characters.dihedral_group_classes"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.dh_group_matrices": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.group_by",
+        "McUtils.Numputils.vec_tensordiag",
+        "McUtils.Symmetry.Characters.cyclic_group_operation_representation",
+        "McUtils.Symmetry.Characters.improper_rotation_group_operation_representation"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.dh_group_names": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.cv_group_irrep_names"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.dihedral_group_operation_representation": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.cyclic_group_operation_representation"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.improper_rotation_group_classes": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.cycle_decomposition_permutation_product",
+        "McUtils.Symmetry.Characters.cyclic_permutations"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.improper_rotation_group_names": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.cyclic_group_irrep_names"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.improper_rotation_group_operation_representation": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.cyclic_group_operation_representation"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.symmetric_group_character_table": {
+      "depends_on": [
+        "McUtils.Combinatorics",
+        "McUtils.Combinatorics.IntegerPartitioner",
+        "McUtils.Combinatorics.IntegerPartitioner.partitions",
+        "McUtils.Combinatorics.YoungTableauxGenerator",
+        "McUtils.Symmetry.Characters.check_boundary_strip_sst",
+        "McUtils.Symmetry.Characters.symmetric_group_class_sizes"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Characters.symmetric_group_class_sizes": {
+      "depends_on": [
+        "McUtils.Combinatorics",
+        "McUtils.Combinatorics.IntegerPartitioner",
+        "McUtils.Combinatorics.IntegerPartitioner.partitions",
+        "McUtils.Symmetry.Characters._group_size"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Elements.ComposedSymmetryElement": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.SymmetryElement"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Symmetry.Elements.ComposedSymmetryElement.__init__": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.SymmetryElement"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.ComposedSymmetryElement.inverse": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.ComposedSymmetryElement"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.ComposedSymmetryElement.plot": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.SymmetryElement",
+        "McUtils.Symmetry.Elements.SymmetryElement.from_transformation_matrix"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.IdentityElement": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.SymmetryElement"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Symmetry.Elements.ImproperRotationElement": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.SymmetryElement"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Symmetry.Elements.ImproperRotationElement.__init__": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.vec_normalize"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.ImproperRotationElement.compose": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.ImproperRotationElement",
+        "McUtils.Symmetry.Elements.InversionElement",
+        "McUtils.Symmetry.Elements.RotationElement"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.ImproperRotationElement.get_transformation": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.rotation_matrix",
+        "McUtils.Numputils.view_matrix"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.ImproperRotationElement.plot": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.view_matrix",
+        "McUtils.Plots.Disk",
+        "McUtils.Plots.Line"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.InversionElement": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.SymmetryElement"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Symmetry.Elements.InversionElement.compose": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.IdentityElement",
+        "McUtils.Symmetry.Elements.ImproperRotationElement",
+        "McUtils.Symmetry.Elements.InversionElement",
+        "McUtils.Symmetry.Elements.ReflectionElement",
+        "McUtils.Symmetry.Elements.RotationElement"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.InversionElement.plot": {
+      "depends_on": [
+        "McUtils.Plots.Sphere"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.ReflectionElement": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.SymmetryElement"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Symmetry.Elements.ReflectionElement.__init__": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.vec_normalize"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.ReflectionElement.compose": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.IdentityElement",
+        "McUtils.Symmetry.Elements.ImproperRotationElement",
+        "McUtils.Symmetry.Elements.InversionElement",
+        "McUtils.Symmetry.Elements.ReflectionElement",
+        "McUtils.Symmetry.Elements.RotationElement"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.ReflectionElement.get_transformation": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.view_matrix"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.ReflectionElement.plot": {
+      "depends_on": [
+        "McUtils.Plots.Disk"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.RotationElement": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.SymmetryElement"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Symmetry.Elements.RotationElement.__init__": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.vec_normalize"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.RotationElement.compose": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.ImproperRotationElement",
+        "McUtils.Symmetry.Elements.InversionElement",
+        "McUtils.Symmetry.Elements.RotationElement"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.RotationElement.get_transformation": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.rotation_matrix"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.RotationElement.plot": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.view_matrix",
+        "McUtils.Plots.Disk",
+        "McUtils.Plots.Line"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.SymmetryElement.compose": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.ComposedSymmetryElement"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Elements.SymmetryElement.from_transformation_matrix": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.TransformationTypes",
+        "McUtils.Numputils.TransformationTypes.Identity",
+        "McUtils.Numputils.TransformationTypes.ImproperRotation",
+        "McUtils.Numputils.TransformationTypes.Inversion",
+        "McUtils.Numputils.TransformationTypes.Reflection",
+        "McUtils.Numputils.TransformationTypes.Rotation",
+        "McUtils.Numputils.identify_cartesian_transformation_type",
+        "McUtils.Symmetry.Elements.IdentityElement",
+        "McUtils.Symmetry.Elements.ImproperRotationElement",
+        "McUtils.Symmetry.Elements.InversionElement",
+        "McUtils.Symmetry.Elements.ReflectionElement",
+        "McUtils.Symmetry.Elements.RotationElement"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.NamedPointGroup": {
+      "depends_on": [
+        "McUtils.Symmetry.PointGroups.PointGroup"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Symmetry.PointGroups.NamedPointGroup.__init__": {
+      "depends_on": [
+        "McUtils.Symmetry.PointGroups.NamedPointGroups"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.NamedPointGroup.get_all_character_matrices": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.point_group_data"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.NamedPointGroup.get_character_table": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.CharacterTable",
+        "McUtils.Symmetry.Characters.CharacterTable.fixed_size_point_group"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.NamedPointGroup.modify": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.default"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.ParametrizedPointGroup": {
+      "depends_on": [
+        "McUtils.Symmetry.PointGroups.ParametrizedPointGroups",
+        "McUtils.Symmetry.PointGroups.PointGroup"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Symmetry.PointGroups.ParametrizedPointGroup.__init__": {
+      "depends_on": [
+        "McUtils.Symmetry.PointGroups.ParametrizedPointGroups"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.ParametrizedPointGroup.get_all_character_matrices": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.point_group_data"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.ParametrizedPointGroup.get_character_table": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.CharacterTable",
+        "McUtils.Symmetry.Characters.CharacterTable.point_group"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.ParametrizedPointGroup.modify": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.default"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.PointGroup.character_table": {
+      "depends_on": [
+        "McUtils.Symmetry.Characters.CharacterTable"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.PointGroup.from_name": {
+      "depends_on": [
+        "McUtils.Symmetry.PointGroups.NamedPointGroup",
+        "McUtils.Symmetry.PointGroups.NamedPointGroups",
+        "McUtils.Symmetry.PointGroups.ParametrizedPointGroup",
+        "McUtils.Symmetry.PointGroups.ParametrizedPointGroups"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.PointGroup.from_symmetry_elements": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.view_matrix",
+        "McUtils.Symmetry.Elements.ImproperRotationElement",
+        "McUtils.Symmetry.Elements.InversionElement",
+        "McUtils.Symmetry.Elements.ReflectionElement",
+        "McUtils.Symmetry.Elements.RotationElement",
+        "McUtils.Symmetry.Elements.SymmetryElement"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.PointGroup.get_axes": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.SymmetryElement",
+        "McUtils.Symmetry.Elements.SymmetryElement.from_transformation_matrix"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.PointGroup.get_axes_from_symmetry_elements": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.view_matrix",
+        "McUtils.Symmetry.Elements.ReflectionElement",
+        "McUtils.Symmetry.Elements.RotationElement"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.PointGroup.get_modification_kwargs": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.default",
+        "McUtils.Devutils.is_default"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.PointGroup.get_symmetry_element_primary_rotation": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.RotationElement"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.PointGroup.get_symmetry_elements": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.SymmetryElement",
+        "McUtils.Symmetry.Elements.SymmetryElement.from_transformation_matrix"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.PointGroup.modify": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.default"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.PointGroups.PointGroup.plot": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.str_is",
+        "McUtils.Plots.Graphics3D",
+        "McUtils.Symmetry.Elements.ImproperRotationElement",
+        "McUtils.Symmetry.Elements.InversionElement",
+        "McUtils.Symmetry.Elements.ReflectionElement",
+        "McUtils.Symmetry.Elements.RotationElement"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.Rotors.identify_rotor_type": {
+      "depends_on": [
+        "McUtils.Symmetry.Rotors.RotorTypes",
+        "McUtils.Symmetry.Rotors.RotorTypes.Asymmetric",
+        "McUtils.Symmetry.Rotors.RotorTypes.Atom",
+        "McUtils.Symmetry.Rotors.RotorTypes.Linear",
+        "McUtils.Symmetry.Rotors.RotorTypes.Oblate",
+        "McUtils.Symmetry.Rotors.RotorTypes.Prolate",
+        "McUtils.Symmetry.Rotors.RotorTypes.Spherical"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Symmetrizer._symmetry_reduce": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.permutation_cycles",
+        "McUtils.Numputils.symmetry_permutation"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Symmetrizer.get_internal_permutation_symmetry_matrices": {
+      "depends_on": [
+        "McUtils.Coordinerds",
+        "McUtils.Coordinerds.canonicalize_internal",
+        "McUtils.Coordinerds.permute_internals"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Symmetrizer.prep_symmetry_operations": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.SymmetryElement",
+        "McUtils.Symmetry.PointGroups.PointGroup"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Symmetrizer.symmetrize_internals": {
+      "depends_on": [
+        "McUtils.Coordinerds",
+        "McUtils.Coordinerds.RedundantCoordinateGenerator",
+        "McUtils.Coordinerds.RedundantCoordinateGenerator.get_redundant_transformation",
+        "McUtils.Coordinerds.coordinate_indices",
+        "McUtils.Coordinerds.permute_internals",
+        "McUtils.Iterators",
+        "McUtils.Iterators.transpose",
+        "McUtils.Numputils",
+        "McUtils.Numputils.inverse_internal_coordinate_tensors",
+        "McUtils.Symmetry.Symmetrizer.get_internal_permutation_symmetry_matrices",
+        "McUtils.Symmetry.Symmetrizer.symmetrized_coordinate_coefficients",
+        "McUtils.Symmetry.Symmetrizer.symmetrized_internal_coordinate_expansions"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Symmetrizer.symmetrize_structure": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.apply_symmetries",
+        "McUtils.Numputils.group_by",
+        "McUtils.Symmetry.Symmetrizer._symmetry_reduce",
+        "McUtils.Symmetry.Symmetrizer.prep_symmetry_operations"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Symmetrizer.symmetrized_coordinate_coefficients": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.group_by",
+        "McUtils.Numputils.symmetry_permutation",
+        "McUtils.Numputils.vec_normalize",
+        "McUtils.Symmetry.Elements.SymmetryElement",
+        "McUtils.Symmetry.Elements.SymmetryElement.from_transformation_matrix",
+        "McUtils.Symmetry.PointGroups.PointGroup",
+        "McUtils.Symmetry.PointGroups.PointGroup.from_name",
+        "McUtils.Symmetry.PointGroups.PointGroup.get_axes_from_symmetry_elements",
+        "McUtils.Symmetry.SymmetryIdentifier.PointGroupIdentifier"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.Symmetrizer.symmetrized_internal_coordinate_expansions": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.internal_coordinate_tensors",
+        "McUtils.Numputils.tensor_reexpand"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.SymmetryIdentifier.PointGroupIdentifier.__init__": {
+      "depends_on": [
+        "McUtils.Symmetry.SymmetryIdentifier.identify_symmetry_equivalent_atoms"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.SymmetryIdentifier.PointGroupIdentifier.check_element": {
+      "depends_on": [
+        "McUtils.Symmetry.Elements.SymmetryElement"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.SymmetryIdentifier.PointGroupIdentifier.embed_point_group": {
+      "depends_on": [
+        "McUtils.Symmetry.PointGroups.PointGroup",
+        "McUtils.Symmetry.PointGroups.PointGroup.get_axes_from_symmetry_elements"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.SymmetryIdentifier.PointGroupIdentifier.find_point_group_alignment_axes": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.view_matrix",
+        "McUtils.Symmetry.Elements.ReflectionElement",
+        "McUtils.Symmetry.Elements.RotationElement",
+        "McUtils.Symmetry.PointGroups.PointGroup",
+        "McUtils.Symmetry.PointGroups.PointGroup.get_symmetry_element_primary_rotation"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.SymmetryIdentifier.PointGroupIdentifier.get_group_orders": {
+      "depends_on": [
+        "McUtils.Combinatorics",
+        "McUtils.Combinatorics.prime_factorize"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.SymmetryIdentifier.PointGroupIdentifier.get_groups": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.distance_matrix"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.SymmetryIdentifier.PointGroupIdentifier.get_groups_from_masses": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.group_by"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.SymmetryIdentifier.PointGroupIdentifier.get_rotor_type": {
+      "depends_on": [
+        "McUtils.Symmetry.Rotors.identify_rotor_type"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.SymmetryIdentifier.PointGroupIdentifier.identify_point_group": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.view_matrix",
+        "McUtils.Symmetry.Elements.ImproperRotationElement",
+        "McUtils.Symmetry.Elements.InversionElement",
+        "McUtils.Symmetry.Elements.ReflectionElement",
+        "McUtils.Symmetry.Elements.RotationElement",
+        "McUtils.Symmetry.Elements.SymmetryElement",
+        "McUtils.Symmetry.PointGroups.PointGroup",
+        "McUtils.Symmetry.PointGroups.PointGroup.from_name",
+        "McUtils.Symmetry.Rotors.RotorTypes",
+        "McUtils.Symmetry.Rotors.RotorTypes.Linear",
+        "McUtils.Symmetry.Rotors.RotorTypes.Spherical"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.SymmetryIdentifier.PointGroupIdentifier.prep_coords": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.center_of_mass",
+        "McUtils.Numputils.inertia_tensors",
+        "McUtils.Symmetry.Rotors.RotorTypes",
+        "McUtils.Symmetry.Rotors.RotorTypes.Atom",
+        "McUtils.Symmetry.SymmetryIdentifier.SymmetryEquivalentAtomData"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Symmetry.SymmetryIdentifier.identify_point_group": {
+      "depends_on": [
+        "McUtils.Symmetry.SymmetryIdentifier.PointGroupIdentifier"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Symmetry.SymmetryIdentifier.identify_symmetry_equivalent_atoms": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.distance_matrix",
+        "McUtils.Numputils.group_by"
       ],
       "kind": "function"
     },
@@ -25607,12 +26490,25 @@
       "Zachary",
       "mpl_toolkits"
     ],
+    "Profilers": [
+      "pyinstrument"
+    ],
     "Scaffolding": [
       "Devutils",
       "Extensions",
       "Graphs",
       "Parallelizers",
       "Parsers"
+    ],
+    "Symmetry": [
+      "Combinatorics",
+      "Coordinerds",
+      "Devutils",
+      "Formatters",
+      "Iterators",
+      "Jupyter",
+      "Numputils",
+      "Plots"
     ],
     "Zachary": [
       "Combinatorics",

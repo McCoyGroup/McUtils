@@ -395,7 +395,7 @@ class TemplateFormatter(string.Formatter):
             """
             ...
 
-    def __init__(self, templates):
+    def __init__(self, templates=None):
         """
         **LLM Docstring**
 
@@ -489,7 +489,7 @@ class TemplateFormatter(string.Formatter):
         """
         ...
 
-    def apply_assignment(self, key, spec) -> str:
+    def apply_assignment(self, _, spec, eval=False) -> str:
         """
         **LLM Docstring**
 

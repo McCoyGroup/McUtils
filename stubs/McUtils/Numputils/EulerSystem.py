@@ -38,6 +38,7 @@ def euler_matrix(angles, ordering='xyz'):
     :type ordering:
     """
     ...
+euler_ang_map = {'zyz': zyz_angles, 'xyz': xyz_angles, 'zyx': zyx_angles}
 
 def euler_angles(basis, ordering='xyz'):
     """Calculates the Euler angles for the basis
