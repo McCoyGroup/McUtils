@@ -1,8 +1,8 @@
-# LLM Examples
+**LLM Examples**
 
 Optional programs and toolkits must be installed for the corresponding examples.
 
-## Generate and visualize RDKit conformers
+### Generate and visualize RDKit conformers
 
 ```python
 import numpy as np
@@ -20,7 +20,7 @@ print("relative energies:", energies - energies.min())
 best.draw(image_size=(600, 400), use_coords=True)
 ```
 
-## Find and highlight a functional group
+### Find and highlight a functional group
 
 ```python
 from IPython.display import display
@@ -36,7 +36,7 @@ image = aspirin.draw(
 image.show()
 ```
 
-## Parse a CREST conformer ensemble
+### Parse a CREST conformer ensemble
 
 ```python
 import numpy as np
@@ -52,7 +52,7 @@ print("lowest energies:", relative_energies[:5])
 best_geometry = coords[0]
 ```
 
-## Submit a Slurm calculation
+### Submit a Slurm calculation
 
 ```python
 from McUtils.ExternalPrograms import SLURMExecutionEngine, ExecutionStatus
@@ -68,7 +68,7 @@ if status is ExecutionStatus.COMPLETED:
     print(future.get_result())
 ```
 
-## Optimize and differentiate an RDKit force field
+### Optimize and differentiate an RDKit force field
 
 ```python
 import numpy as np
@@ -83,7 +83,7 @@ print("status:", status, "energy:", energy)
 print("gradient norm:", np.linalg.norm(gradient), "Hessian shape:", hessian.shape)
 ```
 
-## Convert between chemical file formats
+### Convert between chemical file formats
 
 ```python
 from McUtils.ExternalPrograms import RDMolecule

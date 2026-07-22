@@ -367,9 +367,9 @@ Chained conversions are not _currently_ supported, but might well become support
 
 
 ## Examples
-# LLM Examples
+**LLM Examples**
 
-## Convert Cartesian coordinates to a Z-matrix and back
+### Convert Cartesian coordinates to a Z-matrix and back
 
 ```python
 import numpy as np
@@ -384,7 +384,7 @@ print("bond lengths and angle:", internals)
 assert np.allclose(rebuilt, water)
 ```
 
-## Convert a batch of geometries
+### Convert a batch of geometries
 
 ```python
 import numpy as np
@@ -399,7 +399,7 @@ print("trajectory shape:", internal_trajectory.shape)
 print("O-H distances:", internal_trajectory[:, 0, 0])
 ```
 
-## Use the convenience conversion interface
+### Use the convenience conversion interface
 
 ```python
 import numpy as np
@@ -415,7 +415,7 @@ assert np.allclose(pair_dists, restored_dists)
 assert np.allclose(restored, coords)
 ```
 
-## Canonicalize internal-coordinate specifications
+### Canonicalize internal-coordinate specifications
 
 ```python
 from McUtils.Coordinerds import canonicalize_internal
@@ -426,7 +426,7 @@ for original, normalized in zip(specs, canonical):
     print(original, "->", normalized)
 ```
 
-## Generate primitive coordinates from a bond graph
+### Generate primitive coordinates from a bond graph
 
 ```python
 from McUtils.Coordinerds import PrimitiveCoordinatePicker
@@ -440,7 +440,7 @@ print("primitive coordinates:", len(coordinates))
 print(coordinates[:10])
 ```
 
-## Reindex a Z-matrix ordering
+### Reindex a Z-matrix ordering
 
 ```python
 import numpy as np
@@ -467,9 +467,9 @@ print(reindexed)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-6ef2eb" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-6ef2eb"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-c37366" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-c37366"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-6ef2eb" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-c37366" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
@@ -513,9 +513,9 @@ print(reindexed)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-2ca063" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-2ca063"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-e7cd0c" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e7cd0c"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-2ca063" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e7cd0c" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

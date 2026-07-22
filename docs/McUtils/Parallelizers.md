@@ -228,9 +228,9 @@ array([0.5852531 , 0.63836097, 0.40315219, 0.04769397, 0.5226616 ,
 
 To support MPI-style calling, a `ClientServerRunner` is also provided.
 
-# `McUtils.Parallelizers` examples
+**LLM Examples**
 
-## Write backend-independent numerical code
+### Write backend-independent numerical code
 
 ```python
 import numpy as np
@@ -247,7 +247,7 @@ energies = parallelizer.map(energy, geometries,
 print(energies)
 ```
 
-## Switch to multiprocessing
+### Switch to multiprocessing
 
 ```python
 import numpy as np
@@ -262,7 +262,7 @@ with MultiprocessingParallelizer(nprocs=4) as parallelizer:
 print("mean norm:", np.mean(norms))
 ```
 
-## Share a NumPy array between processes
+### Share a NumPy array between processes
 
 ```python
 import numpy as np
@@ -281,7 +281,7 @@ finally:
     shared.unlink()
 ```
 
-## Use one parallelizer contract for serial and MPI execution
+### Use one parallelizer contract for serial and MPI execution
 
 ```python
 from McUtils.Parallelizers import Parallelizer
@@ -294,7 +294,7 @@ with parallelizer:
 print(rank, size, value)
 ```
 
-## Scatter and gather array blocks
+### Scatter and gather array blocks
 
 ```python
 import numpy as np
@@ -308,7 +308,7 @@ combined = parallelizer.gather(local)
 assert np.allclose(combined, data**2)
 ```
 
-## Share structured state
+### Share structured state
 
 ```python
 from McUtils.Parallelizers import SharedMemoryDict
@@ -336,9 +336,9 @@ finally:
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-a44170" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a44170"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-637d64" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-637d64"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a44170" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-637d64" markdown="1">
  - [BasicMultiprocessing](#BasicMultiprocessing)
 - [MapMultiprocessing](#MapMultiprocessing)
 - [MapMultiprocessingDataSmall](#MapMultiprocessingDataSmall)
@@ -352,9 +352,9 @@ finally:
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-20069e" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-20069e"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-a282fb" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-a282fb"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-20069e" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-a282fb" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

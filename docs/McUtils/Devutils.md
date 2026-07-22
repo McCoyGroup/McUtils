@@ -235,9 +235,9 @@ Provides utilities for working with objects, defaults, etc. to abstract away com
 
 
 ## Examples
-# LLM Examples
+**LLM Examples**
 
-## Route options to the functions that accept them
+### Route options to the functions that accept them
 
 ```python
 from McUtils.Devutils import OptionsSet
@@ -252,7 +252,7 @@ print("optimizer options:", accepted)
 print("workflow options:", remaining)
 ```
 
-## Validate a nested configuration
+### Validate a nested configuration
 
 ```python
 from McUtils.Devutils import Schema
@@ -266,7 +266,7 @@ config = {"method": "CCSD(T)", "resources": {"cores": 16, "queue": "long"}}
 assert schema.validate(config)
 ```
 
-## Safely write and read JSON
+### Safely write and read JSON
 
 ```python
 from McUtils.Devutils import write_json, read_json, file_hash
@@ -278,7 +278,7 @@ assert restored == configuration
 print("configuration hash:", file_hash("calculation.json"))
 ```
 
-## Use explicit default sentinels
+### Use explicit default sentinels
 
 ```python
 from McUtils.Devutils import default, is_default
@@ -291,7 +291,7 @@ def choose_backend(backend=default):
 print(choose_backend(), choose_backend("numba"))
 ```
 
-## Capture output through a logger
+### Capture output through a logger
 
 ```python
 import sys
@@ -304,7 +304,7 @@ with logger.block(tag="capturing"):
     print("energy = -76.2413")
 ```
 
-## Hash a reproducible input directory
+### Hash a reproducible input directory
 
 ```python
 from McUtils.Devutils import directory_hash, files_hash

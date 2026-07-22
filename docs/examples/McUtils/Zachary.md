@@ -106,11 +106,11 @@ gg2[1, 2] = ContourPlot(*mesh,
 </div>
 </div>
 
-# LLM examples
+**LLM Examples**
 
 These examples cover finite differences, interpolation, symbolic tensor derivatives, and molecular surfaces.
 
-## Differentiate a two-dimensional potential
+### Differentiate a two-dimensional potential
 
 ```python
 import numpy as np
@@ -129,7 +129,7 @@ assert np.allclose(gradient, [1., -3.], atol=1e-7)
 assert np.allclose(hessian, [[2., 1.], [1., 4.]], atol=1e-6)
 ```
 
-## Interpolate a periodic torsional potential
+### Interpolate a periodic torsional potential
 
 ```python
 import numpy as np
@@ -145,7 +145,7 @@ assert interpolated.shape == query.shape
 print("barrier:", interpolated.max(), "maximum slope:", np.abs(derivative).max())
 ```
 
-## Construct a solvent-excluded surface
+### Construct a solvent-excluded surface
 
 ```python
 import numpy as np
@@ -162,7 +162,7 @@ print("SES area / Å²:", mesh.surface_area() / a2b**2)
 mesh.plot(vertex_values=mesh.verts[:, 2], distance_units="Angstroms").show()
 ```
 
-## Compose a two-mode analytic potential
+### Compose a two-mode analytic potential
 
 `DifferentiableFunction` objects support arithmetic composition while retaining analytic
 derivatives. Here two Morse oscillators act on different coordinates and are coupled by
@@ -183,7 +183,7 @@ print("stationary-point gradient:", gradient[0])
 print("Hessian shape:", hessian.shape)
 ```
 
-## Differentiate a molecular stretch–bend potential
+### Differentiate a molecular stretch–bend potential
 
 `CoordinateFunction` combines the differentiable-expression framework with internal
 coordinate conversions. Its chain-rule machinery maps the resulting gradient and
@@ -205,7 +205,7 @@ print("energy:", energy, "|gradient|:", np.linalg.norm(gradient))
 print("Cartesian Hessian:", hessian.shape)
 ```
 
-## Interpolate a Cartesian reaction path
+### Interpolate a Cartesian reaction path
 
 ```python
 import numpy as np
@@ -219,7 +219,7 @@ print("reaction-path images:", images.shape)
 ```
 
 
-## Evaluate a symbolic tensor norm and Hessian
+### Evaluate a symbolic tensor norm and Hessian
 
 ```python
 import numpy as np

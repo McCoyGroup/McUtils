@@ -1,6 +1,6 @@
-# LLM Examples
+**LLM Examples**
 
-## Display rich API documentation in Jupyter
+### Display rich API documentation in Jupyter
 
 ```python
 from McUtils.Docs import jdoc
@@ -14,7 +14,7 @@ documentation = jdoc(
 documentation.display()
 ```
 
-## Extract examples from a test module
+### Extract examples from a test module
 
 ```python
 from McUtils.Docs import ExamplesParser
@@ -26,7 +26,7 @@ print("all documented functions:", len(names))
 print("finite-difference examples:", finite_difference_examples)
 ```
 
-## Build package stubs and summaries
+### Build package stubs and summaries
 
 ```python
 from McUtils.Docs import StubSummaryBuilder
@@ -40,7 +40,7 @@ print("stub bytes:", summary["stub_size"])
 print("summary bytes:", summary["summary_size"])
 ```
 
-## Render static HTML documentation
+### Render static HTML documentation
 
 ```python
 from McUtils.Docs import static_doc
@@ -53,7 +53,7 @@ html = static_doc(
 print("generated HTML characters:", len(html))
 ```
 
-## Walk an object hierarchy
+### Walk an object hierarchy
 
 ```python
 from McUtils.Docs import DocWalker
@@ -64,7 +64,7 @@ documentation = walker.visit_root(Numputils, max_depth=1)
 print(documentation)
 ```
 
-## Build a documentation site
+### Build a documentation site
 
 ```python
 from McUtils.Docs import DocBuilder

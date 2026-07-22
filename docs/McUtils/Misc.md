@@ -59,9 +59,9 @@ Defines a set of miscellaneous helper utilities that are commonly used across pr
 
 
 ## Examples
-# `McUtils.Misc` examples
+**LLM Examples**
 
-## Compile a symbolic numerical expression
+### Compile a symbolic numerical expression
 
 ```python
 import numpy as np
@@ -76,7 +76,7 @@ points = np.array([[1., 2., 3.], [.5, .5, .5]])
 assert np.allclose(energy(points), [7., .375])
 ```
 
-## Write code that works with or without Numba
+### Write code that works with or without Numba
 
 ```python
 import numpy as np
@@ -94,7 +94,7 @@ def pairwise_distances(points):
 print(pairwise_distances(np.eye(3)))
 ```
 
-## Track modifications during debugging
+### Track modifications during debugging
 
 ```python
 from types import SimpleNamespace
@@ -109,7 +109,7 @@ tracked.iteration += 1
 print("updated state:", state)
 ```
 
-## Construct and compile a symbolic polynomial
+### Construct and compile a symbolic polynomial
 
 ```python
 import numpy as np
@@ -122,7 +122,7 @@ grid = np.linspace(-2, 2, 9)
 print(function(grid))
 ```
 
-## Build a symbolic NumPy reduction
+### Build a symbolic NumPy reduction
 
 ```python
 import numpy as np
@@ -134,7 +134,7 @@ rms = rms_expr.compile({"np": np})
 print("RMS:", rms(np.array([1., -2., 3.])))
 ```
 
-## Inspect whether Numba is available
+### Inspect whether Numba is available
 
 ```python
 from McUtils.Misc.NumbaTools import NumbaState, load_numba
@@ -161,17 +161,17 @@ print("Numba state:", NumbaState)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-860e82" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-860e82"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-f1b1e4" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-f1b1e4"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-860e82" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-f1b1e4" markdown="1">
  - [Symbolics](#Symbolics)
 - [TeXWriter](#TeXWriter)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-2edae6" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-2edae6"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-502144" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-502144"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-2edae6" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-502144" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

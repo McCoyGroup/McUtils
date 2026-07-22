@@ -70,9 +70,9 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 
 
 ## Examples
-# LLM Examples
+**LLM Examples**
 
-## Display rich API documentation in Jupyter
+### Display rich API documentation in Jupyter
 
 ```python
 from McUtils.Docs import jdoc
@@ -86,7 +86,7 @@ documentation = jdoc(
 documentation.display()
 ```
 
-## Extract examples from a test module
+### Extract examples from a test module
 
 ```python
 from McUtils.Docs import ExamplesParser
@@ -98,7 +98,7 @@ print("all documented functions:", len(names))
 print("finite-difference examples:", finite_difference_examples)
 ```
 
-## Build package stubs and summaries
+### Build package stubs and summaries
 
 ```python
 from McUtils.Docs import StubSummaryBuilder
@@ -112,7 +112,7 @@ print("stub bytes:", summary["stub_size"])
 print("summary bytes:", summary["summary_size"])
 ```
 
-## Render static HTML documentation
+### Render static HTML documentation
 
 ```python
 from McUtils.Docs import static_doc
@@ -125,7 +125,7 @@ html = static_doc(
 print("generated HTML characters:", len(html))
 ```
 
-## Walk an object hierarchy
+### Walk an object hierarchy
 
 ```python
 from McUtils.Docs import DocWalker
@@ -136,7 +136,7 @@ documentation = walker.visit_root(Numputils, max_depth=1)
 print(documentation)
 ```
 
-## Build a documentation site
+### Build a documentation site
 
 ```python
 from McUtils.Docs import DocBuilder
@@ -163,19 +163,18 @@ builder.build()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-fce8c2" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-fce8c2"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-5fc3a2" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-5fc3a2"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-fce8c2" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-5fc3a2" markdown="1">
  - [McUtilsDoc](#McUtilsDoc)
 - [PsienceDoc](#PsienceDoc)
 - [ParseExamples](#ParseExamples)
-- [FormatSpec](#FormatSpec)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-686efc" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-686efc"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-4bd954" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-4bd954"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-686efc" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-4bd954" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -282,24 +281,6 @@ class DocsTests(TestCase):
     def test_ParseExamples(self):
         parser = ExamplesParser.from_file(os.path.abspath(__file__))
         self.assertTrue(hasattr(parser.functions, 'items'))
-```
-
-#### <a name="FormatSpec">FormatSpec</a>
-```python
-    def test_FormatSpec(self):
-        fmt = inspect.cleandoc("""
-        ### My Data
-
-        {$:b=loop(add_temp, l1, l2, slots=['l1', 'l2'])}
-        {$:len(b) ** 2}
-
-
-        """)
-
-        print("",
-              TemplateFormatter().format(fmt, param=2, l1=[1, 2, 3], l2=[4, 5, 6], add_temp='{l1} + {l2}', p1=1, p2=0),
-              sep="\n"
-              )
 ```
 
  </div>

@@ -158,9 +158,9 @@ array([0.5852531 , 0.63836097, 0.40315219, 0.04769397, 0.5226616 ,
 
 To support MPI-style calling, a `ClientServerRunner` is also provided.
 
-# `McUtils.Parallelizers` examples
+**LLM Examples**
 
-## Write backend-independent numerical code
+### Write backend-independent numerical code
 
 ```python
 import numpy as np
@@ -177,7 +177,7 @@ energies = parallelizer.map(energy, geometries,
 print(energies)
 ```
 
-## Switch to multiprocessing
+### Switch to multiprocessing
 
 ```python
 import numpy as np
@@ -192,7 +192,7 @@ with MultiprocessingParallelizer(nprocs=4) as parallelizer:
 print("mean norm:", np.mean(norms))
 ```
 
-## Share a NumPy array between processes
+### Share a NumPy array between processes
 
 ```python
 import numpy as np
@@ -211,7 +211,7 @@ finally:
     shared.unlink()
 ```
 
-## Use one parallelizer contract for serial and MPI execution
+### Use one parallelizer contract for serial and MPI execution
 
 ```python
 from McUtils.Parallelizers import Parallelizer
@@ -224,7 +224,7 @@ with parallelizer:
 print(rank, size, value)
 ```
 
-## Scatter and gather array blocks
+### Scatter and gather array blocks
 
 ```python
 import numpy as np
@@ -238,7 +238,7 @@ combined = parallelizer.gather(local)
 assert np.allclose(combined, data**2)
 ```
 
-## Share structured state
+### Share structured state
 
 ```python
 from McUtils.Parallelizers import SharedMemoryDict

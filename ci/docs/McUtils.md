@@ -64,26 +64,37 @@ been written over the years.
 [Parallelizers](McUtils/Parallelizers.md)   
 </div>
    <div class="col" markdown="1">
-[Devutils](McUtils/Devutils.md)   
+[Profilers](McUtils/Profilers.md)   
 </div>
    <div class="col" markdown="1">
-[Combinatorics](McUtils/Combinatorics.md)   
+[Devutils](McUtils/Devutils.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[Combinatorics](McUtils/Combinatorics.md)   
+</div>
    <div class="col" markdown="1">
 [Graphs](McUtils/Graphs.md)   
 </div>
    <div class="col" markdown="1">
 [Iterators](McUtils/Iterators.md)   
 </div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[Symmetry](McUtils/Symmetry.md)   
+</div>
    <div class="col" markdown="1">
 [Docs](McUtils/Docs.md)   
+</div>
+   <div class="col" markdown="1">
+[Misc](McUtils/Misc.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Misc](McUtils/Misc.md)   
+   
 </div>
    <div class="col" markdown="1">
    

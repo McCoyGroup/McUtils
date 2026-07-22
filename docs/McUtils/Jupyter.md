@@ -368,11 +368,11 @@ for working in Jupyter (primarily JupterLab) environments
 
 
 ## Examples
-# LLM Examples
+**LLM Examples**
 
 Run these examples in JupyterLab or another IPython notebook.
 
-## Compose a calculation summary card
+### Compose a calculation summary card
 
 ```python
 from McUtils.Jupyter import JHTML
@@ -387,7 +387,7 @@ layout = JHTML.Div(JHTML.HTML.Header("Electronic-structure summary"), card,
 layout.display()
 ```
 
-## Generate SVG graphics programmatically
+### Generate SVG graphics programmatically
 
 ```python
 from McUtils.Jupyter import JHTML
@@ -401,7 +401,7 @@ drawing = SVG.Svg(
 drawing.display()
 ```
 
-## Build a small interactive control panel
+### Build a small interactive control panel
 
 ```python
 from McUtils.Jupyter import JHTML, Button
@@ -418,7 +418,7 @@ with JHTML.OutputArea() as output:
 div
 ```
 
-## Style generated HTML with CSS
+### Style generated HTML with CSS
 
 ```python
 from McUtils.Jupyter import JHTML
@@ -437,7 +437,7 @@ JHTML.Div(
 ).display()
 ```
 
-## Lay out several calculation panels
+### Lay out several calculation panels
 
 ```python
 from McUtils.Jupyter import JHTML
@@ -448,7 +448,7 @@ columns = [JHTML.Bootstrap.Col(card, width=4) for card in cards]
 JHTML.Bootstrap.Row(*columns).display()
 ```
 
-## Embed an X3D scene
+### Embed an X3D scene
 
 ```python
 from McUtils.Jupyter import JHTML
@@ -475,9 +475,9 @@ JHTML.Div(scene, dynamic=False).display()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-cd0200" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-cd0200"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-d6e768" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-d6e768"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-cd0200" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-d6e768" markdown="1">
  - [HTML](#HTML)
 - [Styles](#Styles)
 - [WidgetConstruction](#WidgetConstruction)
@@ -486,9 +486,9 @@ JHTML.Div(scene, dynamic=False).display()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-9a8c5a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-9a8c5a"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-1eae05" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-1eae05"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-9a8c5a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-1eae05" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

@@ -357,11 +357,11 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 
 
 ## Examples
-# LLM Examples
+**LLM Examples**
 
 Optional programs and toolkits must be installed for the corresponding examples.
 
-## Generate and visualize RDKit conformers
+### Generate and visualize RDKit conformers
 
 ```python
 import numpy as np
@@ -379,7 +379,7 @@ print("relative energies:", energies - energies.min())
 best.draw(image_size=(600, 400), use_coords=True)
 ```
 
-## Find and highlight a functional group
+### Find and highlight a functional group
 
 ```python
 from IPython.display import display
@@ -395,7 +395,7 @@ image = aspirin.draw(
 image.show()
 ```
 
-## Parse a CREST conformer ensemble
+### Parse a CREST conformer ensemble
 
 ```python
 import numpy as np
@@ -411,7 +411,7 @@ print("lowest energies:", relative_energies[:5])
 best_geometry = coords[0]
 ```
 
-## Submit a Slurm calculation
+### Submit a Slurm calculation
 
 ```python
 from McUtils.ExternalPrograms import SLURMExecutionEngine, ExecutionStatus
@@ -427,7 +427,7 @@ if status is ExecutionStatus.COMPLETED:
     print(future.get_result())
 ```
 
-## Optimize and differentiate an RDKit force field
+### Optimize and differentiate an RDKit force field
 
 ```python
 import numpy as np
@@ -442,7 +442,7 @@ print("status:", status, "energy:", energy)
 print("gradient norm:", np.linalg.norm(gradient), "Hessian shape:", hessian.shape)
 ```
 
-## Convert between chemical file formats
+### Convert between chemical file formats
 
 ```python
 from McUtils.ExternalPrograms import RDMolecule
@@ -470,9 +470,9 @@ print("PDB lines:", len(pdb.splitlines()))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-500930" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-500930"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-cd16d9" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-cd16d9"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-500930" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-cd16d9" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [ParseReports](#ParseReports)
@@ -491,9 +491,9 @@ print("PDB lines:", len(pdb.splitlines()))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-5176fd" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-5176fd"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-c21d14" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c21d14"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-5176fd" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c21d14" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

@@ -1,6 +1,6 @@
-# LLM Examples
+**LLM Examples**
 
-## Describe a compiled function signature
+### Describe a compiled function signature
 
 ```python
 import numpy as np
@@ -19,7 +19,7 @@ prepared = signature.prep_args((), {"natoms": 3, "coordinates": coords,
 print(signature.cpp_signature, prepared[1].shape)
 ```
 
-## Wrap a shared-library function
+### Wrap a shared-library function
 
 ```python
 from McUtils.Extensions import SharedLibraryFunction, FunctionSignature
@@ -35,7 +35,7 @@ potential = SharedLibraryFunction("libmbpol.so", signature)
 print(potential)
 ```
 
-## Configure a C++ extension loader
+### Configure a C++ extension loader
 
 ```python
 from McUtils.Extensions import CLoader
@@ -51,7 +51,7 @@ module = loader.load()
 print("loaded:", module)
 ```
 
-## Infer arguments from Python-style specifications
+### Infer arguments from Python-style specifications
 
 ```python
 from McUtils.Extensions import FunctionSignature
@@ -63,7 +63,7 @@ print("C++ declaration:", signature.cpp_signature)
 print("ctypes arguments:", signature.arg_types)
 ```
 
-## Manage a collection of shared-library calls
+### Manage a collection of shared-library calls
 
 ```python
 from McUtils.Extensions import SharedLibrary
@@ -77,7 +77,7 @@ library = SharedLibrary(
 print(library.energy, library.gradient)
 ```
 
-## Load a Python module dynamically
+### Load a Python module dynamically
 
 ```python
 from McUtils.Extensions import ModuleLoader

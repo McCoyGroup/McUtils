@@ -1,7 +1,7 @@
 
-# LLM Examples
+**LLM Examples**
 
-## Serialize and restore a sparse scientific object
+### Serialize and restore a sparse scientific object
 
 ```python
 import numpy as np
@@ -16,7 +16,7 @@ assert np.allclose(restored.asarray(), matrix.asarray())
 print("protocol:", payload["pseudopickle_protocol"])
 ```
 
-## Checkpoint an iterative calculation
+### Checkpoint an iterative calculation
 
 ```python
 import numpy as np
@@ -31,7 +31,7 @@ with JSONCheckpointer("optimization.json") as checkpoint:
     print("restart at iteration", checkpoint["iteration"] + 1)
 ```
 
-## Use structured logging blocks
+### Use structured logging blocks
 
 ```python
 from McUtils.Scaffolding import Logger
@@ -44,7 +44,7 @@ with logger.block(tag="Optimization step {step}", step=1):
 logger.log_print("Calculation complete")
 ```
 
-## Cache an expensive calculation
+### Cache an expensive calculation
 
 ```python
 from McUtils.Scaffolding import MaxSizeCache
@@ -56,7 +56,7 @@ for key, value in [("HF", -75.98), ("MP2", -76.23),
 print("retained keys:", list(cache.keys()))
 ```
 
-## Persist a nested tree in HDF5
+### Persist a nested tree in HDF5
 
 ```python
 import numpy as np
@@ -70,7 +70,7 @@ restored = serializer.deserialize("structure.hdf5")
 assert np.allclose(restored["coordinates"], data["coordinates"])
 ```
 
-## Load a file-backed configuration
+### Load a file-backed configuration
 
 ```python
 from McUtils.Scaffolding import Config

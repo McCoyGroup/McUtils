@@ -147,9 +147,9 @@ Defines a set of formatting utilities
 
 
 ## Examples
-# LLM Examples
+**LLM Examples**
 
-## Format a hierarchical results table
+### Format a hierarchical results table
 
 ```python
 from McUtils.Formatters import TableFormatter
@@ -165,7 +165,7 @@ table = TableFormatter.format_tree(
 print(table)
 ```
 
-## Build a TeX equation
+### Build a TeX equation
 
 ```python
 from McUtils.Formatters import TeX
@@ -178,7 +178,7 @@ block = TeX.Equation(equation, label="eq:normal-modes")
 print(block.format_tex())
 ```
 
-## Render a mixed TeX table
+### Render a mixed TeX table
 
 ```python
 from McUtils.Formatters import TeX
@@ -192,7 +192,7 @@ table = TeX.Table(headers, rows, caption="Electronic energies",
 print(table.format_tex())
 ```
 
-## Render a directory of templates
+### Render a directory of templates
 
 ```python
 from McUtils.Formatters import TemplateWriter
@@ -204,7 +204,7 @@ writer = TemplateWriter(
 writer.write_all({"method": "B3LYP", "basis": "6-31G*", "charge": 0})
 ```
 
-## Select files with composable matchers
+### Select files with composable matchers
 
 ```python
 from pathlib import Path
@@ -216,7 +216,7 @@ files = [path for path in Path("calculations").rglob("*")
 print("matched outputs:", files)
 ```
 
-## Flatten a TeX project
+### Flatten a TeX project
 
 ```python
 from McUtils.Formatters import TeXTranspiler

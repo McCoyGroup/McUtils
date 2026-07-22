@@ -1,5 +1,5 @@
 
-## FChk Parsing
+### FChk Parsing
 
 Gaussian `.fchk` files have a set structure which looks roughly like
 ```lang-none
@@ -24,7 +24,7 @@ my_coords = res["Current cartesian coordinates"]
 ```
 
 
-## Log Parsing
+### Log Parsing
 
 Gaussian `.log` files are totally unstructured (and a bit of a disaster). 
 This means we need to write custom parsing logic for every field we might want.
@@ -45,7 +45,7 @@ and to access properties you will pull them from the dict, `res`
 my_coords = res["StandardCartesianCoordinates"]
 ```
 
-### Adding New Parsing Fields
+#### Adding New Parsing Fields
 
 New parse fields can be added by registering a property on `GaussianLogComponents`. 
 Each field is defined as a dict like
@@ -70,7 +70,7 @@ You can add to `GaussianLogComponents` at runtime.
 Not all changes need to be integrated directly into the file.
 {: .alert .alert-info}
 
-#### Creating Parsers
+##### Creating Parsers
 
 As a concrete example, for a simple property the coordinates, there is a series of blocks each of which looks like
 
@@ -203,7 +203,7 @@ GaussianLogComponents["ZMatCartesianCoordinates"] = {
 
 where the reader now initially looks for the tag `Z-Matrix orientation:` and then skips over the delimiters twice.
 
-#### Dealing with Optimizations
+##### Dealing with Optimizations
 
 We can use the same type of trick to deal with parameters coming from optimizations.
 For instance, to get the dipole moments from a relaxed scan, we do the following
@@ -283,13 +283,13 @@ If no matches were found, the value of `match` defaults to `None` and we do noth
 Finally, we allow the `match` to actually parse out the dipole moment by accessing its `value` attribute, and
 then we return the `array` from that which contains the matched dipole moment.
 
-## GJF Setup
+### GJF Setup
 
 Support is also provided for the automatic generation of Gaussian job files (`.gjf`) through the `GaussianJob` class.
 
-# LLM Examples
+**LLM Examples**
 
-## Extract geometries and energies from a scan
+### Extract geometries and energies from a scan
 
 ```python
 import numpy as np
@@ -305,7 +305,7 @@ print("scan range / kcal mol^-1:", relative.ptp())
 minimum_geometry = geometries[np.argmin(scan_energies)]
 ```
 
-## Read dipoles along a trajectory
+### Read dipoles along a trajectory
 
 ```python
 import numpy as np
@@ -320,7 +320,7 @@ print("initial and final dipoles:", magnitudes[[0, -1]])
 print("number of optimization structures:", len(geometries))
 ```
 
-## Inspect formatted-checkpoint derivatives
+### Inspect formatted-checkpoint derivatives
 
 ```python
 from McUtils.GaussianInterface import GaussianFChkReader
@@ -335,7 +335,7 @@ print("gradient norm:", (gradient**2).sum() ** .5)
 print("force-constant data shape:", force_constants.shape)
 ```
 
-## Read normal modes and frequencies
+### Read normal modes and frequencies
 
 ```python
 import numpy as np
@@ -350,7 +350,7 @@ print("frequency range:", frequencies.min(), frequencies.max())
 print("normal-mode tensor:", displacements.shape)
 ```
 
-## Limit parsing to the final structures
+### Limit parsing to the final structures
 
 ```python
 from McUtils.GaussianInterface import GaussianLogReader
@@ -363,7 +363,7 @@ for index, geometry in enumerate(structures):
 final_geometry = structures[-1]
 ```
 
-## Inspect the Gaussian job header
+### Inspect the Gaussian job header
 
 ```python
 from McUtils.GaussianInterface import GaussianLogReader

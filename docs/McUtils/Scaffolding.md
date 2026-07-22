@@ -168,9 +168,9 @@ In order of usefulness, the design is:
 
 ## Examples
 
-# LLM Examples
+**LLM Examples**
 
-## Serialize and restore a sparse scientific object
+### Serialize and restore a sparse scientific object
 
 ```python
 import numpy as np
@@ -185,7 +185,7 @@ assert np.allclose(restored.asarray(), matrix.asarray())
 print("protocol:", payload["pseudopickle_protocol"])
 ```
 
-## Checkpoint an iterative calculation
+### Checkpoint an iterative calculation
 
 ```python
 import numpy as np
@@ -200,7 +200,7 @@ with JSONCheckpointer("optimization.json") as checkpoint:
     print("restart at iteration", checkpoint["iteration"] + 1)
 ```
 
-## Use structured logging blocks
+### Use structured logging blocks
 
 ```python
 from McUtils.Scaffolding import Logger
@@ -213,7 +213,7 @@ with logger.block(tag="Optimization step {step}", step=1):
 logger.log_print("Calculation complete")
 ```
 
-## Cache an expensive calculation
+### Cache an expensive calculation
 
 ```python
 from McUtils.Scaffolding import MaxSizeCache
@@ -225,7 +225,7 @@ for key, value in [("HF", -75.98), ("MP2", -76.23),
 print("retained keys:", list(cache.keys()))
 ```
 
-## Persist a nested tree in HDF5
+### Persist a nested tree in HDF5
 
 ```python
 import numpy as np
@@ -239,7 +239,7 @@ restored = serializer.deserialize("structure.hdf5")
 assert np.allclose(restored["coordinates"], data["coordinates"])
 ```
 
-## Load a file-backed configuration
+### Load a file-backed configuration
 
 ```python
 from McUtils.Scaffolding import Config
@@ -264,9 +264,9 @@ print(config.name, options)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-e9d21a" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-e9d21a"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-fbcfa4" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-fbcfa4"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-e9d21a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-fbcfa4" markdown="1">
  - [Schema](#Schema)
 - [TreeFlattening](#TreeFlattening)
 - [Pseudopickle](#Pseudopickle)
@@ -293,9 +293,9 @@ print(config.name, options)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-a84d50" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-a84d50"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-a9d82f" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-a9d82f"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-a84d50" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-a9d82f" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

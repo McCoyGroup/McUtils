@@ -1,5 +1,5 @@
 
-## RegexPattern
+### RegexPattern
 
 A `RegexPattern` is a higher-level interface to work with the [regular expression](https://en.wikipedia.org/wiki/Regular_expression) (regex) string pattern matching language.
 Python provides support for regular expressions through the [`re`](https://docs.python.org/3/library/re.html) module.
@@ -14,7 +14,7 @@ There are a bunch of different `RegexPattern` instances that cover different cas
 * `VariableName`: matches a string of digits or text as the first character is a letter
 * `Optional`: represents an _optional_ pattern to match
 
-### Capturing/Named
+#### Capturing/Named
 
 When matching pieces of text it is also important to specify which pieces of text we would like to actually get back out.
 For this there are two main `RegexPattern` instances.
@@ -65,7 +65,7 @@ for match in matches[:5]:
 </div>
 </div>
 
-## StringParser
+### StringParser
 
 A more powerful interface than `RegexPattern` is through a `StringParser` instance.
 This provides a wrapper on `RegexPattern` that handles the process of turning matches into `NumPy` arrays of the appropriate type.
@@ -114,7 +114,7 @@ As the data type has organically evolved it has become potentially tough to unde
 A reimplementation based on `recarray` would _potentially_ solve some issues.
 {: .alert .alert-warning}
 
-### Block Handlers
+#### Block Handlers
 
 For efficiency sake, `StringParser` objects also provide a `block_handlers` argument (and handlers can be defined on `RegexPatterns` directly).
 A handler is a function that can be applied to a parsed piece of text and should directly return a `NumPy` array so that it can be worked into the returned `StructuredTypeArray`.
@@ -135,9 +135,9 @@ Named(
 Here `StringParser.array_handler(dtype=float)` provides efficient parsing of data through `np.loadtxt` with a `float` as the target `dtype`.
 We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
-# LLM Examples
+**LLM Examples**
 
-## Build a declarative parser for numerical records
+### Build a declarative parser for numerical records
 
 ```python
 from McUtils.Parsers import RegexPattern, Repeating, Capturing
@@ -152,7 +152,7 @@ values = parser.parse("Eigenvalues --  -0.1423  0.0781  0.2114")
 print(values.array)
 ```
 
-## Stream structures from an XYZ trajectory
+### Stream structures from an XYZ trajectory
 
 ```python
 from McUtils.Parsers import XYZParser
@@ -164,7 +164,7 @@ for comment, atoms, coords in structures:
 first_geometry = structures[0][2]
 ```
 
-## Parse selected fields from a CIF
+### Parse selected fields from a CIF
 
 ```python
 from McUtils.ExternalPrograms import CIFParser, CIFConverter
@@ -179,7 +179,7 @@ print("cell:", crystal.cell_properties())
 print("expanded structure:", len(atoms), coordinates.shape)
 ```
 
-## Compose named fields into structured data
+### Compose named fields into structured data
 
 ```python
 from McUtils.Parsers import RegexPattern, Named, Number, VariableName, Whitespace
@@ -192,7 +192,7 @@ parsed = parser.parse("Energy -76.2413")
 print(parsed["label"].array, parsed["value"].array)
 ```
 
-## Search a large file without loading it all
+### Search a large file without loading it all
 
 ```python
 from McUtils.Parsers import FileStreamReader, FileStreamerTag

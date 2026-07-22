@@ -1,6 +1,6 @@
-# `McUtils.Misc` examples
+**LLM Examples**
 
-## Compile a symbolic numerical expression
+### Compile a symbolic numerical expression
 
 ```python
 import numpy as np
@@ -15,7 +15,7 @@ points = np.array([[1., 2., 3.], [.5, .5, .5]])
 assert np.allclose(energy(points), [7., .375])
 ```
 
-## Write code that works with or without Numba
+### Write code that works with or without Numba
 
 ```python
 import numpy as np
@@ -33,7 +33,7 @@ def pairwise_distances(points):
 print(pairwise_distances(np.eye(3)))
 ```
 
-## Track modifications during debugging
+### Track modifications during debugging
 
 ```python
 from types import SimpleNamespace
@@ -48,7 +48,7 @@ tracked.iteration += 1
 print("updated state:", state)
 ```
 
-## Construct and compile a symbolic polynomial
+### Construct and compile a symbolic polynomial
 
 ```python
 import numpy as np
@@ -61,7 +61,7 @@ grid = np.linspace(-2, 2, 9)
 print(function(grid))
 ```
 
-## Build a symbolic NumPy reduction
+### Build a symbolic NumPy reduction
 
 ```python
 import numpy as np
@@ -73,7 +73,7 @@ rms = rms_expr.compile({"np": np})
 print("RMS:", rms(np.array([1., -2., 3.])))
 ```
 
-## Inspect whether Numba is available
+### Inspect whether Numba is available
 
 ```python
 from McUtils.Misc.NumbaTools import NumbaState, load_numba

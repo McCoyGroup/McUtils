@@ -93,9 +93,9 @@ The existing `ExtensionLoader` will be moving here, and will be supplemented by 
 
 
 ## Examples
-# LLM Examples
+**LLM Examples**
 
-## Describe a compiled function signature
+### Describe a compiled function signature
 
 ```python
 import numpy as np
@@ -114,7 +114,7 @@ prepared = signature.prep_args((), {"natoms": 3, "coordinates": coords,
 print(signature.cpp_signature, prepared[1].shape)
 ```
 
-## Wrap a shared-library function
+### Wrap a shared-library function
 
 ```python
 from McUtils.Extensions import SharedLibraryFunction, FunctionSignature
@@ -130,7 +130,7 @@ potential = SharedLibraryFunction("libmbpol.so", signature)
 print(potential)
 ```
 
-## Configure a C++ extension loader
+### Configure a C++ extension loader
 
 ```python
 from McUtils.Extensions import CLoader
@@ -146,7 +146,7 @@ module = loader.load()
 print("loaded:", module)
 ```
 
-## Infer arguments from Python-style specifications
+### Infer arguments from Python-style specifications
 
 ```python
 from McUtils.Extensions import FunctionSignature
@@ -158,7 +158,7 @@ print("C++ declaration:", signature.cpp_signature)
 print("ctypes arguments:", signature.arg_types)
 ```
 
-## Manage a collection of shared-library calls
+### Manage a collection of shared-library calls
 
 ```python
 from McUtils.Extensions import SharedLibrary
@@ -172,7 +172,7 @@ library = SharedLibrary(
 print(library.energy, library.gradient)
 ```
 
-## Load a Python module dynamically
+### Load a Python module dynamically
 
 ```python
 from McUtils.Extensions import ModuleLoader
@@ -198,9 +198,9 @@ print("plugin module:", module.__name__)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-36e7d2" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-36e7d2"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-64820e" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-64820e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-36e7d2" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-64820e" markdown="1">
  - [BasicTypeSig](#BasicTypeSig)
 - [SOSig](#SOSig)
 - [SharedLibraryFunction](#SharedLibraryFunction)
@@ -210,9 +210,9 @@ print("plugin module:", module.__name__)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-c2b277" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c2b277"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-3031f3" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-3031f3"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c2b277" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-3031f3" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

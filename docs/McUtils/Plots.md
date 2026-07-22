@@ -516,9 +516,9 @@ Image/animation support and other back end support for 3D graphics (`VTK`) are p
 
 
 ## Examples
-# LLM Examples
+**LLM Examples**
 
-## Overlay a model and observations
+### Overlay a model and observations
 
 ```python
 import numpy as np
@@ -534,7 +534,7 @@ figure.axes_labels = ["phase / rad", "signal"]
 figure.show()
 ```
 
-## Plot a three-dimensional surface
+### Plot a three-dimensional surface
 
 ```python
 import numpy as np
@@ -548,7 +548,7 @@ figure = Plot3D(xx, yy, zz, plot_style={"cmap": "viridis"},
 figure.show()
 ```
 
-## Apply a reusable theme
+### Apply a reusable theme
 
 ```python
 import numpy as np
@@ -564,7 +564,7 @@ fig = Plot(x, np.exp(-x) * np.cos(5 * x), axes_labels=["t", "signal"], theme="pa
 fig.show()
 ```
 
-## Compare scalar fields in a graphics grid
+### Compare scalar fields in a graphics grid
 
 ```python
 import numpy as np
@@ -579,7 +579,7 @@ for column, (field, label) in enumerate(zip(fields, ["density", "x-weighted dens
 grid.show()
 ```
 
-## Draw geometric primitives in 3-D
+### Draw geometric primitives in 3-D
 
 ```python
 import numpy as np
@@ -608,9 +608,9 @@ figure.show()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-45c3f2" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-45c3f2"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-90f506" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-90f506"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-45c3f2" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-90f506" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -638,9 +638,9 @@ figure.show()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-89b63c" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-89b63c"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-73e8e0" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-73e8e0"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-89b63c" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-73e8e0" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
