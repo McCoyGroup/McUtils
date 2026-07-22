@@ -599,6 +599,9 @@ class TemplateASTEvaluator:
             return self.evaluate_node(node.value).__getitem__(self.evaluate_node(node.slice))
         elif isinstance(node, ast.Index):
             return self.evaluate_node(node.value)
+        elif isinstance(node, ast.NamedExpr):
+            self.evaluate_node(ast.Assign(targets=[node.target], value=node.value))
+            return self.format_parameters[node.target.id]
         elif isinstance(node, ast.Call):
             if isinstance(node.func, ast.Attribute): # subattr of some object...I guess we can call it?
                 directive = self.evaluate_node(node.func)
@@ -654,7 +657,7 @@ class TemplateFormatter(string.Formatter):
             :rtype: None
             """
             raise TypeError("`frozendict` is immutable")
-    def __init__(self, templates):
+    def __init__(self, templates=None):
         """
         **LLM Docstring**
 
@@ -666,6 +669,8 @@ class TemplateFormatter(string.Formatter):
         :return: `None`.
         :rtype: None
         """
+        if templates is None:
+            templates = []
         self.__templates = self.frozendict(templates)
         self._fmt_stack = []
     @property
@@ -749,8 +754,16 @@ class TemplateFormatter(string.Formatter):
         :return: The evaluated directive-expression result.
         :rtype: str
         """
-        return self.apply_eval_tree(_, "("+spec+")")
-    def apply_assignment(self, key, spec) -> str:
+        bits = spec.split("=", 1)
+        is_assignment = False
+        if len(bits) == 2:
+            key = bits[0].strip()
+            is_assignment = re.match("^[a-zA-Z_][a-zA-Z_0-9]*$", key)
+        if is_assignment:
+            return self.apply_assignment(_, spec)
+        else:
+            return self.apply_eval_tree(_, "("+spec+")")
+    def apply_assignment(self, _, spec) -> str:
         """
         **LLM Docstring**
 
@@ -765,7 +778,7 @@ class TemplateFormatter(string.Formatter):
         :rtype: str
         """
         key, val = spec.split("=", 1)
-        self.format_parameters[key] = val
+        self.format_parameters[key] = self.apply_eval_tree(_, "("+val+")")
         return ""
     def apply_raw(self, key, spec) -> str:
         """

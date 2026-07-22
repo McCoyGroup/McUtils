@@ -35,7 +35,7 @@ class FormatterTests(TestCase):
             )
         )
 
-    @debugTest
+    @validationTest
     def test_TeXTranspile(self):
         print()
 
@@ -68,3 +68,35 @@ class FormatterTests(TestCase):
         # )
 
         transpiler.transpile(os.path.expanduser('~/Desktop/wat'), allow_missing_styles=True)
+
+    @validationTest
+    def test_TeXWriter(self):
+        array = [[1, 2, 3], [4, 500000, 6]]
+        arr_tex = TeX.wrap_parens(TeX.Array(array))
+        print(arr_tex.format_tex())
+        o = TeX.Symbol('omega')
+        i = TeX.Symbol('i')
+        f = TeX.Symbol(TeX.bold('f'))
+        sum = TeX.Symbol('sum')
+        expr = sum[i:0:5] | o ** 2
+        expr = f.Eq(arr_tex)
+        print(TeX.Equation(expr, label='fmat').format_tex())
+
+    @validationTest
+    def test_FormatSpec(self):
+        import inspect
+
+        fmt = inspect.cleandoc("""
+            ### My Data
+            {$:b=loop_template(add_temp, l1, l2, joiner=j)}
+            {$:b}
+            {$:len(b)**2}
+            {$:len(c:=loop_template(add_temp, l1, l2, joiner=j))**2}
+            {$:c}
+        
+            """)
+
+        print("",
+              TemplateFormatter().format(fmt, param=2, l1=[1, 2, 3], l2=[4, 5, 6], add_temp='{} + {}', j=" + "),
+              sep="\n"
+              )
