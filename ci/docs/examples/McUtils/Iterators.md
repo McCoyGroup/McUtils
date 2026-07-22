@@ -1,6 +1,6 @@
-# LLM Examples
+**LLM Examples**
 
-## Batch a stream of calculations
+### Batch a stream of calculations
 
 ```python
 from McUtils.Iterators import chunked, counts
@@ -16,7 +16,7 @@ for batch_number, batch in enumerate(chunked(jobs, 2), 1):
     print("submitting batch", batch_number, batch)
 ```
 
-## Flatten nested results while preserving records
+### Flatten nested results while preserving records
 
 ```python
 from McUtils.Iterators import flatten, delete_duplicates
@@ -30,7 +30,7 @@ print("molecules:", molecules)
 print("energies:", energies)
 ```
 
-## Traverse a Cartesian product in zigzag order
+### Traverse a Cartesian product in zigzag order
 
 ```python
 from McUtils.Iterators import zigzag_product
@@ -42,7 +42,7 @@ for temperature, pressure in scan:
     print(f"T={temperature} K, P={pressure} bar")
 ```
 
-## Transpose ragged result streams
+### Transpose ragged result streams
 
 ```python
 from McUtils.Iterators import transpose
@@ -55,7 +55,7 @@ print(energies)
 print(timings)
 ```
 
-## Interleave atomic positions and footer info
+### Interleave atomic positions and footer info
 
 ```python
 from McUtils.Iterators import riffle
@@ -68,7 +68,7 @@ for block in riffle(records, joins):
     print(block)
 ```
 
-## Find the first converged result
+### Find the first converged result
 
 ```python
 from McUtils.Iterators import first

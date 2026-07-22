@@ -37,6 +37,8 @@ from . import Scaffolding
 __all__ += ["Scaffolding"]
 from . import Parallelizers
 __all__ += ["Parallelizers"]
+from . import Profilers
+__all__ += ["Profilers"]
 from . import Devutils
 __all__ += ["Devutils"]
 from . import Combinatorics
@@ -45,6 +47,8 @@ from . import Graphs
 __all__ += ["Graphs"]
 from . import Iterators
 __all__ += ["Iterators"]
+from . import Symmetry
+__all__ += ["Symmetry"]
 from . import Docs
 __all__ += ["Docs"]
 from . import Misc

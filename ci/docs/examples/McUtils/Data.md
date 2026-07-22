@@ -40,9 +40,9 @@ assert UnitsData.convert("AtomicMassUnits", "AtomicUnitOfMass") == UnitsData.con
 assert UnitsData.convert("Wavenumbers", "AtomicUnitOfEnergy") == UnitsData.convert("Wavenumbers", "Hartrees")
 ```
 
-# LLM Examples
+**LLM Examples**
 
-## Look up atomic and bond data
+### Look up atomic and bond data
 
 ```python
 from McUtils.Data import AtomData, BondData
@@ -55,7 +55,7 @@ print("reference O-H length:", oh_length)
 print("reference C=O length:", co_length)
 ```
 
-## Convert spectroscopic units
+### Convert spectroscopic units
 
 ```python
 import numpy as np
@@ -69,7 +69,7 @@ print("frequencies / cm^-1:", frequencies_cm)
 print("energies / eV:", energies_ev)
 ```
 
-## Estimate an isotope shift
+### Estimate an isotope shift
 
 ```python
 from McUtils.Data import AtomData
@@ -84,7 +84,7 @@ od_frequency = oh_frequency * (mu_oh / mu_od) ** .5
 print(f"estimated O-D frequency: {od_frequency:.1f} cm^-1")
 ```
 
-## Inspect named colors
+### Inspect named colors
 
 ```python
 from McUtils.Data import ColorData
@@ -96,7 +96,7 @@ for name in ["red", "navy", "forestgreen", "gold"]:
         print(name, "is not present in this color table")
 ```
 
-## Compare isotope records
+### Compare isotope records
 
 ```python
 from McUtils.Data import AtomData, DataRecord
@@ -108,7 +108,7 @@ assert all(isinstance(record, DataRecord) for record in [protium, deuterium, tri
 print([record["Mass"] for record in [protium, deuterium, tritium]])
 ```
 
-## Traverse a chain of unit conversions
+### Traverse a chain of unit conversions
 
 ```python
 from McUtils.Data import UnitsData

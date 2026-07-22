@@ -1,6 +1,6 @@
-# LLM Examples
+**LLM Examples**
 
-## Convert Cartesian coordinates to a Z-matrix and back
+### Convert Cartesian coordinates to a Z-matrix and back
 
 ```python
 import numpy as np
@@ -15,7 +15,7 @@ print("bond lengths and angle:", internals)
 assert np.allclose(rebuilt, water)
 ```
 
-## Convert a batch of geometries
+### Convert a batch of geometries
 
 ```python
 import numpy as np
@@ -30,7 +30,7 @@ print("trajectory shape:", internal_trajectory.shape)
 print("O-H distances:", internal_trajectory[:, 0, 0])
 ```
 
-## Use the convenience conversion interface
+### Use the convenience conversion interface
 
 ```python
 import numpy as np
@@ -46,7 +46,7 @@ assert np.allclose(pair_dists, restored_dists)
 assert np.allclose(restored, coords)
 ```
 
-## Canonicalize internal-coordinate specifications
+### Canonicalize internal-coordinate specifications
 
 ```python
 from McUtils.Coordinerds import canonicalize_internal
@@ -57,7 +57,7 @@ for original, normalized in zip(specs, canonical):
     print(original, "->", normalized)
 ```
 
-## Generate primitive coordinates from a bond graph
+### Generate primitive coordinates from a bond graph
 
 ```python
 from McUtils.Coordinerds import PrimitiveCoordinatePicker
@@ -71,7 +71,7 @@ print("primitive coordinates:", len(coordinates))
 print(coordinates[:10])
 ```
 
-## Reindex a Z-matrix ordering
+### Reindex a Z-matrix ordering
 
 ```python
 import numpy as np

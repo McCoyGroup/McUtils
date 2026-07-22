@@ -1,6 +1,6 @@
-# LLM Examples
+**LLM Examples**
 
-## Overlay a model and observations
+### Overlay a model and observations
 
 ```python
 import numpy as np
@@ -16,7 +16,7 @@ figure.axes_labels = ["phase / rad", "signal"]
 figure.show()
 ```
 
-## Plot a three-dimensional surface
+### Plot a three-dimensional surface
 
 ```python
 import numpy as np
@@ -30,7 +30,7 @@ figure = Plot3D(xx, yy, zz, plot_style={"cmap": "viridis"},
 figure.show()
 ```
 
-## Apply a reusable theme
+### Apply a reusable theme
 
 ```python
 import numpy as np
@@ -46,7 +46,7 @@ fig = Plot(x, np.exp(-x) * np.cos(5 * x), axes_labels=["t", "signal"], theme="pa
 fig.show()
 ```
 
-## Compare scalar fields in a graphics grid
+### Compare scalar fields in a graphics grid
 
 ```python
 import numpy as np
@@ -61,7 +61,7 @@ for column, (field, label) in enumerate(zip(fields, ["density", "x-weighted dens
 grid.show()
 ```
 
-## Draw geometric primitives in 3-D
+### Draw geometric primitives in 3-D
 
 ```python
 import numpy as np
