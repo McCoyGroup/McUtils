@@ -526,6 +526,7 @@ class SystemBlock(OptionsBlock):
 class ExternalProgramJob(metaclass=abc.ABCMeta):
     # blocks: 'tuple[OptionsBlock]' = []
     # base_template = None
+    extension: str
 
     registry = {}
     @classmethod

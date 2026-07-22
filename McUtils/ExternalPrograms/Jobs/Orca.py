@@ -312,6 +312,7 @@ class OrcaSystemBlock(SystemBlock):
 
 @ExternalProgramJob.register("orca")
 class OrcaJob(ExternalProgramJob):
+    extension = ".inp"
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'orca_job.inp')
     blocks = [
         OrcaKeywordsBlock,
