@@ -908,7 +908,7 @@ def improper_rotation_group_names(n):
         names = [n+"'" for n in names] + [n+"''" for n in names]
     return names
 
-def ch_group_character_table(n):
+def ch_group_character_table(n, zero_cutoff=1e-8):
     """
     **LLM Docstring**
 
@@ -925,6 +925,9 @@ def ch_group_character_table(n):
     inds = np.arange(1, n)[:, np.newaxis] * np.arange(2*n)[np.newaxis, :]
     table[1:n] = np.exp(inds*2j*np.pi/n)
     table[n:] = table[:n] @ np.diag(np.concatenate([np.ones(n), -np.ones(n)]))
+    im_sum_max = np.max(np.abs(np.imag(table)))
+    if im_sum_max < zero_cutoff:
+        table = np.real(table)
     return table
 
 def ch_group_classes(n):

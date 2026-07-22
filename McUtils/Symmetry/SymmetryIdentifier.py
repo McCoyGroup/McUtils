@@ -4,8 +4,9 @@ import abc
 import numpy as np
 import enum
 import itertools
-import McUtils.Numputils as nput
-import McUtils.Combinatorics as comb
+from ..Data import UnitsData
+from .. import Numputils as nput
+from .. import Combinatorics as comb
 
 from .Elements import *
 from .PointGroups import *
@@ -178,6 +179,8 @@ class PointGroupIdentifier:
         if masses is None:
             masses = np.ones(len(coords))
         masses = np.asanyarray(masses)
+        if masses[0] < 500:
+            masses = masses * UnitsData.convert("AtomicMassUnits", "ElectronMass")
         self.group_orders = self.get_group_orders()
         self.coord_data = self.prep_coords(coords, masses=masses)
         self.group_coords = [
