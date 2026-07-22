@@ -760,10 +760,10 @@ class TemplateFormatter(string.Formatter):
             key = bits[0].strip()
             is_assignment = re.match("^[a-zA-Z_][a-zA-Z_0-9]*$", key)
         if is_assignment:
-            return self.apply_assignment(_, spec)
+            return self.apply_assignment(_, spec, eval=True)
         else:
             return self.apply_eval_tree(_, "("+spec+")")
-    def apply_assignment(self, _, spec) -> str:
+    def apply_assignment(self, _, spec, eval=False) -> str:
         """
         **LLM Docstring**
 
@@ -778,7 +778,8 @@ class TemplateFormatter(string.Formatter):
         :rtype: str
         """
         key, val = spec.split("=", 1)
-        self.format_parameters[key] = self.apply_eval_tree(_, "("+val+")")
+        if eval: val = self.apply_eval_tree(_, "("+val+")")
+        self.format_parameters[key] = val
         return ""
     def apply_raw(self, key, spec) -> str:
         """
