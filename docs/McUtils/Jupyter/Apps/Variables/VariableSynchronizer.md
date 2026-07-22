@@ -65,7 +65,7 @@ Return a representation showing the name and value.
 <a id="McUtils.Jupyter.Apps.Variables.VariableSynchronizer.create_var" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
-create_var(cls, var, namespace=None): 
+create_var(cls, var, namespace=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L489)/

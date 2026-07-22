@@ -54,8 +54,8 @@ result whenever an input changes, with optional debouncing.
 link_vars(self, *var): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L730)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L730?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L734)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L734?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -68,8 +68,8 @@ variable additions).
 to_widget(self, parent=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L742)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L742?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L746)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L746?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -86,8 +86,8 @@ temporarily relaxed debounce).
 observe(self, fn, names=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L765)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L765?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L769)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L769?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -105,8 +105,8 @@ Observe changes on the underlying widget.
 unobserve(self, fn, names=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L779)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L779?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L783)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L783?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -122,8 +122,8 @@ Remove a change observer.
 update(self, event): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L802)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L802?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L806)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L806?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -139,8 +139,8 @@ pane.
 to_jhtml(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L840)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L840?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L844)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Controls/FunctionDisplay.py#L844?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 

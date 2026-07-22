@@ -5,7 +5,7 @@
 </div>
 
 ```python
-Var(name, namespace=None): 
+Var(name, namespace=None, **opts): 
 ```
 **LLM Docstring**
 

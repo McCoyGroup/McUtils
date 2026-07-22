@@ -23,7 +23,7 @@ theme: dict
 ```
 <a id="McUtils.Jupyter.Apps.Apps.Manipulator.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, func, *controls, debounce=None, autoclear=True, namespace=None, **etc): 
+__init__(self, func, *controls, debounce=None, autoclear=True, namespace=None, layout_function=None, control_layout_function=None, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps.py#L61)/
@@ -47,14 +47,36 @@ Build an interactive `Card` that re-runs a function over a set of controls
     > extra `Card` options
 
 
+<a id="McUtils.Jupyter.Apps.Apps.Manipulator.default_layout" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+default_layout(cls, self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L94)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L94?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Jupyter.Apps.Apps.Manipulator.default_control_layout" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+default_control_layout(cls, self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L103)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L103?message=Update%20Docs)]
+</div>
+
+
 <a id="McUtils.Jupyter.Apps.Apps.Manipulator.canonicalize_control" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 canonicalize_control(cls, settings, namespace=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L93)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L93?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L106)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L106?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -74,8 +96,8 @@ and the control type).
 initialize(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/Manipulator.py#L124)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/Manipulator.py#L124?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Apps/Manipulator.py#L137)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Apps/Manipulator.py#L137?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 

@@ -182,9 +182,9 @@ In order of usefulness, the design is:
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-a324e6" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a324e6"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-b09d88" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-b09d88"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a324e6" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-b09d88" markdown="1">
  - [Schema](#Schema)
 - [TreeFlattening](#TreeFlattening)
 - [Pseudopickle](#Pseudopickle)
@@ -211,9 +211,9 @@ In order of usefulness, the design is:
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-8402b2" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-8402b2"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-4cf46a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-4cf46a"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-8402b2" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-4cf46a" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

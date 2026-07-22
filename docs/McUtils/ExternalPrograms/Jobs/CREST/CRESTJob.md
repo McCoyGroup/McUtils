@@ -27,8 +27,8 @@ blocks: list
 __init__(self, *strs, path='crest', input_file='geom.xyz', log_file='confgen.log', **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/CREST.py#L189)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/CREST.py#L189?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/CREST.py#L190)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/CREST.py#L190?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -52,8 +52,8 @@ and wiring up the CREST executable, input geometry, and log-file paths.
 get_block_types(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L222)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L222?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L223)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L223?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -68,8 +68,8 @@ Return the ordered CREST block types.
 load_template(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L234)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L234?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L235)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L235?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 

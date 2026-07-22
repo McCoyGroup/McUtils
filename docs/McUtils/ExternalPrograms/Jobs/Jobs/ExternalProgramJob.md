@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob">ExternalProgramJob</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L523)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L523?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L526)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L526?message=Update%20Docs)]
 </div>
 
 
@@ -18,14 +18,61 @@
 ## <a class="collapse-link" data-toggle="collapse" href="#methods" markdown="1"> Methods and Properties</a> <a class="float-right" data-toggle="collapse" href="#methods"><i class="fa fa-chevron-down"></i></a>
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
- 
+ ```python
+registry: dict
+distance_units: str
+```
+<a id="McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob.register" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+register(cls, name, method=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L532)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L532?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob.resolve" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+resolve(cls, job_class): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L545)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L545?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob.get_mol_options" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+get_mol_options(cls, mol, units=None, use_internals=False) -> dict: 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L559)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L559?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob.from_mol" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+from_mol(cls, mol, *args, use_internals=False, **etc): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L582)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L582?message=Update%20Docs)]
+</div>
+
+
 <a id="McUtils.ExternalPrograms.Jobs.Jobs.ExternalProgramJob.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
 __init__(self, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L526)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L526?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L589)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L589?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -40,8 +87,8 @@ belong to which block, and sort the supplied options into per-block buckets.
 get_block_types(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L543)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L543?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L606)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L606?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -55,8 +102,8 @@ Abstract: return the ordered list of `OptionsBlock` types making up this job.
 load_template(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L554)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L554?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L617)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L617?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -70,8 +117,8 @@ Abstract: return the top-level job template.
 populate_blocks(self, opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L566)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L566?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L629)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L629?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -88,8 +135,8 @@ any option matches no block.
 get_params(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L596)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L596?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L659)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L659?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -104,8 +151,8 @@ mapping, raising on key collisions between blocks.
 format(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L619)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L619?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L682)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L682?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -120,8 +167,8 @@ parameters.
 write(self, file, mode='w'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L632)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L632?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L695)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.py#L695?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -185,7 +232,7 @@ Write the formatted job to a file (path or open stream).
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/Jobs/Jobs/ExternalProgramJob.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L523?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Jobs.py#L526?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

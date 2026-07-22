@@ -19,6 +19,7 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  ```python
+extension: str
 job_template: str
 blocks: list
 ```
@@ -27,8 +28,8 @@ blocks: list
 __init__(self, *strs, basis_set=None, level_of_theory=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Orca.py#L322)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Orca.py#L322?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Orca.py#L324)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Orca.py#L324?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -50,8 +51,8 @@ arguments as simple keywords.
 get_block_types(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L357)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L357?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L359)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L359?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -66,8 +67,8 @@ Return the ordered ORCA block types.
 load_template(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L369)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L369?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L371)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L371?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
