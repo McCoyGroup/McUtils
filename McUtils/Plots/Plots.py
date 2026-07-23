@@ -521,7 +521,10 @@ class Plot(Graphics):
         if not self._initialized:
             self._initialize()
             if self.display_format is not None:
-                self.figure.figure.default_display_format = self.display_format
+                if hasattr(self.figure, 'figure'):
+                    self.figure.figure.display_format = self.display_format
+                else:
+                    self.figure.display_format = self.display_format
         return self.graphics
     @property
     def artists(self):
