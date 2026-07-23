@@ -1,7 +1,7 @@
 # <a id="McUtils.Symmetry.Symmetrizer.get_internal_permutation_symmetry_matrices">get_internal_permutation_symmetry_matrices</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Symmetrizer.py#L351)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Symmetrizer.py#L351?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Symmetrizer.py#L354)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Symmetrizer.py#L354?message=Update%20Docs)]
 </div>
 
 ```python
@@ -66,7 +66,7 @@ Build the three-dimensional Cartesian matrix representation for selected group e
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Symmetry/Symmetrizer/get_internal_permutation_symmetry_matrices.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Symmetry/Symmetrizer/get_internal_permutation_symmetry_matrices.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Symmetrizer.py#L351?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Symmetrizer.py#L354?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

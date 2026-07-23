@@ -151,6 +151,27 @@ rigid, (matrix, rank) = statistically_rigid(edges, ndim=2, points=points, return
 print("rigidity-matrix rank:", rank, "rigid:", rigid)
 ```
 
+### Molecular graphs
+
+```python
+import numpy as np
+from McUtils.ExternalPrograms import RDMolecule
+from McUtils.Coordinerds import CoordinateSet, CartesianCoordinates3D, ZMatrixCoordinates
+
+mol = RDMolecule.from_smiles(
+    "CC(O)C(=O)O", add_implicit_hydrogens=True,
+    num_confs=20, optimize=True, take_min=True
+)
+graph = mol.get_edge_graph()
+carts = CoordinateSet(mol.coords, system=CartesianCoordinates3D)
+zmat = carts.convert(ZMatrixCoordinates)
+round_trip = zmat.convert(CartesianCoordinates3D)
+
+print("atoms:", mol.atoms)
+print("rings:", graph.get_rings())
+print("coordinate round-trip error:", np.linalg.norm(round_trip - carts))
+mol.plot(image_size=(650, 450)).show()
+```
 
 
 

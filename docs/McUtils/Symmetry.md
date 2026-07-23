@@ -180,6 +180,77 @@ reduction = c3v.coordinate_mode_reduction(ammonia)
 print("Cartesian-mode reduction:", np.rint(reduction).astype(int))
 ```
 
+### Complete symmetry breaking decomposition workflow
+
+```python
+from Psience.Molecools import Molecule
+from McUtils.Plots import Sphere
+import numpy as np
+import McUtils.Numputils as nput
+from McUtils.Data import AtomData, UnitsData
+from McUtils.Symmetry import identify_point_group, symmetrized_coordinate_coefficients
+from McUtils.Plots import Plot
+
+atoms = ["O", "H", "H"]
+eq = np.array([[0., 0., 0.], [0.758, 0., 0.504], [-0.758, 0., 0.504]])
+masses = np.array([AtomData[a, "Mass"] for a in atoms])
+displacements = np.linspace(0, 0.25, 31)
+
+groups, asymmetry = [], []
+pg0 = identify_point_group(eq, masses=masses, tol=1e-3)
+
+# optional, show the point group elements in context
+fig = pg0[1].plot()
+for coord, col in zip(
+    eq, [AtomData[a, "IconColor"] for a in atoms]
+):
+    Sphere(coord, .5, color=col).plot(fig)
+fig.show()
+
+
+# get symmetrized coordinates
+symms = symmetrized_coordinate_coefficients(pg0[1], eq,
+                                            merge_equivalents=True,
+                                            as_characters=True,
+                                            normalize=True,
+                                            realign=False)
+projector = nput.translation_rotation_projector(
+    eq, masses, direction='reverse')
+coords = projector @ np.concatenate(symms, axis=-1).T
+coords = nput.find_basis(coords)
+
+# optional, animate the symmetrized coordinates
+mol = Molecule(
+    atoms,
+    eq * UnitsData.convert("Angstroms", "BohrRadius")
+)
+anim = mol.animate_coordinate(2,
+                              coordinate_expansion=[coords.T],
+                              view_settings={
+                                  'right_vector': [1, 0, 0],
+                                  'up_vector': [0, 0, -1],
+                                  'view_distance': 3
+                              })
+anim.show()
+
+# project a displacement onto the symmetry coordinate basis
+groups, asymmetries = [], []
+for dx in displacements:
+    geom = eq.copy()
+    geom[1, 0] += dx
+    pg = identify_point_group(geom, masses=masses, tol=1e-3)
+    groups.append(str(pg))
+    asymmetry.append(np.dot(geom - eq, coords.T))
+
+print(list(zip(displacements[::10], groups[::10])))
+asymmetries = np.moveaxis(asymmetry, -1, 0)
+figure = None
+for a in asymmetries:
+    figure = Plot(displacements, a,
+                 plot_label="symmetry-breaking",
+                 axes_labels=["H displacement (Å)", "asymmetry (Å)"], figure=figure)
+figure.show()
+```
 
 
 
@@ -194,9 +265,9 @@ print("Cartesian-mode reduction:", np.rint(reduction).astype(int))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-96fa91" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-96fa91"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-757cb1" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-757cb1"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-96fa91" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-757cb1" markdown="1">
  - [Characters](#Characters)
 - [CharacterDecomposition](#CharacterDecomposition)
 - [CharacterSymmetries](#CharacterSymmetries)
@@ -207,12 +278,13 @@ print("Cartesian-mode reduction:", np.rint(reduction).astype(int))
 - [PointGroupAlignments](#PointGroupAlignments)
 - [Visualization](#Visualization)
 - [InternalSymmetries](#InternalSymmetries)
+- [CartesianSpaceModes](#CartesianSpaceModes)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-2eb66a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-2eb66a"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-db6b93" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-db6b93"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-2eb66a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-db6b93" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -599,6 +671,28 @@ class SymmetryTests(TestCase):
                                                                         return_base_expansion=True,
                                                                         atom_selection=[1, 2, 3]
                                                                         )
+```
+
+#### <a name="CartesianSpaceModes">CartesianSpaceModes</a>
+```python
+    def test_CartesianSpaceModes(self):
+        import numpy as np
+        from McUtils.Data import AtomData
+        from McUtils.Symmetry import identify_point_group, symmetrized_coordinate_coefficients
+        from McUtils.Plots import Plot
+
+        atoms = ["O", "H", "H"]
+        eq = np.array([[0., 0., 0.], [0.758, 0., 0.504], [-0.758, 0., 0.504]])
+        masses = np.array([AtomData[a, "Mass"] for a in atoms])
+
+        pg0 = identify_point_group(eq, masses=masses, tol=1e-3)[1]
+        print(pg0.character_table.format())
+        symms = symmetrized_coordinate_coefficients(pg0, eq,
+                                                    merge_equivalents=True,
+                                                    as_characters=False,
+                                                    # normalize=True
+                                                    )
+        print(symms.shape)
 ```
 
  </div>

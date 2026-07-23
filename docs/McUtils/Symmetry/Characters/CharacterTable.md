@@ -1,8 +1,8 @@
 ## <a id="McUtils.Symmetry.Characters.CharacterTable">CharacterTable</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters.py#L2856)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters.py#L2856?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters.py#L2859)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters.py#L2859?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, characters, group_name=None, class_names=None, irrep_names=None, permutations=None, classes=None, matrices=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters.py#L2857)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters.py#L2857?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters.py#L2860)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters.py#L2860?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -54,8 +54,8 @@ Store a character table and derive its group order and conjugacy-class sizes fro
 symmetric_group(cls, n): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2902)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2902?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2905)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2905?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -72,8 +72,8 @@ Construct a `CharacterTable` for the requested symmetric group using the module-
 cyclic_group(cls, n): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2925)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2925?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2928)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2928?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -90,8 +90,8 @@ Construct a `CharacterTable` for the requested cyclic group using the module-lev
 dihedral_group(cls, n): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2949)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2949?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2952)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2952?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -108,8 +108,8 @@ Construct a `CharacterTable` for the requested dihedral group using the module-l
 improper_rotation_group(cls, n): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2972)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2972?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2975)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2975?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -126,8 +126,8 @@ Construct a `CharacterTable` for the requested improper rotation group using the
 point_group(cls, key, n=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2996)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2996?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2999)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2999?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -146,8 +146,8 @@ Construct a `CharacterTable` for the requested point group using the module-leve
 fixed_size_point_group(cls, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L3026)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L3026?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L3029)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L3029?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -164,8 +164,8 @@ Construct the hard-coded or analytic character table for the `fixed_size` group 
 format_character_table(self, table, group_name=None, classes=None, irrep_names=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L3040)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L3040?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L3043)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L3043?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -188,8 +188,8 @@ Construct the hard-coded or analytic character table for the `format` group fami
 group_key(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3085)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3085?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3088)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3088?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -204,8 +204,8 @@ Convert stored group metadata into a compact point-group key such as `C3v`.
 symmetry_symbol(cls, primary_axis, secondary_axis, type, axis, root, order): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L3106)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L3106?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L3109)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L3109?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -231,8 +231,8 @@ Translate a classified Cartesian transformation into a conventional symmetry-ope
 get_class_symbols(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3158)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3158?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3161)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3161?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -246,8 +246,8 @@ Classify representative matrices and produce display symbols for each conjugacy 
 format(self, classes=None, irrep_names=None, group_name=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3198)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3198?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3201)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3201?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -268,8 +268,8 @@ Format this table using stored metadata unless explicit labels are supplied.
 character_basis(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3228)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3228?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3231)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3231?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -283,8 +283,8 @@ Return the class-weighted, group-order-normalized character basis used for proje
 extend_class_representation(self, rep): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3244)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3244?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3247)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3247?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -300,8 +300,8 @@ Expand class-level representation values to one value per concrete group element
 get_extended_character_table(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3263)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3263?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3266)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3266?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -315,8 +315,8 @@ Construct the hard-coded or analytic character table for the `get_extended` grou
 decompose_representation(self, rep): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3274)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3274?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3277)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3277?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -332,8 +332,8 @@ Project a representation onto irreducible characters using the weighted characte
 space_representation(self, mats, symms=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3291)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3291?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3294)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3294?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -351,8 +351,8 @@ Compute traces of transformation matrices, optionally after combining them with 
 matrix_from_representation(self, vec): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3346)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3346?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3349)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3349?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -368,8 +368,8 @@ Form a matrix as a linear combination of the full group-operation matrices.
 inverse_character_representation(self, chars): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3362)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3362?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3365)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3365?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -382,11 +382,11 @@ Map irreducible-character coefficients back into class-representation values.
 
 <a id="McUtils.Symmetry.Characters.CharacterTable.symmetry_permutations" class="docs-object-method">&nbsp;</a> 
 ```python
-symmetry_permutations(self, coords): 
+symmetry_permutations(self, coords, matrices=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3377)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3377?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3380)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3380?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -399,11 +399,11 @@ Generate permutation representatives for the requested cyclic action.
 
 <a id="McUtils.Symmetry.Characters.CharacterTable.axis_representation" class="docs-object-method">&nbsp;</a> 
 ```python
-axis_representation(self, include_rotations=True): 
+axis_representation(self, include_rotations=True, matrices=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3393)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3393?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3398)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3398?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -419,8 +419,8 @@ Build the translational, and optionally rotational, Cartesian character represen
 fixed_permutation_representation(self, base_rep, perms): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3415)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3415?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3422)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3422?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -435,11 +435,11 @@ Combine a base representation with permutation matrices by applying the same Car
 
 <a id="McUtils.Symmetry.Characters.CharacterTable.coordinate_representation" class="docs-object-method">&nbsp;</a> 
 ```python
-coordinate_representation(self, coords): 
+coordinate_representation(self, coords, matrices=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3454)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3454?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3461)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3461?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -452,11 +452,11 @@ Build the full Cartesian coordinate representation induced by molecular symmetry
 
 <a id="McUtils.Symmetry.Characters.CharacterTable.coordinate_mode_reduction" class="docs-object-method">&nbsp;</a> 
 ```python
-coordinate_mode_reduction(self, coords): 
+coordinate_mode_reduction(self, coords, coordinate_representation=None, matrices=None, axis_representation=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3470)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3470?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3477)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3477?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -472,8 +472,8 @@ Decompose the Cartesian coordinate representation and subtract translational/rot
 get_full_matrices(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3486)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3486?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3499)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3499?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -487,8 +487,8 @@ Build the three-dimensional Cartesian matrix representation for selected group e
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3499)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3499?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters/CharacterTable.py#L3512)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters/CharacterTable.py#L3512?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -548,7 +548,7 @@ Return a compact representation containing the group key.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Symmetry/Characters/CharacterTable.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Symmetry/Characters/CharacterTable.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters.py#L2856?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters.py#L2859?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

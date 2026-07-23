@@ -1,7 +1,7 @@
 # <a id="McUtils.Symmetry.Symmetrizer.symmetrize_internals">symmetrize_internals</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Symmetrizer.py#L437)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Symmetrizer.py#L437?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Symmetrizer.py#L440)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Symmetrizer.py#L440?message=Update%20Docs)]
 </div>
 
 ```python
@@ -88,7 +88,7 @@ Generate symmetry-adapted internal-coordinate coefficients and optionally Cartes
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Symmetry/Symmetrizer/symmetrize_internals.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Symmetry/Symmetrizer/symmetrize_internals.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Symmetrizer.py#L437?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Symmetrizer.py#L440?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

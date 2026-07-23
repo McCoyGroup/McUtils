@@ -1,7 +1,7 @@
 # <a id="McUtils.Symmetry.Characters.point_group_data">point_group_data</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters.py#L2819)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters.py#L2819?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/Characters.py#L2822)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters.py#L2822?message=Update%20Docs)]
 </div>
 
 ```python
@@ -70,7 +70,7 @@ Look up fixed-size or parametrized point-group generators and optionally evaluat
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Symmetry/Characters/point_group_data.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Symmetry/Characters/point_group_data.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters.py#L2819?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/Characters.py#L2822?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

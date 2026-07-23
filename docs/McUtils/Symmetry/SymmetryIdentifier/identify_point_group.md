@@ -1,7 +1,7 @@
 # <a id="McUtils.Symmetry.SymmetryIdentifier.identify_point_group">identify_point_group</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier.py#L903)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier.py#L903?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier.py#L906)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier.py#L906?message=Update%20Docs)]
 </div>
 
 ```python
@@ -28,8 +28,8 @@ Construct the hard-coded or analytic character table for the `identify` group fa
     > Whether to orient the returned point group in the molecular principal-axis frame. Defaults to `True`.
   - `verbose`: `object`
     > Whether to print diagnostic information. Defaults to `False`.
-  - `:returns`: `np.ndarray`
-    > The square character table with irreducible representations along rows.
+  - `:returns`: `_`
+    > The identified symmetry elements and the corresponding point group
 
 
 
@@ -80,7 +80,7 @@ Construct the hard-coded or analytic character table for the `identify` group fa
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Symmetry/SymmetryIdentifier/identify_point_group.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Symmetry/SymmetryIdentifier/identify_point_group.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier.py#L903?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier.py#L906?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

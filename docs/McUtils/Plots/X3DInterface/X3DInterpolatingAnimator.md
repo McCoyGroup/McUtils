@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DInterpolatingAnimator">X3DInterpolatingAnimator</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L2921)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L2921?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L2934)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L2934?message=Update%20Docs)]
 </div>
 
 
@@ -25,8 +25,8 @@
 get_animation_objects(cls, object_attr_sets: 'dict[X3DObject, dict]', id): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2922)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2922?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2935)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2935?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -47,8 +47,8 @@ target node.
 frame_diffs(cls, ref: 'X3DObject | X3DHTML.X3DElement', test: 'X3DObject | X3DHTML.X3DElement', *rest: 'X3DObject | X3DHTML.X3DElement'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2963)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2963?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2976)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2976?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -70,8 +70,8 @@ across frames, separating the static nodes from the per-node attribute changes.
 from_frames(cls, frames: 'list[X3DObject | X3DHTML.X3DElement]', **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L3047)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L3047?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L3060)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L3060?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -136,7 +136,7 @@ static content is kept as-is and only the changing attributes are animated.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DInterpolatingAnimator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DInterpolatingAnimator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L2921?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L2934?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

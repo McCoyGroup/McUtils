@@ -387,13 +387,43 @@ Build the three-dimensional Cartesian matrix representation for selected group e
     > An array of shape `(n_elements, 3, 3)`.
 
 
+<a id="McUtils.Symmetry.PointGroups.PointGroup.axis_representation" class="docs-object-method">&nbsp;</a> 
+```python
+axis_representation(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/PointGroups/PointGroup.py#L535)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/PointGroups/PointGroup.py#L535?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Symmetry.PointGroups.PointGroup.coordinate_representation" class="docs-object-method">&nbsp;</a> 
+```python
+coordinate_representation(self, coords): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/PointGroups/PointGroup.py#L537)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/PointGroups/PointGroup.py#L537?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Symmetry.PointGroups.PointGroup.coordinate_mode_reduction" class="docs-object-method">&nbsp;</a> 
+```python
+coordinate_mode_reduction(self, coords): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/PointGroups/PointGroup.py#L539)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/PointGroups/PointGroup.py#L539?message=Update%20Docs)]
+</div>
+
+
 <a id="McUtils.Symmetry.PointGroups.PointGroup.plot" class="docs-object-method">&nbsp;</a> 
 ```python
 plot(self, figure=None, elements=None, origin=None, inversion_styles=None, rotation_styles=None, reflection_styles=None, improper_rotation_styles=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/PointGroups/PointGroup.py#L535)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/PointGroups/PointGroup.py#L535?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/PointGroups/PointGroup.py#L542)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/PointGroups/PointGroup.py#L542?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 

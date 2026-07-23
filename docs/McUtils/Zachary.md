@@ -427,6 +427,62 @@ hessian = TensorExpression(norm.dQ().dQ(), q=point).eval()
 print("norm:", value, "Hessian eigenvalues:", np.linalg.eigvalsh(hessian))
 ```
 
+### Differentiable Function Workflow
+
+```python
+import numpy as np
+from McUtils.Zachary import CoordinateFunction, finite_difference
+from McUtils.Plots import GraphicsGrid, Plot
+
+potential = (
+    CoordinateFunction.morse((0, 1), re=1.8, a=1.1, de=10.0)
+    + CoordinateFunction.morse((0, 2), re=1.8, a=1.1, de=10.0)
+    + 0.2 * CoordinateFunction.cos((1, 0, 2), n=2)
+)
+
+r = np.linspace(1.45, 2.25, 121)
+geoms = np.zeros((len(r), 3, 3))
+geoms[:, 1, 0] = r
+geoms[:, 2] = [1.8 * np.cos(1.9), 1.8 * np.sin(1.9), 0.0]
+internal_coords, expansion = potential(geoms, reexpress=False, order=2)
+energy = expansion[0]
+fd_curvature = finite_difference(r, energy, 2, stencil=7)
+
+grid = GraphicsGrid(nrows=1, ncols=2, spacings=[5, 0], padding=50)
+grid[0, 0] = Plot(r, energy, figure=grid[0, 0], plot_label="V(r)")
+grid[0, 1] = Plot(r, fd_curvature, figure=grid[0, 1], plot_label="d²V/dr²")
+grid.show()
+```
+
+### Solvent Accessible Surface Areas and Volumes
+
+```python
+import numpy as np
+from McUtils.ExternalPrograms import RDMolecule
+from McUtils.Zachary import SphereUnionSurface
+
+mol = RDMolecule.from_smiles('O=C(O)C(c1ccccc1)')
+atoms = mol.atoms
+coords = mol.coords
+surface = SphereUnionSurface.from_xyz(
+    atoms, coords, radius_property="VanDerWaalsRadius",
+    distance_units="Angstroms", samples=300
+)
+
+mesh = surface.get_triangulation(
+    method='isosurface',
+    probe_radius=1.4, probe_type="sas", 
+    grid_samples=20
+)
+print("sampled SAS area:", surface.surface_area(method="sampling"))
+print("triangulated area:", mesh.surface_area())
+print("enclosed volume:", mesh.volume())
+
+fig = surface.plot(points=surface.sampling_points, plot_intersections=True)
+mesh.plot(figure=fig, transparency=0.35)
+fig.show()
+```
+
 
 
 
@@ -440,9 +496,9 @@ print("norm:", value, "Hessian eigenvalues:", np.linalg.eigvalsh(hessian))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-e0abad" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-e0abad"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-8d6bf2" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-8d6bf2"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-e0abad" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-8d6bf2" markdown="1">
  - [stirs](#stirs)
 - [bin_gs](#bin_gs)
 - [bins](#bins)
@@ -495,9 +551,9 @@ print("norm:", value, "Hessian eigenvalues:", np.linalg.eigvalsh(hessian))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-b98cea" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-b98cea"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-bd331d" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-bd331d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-b98cea" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-bd331d" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

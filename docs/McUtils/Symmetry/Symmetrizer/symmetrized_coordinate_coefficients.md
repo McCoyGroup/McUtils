@@ -5,7 +5,7 @@
 </div>
 
 ```python
-symmetrized_coordinate_coefficients(point_group, coords, masses=None, permutation_basis=None, as_characters=True, normalize=False, perms=None, ops=None, return_basis=None, merge_equivalents=None, drop_empty_modes=None, realign=True, permutation_tol=0.01, **pg_tols): 
+symmetrized_coordinate_coefficients(point_group, coords, masses=None, permutation_basis=None, as_characters=True, character_reps=None, normalize=False, perms=None, ops=None, return_basis=None, merge_equivalents=None, drop_empty_modes=None, realign=True, permutation_tol=0.01, **pg_tols): 
 ```
 **LLM Docstring**
 

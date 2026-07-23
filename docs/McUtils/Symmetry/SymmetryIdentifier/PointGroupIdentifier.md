@@ -1,8 +1,8 @@
 ## <a id="McUtils.Symmetry.SymmetryIdentifier.PointGroupIdentifier">PointGroupIdentifier</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier.py#L137)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier.py#L137?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier.py#L138)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier.py#L138?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, coords, masses=None, groups=None, tol=0.01, mass_tol=1, mom_tol=1, grouping_tol=0.01, verbose=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier.py#L138)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier.py#L138?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier.py#L139)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier.py#L139?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -55,8 +55,8 @@ Prepare atom-equivalence groups, principal-axis coordinates, group rotation orde
 get_groups(self, coords, base_groups): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L188)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L188?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L191)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L191?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -74,8 +74,8 @@ Refine supplied atom groups by matching sorted distance profiles and merging ove
 get_rotor_type(self, moms): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L260)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L260?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L263)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L263?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -91,8 +91,8 @@ Classify principal moments using the identifier moment tolerance.
 get_group_orders(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L273)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L273?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L276)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L276?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -106,8 +106,8 @@ Derive candidate proper-rotation orders from common factors of equivalent-atom g
 check_element(self, elem: 'SymmetryElement', verbose=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L313)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L313?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L316)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L316?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -125,8 +125,8 @@ Test whether a candidate operation maps every equivalent-atom group onto itself 
 get_groups_from_masses(self, masses): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L349)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L349?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L352)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L352?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -142,8 +142,8 @@ Group atom indices by rounded mass values.
 prep_coords(self, coords, masses=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L363)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L363?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L366)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L366?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -161,8 +161,8 @@ Center coordinates, diagonalize the inertia tensor, rotate into principal axes, 
 rotation_axis_iterator(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L393)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L393?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L396)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L396?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -176,8 +176,8 @@ Yield candidate rotation axes from Cartesian basis axes, atom directions, and pa
 reflection_plane_iterator(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L424)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L424?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L427)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L427?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -191,8 +191,8 @@ Yield candidate reflection-plane normals from Cartesian axes and pairwise coordi
 rotation_face_iterator(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L441)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L441?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L444)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L444?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -206,8 +206,8 @@ Yield normals to equilateral-like faces formed by triples of equivalent atoms.
 embed_point_group(self, point_group: "'PointGroup|list[SymmetryElement]'"): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L462)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L462?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L465)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L465?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -223,8 +223,8 @@ Construct the hard-coded or analytic character table for the `embed` group famil
 find_point_group_alignment_axes(self, point_group: "'PointGroup|list[SymmetryElement]'"): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L481)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L481?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L484)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L484?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -240,8 +240,8 @@ Match defining rotations or reflection planes from a reference group to molecula
 identify_point_group(self, realign=True) -> 'tuple[list[SymmetryElement], PointGroup]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L633)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L633?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L636)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.py#L636?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -303,7 +303,7 @@ Construct the hard-coded or analytic character table for the `identify` group fa
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Symmetry/SymmetryIdentifier/PointGroupIdentifier.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier.py#L137?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Symmetry/SymmetryIdentifier.py#L138?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

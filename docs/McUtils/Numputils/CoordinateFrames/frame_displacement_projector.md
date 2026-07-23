@@ -5,7 +5,7 @@
 </div>
 
 ```python
-frame_displacement_projector(tr_modes, masses, mass_weighted=False, orthonormal=True, pre_weighted=False): 
+frame_displacement_projector(tr_modes, masses, mass_weighted=False, orthonormal=True, pre_weighted=False, direction='forward'): 
 ```
 **LLM Docstring**
 

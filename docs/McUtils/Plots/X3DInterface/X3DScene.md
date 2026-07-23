@@ -50,7 +50,7 @@ Set up a scene primitive with an optional background and viewpoint.
 <a id="McUtils.Plots.X3DInterface.X3DScene.get_view_settings" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
-get_view_settings(cls, up_vector=None, view_vector=None, right_vector=None, view_distance=None, view_center=None, view_matrix=None, view_position=None, **etc): 
+get_view_settings(cls, up_vector=None, view_vector=None, right_vector=None, view_distance=None, view_center=None, view_matrix=None, view_position=None, return_settings=False, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1346)/
