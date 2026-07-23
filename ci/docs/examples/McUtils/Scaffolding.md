@@ -80,3 +80,33 @@ config.update(memory="16GB", cores=8)
 options = config.opt_dict
 print(config.name, options)
 ```
+
+### Store Conformer Libraries
+
+```
+import numpy as np
+from McUtils.ExternalPrograms import RDMolecule
+from McUtils.Scaffolding import HDF5Checkpointer
+
+mol = RDMolecule.from_smiles(
+    "O=C(O)C(O)C", add_implicit_hydrogens=True,
+    num_confs=50, optimize=True, take_min=True
+)
+# In a conformer-search workflow, `conformers` can instead come from CREST,
+# an RDKit conformer-id loop, or a trajectory. Here we make a small local
+# ensemble around the optimized minimum so the storage pattern is explicit.
+rng = np.random.default_rng(8)
+conformers = mol.coords + rng.normal(0, 0.03, size=(40,) + mol.coords.shape)
+energies = np.asarray(mol.calculate_energy(conformers))
+order = np.argsort(energies)[:10]
+tags = [mol.conformer_smiles_tag(coords=conformers[i], include_zmatrix=True)
+        for i in order]
+
+with HDF5Checkpointer("conformer_archive.hdf5") as chk:
+    chk["smiles"] = mol.to_smiles(canonical=True)
+    chk["energies"] = energies[order]
+    chk["coordinates"] = conformers[order]
+    chk["geometry_tags"] = tags
+
+print("saved energy span:", energies[order[-1]] - energies[order[0]])
+```

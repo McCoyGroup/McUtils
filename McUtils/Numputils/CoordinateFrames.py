@@ -563,22 +563,24 @@ def frame_displacement_projector(tr_modes, masses,
     """
     if not mass_weighted:
         if pre_weighted:
-            if direction == 'forward':
-                g12 = np.diag(np.repeat(np.sqrt(masses), 3)) # sqrt factor already applied
-            else:
-                g12 = np.diag(np.repeat(np.sqrt(1/masses), 3))
+            g12 = np.diag(np.repeat(np.sqrt(masses), 3)) # sqrt factor already applied
+            gi12 = np.diag(np.repeat(np.sqrt(1/masses), 3)) # sqrt factor already applied
+            if direction != 'forward':
+                g12, gi12 = gi12, g12
             inv = np.tensordot(tr_modes, g12, axes=[-2, -1])
+            tr_modes = np.moveaxis(np.tensordot(tr_modes, gi12, axes=[-2, -1]), -1, -2)
         else:
             inv = np.moveaxis(tr_modes, -2, -1)
     else:
         if pre_weighted:
             inv = np.moveaxis(tr_modes, -2, -1)
         else:
-            if direction == 'forward':
-                g12 = np.diag(np.repeat(np.sqrt(1/masses), 3))
-            else:
-                g12 = np.diag(np.repeat(np.sqrt(masses), 3))
-            inv = np.tensordot(tr_modes, g12, axes=[-2, -1])
+            g12 = np.diag(np.repeat(np.sqrt(masses), 3)) # sqrt factor already applied
+            gi12 = np.diag(np.repeat(np.sqrt(1/masses), 3)) # sqrt factor already applied
+            if direction != 'forward':
+                g12, gi12 = gi12, g12
+            inv = np.tensordot(tr_modes, gi12, axes=[-2, -1])
+            tr_modes = np.moveaxis(np.tensordot(tr_modes, g12, axes=[-2, -1]), -1, -2)
     if orthonormal:
         projector = vec_ops.orthogonal_projection_matrix(tr_modes, inverse=inv, orthonormal=True)
     else:

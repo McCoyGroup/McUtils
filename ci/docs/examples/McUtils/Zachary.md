@@ -232,3 +232,59 @@ value = TensorExpression(norm, q=point).eval()
 hessian = TensorExpression(norm.dQ().dQ(), q=point).eval()
 print("norm:", value, "Hessian eigenvalues:", np.linalg.eigvalsh(hessian))
 ```
+
+### Differentiable Function Workflow
+
+```python
+import numpy as np
+from McUtils.Zachary import CoordinateFunction, finite_difference
+from McUtils.Plots import GraphicsGrid, Plot
+
+potential = (
+    CoordinateFunction.morse((0, 1), re=1.8, a=1.1, de=10.0)
+    + CoordinateFunction.morse((0, 2), re=1.8, a=1.1, de=10.0)
+    + 0.2 * CoordinateFunction.cos((1, 0, 2), n=2)
+)
+
+r = np.linspace(1.45, 2.25, 121)
+geoms = np.zeros((len(r), 3, 3))
+geoms[:, 1, 0] = r
+geoms[:, 2] = [1.8 * np.cos(1.9), 1.8 * np.sin(1.9), 0.0]
+internal_coords, expansion = potential(geoms, reexpress=False, order=2)
+energy = expansion[0]
+fd_curvature = finite_difference(r, energy, 2, stencil=7)
+
+grid = GraphicsGrid(nrows=1, ncols=2, spacings=[5, 0], padding=50)
+grid[0, 0] = Plot(r, energy, figure=grid[0, 0], plot_label="V(r)")
+grid[0, 1] = Plot(r, fd_curvature, figure=grid[0, 1], plot_label="d²V/dr²")
+grid.show()
+```
+
+### Solvent Accessible Surface Areas and Volumes
+
+```python
+import numpy as np
+from McUtils.ExternalPrograms import RDMolecule
+from McUtils.Zachary import SphereUnionSurface
+
+mol = RDMolecule.from_smiles('O=C(O)C(c1ccccc1)')
+atoms = mol.atoms
+coords = mol.coords
+surface = SphereUnionSurface.from_xyz(
+    atoms, coords, radius_property="VanDerWaalsRadius",
+    distance_units="Angstroms", samples=300
+)
+
+mesh = surface.get_triangulation(
+    method='isosurface',
+    probe_radius=1.4, probe_type="sas", 
+    grid_samples=20
+)
+print("sampled SAS area:", surface.surface_area(method="sampling"))
+print("triangulated area:", mesh.surface_area())
+print("enclosed volume:", mesh.volume())
+
+fig = surface.plot(points=surface.sampling_points, plot_intersections=True)
+mesh.plot(figure=fig, transparency=0.35)
+fig.show()
+```

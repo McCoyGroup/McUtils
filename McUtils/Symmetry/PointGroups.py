@@ -423,7 +423,7 @@ class PointGroup(metaclass=abc.ABCMeta):
             if abs(np.dot(secondary_axis, primary_axis)) > 1 - 1e-2:
                 secondary_axis = [0, 0, 1]
 
-        return nput.view_matrix(primary_axis, secondary_axis, output_order=(0, 2, 1))
+        return nput.view_matrix(primary_axis, secondary_axis, output_order=['x', 'y', 'z'])
 
     def get_axes(self, elements=None, base_axes=False):
         """
@@ -531,6 +531,13 @@ class PointGroup(metaclass=abc.ABCMeta):
             tf = self._axes @ self.base_axes.T
             mats = tf[np.newaxis] @ mats @ tf.T[np.newaxis]
         return mats
+
+    def axis_representation(self):
+        return self.character_table.axis_representation(matrices=self.get_matrices())
+    def coordinate_representation(self, coords):
+        return self.character_table.coordinate_representation(coords, matrices=self.get_matrices())
+    def coordinate_mode_reduction(self, coords):
+        return self.character_table.coordinate_mode_reduction(coords, matrices=self.get_matrices())
 
     def plot(self,
              figure=None,
