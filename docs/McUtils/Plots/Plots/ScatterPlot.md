@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Plots.ScatterPlot">ScatterPlot</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L727)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L727?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots.py#L730)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L730?message=Update%20Docs)]
 </div>
 
 Inherits from `Plot`.
@@ -29,8 +29,8 @@ method: str
 prep_styles(self, cmap=None, c=None, facecolors=None, edgecolors=None, filled=None, prep_colors=False, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/ScatterPlot.py#L740)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/ScatterPlot.py#L740?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Plots/ScatterPlot.py#L743)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots/ScatterPlot.py#L743?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -105,7 +105,7 @@ between `c`/`facecolors`/`edgecolors`) before delegating to the base style prep.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Plots/ScatterPlot.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Plots/ScatterPlot.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L727?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Plots.py#L730?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

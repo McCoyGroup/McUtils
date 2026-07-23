@@ -135,7 +135,7 @@ for dx in displacements:
     geom[1, 0] += dx
     pg = identify_point_group(geom, masses=masses, tol=1e-3)
     groups.append(str(pg))
-    asymmetry.append(np.dot(geom - eq, coords.T))
+    asymmetry.append(np.dot((geom - eq).flatten(), coords))
 
 print(list(zip(displacements[::10], groups[::10])))
 asymmetries = np.moveaxis(asymmetry, -1, 0)

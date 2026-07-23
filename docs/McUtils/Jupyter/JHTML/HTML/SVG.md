@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.JHTML.HTML.SVG">SVG</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L4409)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L4409?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/JHTML/HTML.py#L4417)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L4417?message=Update%20Docs)]
 </div>
 
 
@@ -72,8 +72,8 @@ Metadata: Metadata
 get_class_map(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L4416)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L4416?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L4424)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L4424?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -133,7 +133,7 @@ Lazily build and cache the SVG tag-to-wrapper-class mapping.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/JHTML/HTML/SVG.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/JHTML/HTML/SVG.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L4409?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/JHTML/HTML.py#L4417?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -158,8 +158,8 @@ Wbr: Wbr
 image_from_string(cls, image_string: 'bytes | str', format='image/png', **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L4035)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L4035?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L4043)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L4043?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
