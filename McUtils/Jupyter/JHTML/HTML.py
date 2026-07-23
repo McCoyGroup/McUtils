@@ -3841,6 +3841,14 @@ class HTML(XMLBase):
                 id = str(uuid.uuid4())
             self.id = id
             self.text = text
+        def __repr__(self):
+            return f"{type(self).__name__}<{self.text}>"
+        @property
+        def elems(self):
+            return []
+        @property
+        def attrs(self):
+            return {}
         def tostring(self, **opts):
             """
             **LLM Docstring**

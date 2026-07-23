@@ -4727,6 +4727,7 @@ class MPLFigure(GraphicsFigure):
 
 class MPLBackend(GraphicsBackend):
     Figure = MPLFigure
+    default_mpl_backend = None
     @property
     def plt(self):
         """
@@ -4747,6 +4748,25 @@ class MPLBackend(GraphicsBackend):
         :return: the `matplotlib` module
         """
         return MPLManager.mpl_api()
+    @contextlib.contextmanager
+    def manage_backend(self, target=None):
+        matplotlib = MPLManager.mpl_api()
+        if target is None:
+            target = self.default_mpl_backend
+        if target is None:
+            from ..Jupyter.JHTML import JupyterAPIs
+            dynamic_loading = JupyterAPIs().in_jupyter_environment()
+            if dynamic_loading:
+                target = 'agg'
+        if target is not None:
+            old_backend = matplotlib.get_backend()
+            try:
+                matplotlib.use(target)
+                yield
+            finally:
+                matplotlib.use(old_backend)
+        else:
+            yield
     def create_raw_figure(self, *args, **kwargs):
         """
         **LLM Docstring**
@@ -4758,7 +4778,8 @@ class MPLBackend(GraphicsBackend):
         :return: the result
         """
         Axes = self.Figure.Axes
-        figure, axes = MPLManager.plt_api().subplots(*args, **kwargs)
+        with self.manage_backend():
+            figure, axes = MPLManager.plt_api().subplots(*args, **kwargs)
         if isinstance(axes, (np.ndarray, list, tuple)):
             if isinstance(axes[0], (np.ndarray, list, tuple)):
                 axes = tuple(tuple(Axes(b) for b in a) for a in axes)
@@ -4855,17 +4876,12 @@ class MPLBackend(GraphicsBackend):
         dynamic_loading = JupyterAPIs().in_jupyter_environment()
         if not dynamic_loading:
             self.plt.show()
-        else:
-            display = JupyterAPIs().display_api
+        elif not graphics.shown:
             graphics.shown = True
             html = graphics.to_widget()
             if autoclose:
                 self.close_figure(graphics)
-            display.clear_output(wait=True)
             return html.display()
-            # return display.display(display.HTML(html))
-        # self.plt.show()
-        # return graphics.show_mpl(self, reshow=reshow)
     def to_widget(self, figure:GraphicsFigure, autoclose=True):
         """
         **LLM Docstring**
