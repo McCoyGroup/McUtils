@@ -1350,6 +1350,7 @@ class X3DScene(X3DPrimitive):
                           view_center=None,
                           view_matrix=None,
                           view_position=None,
+                          return_settings=False,
                           **etc):
         """
         **LLM Docstring**
@@ -1422,13 +1423,25 @@ class X3DScene(X3DPrimitive):
                 view_position = view_position['untransformed']
             else:
                 view_position = view_matrix @ np.asanyarray(view_position)
-        return dict(
-            {
-                'orientation': list(cross) + [ang],
-                'position': view_position
-            },
-            **etc
-        )
+        if return_settings:
+            return dict(
+                {
+                    'view_angle': ang,
+                    'rotation_axis': cross,
+                    'view': view_vector,
+                    'dist': view_distance,
+                    'center': view_center
+                },
+                **etc
+            )
+        else:
+            return dict(
+                {
+                    'orientation': list(cross) + [ang],
+                    'position': view_position
+                },
+                **etc
+            )
 
 class X3DBackground(X3DOptionsSet):
     wrapper_class = X3DHTML.Background

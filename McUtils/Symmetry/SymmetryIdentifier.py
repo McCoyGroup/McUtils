@@ -541,7 +541,7 @@ class PointGroupIdentifier:
                 axes = nput.view_matrix(
                     primary_axis.axis,
                     view_vector=perp_c2.axis,
-                    output_order=(0, 2, 1)
+                    output_order=['x', 'y', 'z']
                 )
             else:
                 pg_sv_plane = None
@@ -568,7 +568,7 @@ class PointGroupIdentifier:
                     axes = nput.view_matrix(
                         primary_axis.axis,
                         view_vector=sv_plane.axis,
-                        output_order=(0, 2, 1)
+                        output_order=['x', 'y', 'z']
                     )
                 else:
                     # look for any c2
@@ -598,12 +598,12 @@ class PointGroupIdentifier:
                         axes = nput.view_matrix(
                             primary_axis.axis,
                             view_vector=c2_axis.axis,
-                            output_order=(0, 2, 1)
+                            output_order=['x', 'y', 'z']
                         )
                     else:
                         axes = nput.view_matrix(
                             primary_axis.axis,
-                            output_order=(0, 2, 1)
+                            output_order=['x', 'y', 'z']
                         )
         else:
             # search for reflection plane in elements
@@ -627,7 +627,7 @@ class PointGroupIdentifier:
 
                 axes = nput.view_matrix(
                     plane.axis,
-                    output_order=(0, 2, 1)
+                    output_order=['x', 'y', 'z']
                 )
 
         return self.coord_data.axes @ axes
@@ -678,8 +678,8 @@ class PointGroupIdentifier:
                     raise ValueError("couldn't identify C4 axis for O-type structure")
                 axes = nput.view_matrix(
                     c5_axis,
-                    view_vector=elements[-2].axis,  # arbitrary C2
-                    output_order=(0, 2, 1)
+                    view_vector=elements[-2].axis,  # arbitrary C2,
+                    output_order=['x', 'y', 'z']
                 )
                 if has_inversion:
                     return PointGroup.from_name("Ih", axes=axes)
@@ -697,8 +697,8 @@ class PointGroupIdentifier:
                     raise ValueError("couldn't identify C4 axis for O-type structure")
                 axes = nput.view_matrix(
                     c4_axis,
-                    view_vector=elements[-2].axis, # arbitrary C2
-                    output_order=(0, 2, 1)
+                    view_vector=elements[-2].axis, # arbitrary C2,
+                    output_order=['x', 'y', 'z']
                 )
                 if has_inversion:
                     pg = PointGroup.from_name("Oh", axes=axes)
@@ -722,8 +722,8 @@ class PointGroupIdentifier:
                 if has_inversion:
                     axes = nput.view_matrix(
                         c3_axis,
-                        view_vector=elements[-(n_c3 + 2)].axis,  # arbitrary C2
-                        output_order=(0, 2, 1)
+                        view_vector=elements[-(n_c3 + 2)].axis,  # arbitrary C2,
+                        output_order=['x', 'y', 'z']
                     )
                     pg = PointGroup.from_name("Th", axes=axes)
                 elif n_c3 >= 4:
@@ -749,14 +749,14 @@ class PointGroupIdentifier:
                         axes = nput.view_matrix(
                             c3_axis,
                             view_vector=sd_plane.axis,
-                            output_order=(0, 2, 1)
+                            output_order=['x', 'y', 'z']
                         )
                     pg = PointGroup.from_name("Td", axes=axes)
                 else:
                     axes = nput.view_matrix(
                         c3_axis,
-                        view_vector=elements[-(n_c3 + 2)].axis,  # arbitrary C2
-                        output_order=(0, 2, 1)
+                        view_vector=elements[-(n_c3 + 2)].axis,  # arbitrary C2,
+                        output_order=['x', 'y', 'z']
                     )
                     pg = PointGroup.from_name("T", axes=axes)
             else:
@@ -813,14 +813,14 @@ class PointGroupIdentifier:
                     if c2_axis is None:
                         axes = nput.view_matrix(
                             primary_axis,
-                            output_order=(0, 2, 1)
+                            output_order=['x', 'y', 'z']
                         )
                         pg = PointGroup.from_name("Ch", group_order, axes=axes)
                     else:
                         axes = nput.view_matrix(
                             primary_axis,
                             view_vector=c2_axis,
-                            output_order=(0, 2, 1)
+                            output_order=['x', 'y', 'z']
                         )
                         pg = PointGroup.from_name("Dh", group_order, axes=axes)
                 else:
@@ -828,7 +828,7 @@ class PointGroupIdentifier:
                         axes = nput.view_matrix(
                             primary_axis,
                             view_vector=c2_axis,
-                            output_order=(0, 2, 1)
+                            output_order=['x', 'y', 'z']
                         )
                         # check for s_d plane
                         elem = ReflectionElement(c2_axis)
@@ -860,13 +860,13 @@ class PointGroupIdentifier:
                             axes = nput.view_matrix(
                                 primary_axis,
                                 view_vector=sv_axis,
-                                output_order=(0, 2, 1)
+                                output_order=['x', 'y', 'z']
                             )
                             pg = PointGroup.from_name("Cv", group_order, axes=axes)
                         else:
                             axes = nput.view_matrix(
                                 primary_axis,
-                                output_order=(0, 2, 1)
+                                output_order=['x', 'y', 'z']
                             )
                             elem = ImproperRotationElement(2*group_order, primary_axis)
                             if self.check_element(elem):
@@ -893,7 +893,7 @@ class PointGroupIdentifier:
                     if sd_axis is not None:
                         axes = nput.view_matrix(
                             sd_axis,
-                            output_order=(0, 2, 1)
+                            output_order=['x', 'y', 'z']
                         )
                         pg = PointGroup.from_name("Cs", axes=axes)
                     else:
@@ -933,8 +933,7 @@ def identify_point_group(
     :type realign: object
     :param verbose: Whether to print diagnostic information. Defaults to `False`.
     :type verbose: object
-    :return: The square character table with irreducible representations along rows.
-    :rtype: np.ndarray
+    :return: The identified symmetry elements and the corresponding point group
     """
     return PointGroupIdentifier(coords,
                                 masses=masses, groups=groups,

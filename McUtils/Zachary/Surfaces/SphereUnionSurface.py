@@ -3398,6 +3398,8 @@ class SphereUnionSurfaceMesh:
         self.densities = densities
         self.vert_map = vert_map
         self.tri_map = tri_map
+        if nput.is_numeric_array_like(normals):
+            normals = (np.asanyarray(normals), None)
         self._normals = normals
         self.vertex_normals = vertex_normals
         self.centers = centers
@@ -3641,6 +3643,9 @@ class SphereUnionSurfaceMesh:
         """
         if self._normals is None:
             self._normals = self.get_normals()
+        elif self._normals[1] is None:
+            nd = self.get_normals()
+            self._normals = (self._normals[0], nd[1])
         return self._normals[1]
     def get_normals(self, normalize=True):
         """

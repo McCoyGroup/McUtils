@@ -3377,7 +3377,7 @@ class CharacterTable:
             np.tensordot(chars, self.character_basis, axes=[-1, -2])
         )
 
-    def symmetry_permutations(self, coords):
+    def symmetry_permutations(self, coords, matrices=None):
         """
         **LLM Docstring**
 
@@ -3388,12 +3388,14 @@ class CharacterTable:
         :return: An integer array whose rows are permutations.
         :rtype: np.ndarray
         """
+        if matrices is None:
+            matrices = self.matrices
         return np.array([
             nput.symmetry_permutation(coords, m)
-            for m in self.matrices
+            for m in matrices
         ]).T
 
-    def axis_representation(self, include_rotations=True):
+    def axis_representation(self, include_rotations=True, matrices=None):
         """
         **LLM Docstring**
 
@@ -3404,9 +3406,11 @@ class CharacterTable:
         :return: The axis character representation.
         :rtype: np.ndarray
         """
-        carts = self.space_representation(nput.vec_tensordiag(np.eye(3)))
+        if matrices is None:
+            matrices = self.matrices
+        carts = self.space_representation(nput.vec_tensordiag(np.eye(3)), symms=matrices)
         if not include_rotations: return carts
-        reflection_pos = np.where(np.linalg.det(self.matrices) < 0)
+        reflection_pos = np.where(np.linalg.det(matrices) < 0)
         rots = carts.copy()
         if len(reflection_pos) > 0:
             # I think this is justified, but not sure...
@@ -3454,7 +3458,7 @@ class CharacterTable:
     #     base_mat = np.moveaxis(np.tensordot(self.extended_character_table, perm_signs, axes=[-1, 0]), 0, -1)
     #     return base_mat
 
-    def coordinate_representation(self, coords):
+    def coordinate_representation(self, coords, matrices=None):
         """
         **LLM Docstring**
 
@@ -3466,11 +3470,13 @@ class CharacterTable:
         :rtype: np.ndarray
         """
         coords = np.asanyarray(coords)
-        perms = self.symmetry_permutations(coords)
-        base_rep = self.axis_representation(include_rotations=False)
+        perms = self.symmetry_permutations(coords, matrices=matrices)
+        base_rep = self.axis_representation(include_rotations=False, matrices=matrices)
         return self.fixed_permutation_representation(base_rep, perms)
 
-    def coordinate_mode_reduction(self, coords):
+    def coordinate_mode_reduction(self, coords, coordinate_representation=None, matrices=None,
+                                  axis_representation=None
+                                  ):
         """
         **LLM Docstring**
 
@@ -3481,9 +3487,13 @@ class CharacterTable:
         :return: Vibrational irreducible-representation multiplicities.
         :rtype: np.ndarray
         """
-        base_rep = np.sum(self.coordinate_representation(coords), axis=0)
+        if coordinate_representation is None:
+            coordinate_representation = self.coordinate_representation(coords, matrices=matrices)
+        base_rep = np.sum(coordinate_representation, axis=0)
         reduced = self.decompose_representation(base_rep)
-        axes = self.decompose_representation(np.sum(self.axis_representation(), axis=0))
+        if axis_representation is None:
+            axis_representation = self.axis_representation(matrices=matrices)
+        axes = self.decompose_representation(np.sum(axis_representation, axis=0))
         return reduced - axes
 
     def get_full_matrices(self):

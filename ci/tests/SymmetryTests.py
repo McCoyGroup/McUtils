@@ -318,7 +318,7 @@ class SymmetryTests(TestCase):
                 print(e, e.axis)
 
 
-    @debugTest
+    @validationTest
     def test_InternalSymmetries(self):
         import McUtils.Coordinerds as coordops
         import McUtils.Numputils as nput
@@ -387,3 +387,23 @@ class SymmetryTests(TestCase):
         # print("-"*100)
         # print(coeffs[0])
 
+
+    @debugTest
+    def test_CartesianSpaceModes(self):
+        import numpy as np
+        from McUtils.Data import AtomData
+        from McUtils.Symmetry import identify_point_group, symmetrized_coordinate_coefficients
+        from McUtils.Plots import Plot
+
+        atoms = ["O", "H", "H"]
+        eq = np.array([[0., 0., 0.], [0.758, 0., 0.504], [-0.758, 0., 0.504]])
+        masses = np.array([AtomData[a, "Mass"] for a in atoms])
+
+        pg0 = identify_point_group(eq, masses=masses, tol=1e-3)[1]
+        print(pg0.character_table.format())
+        symms = symmetrized_coordinate_coefficients(pg0, eq,
+                                                    merge_equivalents=True,
+                                                    as_characters=False,
+                                                    # normalize=True
+                                                    )
+        print(symms.shape)

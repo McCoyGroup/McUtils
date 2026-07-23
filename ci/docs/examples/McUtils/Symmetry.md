@@ -74,3 +74,75 @@ c3v = CharacterTable.point_group("Cv", 3)
 reduction = c3v.coordinate_mode_reduction(ammonia)
 print("Cartesian-mode reduction:", np.rint(reduction).astype(int))
 ```
+
+### Complete symmetry breaking decomposition workflow
+
+```python
+from Psience.Molecools import Molecule
+from McUtils.Plots import Sphere
+import numpy as np
+import McUtils.Numputils as nput
+from McUtils.Data import AtomData, UnitsData
+from McUtils.Symmetry import identify_point_group, symmetrized_coordinate_coefficients
+from McUtils.Plots import Plot
+
+atoms = ["O", "H", "H"]
+eq = np.array([[0., 0., 0.], [0.758, 0., 0.504], [-0.758, 0., 0.504]])
+masses = np.array([AtomData[a, "Mass"] for a in atoms])
+displacements = np.linspace(0, 0.25, 31)
+
+groups, asymmetry = [], []
+pg0 = identify_point_group(eq, masses=masses, tol=1e-3)
+
+# optional, show the point group elements in context
+fig = pg0[1].plot()
+for coord, col in zip(
+    eq, [AtomData[a, "IconColor"] for a in atoms]
+):
+    Sphere(coord, .5, color=col).plot(fig)
+fig.show()
+
+
+# get symmetrized coordinates
+symms = symmetrized_coordinate_coefficients(pg0[1], eq,
+                                            merge_equivalents=True,
+                                            as_characters=True,
+                                            normalize=True,
+                                            realign=False)
+projector = nput.translation_rotation_projector(
+    eq, masses, direction='reverse')
+coords = projector @ np.concatenate(symms, axis=-1).T
+coords = nput.find_basis(coords)
+
+# optional, animate the symmetrized coordinates
+mol = Molecule(
+    atoms,
+    eq * UnitsData.convert("Angstroms", "BohrRadius")
+)
+anim = mol.animate_coordinate(2,
+                              coordinate_expansion=[coords.T],
+                              view_settings={
+                                  'right_vector': [1, 0, 0],
+                                  'up_vector': [0, 0, -1],
+                                  'view_distance': 3
+                              })
+anim.show()
+
+# project a displacement onto the symmetry coordinate basis
+groups, asymmetries = [], []
+for dx in displacements:
+    geom = eq.copy()
+    geom[1, 0] += dx
+    pg = identify_point_group(geom, masses=masses, tol=1e-3)
+    groups.append(str(pg))
+    asymmetry.append(np.dot(geom - eq, coords.T))
+
+print(list(zip(displacements[::10], groups[::10])))
+asymmetries = np.moveaxis(asymmetry, -1, 0)
+figure = None
+for a in asymmetries:
+    figure = Plot(displacements, a,
+                 plot_label="symmetry-breaking",
+                 axes_labels=["H displacement (Å)", "asymmetry (Å)"], figure=figure)
+figure.show()
+```

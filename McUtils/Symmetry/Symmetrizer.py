@@ -176,6 +176,7 @@ def symmetrized_coordinate_coefficients(point_group,
                                         masses=None,
                                         permutation_basis=None,
                                         as_characters=True,
+                                        character_reps=None,
                                         normalize=False,
                                         perms=None,
                                         ops=None,
@@ -291,7 +292,9 @@ def symmetrized_coordinate_coefficients(point_group,
         if hasattr(ct, "character_table"):
             ct = point_group.character_table
 
-        full_modes = np.tensordot(ct.extend_class_representation(ct.table), full_modes, axes=[-1, -1])
+        if character_reps is None:
+            character_reps = ct.table
+        full_modes = np.tensordot(ct.extend_class_representation(character_reps), full_modes, axes=[-1, -1])
         if normalize:
             full_modes = nput.vec_normalize(
                 full_modes.reshape(full_modes.shape[:2] + (-1,)),
@@ -330,7 +333,7 @@ def symmetrized_coordinate_coefficients(point_group,
 
         if equivalent_coords is not None:
             comp_bits = [c[0] for c in equivalent_coords]
-            full_modes = full_modes.reshape((full_modes.shape[0], full_modes.shape[-1], -1))
+            full_modes = full_modes.reshape(full_modes.shape[:2] + (-1,))
             full_modes = full_modes[:, :, comp_bits]
 
         if drop_empty_modes:
