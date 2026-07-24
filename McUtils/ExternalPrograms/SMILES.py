@@ -728,18 +728,81 @@ def _break_ring_aromaticities(new_mol, idx2):
                 and not any(is_aromatic for ring,is_aromatic in aromatic_rings.items() if idx in ring)
             ):
                 _break_aromaticity(new_mol, new_mol, idx, idx, break_rings=False)
-def _break_aromaticity(ref_mol, new_mol, idx1, idx2, break_rings=True):
+def _push_inc_bond(new_mol, idx:int, visted:set):
+    # TODO: check that valencies are bad first
+    a1 = new_mol.GetAtomWithIdx(idx)
+    visted.add(idx)
+    for b in a1.GetBonds():
+        t = b.GetBondTypeAsDouble()
+        if t < 2:
+            targs = [b.GetBeginAtomIdx(), b.GetEndAtomIdx()]
+            if (
+                    any(t not in visted for t in targs)
+                    and not any(new_mol.GetAtomWithIdx(t).GetSymbol() == "H" for t in targs)
+            ):
+                new_type = get_rdkit_bond_type(t + 1)
+                b.SetBondType(new_type)
+                for x2 in targs:
+                    if x2 not in visted:
+                        _push_dec_bond(new_mol, x2, visted)
+                break
+def _push_dec_bond(new_mol, idx:int, visted:set):
+    #TODO: check that valencies are bad first
+    a1 = new_mol.GetAtomWithIdx(idx)
+    visted.add(idx)
+    for b in a1.GetBonds():
+        t = b.GetBondTypeAsDouble()
+        if t > 1:
+            targs = [b.GetBeginAtomIdx(), b.GetEndAtomIdx()]
+            if (
+                    any(t not in visted for t in targs)
+                    and not any(new_mol.GetAtomWithIdx(t).GetSymbol() == "H" for t in targs)
+            ):
+                new_type = get_rdkit_bond_type(t - 1)
+                b.SetBondType(new_type)
+                for x2 in targs:
+                    if x2 not in visted:
+                        _push_inc_bond(new_mol, x2, visted)
+                break
+
+def _break_aromaticity(ref_mol, new_mol, idx1, idx2,
+                       original_aromaticity_map,
+                       push_bonds=True, break_rings=True, check_valences=False):
     Chem = RDMolecule.allchem_api()
     a1 = ref_mol.GetAtomWithIdx(idx1)
     is_aromatic = a1.GetIsAromatic()
-    if is_aromatic:
+    fixed = False
+    if break_rings and is_aromatic:
         a1 = new_mol.GetAtomWithIdx(idx2)
         a1.SetIsAromatic(False)
         for b in a1.GetBonds():
             if b.GetBondType() == Chem.BondType.AROMATIC:
                 b.SetBondType(Chem.BondType.SINGLE)
-        if break_rings:
+                fixed = True
+        if fixed and break_rings:
             _break_ring_aromaticities(new_mol, idx2)
+    if not fixed and push_bonds:
+        visited = {idx2}
+        _push_dec_bond(new_mol, idx2, visited)
+        if check_valences:
+            for x in visited:
+                a = new_mol.GetAtomWithIdx(x)
+                if a.HasValenceViolation():
+                    if original_aromaticity_map[x]:
+                        a.SetIsAromatic(True)
+                        for b in a.GetBonds():
+                            b.SetBondType(Chem.BondType.Aromatic)
+                    else:
+                        while a.HasValenceViolation():
+                            for b in a.GetBonds():
+                                t = b.GetBondTypeAsDouble()
+                                if t > 1:
+                                    new_type = get_rdkit_bond_type(t - 1)
+                                    b.SetBondType(new_type)
+                            else:
+                                break
+
+
     return is_aromatic
 def _pop_hydrogen(ref_mol, new_mol, idx1, idx2):
     a1 = ref_mol.GetAtomWithIdx(idx1)
@@ -826,7 +889,8 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
                           add_implicit_hydrogens='full',
                           fallback_to_ordering=False,
                           decrement_hydrogens=True,
-                          break_aromaticity=False,
+                          prekekulize=True,
+                          push_bonds=False,
                           return_mol=False) -> str:
     Chem = RDMolecule.allchem_api()
     if cache is None:
@@ -851,12 +915,16 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
     combined = Chem.CombineMols(mol1, mol2)
     editable = Chem.RWMol(combined)
 
-    if isinstance(break_aromaticity, str):
-        break_scaffold_aromaticity = dev.str_is(break_aromaticity, 'scaffold')
-        break_fg_aromaticity = dev.str_is(break_aromaticity, 'functional')
+    if isinstance(push_bonds, str):
+        break_scaffold_aromaticity = dev.str_is(push_bonds, 'scaffold')
+        break_fg_aromaticity = dev.str_is(push_bonds, 'functional')
     else:
-        break_scaffold_aromaticity = break_fg_aromaticity = break_aromaticity
+        break_scaffold_aromaticity = break_fg_aromaticity = push_bonds
 
+    if prekekulize:
+        Chem.Kekulize(editable, clearAromaticFlags=True)
+
+    original_aromaticity_map = [a.GetIsAromatic() for a in combined.GetAtoms()]
     dearomitized_atoms = []
     for b in new_bonds:
         if len(b) == 2:
@@ -885,9 +953,9 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
 
         editable.AddBond(idx1, idx2, t)
         if decrement_hydrogens:
-            Chem.GetSymmSSSR(editable)
+            editable.UpdatePropertyCache(strict=False)
             if break_scaffold_aromaticity:
-                dearomitized = _break_aromaticity(mol1, editable, idx1, idx1)
+                dearomitized = _break_aromaticity(mol1, editable, idx1, idx1, original_aromaticity_map)
             else:
                 dearomitized = False
             if not dearomitized:
@@ -901,7 +969,7 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
                 idx2 = idx2 - 1
                 map2 = {m:i-1 for m,i in map2.items()}
             if break_fg_aromaticity:
-                dearomitized = _break_aromaticity(mol2, editable, i2, idx2)
+                dearomitized = _break_aromaticity(mol2, editable, i2, idx2, original_aromaticity_map)
             else:
                 dearomitized = False
             if not dearomitized:
@@ -923,7 +991,7 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
         joined.GetAtomWithIdx(i).SetAtomMapNum(m - offset + len(map1))
 
     if add_implicit_hydrogens:
-        joined = Chem.RemoveHs(joined)
+        joined = Chem.RemoveHs(joined, sanitize=resanitize)
 
     for atom in joined.GetAtoms():
         if atom.GetPropsAsDict().get('dearomitized'):

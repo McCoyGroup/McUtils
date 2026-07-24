@@ -307,6 +307,7 @@ class ExternalProgramsTest(TestCase):
     def test_SMILESManip(self):
         from Psience.Molecools import Molecule
         from McUtils.Data import SMILESData
+        from McUtils.ExternalPrograms import join_smiles_fragments
 
         print(
             SMILESData.scaffold('coumarin_3_7_diyl')
@@ -315,11 +316,11 @@ class ExternalProgramsTest(TestCase):
             SMILESData.functional_group('phenyl')
         )
 
-
         smi = join_smiles_fragments(
             SMILESData.scaffold('coumarin_3_7_diyl'),
             SMILESData.functional_group('phenyl'),
-            break_aromaticity='scaffold'
+            push_bonds='scaffold',
+            resanitize=False
         )
         print(smi)
         Molecule.from_string(smi).plot(highlight_atoms=[0, 1]).show()
