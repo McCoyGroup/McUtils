@@ -110,7 +110,7 @@ def translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True, r
     """
     ...
 
-def frame_displacement_projector(tr_modes, masses, mass_weighted=False, orthonormal=True, pre_weighted=False):
+def frame_displacement_projector(tr_modes, masses, mass_weighted=False, orthonormal=True, pre_weighted=False, direction='forward'):
     """
     **LLM Docstring**
 
@@ -138,7 +138,7 @@ def frame_displacement_projector(tr_modes, masses, mass_weighted=False, orthonor
     """
     ...
 
-def translation_rotation_projector(coords, masses=None, mass_weighted=False, return_modes=False, orthonormal=True):
+def translation_rotation_projector(coords, masses=None, mass_weighted=False, return_modes=False, orthonormal=False, direction='forward'):
     """
     **LLM Docstring**
 

@@ -396,7 +396,7 @@ def improper_rotation_group_names(n):
     """
     ...
 
-def ch_group_character_table(n):
+def ch_group_character_table(n, zero_cutoff=1e-08):
     """
     **LLM Docstring**
 
@@ -1174,7 +1174,7 @@ class CharacterTable:
         """
         ...
 
-    def symmetry_permutations(self, coords):
+    def symmetry_permutations(self, coords, matrices=None):
         """
         **LLM Docstring**
 
@@ -1187,7 +1187,7 @@ class CharacterTable:
         """
         ...
 
-    def axis_representation(self, include_rotations=True):
+    def axis_representation(self, include_rotations=True, matrices=None):
         """
         **LLM Docstring**
 
@@ -1215,7 +1215,7 @@ class CharacterTable:
         """
         ...
 
-    def coordinate_representation(self, coords):
+    def coordinate_representation(self, coords, matrices=None):
         """
         **LLM Docstring**
 
@@ -1228,7 +1228,7 @@ class CharacterTable:
         """
         ...
 
-    def coordinate_mode_reduction(self, coords):
+    def coordinate_mode_reduction(self, coords, coordinate_representation=None, matrices=None, axis_representation=None):
         """
         **LLM Docstring**
 

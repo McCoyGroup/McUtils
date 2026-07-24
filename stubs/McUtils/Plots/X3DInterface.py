@@ -750,7 +750,7 @@ class X3DScene(X3DPrimitive):
     default_view_distance = 10
 
     @classmethod
-    def get_view_settings(cls, up_vector=None, view_vector=None, right_vector=None, view_distance=None, view_center=None, view_matrix=None, view_position=None, **etc):
+    def get_view_settings(cls, up_vector=None, view_vector=None, right_vector=None, view_distance=None, view_center=None, view_matrix=None, view_position=None, return_settings=False, **etc):
         """
         **LLM Docstring**
 

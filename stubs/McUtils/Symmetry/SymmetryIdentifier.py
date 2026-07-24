@@ -3,8 +3,9 @@ import abc
 import numpy as np
 import enum
 import itertools
-import McUtils.Numputils as nput
-import McUtils.Combinatorics as comb
+from ..Data import UnitsData
+from .. import Numputils as nput
+from .. import Combinatorics as comb
 from .Elements import *
 from .PointGroups import *
 from .Rotors import RotorTypes, identify_rotor_type
@@ -265,7 +266,6 @@ def identify_point_group(coords, masses=None, groups=None, tol=1e-08, mass_tol=1
     :type realign: object
     :param verbose: Whether to print diagnostic information. Defaults to `False`.
     :type verbose: object
-    :return: The square character table with irreducible representations along rows.
-    :rtype: np.ndarray
+    :return: The identified symmetry elements and the corresponding point group
     """
     ...

@@ -186,7 +186,6 @@ class RDMolecule(ExternalMolecule):
         :param verbose: don't suppress logging
         :type verbose: bool
         :return: the (log-blocking or no-op) context manager
-        :rtype: object
         """
         ...
 

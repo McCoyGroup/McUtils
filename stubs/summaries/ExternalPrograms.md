@@ -423,6 +423,17 @@
 - `consume_smiles_supplier(supplier, consumer, pool=None, start_at=None, upto=None, initializer=None)` — Apply a consumer function to the SMILES entries of a supplier, optionally in
 - `smarts_matcher(pattern, error_value=None, sanitize=True, **parser_options)` — Build a matcher callable that tests whether a SMILES string contains a given
 - `match_smiles_supplier(supplier, matcher, pool=None, start_at=None, upto=None, quiet=True, out_file=None, initializer=None)` — Match every SMILES entry in a supplier against a SMARTS pattern (or matcher),
+- `parse_smiles_and_atom_map(smiles1, cache, add_implicit_hydrogens=False)`
+- `get_rdkit_bond_type(t, as_number=False)`
+- `remove_smiles_binding_sites(smi, sites=None, cache=None, add_implicit_hydrogens='full')`
+- `set_smiles_binding_sites(smi, site_map, cache=None, add_implicit_hydrogens='full')`
+- `substitute_smiles_atoms(smi, site_atom_map, cache=None, resanitize=True, preserve_valence_defect=True, add_implicit_hydrogens='full', return_mol=False)`
+- `join_smiles_fragments(scaffold, functional_group, new_bonds=((0, 0),), cache=None, resanitize=True, add_implicit_hydrogens='full', fallback_to_ordering=False, decrement_hydrogens=True, prekekulize=True, push_bonds=False, return_mol=False)`
+- `renumber_smiles_atom_map(smiles, remapping, cache=None, shift=True, add_implicit_hydrogens=False)`
+- `set_smiles_bond_order(smiles, start, end, order, cache=None, adjust_hydrogens=True, add_implicit_hydrogens=False, resanitize=False, return_mol=False)`
+- `set_smiles_chiralities(base_smiles, site_chirality_map)`
+- `set_smiles_stereochemistry(base_smiles, active_sites, stereo)`
+- `build_templated_smiles(scaffold, *replacements, active_sites=None, chiralities=None, bond_orders=None, atom_replacements=None, cache=None, add_implicit_hydrogens='full', remove_sites=False)`
 
 ### `Subprocesses.py`
 - `env_proc_call(*args, executable=None, text=True, env=None, shell=False, **subprocess_run_kwargs)` — Run a command with an environment-specific executable directory prepended to `PATH`; string command…

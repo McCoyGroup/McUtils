@@ -22,7 +22,7 @@
     > Exception subclass for data error
   - **class `DataHandler`**
     > Defines a general data loader class that we can use for `AtomData` and any other data classes we might find useful.
-    - `__init__(data_name, data_key=None, source_key=None, data_dir=None, data_pkg=None, alternate_keys=None, getter=None, record_type=None)`
+    - `__init__(data_name, data_key=None, source_key=None, data_dir=None, data_pkg=None, alternate_keys=None, getter=None, record_type=None, extension='.py')`
     - `data_file()`
     - `load(env=None)` — Actually loads the data from `data_file`.
     - `data()`
@@ -84,6 +84,14 @@
     - `parse_header(line)`
     - `savetxt(file)` — Saves the QuantityArray to a text file
     - `loadtxt(file)` — Loads a QuantityArray from a text file
+
+### `SMILESData.py`
+  - **class `SMILESDataHandler`** (DataHandler)
+    - `__init__()`
+    - `functional_group(name, return_string=True)`
+    - `scaffold(name, return_string=True)`
+    - `random_scaffold(return_string=True)`
+    - `random_functional_group(return_string=True)`
 
 ### `WavefunctionData.py`
   - **class `WavefunctionDataHandler`** (DataHandler)

@@ -268,6 +268,7 @@
   - **class `MPLBackend`** (GraphicsBackend)
     - `plt()` — **LLM Docstring**
     - `mpl()` — **LLM Docstring**
+    - `manage_backend(target=None)`
     - `create_raw_figure(*args, **kwargs)` — Create a new figure (and its initial axes) for this backend (matplotlib backend).
     - `show_all()` — **LLM Docstring**
     - **class `ThemeContextManager`** (GraphicsBackend.ThemeContextManager)
@@ -1921,7 +1922,7 @@
     - `get_children()` — **LLM Docstring**
   - **class `X3DScene`** (X3DPrimitive)
     - `__init__(*children, background=None, viewpoint=None, **opts)`
-    - `get_view_settings(up_vector=None, view_vector=None, right_vector=None, view_distance=None, view_center=None, view_matrix=None, view_position=None, **etc)` — Build viewpoint settings (position/orientation/etc.) from a flexible view
+    - `get_view_settings(up_vector=None, view_vector=None, right_vector=None, view_distance=None, view_center=None, view_matrix=None, view_position=None, return_settings=False, **etc)` — Build viewpoint settings (position/orientation/etc.) from a flexible view
   - **class `X3DBackground`** (X3DOptionsSet)
     - `prep_attrs(attrs)` — Canonicalize the background attributes (resolving the color into components/transparency) before re…
     - `to_x3d()` — Render the background to its X3D DOM element.

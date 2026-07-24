@@ -120,12 +120,17 @@
     "Scaffolding::NumPyCheckpointing"
   ],
   "McUtils.Data.AtomData": [
-    "Coordinerds::SmoothCoordinateInterpolation"
+    "Coordinerds::SmoothCoordinateInterpolation",
+    "Symmetry::CartesianSpaceModes"
   ],
   "McUtils.Data.ConstantsData": [
     "Coordinerds::DistsFromInternals",
     "Coordinerds::SmoothCoordinateInterpolation",
     "Zachary::FiniteDifferenceParallelism"
+  ],
+  "McUtils.Data.SMILESData": [
+    "ExternalPrograms::RandomSMILESManip",
+    "ExternalPrograms::SMILESManip"
   ],
   "McUtils.Devutils": [
     "Coordinerds::SmoothCoordinateInterpolation",
@@ -191,8 +196,25 @@
   "McUtils.ExternalPrograms.SMILES.SMILESSupplier": [
     "ExternalPrograms::SMIVendor"
   ],
+  "McUtils.ExternalPrograms.SMILES.build_templated_smiles": [
+    "ExternalPrograms::SMILESManip",
+    "ExternalPrograms::SMILESScaffoldGenerator"
+  ],
+  "McUtils.ExternalPrograms.SMILES.join_smiles_fragments": [
+    "ExternalPrograms::AromaticSMILESManip",
+    "ExternalPrograms::RandomSMILESManip"
+  ],
   "McUtils.ExternalPrograms.SMILES.match_smiles_supplier": [
     "ExternalPrograms::SMIVendor"
+  ],
+  "McUtils.ExternalPrograms.SMILES.parse_smiles_and_atom_map": [
+    "ExternalPrograms::AromaticSMILESManip"
+  ],
+  "McUtils.ExternalPrograms.SMILES.renumber_smiles_atom_map": [
+    "ExternalPrograms::AromaticSMILESManip"
+  ],
+  "McUtils.ExternalPrograms.SMILES.set_smiles_bond_order": [
+    "ExternalPrograms::AromaticSMILESManip"
   ],
   "McUtils.ExternalPrograms.Servers.EvaluationServer.EvaluationClient": [
     "ExternalPrograms::EvaluationServer"
@@ -454,6 +476,7 @@
     "Plots::PlotDelayed",
     "Plots::PlotStyling",
     "Plots::PlotlyBackend",
+    "Symmetry::CartesianSpaceModes",
     "Zachary::ExpandFunction"
   ],
   "McUtils.Plots.Plots.Plot3D": [
@@ -551,7 +574,11 @@
     "Symmetry::InternalSymmetries"
   ],
   "McUtils.Symmetry.Symmetrizer.symmetrized_coordinate_coefficients": [
+    "Symmetry::CartesianSpaceModes",
     "Symmetry::InternalSymmetries"
+  ],
+  "McUtils.Symmetry.SymmetryIdentifier.identify_point_group": [
+    "Symmetry::CartesianSpaceModes"
   ],
   "McUtils.Zachary.Interpolator": [
     "Zachary::Interpolator1D",
@@ -644,9 +671,13 @@
   "Psience.Molecools.Molecule": [
     "Coordinerds::GenericInternals",
     "Coordinerds::NewInternalCoordinateSet",
+    "ExternalPrograms::AromaticSMILESManip",
     "ExternalPrograms::CRESTJob",
     "ExternalPrograms::CubeParser",
     "ExternalPrograms::OBGen3D",
+    "ExternalPrograms::RandomSMILESManip",
+    "ExternalPrograms::SMILESManip",
+    "ExternalPrograms::SMILESScaffoldGenerator",
     "Jupyter::WidgetConstruction",
     "Jupyter::WidgetInteractivity",
     "Numputils::ConvertInternals",

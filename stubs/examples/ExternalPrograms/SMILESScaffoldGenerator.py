@@ -1,4 +1,4 @@
-"""Extracted from ExternalProgramsTest.test_OBGen3D via McUtils.Docs.ExamplesParser -- not the original file, and may reference test-only setup/state. Run with: python -m unittest ExternalProgramsTest.test_OBGen3D"""
+"""Extracted from ExternalProgramsTest.test_SMILESScaffoldGenerator via McUtils.Docs.ExamplesParser -- not the original file, and may reference test-only setup/state. Run with: python -m unittest ExternalProgramsTest.test_SMILESScaffoldGenerator"""
 
 from Peeves.TestUtils import *
 from unittest import TestCase
@@ -22,7 +22,8 @@ class ExternalProgramsTest(TestCase):
         return arg
 
     @validationTest
-    def test_OBGen3D(self):
+    def test_SMILESScaffoldGenerator(self):
         from Psience.Molecools import Molecule
-        mol = OBMolecule.from_string('CO[C]12C[C@@](C=C1)(c1ccc(F)cc1)CC2', 'smi')
-        mol.draw(use_coords=True).show()
+        prod = build_templated_smiles('C1CCCC=1', {'functional_group': '[O:1]', 'bond_order': 2}, {'functional_group': '[S:1]', 'bond_order': 2}, active_sites={1: 0, 2: 2, 3: 1}, atom_replacements={2: 'N'}, remove_sites=True)
+        print(prod)
+        Molecule.from_string(prod).plot().show()
