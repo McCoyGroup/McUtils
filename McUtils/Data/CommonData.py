@@ -1,6 +1,7 @@
 """
 Defines a common data handler
 """
+from .. import Devutils as dev
 import os, sys
 
 __all__ = [ "DataHandler", "DataError", "DataRecord" ]
@@ -27,7 +28,8 @@ class DataHandler:
                  data_pkg=None,
                  alternate_keys=None,
                  getter=None,
-                 record_type=None
+                 record_type=None,
+                 extension='.py'
                  ):
         """
         :param data_name: the name of the dataset
@@ -55,6 +57,7 @@ class DataHandler:
             source_key = default_data_source_key
         if data_pkg is None:
             data_pkg = default_data_package
+        self.extension = extension
         self._data = None # this'll be a dict where we store all our data
         self._src = None
         self._dir = data_dir
@@ -68,7 +71,7 @@ class DataHandler:
         self.getter = getter
     @property
     def data_file(self): # in case other people want to load it...
-        return os.path.join(self._dir, self._name+".py")
+        return os.path.join(self._dir, self._pkg, self._name+self.extension)
     def _load_alts(self):
         # assumes we have dict data, but this entire structure does that anyway
         if not self._alts is None:
@@ -89,19 +92,28 @@ class DataHandler:
         """
         # currently we only load python data
         # TODO: I should rewrite this to use a Deserializer object...
-        env = {} if env is None else env
-        import sys
-        sys.path.insert(0, self._dir) #name needs to be unique enough...
-        if self._pkg is None:
-            exec_stmt = "from {0} import {1} as {1}".format(self._name, self._key)
+        if self.extension == '.py':
+            env = {} if env is None else env
+            sys.path.insert(0, self._dir) #name needs to be unique enough...
+            if self._pkg is None:
+                exec_stmt = "from {0} import {1} as {1}".format(self._name, self._key)
+            else:
+                exec_stmt = "from {0}.{1} import {2} as {2}".format(self._pkg, self._name, self._key)
+            exec(exec_stmt, env, env)
+            self._data = env[self._key]
+            try:
+                self._src = env[self._src_key]
+            except:
+                pass
+        elif self.extension == '.json':
+            env = dev.read_json(self.data_file)
+            self._data = env[self._key]
+            try:
+                self._src = env[self._src_key]
+            except:
+                pass
         else:
-            exec_stmt = "from {0}.{1} import {2} as {2}".format(self._pkg, self._name, self._key)
-        exec(exec_stmt, env, env)
-        self._data = env[self._key]
-        try:
-            self._src = env[self._src_key]
-        except:
-            pass
+            raise ValueError(f"don't know how to load from {self.extension}")
         self._load_alts()
         self._loaded = True
     @property
