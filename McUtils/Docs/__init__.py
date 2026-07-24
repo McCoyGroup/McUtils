@@ -13,3 +13,5 @@ from .Stubs import *; from .Stubs import __all__ as exposed
 __all__ += exposed
 from .ExamplesParser import *; from .ExamplesParser import __all__ as exposed
 __all__ += exposed
+from .Docstrings import *; from .Docstrings import __all__ as exposed
+__all__ += exposed
