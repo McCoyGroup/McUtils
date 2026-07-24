@@ -307,25 +307,68 @@ class ExternalProgramsTest(TestCase):
     def test_SMILESManip(self):
         from Psience.Molecools import Molecule
         from McUtils.Data import SMILESData
-        from McUtils.ExternalPrograms import join_smiles_fragments
+        from McUtils.ExternalPrograms import build_templated_smiles
 
-        print(
-            SMILESData.scaffold('coumarin_3_7_diyl')
+        prod = build_templated_smiles(
+            SMILESData.functional_group('carbamate'),
+            {
+                'functional_group':SMILESData.functional_group('imine'),
+                'new_bonds':[
+                    [0, 1],
+                    [1, 0]
+                ],
+                'push_bonds':True
+            }
         )
-        print(
-            SMILESData.functional_group('phenyl')
+        print(prod)
+
+        Molecule.from_string(prod).plot().show()
+
+    @validationTest
+    def test_SMILESScaffoldGenerator(self):
+        from Psience.Molecools import Molecule
+
+        prod = build_templated_smiles(
+            'C1CCCC=1',
+            {
+                'functional_group':"[O:1]",
+                'bond_order':2
+            },
+            {
+                'functional_group':"[S:1]",
+                'bond_order':2
+            },
+            active_sites={1:0, 2:2, 3:1},
+            atom_replacements={2:'N'},
+            remove_sites=True
         )
+
+        print(prod)
+        # Molecule.from_string(base_scaff).plot().show()
+        Molecule.from_string(prod).plot().show()
+
+    @validationTest
+    def test_RandomSMILESManip(self):
+        from Psience.Molecools import Molecule
+        from McUtils.Data import SMILESData
+        scaff = SMILESData.random_scaffold()
+        fg = SMILESData.random_functional_group()
 
         smi = join_smiles_fragments(
-            SMILESData.scaffold('coumarin_3_7_diyl'),
-            SMILESData.functional_group('phenyl'),
-            push_bonds='scaffold',
-            resanitize=False
+            scaff,
+            fg,
+            # push_bonds='scaffold',
+            # resanitize=False
         )
+        print(scaff)
+        print(fg)
         print(smi)
         Molecule.from_string(smi).plot(highlight_atoms=[0, 1]).show()
         return
 
+    @validationTest
+    def test_AromaticSMILESManip(self):
+        from Psience.Molecools import Molecule
         diene = '[C:1]([C:5]2)[C:3]=[C:4][C:2]2'
         dienophile = 'O=C1NC(=O)[C:2]=[C:1]1'
 
@@ -334,11 +377,11 @@ class ExternalProgramsTest(TestCase):
         template = join_smiles_fragments(diene, dienophile, [[0, 0], [1, 1]],
                                          cache=cache,
                                          add_implicit_hydrogens='full',
-                                         break_aromaticity=True)
+                                         push_bonds=True)
         map_data1 = parse_smiles_and_atom_map(diene, cache=cache, add_implicit_hydrogens='full')
         offset = len(map_data1['map'])
         template = renumber_smiles_atom_map(template, {offset: 2, offset + 1: 3},
-                                 cache=cache,
-                                 add_implicit_hydrogens='full')
+                                            cache=cache,
+                                            add_implicit_hydrogens='full')
 
         Molecule.from_string(template).plot(highlight_atoms=[0, 1, 2, 3]).show()
