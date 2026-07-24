@@ -13,7 +13,8 @@ from .. import Devutils as dev
 __all__ = [
     "DocstringParser",
     "DocstringWriter",
-    "DocstringDialectHandler"
+    "DocstringDialectHandler",
+    "DocstringDataAnalyzer"
 ]
 
 
@@ -540,66 +541,6 @@ def data_extractor(raw: str, node: ast.AST, dialect: Optional[DocstringDialectHa
     return handler.extract(raw, node)
 
 
-def analysis(data: "DocstringData") -> Dict[str, Any]:
-    """Heuristically assess the quality of a parsed docstring.
-
-    Args:
-        data (DocstringData): A parsed (and possibly hand-edited) record.
-
-    Returns:
-        dict: ``{"score": int 0-100, "issues": list[str], "ok": bool}``.
-    """
-    issues: List[str] = []
-    score = 100
-
-    if not data.short_description:
-        issues.append("missing short description")
-        score -= 30
-    else:
-        if len(data.short_description) > 120:
-            issues.append("short description too long (should be one concise line)")
-            score -= 10
-        if not data.short_description[:1].isupper():
-            issues.append("short description should start with a capital letter")
-            score -= 5
-
-    params = data.type_info.get("params", {})
-    real_params = {n: v for n, v in params.items() if n not in ("self", "cls")}
-
-    undocumented = [n for n, v in real_params.items() if not v.get("description")]
-    if undocumented:
-        issues.append(f"undocumented parameter(s): {', '.join(undocumented)}")
-        score -= min(30, 10 * len(undocumented))
-
-    stale = [n for n, v in real_params.items() if v.get("annotation") is None and v.get("doc_type")]
-    # only flag as "stale" if it's not a real signature param at all
-    stale = [n for n in stale if n not in _signature_param_names(data)]
-    if stale:
-        issues.append(f"documented parameter(s) not in signature: {', '.join(stale)}")
-        score -= min(20, 10 * len(stale))
-
-    mismatched = []
-    for n, v in real_params.items():
-        ann, doc_t = v.get("annotation"), v.get("doc_type")
-        if ann and doc_t and _normalize_type(ann) != _normalize_type(doc_t):
-            mismatched.append(n)
-    if mismatched:
-        issues.append(f"type mismatch between annotation and docs: {', '.join(mismatched)}")
-        score -= min(20, 10 * len(mismatched))
-
-    ret = data.type_info.get("returns", {}) or {}
-    if ret.get("annotation") and ret["annotation"] != "None" and not ret.get("description"):
-        issues.append("return value not documented")
-        score -= 10
-
-    if len(real_params) >= 3 and not data.examples:
-        issues.append("no usage example for a non-trivial signature")
-        score -= 10
-
-    score = max(0, score)
-    return {"score": score, "issues": issues, "ok": score >= 70}
-
-
 def _normalize_type(s: str) -> str:
     return re.sub(r"\s+", "", s or "").lower()
 
@@ -673,8 +614,7 @@ class DocstringParser:
     """Parse a Python source file into a list of :class:`DocstringData`.
 
     Each function's docstring is parsed by whichever
-    :class:`DocstringDialectHandler` matches it best (see
-    :func:`detect_dialect`), so a single file with a mix of Google-style and
+    `DocstringDialectHandler` matches it best (see `detect_dialect`), so a single file with a mix of Google-style and
     Sphinx-style docstrings parses correctly function-by-function -- unless a
     `dialect` is passed to force one convention for the whole file.
     """
@@ -686,7 +626,7 @@ class DocstringParser:
                 docstring is parsed with this handler instead of
                 auto-detecting one per function.
         """
-        self.dialect = dialect
+        self.dialect = resolve_dialect(dialect)
 
     def parse_source(self, src: str, only_missing: bool = False) -> List[DocstringData]:
         """Parse `src` text and return one :class:`DocstringData` per function.
@@ -867,3 +807,186 @@ class DocstringWriter:
             (``ast.unparse``-normalized) code.
         """
         return _strip_docstrings(original_src) == _strip_docstrings(new_src)
+
+class DocstringIssue:
+    issue_registry = {}
+    @classmethod
+    def register(cls, name, method=None):
+        if method is None and hasattr(name, 'name'):
+            method = name
+            name = method.name
+        if method is not None:
+            cls.issue_registry[name] = method
+            return method
+        else:
+            def register(method, name=name):
+                return cls.register(name, method)
+            return register
+
+    __slots__ = ("description", "score")
+    default_description = None
+    default_score = None
+    def __init__(self, description=None, score=None):
+        if description is None: description = self.default_description
+        self.description = description
+        if score is None: score = self.default_score
+        self.score = score
+    def __repr__(self):
+        argstr_bits = []
+        if self.description is not None:
+            argstr_bits.append(f"{self.description=!r}")
+        if self.score is not None:
+            argstr_bits.append(f"{self.score=!r}")
+        argstr = ", ".join(argstr_bits)
+        return f"{type(self).__name__}({argstr})"
+
+@DocstringIssue.register('missing_description')
+class MissingDescription(DocstringIssue):
+    default_score = 50
+@DocstringIssue.register('missing_short_description')
+class MissingShortDescription(MissingDescription):
+    default_score = 10
+@DocstringIssue.register('missing_parameter')
+class MissingParameter(DocstringIssue):
+    default_score = 30
+@DocstringIssue.register('missing_return_value')
+class MissingReturnValue(DocstringIssue):
+    default_score = 50
+@DocstringIssue.register('missing_return_type')
+class MissingReturnType(DocstringIssue):
+    default_score = 30
+@DocstringIssue.register('stale_parameter')
+class StaleParameter(DocstringIssue):
+    default_score = 30
+@DocstringIssue.register('stale_parameter_type')
+class StaleParameterType(DocstringIssue):
+    default_score = 20
+@DocstringIssue.register('missing_parameter_description')
+class MissingParameterDescription(MissingDescription):
+    default_score = 10
+@DocstringIssue.register('missing_parameter_type')
+class MissingParameterType(DocstringIssue):
+    default_score = 5
+@DocstringIssue.register('bad_description')
+class BadDescription(DocstringIssue):
+    default_score = 10
+@DocstringIssue.register('short_description_too_long')
+class ShortDescriptionTooLong(BadDescription):
+    default_score = 5
+
+class DocstringDataAnalyzer:
+    def __init__(self, data:DocstringData, analyses=None):
+        self.data = data
+        self.analyses = analyses
+
+    @property
+    def default_analyses(self):
+        return {
+            "descriptions":self._check_description,
+            "parameters":self._check_undocumented_parameters,
+            "stale":self._check_stale_parameters,
+            "returns":self._check_return_values,
+        }
+    def get_analyses(self):
+        if self.analyses is None:
+            return self.default_analyses
+        elif dev.is_list_like(self.analyses):
+            df = self.default_analyses
+            return {k:df[k] for k in self.analyses}
+        else:
+            return self.analyses
+
+    @classmethod
+    def _check_doc_type(cls, typestr):
+        return (
+            typestr is not None and
+            typestr not in ("object", "Any", "_", "")
+        )
+
+    @classmethod
+    def _check_description(cls, data:DocstringData) -> list[DocstringIssue]:
+        issues = []
+        if not data.short_description:
+            if not data.details:
+                issues.append(MissingDescription())
+            else:
+                issues.append(MissingShortDescription())
+        else:
+            if len(data.short_description) > 120:
+                issues.append(ShortDescriptionTooLong())
+        return issues
+
+    @classmethod
+    def _check_undocumented_parameters(cls, data:DocstringData) -> list[DocstringIssue]:
+        issues = []
+
+        params = data.type_info.get("params", {})
+        real_params = {n: v for n, v in params.items() if n not in ("self", "cls")}
+
+        for n, v in real_params.items():
+            if not v.get("description"):
+                issues.append(MissingParameterDescription())
+            if not cls._check_doc_type(v.get("doc_type")):
+                issues.append(MissingParameterType())
+
+        return issues
+
+    @classmethod
+    def _check_stale_parameters(cls, data: DocstringData) -> list[DocstringIssue]:
+        issues = []
+
+        params = data.type_info.get("params", {})
+        real_params = {n: v for n, v in params.items() if n not in ("self", "cls")}
+
+        stale = [n for n, v in real_params.items() if v.get("annotation") is None and v.get("doc_type")]
+        # only flag as "stale" if it's not a real signature param at all
+        stale = [n for n in stale if n not in _signature_param_names(data)]
+        if stale:
+            for n in stale:
+                issues.append(StaleParameter(n))
+
+        mismatched = []
+        for n, v in real_params.items():
+            ann, doc_t = v.get("annotation"), v.get("doc_type")
+            if ann and doc_t and _normalize_type(ann) != _normalize_type(doc_t):
+                mismatched.append(n)
+        if mismatched:
+            for n in mismatched:
+                issues.append(StaleParameterType(n))
+
+        return issues
+
+    @classmethod
+    def _check_return_values(cls, data: DocstringData) -> list[DocstringIssue]:
+        issues = []
+
+        ret = data.type_info.get("returns", {}) or {}
+        if not ret.get("description"):
+            issues.append(MissingReturnValue())
+        if not cls._check_doc_type(ret.get("doc_type")):
+            issues.append(MissingReturnType())
+
+        return issues
+
+    def analyze_docstring_quality(self) -> tuple[dict[str, list[DocstringIssue]], int]:
+        """Heuristically assess the quality of a parsed docstring.
+
+        Args:
+            data (DocstringData): A parsed (and possibly hand-edited) record.
+
+        Returns:
+            dict: ``{"score": int 0-100, "issues": list[str], "ok": bool}``.
+        """
+        score = 0
+        issue_breakdowns = {}
+        data = self.data
+        for tag, analysis in self.get_analyses().items():
+            issues = analysis(data)
+            issue_breakdowns[tag] = issues
+            score += sum(i.score for i in issues)
+
+        return issue_breakdowns, -score
+
+
+
+

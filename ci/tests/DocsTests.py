@@ -101,10 +101,11 @@ class DocsTests(TestCase):
         docfile = sys.modules[DocstringParser.__module__].__file__
         docs = DocstringParser().parse_file(docfile)
         for doc in docs:
-            print(doc)
-        new_src = DocstringWriter(dialect='sphinx').write_file(
-            docfile,
-            docs,
-            target=None
-        )
-        print(new_src)
+            probs, score = DocstringDataAnalyzer(doc).analyze_docstring_quality()
+            print(score, doc)
+        # new_src = DocstringWriter(dialect='sphinx').write_file(
+        #     docfile,
+        #     docs,
+        #     target=None
+        # )
+        # print(new_src)
