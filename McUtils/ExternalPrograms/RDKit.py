@@ -208,7 +208,6 @@ class RDMolecule(ExternalMolecule):
         :param verbose: don't suppress logging
         :type verbose: bool
         :return: the (log-blocking or no-op) context manager
-        :rtype: object
         """
         from rdkit.rdBase import BlockLogs
         if verbose:
@@ -874,6 +873,18 @@ class RDMolecule(ExternalMolecule):
                     if atom.GetAtomMapNum() != 0:  # only fix mapped atoms
                         atom.SetNoImplicit(False)  # allow implicit Hs again
                         atom.SetNumExplicitHs(0)  # clear any explicit H count
+                        # remove any bonded hydrogens
+                        # did_edits = False
+                        # edit_mol = Chem.RWMol(rdkit_mol)
+                        # for aa in atom.GetNeighbors():
+                        #     if aa.GetSymbol() == 'H':
+                        #         did_edits = True
+                        #         edit_mol.RemoveAtom(aa)
+                        #         # b = edit_mol.GetBondBetween(atom.GetIdx(), aa.GetIdx())
+                        #         # edit_mol.RemoveBond(b)
+                        # if did_edits:
+                        #     rdkit_mol = edit_mol.GetMol()
+
             rdkit_mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
 
         if reorder_from_atom_map:

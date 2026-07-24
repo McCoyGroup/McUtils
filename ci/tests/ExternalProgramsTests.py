@@ -294,7 +294,7 @@ class ExternalProgramsTest(TestCase):
                  transparency=.5)
         fig.show()
 
-    @debugTest
+    @validationTest
     def test_OBGen3D(self):
         from Psience.Molecools import Molecule
 
@@ -302,3 +302,43 @@ class ExternalProgramsTest(TestCase):
         # print(mol.coords)
         # Molecule.from_openbabel(mol).plot().show()
         mol.draw(use_coords=True).show()
+
+    @debugTest
+    def test_SMILESManip(self):
+        from Psience.Molecools import Molecule
+        from McUtils.Data import SMILESData
+        from McUtils.ExternalPrograms import join_smiles_fragments
+
+        print(
+            SMILESData.scaffold('coumarin_3_7_diyl')
+        )
+        print(
+            SMILESData.functional_group('phenyl')
+        )
+
+        smi = join_smiles_fragments(
+            SMILESData.scaffold('coumarin_3_7_diyl'),
+            SMILESData.functional_group('phenyl'),
+            push_bonds='scaffold',
+            resanitize=False
+        )
+        print(smi)
+        Molecule.from_string(smi).plot(highlight_atoms=[0, 1]).show()
+        return
+
+        diene = '[C:1]([C:5]2)[C:3]=[C:4][C:2]2'
+        dienophile = 'O=C1NC(=O)[C:2]=[C:1]1'
+
+        cache = {}
+        dienophile = set_smiles_bond_order(dienophile, 0, 1, 1, cache=cache)
+        template = join_smiles_fragments(diene, dienophile, [[0, 0], [1, 1]],
+                                         cache=cache,
+                                         add_implicit_hydrogens='full',
+                                         break_aromaticity=True)
+        map_data1 = parse_smiles_and_atom_map(diene, cache=cache, add_implicit_hydrogens='full')
+        offset = len(map_data1['map'])
+        template = renumber_smiles_atom_map(template, {offset: 2, offset + 1: 3},
+                                 cache=cache,
+                                 add_implicit_hydrogens='full')
+
+        Molecule.from_string(template).plot(highlight_atoms=[0, 1, 2, 3]).show()

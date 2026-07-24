@@ -2,15 +2,24 @@ import functools
 import multiprocessing
 
 from .. import Devutils as dev
+from .. import Numputils as nput
 from .RDKit import RDMolecule
 import numpy as np
 import hashlib
+import itertools
 
 __all__ = [
     "SMILESSupplier",
     "consume_smiles_supplier",
     "match_smiles_supplier",
-    "smarts_matcher"
+    "smarts_matcher",
+    "fragment_to_smiles_iterator",
+    "join_smiles_fragments",
+    "set_smiles_chiralities",
+    "set_smiles_stereochemistry",
+    "set_smiles_bond_order",
+    "renumber_smiles_atom_map",
+    "parse_smiles_and_atom_map"
 ]
 
 class SMILESSupplier:
@@ -48,7 +57,7 @@ class SMILESSupplier:
         self._stream = None
         self._cur = None
         self._max_offset = None
-        self._offsets:np.ndarray[(None,), int] = None
+        self._offsets:'np.ndarray[(None,), int]' = None
         self._flexible_offsets = None
         self._assignable_offsets = None
         self._encoding = self.smi.get_encoding()
@@ -560,8 +569,7 @@ def _match_rdkit(matcher, smi, error_value=None, sanitize=False, **parser_option
     :return: the SMILES on a match, else the error value
     :rtype: str | None
     """
-    from .RDKit import RDKitInterface
-    AllChem = RDKitInterface.submodule("Chem.AllChem")
+    AllChem = RDMolecule.allchem_api()
 
     mol = RDMolecule.parse_smiles(smi, sanitize=sanitize, **parser_options)
     if mol is None: return error_value
@@ -605,8 +613,7 @@ def smarts_matcher(pattern, error_value=None, sanitize=True, **parser_options):
     :return: the matcher callable
     :rtype: Callable
     """
-    from .RDKit import RDKitInterface
-    AllChem = RDKitInterface.submodule("Chem.AllChem")
+    AllChem = RDMolecule.allchem_api()
     smarts_candidate = AllChem.MolFromSmarts(pattern)
     if sanitize:
         smarts_candidate.UpdatePropertyCache()
@@ -652,8 +659,7 @@ def match_smiles_supplier(supplier:SMILESSupplier, matcher, pool=None,
     from rdkit.rdBase import BlockLogs
     smarts_tag = str(matcher)
     if isinstance(matcher, str):
-        from .RDKit import RDKitInterface
-        AllChem = RDKitInterface.submodule("Chem.AllChem")
+        AllChem = RDMolecule.allchem_api()
         smarts_candidate = AllChem.MolFromSmarts(matcher)
         matcher = functools.partial(_match_rdkit, smarts_candidate)
         if quiet and initializer is None:
@@ -692,3 +698,480 @@ def match_smiles_supplier(supplier:SMILESSupplier, matcher, pool=None,
                 match_output.write(match + "\n")
 
     return matches
+
+
+
+def _get_atom_idx(mol, map_num):
+    for atom in mol.GetAtoms():
+        if atom.GetAtomMapNum() == map_num:
+            return atom.GetIdx()
+    raise ValueError(f"Atom map number {map_num} not found in molecule.")
+def _check_ring_aromatic(new_mol, ring_indices):
+    return all(
+        new_mol.GetAtomWithIdx(i).GetIsAromatic() for i in ring_indices
+    )
+def _break_ring_aromaticities(new_mol, idx2):
+    ring_info = new_mol.GetRingInfo()
+    all_atom_rings = ring_info.AtomRings()
+    aromatic_rings = {
+        r:_check_ring_aromatic(new_mol, r) if idx2 not in r else False
+        for r in all_atom_rings
+    }
+    for ring in all_atom_rings:
+        if idx2 in ring:
+            other_atoms = [idx for idx in ring if idx != idx2]
+        else:
+            continue
+        for idx in other_atoms:
+            if (
+                    new_mol.GetAtomWithIdx(idx).GetIsAromatic()
+                and not any(is_aromatic for ring,is_aromatic in aromatic_rings.items() if idx in ring)
+            ):
+                _break_aromaticity(new_mol, new_mol, idx, idx, break_rings=False)
+def _push_inc_bond(new_mol, idx:int, visted:set):
+    # TODO: check that valencies are bad first
+    a1 = new_mol.GetAtomWithIdx(idx)
+    visted.add(idx)
+    for b in a1.GetBonds():
+        t = b.GetBondTypeAsDouble()
+        if t < 2:
+            targs = [b.GetBeginAtomIdx(), b.GetEndAtomIdx()]
+            if (
+                    any(t not in visted for t in targs)
+                    and not any(new_mol.GetAtomWithIdx(t).GetSymbol() == "H" for t in targs)
+            ):
+                new_type = get_rdkit_bond_type(t + 1)
+                b.SetBondType(new_type)
+                for x2 in targs:
+                    if x2 not in visted:
+                        _push_dec_bond(new_mol, x2, visted)
+                break
+def _push_dec_bond(new_mol, idx:int, visted:set):
+    #TODO: check that valencies are bad first
+    a1 = new_mol.GetAtomWithIdx(idx)
+    visted.add(idx)
+    for b in a1.GetBonds():
+        t = b.GetBondTypeAsDouble()
+        if t > 1:
+            targs = [b.GetBeginAtomIdx(), b.GetEndAtomIdx()]
+            if (
+                    any(t not in visted for t in targs)
+                    and not any(new_mol.GetAtomWithIdx(t).GetSymbol() == "H" for t in targs)
+            ):
+                new_type = get_rdkit_bond_type(t - 1)
+                b.SetBondType(new_type)
+                for x2 in targs:
+                    if x2 not in visted:
+                        _push_inc_bond(new_mol, x2, visted)
+                break
+
+def _break_aromaticity(ref_mol, new_mol, idx1, idx2,
+                       original_aromaticity_map,
+                       push_bonds=True, break_rings=True, check_valences=False):
+    Chem = RDMolecule.allchem_api()
+    a1 = ref_mol.GetAtomWithIdx(idx1)
+    is_aromatic = a1.GetIsAromatic()
+    fixed = False
+    if break_rings and is_aromatic:
+        a1 = new_mol.GetAtomWithIdx(idx2)
+        a1.SetIsAromatic(False)
+        for b in a1.GetBonds():
+            if b.GetBondType() == Chem.BondType.AROMATIC:
+                b.SetBondType(Chem.BondType.SINGLE)
+                fixed = True
+        if fixed and break_rings:
+            _break_ring_aromaticities(new_mol, idx2)
+    if not fixed and push_bonds:
+        visited = {idx2}
+        _push_dec_bond(new_mol, idx2, visited)
+        if check_valences:
+            for x in visited:
+                a = new_mol.GetAtomWithIdx(x)
+                if a.HasValenceViolation():
+                    if original_aromaticity_map[x]:
+                        a.SetIsAromatic(True)
+                        for b in a.GetBonds():
+                            b.SetBondType(Chem.BondType.Aromatic)
+                    else:
+                        while a.HasValenceViolation():
+                            for b in a.GetBonds():
+                                t = b.GetBondTypeAsDouble()
+                                if t > 1:
+                                    new_type = get_rdkit_bond_type(t - 1)
+                                    b.SetBondType(new_type)
+                            else:
+                                break
+
+
+    return is_aromatic
+def _pop_hydrogen(ref_mol, new_mol, idx1, idx2):
+    a1 = ref_mol.GetAtomWithIdx(idx1)
+    implicit_hs = a1.GetNumImplicitHs()
+    explicit_hs = a1.GetNumExplicitHs()
+    if implicit_hs > 0:
+        return False
+    elif explicit_hs > 0:
+        a1 = new_mol.GetAtomWithIdx(idx2)
+        explicit_hs = a1.GetNumExplicitHs()
+        a1.SetNumExplicitHs(explicit_hs - 1)
+        return False
+    else:
+        # Find one explicit neighbor on the new mol
+        a1 = new_mol.GetAtomWithIdx(idx2)
+        for neighbor in a1.GetNeighbors():
+            if neighbor.GetAtomicNum() == 1:
+                h_idx = neighbor.GetIdx()
+                new_mol.RemoveAtom(h_idx)
+                return True
+        return False
+def _add_hydrogen(new_mol, idx1, allow_explicit=True):
+    Chem = RDMolecule.allchem_api()
+    a1 = new_mol.GetAtomWithIdx(idx1)
+    implicit_hs = not a1.GetNoImplicit()
+    explicit_hs = a1.GetNumExplicitHs()
+    if implicit_hs:
+        return False
+    elif explicit_hs >= 0 and allow_explicit:
+        explicit_hs = a1.GetNumExplicitHs()
+        a1.SetNumExplicitHs(explicit_hs + 1)
+        return False
+    else:
+        # Find one explicit neighbor on the new mol
+        a = Chem.Atom("H")
+        idx2 = new_mol.AddAtom(a)
+        new_mol.AddBond(idx2, idx1, Chem.BondType.SINGLE)
+        return True
+def parse_smiles_and_atom_map(smiles1, cache, add_implicit_hydrogens=False):
+    if cache is None: cache = {}
+    if smiles1 not in cache:
+        mol = RDMolecule.parse_smiles(smiles1, remove_hydrogens=True, add_implicit_hydrogens=add_implicit_hydrogens)
+        if mol is not None:
+            map = {a.GetAtomMapNum(): a.GetIdx() for a in mol.GetAtoms()}
+            map.pop(0, None)
+        else:
+            map = None
+        cache[smiles1] = {'mol': mol, 'map': map}
+    return cache[smiles1]
+def get_rdkit_bond_type(t, as_number=False):
+    Chem = RDMolecule.allchem_api()
+    if nput.is_numeric(t):
+        if as_number: return t
+        if t == 1:
+            t = Chem.BondType.SINGLE
+        elif t == 2:
+            t = Chem.BondType.DOUBLE
+        elif t == 3:
+            t = Chem.BondType.TRIPLE
+        elif 1 < t and t < 2:
+            t = Chem.BondType.AROMATIC
+        elif 2 < t and t < 3:
+            t = Chem.BondType.TWOANDAHALF
+        elif 3 < t and t < 4:
+            t = Chem.BondType.THREEANDAHALF
+        else:
+            raise ValueError(f"Bond type {t} is not supported.")
+    elif not as_number:
+        bond_type_map = {
+            Chem.BondType.SINGLE: 1.0,
+            Chem.BondType.DOUBLE: 2.0,
+            Chem.BondType.TRIPLE: 3.0,
+            Chem.BondType.AROMATIC: 1.5,
+            Chem.BondType.TWOANDAHALF: 2.5,
+            Chem.BondType.THREEANDAHALF: 3.5,
+            Chem.BondType.UNSPECIFIED: 0.0
+        }
+        return bond_type_map[t]
+    return t
+def join_smiles_fragments(scaffold: str, functional_group: str,
+                          new_bonds=((0, 0),),
+                          cache=None,
+                          resanitize=True,
+                          add_implicit_hydrogens='full',
+                          fallback_to_ordering=False,
+                          decrement_hydrogens=True,
+                          prekekulize=True,
+                          push_bonds=False,
+                          return_mol=False) -> str:
+    Chem = RDMolecule.allchem_api()
+    if cache is None:
+        cache = {}
+    mol_data1 = parse_smiles_and_atom_map(scaffold, cache, add_implicit_hydrogens=add_implicit_hydrogens)
+    mol_data2 = parse_smiles_and_atom_map(functional_group, cache, add_implicit_hydrogens=add_implicit_hydrogens)
+    mol1 = mol_data1['mol']
+    mol2 = mol_data2['mol']
+
+    if mol1 is None:
+        raise ValueError(f"bad SMILES {scaffold}")
+    if mol1 is None:
+        raise ValueError(f"bad SMILES {functional_group}")
+
+    map1 = mol_data1['map']
+    map2 = mol_data2['map']
+    offset = mol1.GetNumAtoms()
+
+    map2 = {m+offset: i+offset for m,i in map2.items()}
+
+    # Combine both molecules into one (no bond yet)
+    combined = Chem.CombineMols(mol1, mol2)
+    editable = Chem.RWMol(combined)
+
+    if isinstance(push_bonds, str):
+        break_scaffold_aromaticity = dev.str_is(push_bonds, 'scaffold')
+        break_fg_aromaticity = dev.str_is(push_bonds, 'functional')
+    else:
+        break_scaffold_aromaticity = break_fg_aromaticity = push_bonds
+
+    if prekekulize:
+        Chem.Kekulize(editable, clearAromaticFlags=True)
+
+    original_aromaticity_map = [a.GetIsAromatic() for a in combined.GetAtoms()]
+    dearomitized_atoms = []
+    for b in new_bonds:
+        if len(b) == 2:
+            m1, m2 = b
+            t = 1
+        else:
+            m1, m2, t = b
+        if fallback_to_ordering:
+            idx1 = map1.get(m1 + 1, m1)
+            idx2 = map2.get(m2 + offset + 1, m2 + offset)
+        else:
+            idx1 = map1[m1 + 1]
+            idx2 = map2[m2 + offset + 1]
+
+        if nput.is_numeric(t):
+            if t == 1:
+                t = Chem.BondType.SINGLE
+            elif t == 2:
+                t = Chem.BondType.DOUBLE
+            elif t == 3:
+                t = Chem.BondType.TRIPLE
+            elif 1 < t and t < 2:
+                t = Chem.BondType.AROMATIC
+            else:
+                raise ValueError(f"Bond type {t} is not supported.")
+
+        editable.AddBond(idx1, idx2, t)
+        if decrement_hydrogens:
+            editable.UpdatePropertyCache(strict=False)
+            if break_scaffold_aromaticity:
+                dearomitized = _break_aromaticity(mol1, editable, idx1, idx1, original_aromaticity_map)
+            else:
+                dearomitized = False
+            if not dearomitized:
+                modified = _pop_hydrogen(mol1, editable, idx1, idx1)
+            else:
+                modified = False
+                dearomitized_atoms.append(editable.GetAtomWithIdx(idx1))
+            i2 = idx2 - offset
+            if modified:
+                offset = offset
+                idx2 = idx2 - 1
+                map2 = {m:i-1 for m,i in map2.items()}
+            if break_fg_aromaticity:
+                dearomitized = _break_aromaticity(mol2, editable, i2, idx2, original_aromaticity_map)
+            else:
+                dearomitized = False
+            if not dearomitized:
+                _pop_hydrogen(mol2, editable, i2, idx2)
+            else:
+                dearomitized_atoms.append(editable.GetAtomWithIdx(idx2))
+    dearomitized_atoms = [a.GetIdx() for a in dearomitized_atoms]
+    joined = editable.GetMol()
+
+    if resanitize:
+        Chem.SanitizeMol(joined)
+
+    for idx in dearomitized_atoms:
+        joined.GetAtomWithIdx(idx).SetProp("dearomitized", "true")
+
+    for m,i in map1.items():
+        joined.GetAtomWithIdx(i).SetAtomMapNum(m)
+    for m,i in map2.items():
+        joined.GetAtomWithIdx(i).SetAtomMapNum(m - offset + len(map1))
+
+    if add_implicit_hydrogens:
+        joined = Chem.RemoveHs(joined, sanitize=resanitize)
+
+    for atom in joined.GetAtoms():
+        if atom.GetPropsAsDict().get('dearomitized'):
+            atom.SetIsAromatic(False)
+
+    if return_mol:
+        return joined
+    else:
+        return Chem.MolToSmiles(joined)
+
+def renumber_smiles_atom_map(smiles,
+                             remapping,
+                             cache=None,
+                             shift=True,
+                             add_implicit_hydrogens=False):
+    Chem = RDMolecule.allchem_api()
+    if cache is None:
+        cache = {}
+    mol_data = parse_smiles_and_atom_map(smiles, cache, add_implicit_hydrogens=add_implicit_hydrogens)
+    mol = mol_data['mol']
+    map = mol_data['map']
+
+    mol = Chem.Mol(mol)
+    map = map.copy()
+    for i,j in remapping.items():
+        i = i + 1
+        j = j + 1
+        cur_i = map[i]
+        cur_j = map.get(j)
+        del map[i]
+        map[j] = cur_i
+        if cur_j is not None:
+            if shift:
+                k = j+1
+                while k in map:
+                    tmp = map[k]
+                    map[k] = cur_j
+                    cur_j = tmp
+                    k = k + 1
+                else:
+                    map[k] = cur_j
+            else:
+                map[i] = cur_j
+    for i,a in map.items():
+        mol.GetAtomWithIdx(a).SetAtomMapNum(i)
+    if add_implicit_hydrogens:
+        mol = Chem.RemoveHs(mol)
+
+    return Chem.MolToSmiles(mol)
+
+def set_smiles_bond_order(smiles, start, end, order,
+                   cache=None,
+                   adjust_hydrogens=True,
+                   add_implicit_hydrogens=False,
+                   return_mol=False):
+    Chem = RDMolecule.allchem_api()
+    if cache is None:
+        cache = {}
+    mol_data = parse_smiles_and_atom_map(smiles, cache=cache, add_implicit_hydrogens=add_implicit_hydrogens)
+    start = mol_data['map'][start + 1]
+    end = mol_data['map'][end + 1]
+    editable = Chem.RWMol(mol_data['mol'])
+    b = editable.GetBondBetweenAtoms(start, end)
+    ext_type = b.GetBondTypeAsDouble()
+    order = get_rdkit_bond_type(order)
+    order_num = get_rdkit_bond_type(order, as_number=True)
+    if ext_type != order_num:
+        b.SetBondType(order)
+        if adjust_hydrogens:
+            if ext_type > order_num:
+                for i in range(int(np.ceil(ext_type - order_num))):
+                    _add_hydrogen(editable, start)
+                    _add_hydrogen(editable, end)
+            else:
+                for i in range(int(np.ceil(ext_type - order_num))):
+                    _pop_hydrogen(mol_data['mol'], editable, start, start)
+                    _pop_hydrogen(mol_data['mol'], editable, end, end)
+    mol = editable.GetMol()
+    if add_implicit_hydrogens is not None:
+        mol = Chem.RemoveHs(mol)
+    if return_mol:
+        return mol
+    else:
+        return Chem.MolToSmiles(mol)
+
+def set_smiles_chiralities(base_smiles, site_chirality_map):
+    Chem = RDMolecule.allchem_api()
+    if not isinstance(base_smiles, str):
+        mol = Chem.Mol(base_smiles)
+    else:
+        mol = Chem.MolFromSmiles(base_smiles)
+    atom_map_pos = {atom.GetAtomMapNum(): atom.GetIdx() for atom in mol.GetAtoms()}
+    atom_map_pos.pop(0, None)
+
+    for map_num, winding in site_chirality_map.items():
+        atom_idx = atom_map_pos[map_num+1]
+        winding_map = {
+            "CW": Chem.ChiralType.CHI_TETRAHEDRAL_CW,
+            "CCW": Chem.ChiralType.CHI_TETRAHEDRAL_CCW,
+        }
+        if winding.upper() not in winding_map:
+            raise ValueError("winding must be 'CW' or 'CCW'")
+        atom = mol.GetAtomWithIdx(atom_idx)
+
+
+        atom.SetChiralTag(winding_map[winding.upper()])
+
+    Chem.AssignStereochemistry(mol, cleanIt=True, force=True)
+    return Chem.MolToSmiles(mol)
+
+def set_smiles_stereochemistry(base_smiles, active_sites,  stereo):
+    Chem = RDMolecule.allchem_api()
+    # inject stereo information in the RDKit graph
+    if not isinstance(base_smiles, str):
+        mol = Chem.Mol(base_smiles)
+    else:
+        mol = Chem.MolFromSmiles(base_smiles)
+    atom_map_pos = {atom.GetAtomMapNum():atom.GetIdx() for atom in mol.GetAtoms()}
+    atom_map_pos.pop(0, None)
+
+    if nput.is_int(active_sites[0]):
+        active_sites = [active_sites]
+    for a,b,c,d in active_sites:
+        i, j, k, l = atom_map_pos[a], atom_map_pos[b], atom_map_pos[c], atom_map_pos[d]
+        # TODO: ensure this is robust, might need to iterate on thiz
+        mol.GetBondBetweenAtoms(j, k).SetStereo(Chem.BondStereo.STEREOE if stereo == "trans" else Chem.BondStereo.STEREOZ)
+        mol.GetBondBetweenAtoms(i, j).SetBondDir(Chem.BondDir.ENDDOWNRIGHT)
+        mol.GetBondBetweenAtoms(k, l).SetBondDir(Chem.BondDir.ENDUPRIGHT)
+        set_smiles_stereochemistry = False
+        with RDMolecule.quiet_errors():
+            for a, b in [(j, k), (k, j)]:
+                if set_smiles_stereochemistry: break
+                for c, d in [(i, l), (l, i)]:
+                    # this is bad practice, I should look up what they are actually doing
+                    # but we are going quick and dirty
+                    try:
+                        mol.GetBondBetweenAtoms(a, b).SetStereoAtoms(c, d)
+                    except RuntimeError:
+                        ...
+                    else:
+                        set_smiles_stereochemistry = True
+                        break
+            else:
+                raise ValueError(f"failed to set stereo atoms for {i},{j},{k},{l}")
+
+    Chem.AssignStereochemistry(mol, cleanIt=True, force=True)
+    smi = Chem.MolToSmiles(mol)
+    return smi
+
+def fragment_to_smiles_iterator(
+        template,
+        fragments,
+        active_sites,
+        chiralities=None,
+        filter=None,
+        add_implicit_hydrogens='full'
+):
+    Chem = RDMolecule.allchem_api()
+    cache = {}
+    nsites = len(active_sites)
+    for frags in itertools.combinations_with_replacement(fragments, nsites):
+        if filter is not None and not filter(template, active_sites, frags):
+            continue
+        temp = template
+        for site,frag in zip(active_sites, frags):
+            if nput.is_int(site):
+                site = [site]
+            new_bonds = [[s, i] for i,s in enumerate(site)]
+            try:
+                temp = join_smiles_fragments(temp, frag, new_bonds,
+                                             cache=cache,
+                                             add_implicit_hydrogens=add_implicit_hydrogens)
+            except Chem.rdchem.AtomValenceException:
+                continue
+        if chiralities is not None:
+            chiralities = [
+                [c] if isinstance(c, str) else c
+                for c in chiralities
+            ]
+            for c_set in itertools.product(*chiralities):
+                yield set_smiles_chiralities(temp, dict(zip(active_sites, c_set)))
+        else:
+            yield temp
