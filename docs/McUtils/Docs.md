@@ -57,7 +57,18 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 [ExamplesParser](Docs/ExamplesParser/ExamplesParser.md)   
 </div>
    <div class="col" markdown="1">
-   
+[DocstringParser](Docs/Docstrings/DocstringParser.md)   
+</div>
+   <div class="col" markdown="1">
+[DocstringWriter](Docs/Docstrings/DocstringWriter.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[DocstringDialectHandler](Docs/Docstrings/DocstringDialectHandler.md)   
+</div>
+   <div class="col" markdown="1">
+[DocstringDataAnalyzer](Docs/Docstrings/DocstringDataAnalyzer.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -163,18 +174,19 @@ builder.build()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-458652" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-458652"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-c49052" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-c49052"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-458652" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-c49052" markdown="1">
  - [McUtilsDoc](#McUtilsDoc)
 - [PsienceDoc](#PsienceDoc)
 - [ParseExamples](#ParseExamples)
+- [DocstringParser](#DocstringParser)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-a130ee" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-a130ee"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-98bf94" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-98bf94"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-a130ee" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-98bf94" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -281,6 +293,16 @@ class DocsTests(TestCase):
     def test_ParseExamples(self):
         parser = ExamplesParser.from_file(os.path.abspath(__file__))
         self.assertTrue(hasattr(parser.functions, 'items'))
+```
+
+#### <a name="DocstringParser">DocstringParser</a>
+```python
+    def test_DocstringParser(self):
+        docfile = sys.modules[DocstringParser.__module__].__file__
+        docs = DocstringParser().parse_file(docfile)
+        for doc in docs:
+            probs, score = DocstringDataAnalyzer(doc).analyze_docstring_quality()
+            print(score, doc)
 ```
 
  </div>
