@@ -322,29 +322,40 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 [smarts_matcher](ExternalPrograms/SMILES/smarts_matcher.md)   
 </div>
    <div class="col" markdown="1">
-[fragment_to_smiles_iterator](ExternalPrograms/SMILES/fragment_to_smiles_iterator.md)   
-</div>
-   <div class="col" markdown="1">
 [join_smiles_fragments](ExternalPrograms/SMILES/join_smiles_fragments.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [set_smiles_chiralities](ExternalPrograms/SMILES/set_smiles_chiralities.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [set_smiles_stereochemistry](ExternalPrograms/SMILES/set_smiles_stereochemistry.md)   
 </div>
    <div class="col" markdown="1">
 [set_smiles_bond_order](ExternalPrograms/SMILES/set_smiles_bond_order.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [renumber_smiles_atom_map](ExternalPrograms/SMILES/renumber_smiles_atom_map.md)   
 </div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[set_smiles_binding_sites](ExternalPrograms/SMILES/set_smiles_binding_sites.md)   
+</div>
+   <div class="col" markdown="1">
+[remove_smiles_binding_sites](ExternalPrograms/SMILES/remove_smiles_binding_sites.md)   
+</div>
+   <div class="col" markdown="1">
+[substitute_smiles_atoms](ExternalPrograms/SMILES/substitute_smiles_atoms.md)   
+</div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [parse_smiles_and_atom_map](ExternalPrograms/SMILES/parse_smiles_and_atom_map.md)   
+</div>
+   <div class="col" markdown="1">
+[build_templated_smiles](ExternalPrograms/SMILES/build_templated_smiles.md)   
 </div>
    <div class="col" markdown="1">
 [QM9](ExternalPrograms/QM9/QM9.md)   
@@ -492,9 +503,9 @@ print("PDB lines:", len(pdb.splitlines()))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-a9249e" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a9249e"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-51ee4e" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-51ee4e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a9249e" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-51ee4e" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [ParseReports](#ParseReports)
@@ -511,12 +522,15 @@ print("PDB lines:", len(pdb.splitlines()))
 - [CubeParser](#CubeParser)
 - [OBGen3D](#OBGen3D)
 - [SMILESManip](#SMILESManip)
+- [SMILESScaffoldGenerator](#SMILESScaffoldGenerator)
+- [RandomSMILESManip](#RandomSMILESManip)
+- [AromaticSMILESManip](#AromaticSMILESManip)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-2ebe92" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-2ebe92"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-659eba" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-659eba"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-2ebe92" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-659eba" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -841,25 +855,74 @@ class ExternalProgramsTest(TestCase):
     def test_SMILESManip(self):
         from Psience.Molecools import Molecule
         from McUtils.Data import SMILESData
-        from McUtils.ExternalPrograms import join_smiles_fragments
+        from McUtils.ExternalPrograms import build_templated_smiles
 
-        print(
-            SMILESData.scaffold('coumarin_3_7_diyl')
+        prod = build_templated_smiles(
+            SMILESData.functional_group('carbamate'),
+            {
+                'functional_group':SMILESData.functional_group('imine'),
+                'new_bonds':[
+                    [0, 1],
+                    [1, 0]
+                ],
+                'push_bonds':True
+            }
         )
-        print(
-            SMILESData.functional_group('phenyl')
+        print(prod)
+
+        Molecule.from_string(prod).plot().show()
+```
+
+#### <a name="SMILESScaffoldGenerator">SMILESScaffoldGenerator</a>
+```python
+    def test_SMILESScaffoldGenerator(self):
+        from Psience.Molecools import Molecule
+
+        prod = build_templated_smiles(
+            'C1CCCC=1',
+            {
+                'functional_group':"[O:1]",
+                'bond_order':2
+            },
+            {
+                'functional_group':"[S:1]",
+                'bond_order':2
+            },
+            active_sites={1:0, 2:2, 3:1},
+            atom_replacements={2:'N'},
+            remove_sites=True
         )
+
+        print(prod)
+        # Molecule.from_string(base_scaff).plot().show()
+        Molecule.from_string(prod).plot().show()
+```
+
+#### <a name="RandomSMILESManip">RandomSMILESManip</a>
+```python
+    def test_RandomSMILESManip(self):
+        from Psience.Molecools import Molecule
+        from McUtils.Data import SMILESData
+        scaff = SMILESData.random_scaffold()
+        fg = SMILESData.random_functional_group()
 
         smi = join_smiles_fragments(
-            SMILESData.scaffold('coumarin_3_7_diyl'),
-            SMILESData.functional_group('phenyl'),
-            push_bonds='scaffold',
-            resanitize=False
+            scaff,
+            fg,
+            # push_bonds='scaffold',
+            # resanitize=False
         )
+        print(scaff)
+        print(fg)
         print(smi)
         Molecule.from_string(smi).plot(highlight_atoms=[0, 1]).show()
         return
+```
 
+#### <a name="AromaticSMILESManip">AromaticSMILESManip</a>
+```python
+    def test_AromaticSMILESManip(self):
+        from Psience.Molecools import Molecule
         diene = '[C:1]([C:5]2)[C:3]=[C:4][C:2]2'
         dienophile = 'O=C1NC(=O)[C:2]=[C:1]1'
 
@@ -868,12 +931,12 @@ class ExternalProgramsTest(TestCase):
         template = join_smiles_fragments(diene, dienophile, [[0, 0], [1, 1]],
                                          cache=cache,
                                          add_implicit_hydrogens='full',
-                                         break_aromaticity=True)
+                                         push_bonds=True)
         map_data1 = parse_smiles_and_atom_map(diene, cache=cache, add_implicit_hydrogens='full')
         offset = len(map_data1['map'])
         template = renumber_smiles_atom_map(template, {offset: 2, offset + 1: 3},
-                                 cache=cache,
-                                 add_implicit_hydrogens='full')
+                                            cache=cache,
+                                            add_implicit_hydrogens='full')
 
         Molecule.from_string(template).plot(highlight_atoms=[0, 1, 2, 3]).show()
 ```
