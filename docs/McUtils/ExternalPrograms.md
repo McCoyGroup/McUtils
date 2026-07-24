@@ -322,29 +322,51 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 [smarts_matcher](ExternalPrograms/SMILES/smarts_matcher.md)   
 </div>
    <div class="col" markdown="1">
-[QM9](ExternalPrograms/QM9/QM9.md)   
+[fragment_to_smiles_iterator](ExternalPrograms/SMILES/fragment_to_smiles_iterator.md)   
 </div>
    <div class="col" markdown="1">
-[SingularityLauncher](ExternalPrograms/Containers/SingularityLauncher.md)   
+[join_smiles_fragments](ExternalPrograms/SMILES/join_smiles_fragments.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[set_smiles_chiralities](ExternalPrograms/SMILES/set_smiles_chiralities.md)   
+</div>
+   <div class="col" markdown="1">
+[set_smiles_stereochemistry](ExternalPrograms/SMILES/set_smiles_stereochemistry.md)   
+</div>
+   <div class="col" markdown="1">
+[set_smiles_bond_order](ExternalPrograms/SMILES/set_smiles_bond_order.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[renumber_smiles_atom_map](ExternalPrograms/SMILES/renumber_smiles_atom_map.md)   
+</div>
+   <div class="col" markdown="1">
+[parse_smiles_and_atom_map](ExternalPrograms/SMILES/parse_smiles_and_atom_map.md)   
+</div>
+   <div class="col" markdown="1">
+[QM9](ExternalPrograms/QM9/QM9.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[SingularityLauncher](ExternalPrograms/Containers/SingularityLauncher.md)   
+</div>
    <div class="col" markdown="1">
 [DockerLauncher](ExternalPrograms/Containers/DockerLauncher.md)   
 </div>
    <div class="col" markdown="1">
 [PodmanLauncher](ExternalPrograms/Containers/PodmanLauncher.md)   
 </div>
-   <div class="col" markdown="1">
-[CharliecloudLauncher](ExternalPrograms/Containers/CharliecloudLauncher.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[CubePropEvaluator](ExternalPrograms/CubeProp/CubePropEvaluator.md)   
+[CharliecloudLauncher](ExternalPrograms/Containers/CharliecloudLauncher.md)   
 </div>
    <div class="col" markdown="1">
-   
+[CubePropEvaluator](ExternalPrograms/CubeProp/CubePropEvaluator.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -470,9 +492,9 @@ print("PDB lines:", len(pdb.splitlines()))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-a3fa0a" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a3fa0a"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-a9249e" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a9249e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a3fa0a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a9249e" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [ParseReports](#ParseReports)
@@ -488,12 +510,13 @@ print("PDB lines:", len(pdb.splitlines()))
 - [ServerPackage](#ServerPackage)
 - [CubeParser](#CubeParser)
 - [OBGen3D](#OBGen3D)
+- [SMILESManip](#SMILESManip)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-e7ba7b" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e7ba7b"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-2ebe92" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-2ebe92"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e7ba7b" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-2ebe92" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -811,6 +834,48 @@ class ExternalProgramsTest(TestCase):
         # print(mol.coords)
         # Molecule.from_openbabel(mol).plot().show()
         mol.draw(use_coords=True).show()
+```
+
+#### <a name="SMILESManip">SMILESManip</a>
+```python
+    def test_SMILESManip(self):
+        from Psience.Molecools import Molecule
+        from McUtils.Data import SMILESData
+        from McUtils.ExternalPrograms import join_smiles_fragments
+
+        print(
+            SMILESData.scaffold('coumarin_3_7_diyl')
+        )
+        print(
+            SMILESData.functional_group('phenyl')
+        )
+
+        smi = join_smiles_fragments(
+            SMILESData.scaffold('coumarin_3_7_diyl'),
+            SMILESData.functional_group('phenyl'),
+            push_bonds='scaffold',
+            resanitize=False
+        )
+        print(smi)
+        Molecule.from_string(smi).plot(highlight_atoms=[0, 1]).show()
+        return
+
+        diene = '[C:1]([C:5]2)[C:3]=[C:4][C:2]2'
+        dienophile = 'O=C1NC(=O)[C:2]=[C:1]1'
+
+        cache = {}
+        dienophile = set_smiles_bond_order(dienophile, 0, 1, 1, cache=cache)
+        template = join_smiles_fragments(diene, dienophile, [[0, 0], [1, 1]],
+                                         cache=cache,
+                                         add_implicit_hydrogens='full',
+                                         break_aromaticity=True)
+        map_data1 = parse_smiles_and_atom_map(diene, cache=cache, add_implicit_hydrogens='full')
+        offset = len(map_data1['map'])
+        template = renumber_smiles_atom_map(template, {offset: 2, offset + 1: 3},
+                                 cache=cache,
+                                 add_implicit_hydrogens='full')
+
+        Molecule.from_string(template).plot(highlight_atoms=[0, 1, 2, 3]).show()
 ```
 
  </div>

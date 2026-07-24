@@ -198,9 +198,9 @@ print("plugin module:", module.__name__)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-cc43cf" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-cc43cf"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-de30dc" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-de30dc"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-cc43cf" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-de30dc" markdown="1">
  - [BasicTypeSig](#BasicTypeSig)
 - [SOSig](#SOSig)
 - [SharedLibraryFunction](#SharedLibraryFunction)
@@ -210,9 +210,9 @@ print("plugin module:", module.__name__)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-c44a59" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c44a59"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-b3b025" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-b3b025"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c44a59" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-b3b025" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
