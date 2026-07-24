@@ -1,5 +1,5 @@
-import numpy as np
-from .CommonData import DataHandler, DataRecord
+from .CommonData import DataHandler
+import random
 
 __all__ = [ "SMILESData" ]
 __reload_hook__ = [".CommonData"]
@@ -17,6 +17,10 @@ class SMILESDataHandler(DataHandler):
         if return_string:
             data = data['mapped_smiles']
         return data
+    def random_scaffold(self, return_string=True):
+        return self.scaffold(random.choice(list(self['Scaffolds'].keys())), return_string=return_string)
+    def random_functional_group(self, return_string=True):
+        return self.functional_group(random.choice(list(self['FunctionalGroups'].keys())), return_string=return_string)
 
 SMILESData=SMILESDataHandler()
 SMILESData.__doc__ = """An instance of `SMILESDataHandler` that can be used for looking up data on pre-baked smiles strings"""

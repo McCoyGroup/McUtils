@@ -13,13 +13,16 @@ __all__ = [
     "consume_smiles_supplier",
     "match_smiles_supplier",
     "smarts_matcher",
-    "fragment_to_smiles_iterator",
     "join_smiles_fragments",
     "set_smiles_chiralities",
     "set_smiles_stereochemistry",
     "set_smiles_bond_order",
     "renumber_smiles_atom_map",
-    "parse_smiles_and_atom_map"
+    "set_smiles_binding_sites",
+    "remove_smiles_binding_sites",
+    "substitute_smiles_atoms",
+    "parse_smiles_and_atom_map",
+    "build_templated_smiles"
 ]
 
 class SMILESSupplier:
@@ -882,6 +885,100 @@ def get_rdkit_bond_type(t, as_number=False):
         }
         return bond_type_map[t]
     return t
+def remove_smiles_binding_sites(smi,
+                             sites=None,
+                             cache=None,
+                             add_implicit_hydrogens='full'):
+    Chem = RDMolecule.allchem_api()
+    mol_data = parse_smiles_and_atom_map(smi, cache=cache, add_implicit_hydrogens=add_implicit_hydrogens)
+
+    mol = Chem.Mol(mol_data['mol'])
+    map = mol_data['map']
+    if sites is None:
+        sites = [x-1 for x in map.keys()]
+    for idx in sites:
+        idx = map.get(idx+1)
+        if idx is not None:
+            mol.GetAtomWithIdx(idx).SetAtomMapNum(0)
+
+    if add_implicit_hydrogens:
+        mol = Chem.RemoveHs(mol)
+
+    return Chem.MolToSmiles(mol)
+def set_smiles_binding_sites(smi,
+                             site_map,
+                             cache=None,
+                             add_implicit_hydrogens='full'):
+    Chem = RDMolecule.allchem_api()
+    mol_data = parse_smiles_and_atom_map(smi, cache=cache, add_implicit_hydrogens=add_implicit_hydrogens)
+    if not dev.is_dict_like(site_map):
+        site_map = {n:i for i,n in enumerate(site_map)}
+    site_map = {k:v for k,v in mol_data['map'].items()} | site_map
+
+    mol = Chem.Mol(mol_data['mol'])
+    for k,v in site_map.items():
+        mol.GetAtomWithIdx(k).SetAtomMapNum(v+1)
+
+    if add_implicit_hydrogens:
+        mol = Chem.RemoveHs(mol)
+
+    return Chem.MolToSmiles(mol)
+def substitute_smiles_atoms(smi,
+                            site_atom_map,
+                            cache=None,
+                            resanitize=True,
+                            preserve_valence_defect=True,
+                            add_implicit_hydrogens='full',
+                            return_mol=False):
+    Chem = RDMolecule.allchem_api()
+    pt = Chem.GetPeriodicTable()
+    mol_data = parse_smiles_and_atom_map(smi, cache=cache, add_implicit_hydrogens=add_implicit_hydrogens)
+
+    mol = Chem.RWMol(mol_data['mol'])
+    map = mol_data['map']
+    for site, atom_type in site_atom_map.items():
+        if isinstance(atom_type, str):
+            atom_type = {'element':atom_type}
+        idx = map[site + 1]
+        atom = mol.GetAtomWithIdx(idx)
+        if preserve_valence_defect:
+            cur_valence = atom.GetTotalValence()
+            defect = pt.GetDefaultValence(atom.GetSymbol()) - cur_valence
+        else:
+            defect = None
+        new_atom = Chem.Atom(atom_type['element'])
+        if 'charge' in atom_type:
+            new_atom.SetFormalCharge(atom_type['charge'])
+        new_atom.SetAtomMapNum(atom.GetAtomMapNum())
+        mol.ReplaceAtom(idx, new_atom)
+        if defect is not None:
+            mol.UpdatePropertyCache(strict=False)
+            new_atom = mol.GetAtomWithIdx(idx)
+            cur_valence = new_atom.GetTotalValence()
+            defect2 = pt.GetDefaultValence(new_atom.GetSymbol()) - cur_valence
+            defect_diff = defect2 - defect
+            if defect_diff != 0:
+                implicit_hs = not new_atom.GetNoImplicit()
+                if implicit_hs and 'charge' not in atom_type:
+                    new_atom.SetFormalCharge(new_atom.GetFormalCharge() - defect_diff)
+                elif defect_diff < 0:
+                    for i in range(int(np.ceil(-defect_diff))):
+                        _pop_hydrogen(mol, mol, idx, idx)
+                else:
+                    for i in range(int(np.ceil(defect_diff))):
+                        _add_hydrogen(mol, idx)
+
+    mol = mol.GetMol()
+
+    if resanitize:
+        Chem.SanitizeMol(mol)
+    if add_implicit_hydrogens:
+        mol = Chem.RemoveHs(mol, sanitize=resanitize)
+
+    if return_mol:
+        return mol
+    else:
+        return Chem.MolToSmiles(mol)
 def join_smiles_fragments(scaffold: str, functional_group: str,
                           new_bonds=((0, 0),),
                           cache=None,
@@ -922,7 +1019,10 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
         break_scaffold_aromaticity = break_fg_aromaticity = push_bonds
 
     if prekekulize:
-        Chem.Kekulize(editable, clearAromaticFlags=True)
+        try:
+            Chem.Kekulize(editable, clearAromaticFlags=True)
+        except Chem.rdchem.KekulizeException:
+            ...
 
     original_aromaticity_map = [a.GetIsAromatic() for a in combined.GetAtoms()]
     dearomitized_atoms = []
@@ -933,11 +1033,14 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
         else:
             m1, m2, t = b
         if fallback_to_ordering:
-            idx1 = map1.get(m1 + 1, m1)
-            idx2 = map2.get(m2 + offset + 1, m2 + offset)
-        else:
-            idx1 = map1[m1 + 1]
-            idx2 = map2[m2 + offset + 1]
+            if m1+1 not in map1:
+                map1 = map1.copy()
+                map1[m1 + 1] = m1
+            if m2+offset+1 not in map2:
+                map2 = map2.copy()
+                map2[m2+offset+1] = m2+offset
+        idx1 = map1[m1 + 1]
+        idx2 = map2[m2 + offset + 1]
 
         if nput.is_numeric(t):
             if t == 1:
@@ -953,29 +1056,34 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
 
         editable.AddBond(idx1, idx2, t)
         if decrement_hydrogens:
-            editable.UpdatePropertyCache(strict=False)
-            if break_scaffold_aromaticity:
-                dearomitized = _break_aromaticity(mol1, editable, idx1, idx1, original_aromaticity_map)
-            else:
-                dearomitized = False
-            if not dearomitized:
-                modified = _pop_hydrogen(mol1, editable, idx1, idx1)
-            else:
-                modified = False
-                dearomitized_atoms.append(editable.GetAtomWithIdx(idx1))
+            dearomitized_mods = [False, False]
             i2 = idx2 - offset
-            if modified:
-                offset = offset
-                idx2 = idx2 - 1
-                map2 = {m:i-1 for m,i in map2.items()}
-            if break_fg_aromaticity:
-                dearomitized = _break_aromaticity(mol2, editable, i2, idx2, original_aromaticity_map)
-            else:
-                dearomitized = False
-            if not dearomitized:
-                _pop_hydrogen(mol2, editable, i2, idx2)
-            else:
-                dearomitized_atoms.append(editable.GetAtomWithIdx(idx2))
+            for _ in range(int(np.ceil(get_rdkit_bond_type(t, as_number=True)))):
+                editable.UpdatePropertyCache(strict=False)
+                if break_scaffold_aromaticity:
+                    dearomitized = _break_aromaticity(mol1, editable, idx1, idx1, original_aromaticity_map)
+                else:
+                    dearomitized = False
+                if not dearomitized:
+                    modified = _pop_hydrogen(mol1, editable, idx1, idx1)
+                else:
+                    modified = False
+                    if not dearomitized_mods[0]:
+                        dearomitized_mods[0] = True
+                        dearomitized_atoms.append(editable.GetAtomWithIdx(idx1))
+                if modified:
+                    idx2 = idx2 - 1
+                    map2 = {m:i-1 for m,i in map2.items()}
+                if break_fg_aromaticity:
+                    dearomitized = _break_aromaticity(mol2, editable, i2, idx2, original_aromaticity_map)
+                else:
+                    dearomitized = False
+                if not dearomitized:
+                    _pop_hydrogen(mol2, editable, i2, idx2)
+                else:
+                    if not dearomitized_mods[1]:
+                        dearomitized_mods[1] = True
+                        dearomitized_atoms.append(editable.GetAtomWithIdx(idx2))
     dearomitized_atoms = [a.GetIdx() for a in dearomitized_atoms]
     joined = editable.GetMol()
 
@@ -1043,10 +1151,11 @@ def renumber_smiles_atom_map(smiles,
     return Chem.MolToSmiles(mol)
 
 def set_smiles_bond_order(smiles, start, end, order,
-                   cache=None,
-                   adjust_hydrogens=True,
-                   add_implicit_hydrogens=False,
-                   return_mol=False):
+                          cache=None,
+                          adjust_hydrogens=True,
+                          add_implicit_hydrogens=False,
+                          resanitize=False,
+                          return_mol=False):
     Chem = RDMolecule.allchem_api()
     if cache is None:
         cache = {}
@@ -1141,37 +1250,55 @@ def set_smiles_stereochemistry(base_smiles, active_sites,  stereo):
     smi = Chem.MolToSmiles(mol)
     return smi
 
-def fragment_to_smiles_iterator(
-        template,
-        fragments,
-        active_sites,
+def build_templated_smiles(
+        scaffold,
+        *replacements,
+        active_sites=None,
         chiralities=None,
-        filter=None,
-        add_implicit_hydrogens='full'
+        bond_orders=None,
+        atom_replacements=None,
+        cache=None,
+        add_implicit_hydrogens='full',
+        remove_sites=False,
 ):
-    Chem = RDMolecule.allchem_api()
-    cache = {}
-    nsites = len(active_sites)
-    for frags in itertools.combinations_with_replacement(fragments, nsites):
-        if filter is not None and not filter(template, active_sites, frags):
-            continue
-        temp = template
-        for site,frag in zip(active_sites, frags):
-            if nput.is_int(site):
-                site = [site]
-            new_bonds = [[s, i] for i,s in enumerate(site)]
-            try:
-                temp = join_smiles_fragments(temp, frag, new_bonds,
-                                             cache=cache,
-                                             add_implicit_hydrogens=add_implicit_hydrogens)
-            except Chem.rdchem.AtomValenceException:
-                continue
-        if chiralities is not None:
-            chiralities = [
-                [c] if isinstance(c, str) else c
-                for c in chiralities
-            ]
-            for c_set in itertools.product(*chiralities):
-                yield set_smiles_chiralities(temp, dict(zip(active_sites, c_set)))
-        else:
-            yield temp
+    if cache is None: cache = {}
+    if active_sites is not None:
+        scaffold = set_smiles_binding_sites(scaffold,
+                                            active_sites,
+                                            cache=cache,
+                                            add_implicit_hydrogens=add_implicit_hydrogens)
+    for i,replacement in enumerate(replacements):
+        if isinstance(replacement, str):
+            replacement = {
+                "functional_group": replacement
+            }
+        if 'new_bonds' not in replacement:
+            replacement = replacement.copy()
+            bo = replacement.pop('bond_order', 1)
+            replacement['new_bonds'] = [[i, 0, bo]]
+        scaffold = join_smiles_fragments(scaffold,
+                                         cache=cache,
+                                         add_implicit_hydrogens=add_implicit_hydrogens,
+                                         **replacement)
+    if atom_replacements is not None:
+        scaffold = substitute_smiles_atoms(scaffold, atom_replacements,
+                                           cache=cache,
+                                           add_implicit_hydrogens=add_implicit_hydrogens)
+    if bond_orders is not None:
+        for start,end,t in bond_orders:
+            scaffold = set_smiles_bond_order(scaffold, start, end, t,
+                                               cache=cache,
+                                               add_implicit_hydrogens=add_implicit_hydrogens)
+
+    if chiralities is not None:
+        scaffold = set_smiles_chiralities(scaffold,
+                                          chiralities,
+                                          cache=cache,
+                                          add_implicit_hydrogens=add_implicit_hydrogens)
+    if remove_sites:
+        if remove_sites is True: remove_sites = None
+        scaffold = remove_smiles_binding_sites(scaffold, remove_sites,
+                                               cache=cache,
+                                               add_implicit_hydrogens=add_implicit_hydrogens)
+
+    return scaffold
