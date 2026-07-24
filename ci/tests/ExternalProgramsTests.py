@@ -303,7 +303,7 @@ class ExternalProgramsTest(TestCase):
         # Molecule.from_openbabel(mol).plot().show()
         mol.draw(use_coords=True).show()
 
-    @debugTest
+    @validationTest
     def test_SMILESManip(self):
         from Psience.Molecools import Molecule
         from McUtils.Data import SMILESData

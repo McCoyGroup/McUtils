@@ -1,7 +1,7 @@
 from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.Docs import *
-import os, inspect
+import os, inspect, sys
 
 class DocsTests(TestCase):
     """
@@ -47,7 +47,7 @@ class DocsTests(TestCase):
         }
         DocBuilder(**doc_config).build()
 
-    @debugTest
+    @validationTest
     def test_PsienceDoc(self):
         """
         Builds sample documentation for the Peeves package
@@ -96,3 +96,15 @@ class DocsTests(TestCase):
         # tests = ExamplesParser.parse_tests(os.path.abspath(__file__))
         # print(tests.format_tex())
 
+    @debugTest
+    def test_DocstringParser(self):
+        docfile = sys.modules[DocstringParser.__module__].__file__
+        docs = DocstringParser().parse_file(docfile)
+        for doc in docs:
+            print(doc)
+        new_src = DocstringWriter(dialect='sphinx').write_file(
+            docfile,
+            docs,
+            target=None
+        )
+        print(new_src)
