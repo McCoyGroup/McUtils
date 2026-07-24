@@ -2318,6 +2318,13 @@
       ],
       "kind": "method"
     },
+    "McUtils.Data.CommonData.DataHandler.load": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.read_json"
+      ],
+      "kind": "method"
+    },
     "McUtils.Data.ConstantsData.UnitsDataHandler": {
       "depends_on": [
         "McUtils.Data.CommonData.DataHandler"
@@ -2367,6 +2374,12 @@
         "McUtils.Data.UnitsData.convert"
       ],
       "kind": "method"
+    },
+    "McUtils.Data.SMILESData.SMILESDataHandler": {
+      "depends_on": [
+        "McUtils.Data.CommonData.DataHandler"
+      ],
+      "kind": "class"
     },
     "McUtils.Data.WavefunctionData.WavefunctionDataHandler": {
       "depends_on": [
@@ -5167,6 +5180,30 @@
       ],
       "kind": "method"
     },
+    "McUtils.ExternalPrograms.SMILES._add_hydrogen": {
+      "depends_on": [
+        "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.allchem_api"
+      ],
+      "kind": "function"
+    },
+    "McUtils.ExternalPrograms.SMILES._break_aromaticity": {
+      "depends_on": [
+        "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.allchem_api",
+        "McUtils.ExternalPrograms.SMILES._break_ring_aromaticities",
+        "McUtils.ExternalPrograms.SMILES._push_dec_bond",
+        "McUtils.ExternalPrograms.SMILES.get_rdkit_bond_type"
+      ],
+      "kind": "function"
+    },
+    "McUtils.ExternalPrograms.SMILES._break_ring_aromaticities": {
+      "depends_on": [
+        "McUtils.ExternalPrograms.SMILES._break_aromaticity",
+        "McUtils.ExternalPrograms.SMILES._check_ring_aromatic"
+      ],
+      "kind": "function"
+    },
     "McUtils.ExternalPrograms.SMILES._consume_supplier_mp": {
       "depends_on": [
         "McUtils.ExternalPrograms.SMILES.SMILESSupplier",
@@ -5176,10 +5213,34 @@
     },
     "McUtils.ExternalPrograms.SMILES._match_rdkit": {
       "depends_on": [
-        "McUtils.ExternalPrograms.RDKit.RDKitInterface",
-        "McUtils.ExternalPrograms.RDKit.RDKitInterface.submodule",
         "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.allchem_api",
         "McUtils.ExternalPrograms.RDKit.RDMolecule.parse_smiles"
+      ],
+      "kind": "function"
+    },
+    "McUtils.ExternalPrograms.SMILES._push_dec_bond": {
+      "depends_on": [
+        "McUtils.ExternalPrograms.SMILES._push_inc_bond",
+        "McUtils.ExternalPrograms.SMILES.get_rdkit_bond_type"
+      ],
+      "kind": "function"
+    },
+    "McUtils.ExternalPrograms.SMILES._push_inc_bond": {
+      "depends_on": [
+        "McUtils.ExternalPrograms.SMILES._push_dec_bond",
+        "McUtils.ExternalPrograms.SMILES.get_rdkit_bond_type"
+      ],
+      "kind": "function"
+    },
+    "McUtils.ExternalPrograms.SMILES.build_templated_smiles": {
+      "depends_on": [
+        "McUtils.ExternalPrograms.SMILES.join_smiles_fragments",
+        "McUtils.ExternalPrograms.SMILES.remove_smiles_binding_sites",
+        "McUtils.ExternalPrograms.SMILES.set_smiles_binding_sites",
+        "McUtils.ExternalPrograms.SMILES.set_smiles_bond_order",
+        "McUtils.ExternalPrograms.SMILES.set_smiles_chiralities",
+        "McUtils.ExternalPrograms.SMILES.substitute_smiles_atoms"
       ],
       "kind": "function"
     },
@@ -5192,12 +5253,36 @@
       ],
       "kind": "function"
     },
+    "McUtils.ExternalPrograms.SMILES.get_rdkit_bond_type": {
+      "depends_on": [
+        "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.allchem_api",
+        "McUtils.Numputils",
+        "McUtils.Numputils.is_numeric"
+      ],
+      "kind": "function"
+    },
+    "McUtils.ExternalPrograms.SMILES.join_smiles_fragments": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.str_is",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.allchem_api",
+        "McUtils.ExternalPrograms.SMILES._break_aromaticity",
+        "McUtils.ExternalPrograms.SMILES._pop_hydrogen",
+        "McUtils.ExternalPrograms.SMILES.get_rdkit_bond_type",
+        "McUtils.ExternalPrograms.SMILES.parse_smiles_and_atom_map",
+        "McUtils.Numputils",
+        "McUtils.Numputils.is_numeric"
+      ],
+      "kind": "function"
+    },
     "McUtils.ExternalPrograms.SMILES.match_smiles_supplier": {
       "depends_on": [
         "McUtils.Devutils",
         "McUtils.Devutils.StreamInterface",
-        "McUtils.ExternalPrograms.RDKit.RDKitInterface",
-        "McUtils.ExternalPrograms.RDKit.RDKitInterface.submodule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.allchem_api",
         "McUtils.ExternalPrograms.SMILES.SMILESSupplier",
         "McUtils.ExternalPrograms.SMILES._disable_rdkit_log",
         "McUtils.ExternalPrograms.SMILES._match_rdkit",
@@ -5205,11 +5290,83 @@
       ],
       "kind": "function"
     },
+    "McUtils.ExternalPrograms.SMILES.parse_smiles_and_atom_map": {
+      "depends_on": [
+        "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.parse_smiles"
+      ],
+      "kind": "function"
+    },
+    "McUtils.ExternalPrograms.SMILES.remove_smiles_binding_sites": {
+      "depends_on": [
+        "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.allchem_api",
+        "McUtils.ExternalPrograms.SMILES.parse_smiles_and_atom_map"
+      ],
+      "kind": "function"
+    },
+    "McUtils.ExternalPrograms.SMILES.renumber_smiles_atom_map": {
+      "depends_on": [
+        "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.allchem_api",
+        "McUtils.ExternalPrograms.SMILES.parse_smiles_and_atom_map"
+      ],
+      "kind": "function"
+    },
+    "McUtils.ExternalPrograms.SMILES.set_smiles_binding_sites": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.is_dict_like",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.allchem_api",
+        "McUtils.ExternalPrograms.SMILES.parse_smiles_and_atom_map"
+      ],
+      "kind": "function"
+    },
+    "McUtils.ExternalPrograms.SMILES.set_smiles_bond_order": {
+      "depends_on": [
+        "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.allchem_api",
+        "McUtils.ExternalPrograms.SMILES._add_hydrogen",
+        "McUtils.ExternalPrograms.SMILES._pop_hydrogen",
+        "McUtils.ExternalPrograms.SMILES.get_rdkit_bond_type",
+        "McUtils.ExternalPrograms.SMILES.parse_smiles_and_atom_map"
+      ],
+      "kind": "function"
+    },
+    "McUtils.ExternalPrograms.SMILES.set_smiles_chiralities": {
+      "depends_on": [
+        "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.allchem_api"
+      ],
+      "kind": "function"
+    },
+    "McUtils.ExternalPrograms.SMILES.set_smiles_stereochemistry": {
+      "depends_on": [
+        "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.allchem_api",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.quiet_errors",
+        "McUtils.ExternalPrograms.SMILES.set_smiles_stereochemistry",
+        "McUtils.Numputils",
+        "McUtils.Numputils.is_int"
+      ],
+      "kind": "function"
+    },
     "McUtils.ExternalPrograms.SMILES.smarts_matcher": {
       "depends_on": [
-        "McUtils.ExternalPrograms.RDKit.RDKitInterface",
-        "McUtils.ExternalPrograms.RDKit.RDKitInterface.submodule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.allchem_api",
         "McUtils.ExternalPrograms.SMILES._match_rdkit"
+      ],
+      "kind": "function"
+    },
+    "McUtils.ExternalPrograms.SMILES.substitute_smiles_atoms": {
+      "depends_on": [
+        "McUtils.ExternalPrograms.RDKit.RDMolecule",
+        "McUtils.ExternalPrograms.RDKit.RDMolecule.allchem_api",
+        "McUtils.ExternalPrograms.SMILES._add_hydrogen",
+        "McUtils.ExternalPrograms.SMILES._pop_hydrogen",
+        "McUtils.ExternalPrograms.SMILES.parse_smiles_and_atom_map"
       ],
       "kind": "function"
     },
@@ -18628,6 +18785,14 @@
       ],
       "kind": "method"
     },
+    "McUtils.Plots.Backends.MPLBackend.manage_backend": {
+      "depends_on": [
+        "McUtils.Jupyter.JHTML.JupyterAPIs",
+        "McUtils.Plots.Backends.MPLManager",
+        "McUtils.Plots.Backends.MPLManager.mpl_api"
+      ],
+      "kind": "method"
+    },
     "McUtils.Plots.Backends.MPLBackend.mpl": {
       "depends_on": [
         "McUtils.Plots.Backends.MPLManager",
@@ -23226,6 +23391,8 @@
     },
     "McUtils.Symmetry.SymmetryIdentifier.PointGroupIdentifier.__init__": {
       "depends_on": [
+        "McUtils.Data.ConstantsData",
+        "McUtils.Data.ConstantsData.convert",
         "McUtils.Symmetry.SymmetryIdentifier.identify_symmetry_equivalent_atoms"
       ],
       "kind": "method"
@@ -24527,6 +24694,13 @@
       "depends_on": [
         "McUtils.Numputils",
         "McUtils.Numputils.distance_matrix"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurfaceMesh.__init__": {
+      "depends_on": [
+        "McUtils.Numputils",
+        "McUtils.Numputils.is_numeric_array_like"
       ],
       "kind": "method"
     },
@@ -26503,6 +26677,7 @@
     "Symmetry": [
       "Combinatorics",
       "Coordinerds",
+      "Data",
       "Devutils",
       "Formatters",
       "Iterators",

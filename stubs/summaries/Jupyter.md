@@ -1303,6 +1303,8 @@
       > type hierarchy for explicit isintance check purposes, should have a
       > trait-style base class but too much work now
       - `__init__(text, id=None)`
+      - `elems()`
+      - `attrs()`
       - `tostring(**opts)` — :param opts: Additional options forwarded to the underlying operation.
       - `display()` — Choose IPython or browser display for the raw fragment.
       - `display_in_browser()` — Display the raw fragment through the shared temporary-browser helper.

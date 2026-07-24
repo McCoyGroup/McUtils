@@ -3104,6 +3104,7 @@ class MPLFigure(GraphicsFigure):
 
 class MPLBackend(GraphicsBackend):
     Figure = MPLFigure
+    default_mpl_backend = None
 
     @property
     def plt(self):
@@ -3125,6 +3126,10 @@ class MPLBackend(GraphicsBackend):
 
         :return: the `matplotlib` module
         """
+        ...
+
+    @contextlib.contextmanager
+    def manage_backend(self, target=None):
         ...
 
     def create_raw_figure(self, *args, **kwargs):

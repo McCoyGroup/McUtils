@@ -1,10 +1,12 @@
 import functools
 import multiprocessing
 from .. import Devutils as dev
+from .. import Numputils as nput
 from .RDKit import RDMolecule
 import numpy as np
 import hashlib
-__all__ = ['SMILESSupplier', 'consume_smiles_supplier', 'match_smiles_supplier', 'smarts_matcher']
+import itertools
+__all__ = ['SMILESSupplier', 'consume_smiles_supplier', 'match_smiles_supplier', 'smarts_matcher', 'join_smiles_fragments', 'set_smiles_chiralities', 'set_smiles_stereochemistry', 'set_smiles_bond_order', 'renumber_smiles_atom_map', 'set_smiles_binding_sites', 'remove_smiles_binding_sites', 'substitute_smiles_atoms', 'parse_smiles_and_atom_map', 'build_templated_smiles']
 
 class SMILESSupplier:
 
@@ -386,4 +388,61 @@ def match_smiles_supplier(supplier: SMILESSupplier, matcher, pool=None, start_at
     :return: the matching SMILES strings
     :rtype: list[str]
     """
+    ...
+
+def _get_atom_idx(mol, map_num):
+    ...
+
+def _check_ring_aromatic(new_mol, ring_indices):
+    ...
+
+def _break_ring_aromaticities(new_mol, idx2):
+    ...
+
+def _push_inc_bond(new_mol, idx: int, visted: set):
+    ...
+
+def _push_dec_bond(new_mol, idx: int, visted: set):
+    ...
+
+def _break_aromaticity(ref_mol, new_mol, idx1, idx2, original_aromaticity_map, push_bonds=True, break_rings=True, check_valences=False):
+    ...
+
+def _pop_hydrogen(ref_mol, new_mol, idx1, idx2):
+    ...
+
+def _add_hydrogen(new_mol, idx1, allow_explicit=True):
+    ...
+
+def parse_smiles_and_atom_map(smiles1, cache, add_implicit_hydrogens=False):
+    ...
+
+def get_rdkit_bond_type(t, as_number=False):
+    ...
+
+def remove_smiles_binding_sites(smi, sites=None, cache=None, add_implicit_hydrogens='full'):
+    ...
+
+def set_smiles_binding_sites(smi, site_map, cache=None, add_implicit_hydrogens='full'):
+    ...
+
+def substitute_smiles_atoms(smi, site_atom_map, cache=None, resanitize=True, preserve_valence_defect=True, add_implicit_hydrogens='full', return_mol=False):
+    ...
+
+def join_smiles_fragments(scaffold: str, functional_group: str, new_bonds=((0, 0),), cache=None, resanitize=True, add_implicit_hydrogens='full', fallback_to_ordering=False, decrement_hydrogens=True, prekekulize=True, push_bonds=False, return_mol=False) -> str:
+    ...
+
+def renumber_smiles_atom_map(smiles, remapping, cache=None, shift=True, add_implicit_hydrogens=False):
+    ...
+
+def set_smiles_bond_order(smiles, start, end, order, cache=None, adjust_hydrogens=True, add_implicit_hydrogens=False, resanitize=False, return_mol=False):
+    ...
+
+def set_smiles_chiralities(base_smiles, site_chirality_map):
+    ...
+
+def set_smiles_stereochemistry(base_smiles, active_sites, stereo):
+    ...
+
+def build_templated_smiles(scaffold, *replacements, active_sites=None, chiralities=None, bond_orders=None, atom_replacements=None, cache=None, add_implicit_hydrogens='full', remove_sites=False):
     ...

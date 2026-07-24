@@ -84,8 +84,8 @@
 - `moments_of_inertia(coords, masses=None, force_rotation=True, return_com=False)` — Computes the moment of inertia tensor for the walkers with coordinates coords (assumes all have the…
 - `moments_of_inertia_expansion(coords, masses=None, order=1, force_rotation=True, mass_weighted=True)` — Compute the derivative expansion of the moments of inertia (eigenvalues) and
 - `translation_rotation_eigenvectors(coords, masses=None, mass_weighted=True, ref=None, ref_masses=None, axes=None, align_with_frame=True, return_values=False, return_com=False, return_rot=True, return_principle_axes=False)` — Returns the eigenvectors corresponding to translations and rotations
-- `frame_displacement_projector(tr_modes, masses, mass_weighted=False, orthonormal=True, pre_weighted=False)` — Build the projector that removes a set of frame (translation/rotation) modes
-- `translation_rotation_projector(coords, masses=None, mass_weighted=False, return_modes=False, orthonormal=True)` — Build the projector that removes overall translation and rotation from a
+- `frame_displacement_projector(tr_modes, masses, mass_weighted=False, orthonormal=True, pre_weighted=False, direction='forward')` — Build the projector that removes a set of frame (translation/rotation) modes
+- `translation_rotation_projector(coords, masses=None, mass_weighted=False, return_modes=False, orthonormal=False, direction='forward')` — Build the projector that removes overall translation and rotation from a
 - `remove_translation_rotations(expansion, coords, masses=None, mass_weighted=False)` — Apply the translation/rotation projector to every tensor in a derivative
 - `translation_rotation_invariant_transformation(coords, masses=None, mass_weighted=True, strip_embedding=True)` — Construct the transformation (and its inverse) into the space of internal,
 - `principle_axis_embedded_coords(coords, masses=None, sel=None)` — Returns coordinate embedded in the principle axis frame

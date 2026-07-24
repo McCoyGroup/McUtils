@@ -305,6 +305,15 @@ class PointGroup(metaclass=abc.ABCMeta):
         """
         ...
 
+    def axis_representation(self):
+        ...
+
+    def coordinate_representation(self, coords):
+        ...
+
+    def coordinate_mode_reduction(self, coords):
+        ...
+
     def plot(self, figure=None, elements=None, origin=None, inversion_styles=None, rotation_styles=None, reflection_styles=None, improper_rotation_styles=None, **opts):
         """
         **LLM Docstring**

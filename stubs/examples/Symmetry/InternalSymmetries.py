@@ -8,7 +8,7 @@ import McUtils.Numputils as nput
 
 class SymmetryTests(TestCase):
 
-    @debugTest
+    @validationTest
     def test_InternalSymmetries(self):
         import McUtils.Coordinerds as coordops
         import McUtils.Numputils as nput

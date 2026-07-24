@@ -2585,6 +2585,17 @@ class HTML(XMLBase):
             """
             ...
 
+        def __repr__(self):
+            ...
+
+        @property
+        def elems(self):
+            ...
+
+        @property
+        def attrs(self):
+            ...
+
         def tostring(self, **opts):
             """
             **LLM Docstring**

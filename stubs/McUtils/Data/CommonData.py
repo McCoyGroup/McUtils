@@ -1,6 +1,7 @@
 """
 Defines a common data handler
 """
+from .. import Devutils as dev
 import os, sys
 __all__ = ['DataHandler', 'DataError', 'DataRecord']
 default_data_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)))
@@ -18,7 +19,7 @@ class DataHandler:
     Defines a general data loader class that we can use for `AtomData` and any other data classes we might find useful.
     """
 
-    def __init__(self, data_name, data_key=None, source_key=None, data_dir=None, data_pkg=None, alternate_keys=None, getter=None, record_type=None):
+    def __init__(self, data_name, data_key=None, source_key=None, data_dir=None, data_pkg=None, alternate_keys=None, getter=None, record_type=None, extension='.py'):
         """
         :param data_name: the name of the dataset
         :type data_name: str

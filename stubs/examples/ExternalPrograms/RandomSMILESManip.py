@@ -1,4 +1,4 @@
-"""Extracted from ExternalProgramsTest.test_OBGen3D via McUtils.Docs.ExamplesParser -- not the original file, and may reference test-only setup/state. Run with: python -m unittest ExternalProgramsTest.test_OBGen3D"""
+"""Extracted from ExternalProgramsTest.test_RandomSMILESManip via McUtils.Docs.ExamplesParser -- not the original file, and may reference test-only setup/state. Run with: python -m unittest ExternalProgramsTest.test_RandomSMILESManip"""
 
 from Peeves.TestUtils import *
 from unittest import TestCase
@@ -22,7 +22,14 @@ class ExternalProgramsTest(TestCase):
         return arg
 
     @validationTest
-    def test_OBGen3D(self):
+    def test_RandomSMILESManip(self):
         from Psience.Molecools import Molecule
-        mol = OBMolecule.from_string('CO[C]12C[C@@](C=C1)(c1ccc(F)cc1)CC2', 'smi')
-        mol.draw(use_coords=True).show()
+        from McUtils.Data import SMILESData
+        scaff = SMILESData.random_scaffold()
+        fg = SMILESData.random_functional_group()
+        smi = join_smiles_fragments(scaff, fg)
+        print(scaff)
+        print(fg)
+        print(smi)
+        Molecule.from_string(smi).plot(highlight_atoms=[0, 1]).show()
+        return

@@ -25,7 +25,7 @@
 - `improper_rotation_group_classes(n)` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
 - `improper_rotation_group_operation_representation(n, elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
 - `improper_rotation_group_names(n)` — Generate irreducible-representation labels in the same order as the corresponding character table.
-- `ch_group_character_table(n)` — Construct the hard-coded or analytic character table for the `ch_group` group family.
+- `ch_group_character_table(n, zero_cutoff=1e-08)` — Construct the hard-coded or analytic character table for the `ch_group` group family.
 - `ch_group_classes(n)` — Generate permutation representatives and conjugacy-class index groups for the requested point-group…
 - `ch_group_matrices(n, elements=None)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
 - `ch_group_names(n)` — Generate irreducible-representation labels in the same order as the corresponding character table.
@@ -84,11 +84,11 @@
     - `space_representation(mats, symms=None)` — Compute traces of transformation matrices, optionally after combining them with supplied symmetry o…
     - `matrix_from_representation(vec)` — Form a matrix as a linear combination of the full group-operation matrices.
     - `inverse_character_representation(chars)` — Map irreducible-character coefficients back into class-representation values.
-    - `symmetry_permutations(coords)` — Generate permutation representatives for the requested cyclic action.
-    - `axis_representation(include_rotations=True)` — Build the translational, and optionally rotational, Cartesian character representation from operati…
+    - `symmetry_permutations(coords, matrices=None)` — Generate permutation representatives for the requested cyclic action.
+    - `axis_representation(include_rotations=True, matrices=None)` — Build the translational, and optionally rotational, Cartesian character representation from operati…
     - `fixed_permutation_representation(base_rep, perms)` — Combine a base representation with permutation matrices by applying the same Cartesian block to eac…
-    - `coordinate_representation(coords)` — Build the full Cartesian coordinate representation induced by molecular symmetry permutations.
-    - `coordinate_mode_reduction(coords)` — Decompose the Cartesian coordinate representation and subtract translational/rotational content.
+    - `coordinate_representation(coords, matrices=None)` — Build the full Cartesian coordinate representation induced by molecular symmetry permutations.
+    - `coordinate_mode_reduction(coords, coordinate_representation=None, matrices=None, axis_representation=None)` — Decompose the Cartesian coordinate representation and subtract translational/rotational content.
     - `get_full_matrices()` — Build the three-dimensional Cartesian matrix representation for selected group elements.
 
 ### `Elements.py`
@@ -165,6 +165,9 @@
     - `align(axes)` — Return a copy aligned to explicitly supplied axes, transforming cached elements consistently.
     - `transform(tf)` — Express the symmetry element in a transformed Cartesian basis.
     - `get_matrices(only_class_representatives=True)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
+    - `axis_representation()`
+    - `coordinate_representation(coords)`
+    - `coordinate_mode_reduction(coords)`
     - `plot(figure=None, elements=None, origin=None, inversion_styles=None, rotation_styles=None, reflection_styles=None, improper_rotation_styles=None, **opts)` — Add graphical primitives representing this symmetry element to a figure.
   - **class `NamedPointGroup`** (PointGroup)
     - `__init__(name, character_table=None, elements=None, axes=None)`
@@ -187,7 +190,7 @@
 ### `Symmetrizer.py`
 - `prep_symmetry_operations(symmetry_elements)` — Normalize point groups, symmetry elements, and raw matrices into a list of Cartesian transformation…
 - `symmetrize_structure(coords, symmetry_elements, labels=None, masses=None, groups=None, tol=0.1, mass_tol=1, expand=True)` — Reduce each chemically equivalent coordinate group under supplied operations and optionally expand…
-- `symmetrized_coordinate_coefficients(point_group, coords, masses=None, permutation_basis=None, as_characters=True, normalize=False, perms=None, ops=None, return_basis=None, merge_equivalents=None, drop_empty_modes=None, realign=True, permutation_tol=0.01, **pg_tols)` — Build Cartesian or custom permutation representations, optionally project them into character block…
+- `symmetrized_coordinate_coefficients(point_group, coords, masses=None, permutation_basis=None, as_characters=True, character_reps=None, normalize=False, perms=None, ops=None, return_basis=None, merge_equivalents=None, drop_empty_modes=None, realign=True, permutation_tol=0.01, **pg_tols)` — Build Cartesian or custom permutation representations, optionally project them into character block…
 - `get_internal_permutation_symmetry_matrices(internals, permutations)` — Build the three-dimensional Cartesian matrix representation for selected group elements.
 - `symmetrize_internals(point_group, internals, cartesians=None, *, masses=None, as_characters=True, normalize=None, perms=None, return_expansions=False, return_base_expansion=False, ops=None, atom_selection=None, reduce_redundant_coordinates=None, **etc)` — Generate symmetry-adapted internal-coordinate coefficients and optionally Cartesian expansion tenso…
 - `symmetrized_internal_coordinate_expansions(coeffs, cartesians, full_basis, order=1, masses=None, return_inverse=False, normalized_coefficients=True, return_base_expansion=False)` — Transform internal-coordinate derivative tensors into each symmetry-adapted coefficient block, opti…
