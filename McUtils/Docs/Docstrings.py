@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import abc
 import ast
 import dataclasses
@@ -136,6 +138,25 @@ def _extract_doctest_examples(raw: str) -> List[str]:
     return [m.group(1).strip("\n") for m in _DOCTEST_RE.finditer(raw or "") if m.group(1).strip()]
 
 
+def _parse_list_field(text: str) -> List[str]:
+    """Parse a free-form list section/field (e.g. Related/Links) into items.
+
+    Splits on newlines first; if that yields a single line, falls back to
+    splitting on commas or semicolons so a one-liner like
+    ``:related: foo, bar`` still produces two items. Leading bullet markers
+    ('-', '*', '\u2022') are stripped from each item.
+    """
+    text = (text or "").strip()
+    if not text:
+        return []
+    lines = [l.strip() for l in text.split("\n") if l.strip()]
+    if len(lines) <= 1 and lines:
+        parts = re.split(r'[,;]', lines[0])
+        if len(parts) > 1:
+            lines = [p.strip() for p in parts if p.strip()]
+    return [re.sub(r'^[-*\u2022]\s*', '', l) for l in lines if l]
+
+
 def _blank_params(node: ast.AST) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """Seed (params, returns) dicts straight from the signature, with no docs yet."""
     sig = _signature_types(node)
@@ -185,11 +206,13 @@ class GoogleDialectHandler(DocstringDialectHandler):
 
     _SECTION_RE = re.compile(
         r'^(Args|Arguments|Parameters|Returns|Return|Yields|Yield|'
-        r'Raises|Raise|Example|Examples|Note|Notes|Attributes|Attribute)\s*:\s*$',
+        r'Raises|Raise|Example|Examples|Note|Notes|Attributes|Attribute|'
+        r'Related|Links)\s*:\s*$',
         re.IGNORECASE,
     )
     _SNIFF_RE = re.compile(
-        r'^[ \t]*(Args|Arguments|Parameters|Returns|Return|Yields|Yield|Raises|Raise)\s*:\s*$',
+        r'^[ \t]*(Args|Arguments|Parameters|Returns|Return|Yields|Yield|Raises|Raise|'
+        r'Related|Links)\s*:\s*$',
         re.IGNORECASE | re.MULTILINE,
     )
     _ARG_LINE_RE = re.compile(r'^(\s*)([\w\*]+)\s*(?:\(([^)]*)\))?\s*:\s*(.*)$')
@@ -308,11 +331,16 @@ class GoogleDialectHandler(DocstringDialectHandler):
         if ret_key:
             returns["doc_type"], returns["description"] = self._parse_return_section(sections[ret_key])
 
+        related = _parse_list_field(sections.get("related", ""))
+        links = _parse_list_field(sections.get("links", ""))
+
         return {
             "short_description": short,
             "details": details,
             "examples": examples,
             "type_info": {"params": params, "returns": returns},
+            "related": related,
+            "links": links,
         }
 
     def render(self, data: "DocstringData") -> str:
@@ -346,6 +374,12 @@ class GoogleDialectHandler(DocstringDialectHandler):
                 + "\n".join(("    " + l if l.strip() else "") for l in ex_body.split("\n"))
             )
 
+        if data.related:
+            parts.append("Related:\n" + "\n".join("    " + r for r in data.related))
+
+        if data.links:
+            parts.append("Links:\n" + "\n".join("    " + l for l in data.links))
+
         return "\n\n".join(p for p in parts if p.strip())
 
 
@@ -362,7 +396,8 @@ class SphinxDialectHandler(DocstringDialectHandler):
     name = "sphinx"
 
     _SNIFF_RE = re.compile(
-        r'^[ \t]*:(param|parameter|type|return|returns|rtype|raises|raise|yield|yields)\b',
+        r'^[ \t]*:(param|parameter|type|return|returns|rtype|raises|raise|yield|yields|'
+        r'example|examples|related|links|link)\b',
         re.IGNORECASE | re.MULTILINE,
     )
     _DIRECTIVE_RE = re.compile(r'^\s*:(\w+)(?:\s+([^:]+?))?\s*:\s*(.*)$')
@@ -371,8 +406,15 @@ class SphinxDialectHandler(DocstringDialectHandler):
     def sniff(cls, raw: str) -> bool:
         return bool(cls._SNIFF_RE.search(raw or ""))
 
-    def _parse_directives(self, raw: str) -> Tuple[str, List[Tuple[str, str, str]]]:
-        """Return (intro_text, [(tag, arg, body_text), ...]) in source order."""
+    def _parse_directives(self, raw: str) -> Tuple[str, List[Tuple[str, str, List[str]]]]:
+        """Return (intro_text, [(tag, arg, body_lines), ...]) in source order.
+
+        `body_lines` keeps each continuation line separate (rather than
+        joining them into one string here) so callers can choose how to
+        rejoin: single-value fields like ``:param:``/``:type:`` collapse to
+        one line, while multi-line fields like ``:examples:`` keep their
+        internal line breaks (important for doctest blocks).
+        """
         intro_lines: List[str] = []
         directives: List[List[Any]] = []
         current = None
@@ -383,37 +425,58 @@ class SphinxDialectHandler(DocstringDialectHandler):
                 current = [tag.lower(), (arg or "").strip(), [rest]]
                 directives.append(current)
             elif current is not None:
-                current[2].append(line.strip())
+                current[2].append(line)
             else:
                 intro_lines.append(line)
-        return "\n".join(intro_lines).strip(), [
-            (tag, arg, " ".join(l for l in body if l).strip()) for tag, arg, body in directives
-        ]
+        return "\n".join(intro_lines).strip(), [(tag, arg, body) for tag, arg, body in directives]
 
     def extract(self, raw: str, node: ast.AST) -> Dict[str, Any]:
         intro, directives = self._parse_directives(raw or "")
         short, details = _split_intro(intro)
         params, returns = _blank_params(node)
+        examples: List[str] = []
+        related: List[str] = []
+        links: List[str] = []
 
-        for tag, arg, text in directives:
+        def single_line(body_lines):
+            return " ".join(l.strip() for l in body_lines if l.strip())
+
+        def multi_line(body_lines):
+            return "\n".join(l.strip() for l in body_lines).strip()
+
+        for tag, arg, body_lines in directives:
             if tag in ("param", "parameter"):
+                text = single_line(body_lines)
                 params.setdefault(arg, {"annotation": None, "doc_type": "", "description": ""})
                 params[arg]["description"] = text
             elif tag == "type":
+                text = single_line(body_lines)
                 params.setdefault(arg, {"annotation": None, "doc_type": "", "description": ""})
                 params[arg]["doc_type"] = text
             elif tag in ("return", "returns"):
-                returns["description"] = text
+                returns["description"] = single_line(body_lines)
             elif tag == "rtype":
-                returns["doc_type"] = text
+                returns["doc_type"] = single_line(body_lines)
+            elif tag in ("example", "examples"):
+                text = multi_line(body_lines)
+                if text:
+                    examples.append(text)
+            elif tag == "related":
+                related.extend(_parse_list_field(multi_line(body_lines)))
+            elif tag in ("links", "link"):
+                links.extend(_parse_list_field(multi_line(body_lines)))
             # :raises:/:yield: etc. aren't part of the canonical schema; ignored.
 
-        examples = _extract_doctest_examples(raw or "")
+        examples.extend(
+            block for block in _extract_doctest_examples(intro) if block not in examples
+        )
         return {
             "short_description": short,
             "details": details,
             "examples": examples,
             "type_info": {"params": params, "returns": returns},
+            "related": related,
+            "links": links,
         }
 
     def render(self, data: "DocstringData") -> str:
@@ -439,11 +502,21 @@ class SphinxDialectHandler(DocstringDialectHandler):
             field_lines.append(f":return: {ret_desc}")
         if ret_typ:
             field_lines.append(f":rtype: {ret_typ}")
-        if field_lines:
-            parts.append("\n".join(field_lines))
 
         if data.examples:
-            parts.append("\n\n".join(data.examples))
+            field_lines.append(":examples:")
+            for example in data.examples:
+                for l in example.split("\n"):
+                    field_lines.append("    " + l if l.strip() else "")
+
+        if data.related:
+            field_lines.append(":related: " + ", ".join(data.related))
+
+        if data.links:
+            field_lines.append(":links: " + ", ".join(data.links))
+
+        if field_lines:
+            parts.append("\n".join(field_lines))
 
         return "\n\n".join(p for p in parts if p.strip())
 
@@ -468,6 +541,8 @@ class PlainDialectHandler(DocstringDialectHandler):
             "details": details,
             "examples": _extract_doctest_examples(raw or ""),
             "type_info": {"params": params, "returns": returns},
+            "related": [],
+            "links": [],
         }
 
     def render(self, data: "DocstringData") -> str:
@@ -580,6 +655,10 @@ class DocstringData:
             record was parsed with (e.g. ``"google"``, ``"sphinx"``,
             ``"plain"``) -- see ``DIALECTS``. Used by :class:`DocstringWriter`
             to render back in the same convention.
+        related (List[str]): Names of related functions/classes, from a
+            ``Related:`` section (Google) or ``:related:`` field (Sphinx).
+        links (List[str]): Reference URLs/links, from a ``Links:`` section
+            (Google) or ``:links:`` field (Sphinx).
     """
 
     qualname: str
@@ -595,6 +674,8 @@ class DocstringData:
     type_info: Dict[str, Any] = field(default_factory=lambda: {"params": {}, "returns": {}})
     quality: Optional[Dict[str, Any]] = None
     dialect: str = ""
+    related: List[str] = field(default_factory=list)
+    links: List[str] = field(default_factory=list)
 
     def to_json(self) -> dict:
         """Return a plain, JSON-serializable dict of this record."""
@@ -808,7 +889,7 @@ class DocstringWriter:
         """
         return _strip_docstrings(original_src) == _strip_docstrings(new_src)
 
-class DocstringIssue:
+class DocstringQAField:
     issue_registry = {}
     @classmethod
     def register(cls, name, method=None):
@@ -840,39 +921,49 @@ class DocstringIssue:
         argstr = ", ".join(argstr_bits)
         return f"{type(self).__name__}({argstr})"
 
-@DocstringIssue.register('missing_description')
-class MissingDescription(DocstringIssue):
-    default_score = 50
-@DocstringIssue.register('missing_short_description')
+@DocstringQAField.register('missing_description')
+class MissingDescription(DocstringQAField):
+    default_score = -50
+@DocstringQAField.register('missing_short_description')
 class MissingShortDescription(MissingDescription):
-    default_score = 10
-@DocstringIssue.register('missing_parameter')
-class MissingParameter(DocstringIssue):
-    default_score = 30
-@DocstringIssue.register('missing_return_value')
-class MissingReturnValue(DocstringIssue):
-    default_score = 50
-@DocstringIssue.register('missing_return_type')
-class MissingReturnType(DocstringIssue):
-    default_score = 30
-@DocstringIssue.register('stale_parameter')
-class StaleParameter(DocstringIssue):
-    default_score = 30
-@DocstringIssue.register('stale_parameter_type')
-class StaleParameterType(DocstringIssue):
-    default_score = 20
-@DocstringIssue.register('missing_parameter_description')
+    default_score = -10
+@DocstringQAField.register('missing_parameter')
+class MissingParameter(DocstringQAField):
+    default_score = -30
+@DocstringQAField.register('missing_return_value')
+class MissingReturnValue(DocstringQAField):
+    default_score = -50
+@DocstringQAField.register('missing_return_type')
+class MissingReturnType(DocstringQAField):
+    default_score = -30
+@DocstringQAField.register('stale_parameter')
+class StaleParameter(DocstringQAField):
+    default_score = -30
+@DocstringQAField.register('stale_parameter_type')
+class StaleParameterType(DocstringQAField):
+    default_score = -20
+@DocstringQAField.register('missing_parameter_description')
 class MissingParameterDescription(MissingDescription):
-    default_score = 10
-@DocstringIssue.register('missing_parameter_type')
-class MissingParameterType(DocstringIssue):
-    default_score = 5
-@DocstringIssue.register('bad_description')
-class BadDescription(DocstringIssue):
-    default_score = 10
-@DocstringIssue.register('short_description_too_long')
+    default_score = -10
+@DocstringQAField.register('missing_parameter_type')
+class MissingParameterType(DocstringQAField):
+    default_score = -5
+@DocstringQAField.register('bad_description')
+class BadDescription(DocstringQAField):
+    default_score = -10
+@DocstringQAField.register('short_description_too_long')
 class ShortDescriptionTooLong(BadDescription):
-    default_score = 5
+    default_score = -5
+
+@DocstringQAField.register('has_examples')
+class HasExamples(DocstringQAField):
+    default_score = 75
+@DocstringQAField.register('has_related')
+class HasRelated(DocstringQAField):
+    default_score = 1
+@DocstringQAField.register('has_links')
+class HasLinks(DocstringQAField):
+    default_score = 1
 
 class DocstringDataAnalyzer:
     def __init__(self, data:DocstringData, analyses=None):
@@ -886,6 +977,9 @@ class DocstringDataAnalyzer:
             "parameters":self._check_undocumented_parameters,
             "stale":self._check_stale_parameters,
             "returns":self._check_return_values,
+            "examples":self._check_examples,
+            "related":self._check_related,
+            "links":self._check_links,
         }
     def get_analyses(self):
         if self.analyses is None:
@@ -904,7 +998,7 @@ class DocstringDataAnalyzer:
         )
 
     @classmethod
-    def _check_description(cls, data:DocstringData) -> list[DocstringIssue]:
+    def _check_description(cls, data:DocstringData) -> list[DocstringQAField]:
         issues = []
         if not data.short_description:
             if not data.details:
@@ -917,7 +1011,7 @@ class DocstringDataAnalyzer:
         return issues
 
     @classmethod
-    def _check_undocumented_parameters(cls, data:DocstringData) -> list[DocstringIssue]:
+    def _check_undocumented_parameters(cls, data:DocstringData) -> list[DocstringQAField]:
         issues = []
 
         params = data.type_info.get("params", {})
@@ -932,7 +1026,7 @@ class DocstringDataAnalyzer:
         return issues
 
     @classmethod
-    def _check_stale_parameters(cls, data: DocstringData) -> list[DocstringIssue]:
+    def _check_stale_parameters(cls, data: DocstringData) -> list[DocstringQAField]:
         issues = []
 
         params = data.type_info.get("params", {})
@@ -957,7 +1051,7 @@ class DocstringDataAnalyzer:
         return issues
 
     @classmethod
-    def _check_return_values(cls, data: DocstringData) -> list[DocstringIssue]:
+    def _check_return_values(cls, data: DocstringData) -> list[DocstringQAField]:
         issues = []
 
         ret = data.type_info.get("returns", {}) or {}
@@ -968,15 +1062,35 @@ class DocstringDataAnalyzer:
 
         return issues
 
-    def analyze_docstring_quality(self) -> tuple[dict[str, list[DocstringIssue]], int]:
-        """Heuristically assess the quality of a parsed docstring.
+    @classmethod
+    def _check_examples(cls, data: DocstringData) -> list[DocstringQAField]:
+        issues = []
+        examples = data.examples or []
+        n = len(examples)
+        for example in examples:
+            issues.append(HasExamples())
+        return issues
 
-        Args:
-            data (DocstringData): A parsed (and possibly hand-edited) record.
+    @classmethod
+    def _check_related(cls, data: DocstringData) -> list[DocstringQAField]:
+        """Reward (not penalize) cross-referencing related functions/classes."""
+        issues = []
+        related = data.related or []
+        for rel in related:
+            issues.append(HasRelated())
+        return issues
 
-        Returns:
-            dict: ``{"score": int 0-100, "issues": list[str], "ok": bool}``.
-        """
+    @classmethod
+    def _check_links(cls, data: DocstringData) -> list[DocstringQAField]:
+        """Reward (not penalize) including reference links."""
+        issues = []
+        links = data.links or []
+        for link in links:
+            issues.append(HasLinks())
+        return issues
+
+    def analyze_docstring_quality(self) -> tuple[dict[str, list[DocstringQAField]], int]:
+        """Heuristically assess the quality of a parsed docstring."""
         score = 0
         issue_breakdowns = {}
         data = self.data
@@ -985,8 +1099,4 @@ class DocstringDataAnalyzer:
             issue_breakdowns[tag] = issues
             score += sum(i.score for i in issues)
 
-        return issue_breakdowns, -score
-
-
-
-
+        return issue_breakdowns, score
