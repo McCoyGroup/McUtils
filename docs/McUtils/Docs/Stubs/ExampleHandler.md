@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.Stubs.ExampleHandler">ExampleHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1222)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1222?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1290)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1290?message=Update%20Docs)]
 </div>
 
 Extracts runnable examples from each package's test file (see
@@ -33,13 +33,44 @@ EXAMPLE_FILE_HEADER_TEMPLATE: str
 EXAMPLES_PARSER_UNAVAILABLE_WARNING: str
 EXAMPLES_PARSE_ERROR_TEMPLATE: str
 ```
+<a id="McUtils.Docs.Stubs.ExampleHandler.__init__" class="docs-object-method">&nbsp;</a> 
+```python
+__init__(self, dispatcher, filter=None, exclude=<function default_exclude at 0x7f9edc6c75e0>): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1301)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1301?message=Update%20Docs)]
+</div>
+Args:
+filter: optional ``(qualname, package_name) -> bool``, checked
+    against ``"{TestClassName}.{test_method_name}"``. If
+    given, only matching examples are written at all; ``None``
+    (default) applies no filter.
+exclude: optional ``(qualname, package_name) -> bool``,
+    inverted from `filter`. Defaults to :func:`default_exclude`;
+    pass ``None`` to disable.
+
+
+<a id="McUtils.Docs.Stubs.ExampleHandler.wanted" class="docs-object-method">&nbsp;</a> 
+```python
+wanted(self, qualname, package_name=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/ExampleHandler.py#L1316)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/ExampleHandler.py#L1316?message=Update%20Docs)]
+</div>
+True if `qualname` (a ``"{TestClass}.{test_method}"`` name)
+should actually be written as an example, given this handler's
+`filter`/`exclude`.
+
+
 <a id="McUtils.Docs.Stubs.ExampleHandler.locate_test_file" class="docs-object-method">&nbsp;</a> 
 ```python
 locate_test_file(self, package_name, tests_directory): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/ExampleHandler.py#L1250)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/ExampleHandler.py#L1250?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/ExampleHandler.py#L1343)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/ExampleHandler.py#L1343?message=Update%20Docs)]
 </div>
 Mirrors McUtils.Docs.DocBuilder's `tests_directory` convention:
 a flat directory containing one `<PackageName>Tests.py` file per
@@ -53,8 +84,8 @@ exist.
 build_usage_graph_for_package(self, package_name, parser): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/ExampleHandler.py#L1328)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/ExampleHandler.py#L1328?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/ExampleHandler.py#L1421)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/ExampleHandler.py#L1421?message=Update%20Docs)]
 </div>
 Combine ExamplesParser.functions_map (bare name -> example
 names referencing it) with our own name resolution to produce
@@ -69,8 +100,8 @@ this can also be inspected/tested standalone.
 extract_examples(self, package_name, tests_directory=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/ExampleHandler.py#L1377)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/ExampleHandler.py#L1377?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/ExampleHandler.py#L1482)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/ExampleHandler.py#L1482?message=Update%20Docs)]
 </div>
 For one top-level package: locate its test file (see
 locate_test_file), parse it with McUtils.Docs.ExamplesParser,
@@ -91,8 +122,8 @@ Returns the number of examples written.
 write_usage_graph(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/ExampleHandler.py#L1414)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/ExampleHandler.py#L1414?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/ExampleHandler.py#L1521)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/ExampleHandler.py#L1521?message=Update%20Docs)]
 </div>
 Write usage_graph.json at the root of out_dir: {fully
 qualified name: [example ids that use it]}, blacklist-filtered
@@ -104,8 +135,8 @@ the same way as dependency_graph.json.
 parse(self, package_name, pkg_src_path): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/ExampleHandler.py#L1424)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/ExampleHandler.py#L1424?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/ExampleHandler.py#L1531)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/ExampleHandler.py#L1531?message=Update%20Docs)]
 </div>
 
 
@@ -114,8 +145,8 @@ parse(self, package_name, pkg_src_path):
 write(self, components): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/ExampleHandler.py#L1429)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/ExampleHandler.py#L1429?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/ExampleHandler.py#L1536)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/ExampleHandler.py#L1536?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -170,7 +201,7 @@ write(self, components):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/Stubs/ExampleHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/Stubs/ExampleHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1222?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1290?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

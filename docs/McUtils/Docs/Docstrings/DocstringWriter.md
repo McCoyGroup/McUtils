@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.Docstrings.DocstringWriter">DocstringWriter</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L764)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L764?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L816)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L816?message=Update%20Docs)]
 </div>
 
 Write (possibly edited) :class:`DocstringData` records back into source.
@@ -34,8 +34,8 @@ default_dialect: SphinxDialectHandler
 __init__(self, header: 'str' = '', add_header: 'bool' = True, dialect: 'Optional[DocstringDialectHandler]' = None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L776)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L776?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L828)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L828?message=Update%20Docs)]
 </div>
 Args:
 header (str): Line prepended to every rewritten docstring.
@@ -50,8 +50,8 @@ dialect (Optional[DocstringDialectHandler]): If given, every
 write_source(self, src: 'str', data_list: 'List[DocstringData]') -> 'str': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringWriter.py#L807)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringWriter.py#L807?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringWriter.py#L859)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringWriter.py#L859?message=Update%20Docs)]
 </div>
 Return a new source string with the given records' docstrings applied.
 
@@ -74,8 +74,8 @@ Returns:
 write_file(self, path: 'str', data_list: 'List[DocstringData]', target: 'str' = <McUtils.Devutils.core.DefaultType instance>, backup: 'bool' = None) -> 'tuple[str, str]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringWriter.py#L850)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringWriter.py#L850?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringWriter.py#L902)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringWriter.py#L902?message=Update%20Docs)]
 </div>
 Read `path`, apply `data_list`, and write the result back to `path`.
 
@@ -95,8 +95,8 @@ Returns:
 verify_code_identity(original_src: 'str', new_src: 'str') -> 'bool': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L882)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L882?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L934)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L934?message=Update%20Docs)]
 </div>
 Confirm only docstrings differ between two versions of a file.
 
@@ -160,7 +160,7 @@ Returns:
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/Docstrings/DocstringWriter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/Docstrings/DocstringWriter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L764?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L816?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

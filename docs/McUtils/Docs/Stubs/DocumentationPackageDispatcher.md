@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.Stubs.DocumentationPackageDispatcher">DocumentationPackageDispatcher</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1433)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1433?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1540)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1540?message=Update%20Docs)]
 </div>
 
 Owns package/module resolution -- discovering a root module's
@@ -59,8 +59,8 @@ ModuleData: ModuleData
 __init__(self, root_src_dir=None, out_dir='stubs', max_doc_len=800, min_words=5, write_sidecar_file=False, verbose=False, allow_static_mode=True, tests_directory=None, handlers=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1488)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1488?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1595)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1595?message=Update%20Docs)]
 </div>
 
 
@@ -70,8 +70,8 @@ __init__(self, root_src_dir=None, out_dir='stubs', max_doc_len=800, min_words=5,
 root_module_name(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1507)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1507?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1614)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1614?message=Update%20Docs)]
 </div>
 
 
@@ -81,8 +81,8 @@ root_module_name(self):
 resolved_root_dir(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1510)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1510?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1617)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1617?message=Update%20Docs)]
 </div>
 
 
@@ -92,8 +92,8 @@ resolved_root_dir(self):
 packages(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1513)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1513?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1620)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1620?message=Update%20Docs)]
 </div>
 
 
@@ -103,8 +103,8 @@ packages(self):
 sidecar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1516)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1516?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1623)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1623?message=Update%20Docs)]
 </div>
 
 
@@ -114,8 +114,8 @@ sidecar(self):
 report(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1519)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1519?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1626)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1626?message=Update%20Docs)]
 </div>
 
 
@@ -125,8 +125,8 @@ report(self):
 dynamic_mode(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1522)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1522?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1629)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1629?message=Update%20Docs)]
 </div>
 
 
@@ -136,8 +136,8 @@ dynamic_mode(self):
 dependency_graph(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1525)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1525?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1632)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1632?message=Update%20Docs)]
 </div>
 
 
@@ -147,8 +147,8 @@ dependency_graph(self):
 usage_graph(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1528)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1528?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1635)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1635?message=Update%20Docs)]
 </div>
 
 
@@ -157,8 +157,8 @@ usage_graph(self):
 discover_top_level_packages(self, root_module_name, try_dynamic=True, src_dir=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1578)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1578?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1685)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1685?message=Update%20Docs)]
 </div>
 
 
@@ -167,8 +167,8 @@ discover_top_level_packages(self, root_module_name, try_dynamic=True, src_dir=No
 generate(self, package_name, root_module_name=None, update_current=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1652)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1652?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1759)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1759?message=Update%20Docs)]
 </div>
 Resolve `package_name`'s source path and run every handler's
 `.parse()` over it, filing each handler's returned components
@@ -180,8 +180,8 @@ under `self.report[package_name][handler.name]`.
 generate_all(self, root_module_name): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1676)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1676?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1783)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1783?message=Update%20Docs)]
 </div>
 Discover every top-level package under `root_module_name`,
 `.generate()` each one, then `.finalize()`.
@@ -192,8 +192,8 @@ Discover every top-level package under `root_module_name`,
 finalize(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1691)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1691?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1798)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/DocumentationPackageDispatcher.py#L1798?message=Update%20Docs)]
 </div>
 Call every handler's `.write()` with the full accumulated
 report (`{package_name: {handler_name: parse()-result}}`), so each
@@ -251,7 +251,7 @@ handler can do its own cross-package aggregation.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/Stubs/DocumentationPackageDispatcher.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/Stubs/DocumentationPackageDispatcher.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1433?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1540?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

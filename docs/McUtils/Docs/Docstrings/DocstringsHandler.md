@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.Docstrings.DocstringsHandler">DocstringsHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L1112)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L1112?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L1185)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L1185?message=Update%20Docs)]
 </div>
 
 `PackageHandler` that runs `DocstringParser` + `DocstringDataAnalyzer`
@@ -36,11 +36,11 @@ READ_ERROR_WARNING_TEMPLATE: str
 ```
 <a id="McUtils.Docs.Docstrings.DocstringsHandler.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, dispatcher, dialect=None, analyses=None): 
+__init__(self, dispatcher, dialect=None, analyses=None, filter=None, exclude=<function default_exclude at 0x7f9edc6a6b80>): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L1132)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L1132?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L1205)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L1205?message=Update%20Docs)]
 </div>
 Args:
 dialect: forced `DocstringDialectHandler`, passed straight
@@ -49,6 +49,14 @@ dialect: forced `DocstringDialectHandler`, passed straight
 analyses: forced subset/mapping of checks, passed straight
     through to every `DocstringDataAnalyzer` (default: all of
     `DocstringDataAnalyzer.default_analyses`).
+filter: optional ``(qualname, package_name) -> bool`` forwarded
+    to `DocstringParser` -- only matching functions/methods are
+    parsed at all. Defaults to ``None`` (no filtering).
+exclude: optional ``(qualname, package_name) -> bool`` forwarded
+    to `DocstringParser` -- matching functions/methods are
+    skipped entirely (never parsed). Defaults to
+    :func:`default_exclude` (anything with a leading-underscore
+    class or function/method name); pass ``None`` to disable.
 
 
 <a id="McUtils.Docs.Docstrings.DocstringsHandler.parse" class="docs-object-method">&nbsp;</a> 
@@ -56,22 +64,24 @@ analyses: forced subset/mapping of checks, passed straight
 parse(self, package_name, pkg_src_path): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringsHandler.py#L1191)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringsHandler.py#L1191?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringsHandler.py#L1299)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringsHandler.py#L1299?message=Update%20Docs)]
 </div>
 Score every docstring under `pkg_src_path`; safe against any one
 file failing to read/parse (best-effort -- one bad module shouldn't
 drop QA data for the rest of the package; its error is recorded
-under `errors` instead).
+under `errors` instead). Functions/methods ruled out by `filter`/
+`exclude` are never parsed in the first place -- see
+`DocstringParser.wanted`.
 
 
 <a id="McUtils.Docs.Docstrings.DocstringsHandler.write" class="docs-object-method">&nbsp;</a> 
 ```python
-write(self, components): 
+write(self, components, compact=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringsHandler.py#L1214)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringsHandler.py#L1214?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringsHandler.py#L1324)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringsHandler.py#L1324?message=Update%20Docs)]
 </div>
 Aggregate every package's `parse()` result into a single
 docstring_quality.json at the root of out_dir.
@@ -128,7 +138,7 @@ docstring_quality.json at the root of out_dir.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/Docstrings/DocstringsHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/Docstrings/DocstringsHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L1112?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L1185?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

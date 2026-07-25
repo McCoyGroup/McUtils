@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.Stubs.StubSummaryBuilder">StubSummaryBuilder</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L47)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L47?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L64)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L64?message=Update%20Docs)]
 </div>
 
 Parameters
@@ -95,11 +95,11 @@ SYNTAX_ERROR_WARNING_TEMPLATE: str
 ```
 <a id="McUtils.Docs.Stubs.StubSummaryBuilder.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, out_dir='stubs', max_doc_len=800, min_words=5, write_sidecar_file=False, verbose=False, dispatcher=None): 
+__init__(self, out_dir='stubs', max_doc_len=800, min_words=5, write_sidecar_file=False, verbose=False, dispatcher=None, filter=None, exclude=<function default_exclude at 0x7f9edc6c75e0>): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L280)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L280?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L306)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L306?message=Update%20Docs)]
 </div>
 Args:
 dispatcher (Optional[DocumentationPackageDispatcher]): supplies
@@ -108,6 +108,28 @@ dispatcher (Optional[DocumentationPackageDispatcher]): supplies
     Required for anything beyond pure, stateless helpers (e.g.
     `stub_module`/`summarize_module` on a string of source you
     already have); a `StubSummaryHandler` sets this for you.
+filter: optional ``(qualname, package_name) -> bool``. Only
+    affects the API *summary* (`summarize_module`/
+    `summarize_class`) -- stub files always preserve every
+    real function/class verbatim. If given, only qualnames for
+    which this returns True are included; ``None`` (default)
+    applies no filter.
+exclude: optional ``(qualname, package_name) -> bool``,
+    inverted from `filter` -- matching qualnames are left out
+    of the summary. Defaults to :func:`default_exclude`; pass
+    ``None`` to disable.
+
+
+<a id="McUtils.Docs.Stubs.StubSummaryBuilder.wanted" class="docs-object-method">&nbsp;</a> 
+```python
+wanted(self, qualname, package_name=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L337)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L337?message=Update%20Docs)]
+</div>
+True if `qualname` should appear in the API summary, given this
+builder's `filter`/`exclude`. Has no effect on stub generation.
 
 
 <a id="McUtils.Docs.Stubs.StubSummaryBuilder.root_module_name" class="docs-object-method">&nbsp;</a> 
@@ -116,8 +138,8 @@ dispatcher (Optional[DocumentationPackageDispatcher]): supplies
 root_module_name(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L301)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L301?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L349)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L349?message=Update%20Docs)]
 </div>
 
 
@@ -127,8 +149,8 @@ root_module_name(self):
 dynamic_mode(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L304)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L304?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L352)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L352?message=Update%20Docs)]
 </div>
 
 
@@ -138,8 +160,8 @@ dynamic_mode(self):
 dependency_graph(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L307)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L307?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L355)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L355?message=Update%20Docs)]
 </div>
 
 
@@ -149,8 +171,8 @@ dependency_graph(self):
 sidecar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L310)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L310?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L358)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L358?message=Update%20Docs)]
 </div>
 
 
@@ -159,8 +181,8 @@ sidecar(self):
 collapse_scalar_assign_runs(self, body, min_group=6, context=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L323)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L323?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L371)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L371?message=Update%20Docs)]
 </div>
 
 
@@ -169,8 +191,8 @@ collapse_scalar_assign_runs(self, body, min_group=6, context=None):
 is_collapsed_registry(self, node): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L371)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L371?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L419)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L419?message=Update%20Docs)]
 </div>
 
 
@@ -179,8 +201,8 @@ is_collapsed_registry(self, node):
 externalize_large_literal(self, node, module_key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L402)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L402?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L450)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L450?message=Update%20Docs)]
 </div>
 
 
@@ -189,8 +211,8 @@ externalize_large_literal(self, node, module_key):
 is_simple_assign(self, node, max_len=120): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L435)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L435?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L483)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L483?message=Update%20Docs)]
 </div>
 
 
@@ -199,8 +221,8 @@ is_simple_assign(self, node, max_len=120):
 is_all_operation(self, node): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L452)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L452?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L500)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L500?message=Update%20Docs)]
 </div>
 True for any statement that assigns to, augments, or mutates
 `__all__` -- `__all__ = [...]`, `__all__ += [...]`,
@@ -218,8 +240,8 @@ including this tool's own `discover_top_level_packages`.
 resolve_dynamic_all(self, package_name, rel_path=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L509)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L509?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L557)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L557?message=Update%20Docs)]
 </div>
 If we're in dynamic_mode (the root module was really
 importable), look up this specific module's real, fully-resolved
@@ -245,8 +267,8 @@ source, verbatim.
 record_module_dependencies(self, source, package_name, rel_path=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L590)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L590?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L638)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L638?message=Update%20Docs)]
 </div>
 Parse the ORIGINAL (pre-stub) source of one module and record,
 into self.dependency_graph, which packages/classes/methods/
@@ -265,8 +287,8 @@ best-effort bonus, not something that should block stubbing.
 write_dependency_graph(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L685)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L685?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L733)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L733?message=Update%20Docs)]
 </div>
 Write dependency_graph.json at the root of out_dir. See
 record_module_dependencies for how entries are determined.
@@ -277,8 +299,8 @@ record_module_dependencies for how entries are determined.
 stub_function(self, node): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L701)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L701?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L749)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L749?message=Update%20Docs)]
 </div>
 
 
@@ -287,8 +309,8 @@ stub_function(self, node):
 stub_class(self, node): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L710)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L710?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L758)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L758?message=Update%20Docs)]
 </div>
 
 
@@ -297,8 +319,8 @@ stub_class(self, node):
 stub_module(self, source, module_key, dynamic_all=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L741)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L741?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L789)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L789?message=Update%20Docs)]
 </div>
 
 
@@ -307,8 +329,8 @@ stub_module(self, source, module_key, dynamic_all=None):
 stub_package(self, src_dir, out_dir, package_name=None, keep_full=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L796)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L796?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L844)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L844?message=Update%20Docs)]
 </div>
 
 
@@ -317,8 +339,8 @@ stub_package(self, src_dir, out_dir, package_name=None, keep_full=None):
 write_sidecar_files(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L833)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L833?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L881)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L881?message=Update%20Docs)]
 </div>
 
 
@@ -327,8 +349,8 @@ write_sidecar_files(self):
 first_line(self, docstring, max_len=100): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L851)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L851?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L899)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L899?message=Update%20Docs)]
 </div>
 
 
@@ -337,8 +359,8 @@ first_line(self, docstring, max_len=100):
 class_doc_summary(self, full_doc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L876)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L876?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L924)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L924?message=Update%20Docs)]
 </div>
 
 
@@ -347,38 +369,38 @@ class_doc_summary(self, full_doc):
 render_params(self, args, skip_first=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L888)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L888?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L936)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L936?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Docs.Stubs.StubSummaryBuilder.summarize_class" class="docs-object-method">&nbsp;</a> 
 ```python
-summarize_class(self, node, indent='  '): 
+summarize_class(self, node, indent='  ', package_name=None, qualname_prefix=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L948)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L948?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L996)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L996?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Docs.Stubs.StubSummaryBuilder.summarize_module" class="docs-object-method">&nbsp;</a> 
 ```python
-summarize_module(self, path, rel_path): 
+summarize_module(self, path, rel_path, package_name=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L979)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L979?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L1033)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L1033?message=Update%20Docs)]
 </div>
 
 
 <a id="McUtils.Docs.Stubs.StubSummaryBuilder.build_package_summary" class="docs-object-method">&nbsp;</a> 
 ```python
-build_package_summary(self, src_dir, out_file): 
+build_package_summary(self, src_dir, out_file, package_name=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L1009)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L1009?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L1065)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L1065?message=Update%20Docs)]
 </div>
 
 
@@ -387,8 +409,8 @@ build_package_summary(self, src_dir, out_file):
 write_llm_readme(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L1026)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L1026?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L1082)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L1082?message=Update%20Docs)]
 </div>
 Write LLM.md at the root of out_dir: an operating manual for
 an LLM consuming this directory -- navigation order, what's real
@@ -405,8 +427,8 @@ actively mislead an LLM rather than just under-inform it.
 write_index(self, report): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L1055)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L1055?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L1111)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryBuilder.py#L1111?message=Update%20Docs)]
 </div>
 Write summaries/index.md from a flat {package_name: info} report
 (the shape StubSummaryHandler.parse() returns per package -- see
@@ -465,7 +487,7 @@ collected).
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/Stubs/StubSummaryBuilder.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/Stubs/StubSummaryBuilder.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L47?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L64?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

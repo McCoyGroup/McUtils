@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.Stubs.StubSummaryHandler">StubSummaryHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1132)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1132?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1188)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1188?message=Update%20Docs)]
 </div>
 
 Generates per-module stubs + a per-package API summary during
@@ -27,12 +27,21 @@ name: str
 ```
 <a id="McUtils.Docs.Stubs.StubSummaryHandler.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, dispatcher, builder=None): 
+__init__(self, dispatcher, builder=None, filter=None, exclude=<function default_exclude at 0x7f9edc6c75e0>): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1142)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1142?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1198)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1198?message=Update%20Docs)]
 </div>
+Args:
+filter: optional ``(qualname, package_name) -> bool`` forwarded
+    to the builder -- only affects which functions/classes
+    appear in the API *summary*; stub files always preserve
+    every real function/class. Defaults to ``None`` (no
+    filtering).
+exclude: optional ``(qualname, package_name) -> bool``
+    forwarded to the builder. Defaults to
+    :func:`default_exclude`; pass ``None`` to disable.
 
 
 <a id="McUtils.Docs.Stubs.StubSummaryHandler.parse" class="docs-object-method">&nbsp;</a> 
@@ -40,8 +49,8 @@ __init__(self, dispatcher, builder=None):
 parse(self, package_name, pkg_src_path): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryHandler.py#L1150)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryHandler.py#L1150?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryHandler.py#L1218)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryHandler.py#L1218?message=Update%20Docs)]
 </div>
 
 
@@ -50,8 +59,8 @@ parse(self, package_name, pkg_src_path):
 write(self, components): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryHandler.py#L1187)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryHandler.py#L1187?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/StubSummaryHandler.py#L1255)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/StubSummaryHandler.py#L1255?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -106,7 +115,7 @@ write(self, components):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/Stubs/StubSummaryHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/Stubs/StubSummaryHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1132?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1188?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

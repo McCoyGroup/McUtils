@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.Stubs.PackageHandler">PackageHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1091)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1091?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1147)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1147?message=Update%20Docs)]
 </div>
 
 Base class for one pluggable, per-package documentation artifact.
@@ -40,8 +40,8 @@ name: str
 __init__(self, dispatcher): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1113)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1113?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1169)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1169?message=Update%20Docs)]
 </div>
 
 
@@ -50,8 +50,8 @@ __init__(self, dispatcher):
 parse(self, package_name, pkg_src_path): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/PackageHandler.py#L1116)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/PackageHandler.py#L1116?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/PackageHandler.py#L1172)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/PackageHandler.py#L1172?message=Update%20Docs)]
 </div>
 Do the per-package work; return this package's components.
 
@@ -61,8 +61,8 @@ Do the per-package work; return this package's components.
 write(self, components): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/PackageHandler.py#L1120)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/PackageHandler.py#L1120?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs/PackageHandler.py#L1176)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs/PackageHandler.py#L1176?message=Update%20Docs)]
 </div>
 Do the cross-package work, given every package's `parse()` result.
 
@@ -124,7 +124,7 @@ Args:
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/Stubs/PackageHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/Stubs/PackageHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1091?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Stubs.py#L1147?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
