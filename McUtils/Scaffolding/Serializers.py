@@ -2339,7 +2339,11 @@ def undictify_lists(tree:dict):
             else:
                 tree[k] = undictify_lists(subtree)
     return tree
-def unflatten_tree(serial_tree, unprep_tree=True):
+def unflatten_tree(serial_tree,
+                   unprep_tree=True,
+                   max_leaf_elements=None,
+                   block_pointers=None,
+                   prefix_filter=None):
     """
     **LLM Docstring**
 
@@ -2354,9 +2358,14 @@ def unflatten_tree(serial_tree, unprep_tree=True):
     """
     tree = {}
     tree_stack = collections.deque()
+    prefix = ()
+    prefix_stack = collections.deque()
+    skipped_stack = [False]
     key_map = serial_tree.pop('key_map')
-    block_pointers = {}
+    if block_pointers is None:
+        block_pointers = {}
     aliases = serial_tree['aliases']
+    skipped_sentinel = object()
     for i,k in enumerate(serial_tree['visited_keys']):
         if k >= 0:
             s = key_map[k]
@@ -2378,12 +2387,13 @@ def unflatten_tree(serial_tree, unprep_tree=True):
                     shape = ()
                 else:
                     block_size = np.prod(shape, dtype=int)
+                block_pointers[k] = (shape_offset+1, array_pointer + block_size)
+                if skipped_stack[-1]: continue
                 try:
                     arr = array_data[array_pointer:array_pointer+block_size].reshape(shape)
                 except ValueError:
                     print(k, s, block_size)
                     raise
-                block_pointers[k] = (shape_offset+1, array_pointer + block_size)
                 if arr.ndim == 0:
                     if np.issubdtype(arr.dtype, np.dtype(float)) and np.isnan(arr):
                         arr = None
@@ -2394,9 +2404,27 @@ def unflatten_tree(serial_tree, unprep_tree=True):
                         arr = np.full(arr.shape, None)
                 tree[s] = arr
             else:
+                prefix_stack.append(prefix)
+                prefix = prefix + (s,)
+                skipped = skipped_stack[-1]
+                if not skipped:
+                    if prefix_filter is not None:
+                        skipped = not prefix_filter(prefix)
+                    else:
+                        skipped = False
+                    if not skipped and max_leaf_elements is not None:
+                        skip_depth = len(skipped_stack) - 1
+                        if skip_depth < len(max_leaf_elements):
+                            max_cutoff = max_leaf_elements[skip_depth]
+                            skipped = max_cutoff < len(tree)
+                            if skipped and skip_depth == 0:
+                                break # fast early exit
+                skipped_stack.append(skipped)
                 tree[s] = {}
                 tree_stack.append(tree)
                 tree = tree[s]
+                if skipped:
+                    tree[skipped_sentinel] = True
         else:
             if len(tree_stack) == 0:
                 block = serial_tree['visited_keys'][max(i - 6, 0):i]
@@ -2406,6 +2434,11 @@ def unflatten_tree(serial_tree, unprep_tree=True):
                 ]
                 raise ValueError(f"exhausted tree stack, previous tree entries (max 6): {prev}")
             tree = tree_stack.pop()
+            for k,v in tree.items():
+                if isinstance(v, dict) and skipped_sentinel in v:
+                    del tree[k]
+            prefix = prefix_stack.pop()
+            skipped = skipped_stack.pop()
     if unprep_tree:
         tree = undictify_lists(tree)
     return tree
@@ -2471,7 +2504,10 @@ def write_flat_tree(file, tree, flatten=None, allow_pickle=False, writer=None, *
         **writer_options
     )
 
-def read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False, **reader_options):
+def read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False,
+                   max_leaf_elements=None,
+                   prefix_filter=None,
+                   **reader_options):
     """
     **LLM Docstring**
 
@@ -2517,5 +2553,7 @@ def read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False, **read
         data[k] = (shape, array)
 
     if unflatten:
-        data = unflatten_tree(data)
+        data = unflatten_tree(data,
+                              max_leaf_elements=max_leaf_elements,
+                              prefix_filter=prefix_filter)
     return data
