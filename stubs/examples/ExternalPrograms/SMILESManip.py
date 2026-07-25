@@ -21,7 +21,7 @@ class ExternalProgramsTest(TestCase):
     def _echo(arg):
         return arg
 
-    @debugTest
+    @validationTest
     def test_SMILESManip(self):
         from Psience.Molecools import Molecule
         from McUtils.Data import SMILESData

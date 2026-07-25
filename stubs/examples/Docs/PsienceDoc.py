@@ -3,14 +3,14 @@
 from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.Docs import *
-import os, inspect
+import os, inspect, sys
 
 class DocsTests(TestCase):
     """
     Sample documentation generator tests
     """
 
-    @debugTest
+    @validationTest
     def test_PsienceDoc(self):
         """
         Builds sample documentation for the Peeves package

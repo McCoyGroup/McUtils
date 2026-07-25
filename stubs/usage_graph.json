@@ -146,6 +146,12 @@
     "Docs::McUtilsDoc",
     "Docs::PsienceDoc"
   ],
+  "McUtils.Docs.Docstrings.DocstringDataAnalyzer": [
+    "Docs::DocstringParser"
+  ],
+  "McUtils.Docs.Docstrings.DocstringParser": [
+    "Docs::DocstringParser"
+  ],
   "McUtils.Docs.ExamplesParser": [
     "Docs::ParseExamples"
   ],

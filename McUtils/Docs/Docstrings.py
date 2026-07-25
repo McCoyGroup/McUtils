@@ -629,6 +629,17 @@ def _signature_param_names(data: "DocstringData"):
             or n in ("self", "cls")}
 
 
+def default_exclude(qualname: str, package_name: Optional[str] = None) -> bool:
+    """Default `exclude` predicate for `DocstringParser`/`DocstringsHandler`.
+
+    True if any dotted component of `qualname` -- i.e. any class name or
+    function/method name in its path, such as ``Widget`` or ``spin`` in
+    ``Widget.spin`` -- starts with an underscore. Covers private names
+    (``_helper``), private classes and everything under them, and other
+    dunders (``__eq__``, ``__repr__``, ...) -- except ``__init__``, which
+    is exempted since it's routinely the most useful method to document.
+    """
+    return any(part.startswith("_") and part != "__init__" for part in qualname.split("."))
 # --------------------------------------------------------------------------- #
 # Data model
 # --------------------------------------------------------------------------- #
@@ -702,31 +713,70 @@ class DocstringParser:
     `DocstringDialectHandler` matches it best (see `detect_dialect`), so a single file with a mix of Google-style and
     Sphinx-style docstrings parses correctly function-by-function -- unless a
     `dialect` is passed to force one convention for the whole file.
+
+    `filter`/`exclude` let a caller skip docstring parsing entirely for
+    functions/methods/classes-of-methods that don't matter to it -- neither
+    the docstring nor the signature is even read for anything they skip.
+    Both are called as ``predicate(qualname, package_name)``, where
+    `qualname` is the dotted ``Class.method`` (or bare function) name and
+    `package_name` is whatever the caller passed to `parse_source`/
+    `parse_file` (``None`` if not given -- `DocstringsHandler` passes the
+    actual top-level package name, giving predicates "package information"
+    alongside the name).
     """
 
-    def __init__(self, dialect: Optional[DocstringDialectHandler] = None):
+    def __init__(self, dialect: Optional[DocstringDialectHandler] = None,
+                 filter=None, exclude=default_exclude):
         """
         Args:
             dialect (Optional[DocstringDialectHandler]): If given, every
                 docstring is parsed with this handler instead of
                 auto-detecting one per function.
+            filter: optional ``(qualname, package_name) -> bool``. If
+                given, only qualnames for which this returns True are
+                parsed at all; ``None`` (the default) applies no filter,
+                i.e. everything is a candidate.
+            exclude: optional ``(qualname, package_name) -> bool``.
+                Qualnames for which this returns True are skipped, same as
+                an inverted `filter`. Defaults to :func:`default_exclude`
+                (skip anything with a leading-underscore name); pass
+                ``None`` to disable exclusion entirely.
         """
         self.dialect = resolve_dialect(dialect)
+        self.filter = filter
+        self.exclude = exclude
 
-    def parse_source(self, src: str, only_missing: bool = False) -> List[DocstringData]:
+    def wanted(self, qualname: str, package_name: Optional[str] = None) -> bool:
+        """True if `qualname` should actually be parsed, given this
+        parser's `filter`/`exclude`."""
+        if self.filter is not None and not self.filter(qualname, package_name):
+            return False
+        if self.exclude is not None and self.exclude(qualname, package_name):
+            return False
+        return True
+
+    def parse_source(self, src: str, only_missing: bool = False,
+                      package_name: Optional[str] = None) -> List[DocstringData]:
         """Parse `src` text and return one :class:`DocstringData` per function.
 
         Args:
             src (str): Python source code.
             only_missing (bool): If True, skip functions that already have a
                 docstring.
+            package_name (Optional[str]): Passed through to `filter`/
+                `exclude` alongside each qualname; has no other effect.
 
         Returns:
-            List[DocstringData]: records in source order.
+            List[DocstringData]: records in source order, excluding any
+            qualname `filter`/`exclude` ruled out (those are never parsed
+            at all, not merely omitted after the fact).
         """
         tree = ast.parse(src)
         out: List[DocstringData] = []
         for qual, node in _iter_funcs(tree):
+            if not self.wanted(qual, package_name):
+                continue
+
             has_doc = _has_docstring_node(node)
             if only_missing and has_doc:
                 continue
@@ -752,9 +802,11 @@ class DocstringParser:
             ))
         return out
 
-    def parse_file(self, path: str, only_missing: bool = False) -> List[DocstringData]:
+    def parse_file(self, path: str, only_missing: bool = False,
+                    package_name: Optional[str] = None) -> List[DocstringData]:
         """Read `path` and delegate to :meth:`parse_source`."""
-        return self.parse_source(dev.read_file(path), only_missing=only_missing)
+        return self.parse_source(dev.read_file(path), only_missing=only_missing,
+                                  package_name=package_name)
 
 
 # --------------------------------------------------------------------------- #
@@ -895,12 +947,15 @@ class DocstringWriter:
 
 class DocstringQAField:
     issue_registry = {}
+    tag_name = None
+    default_short_name = None
     @classmethod
     def register(cls, name, method=None):
         if method is None and hasattr(name, 'name'):
             method = name
             name = method.name
         if method is not None:
+            method.tag_name = name
             cls.issue_registry[name] = method
             return method
         else:
@@ -924,21 +979,35 @@ class DocstringQAField:
             argstr_bits.append(f"{self.score=!r}")
         argstr = ", ".join(argstr_bits)
         return f"{type(self).__name__}({argstr})"
+    @property
+    def short_name(self):
+        if self.default_short_name is None:
+            name = self.tag_name
+            if name is None:
+                name = type(self).__name__
+            return name
+        else:
+            return self.default_short_name
 
 @DocstringQAField.register('missing_description')
 class MissingDescription(DocstringQAField):
+    default_short_name = 'description'
     default_score = -50
 @DocstringQAField.register('missing_short_description')
 class MissingShortDescription(MissingDescription):
+    default_short_name = 'short_description'
     default_score = -10
 @DocstringQAField.register('missing_parameter')
 class MissingParameter(DocstringQAField):
+    default_short_name = 'missing'
     default_score = -30
 @DocstringQAField.register('missing_return_value')
 class MissingReturnValue(DocstringQAField):
+    default_short_name = 'missing'
     default_score = -50
 @DocstringQAField.register('missing_return_type')
 class MissingReturnType(DocstringQAField):
+    default_short_name = 'type'
     default_score = -30
 @DocstringQAField.register('stale_parameter')
 class StaleParameter(DocstringQAField):
@@ -948,15 +1017,19 @@ class StaleParameterType(DocstringQAField):
     default_score = -20
 @DocstringQAField.register('missing_parameter_description')
 class MissingParameterDescription(MissingDescription):
+    default_short_name = 'description'
     default_score = -10
 @DocstringQAField.register('missing_parameter_type')
 class MissingParameterType(DocstringQAField):
+    default_short_name = 'type'
     default_score = -5
 @DocstringQAField.register('bad_description')
 class BadDescription(DocstringQAField):
+    default_short_name = 'description'
     default_score = -10
 @DocstringQAField.register('short_description_too_long')
 class ShortDescriptionTooLong(BadDescription):
+    default_short_name = 'too_long'
     default_score = -5
 
 @DocstringQAField.register('has_examples')
@@ -1129,7 +1202,7 @@ class DocstringsHandler(PackageHandler):
     SYNTAX_ERROR_WARNING_TEMPLATE = "[WARN] syntax error, skipping docstring QA: {rel_path}: {error}"
     READ_ERROR_WARNING_TEMPLATE = "[WARN] couldn't read {rel_path} for docstring QA: {error}"
 
-    def __init__(self, dispatcher, dialect=None, analyses=None):
+    def __init__(self, dispatcher, dialect=None, analyses=None, filter=None, exclude=default_exclude):
         """
         Args:
             dialect: forced `DocstringDialectHandler`, passed straight
@@ -1138,9 +1211,17 @@ class DocstringsHandler(PackageHandler):
             analyses: forced subset/mapping of checks, passed straight
                 through to every `DocstringDataAnalyzer` (default: all of
                 `DocstringDataAnalyzer.default_analyses`).
+            filter: optional ``(qualname, package_name) -> bool`` forwarded
+                to `DocstringParser` -- only matching functions/methods are
+                parsed at all. Defaults to ``None`` (no filtering).
+            exclude: optional ``(qualname, package_name) -> bool`` forwarded
+                to `DocstringParser` -- matching functions/methods are
+                skipped entirely (never parsed). Defaults to
+                :func:`default_exclude` (anything with a leading-underscore
+                class or function/method name); pass ``None`` to disable.
         """
         super().__init__(dispatcher)
-        self.parser = DocstringParser(dialect=dialect)
+        self.parser = DocstringParser(dialect=dialect, filter=filter, exclude=exclude)
         self.analyses = analyses
 
     def _iter_py_files(self, pkg_src_path):
@@ -1156,18 +1237,44 @@ class DocstringsHandler(PackageHandler):
         else:
             yield pkg_src_path, os.path.basename(pkg_src_path)
 
+    #: tags whose issues get collapsed to their (deduplicated) `description`
+    #: rather than the full {type, description, score} dict.
+    _SIMPLIFY_BY_DESCRIPTION = frozenset({"stale"})
+    #: tags whose issues get collapsed to their (deduplicated) `type` name.
+    _SIMPLIFY_BY_TYPE = frozenset({"parameters", "returns", "descriptions"})
+
     @staticmethod
     def _issue_to_json(issue: DocstringQAField) -> dict:
         return {"type": type(issue).__name__, "description": issue.description, "score": issue.score}
 
-    def _score_file(self, full_path, rel_path):
+    def _simplified_issues(self, tag, issues):
+        """Drop any issue with a positive score -- those are bonuses (e.g.
+        `HasExamples`), not problems, and don't belong in an `issues`
+        listing -- then simplify what's left: `stale` collapses to its
+        deduplicated `description`s, `parameters`/`returns` collapse to
+        their deduplicated `type` names, and everything else keeps the
+        full {type, description, score} form."""
+        kept = [i for i in issues if (i.score or 0) <= 0]
+        if not kept:
+            kept = []
+        elif tag in self._SIMPLIFY_BY_DESCRIPTION:
+            kept = list(dict.fromkeys(i.description for i in kept))
+        elif tag in self._SIMPLIFY_BY_TYPE:
+            kept = list(dict.fromkeys(i.short_name for i in kept))
+        else:
+            kept = [self._issue_to_json(i) for i in kept]
+        if tag == "returns" and len(kept) == 2:
+            kept = ["both"]
+        return kept
+
+    def _score_file(self, full_path, rel_path, package_name):
         try:
             src = dev.read_file(full_path)
         except Exception as e:
             print(self.READ_ERROR_WARNING_TEMPLATE.format(rel_path=rel_path, error=e), file=sys.stderr)
             return [], str(e)
         try:
-            data_list = self.parser.parse_source(src)
+            data_list = self.parser.parse_source(src, package_name=package_name)
         except SyntaxError as e:
             print(self.SYNTAX_ERROR_WARNING_TEMPLATE.format(rel_path=rel_path, error=e), file=sys.stderr)
             return [], str(e)
@@ -1182,8 +1289,9 @@ class DocstringsHandler(PackageHandler):
                 "dialect": data.dialect,
                 "score": score,
                 "issues": {
-                    tag: [self._issue_to_json(i) for i in issues]
-                    for tag, issues in issue_breakdown.items() if issues
+                    tag: simplified
+                    for tag, issues in issue_breakdown.items()
+                    if (simplified := self._simplified_issues(tag, issues))
                 },
             })
         return records, None
@@ -1192,11 +1300,13 @@ class DocstringsHandler(PackageHandler):
         """Score every docstring under `pkg_src_path`; safe against any one
         file failing to read/parse (best-effort -- one bad module shouldn't
         drop QA data for the rest of the package; its error is recorded
-        under `errors` instead)."""
+        under `errors` instead). Functions/methods ruled out by `filter`/
+        `exclude` are never parsed in the first place -- see
+        `DocstringParser.wanted`."""
         records = []
         errors = []
         for full_path, rel_path in self._iter_py_files(pkg_src_path):
-            recs, err = self._score_file(full_path, rel_path)
+            recs, err = self._score_file(full_path, rel_path, package_name)
             records.extend(recs)
             if err is not None:
                 errors.append({"rel_path": rel_path, "error": err})
@@ -1211,7 +1321,7 @@ class DocstringsHandler(PackageHandler):
             "average_score": (total_score / n) if n else None,
         }
 
-    def write(self, components):
+    def write(self, components, compact=True):
         """Aggregate every package's `parse()` result into a single
         docstring_quality.json at the root of out_dir."""
         packages = {
@@ -1222,17 +1332,23 @@ class DocstringsHandler(PackageHandler):
         average_score = (grand_total / grand_n) if grand_n else None
         grand_errors = sum(len(p.get("errors", [])) for p in packages.values())
 
-        payload = {
-            "packages": packages,
-            "n_functions": grand_n,
-            "total_score": grand_total,
-            "average_score": average_score,
-            "n_errors": grand_errors,
-        }
+        if compact:
+            payload = packages
+        else:
+            payload = {
+                "packages": packages,
+                "n_functions": grand_n,
+                "total_score": grand_total,
+                "average_score": average_score,
+                "n_errors": grand_errors,
+            }
         os.makedirs(self.dispatcher.out_dir, exist_ok=True)
         path = os.path.join(self.dispatcher.out_dir, self.QUALITY_JSON_FILENAME)
         with open(path, "w", encoding="utf-8") as f:
-            json.dump(payload, f, indent=2, sort_keys=True)
+            if compact:
+                json.dump(payload, f, sort_keys=True)
+            else:
+                json.dump(payload, f, indent=2, sort_keys=True)
 
         if self.dispatcher.verbose:
             print(f"docstring quality: {grand_n} functions scored, "
