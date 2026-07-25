@@ -4,19 +4,23 @@ import abc
 import ast
 import dataclasses
 import io
+import json
 import os
 import re
+import sys
 import tokenize
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
 
 from .. import Devutils as dev
+from .Stubs import PackageHandler
 
 __all__ = [
     "DocstringParser",
     "DocstringWriter",
     "DocstringDialectHandler",
-    "DocstringDataAnalyzer"
+    "DocstringDataAnalyzer",
+    "DocstringsHandler",
 ]
 
 
@@ -1100,3 +1104,138 @@ class DocstringDataAnalyzer:
             score += sum(i.score for i in issues)
 
         return issue_breakdowns, score
+
+
+# --------------------------------------------------------------------------- #
+# DocstringsHandler -- DocumentationPackageDispatcher integration
+# --------------------------------------------------------------------------- #
+class DocstringsHandler(PackageHandler):
+    """`PackageHandler` that runs `DocstringParser` + `DocstringDataAnalyzer`
+    over every function/method in a package's source during `parse()`, then
+    -- at `write()` time, once every package has been processed -- writes a
+    single `docstring_quality.json` at the root of `out_dir` tracking the
+    score and issue breakdown for every docstring in the whole run.
+
+    Not one of `DocumentationPackageDispatcher.DEFAULT_HANDLERS`; opt in by
+    passing it explicitly, e.g.::
+
+        DocumentationPackageDispatcher(
+            ..., handlers=(StubSummaryHandler, ExampleHandler, DocstringsHandler))
+    """
+
+    name = "docstring_quality"
+
+    QUALITY_JSON_FILENAME = "docstring_quality.json"
+    SYNTAX_ERROR_WARNING_TEMPLATE = "[WARN] syntax error, skipping docstring QA: {rel_path}: {error}"
+    READ_ERROR_WARNING_TEMPLATE = "[WARN] couldn't read {rel_path} for docstring QA: {error}"
+
+    def __init__(self, dispatcher, dialect=None, analyses=None):
+        """
+        Args:
+            dialect: forced `DocstringDialectHandler`, passed straight
+                through to `DocstringParser` (default: auto-detect per
+                docstring).
+            analyses: forced subset/mapping of checks, passed straight
+                through to every `DocstringDataAnalyzer` (default: all of
+                `DocstringDataAnalyzer.default_analyses`).
+        """
+        super().__init__(dispatcher)
+        self.parser = DocstringParser(dialect=dialect)
+        self.analyses = analyses
+
+    def _iter_py_files(self, pkg_src_path):
+        """Yield (full_path, rel_path) for every .py file under a package's
+        source -- rel_path is relative to pkg_src_path for a package
+        directory, or just the bare filename for a single-file package."""
+        if os.path.isdir(pkg_src_path):
+            for root, _, files in os.walk(pkg_src_path):
+                for fname in sorted(files):
+                    if fname.endswith(".py"):
+                        full = os.path.join(root, fname)
+                        yield full, os.path.relpath(full, pkg_src_path)
+        else:
+            yield pkg_src_path, os.path.basename(pkg_src_path)
+
+    @staticmethod
+    def _issue_to_json(issue: DocstringQAField) -> dict:
+        return {"type": type(issue).__name__, "description": issue.description, "score": issue.score}
+
+    def _score_file(self, full_path, rel_path):
+        try:
+            src = dev.read_file(full_path)
+        except Exception as e:
+            print(self.READ_ERROR_WARNING_TEMPLATE.format(rel_path=rel_path, error=e), file=sys.stderr)
+            return [], str(e)
+        try:
+            data_list = self.parser.parse_source(src)
+        except SyntaxError as e:
+            print(self.SYNTAX_ERROR_WARNING_TEMPLATE.format(rel_path=rel_path, error=e), file=sys.stderr)
+            return [], str(e)
+
+        records = []
+        for data in data_list:
+            issue_breakdown, score = DocstringDataAnalyzer(data, analyses=self.analyses).analyze_docstring_quality()
+            records.append({
+                "rel_path": rel_path,
+                "qualname": data.qualname,
+                "has_docstring": bool(data.raw),
+                "dialect": data.dialect,
+                "score": score,
+                "issues": {
+                    tag: [self._issue_to_json(i) for i in issues]
+                    for tag, issues in issue_breakdown.items() if issues
+                },
+            })
+        return records, None
+
+    def parse(self, package_name, pkg_src_path):
+        """Score every docstring under `pkg_src_path`; safe against any one
+        file failing to read/parse (best-effort -- one bad module shouldn't
+        drop QA data for the rest of the package; its error is recorded
+        under `errors` instead)."""
+        records = []
+        errors = []
+        for full_path, rel_path in self._iter_py_files(pkg_src_path):
+            recs, err = self._score_file(full_path, rel_path)
+            records.extend(recs)
+            if err is not None:
+                errors.append({"rel_path": rel_path, "error": err})
+
+        n = len(records)
+        total_score = sum(r["score"] for r in records)
+        return {
+            "records": records,
+            "errors": errors,
+            "n_functions": n,
+            "total_score": total_score,
+            "average_score": (total_score / n) if n else None,
+        }
+
+    def write(self, components):
+        """Aggregate every package's `parse()` result into a single
+        docstring_quality.json at the root of out_dir."""
+        packages = {
+            pkg: info[self.name] for pkg, info in components.items() if self.name in info
+        }
+        grand_n = sum(p["n_functions"] for p in packages.values())
+        grand_total = sum(p["total_score"] for p in packages.values())
+        average_score = (grand_total / grand_n) if grand_n else None
+        grand_errors = sum(len(p.get("errors", [])) for p in packages.values())
+
+        payload = {
+            "packages": packages,
+            "n_functions": grand_n,
+            "total_score": grand_total,
+            "average_score": average_score,
+            "n_errors": grand_errors,
+        }
+        os.makedirs(self.dispatcher.out_dir, exist_ok=True)
+        path = os.path.join(self.dispatcher.out_dir, self.QUALITY_JSON_FILENAME)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2, sort_keys=True)
+
+        if self.dispatcher.verbose:
+            print(f"docstring quality: {grand_n} functions scored, "
+                  f"average score {average_score}, written to {path}")
+
+        return {"docstring_quality_size": os.path.getsize(path), "average_score": average_score}

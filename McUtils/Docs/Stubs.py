@@ -36,7 +36,11 @@ from ..Formatters import TemplateHandler
 from .ExamplesParser import ExamplesParser
 
 __all__ = [
-    "StubSummaryBuilder"
+    "StubSummaryBuilder",
+    "PackageHandler",
+    "StubSummaryHandler",
+    "ExampleHandler",
+    "DocumentationPackageDispatcher",
 ]
 
 
@@ -99,27 +103,7 @@ class StubSummaryBuilder:
     SIDECAR_LOADER_FILENAME = SIDECAR_MODULE_NAME + ".py"
     SIDECAR_LOADER_FUNC_NAME = "_load_registry_data"
     DEPENDENCY_GRAPH_FILENAME = "dependency_graph.json"
-    EXAMPLES_DIRNAME = "examples"
-    USAGE_GRAPH_FILENAME = "usage_graph.json"
-    TEST_FILENAME_TEMPLATE = "{package_name}Tests.py"
-    EXAMPLE_FILENAME_TEMPLATE = "{example_name}.py"
-    EXAMPLE_FILE_HEADER_TEMPLATE = (
-        '"""Extracted from {class_name}.{method_name} via '
-        'McUtils.Docs.ExamplesParser -- not the original file, and may '
-        'reference test-only setup/state. Run with: '
-        'python -m unittest {class_name}.{method_name}"""\n\n'
-    )
 
-    # ------------------------------------------------------------------
-    # Dependency-graph blacklist -- top-level package names excluded from
-    # dependency_graph.json as noise (stdlib + a handful of ubiquitous
-    # third-party packages). `self.dependency_blacklist` (set in
-    # __init__ from this default) is a per-instance copy, so it can be
-    # tweaked per-run without touching the class default.
-    # ------------------------------------------------------------------
-    STDLIB_BLACKLIST_PACKAGES = frozenset(getattr(sys, "stdlib_module_names", ())) | frozenset({"builtins"})
-    COMMON_THIRD_PARTY_BLACKLIST_PACKAGES = frozenset(TemplateHandler.blacklist_packages)
-    DEFAULT_DEPENDENCY_BLACKLIST = STDLIB_BLACKLIST_PACKAGES | COMMON_THIRD_PARTY_BLACKLIST_PACKAGES
 
     # ------------------------------------------------------------------
     # String templates -- everything written into stubs, summaries, and
@@ -292,72 +276,40 @@ ground truth.
     SUMMARY_SIDECAR_LINE_TEMPLATE = "  sidecar:    {n:,} bytes"
 
     SYNTAX_ERROR_WARNING_TEMPLATE = "[WARN] syntax error, copying as-is: {rel_path}: {error}"
-    IMPORT_FALLBACK_INFO_TEMPLATE = (
-        "[INFO] real import of {root_module_name!r} failed ({error}); "
-        "falling back to static __all__ parsing."
-    )
-    EXAMPLES_PARSER_UNAVAILABLE_WARNING = (
-        "[INFO] McUtils.Docs.ExamplesParser not importable -- skipping example extraction."
-    )
-    EXAMPLES_PARSE_ERROR_TEMPLATE = (
-        "[WARN] failed to parse tests for {package_name!r} ({test_file}): {error}"
-    )
 
-    NO_PACKAGES_DISCOVERED_ERROR = (
-        "No packages discovered yet -- call discover_top_level_packages(root_module_name) "
-        "first, or pass root_module_name to generate()."
-    )
-    PACKAGE_NOT_FOUND_ERROR_TEMPLATE = (
-        "{package_name!r} not found among discovered top-level packages: {available}"
-    )
-    NO_TOP_LEVEL_PACKAGES_ERROR_TEMPLATE = (
-        "No top-level packages discovered for {root_module_name!r} -- "
-        "check that its __init__.py defines/builds __all__."
-    )
-    ROOT_DIR_NOT_FOUND_ERROR = (
-        "Could not locate the root module's source directory -- "
-        "set root_src_dir explicitly."
-    )
-
-    def __init__(self, root_src_dir=None, out_dir="stubs",
-                 max_doc_len=800, min_words=5, write_sidecar_file=False,
-                 verbose=False, allow_static_mode=True, tests_directory=None):
-        self.root_src_dir = root_src_dir
+    def __init__(self, out_dir="stubs", max_doc_len=800, min_words=5,
+                 write_sidecar_file=False, verbose=False, dispatcher=None):
+        """
+        Args:
+            dispatcher (Optional[DocumentationPackageDispatcher]): supplies
+                package/module resolution (`root_module_name`, `dynamic_mode`)
+                and the per-run `sidecar`/`dependency_graph` accumulators.
+                Required for anything beyond pure, stateless helpers (e.g.
+                `stub_module`/`summarize_module` on a string of source you
+                already have); a `StubSummaryHandler` sets this for you.
+        """
         self.out_dir = out_dir
         self.max_doc_len = max_doc_len
         self.min_words = min_words
         self.write_sidecar_file = write_sidecar_file
-        self._module_stack = []
-        self._current_module = None
         self.verbose = verbose
-        self.dependency_blacklist = set(self.DEFAULT_DEPENDENCY_BLACKLIST)
-        self.allow_static_mode = allow_static_mode
-        self.tests_directory = tests_directory
+        self.dispatcher = dispatcher
 
+    # Package/module resolution -- and the state that comes with it
+    # (sidecar, dependency graph, dynamic-import status) -- lives on the
+    # dispatcher now; these just forward to it.
     @property
     def root_module_name(self):
-        return self._current_module.root_module_name
-    @property
-    def resolved_root_dir(self):
-        return self._current_module.resolved_root_dir
-    @property
-    def packages(self):
-        return self._current_module.packages
-    @property
-    def sidecar(self):
-        return self._current_module.sidecar
-    @property
-    def report(self):
-        return self._current_module.report
+        return self.dispatcher.root_module_name
     @property
     def dynamic_mode(self):
-        return self._current_module.dynamic_mode
+        return self.dispatcher.dynamic_mode
     @property
     def dependency_graph(self):
-        return self._current_module.dependency_graph
+        return self.dispatcher.dependency_graph
     @property
-    def usage_graph(self):
-        return self._current_module.usage_graph
+    def sidecar(self):
+        return self.dispatcher.sidecar
 
     # ==================================================================
     # Section 1: stub generation
@@ -606,19 +558,6 @@ ground truth.
             return node.id, attrs
         return None, []
 
-    def _dep_top_level_label(self, origin):
-        """The blacklist-checkable label for a resolved dotted origin:
-        the sibling top-level package name for internal (root_module_name-
-        prefixed) origins (e.g. 'McUtils.Numputils.VectorOps.norm' ->
-        'Numputils'), or the external package name otherwise (e.g.
-        'numpy.linalg.norm' -> 'numpy')."""
-        parts = origin.split(".") if origin else []
-        if not parts:
-            return origin
-        if parts[0] == self.root_module_name and len(parts) > 1:
-            return parts[1]
-        return parts[0]
-
     def _build_static_import_map(self, tree, current_package_dotted):
         """Map local names bound by import statements to a best-guess
         fully-qualified dotted origin, purely from the import statement
@@ -686,7 +625,7 @@ ground truth.
             return import_map.get(name)
 
         def is_wanted(origin):
-            return bool(origin) and self._dep_top_level_label(origin) not in self.dependency_blacklist
+            return bool(origin) and self.dispatcher._dep_top_level_label(origin) not in self.dispatcher.dependency_blacklist
 
         def collect_deps(node):
             deps = set()
@@ -741,7 +680,7 @@ ground truth.
             pkg_bucket = self.dependency_graph["packages"].setdefault(package_name, set())
             pkg_bucket.update(
                 label for d in module_deps
-                if (label := self._dep_top_level_label(d)) != package_name)
+                if (label := self.dispatcher._dep_top_level_label(d)) != package_name)
 
     def write_dependency_graph(self):
         """Write dependency_graph.json at the root of out_dir. See
@@ -755,182 +694,6 @@ ground truth.
         }
         payload = {"packages": packages_out, "entities": entities_out}
         path = os.path.join(self.out_dir, self.DEPENDENCY_GRAPH_FILENAME)
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(payload, f, indent=2, sort_keys=True)
-        return os.path.getsize(path)
-
-    # ------------------------------------------------------------------
-    # Examples extraction (McUtils.Docs.ExamplesParser) + usage graph
-    # ------------------------------------------------------------------
-
-    def locate_test_file(self, package_name, tests_directory):
-        """Mirrors McUtils.Docs.DocBuilder's `tests_directory` convention:
-        a flat directory containing one `<PackageName>Tests.py` file per
-        top-level package (e.g. `ci/tests/CombinatoricsTests.py`).
-        Returns None if tests_directory is falsy or the file doesn't
-        exist."""
-        if not tests_directory:
-            return None
-        path = os.path.join(
-            tests_directory, self.TEST_FILENAME_TEMPLATE.format(package_name=package_name))
-        return path if os.path.isfile(path) else None
-
-    def _build_test_file_import_context(self, tree):
-        """Like _build_static_import_map, but for a standalone test
-        file using absolute imports (test files aren't part of the
-        package tree, so relative-import resolution doesn't apply).
-        Also returns star_targets (dotted modules imported via `from X
-        import *`), since test files commonly do `from
-        McUtils.Combinatorics import *` and the names that brings in are
-        exactly the ones worth tracking in the usage graph."""
-        import_map = {}
-        star_targets = []
-        for node in ast.walk(tree):
-            if isinstance(node, ast.Import):
-                for alias in node.names:
-                    local = alias.asname or alias.name.split(".")[0]
-                    import_map[local] = alias.name
-            elif isinstance(node, ast.ImportFrom) and not node.level:
-                base = node.module or ""
-                for alias in node.names:
-                    if alias.name == "*":
-                        if base:
-                            star_targets.append(base)
-                        continue
-                    local = alias.asname or alias.name
-                    import_map[local] = f"{base}.{alias.name}" if base else alias.name
-        return import_map, star_targets
-
-    def _resolve_via_static_and_dynamic(self, name, import_map, star_targets):
-        """Resolve a bare name referenced in a test file to a
-        fully-qualified origin: first a static guess (direct import, or
-        -- only when dynamic_mode makes the target loaded -- membership
-        in a wildcard-imported module), then refined via live
-        introspection the same way record_module_dependencies does, so
-        re-export chains resolve to the class/function's true defining
-        module rather than wherever it happened to be imported from."""
-        origin = import_map.get(name)
-        if origin is None and self.dynamic_mode:
-            for star_base in star_targets:
-                mod = sys.modules.get(star_base)
-                if mod is not None and hasattr(mod, name):
-                    origin = f"{star_base}.{name}"
-                    break
-        if origin is None:
-            return None
-        if not self.dynamic_mode:
-            return origin
-
-        parts = origin.split(".")
-        for i in range(len(parts), 0, -1):
-            mod = sys.modules.get(".".join(parts[:i]))
-            if mod is None:
-                continue
-            obj = mod
-            for p in parts[i:]:
-                obj = getattr(obj, p, None)
-                if obj is None:
-                    break
-            if obj is not None:
-                mod_attr = getattr(obj, "__module__", None)
-                qual = getattr(obj, "__qualname__", None)
-                if mod_attr:
-                    return f"{mod_attr}.{qual}" if qual else mod_attr
-            break  # found the deepest loaded prefix; no point checking shorter ones
-        return origin
-
-    def build_usage_graph_for_package(self, package_name, parser):
-        """Combine ExamplesParser.functions_map (bare name -> example
-        names referencing it) with our own name resolution to produce
-        {fully_qualified_name: {example_ids}}, applying
-        self.dependency_blacklist exactly as record_module_dependencies
-        does. Does not mutate self.usage_graph -- caller merges it in,
-        so this can also be inspected/tested standalone."""
-        import_map, star_targets = self._build_test_file_import_context(parser.ast)
-        usage = {}
-        for bare_name, example_names in parser.functions_map.items():
-            origin = self._resolve_via_static_and_dynamic(bare_name, import_map, star_targets)
-            if not origin or self._dep_top_level_label(origin) in self.dependency_blacklist:
-                continue
-            example_ids = {f"{package_name}::{ex}" for ex in example_names}
-            usage.setdefault(origin, set()).update(example_ids)
-        return usage
-
-    def _write_examples(self, parser, examples_dir):
-        """Write each example (a `test_`-prefixed method, per
-        ExamplesParser) to its own file under examples_dir. Each file
-        reconstructs a minimal version of the original test class --
-        module-level setup, class-level setup (e.g. setUp, helper
-        classes), and just that one test method -- via ast.unparse
-        rather than raw text splicing, so indentation/assembly is
-        always correct. Returns the number of examples written."""
-        os.makedirs(examples_dir, exist_ok=True)
-        class_node, class_setup_nodes = parser.class_spec
-        base_setup_nodes = parser.setup
-        n_written = 0
-        for name, test_node in parser.functions.items():
-            new_class = ast.ClassDef(
-                name=class_node.name, bases=list(class_node.bases),
-                keywords=list(class_node.keywords),
-                body=list(class_setup_nodes) + [test_node], decorator_list=[])
-            module_node = ast.Module(body=list(base_setup_nodes) + [new_class], type_ignores=[])
-            ast.fix_missing_locations(module_node)
-            try:
-                source = ast.unparse(module_node)
-            except Exception:
-                continue
-            header = self.EXAMPLE_FILE_HEADER_TEMPLATE.format(
-                class_name=class_node.name, method_name=test_node.name)
-            out_path = os.path.join(
-                examples_dir, self.EXAMPLE_FILENAME_TEMPLATE.format(example_name=name))
-            with open(out_path, "w", encoding="utf-8") as f:
-                f.write(header + source + "\n")
-            n_written += 1
-        return n_written
-
-    def extract_examples(self, package_name, tests_directory=None):
-        """For one top-level package: locate its test file (see
-        locate_test_file), parse it with McUtils.Docs.ExamplesParser,
-        write each example under
-        <out_dir>/<root_module_name>/<package_name>/examples/, and
-        merge its usage into self.usage_graph. Safe to call even when
-        no test file exists, ExamplesParser isn't importable, or
-        parsing fails -- returns 0 and (for the latter two) prints a
-        warning rather than raising, since example extraction is a
-        best-effort bonus on top of the stubs/summaries, not something
-        that should block the rest of the pipeline.
-
-        Returns the number of examples written.
-        """
-        if tests_directory is None:
-            tests_directory = self.tests_directory
-        test_file = self.locate_test_file(package_name, tests_directory)
-        if test_file is None:
-            return 0
-
-        try:
-            parser = ExamplesParser.from_file(test_file)
-            _ = parser.functions  # trigger walk_tree() now so parse errors surface here
-        except Exception as e:
-            print(self.EXAMPLES_PARSE_ERROR_TEMPLATE.format(
-                package_name=package_name, test_file=test_file, error=e), file=sys.stderr)
-            return 0
-
-        examples_dir = os.path.join(self.out_dir, self.EXAMPLES_DIRNAME, package_name)
-        n_written = self._write_examples(parser, examples_dir)
-
-        usage = self.build_usage_graph_for_package(package_name, parser)
-        for origin, example_ids in usage.items():
-            self.usage_graph.setdefault(origin, set()).update(example_ids)
-
-        return n_written
-
-    def write_usage_graph(self):
-        """Write usage_graph.json at the root of out_dir: {fully
-        qualified name: [example ids that use it]}, blacklist-filtered
-        the same way as dependency_graph.json."""
-        payload = {name: sorted(ids) for name, ids in self.usage_graph.items()}
-        path = os.path.join(self.out_dir, self.USAGE_GRAPH_FILENAME)
         with open(path, "w", encoding="utf-8") as f:
             json.dump(payload, f, indent=2, sort_keys=True)
         return os.path.getsize(path)
@@ -1260,8 +1023,530 @@ ground truth.
         return len(sections)
 
     # ==================================================================
-    # Section 3: top-level package discovery via __all__
-    # ==================================================================
+    def write_llm_readme(self):
+        """Write LLM.md at the root of out_dir: an operating manual for
+        an LLM consuming this directory -- navigation order, what's real
+        vs. placeholder, and how to correctly read each of the lossy-
+        looking-but-actually-lossless compression tricks used in the
+        stubs (enum/constant-run collapsing, externalized data). This
+        matters because misreading those tricks (e.g. treating a
+        collapsed `_MEMBERS` dict as the real access pattern) would
+        actively mislead an LLM rather than just under-inform it."""
+        root = self.root_module_name or "this package"
+
+        sidecar_note = (
+            self.SIDECAR_PRESENT_NOTE_TEMPLATE.format(
+                sidecar_json_filename=self.SIDECAR_JSON_FILENAME,
+                sidecar_loader_filename=self.SIDECAR_LOADER_FILENAME)
+            if self.write_sidecar_file else
+            self.SIDECAR_ABSENT_NOTE
+        )
+
+        dependency_graph_note = self.DEPENDENCY_GRAPH_NOTE_TEMPLATE.format(
+            dependency_graph_filename=self.DEPENDENCY_GRAPH_FILENAME, root=root)
+
+        content = self.LLM_README_TEMPLATE.format(
+            root=root, sidecar_note=sidecar_note, truncation_marker=self.TRUNCATION_MARKER,
+            dependency_graph_note=dependency_graph_note)
+        with open(os.path.join(self.out_dir, self.LLM_README_FILENAME), "w", encoding="utf-8") as f:
+            f.write(content)
+
+
+    def write_index(self, report):
+        """Write summaries/index.md from a flat {package_name: info} report
+        (the shape StubSummaryHandler.parse() returns per package -- see
+        DocumentationPackageDispatcher for how per-handler results are
+        collected)."""
+        summaries_dir = os.path.join(self.out_dir, self.SUMMARIES_DIRNAME)
+        os.makedirs(summaries_dir, exist_ok=True)
+        lines = [
+            self.INDEX_HEADER_TEMPLATE.format(root_module_name=self.root_module_name),
+            self.INDEX_INTRO_TEMPLATE,
+        ]
+        for pkg_name, info in sorted(report.items()):
+            rel_summary = os.path.relpath(info["summary_file"], self.out_dir)
+            rel_stub = os.path.relpath(info["stub_dir"], self.out_dir)
+            pct = (100 * info["stub_bytes"] / info["orig_bytes"]) if info["orig_bytes"] else 0
+            lines.append(self.INDEX_ENTRY_TEMPLATE.format(
+                pkg_name=pkg_name, rel_summary=rel_summary,
+                n_sections=info["n_summary_sections"], rel_stub=rel_stub,
+                stub_bytes=info["stub_bytes"], pct=pct))
+        with open(os.path.join(summaries_dir, self.INDEX_FILENAME), "w", encoding="utf-8") as f:
+            f.write("\n".join(lines) + "\n")
+
+
+# ============================================================================
+# Package/module resolution + pluggable per-package handlers
+# ============================================================================
+#
+# `DocumentationPackageDispatcher` owns everything StubSummaryBuilder used to
+# own about *finding* packages/modules (discover_top_level_packages, the
+# ModuleData run-state, and the generate/generate_all/finalize orchestration
+# built on top of it) plus the dependency-blacklist config that's shared by
+# more than one artifact. It knows nothing about stubs, summaries, or
+# examples specifically -- that's entirely delegated to a set of
+# `PackageHandler` subclasses, so adding a new documentation artifact means
+# writing a new handler, not touching the dispatcher.
+
+class PackageHandler:
+    """Base class for one pluggable, per-package documentation artifact.
+
+    Lifecycle, per `DocumentationPackageDispatcher` run:
+      * one instance is constructed per handler *class* the dispatcher was
+        given, via ``HandlerCls(dispatcher)``;
+      * ``.parse(package_name, pkg_src_path)`` is called once per package
+        during ``dispatcher.generate(package_name)`` and returns whatever
+        "components" that handler produced for this package (a plain dict --
+        this is also where any files specific to *this one package* get
+        written, e.g. its stub tree or its extracted examples);
+      * once every package has been generated, ``.write(components)`` is
+        called once, at ``dispatcher.finalize()`` time, with
+        ``{package_name: <that package's parse() result>}`` for every
+        package processed so far -- this is where cross-package aggregation
+        happens (an index, a combined graph, a single sidecar file, ...).
+    """
+
+    #: short, unique key this handler's results are filed under in the
+    #: dispatcher's report: ``report[package_name][handler.name]``.
+    name: str = "base"
+
+    def __init__(self, dispatcher):
+        self.dispatcher = dispatcher
+
+    def parse(self, package_name, pkg_src_path):
+        """Do the per-package work; return this package's components."""
+        raise NotImplementedError
+
+    def write(self, components):
+        """Do the cross-package work, given every package's `parse()` result.
+
+        Args:
+            components: ``{package_name: {handler_name: parse()-result}}``
+                -- i.e. the dispatcher's full report, not just this
+                handler's slice of it (so a handler can, if it wants,
+                look at what a *different* handler produced).
+        """
+        raise NotImplementedError
+
+
+class StubSummaryHandler(PackageHandler):
+    """Generates per-module stubs + a per-package API summary during
+    `parse()`. At `write()` time -- once every package has been parsed --
+    writes the artifacts that depend on the full set having been built:
+    dependency_graph.json, the sidecar data file (if enabled),
+    summaries/index.md, and LLM.md.
+    """
+
+    name = "stub_summary"
+
+    def __init__(self, dispatcher, builder=None):
+        super().__init__(dispatcher)
+        self.builder = builder or StubSummaryBuilder(
+            dispatcher=dispatcher, out_dir=dispatcher.out_dir,
+            max_doc_len=dispatcher.max_doc_len, min_words=dispatcher.min_words,
+            write_sidecar_file=dispatcher.write_sidecar_file, verbose=dispatcher.verbose,
+        )
+
+    def parse(self, package_name, pkg_src_path):
+        builder = self.builder
+        summaries_dir = os.path.join(self.dispatcher.out_dir, builder.SUMMARIES_DIRNAME)
+        os.makedirs(summaries_dir, exist_ok=True)
+
+        pkg_stub_out = os.path.join(self.dispatcher.out_dir, self.dispatcher.root_module_name, package_name)
+        pkg_summary_out = os.path.join(
+            summaries_dir, builder.PACKAGE_SUMMARY_FILENAME_TEMPLATE.format(package_name=package_name))
+
+        if os.path.isdir(pkg_src_path):
+            stats = builder.stub_package(pkg_src_path, pkg_stub_out, package_name=package_name)
+        else:
+            os.makedirs(pkg_stub_out, exist_ok=True)
+            with open(pkg_src_path, "r", encoding="utf-8", errors="replace") as f:
+                source = f.read()
+            out_file = os.path.join(pkg_stub_out, os.path.basename(pkg_src_path))
+            dynamic_all = builder.resolve_dynamic_all(package_name, rel_path=None)
+            builder.record_module_dependencies(source, package_name, rel_path=None)
+            stubbed = builder.stub_module(source, package_name, dynamic_all=dynamic_all)
+            with open(out_file, "w", encoding="utf-8") as f:
+                f.write(stubbed)
+            stats = [(os.path.basename(pkg_src_path), len(source), len(stubbed))]
+
+        n_sections = builder.build_package_summary(pkg_stub_out, pkg_summary_out)
+
+        orig_total = sum(s[1] for s in stats)
+        stub_total = sum(s[2] for s in stats)
+        summary_size = os.path.getsize(pkg_summary_out)
+        return {
+            "stub_dir": pkg_stub_out,
+            "summary_file": pkg_summary_out,
+            "orig_bytes": orig_total,
+            "stub_bytes": stub_total,
+            "summary_bytes": summary_size,
+            "n_summary_sections": n_sections,
+        }
+
+    def write(self, components):
+        builder = self.builder
+        flat_report = {
+            pkg: info[self.name] for pkg, info in components.items() if self.name in info
+        }
+
+        sidecar_size = builder.write_sidecar_files()
+        dependency_graph_size = builder.write_dependency_graph()
+        builder.write_index(flat_report)
+        builder.write_llm_readme()
+
+        total_orig = sum(r["orig_bytes"] for r in flat_report.values())
+        total_stub = sum(r["stub_bytes"] for r in flat_report.values())
+        total_summary = sum(r["summary_bytes"] for r in flat_report.values())
+        if builder.verbose:
+            print(builder.SUMMARY_HEADER_TEMPLATE.format(
+                n_packages=len(flat_report), out_dir=self.dispatcher.out_dir))
+            if total_orig:
+                print(builder.SUMMARY_SOURCE_LINE_TEMPLATE.format(n=total_orig))
+                print(builder.SUMMARY_STUB_LINE_TEMPLATE.format(
+                    n=total_stub, pct=100 * total_stub / total_orig))
+                print(builder.SUMMARY_SUMMARY_LINE_TEMPLATE.format(
+                    n=total_summary, pct=100 * total_summary / total_orig))
+            if builder.write_sidecar_file:
+                print(builder.SUMMARY_SIDECAR_LINE_TEMPLATE.format(n=sidecar_size))
+
+        return {
+            "original_size": total_orig,
+            "stub_size": total_stub,
+            "sidecar_size": sidecar_size,
+            "summary_size": total_summary,
+            "dependency_graph_size": dependency_graph_size,
+        }
+
+
+class ExampleHandler(PackageHandler):
+    """Extracts runnable examples from each package's test file (see
+    `locate_test_file`) during `parse()`, writing each one under
+    `<out_dir>/examples/<package_name>/` immediately (there's no reason to
+    defer per-example writes -- they don't depend on any other package).
+    At `write()` time, writes the single aggregated usage_graph.json built
+    up across every package's examples.
+    """
+
+    name = "examples"
+
+    TEST_FILENAME_TEMPLATE = "{package_name}Tests.py"
+    EXAMPLES_DIRNAME = "examples"
+    EXAMPLE_FILENAME_TEMPLATE = "{example_name}.py"
+    USAGE_GRAPH_FILENAME = "usage_graph.json"
+    EXAMPLE_FILE_HEADER_TEMPLATE = (
+        '"""Extracted from {class_name}.{method_name} via '
+        'McUtils.Docs.ExamplesParser -- not the original file, and may '
+        'reference test-only setup/state. Run with: '
+        'python -m unittest {class_name}.{method_name}"""\n\n'
+    )
+    EXAMPLES_PARSER_UNAVAILABLE_WARNING = (
+        "[INFO] McUtils.Docs.ExamplesParser not importable -- skipping example extraction."
+    )
+    EXAMPLES_PARSE_ERROR_TEMPLATE = (
+        "[WARN] failed to parse tests for {package_name!r} ({test_file}): {error}"
+    )
+
+    def locate_test_file(self, package_name, tests_directory):
+        """Mirrors McUtils.Docs.DocBuilder's `tests_directory` convention:
+        a flat directory containing one `<PackageName>Tests.py` file per
+        top-level package (e.g. `ci/tests/CombinatoricsTests.py`).
+        Returns None if tests_directory is falsy or the file doesn't
+        exist."""
+        if not tests_directory:
+            return None
+        path = os.path.join(
+            tests_directory, self.TEST_FILENAME_TEMPLATE.format(package_name=package_name))
+        return path if os.path.isfile(path) else None
+
+    def _build_test_file_import_context(self, tree):
+        """Like StubSummaryBuilder._build_static_import_map, but for a
+        standalone test file using absolute imports (test files aren't part
+        of the package tree, so relative-import resolution doesn't apply).
+        Also returns star_targets (dotted modules imported via `from X
+        import *`), since test files commonly do `from
+        McUtils.Combinatorics import *` and the names that brings in are
+        exactly the ones worth tracking in the usage graph."""
+        import_map = {}
+        star_targets = []
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                for alias in node.names:
+                    local = alias.asname or alias.name.split(".")[0]
+                    import_map[local] = alias.name
+            elif isinstance(node, ast.ImportFrom) and not node.level:
+                base = node.module or ""
+                for alias in node.names:
+                    if alias.name == "*":
+                        if base:
+                            star_targets.append(base)
+                        continue
+                    local = alias.asname or alias.name
+                    import_map[local] = f"{base}.{alias.name}" if base else alias.name
+        return import_map, star_targets
+
+    def _resolve_via_static_and_dynamic(self, name, import_map, star_targets):
+        """Resolve a bare name referenced in a test file to a
+        fully-qualified origin: first a static guess (direct import, or
+        -- only when dynamic_mode makes the target loaded -- membership
+        in a wildcard-imported module), then refined via live
+        introspection the same way StubSummaryBuilder.record_module_
+        dependencies does, so re-export chains resolve to the class/
+        function's true defining module rather than wherever it happened
+        to be imported from."""
+        dynamic_mode = self.dispatcher.dynamic_mode
+        origin = import_map.get(name)
+        if origin is None and dynamic_mode:
+            for star_base in star_targets:
+                mod = sys.modules.get(star_base)
+                if mod is not None and hasattr(mod, name):
+                    origin = f"{star_base}.{name}"
+                    break
+        if origin is None:
+            return None
+        if not dynamic_mode:
+            return origin
+
+        parts = origin.split(".")
+        for i in range(len(parts), 0, -1):
+            mod = sys.modules.get(".".join(parts[:i]))
+            if mod is None:
+                continue
+            obj = mod
+            for p in parts[i:]:
+                obj = getattr(obj, p, None)
+                if obj is None:
+                    break
+            if obj is not None:
+                mod_attr = getattr(obj, "__module__", None)
+                qual = getattr(obj, "__qualname__", None)
+                if mod_attr:
+                    return f"{mod_attr}.{qual}" if qual else mod_attr
+            break  # found the deepest loaded prefix; no point checking shorter ones
+        return origin
+
+    def build_usage_graph_for_package(self, package_name, parser):
+        """Combine ExamplesParser.functions_map (bare name -> example
+        names referencing it) with our own name resolution to produce
+        {fully_qualified_name: {example_ids}}, applying the dispatcher's
+        dependency_blacklist exactly as record_module_dependencies does.
+        Does not mutate dispatcher.usage_graph -- caller merges it in, so
+        this can also be inspected/tested standalone."""
+        import_map, star_targets = self._build_test_file_import_context(parser.ast)
+        usage = {}
+        for bare_name, example_names in parser.functions_map.items():
+            origin = self._resolve_via_static_and_dynamic(bare_name, import_map, star_targets)
+            if not origin or self.dispatcher._dep_top_level_label(origin) in self.dispatcher.dependency_blacklist:
+                continue
+            example_ids = {f"{package_name}::{ex}" for ex in example_names}
+            usage.setdefault(origin, set()).update(example_ids)
+        return usage
+
+    def _write_examples(self, parser, examples_dir):
+        """Write each example (a `test_`-prefixed method, per
+        ExamplesParser) to its own file under examples_dir. Each file
+        reconstructs a minimal version of the original test class --
+        module-level setup, class-level setup (e.g. setUp, helper
+        classes), and just that one test method -- via ast.unparse
+        rather than raw text splicing, so indentation/assembly is
+        always correct. Returns the number of examples written."""
+        os.makedirs(examples_dir, exist_ok=True)
+        class_node, class_setup_nodes = parser.class_spec
+        base_setup_nodes = parser.setup
+        n_written = 0
+        for name, test_node in parser.functions.items():
+            new_class = ast.ClassDef(
+                name=class_node.name, bases=list(class_node.bases),
+                keywords=list(class_node.keywords),
+                body=list(class_setup_nodes) + [test_node], decorator_list=[])
+            module_node = ast.Module(body=list(base_setup_nodes) + [new_class], type_ignores=[])
+            ast.fix_missing_locations(module_node)
+            try:
+                source = ast.unparse(module_node)
+            except Exception:
+                continue
+            header = self.EXAMPLE_FILE_HEADER_TEMPLATE.format(
+                class_name=class_node.name, method_name=test_node.name)
+            out_path = os.path.join(
+                examples_dir, self.EXAMPLE_FILENAME_TEMPLATE.format(example_name=name))
+            with open(out_path, "w", encoding="utf-8") as f:
+                f.write(header + source + "\n")
+            n_written += 1
+        return n_written
+
+    def extract_examples(self, package_name, tests_directory=None):
+        """For one top-level package: locate its test file (see
+        locate_test_file), parse it with McUtils.Docs.ExamplesParser,
+        write each example under
+        <out_dir>/examples/<package_name>/, and merge its usage into
+        dispatcher.usage_graph. Safe to call even when no test file
+        exists, ExamplesParser isn't importable, or parsing fails --
+        returns 0 and (for the latter two) prints a warning rather than
+        raising, since example extraction is a best-effort bonus on top
+        of the stubs/summaries, not something that should block the rest
+        of the pipeline.
+
+        Returns the number of examples written.
+        """
+        if tests_directory is None:
+            tests_directory = self.dispatcher.tests_directory
+        test_file = self.locate_test_file(package_name, tests_directory)
+        if test_file is None:
+            return 0
+
+        try:
+            parser = ExamplesParser.from_file(test_file)
+            _ = parser.functions  # trigger walk_tree() now so parse errors surface here
+        except Exception as e:
+            print(self.EXAMPLES_PARSE_ERROR_TEMPLATE.format(
+                package_name=package_name, test_file=test_file, error=e), file=sys.stderr)
+            return 0
+
+        examples_dir = os.path.join(self.dispatcher.out_dir, self.EXAMPLES_DIRNAME, package_name)
+        n_written = self._write_examples(parser, examples_dir)
+
+        usage = self.build_usage_graph_for_package(package_name, parser)
+        for origin, example_ids in usage.items():
+            self.dispatcher.usage_graph.setdefault(origin, set()).update(example_ids)
+
+        return n_written
+
+    def write_usage_graph(self):
+        """Write usage_graph.json at the root of out_dir: {fully
+        qualified name: [example ids that use it]}, blacklist-filtered
+        the same way as dependency_graph.json."""
+        payload = {name: sorted(ids) for name, ids in self.dispatcher.usage_graph.items()}
+        path = os.path.join(self.dispatcher.out_dir, self.USAGE_GRAPH_FILENAME)
+        with open(path, "w", encoding="utf-8") as f:
+            json.dump(payload, f, indent=2, sort_keys=True)
+        return os.path.getsize(path)
+
+    def parse(self, package_name, pkg_src_path):
+        if self.dispatcher.tests_directory is None:
+            return {"n_examples": 0}
+        return {"n_examples": self.extract_examples(package_name)}
+
+    def write(self, components):
+        return {"usage_graph_size": self.write_usage_graph()}
+
+
+class DocumentationPackageDispatcher:
+    """Owns package/module resolution -- discovering a root module's
+    top-level packages, and the per-run state that comes with that
+    (sidecar data, dependency/usage graphs, the accumulated report) -- and
+    drives a set of `PackageHandler`s over it. Each handler is responsible
+    for one independent documentation artifact; by default that's stubs
+    +summaries (`StubSummaryHandler`) and extracted examples
+    (`ExampleHandler`), but any `PackageHandler` subclass can be added or
+    swapped in via `handlers`.
+
+    Parameters
+    ----------
+    root_src_dir : str or None
+        Path to the root module's source directory (the folder
+        containing its __init__.py). If None, the root module must be
+        importable and its location is resolved from that import.
+    out_dir : str
+        Output directory handed to every handler.
+    max_doc_len, min_words, write_sidecar_file : see StubSummaryBuilder --
+        forwarded to the default StubSummaryHandler's builder.
+    tests_directory : str or None
+        Forwarded to ExampleHandler; if None, example extraction is skipped.
+    handlers : iterable of PackageHandler subclasses, optional
+        Defaults to `(StubSummaryHandler, ExampleHandler)`. Each is
+        instantiated as `HandlerCls(self)`.
+    """
+
+    INIT_FILENAME = "__init__.py"
+
+    STDLIB_BLACKLIST_PACKAGES = frozenset(getattr(sys, "stdlib_module_names", ())) | frozenset({"builtins"})
+    COMMON_THIRD_PARTY_BLACKLIST_PACKAGES = frozenset(TemplateHandler.blacklist_packages)
+    DEFAULT_DEPENDENCY_BLACKLIST = STDLIB_BLACKLIST_PACKAGES | COMMON_THIRD_PARTY_BLACKLIST_PACKAGES
+
+    IMPORT_FALLBACK_INFO_TEMPLATE = (
+        "[INFO] real import of {root_module_name!r} failed ({error}); "
+        "falling back to static __all__ parsing."
+    )
+    NO_PACKAGES_DISCOVERED_ERROR = (
+        "No packages discovered yet -- call discover_top_level_packages(root_module_name) "
+        "first, or pass root_module_name to generate()."
+    )
+    PACKAGE_NOT_FOUND_ERROR_TEMPLATE = (
+        "{package_name!r} not found among discovered top-level packages: {available}"
+    )
+    NO_TOP_LEVEL_PACKAGES_ERROR_TEMPLATE = (
+        "No top-level packages discovered for {root_module_name!r} -- "
+        "check that its __init__.py defines/builds __all__."
+    )
+    ROOT_DIR_NOT_FOUND_ERROR = (
+        "Could not locate the root module's source directory -- "
+        "set root_src_dir explicitly."
+    )
+
+    DEFAULT_HANDLERS = (StubSummaryHandler, ExampleHandler)
+
+    def __init__(self, root_src_dir=None, out_dir="stubs",
+                 max_doc_len=800, min_words=5, write_sidecar_file=False,
+                 verbose=False, allow_static_mode=True, tests_directory=None,
+                 handlers=None):
+        self.root_src_dir = root_src_dir
+        self.out_dir = out_dir
+        self.max_doc_len = max_doc_len
+        self.min_words = min_words
+        self.write_sidecar_file = write_sidecar_file
+        self.verbose = verbose
+        self.allow_static_mode = allow_static_mode
+        self.tests_directory = tests_directory
+        self._module_stack = []
+        self._current_module = None
+        self.dependency_blacklist = set(self.DEFAULT_DEPENDENCY_BLACKLIST)
+
+        handler_classes = handlers if handlers is not None else self.DEFAULT_HANDLERS
+        self.handlers = {h.name: h(self) for h in handler_classes}
+
+    @property
+    def root_module_name(self):
+        return self._current_module.root_module_name
+    @property
+    def resolved_root_dir(self):
+        return self._current_module.resolved_root_dir
+    @property
+    def packages(self):
+        return self._current_module.packages
+    @property
+    def sidecar(self):
+        return self._current_module.sidecar
+    @property
+    def report(self):
+        return self._current_module.report
+    @property
+    def dynamic_mode(self):
+        return self._current_module.dynamic_mode
+    @property
+    def dependency_graph(self):
+        return self._current_module.dependency_graph
+    @property
+    def usage_graph(self):
+        return self._current_module.usage_graph
+
+    def _dep_top_level_label(self, origin):
+        """The blacklist-checkable label for a resolved dotted origin:
+        the sibling top-level package name for internal (root_module_name-
+        prefixed) origins (e.g. 'McUtils.Numputils.VectorOps.norm' ->
+        'Numputils'), or the external package name otherwise (e.g.
+        'numpy.linalg.norm' -> 'numpy'). Shared by every handler that
+        needs blacklist-aware name resolution (dependency graph, usage
+        graph, ...)."""
+        parts = origin.split(".") if origin else []
+        if not parts:
+            return origin
+        if parts[0] == self.root_module_name and len(parts) > 1:
+            return parts[1]
+        return parts[0]
+
+    # ------------------------------------------------------------------
+    # Top-level package discovery via __all__
+    # ------------------------------------------------------------------
 
     def _static_all_from_init(self, init_path):
         try:
@@ -1318,7 +1603,7 @@ ground truth.
                         module = importlib.import_module(root_module_name)
                         all_names = list(getattr(module, "__all__", []) or [])
                         resolved_root_dir = os.path.dirname(os.path.abspath(module.__file__))
-                    except (ImportError,AttributeError) as e:
+                    except (ImportError, AttributeError) as e:
                         print(self.IMPORT_FALLBACK_INFO_TEMPLATE.format(
                             root_module_name=root_module_name, error=e), file=sys.stderr)
 
@@ -1341,9 +1626,9 @@ ground truth.
 
         return root_module_name, resolved_root_dir, discovered, dynamic
 
-    # ==================================================================
-    # Section 4: orchestration
-    # ==================================================================
+    # ------------------------------------------------------------------
+    # Orchestration
+    # ------------------------------------------------------------------
 
     class ModuleData:
         def __init__(self, parent, module_name, module_dir, packages, dynamic_mode):
@@ -1364,11 +1649,13 @@ ground truth.
         def __exit__(self, exc_type, exc_val, exc_tb):
             self.parent._current_module = self.parent._module_stack.pop()
 
-
     def generate(self, package_name, root_module_name=None, update_current=False):
+        """Resolve `package_name`'s source path and run every handler's
+        `.parse()` over it, filing each handler's returned components
+        under `self.report[package_name][handler.name]`."""
         if update_current or self._current_module is None:
-            root_module_name, root_dir, packages, dyanmic_mode = self.discover_top_level_packages(root_module_name)
-            module_data = self.ModuleData(self, package_name, root_dir, packages, dyanmic_mode)
+            root_module_name, root_dir, packages, dynamic_mode = self.discover_top_level_packages(root_module_name)
+            module_data = self.ModuleData(self, root_module_name, root_dir, packages, dynamic_mode)
         else:
             module_data = self._current_module
         with module_data:
@@ -1379,157 +1666,30 @@ ground truth.
                     package_name=package_name, available=sorted(self.packages)))
 
             pkg_src_path = self.packages[package_name]
-            summaries_dir = os.path.join(self.out_dir, self.SUMMARIES_DIRNAME)
-            os.makedirs(summaries_dir, exist_ok=True)
-
-            pkg_stub_out = os.path.join(self.out_dir, self.root_module_name, package_name)
-            pkg_summary_out = os.path.join(
-                summaries_dir, self.PACKAGE_SUMMARY_FILENAME_TEMPLATE.format(package_name=package_name))
-
-            if os.path.isdir(pkg_src_path):
-                stats = self.stub_package(pkg_src_path, pkg_stub_out, package_name=package_name)
-            else:
-                os.makedirs(pkg_stub_out, exist_ok=True)
-                with open(pkg_src_path, "r", encoding="utf-8", errors="replace") as f:
-                    source = f.read()
-                out_file = os.path.join(pkg_stub_out, os.path.basename(pkg_src_path))
-                dynamic_all = self.resolve_dynamic_all(package_name, rel_path=None)
-                self.record_module_dependencies(source, package_name, rel_path=None)
-                stubbed = self.stub_module(source, package_name, dynamic_all=dynamic_all)
-                with open(out_file, "w", encoding="utf-8") as f:
-                    f.write(stubbed)
-                stats = [(os.path.basename(pkg_src_path), len(source), len(stubbed))]
-
-            n_sections = self.build_package_summary(pkg_stub_out, pkg_summary_out)
-
-            n_examples = 0
-            if self.tests_directory is not None:
-                n_examples = self.extract_examples(package_name)
-
-            orig_total = sum(s[1] for s in stats)
-            stub_total = sum(s[2] for s in stats)
-            summary_size = os.path.getsize(pkg_summary_out)
-            info = {
-                "stub_dir": pkg_stub_out,
-                "summary_file": pkg_summary_out,
-                "orig_bytes": orig_total,
-                "stub_bytes": stub_total,
-                "summary_bytes": summary_size,
-                "n_summary_sections": n_sections,
-                "n_examples": n_examples,
+            components = {
+                name: handler.parse(package_name, pkg_src_path)
+                for name, handler in self.handlers.items()
             }
-        return info
+            self.report[package_name] = components
+        return components
 
     def generate_all(self, root_module_name):
-        root_module_name, root_dir, packages, dyanmic_mode = self.discover_top_level_packages(root_module_name)
-        with self.ModuleData(self, root_module_name, root_dir, packages, dyanmic_mode):
+        """Discover every top-level package under `root_module_name`,
+        `.generate()` each one, then `.finalize()`."""
+        root_module_name, root_dir, packages, dynamic_mode = self.discover_top_level_packages(root_module_name)
+        with self.ModuleData(self, root_module_name, root_dir, packages, dynamic_mode):
             if not self.packages:
                 raise ValueError(self.NO_TOP_LEVEL_PACKAGES_ERROR_TEMPLATE.format(
                     root_module_name=root_module_name))
 
             for package_name in sorted(self.packages):
-                info = self.generate(package_name)
-                self.report[package_name] = info
+                self.generate(package_name)
             summary = self.finalize()
             info = self.report
         return info, summary
 
-    def write_llm_readme(self):
-        """Write LLM.md at the root of out_dir: an operating manual for
-        an LLM consuming this directory -- navigation order, what's real
-        vs. placeholder, and how to correctly read each of the lossy-
-        looking-but-actually-lossless compression tricks used in the
-        stubs (enum/constant-run collapsing, externalized data). This
-        matters because misreading those tricks (e.g. treating a
-        collapsed `_MEMBERS` dict as the real access pattern) would
-        actively mislead an LLM rather than just under-inform it."""
-        root = self.root_module_name or "this package"
-
-        sidecar_note = (
-            self.SIDECAR_PRESENT_NOTE_TEMPLATE.format(
-                sidecar_json_filename=self.SIDECAR_JSON_FILENAME,
-                sidecar_loader_filename=self.SIDECAR_LOADER_FILENAME)
-            if self.write_sidecar_file else
-            self.SIDECAR_ABSENT_NOTE
-        )
-
-        dependency_graph_note = self.DEPENDENCY_GRAPH_NOTE_TEMPLATE.format(
-            dependency_graph_filename=self.DEPENDENCY_GRAPH_FILENAME, root=root)
-
-        content = self.LLM_README_TEMPLATE.format(
-            root=root, sidecar_note=sidecar_note, truncation_marker=self.TRUNCATION_MARKER,
-            dependency_graph_note=dependency_graph_note)
-        with open(os.path.join(self.out_dir, self.LLM_README_FILENAME), "w", encoding="utf-8") as f:
-            f.write(content)
-
-
     def finalize(self):
-        sidecar_size = self.write_sidecar_files()
-        self.write_index()
-        dependency_graph_size = self.write_dependency_graph()
-        usage_graph_size = self.write_usage_graph()
-        self.write_llm_readme()
-
-        total_orig = sum(r["orig_bytes"] for r in self.report.values())
-        total_stub = sum(r["stub_bytes"] for r in self.report.values())
-        total_summary = sum(r["summary_bytes"] for r in self.report.values())
-        if self.verbose:
-            print(self.SUMMARY_HEADER_TEMPLATE.format(n_packages=len(self.report), out_dir=self.out_dir))
-            if total_orig:
-                print(self.SUMMARY_SOURCE_LINE_TEMPLATE.format(n=total_orig))
-                print(self.SUMMARY_STUB_LINE_TEMPLATE.format(
-                    n=total_stub, pct=100 * total_stub / total_orig))
-                print(self.SUMMARY_SUMMARY_LINE_TEMPLATE.format(
-                    n=total_summary, pct=100 * total_summary / total_orig))
-            if self.write_sidecar_file:
-                print(self.SUMMARY_SIDECAR_LINE_TEMPLATE.format(n=sidecar_size))
-        summary = {
-            'original_size': total_orig,
-            'stub_size': total_stub,
-            'sidecar_size': sidecar_size,
-            'summary_size': total_summary,
-            'dependency_graph_size': dependency_graph_size,
-            'usage_graph_size': usage_graph_size,
-        }
-        return summary
-
-    def write_index(self):
-        summaries_dir = os.path.join(self.out_dir, self.SUMMARIES_DIRNAME)
-        os.makedirs(summaries_dir, exist_ok=True)
-        lines = [
-            self.INDEX_HEADER_TEMPLATE.format(root_module_name=self.root_module_name),
-            self.INDEX_INTRO_TEMPLATE,
-        ]
-        for pkg_name, info in sorted(self.report.items()):
-            rel_summary = os.path.relpath(info["summary_file"], self.out_dir)
-            rel_stub = os.path.relpath(info["stub_dir"], self.out_dir)
-            pct = (100 * info["stub_bytes"] / info["orig_bytes"]) if info["orig_bytes"] else 0
-            lines.append(self.INDEX_ENTRY_TEMPLATE.format(
-                pkg_name=pkg_name, rel_summary=rel_summary,
-                n_sections=info["n_summary_sections"], rel_stub=rel_stub,
-                stub_bytes=info["stub_bytes"], pct=pct))
-        with open(os.path.join(summaries_dir, self.INDEX_FILENAME), "w", encoding="utf-8") as f:
-            f.write("\n".join(lines) + "\n")
-
-# def main():
-#     import argparse
-#     ap = argparse.ArgumentParser(description=__doc__)
-#     ap.add_argument("root_module_name", help="e.g. McUtils")
-#     ap.add_argument("--src-dir", default=None,
-#                      help="Path to the root module's source directory "
-#                           "(the folder containing its __init__.py). If "
-#                           "omitted, the module must be importable.")
-#     ap.add_argument("--out-dir", default="stubs")
-#     ap.add_argument("--max-doc-len", type=int, default=800)
-#     ap.add_argument("--min-words", type=int, default=5)
-#     ap.add_argument("--write-sidecar-file", action="store_true",
-#                      help="Also write a raw _registry_data.json with the "
-#                           "full externalized data (off by default -- key/"
-#                           "shape summaries stay inline either way).")
-#     args = ap.parse_args()
-#
-#     builder = StubSummaryBuilder(
-#         root_src_dir=args.src_dir, out_dir=args.out_dir,
-#         max_doc_len=args.max_doc_len, min_words=args.min_words,
-#         write_sidecar_file=args.write_sidecar_file)
-#     builder.generate_all(args.root_module_name)
+        """Call every handler's `.write()` with the full accumulated
+        report (`{package_name: {handler_name: parse()-result}}`), so each
+        handler can do its own cross-package aggregation."""
+        return {name: handler.write(self.report) for name, handler in self.handlers.items()}
