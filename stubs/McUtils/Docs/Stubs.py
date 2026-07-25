@@ -32,7 +32,23 @@ import sys
 from .. import Devutils as dev
 from ..Formatters import TemplateHandler
 from .ExamplesParser import ExamplesParser
-__all__ = ['StubSummaryBuilder']
+__all__ = ['StubSummaryBuilder', 'PackageHandler', 'StubSummaryHandler', 'ExampleHandler', 'DocumentationPackageDispatcher']
+
+def default_exclude(qualname: str, package_name=None) -> bool:
+    """Default `exclude` predicate shared by `StubSummaryBuilder`,
+    `StubSummaryHandler`, and `ExampleHandler`. True if any dotted
+    component of `qualname` (a class name or a function/method name in its
+    path, e.g. `Widget` or `spin` in `Widget.spin`) starts with an
+    underscore -- private names, private classes and everything under
+    them, and other dunders (`__eq__`, `__repr__`, ...) -- except
+    `__init__`, which is exempted since it's routinely the most useful
+    method to document.
+
+    (Deliberately duplicated from `Docstrings.default_exclude` rather than
+    imported from there, since `Docstrings` already imports `PackageHandler`
+    from this module -- importing back would be circular.)
+    """
+    ...
 
 class StubSummaryBuilder:
     """
@@ -79,35 +95,38 @@ class StubSummaryBuilder:
     _MEMBERS = {'DATA_SIDECAR_THRESHOLD': 400, 'SUMMARIES_DIRNAME': 'summaries', 'INDEX_FILENAME': 'index.md', 'LLM_README_FILENAME': 'LLM.md', 'INIT_FILENAME': '__init__.py', 'PACKAGE_SUMMARY_FILENAME_TEMPLATE': '{package_name}.md', 'SIDECAR_MODULE_NAME': '_registry_data'}
     SIDECAR_JSON_FILENAME = SIDECAR_MODULE_NAME + '.json'
     SIDECAR_LOADER_FILENAME = SIDECAR_MODULE_NAME + '.py'
-    "Real access pattern: StubSummaryBuilder.<AttrName> (7 class attributes, e.g. StubSummaryBuilder.SIDECAR_LOADER_FUNC_NAME == '_load_registry_data'). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:"
-    _MEMBERS = {'SIDECAR_LOADER_FUNC_NAME': '_load_registry_data', 'DEPENDENCY_GRAPH_FILENAME': 'dependency_graph.json', 'EXAMPLES_DIRNAME': 'examples', 'USAGE_GRAPH_FILENAME': 'usage_graph.json', 'TEST_FILENAME_TEMPLATE': '{package_name}Tests.py', 'EXAMPLE_FILENAME_TEMPLATE': '{example_name}.py', 'EXAMPLE_FILE_HEADER_TEMPLATE': '"""Extracted from {class_name}.{method_name} via McUtils.Docs.ExamplesParser -- not the original file, and may reference test-only setup/state. Run with: python -m unittest {class_name}.{method_name}"""\n\n'}
-    STDLIB_BLACKLIST_PACKAGES = frozenset(getattr(sys, 'stdlib_module_names', ())) | frozenset({'builtins'})
-    COMMON_THIRD_PARTY_BLACKLIST_PACKAGES = frozenset(TemplateHandler.blacklist_packages)
-    DEFAULT_DEPENDENCY_BLACKLIST = STDLIB_BLACKLIST_PACKAGES | COMMON_THIRD_PARTY_BLACKLIST_PACKAGES
-    "Real access pattern: StubSummaryBuilder.<AttrName> (32 class attributes, e.g. StubSummaryBuilder.TRUNCATION_MARKER == '*(truncated — see stub for full docstring)*'). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:"
-    _MEMBERS = {'TRUNCATION_MARKER': '*(truncated — see stub for full docstring)*', 'ENUM_ACCESS_NOTE_TEMPLATE': 'Real access pattern: {cname}.<MemberName> (this is an enum with {n_members} members, e.g. {cname}.{member_name} == {member_value}). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:', 'CLASS_ATTR_ACCESS_NOTE_TEMPLATE': 'Real access pattern: {cname}.<AttrName> ({n_members} class attributes, e.g. {cname}.{member_name} == {member_value}). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:', 'MODULE_SCALAR_ACCESS_NOTE_TEMPLATE': 'Real access pattern: bare module-level names (e.g. {member_name} == {member_value}), not a dict lookup. {n_members} names collapsed below purely for compactness:', 'EXTERNALIZED_DATA_NOTE_TEMPLATE': '{name} data externalized to {sidecar_json_filename} ({key_description})', 'OMITTED_DATA_NOTE_TEMPLATE': '{name} data omitted from this build ({key_description})', 'DESCRIBE_DICT_SMALL_TEMPLATE': '{n} keys: {keys!r}', 'DESCRIBE_DICT_LARGE_TEMPLATE': '{n} keys, first {max_listed}: {sample!r} ... and {remaining} more', 'DESCRIBE_LIST_SMALL_TEMPLATE': '{n} items: {items!r}', 'DESCRIBE_LIST_LARGE_TEMPLATE': '{n} items of type {elem_type}, first {sample_n}: {sample!r} ... and {remaining} more', 'DESCRIBE_SCALAR_TEMPLATE': 'a single {type_name} value', 'SIDECAR_LOADER_TEMPLATE': '"""Auto-generated loader for data externalized from stubbed modules (see StubSummaryBuilder.py)."""\nimport json, os\n_DATA_PATH = os.path.join(os.path.dirname(__file__), {sidecar_json_filename!r})\nwith open(_DATA_PATH, \'r\', encoding=\'utf-8\') as _f:\n    _DATA = json.load(_f)\n\ndef {loader_func_name}(key):\n    return _DATA[key]\n', 'INDEX_HEADER_TEMPLATE': '# {root_module_name} -- stub/summary index\n', 'INDEX_INTRO_TEMPLATE': "Read this file first to find the right package, then open that package's summary for its classes/functions, then the stub file only when you need the exact calling convention.\n", 'INDEX_ENTRY_TEMPLATE': '- **{pkg_name}** -- summary: `{rel_summary}` ({n_sections} modules) | stubs: `{rel_stub}` ({stub_bytes:,} bytes, {pct:.0f}% of source)', 'SIDECAR_PRESENT_NOTE_TEMPLATE': 'The real values live in `{sidecar_json_filename}` at the root of this directory (see `{sidecar_loader_filename}` for the loader function each affected stub imports).', 'SIDECAR_ABSENT_NOTE': 'The real values are NOT included anywhere in this directory at all -- only their keys/shape. If you need an actual value, say so rather than guessing one.', 'DEPENDENCY_GRAPH_NOTE_TEMPLATE': '`{dependency_graph_filename}` (at the root of this directory) maps which packages, classes, methods, and functions depend on which others -- both within `{root}` and on external packages (stdlib and a handful of very common third-party packages are excluded as noise). Use it to trace connections between parts of the codebase before writing an example that spans more than one package, or to find everything that uses a particular class or method. Resolution is best-effort static analysis, refined by live introspection where possible -- treat it as a strong hint, not a guarantee, especially for dynamic or conditional imports.', 'LLM_README_TEMPLATE': '# {root} -- how to use this directory\n\nThis is a **compressed, LLM-oriented reference** for the `{root}` codebase,\ngenerated from its real source. It is NOT the library itself: nothing here\nis meant to be imported or run as the real package. Use it to find out what\nexists and how to call it correctly, then write code against the real\n`{root}` package -- not against this directory.\n\n## Read in this order\n\n1. **`summaries/index.md`** -- one line per top-level package: what it\'s\n   for, how many modules it has, and where its summary/stubs live. Start\n   here to pick the right package.\n2. **`summaries/<package>.md`** -- every public class/function/method in\n   that package, with its exact call signature (parameter names and\n   defaults, no type annotations) and a short one-line purpose. This is\n   usually enough to write a correct call or import.\n3. **`{root}/<package>/<module>.py`** -- the full stub for one module:\n   real signatures, real docstrings (see caveats below), nothing\n   abbreviated further. Open this when the summary line isn\'t enough --\n   you need the full docstring, an edge case, or something the summary\n   truncated.\n\nDo not skip straight to step 3 for everything -- the summaries exist so you\nusually don\'t have to.\n\n## What\'s real vs. placeholder in the stub files\n\n- **Signatures** (parameter names, defaults, `*args`/`**kwargs`) are exact\n  copies of the real source.\n- **Docstrings** are the real docstrings. Class docstrings are capped at\n  their first paragraph (truncated ones are marked -- see "Compression\n  tricks" below); everything else is complete.\n- **Function/method bodies are placeholders** (`...`). They carry no\n  information about real behavior, return values, or edge cases -- never\n  infer runtime behavior from a stub body. The docstring is the only\n  source of behavioral information here; if it doesn\'t say, this\n  directory doesn\'t know either.\n- **`__all__`** (however it\'s constructed in the real source -- plain\n  assignment, `+=` accumulation, etc.) is preserved exactly, so each\n  stubbed module\'s real export list is accurate.\n\n## Compression tricks -- how to read them correctly\n\nThese exist purely to cut size; none of them drop information, but\nmisreading the compact form as the real API would be actively wrong:\n\n- **Enum-style / flat constant runs.** A class with many one-line members\n  (e.g. an `enum.Enum` with dozens of values) is collapsed into a single\n  `_MEMBERS = {{...}}` dict, immediately preceded by a comment stating the\n  REAL access pattern, e.g. `SomeEnum.Primary`, not\n  `SomeEnum._MEMBERS[\'Primary\']`. **Always follow that comment\'s stated\n  access pattern** -- the dict is a compact data table, not the calling\n  convention.\n- **Large literal data** (big lookup tables, constant dictionaries). When\n  a top-level literal is large, its value is replaced with a comment\n  describing its keys/shape (e.g. `1069 keys: [\'Hydrogen1\', \'Hydrogen2\', ...]`)\n  so you know what\'s queryable without the full payload inflating this\n  directory. {sidecar_note}\n- **Truncated class docstrings** end with the marker\n  `{truncation_marker}`. There is genuinely more\n  text in the real source that isn\'t reproduced anywhere in this\n  directory -- if the missing part matters, say you don\'t have it rather\n  than guessing at what follows.\n\n## Cross-package dependencies\n\n{dependency_graph_note}\n\n## Freshness\n\nThis is a point-in-time snapshot. It can drift out of date relative to the\nreal `{root}` source. If you need current, authoritative behavior (not\njust "does this function/class exist and roughly how do I call it"),\nverify against the real source rather than treating this directory as\nground truth.\n', 'SUMMARY_HEADER_TEMPLATE': '{n_packages} top-level packages processed under {out_dir!r}.', 'SUMMARY_SOURCE_LINE_TEMPLATE': '  source:     {n:,} bytes', 'SUMMARY_STUB_LINE_TEMPLATE': '  stubs:      {n:,} bytes ({pct:.1f}% of source)', 'SUMMARY_SUMMARY_LINE_TEMPLATE': '  summaries:  {n:,} bytes ({pct:.1f}% of source)', 'SUMMARY_SIDECAR_LINE_TEMPLATE': '  sidecar:    {n:,} bytes', 'SYNTAX_ERROR_WARNING_TEMPLATE': '[WARN] syntax error, copying as-is: {rel_path}: {error}', 'IMPORT_FALLBACK_INFO_TEMPLATE': '[INFO] real import of {root_module_name!r} failed ({error}); falling back to static __all__ parsing.', 'EXAMPLES_PARSER_UNAVAILABLE_WARNING': '[INFO] McUtils.Docs.ExamplesParser not importable -- skipping example extraction.', 'EXAMPLES_PARSE_ERROR_TEMPLATE': '[WARN] failed to parse tests for {package_name!r} ({test_file}): {error}', 'NO_PACKAGES_DISCOVERED_ERROR': 'No packages discovered yet -- call discover_top_level_packages(root_module_name) first, or pass root_module_name to generate().', 'PACKAGE_NOT_FOUND_ERROR_TEMPLATE': '{package_name!r} not found among discovered top-level packages: {available}', 'NO_TOP_LEVEL_PACKAGES_ERROR_TEMPLATE': 'No top-level packages discovered for {root_module_name!r} -- check that its __init__.py defines/builds __all__.', 'ROOT_DIR_NOT_FOUND_ERROR': "Could not locate the root module's source directory -- set root_src_dir explicitly."}
+    "Real access pattern: StubSummaryBuilder.<AttrName> (27 class attributes, e.g. StubSummaryBuilder.SIDECAR_LOADER_FUNC_NAME == '_load_registry_data'). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:"
+    _MEMBERS = {'SIDECAR_LOADER_FUNC_NAME': '_load_registry_data', 'DEPENDENCY_GRAPH_FILENAME': 'dependency_graph.json', 'TRUNCATION_MARKER': '*(truncated — see stub for full docstring)*', 'ENUM_ACCESS_NOTE_TEMPLATE': 'Real access pattern: {cname}.<MemberName> (this is an enum with {n_members} members, e.g. {cname}.{member_name} == {member_value}). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:', 'CLASS_ATTR_ACCESS_NOTE_TEMPLATE': 'Real access pattern: {cname}.<AttrName> ({n_members} class attributes, e.g. {cname}.{member_name} == {member_value}). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:', 'MODULE_SCALAR_ACCESS_NOTE_TEMPLATE': 'Real access pattern: bare module-level names (e.g. {member_name} == {member_value}), not a dict lookup. {n_members} names collapsed below purely for compactness:', 'EXTERNALIZED_DATA_NOTE_TEMPLATE': '{name} data externalized to {sidecar_json_filename} ({key_description})', 'OMITTED_DATA_NOTE_TEMPLATE': '{name} data omitted from this build ({key_description})', 'DESCRIBE_DICT_SMALL_TEMPLATE': '{n} keys: {keys!r}', 'DESCRIBE_DICT_LARGE_TEMPLATE': '{n} keys, first {max_listed}: {sample!r} ... and {remaining} more', 'DESCRIBE_LIST_SMALL_TEMPLATE': '{n} items: {items!r}', 'DESCRIBE_LIST_LARGE_TEMPLATE': '{n} items of type {elem_type}, first {sample_n}: {sample!r} ... and {remaining} more', 'DESCRIBE_SCALAR_TEMPLATE': 'a single {type_name} value', 'SIDECAR_LOADER_TEMPLATE': '"""Auto-generated loader for data externalized from stubbed modules (see StubSummaryBuilder.py)."""\nimport json, os\n_DATA_PATH = os.path.join(os.path.dirname(__file__), {sidecar_json_filename!r})\nwith open(_DATA_PATH, \'r\', encoding=\'utf-8\') as _f:\n    _DATA = json.load(_f)\n\ndef {loader_func_name}(key):\n    return _DATA[key]\n', 'INDEX_HEADER_TEMPLATE': '# {root_module_name} -- stub/summary index\n', 'INDEX_INTRO_TEMPLATE': "Read this file first to find the right package, then open that package's summary for its classes/functions, then the stub file only when you need the exact calling convention.\n", 'INDEX_ENTRY_TEMPLATE': '- **{pkg_name}** -- summary: `{rel_summary}` ({n_sections} modules) | stubs: `{rel_stub}` ({stub_bytes:,} bytes, {pct:.0f}% of source)', 'SIDECAR_PRESENT_NOTE_TEMPLATE': 'The real values live in `{sidecar_json_filename}` at the root of this directory (see `{sidecar_loader_filename}` for the loader function each affected stub imports).', 'SIDECAR_ABSENT_NOTE': 'The real values are NOT included anywhere in this directory at all -- only their keys/shape. If you need an actual value, say so rather than guessing one.', 'DEPENDENCY_GRAPH_NOTE_TEMPLATE': '`{dependency_graph_filename}` (at the root of this directory) maps which packages, classes, methods, and functions depend on which others -- both within `{root}` and on external packages (stdlib and a handful of very common third-party packages are excluded as noise). Use it to trace connections between parts of the codebase before writing an example that spans more than one package, or to find everything that uses a particular class or method. Resolution is best-effort static analysis, refined by live introspection where possible -- treat it as a strong hint, not a guarantee, especially for dynamic or conditional imports.', 'LLM_README_TEMPLATE': '# {root} -- how to use this directory\n\nThis is a **compressed, LLM-oriented reference** for the `{root}` codebase,\ngenerated from its real source. It is NOT the library itself: nothing here\nis meant to be imported or run as the real package. Use it to find out what\nexists and how to call it correctly, then write code against the real\n`{root}` package -- not against this directory.\n\n## Read in this order\n\n1. **`summaries/index.md`** -- one line per top-level package: what it\'s\n   for, how many modules it has, and where its summary/stubs live. Start\n   here to pick the right package.\n2. **`summaries/<package>.md`** -- every public class/function/method in\n   that package, with its exact call signature (parameter names and\n   defaults, no type annotations) and a short one-line purpose. This is\n   usually enough to write a correct call or import.\n3. **`{root}/<package>/<module>.py`** -- the full stub for one module:\n   real signatures, real docstrings (see caveats below), nothing\n   abbreviated further. Open this when the summary line isn\'t enough --\n   you need the full docstring, an edge case, or something the summary\n   truncated.\n\nDo not skip straight to step 3 for everything -- the summaries exist so you\nusually don\'t have to.\n\n## What\'s real vs. placeholder in the stub files\n\n- **Signatures** (parameter names, defaults, `*args`/`**kwargs`) are exact\n  copies of the real source.\n- **Docstrings** are the real docstrings. Class docstrings are capped at\n  their first paragraph (truncated ones are marked -- see "Compression\n  tricks" below); everything else is complete.\n- **Function/method bodies are placeholders** (`...`). They carry no\n  information about real behavior, return values, or edge cases -- never\n  infer runtime behavior from a stub body. The docstring is the only\n  source of behavioral information here; if it doesn\'t say, this\n  directory doesn\'t know either.\n- **`__all__`** (however it\'s constructed in the real source -- plain\n  assignment, `+=` accumulation, etc.) is preserved exactly, so each\n  stubbed module\'s real export list is accurate.\n\n## Compression tricks -- how to read them correctly\n\nThese exist purely to cut size; none of them drop information, but\nmisreading the compact form as the real API would be actively wrong:\n\n- **Enum-style / flat constant runs.** A class with many one-line members\n  (e.g. an `enum.Enum` with dozens of values) is collapsed into a single\n  `_MEMBERS = {{...}}` dict, immediately preceded by a comment stating the\n  REAL access pattern, e.g. `SomeEnum.Primary`, not\n  `SomeEnum._MEMBERS[\'Primary\']`. **Always follow that comment\'s stated\n  access pattern** -- the dict is a compact data table, not the calling\n  convention.\n- **Large literal data** (big lookup tables, constant dictionaries). When\n  a top-level literal is large, its value is replaced with a comment\n  describing its keys/shape (e.g. `1069 keys: [\'Hydrogen1\', \'Hydrogen2\', ...]`)\n  so you know what\'s queryable without the full payload inflating this\n  directory. {sidecar_note}\n- **Truncated class docstrings** end with the marker\n  `{truncation_marker}`. There is genuinely more\n  text in the real source that isn\'t reproduced anywhere in this\n  directory -- if the missing part matters, say you don\'t have it rather\n  than guessing at what follows.\n\n## Cross-package dependencies\n\n{dependency_graph_note}\n\n## Freshness\n\nThis is a point-in-time snapshot. It can drift out of date relative to the\nreal `{root}` source. If you need current, authoritative behavior (not\njust "does this function/class exist and roughly how do I call it"),\nverify against the real source rather than treating this directory as\nground truth.\n', 'SUMMARY_HEADER_TEMPLATE': '{n_packages} top-level packages processed under {out_dir!r}.', 'SUMMARY_SOURCE_LINE_TEMPLATE': '  source:     {n:,} bytes', 'SUMMARY_STUB_LINE_TEMPLATE': '  stubs:      {n:,} bytes ({pct:.1f}% of source)', 'SUMMARY_SUMMARY_LINE_TEMPLATE': '  summaries:  {n:,} bytes ({pct:.1f}% of source)', 'SUMMARY_SIDECAR_LINE_TEMPLATE': '  sidecar:    {n:,} bytes', 'SYNTAX_ERROR_WARNING_TEMPLATE': '[WARN] syntax error, copying as-is: {rel_path}: {error}'}
 
-    def __init__(self, root_src_dir=None, out_dir='stubs', max_doc_len=800, min_words=5, write_sidecar_file=False, verbose=False, allow_static_mode=True, tests_directory=None):
+    def __init__(self, out_dir='stubs', max_doc_len=800, min_words=5, write_sidecar_file=False, verbose=False, dispatcher=None, filter=None, exclude=default_exclude):
+        """
+        Args:
+            dispatcher (Optional[DocumentationPackageDispatcher]): supplies
+                package/module resolution (`root_module_name`, `dynamic_mode`)
+                and the per-run `sidecar`/`dependency_graph` accumulators.
+                Required for anything beyond pure, stateless helpers (e.g.
+                `stub_module`/`summarize_module` on a string of source you
+                already have); a `StubSummaryHandler` sets this for you.
+            filter: optional ``(qualname, package_name) -> bool``. Only
+                affects the API *summary* (`summarize_module`/
+                `summarize_class`) -- stub files always preserve every
+                real function/class verbatim. If given, only qualnames for
+                which this returns True are included; ``None`` (default)
+                applies no filter.
+            exclude: optional ``(qualname, package_name) -> bool``,
+                inverted from `filter` -- matching qualnames are left out
+                of the summary. Defaults to :func:`default_exclude`; pass
+                ``None`` to disable.
+        """
+        ...
+
+    def wanted(self, qualname, package_name=None):
+        """True if `qualname` should appear in the API summary, given this
+        builder's `filter`/`exclude`. Has no effect on stub generation."""
         ...
 
     @property
     def root_module_name(self):
-        ...
-
-    @property
-    def resolved_root_dir(self):
-        ...
-
-    @property
-    def packages(self):
-        ...
-
-    @property
-    def sidecar(self):
-        ...
-
-    @property
-    def report(self):
         ...
 
     @property
@@ -119,7 +138,7 @@ class StubSummaryBuilder:
         ...
 
     @property
-    def usage_graph(self):
+    def sidecar(self):
         ...
 
     def _is_scalar_assign(self, node):
@@ -199,14 +218,6 @@ class StubSummaryBuilder:
         with a call or subscript)."""
         ...
 
-    def _dep_top_level_label(self, origin):
-        """The blacklist-checkable label for a resolved dotted origin:
-        the sibling top-level package name for internal (root_module_name-
-        prefixed) origins (e.g. 'McUtils.Numputils.VectorOps.norm' ->
-        'Numputils'), or the external package name otherwise (e.g.
-        'numpy.linalg.norm' -> 'numpy')."""
-        ...
-
     def _build_static_import_map(self, tree, current_package_dotted):
         """Map local names bound by import statements to a best-guess
         fully-qualified dotted origin, purely from the import statement
@@ -232,75 +243,6 @@ class StubSummaryBuilder:
     def write_dependency_graph(self):
         """Write dependency_graph.json at the root of out_dir. See
         record_module_dependencies for how entries are determined."""
-        ...
-
-    def locate_test_file(self, package_name, tests_directory):
-        """Mirrors McUtils.Docs.DocBuilder's `tests_directory` convention:
-        a flat directory containing one `<PackageName>Tests.py` file per
-        top-level package (e.g. `ci/tests/CombinatoricsTests.py`).
-        Returns None if tests_directory is falsy or the file doesn't
-        exist."""
-        ...
-
-    def _build_test_file_import_context(self, tree):
-        """Like _build_static_import_map, but for a standalone test
-        file using absolute imports (test files aren't part of the
-        package tree, so relative-import resolution doesn't apply).
-        Also returns star_targets (dotted modules imported via `from X
-        import *`), since test files commonly do `from
-        McUtils.Combinatorics import *` and the names that brings in are
-        exactly the ones worth tracking in the usage graph."""
-        ...
-
-    def _resolve_via_static_and_dynamic(self, name, import_map, star_targets):
-        """Resolve a bare name referenced in a test file to a
-        fully-qualified origin: first a static guess (direct import, or
-        -- only when dynamic_mode makes the target loaded -- membership
-        in a wildcard-imported module), then refined via live
-        introspection the same way record_module_dependencies does, so
-        re-export chains resolve to the class/function's true defining
-        module rather than wherever it happened to be imported from."""
-        ...
-
-    def build_usage_graph_for_package(self, package_name, parser):
-        """Combine ExamplesParser.functions_map (bare name -> example
-        names referencing it) with our own name resolution to produce
-        {fully_qualified_name: {example_ids}}, applying
-        self.dependency_blacklist exactly as record_module_dependencies
-        does. Does not mutate self.usage_graph -- caller merges it in,
-        so this can also be inspected/tested standalone."""
-        ...
-
-    def _write_examples(self, parser, examples_dir):
-        """Write each example (a `test_`-prefixed method, per
-        ExamplesParser) to its own file under examples_dir. Each file
-        reconstructs a minimal version of the original test class --
-        module-level setup, class-level setup (e.g. setUp, helper
-        classes), and just that one test method -- via ast.unparse
-        rather than raw text splicing, so indentation/assembly is
-        always correct. Returns the number of examples written."""
-        ...
-
-    def extract_examples(self, package_name, tests_directory=None):
-        """For one top-level package: locate its test file (see
-        locate_test_file), parse it with McUtils.Docs.ExamplesParser,
-        write each example under
-        <out_dir>/<root_module_name>/<package_name>/examples/, and
-        merge its usage into self.usage_graph. Safe to call even when
-        no test file exists, ExamplesParser isn't importable, or
-        parsing fails -- returns 0 and (for the latter two) prints a
-        warning rather than raising, since example extraction is a
-        best-effort bonus on top of the stubs/summaries, not something
-        that should block the rest of the pipeline.
-
-        Returns the number of examples written.
-        """
-        ...
-
-    def write_usage_graph(self):
-        """Write usage_graph.json at the root of out_dir: {fully
-        qualified name: [example ids that use it]}, blacklist-filtered
-        the same way as dependency_graph.json."""
         ...
 
     def stub_function(self, node):
@@ -333,13 +275,292 @@ class StubSummaryBuilder:
     def _signature_for(self, node, in_class=False):
         ...
 
-    def summarize_class(self, node, indent='  '):
+    def summarize_class(self, node, indent='  ', package_name=None, qualname_prefix=None):
         ...
 
-    def summarize_module(self, path, rel_path):
+    def summarize_module(self, path, rel_path, package_name=None):
         ...
 
-    def build_package_summary(self, src_dir, out_file):
+    def build_package_summary(self, src_dir, out_file, package_name=None):
+        ...
+
+    def write_llm_readme(self):
+        """Write LLM.md at the root of out_dir: an operating manual for
+        an LLM consuming this directory -- navigation order, what's real
+        vs. placeholder, and how to correctly read each of the lossy-
+        looking-but-actually-lossless compression tricks used in the
+        stubs (enum/constant-run collapsing, externalized data). This
+        matters because misreading those tricks (e.g. treating a
+        collapsed `_MEMBERS` dict as the real access pattern) would
+        actively mislead an LLM rather than just under-inform it."""
+        ...
+
+    def write_index(self, report):
+        """Write summaries/index.md from a flat {package_name: info} report
+        (the shape StubSummaryHandler.parse() returns per package -- see
+        DocumentationPackageDispatcher for how per-handler results are
+        collected)."""
+        ...
+
+class PackageHandler:
+    """Base class for one pluggable, per-package documentation artifact.
+
+    Lifecycle, per `DocumentationPackageDispatcher` run:
+      * one instance is constructed per handler *class* the dispatcher was
+        given, via ``HandlerCls(dispatcher)``;
+      * ``.parse(package_name, pkg_src_path)`` is called once per package
+        during ``dispatcher.generate(package_name)`` and returns whatever
+        "components" that handler produced for this package (a plain dict --
+        this is also where any files specific to *this one package* get
+        written, e.g. its stub tree or its extracted examples);
+      * once every package has been generated, ``.write(components)`` is
+        called once, at ``dispatcher.finalize()`` time, with
+        ``{package_name: <that package's parse() result>}`` for every
+        package processed so far -- this is where cross-package aggregation
+        happens (an index, a combined graph, a single sidecar file, ...).
+    """
+    name: str = 'base'
+
+    def __init__(self, dispatcher):
+        ...
+
+    def parse(self, package_name, pkg_src_path):
+        """Do the per-package work; return this package's components."""
+        ...
+
+    def write(self, components):
+        """Do the cross-package work, given every package's `parse()` result.
+
+        Args:
+            components: ``{package_name: {handler_name: parse()-result}}``
+                -- i.e. the dispatcher's full report, not just this
+                handler's slice of it (so a handler can, if it wants,
+                look at what a *different* handler produced).
+        """
+        ...
+
+class StubSummaryHandler(PackageHandler):
+    """Generates per-module stubs + a per-package API summary during
+    `parse()`. At `write()` time -- once every package has been parsed --
+    writes the artifacts that depend on the full set having been built:
+    dependency_graph.json, the sidecar data file (if enabled),
+    summaries/index.md, and LLM.md.
+    """
+    name = 'stub_summary'
+
+    def __init__(self, dispatcher, builder=None, filter=None, exclude=default_exclude):
+        """
+        Args:
+            filter: optional ``(qualname, package_name) -> bool`` forwarded
+                to the builder -- only affects which functions/classes
+                appear in the API *summary*; stub files always preserve
+                every real function/class. Defaults to ``None`` (no
+                filtering).
+            exclude: optional ``(qualname, package_name) -> bool``
+                forwarded to the builder. Defaults to
+                :func:`default_exclude`; pass ``None`` to disable.
+        """
+        ...
+
+    def parse(self, package_name, pkg_src_path):
+        ...
+
+    def write(self, components):
+        ...
+
+class ExampleHandler(PackageHandler):
+    """Extracts runnable examples from each package's test file (see
+    `locate_test_file`) during `parse()`, writing each one under
+    `<out_dir>/examples/<package_name>/` immediately (there's no reason to
+    defer per-example writes -- they don't depend on any other package).
+    At `write()` time, writes the single aggregated usage_graph.json built
+    up across every package's examples.
+    """
+    name = 'examples'
+
+    def __init__(self, dispatcher, filter=None, exclude=default_exclude):
+        """
+        Args:
+            filter: optional ``(qualname, package_name) -> bool``, checked
+                against ``"{TestClassName}.{test_method_name}"``. If
+                given, only matching examples are written at all; ``None``
+                (default) applies no filter.
+            exclude: optional ``(qualname, package_name) -> bool``,
+                inverted from `filter`. Defaults to :func:`default_exclude`;
+                pass ``None`` to disable.
+        """
+        ...
+
+    def wanted(self, qualname, package_name=None):
+        """True if `qualname` (a ``"{TestClass}.{test_method}"`` name)
+        should actually be written as an example, given this handler's
+        `filter`/`exclude`."""
+        ...
+    "Real access pattern: ExampleHandler.<AttrName> (7 class attributes, e.g. ExampleHandler.TEST_FILENAME_TEMPLATE == '{package_name}Tests.py'). Collapsed into a dict below purely for compactness -- do not index it as a dict in real code:"
+    _MEMBERS = {'TEST_FILENAME_TEMPLATE': '{package_name}Tests.py', 'EXAMPLES_DIRNAME': 'examples', 'EXAMPLE_FILENAME_TEMPLATE': '{example_name}.py', 'USAGE_GRAPH_FILENAME': 'usage_graph.json', 'EXAMPLE_FILE_HEADER_TEMPLATE': '"""Extracted from {class_name}.{method_name} via McUtils.Docs.ExamplesParser -- not the original file, and may reference test-only setup/state. Run with: python -m unittest {class_name}.{method_name}"""\n\n', 'EXAMPLES_PARSER_UNAVAILABLE_WARNING': '[INFO] McUtils.Docs.ExamplesParser not importable -- skipping example extraction.', 'EXAMPLES_PARSE_ERROR_TEMPLATE': '[WARN] failed to parse tests for {package_name!r} ({test_file}): {error}'}
+
+    def locate_test_file(self, package_name, tests_directory):
+        """Mirrors McUtils.Docs.DocBuilder's `tests_directory` convention:
+        a flat directory containing one `<PackageName>Tests.py` file per
+        top-level package (e.g. `ci/tests/CombinatoricsTests.py`).
+        Returns None if tests_directory is falsy or the file doesn't
+        exist."""
+        ...
+
+    def _build_test_file_import_context(self, tree):
+        """Like StubSummaryBuilder._build_static_import_map, but for a
+        standalone test file using absolute imports (test files aren't part
+        of the package tree, so relative-import resolution doesn't apply).
+        Also returns star_targets (dotted modules imported via `from X
+        import *`), since test files commonly do `from
+        McUtils.Combinatorics import *` and the names that brings in are
+        exactly the ones worth tracking in the usage graph."""
+        ...
+
+    def _resolve_via_static_and_dynamic(self, name, import_map, star_targets):
+        """Resolve a bare name referenced in a test file to a
+        fully-qualified origin: first a static guess (direct import, or
+        -- only when dynamic_mode makes the target loaded -- membership
+        in a wildcard-imported module), then refined via live
+        introspection the same way StubSummaryBuilder.record_module_
+        dependencies does, so re-export chains resolve to the class/
+        function's true defining module rather than wherever it happened
+        to be imported from."""
+        ...
+
+    def build_usage_graph_for_package(self, package_name, parser):
+        """Combine ExamplesParser.functions_map (bare name -> example
+        names referencing it) with our own name resolution to produce
+        {fully_qualified_name: {example_ids}}, applying the dispatcher's
+        dependency_blacklist exactly as record_module_dependencies does.
+        Does not mutate dispatcher.usage_graph -- caller merges it in, so
+        this can also be inspected/tested standalone."""
+        ...
+
+    def _write_examples(self, parser, examples_dir, package_name=None):
+        """Write each example (a `test_`-prefixed method, per
+        ExamplesParser) to its own file under examples_dir -- except any
+        whose ``"{TestClass}.{test_method}"`` name this handler's
+        `filter`/`exclude` rules out, which are skipped entirely (not
+        written, not counted). Each file reconstructs a minimal version of
+        the original test class -- module-level setup, class-level setup
+        (e.g. setUp, helper classes), and just that one test method -- via
+        ast.unparse rather than raw text splicing, so indentation/assembly
+        is always correct.
+
+        Returns (n_written, written_ids) -- written_ids is the set of
+        `name` keys (as used in `parser.functions`) actually written, so
+        the caller can keep the usage graph consistent with what's on
+        disk."""
+        ...
+
+    def extract_examples(self, package_name, tests_directory=None):
+        """For one top-level package: locate its test file (see
+        locate_test_file), parse it with McUtils.Docs.ExamplesParser,
+        write each example under
+        <out_dir>/examples/<package_name>/, and merge its usage into
+        dispatcher.usage_graph. Safe to call even when no test file
+        exists, ExamplesParser isn't importable, or parsing fails --
+        returns 0 and (for the latter two) prints a warning rather than
+        raising, since example extraction is a best-effort bonus on top
+        of the stubs/summaries, not something that should block the rest
+        of the pipeline.
+
+        Returns the number of examples written.
+        """
+        ...
+
+    def write_usage_graph(self):
+        """Write usage_graph.json at the root of out_dir: {fully
+        qualified name: [example ids that use it]}, blacklist-filtered
+        the same way as dependency_graph.json."""
+        ...
+
+    def parse(self, package_name, pkg_src_path):
+        ...
+
+    def write(self, components):
+        ...
+
+class DocumentationPackageDispatcher:
+    """Owns package/module resolution -- discovering a root module's
+    top-level packages, and the per-run state that comes with that
+    (sidecar data, dependency/usage graphs, the accumulated report) -- and
+    drives a set of `PackageHandler`s over it. Each handler is responsible
+    for one independent documentation artifact; by default that's stubs
+    +summaries (`StubSummaryHandler`) and extracted examples
+    (`ExampleHandler`), but any `PackageHandler` subclass can be added or
+    swapped in via `handlers`.
+
+    Parameters
+    ----------
+    root_src_dir : str or None
+        Path to the root module's source directory (the folder
+        containing its __init__.py). If None, the root module must be
+        importable and its location is resolved from that import.
+    out_dir : str
+        Output directory handed to every handler.
+    max_doc_len, min_words, write_sidecar_file : see StubSummaryBuilder --
+        forwarded to the default StubSummaryHandler's builder.
+    tests_directory : str or None
+        Forwarded to ExampleHandler; if None, example extraction is skipped.
+    handlers : iterable of PackageHandler subclasses, optional
+        Defaults to `(StubSummaryHandler, ExampleHandler)`. Each is
+        instantiated as `HandlerCls(self)`.
+    """
+    INIT_FILENAME = '__init__.py'
+    STDLIB_BLACKLIST_PACKAGES = frozenset(getattr(sys, 'stdlib_module_names', ())) | frozenset({'builtins'})
+    COMMON_THIRD_PARTY_BLACKLIST_PACKAGES = frozenset(TemplateHandler.blacklist_packages)
+    DEFAULT_DEPENDENCY_BLACKLIST = STDLIB_BLACKLIST_PACKAGES | COMMON_THIRD_PARTY_BLACKLIST_PACKAGES
+    IMPORT_FALLBACK_INFO_TEMPLATE = '[INFO] real import of {root_module_name!r} failed ({error}); falling back to static __all__ parsing.'
+    PACKAGE_NOT_FOUND_ERROR_TEMPLATE = '{package_name!r} not found among discovered top-level packages: {available}'
+    NO_TOP_LEVEL_PACKAGES_ERROR_TEMPLATE = 'No top-level packages discovered for {root_module_name!r} -- check that its __init__.py defines/builds __all__.'
+    ROOT_DIR_NOT_FOUND_ERROR = "Could not locate the root module's source directory -- set root_src_dir explicitly."
+    DEFAULT_HANDLERS = (StubSummaryHandler, ExampleHandler)
+
+    def __init__(self, root_src_dir=None, out_dir='stubs', max_doc_len=800, min_words=5, write_sidecar_file=False, verbose=False, allow_static_mode=True, tests_directory=None, handlers=None):
+        ...
+
+    @property
+    def root_module_name(self):
+        ...
+
+    @property
+    def resolved_root_dir(self):
+        ...
+
+    @property
+    def packages(self):
+        ...
+
+    @property
+    def sidecar(self):
+        ...
+
+    @property
+    def report(self):
+        ...
+
+    @property
+    def dynamic_mode(self):
+        ...
+
+    @property
+    def dependency_graph(self):
+        ...
+
+    @property
+    def usage_graph(self):
+        ...
+
+    def _dep_top_level_label(self, origin):
+        """The blacklist-checkable label for a resolved dotted origin:
+        the sibling top-level package name for internal (root_module_name-
+        prefixed) origins (e.g. 'McUtils.Numputils.VectorOps.norm' ->
+        'Numputils'), or the external package name otherwise (e.g.
+        'numpy.linalg.norm' -> 'numpy'). Shared by every handler that
+        needs blacklist-aware name resolution (dependency graph, usage
+        graph, ...)."""
         ...
 
     def _static_all_from_init(self, init_path):
@@ -360,24 +581,18 @@ class StubSummaryBuilder:
             ...
 
     def generate(self, package_name, root_module_name=None, update_current=False):
+        """Resolve `package_name`'s source path and run every handler's
+        `.parse()` over it, filing each handler's returned components
+        under `self.report[package_name][handler.name]`."""
         ...
 
     def generate_all(self, root_module_name):
-        ...
-
-    def write_llm_readme(self):
-        """Write LLM.md at the root of out_dir: an operating manual for
-        an LLM consuming this directory -- navigation order, what's real
-        vs. placeholder, and how to correctly read each of the lossy-
-        looking-but-actually-lossless compression tricks used in the
-        stubs (enum/constant-run collapsing, externalized data). This
-        matters because misreading those tricks (e.g. treating a
-        collapsed `_MEMBERS` dict as the real access pattern) would
-        actively mislead an LLM rather than just under-inform it."""
+        """Discover every top-level package under `root_module_name`,
+        `.generate()` each one, then `.finalize()`."""
         ...
 
     def finalize(self):
-        ...
-
-    def write_index(self):
+        """Call every handler's `.write()` with the full accumulated
+        report (`{package_name: {handler_name: parse()-result}}`), so each
+        handler can do its own cross-package aggregation."""
         ...

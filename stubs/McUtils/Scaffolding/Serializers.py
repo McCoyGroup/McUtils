@@ -1460,7 +1460,7 @@ def undictify_lists(tree: dict):
     """
     ...
 
-def unflatten_tree(serial_tree, unprep_tree=True):
+def unflatten_tree(serial_tree, unprep_tree=True, max_leaf_elements=None, block_pointers=None, prefix_filter=None):
     """
     **LLM Docstring**
 
@@ -1498,7 +1498,7 @@ def write_flat_tree(file, tree, flatten=None, allow_pickle=False, writer=None, *
     """
     ...
 
-def read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False, **reader_options):
+def read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False, max_leaf_elements=None, prefix_filter=None, **reader_options):
     """
     **LLM Docstring**
 

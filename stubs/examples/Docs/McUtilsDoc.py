@@ -3,7 +3,7 @@
 from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.Docs import *
-import os, inspect
+import os, inspect, sys
 
 class DocsTests(TestCase):
     """

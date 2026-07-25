@@ -24,8 +24,6 @@
 - `numba_decorator(*args, method=None, warn=False, **kwargs)`
 - `type_spec(t, warn=False)`
 - `import_from_numba(name, default)`
-  - **class `_noop_context`**
-    - `__init__(*args, **kwargs)`
 
 ### `Symbolics.py`
   - **class `ASTUtils`**

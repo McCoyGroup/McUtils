@@ -3116,6 +3116,356 @@
       ],
       "kind": "method"
     },
+    "McUtils.Docs.Docstrings.BadDescription": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringQAField"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.DocstringDataAnalyzer.__init__": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringData"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringDataAnalyzer._check_description": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringData",
+        "McUtils.Docs.Docstrings.DocstringQAField",
+        "McUtils.Docs.Docstrings.MissingDescription",
+        "McUtils.Docs.Docstrings.MissingShortDescription",
+        "McUtils.Docs.Docstrings.ShortDescriptionTooLong"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringDataAnalyzer._check_examples": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringData",
+        "McUtils.Docs.Docstrings.DocstringQAField",
+        "McUtils.Docs.Docstrings.HasExamples"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringDataAnalyzer._check_links": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringData",
+        "McUtils.Docs.Docstrings.DocstringQAField",
+        "McUtils.Docs.Docstrings.HasLinks"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringDataAnalyzer._check_related": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringData",
+        "McUtils.Docs.Docstrings.DocstringQAField",
+        "McUtils.Docs.Docstrings.HasRelated"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringDataAnalyzer._check_return_values": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringData",
+        "McUtils.Docs.Docstrings.DocstringQAField",
+        "McUtils.Docs.Docstrings.MissingReturnType",
+        "McUtils.Docs.Docstrings.MissingReturnValue"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringDataAnalyzer._check_stale_parameters": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringData",
+        "McUtils.Docs.Docstrings.DocstringQAField",
+        "McUtils.Docs.Docstrings.StaleParameter",
+        "McUtils.Docs.Docstrings.StaleParameterType",
+        "McUtils.Docs.Docstrings._normalize_type",
+        "McUtils.Docs.Docstrings._signature_param_names"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringDataAnalyzer._check_undocumented_parameters": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringData",
+        "McUtils.Docs.Docstrings.DocstringQAField",
+        "McUtils.Docs.Docstrings.MissingParameterDescription",
+        "McUtils.Docs.Docstrings.MissingParameterType"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringDataAnalyzer.analyze_docstring_quality": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringQAField"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringDataAnalyzer.get_analyses": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.is_list_like"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringParser.__init__": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringDialectHandler",
+        "McUtils.Docs.Docstrings.default_exclude",
+        "McUtils.Docs.Docstrings.resolve_dialect"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringParser.parse_file": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.read_file",
+        "McUtils.Docs.Docstrings.DocstringData"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringParser.parse_source": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringData",
+        "McUtils.Docs.Docstrings._has_docstring_node",
+        "McUtils.Docs.Docstrings._iter_funcs",
+        "McUtils.Docs.Docstrings.detect_dialect"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringWriter": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.DocstringWriter.__init__": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringDialectHandler",
+        "McUtils.Docs.Docstrings.resolve_dialect"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringWriter._format_block": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringData"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringWriter._handler_for": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringData",
+        "McUtils.Docs.Docstrings.DocstringDialectHandler",
+        "McUtils.Docs.Docstrings.resolve_dialect"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringWriter.verify_code_identity": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings._strip_docstrings"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringWriter.write_file": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.default",
+        "McUtils.Devutils.is_default",
+        "McUtils.Devutils.read_file",
+        "McUtils.Devutils.write_file",
+        "McUtils.Docs.Docstrings.DocstringData"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringWriter.write_source": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringData",
+        "McUtils.Docs.Docstrings._has_docstring_node",
+        "McUtils.Docs.Docstrings._header_end_line",
+        "McUtils.Docs.Docstrings._iter_funcs"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringsHandler": {
+      "depends_on": [
+        "McUtils.Docs.Stubs.PackageHandler"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.DocstringsHandler.__init__": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringParser",
+        "McUtils.Docs.Docstrings.default_exclude"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringsHandler._issue_to_json": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringQAField"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.DocstringsHandler._score_file": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.read_file",
+        "McUtils.Docs.Docstrings.DocstringDataAnalyzer"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.GoogleDialectHandler": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringDialectHandler"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.GoogleDialectHandler._extract_examples": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings._extract_doctest_examples"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.GoogleDialectHandler.extract": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings._blank_params",
+        "McUtils.Docs.Docstrings._parse_list_field",
+        "McUtils.Docs.Docstrings._split_intro"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.HasExamples": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringQAField"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.HasLinks": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringQAField"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.HasRelated": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringQAField"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.MissingDescription": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringQAField"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.MissingParameter": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringQAField"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.MissingParameterDescription": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.MissingDescription"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.MissingParameterType": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringQAField"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.MissingReturnType": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringQAField"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.MissingReturnValue": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringQAField"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.MissingShortDescription": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.MissingDescription"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.PlainDialectHandler": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringDialectHandler"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.PlainDialectHandler.extract": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings._blank_params",
+        "McUtils.Docs.Docstrings._extract_doctest_examples",
+        "McUtils.Docs.Docstrings._split_intro"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.ShortDescriptionTooLong": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.BadDescription"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.SphinxDialectHandler": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringDialectHandler"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.SphinxDialectHandler.extract": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings._blank_params",
+        "McUtils.Docs.Docstrings._extract_doctest_examples",
+        "McUtils.Docs.Docstrings._parse_list_field",
+        "McUtils.Docs.Docstrings._split_intro"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Docstrings.StaleParameter": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringQAField"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings.StaleParameterType": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringQAField"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Docstrings._blank_params": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings._signature_types"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Docs.Docstrings.data_extractor": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings.DocstringDialectHandler",
+        "McUtils.Docs.Docstrings.detect_dialect"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Docs.Docstrings.detect_dialect": {
+      "depends_on": [
+        "McUtils.Docs.Docstrings",
+        "McUtils.Docs.Docstrings.DocstringDialectHandler"
+      ],
+      "kind": "function"
+    },
+    "McUtils.Docs.Docstrings.resolve_dialect": {
+      "depends_on": [
+        "McUtils.Devutils",
+        "McUtils.Devutils.default",
+        "McUtils.Devutils.is_default",
+        "McUtils.Docs.Docstrings.DocstringDialectHandler",
+        "McUtils.Docs.Docstrings.resolve_dialect"
+      ],
+      "kind": "function"
+    },
     "McUtils.Docs.HTMLDocs.JHTMLDocumentationEngine": {
       "depends_on": [
         "McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateInterfaceEngine"
@@ -3287,24 +3637,57 @@
       ],
       "kind": "class"
     },
-    "McUtils.Docs.Stubs.StubSummaryBuilder": {
+    "McUtils.Docs.Stubs.DocumentationPackageDispatcher": {
       "depends_on": [
+        "McUtils.Docs.Stubs.ExampleHandler",
+        "McUtils.Docs.Stubs.StubSummaryHandler",
         "McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateHandler",
         "McUtils.Formatters.TemplateEngine.TemplateEngine.TemplateHandler.blacklist_packages"
       ],
       "kind": "class"
     },
-    "McUtils.Docs.Stubs.StubSummaryBuilder.discover_top_level_packages": {
+    "McUtils.Docs.Stubs.DocumentationPackageDispatcher.discover_top_level_packages": {
       "depends_on": [
         "McUtils.Devutils",
         "McUtils.Devutils.temporary_sys_path_insert"
       ],
       "kind": "method"
     },
-    "McUtils.Docs.Stubs.StubSummaryBuilder.extract_examples": {
+    "McUtils.Docs.Stubs.ExampleHandler": {
+      "depends_on": [
+        "McUtils.Docs.Stubs.PackageHandler"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Stubs.ExampleHandler.__init__": {
+      "depends_on": [
+        "McUtils.Docs.Stubs.default_exclude"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Stubs.ExampleHandler.extract_examples": {
       "depends_on": [
         "McUtils.Docs.ExamplesParser.ExamplesParser",
         "McUtils.Docs.ExamplesParser.ExamplesParser.from_file"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Stubs.StubSummaryBuilder.__init__": {
+      "depends_on": [
+        "McUtils.Docs.Stubs.default_exclude"
+      ],
+      "kind": "method"
+    },
+    "McUtils.Docs.Stubs.StubSummaryHandler": {
+      "depends_on": [
+        "McUtils.Docs.Stubs.PackageHandler"
+      ],
+      "kind": "class"
+    },
+    "McUtils.Docs.Stubs.StubSummaryHandler.__init__": {
+      "depends_on": [
+        "McUtils.Docs.Stubs.StubSummaryBuilder",
+        "McUtils.Docs.Stubs.default_exclude"
       ],
       "kind": "method"
     },

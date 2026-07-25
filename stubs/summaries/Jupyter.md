@@ -572,7 +572,6 @@
     - `__init__(figure=None, manager=None)`
     - `draw(clear=False)` — Draw the figure using the renderer.
     - `render_objects(figure, obj)`
-  - **class `_BackendD3`** (_Backend)
 
 ### `APIs/ngl.py`
   - **class `NGLAPI`**
@@ -1236,12 +1235,6 @@
       - `get_class_map_updates()` — Return additional tag-class mappings for this element type; the base implementation supplies none.
       - `expanded_class_map()` — Return a context manager that temporarily installs this element type’s class-map updates.
       - `__init__(tag, *elems, on_update=None, style=None, activator=None, can_be_dynamic=None, **attrs)`
-      - **class `_update_callbacks`**
-        > Simple set of callbacks both weakly keyed and default
-        - `__init__(base_callbacks, weak_callbacks)`
-        - `from_raw(data)` — Canonicalize callback input into global and weakly keyed callback mappings.
-        - `items()` — Iterate registrant-specific callback mappings followed by the global callback mapping.
-        - `get(item, default)` — Retrieve callbacks for the global or a registrant-specific mapping.
       - `on_update(key, new_value, old_value, subkey=None)` — Invoke callbacks registered for the specific update key and callbacks registered for all updates.
       - `update_callbacks(key=None, registrant=None)` — Return callbacks registered for a key and optional registrant.
       - `add_update_callback(callback, key=None, registrant=None)` — Register an update callback under an optional update key and registrant.
