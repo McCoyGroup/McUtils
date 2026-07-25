@@ -44,6 +44,23 @@ __all__ = [
 ]
 
 
+def default_exclude(qualname: str, package_name=None) -> bool:
+    """Default `exclude` predicate shared by `StubSummaryBuilder`,
+    `StubSummaryHandler`, and `ExampleHandler`. True if any dotted
+    component of `qualname` (a class name or a function/method name in its
+    path, e.g. `Widget` or `spin` in `Widget.spin`) starts with an
+    underscore -- private names, private classes and everything under
+    them, and other dunders (`__eq__`, `__repr__`, ...) -- except
+    `__init__`, which is exempted since it's routinely the most useful
+    method to document.
+
+    (Deliberately duplicated from `Docstrings.default_exclude` rather than
+    imported from there, since `Docstrings` already imports `PackageHandler`
+    from this module -- importing back would be circular.)
+    """
+    return any(part.startswith("_") and part != "__init__" for part in qualname.split("."))
+
+
 class StubSummaryBuilder:
     """
     Parameters
@@ -104,6 +121,15 @@ class StubSummaryBuilder:
     SIDECAR_LOADER_FUNC_NAME = "_load_registry_data"
     DEPENDENCY_GRAPH_FILENAME = "dependency_graph.json"
 
+    # ------------------------------------------------------------------
+    # NOTE: the dependency-graph blacklist (STDLIB_BLACKLIST_PACKAGES /
+    # COMMON_THIRD_PARTY_BLACKLIST_PACKAGES / DEFAULT_DEPENDENCY_BLACKLIST)
+    # and top-level package/module resolution (discover_top_level_packages,
+    # generate/generate_all/finalize orchestration) now live on
+    # `DocumentationPackageDispatcher`, since they're shared by every
+    # `PackageHandler` (stub/summary generation, example extraction, ...)
+    # rather than being specific to this one.
+    # ------------------------------------------------------------------
 
     # ------------------------------------------------------------------
     # String templates -- everything written into stubs, summaries, and
@@ -278,7 +304,8 @@ ground truth.
     SYNTAX_ERROR_WARNING_TEMPLATE = "[WARN] syntax error, copying as-is: {rel_path}: {error}"
 
     def __init__(self, out_dir="stubs", max_doc_len=800, min_words=5,
-                 write_sidecar_file=False, verbose=False, dispatcher=None):
+                 write_sidecar_file=False, verbose=False, dispatcher=None,
+                 filter=None, exclude=default_exclude):
         """
         Args:
             dispatcher (Optional[DocumentationPackageDispatcher]): supplies
@@ -287,6 +314,16 @@ ground truth.
                 Required for anything beyond pure, stateless helpers (e.g.
                 `stub_module`/`summarize_module` on a string of source you
                 already have); a `StubSummaryHandler` sets this for you.
+            filter: optional ``(qualname, package_name) -> bool``. Only
+                affects the API *summary* (`summarize_module`/
+                `summarize_class`) -- stub files always preserve every
+                real function/class verbatim. If given, only qualnames for
+                which this returns True are included; ``None`` (default)
+                applies no filter.
+            exclude: optional ``(qualname, package_name) -> bool``,
+                inverted from `filter` -- matching qualnames are left out
+                of the summary. Defaults to :func:`default_exclude`; pass
+                ``None`` to disable.
         """
         self.out_dir = out_dir
         self.max_doc_len = max_doc_len
@@ -294,6 +331,17 @@ ground truth.
         self.write_sidecar_file = write_sidecar_file
         self.verbose = verbose
         self.dispatcher = dispatcher
+        self.filter = filter
+        self.exclude = exclude
+
+    def wanted(self, qualname, package_name=None):
+        """True if `qualname` should appear in the API summary, given this
+        builder's `filter`/`exclude`. Has no effect on stub generation."""
+        if self.filter is not None and not self.filter(qualname, package_name):
+            return False
+        if self.exclude is not None and self.exclude(qualname, package_name):
+            return False
+        return True
 
     # Package/module resolution -- and the state that comes with it
     # (sidecar, dependency graph, dynamic-import status) -- lives on the
@@ -945,7 +993,8 @@ ground truth.
         params = self.render_params(node.args, skip_first=skip_first)
         return f"{node.name}({params})"
 
-    def summarize_class(self, node, indent="  "):
+    def summarize_class(self, node, indent="  ", package_name=None, qualname_prefix=None):
+        qualname_prefix = qualname_prefix or node.name
         lines = []
         full_doc = ast.get_docstring(node)
         bases = ", ".join(ast.unparse(b) for b in node.bases) if node.bases else ""
@@ -963,7 +1012,7 @@ ground truth.
 
         for child in node.body:
             if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                if child.name.startswith("_") and child.name != "__init__":
+                if not self.wanted(f"{qualname_prefix}.{child.name}", package_name):
                     continue
                 sig = self._signature_for(child, in_class=True)
                 entry = f"{indent}  - `{sig}`"
@@ -973,10 +1022,15 @@ ground truth.
                         entry += f" — {cdoc}"
                 lines.append(entry)
             elif isinstance(child, ast.ClassDef):
-                lines.extend(self.summarize_class(child, indent=indent + "  "))
+                child_qualname = f"{qualname_prefix}.{child.name}"
+                if not self.wanted(child_qualname, package_name):
+                    continue
+                lines.extend(self.summarize_class(
+                    child, indent=indent + "  ", package_name=package_name,
+                    qualname_prefix=child_qualname))
         return lines
 
-    def summarize_module(self, path, rel_path):
+    def summarize_module(self, path, rel_path, package_name=None):
         with open(path, "r", encoding="utf-8", errors="replace") as f:
             source = f.read()
         try:
@@ -990,9 +1044,11 @@ ground truth.
         body_lines = []
         for node in tree.body:
             if isinstance(node, ast.ClassDef):
-                body_lines.extend(self.summarize_class(node))
+                if not self.wanted(node.name, package_name):
+                    continue
+                body_lines.extend(self.summarize_class(node, package_name=package_name))
             elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
-                if node.name.startswith("_"):
+                if not self.wanted(node.name, package_name):
                     continue
                 doc = self.first_line(ast.get_docstring(node))
                 sig = self._signature_for(node, in_class=False)
@@ -1006,7 +1062,7 @@ ground truth.
         lines.extend(body_lines)
         return "\n".join(lines)
 
-    def build_package_summary(self, src_dir, out_file):
+    def build_package_summary(self, src_dir, out_file, package_name=None):
         sections = []
         for root, _, files in sorted(os.walk(src_dir)):
             for fname in sorted(files):
@@ -1014,7 +1070,7 @@ ground truth.
                     continue
                 path = os.path.join(root, fname)
                 rel = os.path.relpath(path, src_dir)
-                section = self.summarize_module(path, rel)
+                section = self.summarize_module(path, rel, package_name=package_name)
                 if section:
                     sections.append(section)
 
@@ -1139,12 +1195,24 @@ class StubSummaryHandler(PackageHandler):
 
     name = "stub_summary"
 
-    def __init__(self, dispatcher, builder=None):
+    def __init__(self, dispatcher, builder=None, filter=None, exclude=default_exclude):
+        """
+        Args:
+            filter: optional ``(qualname, package_name) -> bool`` forwarded
+                to the builder -- only affects which functions/classes
+                appear in the API *summary*; stub files always preserve
+                every real function/class. Defaults to ``None`` (no
+                filtering).
+            exclude: optional ``(qualname, package_name) -> bool``
+                forwarded to the builder. Defaults to
+                :func:`default_exclude`; pass ``None`` to disable.
+        """
         super().__init__(dispatcher)
         self.builder = builder or StubSummaryBuilder(
             dispatcher=dispatcher, out_dir=dispatcher.out_dir,
             max_doc_len=dispatcher.max_doc_len, min_words=dispatcher.min_words,
             write_sidecar_file=dispatcher.write_sidecar_file, verbose=dispatcher.verbose,
+            filter=filter, exclude=exclude,
         )
 
     def parse(self, package_name, pkg_src_path):
@@ -1170,7 +1238,7 @@ class StubSummaryHandler(PackageHandler):
                 f.write(stubbed)
             stats = [(os.path.basename(pkg_src_path), len(source), len(stubbed))]
 
-        n_sections = builder.build_package_summary(pkg_stub_out, pkg_summary_out)
+        n_sections = builder.build_package_summary(pkg_stub_out, pkg_summary_out, package_name=package_name)
 
         orig_total = sum(s[1] for s in stats)
         stub_total = sum(s[2] for s in stats)
@@ -1229,6 +1297,31 @@ class ExampleHandler(PackageHandler):
     """
 
     name = "examples"
+
+    def __init__(self, dispatcher, filter=None, exclude=default_exclude):
+        """
+        Args:
+            filter: optional ``(qualname, package_name) -> bool``, checked
+                against ``"{TestClassName}.{test_method_name}"``. If
+                given, only matching examples are written at all; ``None``
+                (default) applies no filter.
+            exclude: optional ``(qualname, package_name) -> bool``,
+                inverted from `filter`. Defaults to :func:`default_exclude`;
+                pass ``None`` to disable.
+        """
+        super().__init__(dispatcher)
+        self.filter = filter
+        self.exclude = exclude
+
+    def wanted(self, qualname, package_name=None):
+        """True if `qualname` (a ``"{TestClass}.{test_method}"`` name)
+        should actually be written as an example, given this handler's
+        `filter`/`exclude`."""
+        if self.filter is not None and not self.filter(qualname, package_name):
+            return False
+        if self.exclude is not None and self.exclude(qualname, package_name):
+            return False
+        return True
 
     TEST_FILENAME_TEMPLATE = "{package_name}Tests.py"
     EXAMPLES_DIRNAME = "examples"
@@ -1342,19 +1435,30 @@ class ExampleHandler(PackageHandler):
             usage.setdefault(origin, set()).update(example_ids)
         return usage
 
-    def _write_examples(self, parser, examples_dir):
+    def _write_examples(self, parser, examples_dir, package_name=None):
         """Write each example (a `test_`-prefixed method, per
-        ExamplesParser) to its own file under examples_dir. Each file
-        reconstructs a minimal version of the original test class --
-        module-level setup, class-level setup (e.g. setUp, helper
-        classes), and just that one test method -- via ast.unparse
-        rather than raw text splicing, so indentation/assembly is
-        always correct. Returns the number of examples written."""
+        ExamplesParser) to its own file under examples_dir -- except any
+        whose ``"{TestClass}.{test_method}"`` name this handler's
+        `filter`/`exclude` rules out, which are skipped entirely (not
+        written, not counted). Each file reconstructs a minimal version of
+        the original test class -- module-level setup, class-level setup
+        (e.g. setUp, helper classes), and just that one test method -- via
+        ast.unparse rather than raw text splicing, so indentation/assembly
+        is always correct.
+
+        Returns (n_written, written_ids) -- written_ids is the set of
+        `name` keys (as used in `parser.functions`) actually written, so
+        the caller can keep the usage graph consistent with what's on
+        disk."""
         os.makedirs(examples_dir, exist_ok=True)
         class_node, class_setup_nodes = parser.class_spec
         base_setup_nodes = parser.setup
         n_written = 0
+        written_ids = set()
         for name, test_node in parser.functions.items():
+            qualname = f"{class_node.name}.{test_node.name}"
+            if not self.wanted(qualname, package_name):
+                continue
             new_class = ast.ClassDef(
                 name=class_node.name, bases=list(class_node.bases),
                 keywords=list(class_node.keywords),
@@ -1372,7 +1476,8 @@ class ExampleHandler(PackageHandler):
             with open(out_path, "w", encoding="utf-8") as f:
                 f.write(header + source + "\n")
             n_written += 1
-        return n_written
+            written_ids.add(name)
+        return n_written, written_ids
 
     def extract_examples(self, package_name, tests_directory=None):
         """For one top-level package: locate its test file (see
@@ -1403,11 +1508,13 @@ class ExampleHandler(PackageHandler):
             return 0
 
         examples_dir = os.path.join(self.dispatcher.out_dir, self.EXAMPLES_DIRNAME, package_name)
-        n_written = self._write_examples(parser, examples_dir)
+        n_written, written_ids = self._write_examples(parser, examples_dir, package_name=package_name)
 
         usage = self.build_usage_graph_for_package(package_name, parser)
         for origin, example_ids in usage.items():
-            self.dispatcher.usage_graph.setdefault(origin, set()).update(example_ids)
+            kept = {eid for eid in example_ids if eid.split("::", 1)[-1] in written_ids}
+            if kept:
+                self.dispatcher.usage_graph.setdefault(origin, set()).update(kept)
 
         return n_written
 
