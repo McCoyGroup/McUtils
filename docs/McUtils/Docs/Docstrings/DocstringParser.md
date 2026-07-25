@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.Docstrings.DocstringParser">DocstringParser</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L694)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L694?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L698)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L698?message=Update%20Docs)]
 </div>
 
 Parse a Python source file into a list of :class:`DocstringData`.
@@ -29,8 +29,8 @@ Sphinx-style docstrings parses correctly function-by-function -- unless a
 __init__(self, dialect: 'Optional[DocstringDialectHandler]' = None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L703)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L703?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L707)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L707?message=Update%20Docs)]
 </div>
 Args:
 dialect (Optional[DocstringDialectHandler]): If given, every
@@ -43,8 +43,8 @@ dialect (Optional[DocstringDialectHandler]): If given, every
 parse_source(self, src: 'str', only_missing: 'bool' = False) -> 'List[DocstringData]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringParser.py#L712)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringParser.py#L712?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringParser.py#L716)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringParser.py#L716?message=Update%20Docs)]
 </div>
 Parse `src` text and return one :class:`DocstringData` per function.
 
@@ -62,8 +62,8 @@ Returns:
 parse_file(self, path: 'str', only_missing: 'bool' = False) -> 'List[DocstringData]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringParser.py#L751)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringParser.py#L751?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringParser.py#L755)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringParser.py#L755?message=Update%20Docs)]
 </div>
 Read `path` and delegate to :meth:`parse_source`.
  </div>
@@ -119,7 +119,7 @@ Read `path` and delegate to :meth:`parse_source`.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/Docstrings/DocstringParser.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/Docstrings/DocstringParser.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L694?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L698?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

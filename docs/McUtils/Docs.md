@@ -54,21 +54,43 @@ Adapted from the Peeves documentation system but tailored for more interactive u
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[PackageHandler](Docs/Stubs/PackageHandler.md)   
+</div>
+   <div class="col" markdown="1">
+[StubSummaryHandler](Docs/Stubs/StubSummaryHandler.md)   
+</div>
+   <div class="col" markdown="1">
+[ExampleHandler](Docs/Stubs/ExampleHandler.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[DocumentationPackageDispatcher](Docs/Stubs/DocumentationPackageDispatcher.md)   
+</div>
+   <div class="col" markdown="1">
 [ExamplesParser](Docs/ExamplesParser/ExamplesParser.md)   
 </div>
    <div class="col" markdown="1">
 [DocstringParser](Docs/Docstrings/DocstringParser.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [DocstringWriter](Docs/Docstrings/DocstringWriter.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [DocstringDialectHandler](Docs/Docstrings/DocstringDialectHandler.md)   
 </div>
    <div class="col" markdown="1">
 [DocstringDataAnalyzer](Docs/Docstrings/DocstringDataAnalyzer.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[DocstringsHandler](Docs/Docstrings/DocstringsHandler.md)   
+</div>
+   <div class="col" markdown="1">
+   
 </div>
    <div class="col" markdown="1">
    
@@ -174,9 +196,9 @@ builder.build()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-c49052" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-c49052"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-161cd4" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-161cd4"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-c49052" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-161cd4" markdown="1">
  - [McUtilsDoc](#McUtilsDoc)
 - [PsienceDoc](#PsienceDoc)
 - [ParseExamples](#ParseExamples)
@@ -184,9 +206,9 @@ builder.build()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-98bf94" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-98bf94"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-565a91" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-565a91"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-98bf94" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-565a91" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Docs.Docstrings.DocstringDialectHandler">DocstringDialectHandler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L174)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L174?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L178)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L178?message=Update%20Docs)]
 </div>
 
 A pluggable docstring convention: parses raw text into the canonical
@@ -33,8 +33,8 @@ name: str
 sniff(cls, raw: 'str') -> 'bool': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L186)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L186?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L190)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L190?message=Update%20Docs)]
 </div>
 Return True if `raw` looks like it was written in this dialect.
 
@@ -44,8 +44,8 @@ Return True if `raw` looks like it was written in this dialect.
 extract(self, raw: 'str', node: 'ast.AST') -> 'Dict[str, Any]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringDialectHandler.py#L191)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringDialectHandler.py#L191?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringDialectHandler.py#L195)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringDialectHandler.py#L195?message=Update%20Docs)]
 </div>
 Parse `raw` (+ signature info from `node`) into the canonical dict:
 ``{"short_description", "details", "examples", "type_info"}``.
@@ -56,8 +56,8 @@ Parse `raw` (+ signature info from `node`) into the canonical dict:
 render(self, data: "'DocstringData'") -> 'str': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringDialectHandler.py#L197)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringDialectHandler.py#L197?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings/DocstringDialectHandler.py#L201)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings/DocstringDialectHandler.py#L201?message=Update%20Docs)]
 </div>
 Render a (possibly edited) ``DocstringData`` back into body text.
  </div>
@@ -113,7 +113,7 @@ Render a (possibly edited) ``DocstringData`` back into body text.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Docs/Docstrings/DocstringDialectHandler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Docs/Docstrings/DocstringDialectHandler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L174?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Docs/Docstrings.py#L178?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

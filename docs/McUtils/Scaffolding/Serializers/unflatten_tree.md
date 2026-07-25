@@ -5,7 +5,7 @@
 </div>
 
 ```python
-unflatten_tree(serial_tree, unprep_tree=True): 
+unflatten_tree(serial_tree, unprep_tree=True, max_leaf_elements=None, block_pointers=None, prefix_filter=None): 
 ```
 **LLM Docstring**
 

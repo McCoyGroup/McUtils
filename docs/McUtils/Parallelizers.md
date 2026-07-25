@@ -336,9 +336,9 @@ finally:
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-b1842d" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-b1842d"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-b13d82" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-b13d82"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-b1842d" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-b13d82" markdown="1">
  - [BasicMultiprocessing](#BasicMultiprocessing)
 - [MapMultiprocessing](#MapMultiprocessing)
 - [MapMultiprocessingDataSmall](#MapMultiprocessingDataSmall)
@@ -352,9 +352,9 @@ finally:
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-10debc" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-10debc"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-72f1d1" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-72f1d1"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-10debc" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-72f1d1" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
