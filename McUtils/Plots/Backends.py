@@ -8500,6 +8500,9 @@ class SVGAxes(GraphicsAxes):
         :return: `(font_options, remaining_options)`
         :rtype: tuple
         """
+        if dev.is_dict_like(styles.get('font_style')):
+            styles = styles | styles['font_style']
+            styles.pop('font_style')
         font_opts = {}
         rem_opts = {}
         for k,v in styles.items():
@@ -14714,7 +14717,7 @@ class MeshInformation:
     def to_zachary(self):
         from ..Zachary import SphereUnionSurfaceMesh
 
-        styles = {'transparency':None}
+        styles = {'line_color':None, 'transparency':None}
         if self.material is not None:
             styles.update(self.material)
             color = styles.pop('base_color', None)
@@ -14725,6 +14728,9 @@ class MeshInformation:
                     color = np.array(color) * 255
                     color = ColorPalette.rgb_code(color)
                 styles['color'] = color
+            glow = styles.pop('emissive', None)
+            if glow is not None:
+                styles['glow'] = glow
         return SphereUnionSurfaceMesh(
             self.vertices,
             self.faces,
@@ -14806,7 +14812,7 @@ class Mesh3DAxes(GraphicsAxes3D):
         return sphere_points, faces, normals
 
     @classmethod
-    def _uv_cylinder(cls, start, end, radius, n_phi=32, capped=True):
+    def _uv_cylinder(cls, start, end, radius, n_phi=32, closed=True):
         """Structured cylinder with smooth barrel normals + flat caps (default path)."""
         start, end = np.asanyarray(start), np.asanyarray(end)
         cylinder_points, faces = nput.uv_cylinder(n_phi)
@@ -14819,13 +14825,24 @@ class Mesh3DAxes(GraphicsAxes3D):
         normals = normals @ rot
         cylinder_points = cylinder_points @ rot
         cylinder_points = cylinder_points + start[np.newaxis]
+        if closed is True or closed is False:
+            closed = (closed, closed)
+        if not closed[0]:
+            cylinder_points = cylinder_points[1:]
+            normals = normals[1:]
+            faces = faces[np.all(faces != 0, axis=1)] - 1
+        if not closed[1]:
+            cp = len(cylinder_points) - 1
+            cylinder_points = cylinder_points[:-1]
+            normals = normals[:-1]
+            faces = faces[np.all(faces != cp, axis=1)]
         return cylinder_points, faces, normals
 
     @classmethod
-    def _uv_cone(cls, start, end, radius, n_phi=32, capped=True):
+    def _uv_cone(cls, start, end, radius, n_phi=32, top_radius=0.0, closed=True):
         """Structured cylinder with smooth barrel normals + flat caps (default path)."""
         start, end = np.asanyarray(start), np.asanyarray(end)
-        cylinder_points, faces = nput.uv_cone(n_phi)
+        cylinder_points, faces = nput.uv_cone(n_phi, top_radius=top_radius)
         ax, norm = nput.vec_normalize(end - start, return_norms=True)
         normals = cylinder_points.copy()
         normals[0, 2] = -1
@@ -14850,6 +14867,132 @@ class Mesh3DAxes(GraphicsAxes3D):
         cylinder_points *= scalings[np.newaxis]
         cylinder_points = cylinder_points + start[np.newaxis]
         return cylinder_points, faces, None
+
+    def _frame_from_axis(axis):
+        """Orthonormal 3x3 whose 3rd column is the unit `axis`."""
+        z = np.asarray(axis, dtype=float)
+        z = z / np.linalg.norm(z)
+        seed = np.array([1.0, 0.0, 0.0]) if abs(z[0]) < 0.9 else np.array([0.0, 1.0, 0.0])
+        x = np.cross(seed, z);
+        x /= np.linalg.norm(x)
+        y = np.cross(z, x)
+        return np.stack([x, y, z], axis=1)
+
+    @classmethod
+    def _plane_frame(cls, normal, view_vector=None):
+        """(x, y) unit vectors spanning the plane perpendicular to `normal`."""
+        return nput.view_matrix(normal, view_vector=view_vector, output_order=["x", "y", "z"]).T[:2]
+
+    @classmethod
+    def _double_side(cls, verts, faces, normals):
+        """
+        Duplicate the faces with reversed winding so the surface is visible from both
+        sides. Vertices are duplicated too, with flipped normals, so the back sheet
+        is correctly lit rather than reusing the front's outward normals.
+        """
+        n = len(verts)
+        verts2 = np.concatenate([verts, verts], axis=0)
+        faces2 = np.concatenate([faces, faces[:, ::-1] + n], axis=0)
+        normals2 = None if normals is None else np.concatenate([normals, -normals], axis=0)
+        return verts2, faces2, normals2
+
+    @classmethod
+    def _planar_mesh(cls, points, faces, mat, double_sided, name):
+        """Build a flat MeshInformation for a planar primitive (poly/disk/rect)."""
+        points = np.asanyarray(points, dtype=float).reshape(-1, 3)
+        faces = np.asanyarray(faces, dtype=np.int64).reshape(-1, 3)
+        pn = nput.polygon_normal(points)
+        normals = np.broadcast_to(pn, points.shape).copy()
+        if double_sided:
+            points, faces, normals = cls._double_side(points, faces, normals)
+            mat = dict(mat or {})
+            mat["double_sided"] = False  # both sides are real geometry
+        return MeshInformation(points, faces, normals=normals, material=mat, name=name)
+
+    @classmethod
+    def _text_frame(cls, normal, up=None):
+        """In-plane (right, up) axes for laying out text on the plane `normal`."""
+        return nput.view_matrix(normal, view_vector=up, output_order=["y", "x", "z"]).T[:2]
+
+    @classmethod
+    def _fill_regions(cls, polys):
+        """
+        Group flattened contours into glyph fill-regions. Each region is one solid
+        outer contour plus the holes directly inside it, found by containment nesting
+        (a contour at even nesting depth is solid, odd is a hole). Returns a list of
+        (outer_index, [hole_indices]).
+        """
+        from matplotlib.path import Path as _MPath
+        n = len(polys)
+        reps = np.array([c[0] for c in polys])  # a vertex from each contour
+        contains = np.zeros((n, n), dtype=bool)  # contains[j, i]: j encloses i
+        for j in range(n):
+            contains[j] = _MPath(polys[j]).contains_points(reps)
+            contains[j, j] = False
+        depth = contains.sum(axis=0)  # how many contours enclose i
+        groups = []
+        for i in range(n):
+            if depth[i] % 2 != 0:
+                continue  # i is a hole, handled by its parent
+            holes = []
+            for h in range(n):
+                if depth[h] == depth[i] + 1 and contains[i, h]:
+                    containers = [k for k in range(n) if contains[k, h]]
+                    if max(containers, key=lambda k: depth[k]) == i:  # i is immediate parent
+                        holes.append(h)
+            groups.append((i, holes))
+        return groups
+
+    @classmethod
+    def _text_geometry(cls, text, size=1.0, anchor=(0.5, 0.5), **font_opts):
+        """
+        Filled 2D triangle mesh for a text string. Flattens the SVG-style glyph path
+        to contours, triangulates via Delaunay, and keeps triangles whose centroid
+        falls inside an odd number of contours (even-odd fill) -- which drops the
+        interior holes of letters like 'o', 'A', 'e'. Returns (verts2d, faces), with
+        `anchor` (fractions of the bbox) mapped to the local origin.
+        """
+        from scipy.spatial import Delaunay, QhullError
+        from matplotlib.path import Path as _MPath
+        if not text or not str(text).strip():  # whitespace breaks matplotlib TextPath
+            return np.zeros((0, 2)), np.zeros((0, 3), dtype=np.int64)
+        path =  SVGAxes._text_to_path((0, 0), text,
+                                      size=size,
+                                      invert=False, anchor=anchor, **font_opts)
+        polys = [
+            np.asarray(p, dtype=float)
+            for p in path.to_polygons(closed_only=True)
+            if len(p) >= 3
+        ]
+        if not polys:
+            return np.zeros((0, 2)), np.zeros((0, 3), dtype=np.int64)
+
+        all_pts, all_faces, offset = [], [], 0
+        for outer_i, hole_idxs in cls._fill_regions(polys):
+            idxs = [outer_i] + hole_idxs
+            pts = np.unique(np.round(np.concatenate([polys[k] for k in idxs], axis=0), 9), axis=0)
+            if len(pts) < 3:
+                continue
+            try:
+                simplices = Delaunay(pts).simplices
+            except QhullError:  # degenerate (collinear) region
+                continue
+            centroids = pts[simplices].mean(axis=1)
+            keep = _MPath(polys[outer_i]).contains_points(centroids)
+            for h in hole_idxs:
+                keep &= ~_MPath(polys[h]).contains_points(centroids)
+            faces = simplices[keep]
+            if len(faces) == 0:
+                continue
+            all_pts.append(pts)
+            all_faces.append(faces + offset)
+            offset += len(pts)
+
+        if not all_faces:
+            return np.zeros((0, 2)), np.zeros((0, 3), dtype=np.int64)
+        pts = np.concatenate(all_pts, axis=0)
+        faces = np.concatenate(all_faces, axis=0).astype(np.int64)
+        return pts, faces
 
     # ---- required plumbing ------------------------------------------------- #
     @classmethod
@@ -14911,6 +15054,8 @@ class Mesh3DAxes(GraphicsAxes3D):
 
 
     def _emit(self, mesh):
+        if isinstance(mesh, list):
+            raise ValueError(mesh)
         self.meshes.append(mesh)
         return mesh
 
@@ -14920,7 +15065,7 @@ class Mesh3DAxes(GraphicsAxes3D):
 
     # ---- primitives -------------------------------------------------------- #
     def draw_sphere(self, centers, rads, method=None, n_theta=16, n_phi=32,
-                    samples=64, **styles):
+                    samples=64, emit=True, **styles):
         """
         method:
           None / 'uv'        -> structured uv_sphere, smooth per-vertex normals (default)
@@ -14943,10 +15088,15 @@ class Mesh3DAxes(GraphicsAxes3D):
             for c, r in zip(centers, rads):
                 v, f, nrm = self._uv_sphere(c, float(r), n_theta, n_phi)
                 pieces.append(MeshInformation(v, f, normals=nrm, material=mat))
-        return self._emit(MeshInformation.concatenate(pieces, material=mat, name='sphere'))
+        bits = [
+            MeshInformation.concatenate(pieces, material=mat, name='sphere')
+        ]
+        if emit:
+            for b in bits: self._emit(b)
+        return bits
 
-    def draw_cylinder(self, starts, ends, rads, method=None, n_phi=32,
-                      capped=True, samples=32, **styles):
+    def draw_cylinder(self, starts, ends, rads, normals=False, method=None, n_phi=32,
+                      closed=True, samples=32, emit=True, **styles):
         """
         method:
           None / 'uv'   -> structured barrel with smooth radial normals + flat caps (default)
@@ -14966,12 +15116,19 @@ class Mesh3DAxes(GraphicsAxes3D):
         else:
             pieces = []
             for a, b, r in zip(starts, ends, rads):
-                v, f, nrm = self._uv_cylinder(a, b, float(r), n_phi, capped=True)
+                v, f, nrm = self._uv_cylinder(a, b, float(r), n_phi, closed=closed)
+                if not normals:
+                    nrm = None
                 pieces.append(MeshInformation(v, f, normals=nrm, material=mat))
-        return self._emit(MeshInformation.concatenate(pieces, material=mat, name='cylinder'))
+        bits = [
+            MeshInformation.concatenate(pieces, material=mat, name='cylinder')
+        ]
+        if emit:
+            for b in bits: self._emit(b)
+        return bits
 
     def draw_cone(self, starts, ends, rads, top_rads=0.0, method=None, n_phi=32,
-                  capped=True, **styles):
+                  closed=True, emit=True, **styles):
         """
         Cone (or frustum, via `top_rads`) from base `starts` to tip/top `ends`.
         method None/'uv' -> smooth slant normals + flat caps (default);
@@ -14995,11 +15152,16 @@ class Mesh3DAxes(GraphicsAxes3D):
                 c.apply_translation(a)
                 pieces.append(MeshInformation.from_trimesh(c, material=mat))
             else:
-                v, f, nrm = self._uv_cone(a, b, float(r), float(tr), n_phi, capped)
+                v, f, nrm = self._uv_cone(a, b, radius=float(r), top_radius=float(tr), n_phi=n_phi)
                 pieces.append(MeshInformation(v, f, normals=nrm, material=mat))
-        return self._emit(MeshInformation.concatenate(pieces, material=mat, name='cone'))
+        bits = [
+            MeshInformation.concatenate(pieces, material=mat, name='cone')
+        ]
+        if emit:
+            for b in bits: self._emit(b)
+        return bits
 
-    def draw_box(self, start, end, method=None, **styles):
+    def draw_box(self, start, end, method=None, emit=True, **styles):
         """
         method None/'uv' -> flat-shaded box with per-face normals (default);
         'hull' -> convex hull of the 8 corners (no normals); 'trimesh' -> creation.box.
@@ -15015,48 +15177,191 @@ class Mesh3DAxes(GraphicsAxes3D):
         else:
             v, f, nrm = nput.uv_box(start, end)
             mesh = MeshInformation(v, f, normals=nrm, material=mat, name='box')
-        return self._emit(mesh)
+        bits = [
+            mesh
+        ]
+        if emit:
+            for b in bits: self._emit(b)
+        return bits
 
-    def draw_triangle(self, points, indices=None, **styles):
+    def draw_triangle(self, points, indices=None, emit=True, **styles):
         mat = self._material_from_styles(styles)
         points = np.asanyarray(points, dtype=float).reshape(-1, 3)
         if indices is None:
             indices = np.arange(len(points)).reshape(-1, 3)
-        return self._emit(MeshInformation(points, indices, material=mat, name='mesh'))
+        bits = [
+            MeshInformation(points, indices, material=mat, name='mesh')
+        ]
+        if emit:
+            for b in bits: self._emit(b)
+        return bits
 
     # alias to match the other 3D axes
-    def draw_mesh(self, points, indices, **styles):
-        return self.draw_triangle(points, indices, **styles)
+    def draw_mesh(self, points, indices, emit=True, **styles):
+        return self.draw_triangle(points, indices, emit=emit, **styles)
 
-    def draw_line(self, points, tessellate=True, method=None, line_thickness=0.02, **styles):
+    def draw_line(self, points, tessellate=True, method=None, line_thickness=0.02,
+                  color=None,
+                  glow=None,
+                  emit=True, **styles):
+        if color is None: color='black'
         points = np.asanyarray(points, dtype=float).reshape(-1, 3)
         if tessellate:
+            if glow is None:
+                glow = color
+                color = 'black'
+            if color is not None:
+                styles['color'] = color
+            if glow is not None:
+                styles['glow'] = glow
             return self.draw_cylinder(points[:-1], points[1:], line_thickness,
-                                      method=method, **styles)
-        return self._emit(MeshInformation(points, None,
-                                          material=self._material_from_styles(styles),
-                                          mode='lines', name='line'))
+                                      method=method, normals=False, **styles)
+        if color is not None:
+            styles['color'] = color
+        if glow is not None:
+            styles['glow'] = glow
+        bits = [
+            MeshInformation(points, None,
+                            material=self._material_from_styles(styles),
+                            mode='lines', name='line')
+        ]
+        if emit:
+            for b in bits: self._emit(b)
+        return bits
 
-    def draw_point(self, points, tessellate=True, method=None, point_radius=0.03, **styles):
+    def draw_point(self, points, tessellate=True, method=None, point_radius=0.03, emit=True, **styles):
         points = np.atleast_2d(np.asanyarray(points, dtype=float))
         if tessellate:
             return self.draw_sphere(points, point_radius, method=method, **styles)
-        return self._emit(MeshInformation(points, None,
-                                          material=self._material_from_styles(styles),
-                                          mode='points', name='points'))
+        bits = [MeshInformation(points, None,
+                                      material=self._material_from_styles(styles),
+                                      mode='points', name='points')]
+        if emit:
+            for b in bits: self._emit(b)
+        return bits
 
     # 2D-only / unsupported on a 3D export target
-    def draw_disk(self, *a, **kw):
-        raise NotImplementedError("3D export target")
+    def draw_poly(self, points, double_sided=True, emit=True, **styles):
+        """Filled polygon, triangulated via nput.triangulate_polygon (like PlotlyAxes3D)."""
+        points = np.asanyarray(points, dtype=float).reshape(-1, 3)
+        faces = np.asanyarray(nput.triangulate_polygon(points), dtype=np.int64)
+        mat = self._material_from_styles(styles)
+        bits = [self._planar_mesh(points, faces, mat, double_sided, name='poly')]
+        if emit:
+            for b in bits: self._emit(b)
+        return bits
 
-    def draw_rect(self, *a, **kw):
-        raise NotImplementedError("3D export target")
+    def draw_disk(self, points,
+                  radius=None,
+                  normal=None,
+                  line_color=None,
+                  color=None,
+                  uv_axes=None,
+                  offset_angle=None,
+                  angle=None,
+                  line_thickness=None,
+                  minor_radius=None,
+                  n_phi=48,
+                  double_sided=True,
+                  emit=True,
+                  **styles):
+        """Filled disk(s): triangle fan from center to an n_phi rim, in the plane `normal`."""
+        mat = self._material_from_styles(styles)
+        span_angle = angle
+        del angle
+        if uv_axes is not None:
+            u, v = uv_axes
+            if radius is None:
+                radius = (nput.vec_norms(u) + nput.vec_norms(v)) / 2
+            base_ang, base_norm = nput.vec_angles(u, v, return_crosses=True)
+            base_norm = nput.vec_normalize(base_norm)
+            if normal is None:
+                normal = base_norm
+            angs, crosses, cns = nput.vec_angles([0, 0, 1], normal, return_crosses=True, return_cross_norms=True)
+            if cns < 1e-6:
+                embedding_axes = np.eye(3)
+            else:
+                embedding_axes = nput.rotation_matrix(crosses, angs)
+            emb_u, emb_v = np.array([u, v]) @ embedding_axes
+            det = emb_u[0] * emb_v[1] - emb_u[1] * emb_v[0]
+            emb_z = np.cross(emb_u, emb_v)
+            if det < 0:
+                emb_angle = np.arctan2(emb_v[1], emb_v[0])
+                if emb_z[2] > 0:
+                    emb_angle = -emb_angle
+            else:
+                emb_angle = np.arctan2(emb_u[1], emb_u[0])
+                if emb_z[2] < 0:
+                    emb_angle = -emb_angle
+            if offset_angle is None:
+                offset_angle = emb_angle
+            if span_angle is None:
+                span_angle = angle
 
-    def draw_poly(self, *a, **kw):
-        raise NotImplementedError("3D export target")
+        centers = np.atleast_2d(np.asanyarray(points, dtype=float))
+        radius = np.broadcast_to(np.asanyarray(radius, dtype=float), (len(centers),))
+        angle = span_angle
+        bits = []
+        if offset_angle is None:
+            offset_angle = 0
+        if line_color is not None:
+            for c, r in zip(centers, radius):
+                verts = nput.arc_points(c, r,
+                                        offset_angle,
+                                        angle,
+                                        normal=normal,
+                                        npoints=n_phi,
+                                        minor_radius=minor_radius)
+                bits.extend(
+                    self.draw_line(verts, line_thickness=line_thickness, color=line_color, emit=False)
+                )
 
+        if color is None and line_color is None:
+            color = 'black'
+        if color is not None:
+            pieces = []
+            fan = np.array([[0, 1 + j, 1 + (j + 1) % n_phi] for j in range(n_phi)], dtype=np.int64)
+            for c, r in zip(centers, radius):
+                verts = np.concatenate([[c],
+                                        nput.arc_points(c, r,
+                                            offset_angle,
+                                            angle,
+                                            normal=normal,
+                                            npoints=n_phi,
+                                            minor_radius=minor_radius)
+                                        ], axis=0)
+                pieces.append(self._planar_mesh(verts, fan, mat, double_sided, name='disk'))
+            disk = MeshInformation.concatenate(pieces, material=mat, name='disk')
+            bits.append(disk)
+        if emit:
+            for b in bits:
+                self._emit(b)
+        return bits
+
+    def draw_rect(self, points, normal=(0, 0, 1), double_sided=True, emit=True, **styles):
+        """
+        Rectangle. `points` is either 4 corner points (used directly, in order)
+        or 2 opposite corners, in which case the rect is built in the plane
+        `normal` with edges along that plane's frame.
+        """
+        mat = self._material_from_styles(styles)
+        pts = np.asanyarray(points, dtype=float).reshape(-1, 3)
+        if len(pts) >= 4:
+            corners = pts[:4]
+        else:
+            p0, p1 = pts[0], pts[-1]
+            x, y = self._plane_frame(normal)
+            d = p1 - p0
+            corners = np.array([p0, p0 + x * (d @ x),
+                                p0 + x * (d @ x) + y * (d @ y), p0 + y * (d @ y)])
+        faces = np.array([[0, 1, 2], [0, 2, 3]], dtype=np.int64)
+        bits = [self._planar_mesh(corners, faces, mat, double_sided, name='rect')]
+        if emit:
+            for b in bits:
+                self._emit(b)
+        return bits
     def draw_arrow(self, points, radius=0.05, method=None, n_phi=32,
-                   head_length=0.25, head_width=2.0, **styles):
+                   head_length=0.25, head_width=2.0, closed=True, emit=True, **styles):
         """Arrow = cylinder shaft + cone head. `points` is a (start, end) pair."""
         points = np.asanyarray(points, dtype=float).reshape(-1, 3)
         start, end = points[0], points[-1]
@@ -15064,18 +15369,65 @@ class Mesh3DAxes(GraphicsAxes3D):
         length = np.linalg.norm(axis)
         unit = axis / length
         neck = end - unit * (head_length * length)
-        return [
+        bits = []
+        bits.extend(
             self.draw_cylinder(neck[None], start[None], radius, method=method,
-                           n_phi=n_phi, capped=True, **styles),
+                           n_phi=n_phi, closed=closed, emit=False, **styles)
+        )
+        bits.extend(
             self.draw_cone(neck[None], end[None], radius * head_width, 0.0,
-                              method=method, n_phi=n_phi, capped=True, **styles)
-        ]
+                              method=method, n_phi=n_phi, closed=closed, emit=False, **styles)
+        )
+        if emit:
+            for b in bits: self._emit(b)
+        return bits
+    def draw_text(self, points, vals, height=0.5, normal=(0, 0, 1), up=None,
+                  anchor=(0.5, 0.5), double_sided=True,
+                  color=None,
+                  glow=None,
+                  emit=True, **styles):
+        """
+        Text as filled glyph geometry, via the SVGAxes text-to-path pipeline
+        (matplotlib TextPath). Each label is laid out in the plane `normal` (with
+        optional `up`), scaled so the em-size is `height` world units, and
+        anchored at `anchor` (bbox fractions). Double-sided so it reads from
+        behind too.
+        """
+        pts = np.asanyarray(points, dtype=float)
+        if pts.ndim == 1:
+            pts = pts[None]; vals = [vals]
+        elif isinstance(vals, str):
+            vals = [vals] * len(pts)
+        font_opts, styles = SVGAxes.filter_font_options(styles)
+        if color is None:
+            color = 'black'
+        if glow is None:
+            glow = color
+            color = 'black'
+        if color is not None:
+            styles['color'] = color
+        if glow is not None:
+            styles['glow'] = glow
+        mat = self._material_from_styles(styles)
+        x, y = self._text_frame(normal, up)
+        # font_opts = {k: v for k, v in
+        #              dict(family=font_family, weight=font_weight, style=font_style).items()
+        #              if v is not None}
+        pieces = []
+        for p, s in zip(pts, vals):
+            v2, f = self._text_geometry(str(s), size=height, anchor=anchor, **font_opts)
+            if len(f) == 0:
+                continue                # whitespace-only label
+            v3 = p + v2[:, 0:1] * x + v2[:, 1:2] * y
+            pieces.append(self._planar_mesh(v3, f, mat, double_sided, name='text'))
+        if not pieces:
+            return None
+        bits = [MeshInformation.concatenate(pieces, material=mat, name='text')]
+        if emit:
+            for b in bits: self._emit(b)
+        return bits
 
-    def draw_text(self, *a, **kw):
-        raise NotImplementedError("no text primitive in glTF")
-
-    def draw_path(self, *a, **kw):
-        raise NotImplementedError("3D export target")
+    def draw_path(self, *a, **kw): raise NotImplementedError("3D export target")
 
     # ---- conversions ------------------------------------------------------- #
     def to_mesh_list(self) -> list[MeshInformation]:
@@ -15146,9 +15498,13 @@ class Mesh3DFigure(GraphicsFigure):
         figure = None
         for i, m in enumerate(self.iter_meshes()):
             m: MeshInformation
+            plops = {}
+            if m.normals is None:
+                plops["normalPerVertex"] = False
             _ = m.to_zachary().plot(
                 background=self.background,
-                figure=figure
+                figure=figure,
+                **plops
             )
             if figure is None:
                 figure = _
