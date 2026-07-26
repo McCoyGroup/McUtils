@@ -5,7 +5,7 @@
 </div>
 
 ```python
-view_matrix(up_vector, view_vector=(0, 0, 1), output_order=(2, 0, 1)): 
+view_matrix(up_vector, view_vector=None, output_order=(2, 0, 1)): 
 ```
 **LLM Docstring**
 
