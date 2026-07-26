@@ -503,9 +503,9 @@ print("PDB lines:", len(pdb.splitlines()))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-da3bff" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-da3bff"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-9135fe" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-9135fe"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-da3bff" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-9135fe" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [ParseReports](#ParseReports)
@@ -529,9 +529,9 @@ print("PDB lines:", len(pdb.splitlines()))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-528342" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-528342"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-2fb34e" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-2fb34e"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-528342" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-2fb34e" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -968,7 +968,8 @@ class ExternalProgramsTest(TestCase):
             if 'color' in opts:
                 opts['color'] = plt.prep_color(opts['color'], lighten=-.1)
             return opts
-        fig = Molecule.from_string(prod).plot(
+        mol = Molecule.from_string(prod)
+        fig = mol.plot(
             backend='mesh3D',
             atom_text={7:'asdasd'},
             # display_atom_numbers=True,
@@ -979,10 +980,18 @@ class ExternalProgramsTest(TestCase):
                 (4, 0):{'line_color':"red"}
             },
             principle_axes=True,
+            # reflectiveness=1,
+            # roughness=.2,
+            # metallic=.6
             # theme_function=darken
         )
-
+        iso = mol.get_surface().get_triangulation(method='isosurface',
+                                                  probe_radius=1,
+                                                  probe_type='ses',
+                                                  grid_samples=50)
+        fig = iso.plot(figure=fig, transparency=.8, line_color=None)
         fig.show()
+        fig.savefig('/Users/Mark/Desktop/whack.glb')
 ```
 
  </div>

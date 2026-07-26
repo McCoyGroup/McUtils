@@ -368,7 +368,7 @@ drawing normals.
     > the display distance units
   - `etc`: `Any`
     > extra plotting options
-  - `:returns`: `object`
+  - `:returns`: `_`
     > the figure
 
 
@@ -378,8 +378,8 @@ drawing normals.
 plot_triangle_mesh(cls, verts, indices, figure=None, *, color='blue', transparency=0.8, backend='x3d', return_objects=False, line_color='black', line_transparency=0.9, line_style=None, vertex_colors=None, vertex_values=None, vertex_colormap='WarioColors', rescale_color_values=True, normals=None, centroids=None, normal_color='black', normal_radius=0.01, normal_scaling=0.5, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L4024)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L4024?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L4023)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L4023?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 

@@ -212,9 +212,9 @@ print("1 Eh =", direct, "cm^-1")
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-12f46f" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-12f46f"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-87050d" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-87050d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-12f46f" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-87050d" markdown="1">
  - [AtomData](#AtomData)
 - [AtomMasses](#AtomMasses)
 - [Conversions](#Conversions)
@@ -223,9 +223,9 @@ print("1 Eh =", direct, "cm^-1")
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-827266" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-827266"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-e7e028" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e7e028"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-827266" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e7e028" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

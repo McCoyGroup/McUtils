@@ -26,8 +26,8 @@ conversion_map: dict
 prep_attrs(self, attrs: 'dict'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L831)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L831?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L838)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L838?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -43,8 +43,8 @@ Canonicalize the material attributes (resolving the color into components/transp
 to_x3d(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L851)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L851?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L859)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DMaterial.py#L859?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
