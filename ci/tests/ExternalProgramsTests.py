@@ -391,6 +391,7 @@ class ExternalProgramsTest(TestCase):
         from Psience.Molecools import Molecule
         from McUtils.Data import SMILESData
         from McUtils.ExternalPrograms import build_templated_smiles
+        import McUtils.Plots as plt
 
         prod = build_templated_smiles(
             SMILESData.functional_group('ketone'),
@@ -406,4 +407,23 @@ class ExternalProgramsTest(TestCase):
         )
         print(prod)
 
-        Molecule.from_string(prod).plot(backend='mesh3D').savefig('/Users/Mark/Desktop/whack.glb')
+        def darken(id, cls, opts):
+            if 'color' in opts:
+                opts['color'] = plt.prep_color(opts['color'], lighten=-.1)
+            return opts
+        fig = Molecule.from_string(prod).plot(
+            backend='mesh3D',
+            atom_text={7:'asdasd'},
+            # display_atom_numbers=True,
+            highlight_atoms=[0, 9, 15, 4],
+            draw_coords={
+                (9, 0, 15):{},
+                (4, 0, 9):{},
+                (4, 0):{'line_color':"red"}
+            },
+            principle_axes=True,
+            # theme_function=darken
+        )
+
+        fig.show()
+        # fig.savefig('/Users/Mark/Desktop/whack.glb')

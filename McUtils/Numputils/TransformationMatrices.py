@@ -725,7 +725,7 @@ def affine_matrix(tmat, shift):
 
 def view_matrix(
         up_vector,
-        view_vector=(0, 0, 1),
+        view_vector=None,
         output_order=(2, 0, 1)
 ):
     """
@@ -748,6 +748,16 @@ def view_matrix(
     :rtype: np.ndarray
     """
     up_vector = vec_ops.vec_normalize(up_vector)
+    if view_vector is None:
+        view_vector = np.array([0, 0, 1])
+        alt_view = np.array([1, 0, 0])
+        view_vector = np.expand_dims(view_vector, list(range(up_vector.ndim-1)))
+        view_vector, _ = np.broadcast_arrays(view_vector, up_vector).copy()
+        alt_view = np.expand_dims(alt_view, list(range(up_vector.ndim-1)))
+        alt_view, _= np.broadcast_arrays(alt_view, up_vector)
+        mask = np.abs(vec_ops.vec_dots(up_vector, view_vector)) > .99
+        view_vector[mask] = alt_view[mask]
+
     d = up_vector.shape[-1]
     base_shape = up_vector.shape[:-1]
     up_vector = up_vector.reshape(-1, d)
