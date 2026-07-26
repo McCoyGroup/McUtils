@@ -78,6 +78,11 @@ __all__ = [
     "check_segment_intersection",
     "uv_mapping",
     "fibonacci_sphere",
+    "uv_sphere",
+    "uv_cylinder",
+    "uv_cone",
+    "uv_box",
+    "orient_mesh_faces_outward",
     "lebedev_grid",
     "lebedev_rule"
 ]
@@ -5824,7 +5829,7 @@ def fibonacci_sphere(samples):
     x = np.cos(theta) * radius
     z = np.sin(theta) * radius
 
-    return np.array([x, y, z]).T
+    return np.stack([x, y, z], axis=-1)
 
 
 def uv_mapping(uv):
@@ -5861,4 +5866,229 @@ def uv_mapping(uv):
     r = np.sqrt(np.clip(1.0 - z * z, 0.0, None))
     return np.moveaxis(np.array([r * np.cos(phi), r * np.sin(phi), z]), 0, -1)
 
+def uv_sphere(polar_samples, azimuthal_samples, return_faces=True):
+    n_theta = max(int(polar_samples), 2)
+    n_phi = max(int(azimuthal_samples), 3)
 
+    # --- vertex directions (unit sphere) ------------------------------------ #
+    theta = np.pi * np.arange(1, n_theta) / n_theta  # interior rings only
+    phi = 2 * np.pi * np.arange(n_phi) / n_phi
+    st, ct = np.sin(theta), np.cos(theta)
+    cp, sp = np.cos(phi), np.sin(phi)
+    ring = np.stack([
+        np.outer(st, cp),
+        np.outer(st, sp),
+        np.broadcast_to(ct[:, None], (n_theta - 1, n_phi)),
+    ], axis=-1).reshape(-1, 3)
+    dirs = np.concatenate([
+        [[0.0, 0.0, 1.0]],  # north pole
+        ring,
+        [[0.0, 0.0, -1.0]],  # south pole
+    ], axis=0)
+
+    north, south = 0, len(dirs) - 1
+
+    index_map: np.ndarray[int] = (
+            1
+            + np.arange(0, n_theta + 1)[:, np.newaxis] * n_phi
+            + (np.arange(n_phi + 1)[np.newaxis, :] % n_phi)
+    )
+
+    if return_faces:
+        faces = np.empty((2 * n_phi + 2 * (n_theta - 2) * n_phi, 3), dtype=int)
+        offset, end = 0, n_phi
+        # north cap
+        faces[offset:end, 0] = north
+        faces[offset:end, 1] = index_map[0, :n_phi]
+        faces[offset:end, 2] = index_map[0, 1:n_phi+1]
+        offset = end
+        # quad bands
+        i = np.arange(n_theta - 2)
+        j = np.arange(n_phi)
+        a = index_map[np.ix_(i, j)].reshape(-1)
+        b = index_map[np.ix_(i, j + 1)].reshape(-1)
+        c = index_map[np.ix_(i + 1, j)].reshape(-1)
+        d = index_map[np.ix_(i + 1, j+1)].reshape(-1)
+        end = offset + 2 * len(a)
+        faces[offset:end:2, 0] = a
+        faces[offset:end:2, 1] = b
+        faces[offset:end:2, 2] = c
+        faces[offset+1:end:2, 0] = b
+        faces[offset+1:end:2, 1] = c
+        faces[offset+1:end:2, 2] = d
+        offset = end
+        # south cap
+        end = offset + n_phi
+        last = n_theta - 1
+        faces[offset:end, 0] = south
+        j = np.arange(n_phi)
+        faces[offset:end, 1] = index_map[last-1, j + 1]
+        faces[offset:end, 2] = index_map[last-1, j]
+
+        # orient outward, independent of the construction winding above
+        tri = dirs[faces]
+        fn = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+        flip = np.einsum('ij,ij->i', fn, tri.mean(axis=1)) < 0
+        faces[flip] = faces[flip][:, ::-1]
+
+        return dirs, faces
+    else:
+        return dirs
+
+def uv_cylinder(azimuthal_samples, return_faces=True):
+    n_phi = max(int(azimuthal_samples), 3)
+    start = np.array([0, 0, 0])
+    end = np.array([0, 0, 1])
+
+    phi = 2 * np.pi * np.arange(n_phi) / n_phi
+    cp = np.cos(phi)
+    sp = np.sin(phi)
+
+    verts = np.zeros((2*n_phi + 2, 3), dtype=float)
+    verts[1:n_phi+1, 0] = cp
+    verts[1:n_phi+1, 1] = sp
+    verts[n_phi+1:2*n_phi+1, 0] = cp
+    verts[n_phi+1:2*n_phi+1, 1] = sp
+    verts[n_phi+1:2*n_phi+1, 2] = 1 # offset along z
+    verts[-1, 2] = 1
+
+    if return_faces:
+        faces = np.empty((4*n_phi, 3), dtype=int)
+
+        j = np.arange(n_phi)
+
+        # bottom cap
+        cb = 0
+        faces[:n_phi, 0] = cb
+        faces[:n_phi, 1] = 1 + (j + 1) % n_phi
+        faces[:n_phi, 2] = 1 + j
+
+        off = 1
+        # barrel
+        b0, b1 = off + j, off + (j + 1) % n_phi
+        t0, t1 = off + n_phi + j, off + n_phi + (j + 1) % n_phi
+        faces[n_phi:3*n_phi:2, 0] = b0
+        faces[n_phi:3*n_phi:2, 1] = b1
+        faces[n_phi:3*n_phi:2, 2] = t0
+        faces[n_phi+1:3*n_phi:2, 0] = b1
+        faces[n_phi+1:3*n_phi:2, 1] = t1
+        faces[n_phi+1:3*n_phi:2, 2] = t0
+
+        # top cap
+        off = n_phi + 1
+        ct = off + n_phi
+        faces[3*n_phi:, 0] = ct
+        faces[3*n_phi:, 1] = off + j
+        faces[3*n_phi:, 2] = off + (j + 1) % n_phi
+
+        faces = np.array(faces, dtype=np.int64)
+        tri = verts[faces]  # robust outward orientation
+        fn = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
+        flip = np.einsum('ij,ij->i', fn, tri.mean(axis=1) - (start + end) / 2) < 0
+        faces[flip] = faces[flip][:, ::-1]
+        return verts, faces
+    return verts
+
+def uv_cone(azimuthal_samples, top_radius=0, tol=1e-6, return_faces=True):
+    cyl_data = uv_cylinder(azimuthal_samples, return_faces=return_faces)
+    if not return_faces:
+        verts = cyl_data
+        faces = None
+    else:
+        verts, faces = cyl_data
+
+    n_phi = max(int(azimuthal_samples), 3)
+    if top_radius < tol:
+        verts = np.concatenate([
+            verts[:1+n_phi],
+            verts[(-1,), :]
+        ], axis=0)
+        faces = faces[:n_phi]
+        top = faces.copy()
+        top[:, 0] = len(verts) - 1
+        top = top[:, ::-1]
+        faces = np.concatenate([faces, top], axis=0)
+    else:
+        verts[1+n_phi:, :2] *= top_radius
+
+    if return_faces:
+        return verts, faces
+    else:
+        return faces
+
+
+def uv_box(return_faces=True, allow_normals=False):
+    if allow_normals:
+        pts = np.array([[0., 0., 0.],
+                        [0., 0., 0.],
+                        [0., 0., 0.],
+                        [0., 0., 1.],
+                        [0., 0., 1.],
+                        [0., 0., 1.],
+                        [0., 1., 0.],
+                        [0., 1., 0.],
+                        [0., 1., 0.],
+                        [0., 1., 1.],
+                        [0., 1., 1.],
+                        [0., 1., 1.],
+                        [1., 0., 0.],
+                        [1., 0., 0.],
+                        [1., 0., 0.],
+                        [1., 0., 1.],
+                        [1., 0., 1.],
+                        [1., 0., 1.],
+                        [1., 1., 0.],
+                        [1., 1., 0.],
+                        [1., 1., 0.],
+                        [1., 1., 1.],
+                        [1., 1., 1.],
+                        [1., 1., 1.]])
+    else:
+        pts = np.array([[0., 0., 0.],
+                        [0., 0., 1.],
+                        [0., 1., 0.],
+                        [0., 1., 1.],
+                        [1., 0., 0.],
+                        [1., 0., 1.],
+                        [1., 1., 0.],
+                        [1., 1., 1.]])
+    if return_faces:
+        if allow_normals:
+            faces = np.array([[9,  6,   0],
+                              [3,  9,   0],
+                              [12, 18, 21],
+                              [12, 21, 15],
+                              [1,  13, 16],
+                              [1,  16,  4],
+                              [22, 19,  7],
+                              [10, 22,  7],
+                              [20, 14,  2],
+                              [8,  20,  2],
+                              [5,  17, 23],
+                              [5,  23, 11]])
+        else:
+            faces = np.array([[3, 2, 0],
+                              [1, 3, 0],
+                              [4, 6, 7],
+                              [4, 7, 5],
+                              [0, 4, 5],
+                              [0, 5, 1],
+                              [7, 6, 2],
+                              [3, 7, 2],
+                              [6, 4, 0],
+                              [2, 6, 0],
+                              [1, 5, 7],
+                              [1, 7, 3]])
+        return pts, faces
+    return pts
+
+def orient_mesh_faces_outward(verts, faces, reference):
+    """Flip face winding so normals point away from `reference` (a point or per-face array)."""
+    tri = verts[faces]
+    normals = vec_crosses(tri[:, 0] - tri[:, 1], tri[:, 2] - tri[:, 1])
+    centroids = tri.mean(axis=1)
+    outward = centroids - np.asarray(reference)
+    flip = vec_dots(normals, outward) < 0
+    faces = faces.copy()
+    faces[flip] = faces[flip][:, (0, 2, 1)]
+    return faces

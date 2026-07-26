@@ -3364,7 +3364,7 @@ class MeshCleaner:
 
 class SphereUnionSurfaceMesh:
     def __init__(self, verts, inds, surf=None, densities=None, tri_map=None, vert_map=None, normals=None,
-                 vertex_normals=None, centers=None, radii=None):
+                 vertex_normals=None, centers=None, radii=None, styles=None):
         """
         **LLM Docstring**
 
@@ -3405,6 +3405,7 @@ class SphereUnionSurfaceMesh:
         self.centers = centers
         self.radii = radii
         self._derivative_term_cache = {}
+        self.styles = styles
 
     def surface_area(self, return_components=False):
         """
@@ -3944,6 +3945,7 @@ class SphereUnionSurfaceMesh:
             surf=surf
         )
 
+    default_distance_units = 'Angstroms'
     def plot(self,
              figure=None,
              *,
@@ -3951,7 +3953,7 @@ class SphereUnionSurfaceMesh:
              vertex_values=None,
              normals=None,
              invert_mesh=False,
-             distance_units='Angstroms',
+             distance_units=None,
              **etc
              ):
         """
@@ -3974,9 +3976,29 @@ class SphereUnionSurfaceMesh:
         :return: the figure
         :rtype: object
         """
+        styles = self.styles
+        if styles is None:
+            styles = {}
+        else:
+            styles = styles.copy()
 
         # TODO: move this to molecule specific class...
+        vv = styles.pop('vertex_values', None)
+        if vertex_values is None:
+            vertex_values = vv
+
+        du = styles.pop('distance_units', None)
+        if distance_units is None:
+            distance_units = du
+        if distance_units is None:
+            distance_units = self.default_distance_units
+
+        etc = styles | etc
+
         conv = UnitsData.convert("BohrRadius", distance_units)
+        vv = styles.pop('vertex_values', None)
+        if vertex_values is None:
+            vertex_values = vv
         if vertex_values is None and function is not None:
             vertex_values = function(self.verts)
 

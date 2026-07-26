@@ -283,7 +283,6 @@ def _rad_d1(i, z, m, r, a, d, v, u, n, R1, R2, Q, rv, dxa, dxb, dxc):
         # we actually need the derivatives of the unit vectors for our rotation axes
         dn = normalized_vec_deriv(n, dn_)
         n = vec_normalize(n)
-        # raise Exception(n.shape, dn.shape, dn_.shape)
 
         # derivatives of rotation matrices
         dR1 = rot_deriv(a, n, dq, dn)
@@ -462,7 +461,6 @@ def cartesian_from_rad_derivatives(
                 dxb = derivs[1][inds, z, m, ib, :]
                 dxc = derivs[1][inds, z, m, ic, :]
 
-                # raise Exception(dxa.shape, derivs[1].shape)
                 der, comps1 = _rad_d1(i, z, m, r, a, d, v, u, n, R1, R2, Q, rv, dxa, dxb, dxc)
                 d1_comps[z, m] = _dumb_comps_wrapper(comps1)
 
@@ -1027,24 +1025,94 @@ def disp_deriv_mat(coords, i, j, at_list, axes=None):
             base_shape=coords.shape[:-2]
         )
     else:
-        proj = np.zeros(coords.shape + (3 * len(at_list),))
-        mats = np.zeros(coords[..., at_list, :].shape + (3,))
-        _, (a, b), ord = np.intersect1d(at_list, [i, j], return_indices=True)
-        inv = np.argsort(ord)
-        a, b = np.array([a, b])[inv,]
-        mats = fill_disp_jacob_atom(
-            mats,
-            [[a, 1], [b, -1]],
-            axes=axes,
-            base_shape=coords.shape[:-2]
-        )
-        proj = fill_proj_jacob_atom(
-            proj,
-            [[x, n, 1] for n,x in enumerate(at_list)],
-            axes=axes,
-            base_shape=coords.shape[:-2]
-        )
-        proj = proj.reshape(proj.shape[:-3] + (-1, proj.shape[-1]))
+        # make shapes line up
+        smol_1 = misc.is_numeric(i)
+        if smol_1: i = [i]
+        smol_2 = misc.is_numeric(j)
+        if smol_2: j = [j]
+        i = np.asanyarray(i)
+        j = np.asanyarray(j)
+        if i.ndim < j.ndim:
+            i = np.broadcast_to(
+                np.expand_dims(i, [-(n+1) for n in range(j.ndim - i.ndim)]),
+                j.shape
+            )
+        elif j.ndim < i.ndim:
+            j = np.broadcast_to(
+                np.expand_dims(j, [-(n+1) for n in range(i.ndim - j.ndim)]),
+                i.shape
+            )
+        else:
+            i, j = np.broadcast_arrays(i, j)
+
+        # gotta do the same for the atom lists so we can thread
+        # properly
+        _ = []
+        for al in at_list:
+            if misc.is_numeric(al):
+                al = [al]
+            al = np.asanyarray(al)
+            if al.ndim < al.ndim:
+                al = np.broadcast_to(
+                    np.expand_dims(al, [-(n + 1) for n in range(i.ndim - al.ndim)]),
+                    i.shape
+                )
+            _.append(al)
+        at_list = _
+
+        all_proj = []
+        all_mats = []
+        i_array, j_array = i, j
+        del i
+        del j
+        for x in itertools.product(*(range(s) for s in i_array.shape)):
+            i = i_array[x]
+            j = j_array[x]
+            al = [a[x] for a in at_list]
+            #TODO: vectorize this too
+            proj = np.zeros(coords.shape + (3 * len(al),))
+            mats = np.zeros(coords[..., al, :].shape + (3,))
+            _, (a, b), ord = np.intersect1d(al, [i, j], return_indices=True)
+            inv = np.argsort(ord)
+            a, b = np.array([a, b])[inv,]
+            submats = fill_disp_jacob_atom(
+                mats,
+                [[a, 1], [b, -1]],
+                axes=axes,
+                base_shape=coords.shape[:-2]
+            )
+            all_mats.append(submats)
+            proj = fill_proj_jacob_atom(
+                proj,
+                [[x, n, 1] for n,x in enumerate(al)],
+                axes=axes,
+                base_shape=coords.shape[:-2]
+            )
+            subproj = proj.reshape(proj.shape[:-3] + (-1, proj.shape[-1]))
+            all_proj.append(subproj)
+
+        proj = np.array(all_proj)
+        proj.reshape(i_array.shape + proj.shape[1:])
+
+        mats = np.array(all_mats)
+        mats = mats.reshape(i_array.shape + mats.shape[1:])
+
+        if smol_1 and smol_2:
+            proj = proj[0]
+            mats = mats[0]
+        else:
+            shared = coords.ndim - 2
+            proj = np.moveaxis(
+                proj,
+                list(range(i_array.ndim)),
+                [shared + i for i in range(i_array.ndim)]
+            )
+            mats = np.moveaxis(
+                mats,
+                list(range(i_array.ndim)),
+                [shared + i for i in range(i_array.ndim)]
+            )
+
         return proj, mats
 
 def prep_disp_expansion(coords, i, j, at_list, fixed_atoms=None, expand=True):
@@ -1142,7 +1210,8 @@ def prep_expanded_mats_from_cache(expansion, i, j, at_list, root_dim=1, core_dim
         new.append(new_sub)
     return new
 
-def prep_unit_vector_expansion_from_cache(cache, coords, i, j, at_list, *, order, expand, fixed_atoms):
+def prep_unit_vector_expansion_from_cache(cache, coords, i, j, at_list, *, order, expand, fixed_atoms,
+                                          raise_on_failure=True):
     """
     **LLM Docstring**
 
@@ -1180,7 +1249,7 @@ def prep_unit_vector_expansion_from_cache(cache, coords, i, j, at_list, *, order
         proj, A_expansion = prep_disp_expansion(coords, i, j, at_list,
                                                 fixed_atoms=fixed_atoms,
                                                 expand=expand)
-        A_norms, A_expansion = td.vec_norm_unit_deriv(A_expansion, order)
+        A_norms, A_expansion = td.vec_norm_unit_deriv(A_expansion, order, raise_on_failure=raise_on_failure)
     else:
         proj, A_base = prep_disp_expansion(coords, i, j, at_list,
                                                 fixed_atoms=None,
@@ -1193,7 +1262,7 @@ def prep_unit_vector_expansion_from_cache(cache, coords, i, j, at_list, *, order
         #     sign = 1
         sign = 1
 
-        key = ((i, j), expand, fixed_atoms)
+        key = ((i, j), expand, fixed_atoms, raise_on_failure)
         A_norms = []
         if key in cache:
             (A_raw, A_norms, A_expansion) = cache[key]
@@ -1201,7 +1270,7 @@ def prep_unit_vector_expansion_from_cache(cache, coords, i, j, at_list, *, order
             _, A_raw = prep_disp_expansion(coords, i, j, [i, j],
                                                     fixed_atoms=None,
                                                     expand=True)
-            A_norms, A_expansion = td.vec_norm_unit_deriv(A_raw, order)
+            A_norms, A_expansion = td.vec_norm_unit_deriv(A_raw, order, raise_on_failure=raise_on_failure)
             cache[key] = (A_raw, A_norms, A_expansion)
 
         A_norms = A_norms[:order+1]
@@ -1400,7 +1469,8 @@ def dist_deriv(coords, i, j, /, order=1, method='expansion', fixed_atoms=None,
                cache=None,
                expanded_vectors=None,
                reproject=True,
-               zero_thresh=None):
+               zero_thresh=None,
+               raise_on_failure=True):
     """
     Gives the derivative of the distance between i and j with respect to coords i and coords j
 
@@ -1419,7 +1489,8 @@ def dist_deriv(coords, i, j, /, order=1, method='expansion', fixed_atoms=None,
             cache,
             coords, j, i, [i, j],
             order=order,
-            fixed_atoms=fixed_atoms, expand=True
+            fixed_atoms=fixed_atoms, expand=True,
+            raise_on_failure=raise_on_failure
         )
         # proj, A_expansion = prep_disp_expansion(coords, j, i, [i, j], fixed_atoms=fixed_atoms, expand=True)
         # base_deriv = td.vec_norm_unit_deriv(A_expansion, order=order)[0]
@@ -2735,7 +2806,9 @@ def _fill_derivs(coords, idx, derivs, method='old'):
             tensor[idx] = d
         vals.append(tensor.reshape(base_shape + (nats * 3,) * n))
     return vals
-def dist_vec(coords, i, j, order=None, method='expansion', cache=None, reproject=True, fixed_atoms=None):
+def dist_vec(coords, i, j, order=None, method='expansion', cache=None, reproject=True, fixed_atoms=None,
+             raise_on_failure=True,
+             ):
     """
     Returns the full vectors that define the linearized version of a bond displacement
 
@@ -2748,7 +2821,8 @@ def dist_vec(coords, i, j, order=None, method='expansion', cache=None, reproject
     derivs = dist_deriv(coords, i, j, method=method, order=(1 if order is None else order),
                         cache=cache,
                         reproject=reproject,
-                        fixed_atoms=fixed_atoms)
+                        fixed_atoms=fixed_atoms,
+                        raise_on_failure=raise_on_failure)
     if reproject and method == 'expansion':
         return derivs[1] if order is None else derivs
     else:

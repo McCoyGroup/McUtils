@@ -167,7 +167,7 @@ class GICSystemToCartesianConverter(CoordinateSystemConverter):
                      derivs=None,
                      return_derivs=None,
                      internal_spec=None,
-                     method='direct',
+                     method='iterative',
                      transformations=None,
                      **kw):
         """
