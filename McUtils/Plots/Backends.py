@@ -12849,7 +12849,7 @@ class X3DAxes(GraphicsAxes3D):
         num_dollar = text.count("$")
         return num_dollar == 2 and text[0] == "$" and text[-1] == "$"
     @classmethod
-    def _prep_font_size(cls, text, font_style, opts,
+    def _prep_font_size(cls, text, font_style, opts, font_size_scaling=1,
                         line_height=10, char_width=None, char_width_scaling=1 / 30):
         """
         **LLM Docstring**
@@ -12882,7 +12882,7 @@ class X3DAxes(GraphicsAxes3D):
         #     char_width = font_size * char_width_scaling
         # w = char_width * max(len(t) for t in lines)
         # vh = char_width * line_height * len(lines)
-        font_size = font_size / 48
+        font_size = font_size * font_size_scaling
         font_style['size'] = font_size
 
         return font_style, opts
