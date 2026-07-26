@@ -820,12 +820,19 @@ class X3DMaterial(X3DOptionsSet):
         "specularColor",
         "shininess",
         "transparency",
+        "baseColorFactor",
+        "metallicFactor",
+        "roughnessFactor",
+        "alphaMode"
         # "metadata"
     }
     conversion_map = {
         "brightness": "ambientIntensity",
         "glow": "emissiveColor",
         "color": "diffuseColor",
+        "metal_color": "baseColorFactor",
+        "metallic": "metallicFactor",
+        "roughness": "roughnessFactor",
         "specularity": "specularColor"
     }
     def prep_attrs(self, attrs:dict):
@@ -847,6 +854,7 @@ class X3DMaterial(X3DOptionsSet):
                 new_attrs['transparency'] = transparency
         else:
             new_attrs = attrs
+        new_attrs = {k:v for k,v in new_attrs.items() if v is not None}
         return super().prep_attrs(new_attrs)
     def to_x3d(self):
         """
@@ -856,7 +864,32 @@ class X3DMaterial(X3DOptionsSet):
 
         :return: the X3D element
         """
-        return X3DHTML.Material(**self.prep_attrs(self.attrs))
+        attrs = self.prep_attrs(self.attrs)
+        if (
+                attrs.get('roughnessFactor') is not None
+                or attrs.get('metallicFactor') is not None
+                or attrs.get('baseColorFactor') is not None
+                or attrs.get('emissiveFactor') is not None
+        ):
+            if 'baseColorFactor' not in attrs and 'diffuseColor' in attrs:
+                attrs['baseColorFactor'] = attrs.pop('diffuseColor')
+            if 'emissiveFactor' not in attrs and 'emissiveColor' in attrs:
+                attrs['emissiveFactor'] = attrs.pop('emissiveColor')
+            if 'metallicFactor' not in attrs and 'shininess' in attrs:
+                attrs['metallicFactor'] = attrs.pop('shininess') / 100
+            if 'transparency' in attrs:
+                tp =  attrs.pop('transparency')
+                bcf = attrs.get('baseColorFactor')
+                if bcf is not None:
+                    attrs["baseColorFactor"] = list(bcf)[:3] + [1-tp]
+                if "alphaMode" not in attrs:
+                    attrs["alphaMode"] = "BLEND"
+                if "alphaCutoff" not in attrs:
+                    attrs["alphaCutoff"] = 0.1
+            mat = X3DHTML.PhysicalMaterial(**attrs)
+            return mat
+        else:
+            return X3DHTML.Material(**attrs)
 
 class X3DTexture(X3DOptionsSet):
     __props__ = {
@@ -1317,7 +1350,10 @@ class X3DScene(X3DPrimitive):
     wrapper_class = X3DHTML.Scene
     default_viewpoint = {'viewAll':True}
     children: list
-    def __init__(self, *children:X3DPrimitive, background=None, viewpoint=None, **opts):
+    def __init__(self, *children:X3DPrimitive,
+                 background=None,
+                 environment=True,
+                 viewpoint=None, **opts):
         """
         **LLM Docstring**
 
@@ -1335,6 +1371,10 @@ class X3DScene(X3DPrimitive):
         super().__init__(*children, **opts)
         if background is not None:
             self.children = [X3DBackground(color=background)] + list(self.children)
+        if environment is True:
+            environment = X3DHTML.Environment(reflectionIntensity=1.0)
+        if environment is not None:
+            self.children = [environment] + list(self.children)
         if len(viewpoint) > 0:
             viewpoint = self.get_view_settings(**viewpoint)
             self.children = [X3DHTML.Viewpoint(**viewpoint)] + list(self.children)
