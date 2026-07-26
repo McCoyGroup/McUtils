@@ -27,7 +27,7 @@ name: str
 ```
 <a id="McUtils.Docs.Stubs.StubSummaryHandler.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, dispatcher, builder=None, filter=None, exclude=<function default_exclude at 0x7f9edc6c75e0>): 
+__init__(self, dispatcher, builder=None, filter=None, exclude=<function default_exclude at 0x7f218c9961f0>): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1198)/

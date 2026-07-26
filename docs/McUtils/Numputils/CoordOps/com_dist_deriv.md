@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.CoordOps.com_dist_deriv">com_dist_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L2292)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2292?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L2363)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2363?message=Update%20Docs)]
 </div>
 
 ```python
@@ -83,7 +83,7 @@ expanded via `TensorDerivatives.vec_norm_unit_deriv`.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/com_dist_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/com_dist_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2292?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L2363?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

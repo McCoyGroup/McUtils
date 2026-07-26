@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.CoordOps.internal_coordinate_tensors">internal_coordinate_tensors</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L3313)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3313?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L3387)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3387?message=Update%20Docs)]
 </div>
 
 ```python
@@ -89,7 +89,7 @@ transformation is also produced via `inverse_internal_coordinate_tensors`.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/internal_coordinate_tensors.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/internal_coordinate_tensors.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3313?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3387?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

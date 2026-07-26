@@ -36,7 +36,7 @@ alongside the name).
  
 <a id="McUtils.Docs.Docstrings.DocstringParser.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, dialect: 'Optional[DocstringDialectHandler]' = None, filter=None, exclude=<function default_exclude at 0x7f9edc6a6b80>): 
+__init__(self, dialect: 'Optional[DocstringDialectHandler]' = None, filter=None, exclude=<function default_exclude at 0x7f218c980790>): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Docstrings.py#L728)/

@@ -1,7 +1,7 @@
 # <a id="McUtils.Numputils.CoordOps.transrot_vecs">transrot_vecs</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L3001)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3001?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L3075)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3075?message=Update%20Docs)]
 </div>
 
 ```python
@@ -82,7 +82,7 @@ term, otherwise the full expansion.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/transrot_vecs.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/transrot_vecs.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3001?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L3075?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

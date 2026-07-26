@@ -1,11 +1,11 @@
-# <a id="McUtils.Numputils.Geometry.bezier_coeffs">bezier_coeffs</a>
+# <a id="McUtils.Numputils.Geometry.uv_sphere">uv_sphere</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Geometry.py#L4546)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L4546?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Geometry.py#L5869)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L5869?message=Update%20Docs)]
 </div>
 
 ```python
-bezier_coeffs(n, t): 
+uv_sphere(polar_samples, azimuthal_samples, return_faces=True): 
 ```
 
 
@@ -53,13 +53,13 @@ bezier_coeffs(n, t):
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Numputils/Geometry/bezier_coeffs.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Numputils/Geometry/bezier_coeffs.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Numputils/Geometry/uv_sphere.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Numputils/Geometry/uv_sphere.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Geometry/bezier_coeffs.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Geometry/bezier_coeffs.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Geometry/uv_sphere.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Geometry/uv_sphere.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L4546?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Geometry.py#L5869?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

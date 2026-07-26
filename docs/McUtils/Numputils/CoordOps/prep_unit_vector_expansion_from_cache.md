@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.CoordOps.prep_unit_vector_expansion_from_cache">prep_unit_vector_expansion_from_cache</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1145)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1145?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1213)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1213?message=Update%20Docs)]
 </div>
 
 ```python
-prep_unit_vector_expansion_from_cache(cache, coords, i, j, at_list, *, order, expand, fixed_atoms): 
+prep_unit_vector_expansion_from_cache(cache, coords, i, j, at_list, *, order, expand, fixed_atoms, raise_on_failure=True): 
 ```
 **LLM Docstring**
 
@@ -86,7 +86,7 @@ fixed_atoms)`, and re-embedded into the `at_list` block with
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/prep_unit_vector_expansion_from_cache.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/prep_unit_vector_expansion_from_cache.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1145?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1213?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

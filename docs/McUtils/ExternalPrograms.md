@@ -503,9 +503,9 @@ print("PDB lines:", len(pdb.splitlines()))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-d2faeb" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-d2faeb"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-8f1e33" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-8f1e33"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-d2faeb" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-8f1e33" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [ParseReports](#ParseReports)
@@ -525,12 +525,13 @@ print("PDB lines:", len(pdb.splitlines()))
 - [SMILESScaffoldGenerator](#SMILESScaffoldGenerator)
 - [RandomSMILESManip](#RandomSMILESManip)
 - [AromaticSMILESManip](#AromaticSMILESManip)
+- [SMILESBipy](#SMILESBipy)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-9bc5f2" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-9bc5f2"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-1070f6" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-1070f6"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-9bc5f2" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-1070f6" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -939,6 +940,30 @@ class ExternalProgramsTest(TestCase):
                                             add_implicit_hydrogens='full')
 
         Molecule.from_string(template).plot(highlight_atoms=[0, 1, 2, 3]).show()
+```
+
+#### <a name="SMILESBipy">SMILESBipy</a>
+```python
+    def test_SMILESBipy(self):
+        from Psience.Molecools import Molecule
+        from McUtils.Data import SMILESData
+        from McUtils.ExternalPrograms import build_templated_smiles
+
+        prod = build_templated_smiles(
+            SMILESData.functional_group('ketone'),
+            SMILESData.functional_group('imine'),
+            {
+                'functional_group': SMILESData.functional_group('carbamate'),
+                'new_bonds': [
+                    [1, 0],
+                    [2, 1]
+                ]
+            },
+            SMILESData.scaffold('m_phenylene'),
+        )
+        print(prod)
+
+        Molecule.from_string(prod).plot(backend='mesh3D').savefig('/Users/Mark/Desktop/whack.glb')
 ```
 
  </div>

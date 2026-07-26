@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.CoordOps.dist_deriv">dist_deriv</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1399)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1399?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/CoordOps.py#L1468)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1468?message=Update%20Docs)]
 </div>
 
 ```python
-dist_deriv(coords, i, j, /, order=1, method='expansion', fixed_atoms=None, cache=None, expanded_vectors=None, reproject=True, zero_thresh=None): 
+dist_deriv(coords, i, j, /, order=1, method='expansion', fixed_atoms=None, cache=None, expanded_vectors=None, reproject=True, zero_thresh=None, raise_on_failure=True): 
 ```
 Gives the derivative of the distance between i and j with respect to coords i and coords j
   - `coords`: `np.ndarray`
@@ -66,7 +66,7 @@ Gives the derivative of the distance between i and j with respect to coords i an
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/CoordOps/dist_deriv.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/CoordOps/dist_deriv.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1399?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/CoordOps.py#L1468?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

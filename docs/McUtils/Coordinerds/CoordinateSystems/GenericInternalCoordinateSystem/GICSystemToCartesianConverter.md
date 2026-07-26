@@ -32,7 +32,7 @@ types(self):
 
 <a id="McUtils.Coordinerds.CoordinateSystems.GenericInternalCoordinateSystem.GICSystemToCartesianConverter.convert_many" class="docs-object-method">&nbsp;</a> 
 ```python
-convert_many(self, coords, *, reference_coordinates, specs, order=0, masses=None, remove_translation_rotation=True, derivs=None, return_derivs=None, internal_spec=None, method='direct', transformations=None, **kw): 
+convert_many(self, coords, *, reference_coordinates, specs, order=0, masses=None, remove_translation_rotation=True, derivs=None, return_derivs=None, internal_spec=None, method='iterative', transformations=None, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/CoordinateSystems/GenericInternalCoordinateSystem/GICSystemToCartesianConverter.py#L164)/
