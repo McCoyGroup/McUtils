@@ -440,7 +440,7 @@ class PlotsTests(TestCase):
         # )
         fig.show()
 
-    @debugTest
+    @validationTest
     def test_SVGBackend3D(self):
 
         fig = Graphics3D(backend='svg3D',
@@ -488,3 +488,21 @@ class PlotsTests(TestCase):
             ["l", [100, 0, 0, 100]],
         ], stroke='pink', use_polyline=True).plot(fig)
         fig.show()
+
+    @debugTest
+    def test_MeshBackend(self):
+        from Psience.Molecools import Molecule
+
+        Molecule.from_string('').plot(backend='mesh3D').savefig("/Users/Mark/Desktop/water.glb")
+        # fig = Graphics3D(backend='mesh3D',
+        #                  # image_size=[500, 500],
+        #                  # padding=0,
+        #                  # plot_range=[[-100, 100], [-100, 100], [-100, 100]],
+        #                  background='gray',
+        #                  view_settings={
+        #                      "view_vector": [0, 0, 1],
+        #                      "up_vector": [0, 1, 0],
+        #                      # "view_position":[0, 0, 1]
+        #                  })
+        # Sphere([1, 0, 0], .1, color='red', transparency=.2).plot(fig)
+        # fig.show()

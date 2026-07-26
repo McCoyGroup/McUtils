@@ -17,6 +17,7 @@ import uuid
 import functools
 import io
 import base64
+import dataclasses
 
 from .. import Numputils as nput
 from .. import Devutils as dev
@@ -1365,8 +1366,21 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
         SceneJSON = 'json'
         Plotly = 'plotly'
         Plotly3D = 'plotly3D'
+        Mesh3D = 'mesh3D'
 
     registered_backends = {}
+    @classmethod
+    def register(cls, name, method=None):
+        if method is None and hasattr(name, 'name'):
+            method = name
+            name = method.name
+        if method is not None:
+            cls.registered_backends[name] = method
+            return method
+        else:
+            def register(method, name=name):
+                return cls.register(name, method)
+            return register
     @classmethod
     def get_default_backends(cls):
         """
@@ -1389,6 +1403,7 @@ class GraphicsBackend(metaclass=abc.ABCMeta):
             cls.DefaultBackends.SVG.value: SVGBackend,
             cls.DefaultBackends.SVG3D.value: SVGBackend3D,
             cls.DefaultBackends.SceneJSON.value: SceneJSONBackend,
+            cls.DefaultBackends.Mesh3D.value: Mesh3DBackend,
         }
     @classmethod
     def lookup(cls, backend, opts=None) -> 'GraphicsBackend':
@@ -14580,3 +14595,704 @@ class SceneJSONBackend(GraphicsBackend):
         :return: the result
         """
         return []
+
+"""
+A `trimesh`-independent `GraphicsBackend` that exports styled 3D scenes to
+glTF 2.0 (`.glb`/`.gltf`) for use in PowerPoint and Blender.
+
+Mesh construction
+-----------------
+Primitives are tessellated into a plain `MeshInformation` dataclass (numpy arrays
+only -- no third-party mesh library required). Spheres, capped cylinders and boxes
+are all convex, so by default we sample points on the surface and take a
+`scipy.spatial.ConvexHull`, exactly as `Zachary.Surfaces.SphereUnionSurface` does
+(surface points -> hull -> `.simplices`, then fix face winding against the
+outward direction).
+
+Pass ``method='trimesh'`` to a draw call to instead build the primitive with
+`trimesh.creation.*`. `trimesh` is only imported on that path (or when you call
+``to_trimesh()``), so the backend has no hard dependency on it.
+
+Output
+------
+  * ``to_gltf()``   -> hand-builds a `pygltflib.GLTF2` straight from the
+                       `MeshInformation` arrays (default writer for .glb/.gltf).
+  * ``to_trimesh()``-> converts each `MeshInformation` to a `trimesh.Trimesh`
+                       and returns a `trimesh.Scene` (for .ply/.obj/.stl or
+                       direct inspection).
+
+Wire-up (in Backends.py): add ``GLTF = 'gltf'`` to
+``GraphicsBackend.DefaultBackends`` and
+``cls.DefaultBackends.GLTF.value: GLTFBackend`` to ``get_default_backends``.
+"""
+
+class MeshAPIManager:
+    _gltf = None
+    _trimesh = None
+
+    @classmethod
+    def gltf(cls):
+        if cls._gltf is None:
+            import pygltflib
+            cls._gltf = pygltflib
+        return cls._gltf
+
+    @classmethod
+    def trimesh(cls):
+        if cls._trimesh is None:
+            import trimesh
+            cls._trimesh = trimesh
+        return cls._trimesh
+
+# ----------------------------------------------------------------------------- #
+#  the mesh container
+# ----------------------------------------------------------------------------- #
+@dataclasses.dataclass
+class MeshInformation:
+    """
+    Backend-neutral mesh: numpy arrays plus a normalized material dict.
+    ``mode`` is 'triangles' | 'lines' | 'points'. Convertible to trimesh on demand.
+    """
+    vertices: np.ndarray
+    faces: np.ndarray | None = None
+    normals: np.ndarray | None = None
+    vertex_colors: np.ndarray | None = None
+    material: dict | None = None
+    mode: str = 'triangles'
+    name: str | None = None
+
+    def __post_init__(self):
+        self.vertices = np.asarray(self.vertices, dtype=float).reshape(-1, 3)
+        if self.faces is not None:
+            self.faces = np.asarray(self.faces, dtype=np.int64).reshape(-1, 3)
+
+    # -- geometry ops -------------------------------------------------------- #
+    def transformed(self, matrix=None, shift=None):
+        v = self.vertices
+        if matrix is not None:
+            v = v @ np.asarray(matrix).T
+        if shift is not None:
+            v = v + np.asarray(shift)
+        return dataclasses.replace(self, vertices=v)
+
+    @classmethod
+    def concatenate(cls, meshes, material=None, name=None):
+        """Merge several same-mode meshes into one, offsetting face indices."""
+        meshes = [m for m in meshes if len(m.vertices)]
+        if not meshes:
+            return cls(np.zeros((0, 3)), np.zeros((0, 3), dtype=np.int64))
+        verts, faces, normals, offset = [], [], [], 0
+        have_normals = all(m.normals is not None for m in meshes)
+        for m in meshes:
+            verts.append(m.vertices)
+            if m.faces is not None and len(m.faces):
+                faces.append(m.faces + offset)
+            if have_normals:
+                normals.append(m.normals)
+            offset += len(m.vertices)
+        return cls(
+            np.concatenate(verts, axis=0),
+            np.concatenate(faces, axis=0) if faces else None,
+            normals=np.concatenate(normals, axis=0) if have_normals else None,
+            material=material if material is not None else meshes[0].material,
+            mode=meshes[0].mode,
+            name=name or meshes[0].name,
+        )
+
+    # -- trimesh interop (only place trimesh is touched) --------------------- #
+    def to_trimesh(self):
+        tm = MeshAPIManager.trimesh()
+        kw = {}
+        if self.material is not None:
+            rgba = (np.array(self.material["base_color"]) * 255).astype(np.uint8)
+            kw["vertex_colors"] = np.tile(rgba, (len(self.vertices), 1))
+        if self.normals is not None:
+            kw["vertex_normals"] = self.normals
+        return tm.Trimesh(vertices=self.vertices, faces=self.faces,
+                          process=False, **kw)
+
+    def to_zachary(self):
+        from ..Zachary import SphereUnionSurfaceMesh
+
+        styles = {'transparency':None}
+        if self.material is not None:
+            styles.update(self.material)
+            color = styles.pop('base_color', None)
+            if color is not None:
+                if not isinstance(color, str):
+                    if len(color) == 4:
+                        color, styles["transparency"] = color[:3], 1 - color[-1]
+                    color = np.array(color) * 255
+                    color = ColorPalette.rgb_code(color)
+                styles['color'] = color
+        return SphereUnionSurfaceMesh(
+            self.vertices,
+            self.faces,
+            vertex_normals=self.normals,
+            styles=styles
+        )
+
+    @classmethod
+    def from_trimesh(cls, mesh, material=None, name=None):
+        return cls(np.asarray(mesh.vertices), np.asarray(mesh.faces),
+                   normals=np.asarray(mesh.vertex_normals) if mesh.vertex_normals is not None else None,
+                   material=material, name=name)
+
+
+# ----------------------------------------------------------------------------- #
+#  axes: accumulate MeshInformation
+# ----------------------------------------------------------------------------- #
+class Mesh3DAxes(GraphicsAxes3D):
+
+    def __init__(self, *meshes, title=None, background=None, **opts):
+        super().__init__()
+        self.meshes: list[MeshInformation] = list(meshes)
+        self.title = title
+        self.background = background
+        self.opts = opts
+
+    # ----------------------------------------------------------------------------- #
+    #  material handling (shared vocabulary with the X3D backend)
+    # ----------------------------------------------------------------------------- #
+    @classmethod
+    def _parse_color(cls, color):
+        """Return (rgb in 0..1, alpha in 0..1 or None). Mirrors X3DOptionsSet.parse_color."""
+        if color is None:
+            return None, None
+        if isinstance(color, str):
+            if color == 'transparent':
+                return [1.0, 1.0, 1.0], 0.0
+            try:
+                bits = [float(s) for s in color.split()]
+            except ValueError:
+                bits = []
+                for c in color.split():
+                    if c.startswith('#'):
+                        c = ColorPalette.parse_rgb_code(c)
+                    else:
+                        c = np.array(ColorPalette.parse_color_string(c))
+                    bits.extend(np.array(c) / 255)
+        else:
+            bits = list(np.asarray(color, dtype=float).ravel())
+        if len(bits) > 3:
+            return bits[:3], bits[3]
+        return bits[:3], None
+
+    @classmethod
+    def _material_from_styles(cls, styles: dict) -> dict:
+        rgb, alpha = cls._parse_color(styles.get('color'))
+        if rgb is None:
+            rgb = [0.5, 0.5, 0.5]
+        if styles.get('transparency') is not None:
+            alpha = 1.0 - float(styles['transparency'])
+        if alpha is None:
+            alpha = 1.0
+        emissive, _ = cls._parse_color(styles.get('glow'))
+        return {
+            "base_color": [rgb[0], rgb[1], rgb[2], alpha],
+            "emissive": emissive,
+            "shininess": styles.get('shininess'),
+            "double_sided": styles.get('solid', True) is False,
+        }
+
+    @classmethod
+    def _uv_sphere(cls, center, radius, n_theta=16, n_phi=32):
+        """Structured lat/long sphere with smooth per-vertex normals (default path)."""
+        center = np.asarray(center, dtype=float)
+        sphere_points, faces = nput.uv_sphere(n_theta, n_phi, return_faces=True)
+        normals = sphere_points.copy()
+        sphere_points *= radius
+        sphere_points += center[np.newaxis, :]
+        return sphere_points, faces, normals
+
+    @classmethod
+    def _uv_cylinder(cls, start, end, radius, n_phi=32, capped=True):
+        """Structured cylinder with smooth barrel normals + flat caps (default path)."""
+        start, end = np.asanyarray(start), np.asanyarray(end)
+        cylinder_points, faces = nput.uv_cylinder(n_phi)
+        normals = cylinder_points.copy()
+        normals[0, 2] = -1
+        ax, norm = nput.vec_normalize(end - start, return_norms=True)
+        cylinder_points[:, :2] *= radius
+        cylinder_points[:, 2] *= norm
+        rot = nput.rotation_matrix([0, 0, 1], ax)
+        normals = normals @ rot
+        cylinder_points = cylinder_points @ rot
+        cylinder_points = cylinder_points + start[np.newaxis]
+        return cylinder_points, faces, normals
+
+    @classmethod
+    def _uv_cone(cls, start, end, radius, n_phi=32, capped=True):
+        """Structured cylinder with smooth barrel normals + flat caps (default path)."""
+        start, end = np.asanyarray(start), np.asanyarray(end)
+        cylinder_points, faces = nput.uv_cone(n_phi)
+        ax, norm = nput.vec_normalize(end - start, return_norms=True)
+        normals = cylinder_points.copy()
+        normals[0, 2] = -1
+        cylinder_points[:, :2] *= radius
+        cylinder_points[:, 2] *= norm
+        rot = nput.rotation_matrix([0, 0, 1], ax)
+        normals = normals @ rot
+        cylinder_points = cylinder_points @ rot
+        cylinder_points = cylinder_points + start[np.newaxis]
+        return cylinder_points, faces, normals
+
+    @classmethod
+    def _uv_box(cls, start, end, normal=None, n_phi=32):
+        """Structured cylinder with smooth barrel normals + flat caps (default path)."""
+        start, end = np.asanyarray(start), np.asanyarray(end)
+        cylinder_points, faces = nput.uv_box(n_phi, allow_normals=True)
+        scalings = end - start
+        if normal is not None:
+            rot = nput.rotation_matrix([0, 0, 1], normal)
+            cylinder_points = cylinder_points @ rot
+            scalings = scalings @ rot
+        cylinder_points *= scalings[np.newaxis]
+        cylinder_points = cylinder_points + start[np.newaxis]
+        return cylinder_points, faces, None
+
+    # ---- required plumbing ------------------------------------------------- #
+    @classmethod
+    def canonicalize_opts(cls, opts): return opts
+
+    def remove(self, *, backend):
+        self.meshes = []
+        self.title = ""
+        self.background = "white"
+    def clear(self, *, backend): self.remove(backend=backend)
+
+    def get_plotter(self, method): ...
+    def get_plot_label(self): return self.title
+    def set_plot_label(self, val, **style): self.title = val
+
+    def get_bbox(self):
+        raise NotImplementedError(...)
+    def set_bbox(self, bbox):
+        raise NotImplementedError(...)
+    def get_facecolor(self):
+        return self.background
+    def set_facecolor(self, fg):
+        self.background = fg
+    def set_aspect_ratio(self, ar): ...
+
+    def get_padding(self): raise NotImplementedError(...)
+    def get_style_list(self): raise NotImplementedError("style list cyclers not supported")
+    def set_style_list(self, props): raise NotImplementedError("style list cyclers not supported")
+    def get_frame_visible(self): raise NotImplementedError(...)
+    def set_frame_visible(self, frame_spec): ...
+    def get_frame_style(self): raise NotImplementedError(...)
+    def set_frame_style(self, frame_spec): ...
+    def get_xlim(self): ...
+    def set_xlim(self, val, **opts): ...
+    def get_xticks(self): ...
+    def set_xticks(self, val, **opts): ...
+    def get_xtick_style(self): ...
+    def set_xtick_style(self, **opts): ...
+    def get_xlabel(self): raise NotImplementedError(...)
+    def set_xlabel(self, val, **style): ...
+    def get_ylim(self): ...
+    def set_ylim(self, val, **opts): ...
+    def get_yticks(self): ...
+    def set_yticks(self, val, **opts): ...
+    def get_ytick_style(self): ...
+    def set_ytick_style(self, **opts): ...
+    def get_ylabel(self): raise NotImplementedError(...)
+    def set_ylabel(self, val, **style): ...
+    def get_zlim(self): ...
+    def set_zlim(self, val, **opts): ...
+    def get_zticks(self): ...
+    def set_zticks(self, val, **opts): ...
+    def get_ztick_style(self): ...
+    def set_ztick_style(self, **opts): ...
+    def get_zlabel(self): raise NotImplementedError(...)
+    def set_zlabel(self, val, **style): ...
+    def get_view_settings(self): return self.opts.get('view', {})
+    def set_view_settings(self, **ops): self.opts.setdefault('view', {}).update(ops)
+
+
+    def _emit(self, mesh):
+        self.meshes.append(mesh)
+        return mesh
+
+    @staticmethod
+    def _uses_trimesh(method):
+        return isinstance(method, str) and method.lower() == 'trimesh'
+
+    # ---- primitives -------------------------------------------------------- #
+    def draw_sphere(self, centers, rads, method=None, n_theta=16, n_phi=32,
+                    samples=64, **styles):
+        """
+        method:
+          None / 'uv'        -> structured uv_sphere, smooth per-vertex normals (default)
+          'hull'/'fibonacci' -> fibonacci points + convex hull, flat shading
+          'trimesh'          -> trimesh.creation.uv_sphere
+        """
+        mat = self._material_from_styles(styles)
+        centers = np.atleast_2d(np.asanyarray(centers, dtype=float))
+        rads = np.broadcast_to(np.asanyarray(rads, dtype=float), (len(centers),))
+
+        if self._uses_trimesh(method):
+            tm = MeshAPIManager.trimesh()
+            pieces = []
+            for c, r in zip(centers, rads):
+                s = tm.creation.uv_sphere(radius=float(r))
+                s.apply_translation(c)
+                pieces.append(MeshInformation.from_trimesh(s, material=mat))
+        else:
+            pieces = []
+            for c, r in zip(centers, rads):
+                v, f, nrm = self._uv_sphere(c, float(r), n_theta, n_phi)
+                pieces.append(MeshInformation(v, f, normals=nrm, material=mat))
+        return self._emit(MeshInformation.concatenate(pieces, material=mat, name='sphere'))
+
+    def draw_cylinder(self, starts, ends, rads, method=None, n_phi=32,
+                      capped=True, samples=32, **styles):
+        """
+        method:
+          None / 'uv'   -> structured barrel with smooth radial normals + flat caps (default)
+          'hull'        -> rim points + convex hull, flat shading
+          'trimesh'     -> trimesh.creation.cylinder
+        """
+        mat = self._material_from_styles(styles)
+        starts = np.atleast_2d(np.asanyarray(starts, dtype=float))
+        ends = np.atleast_2d(np.asanyarray(ends, dtype=float))
+        rads = np.broadcast_to(np.asanyarray(rads, dtype=float), (len(starts),))
+
+        if self._uses_trimesh(method):
+            tm = MeshAPIManager.trimesh()
+            pieces = [MeshInformation.from_trimesh(
+                tm.creation.cylinder(radius=float(r), segment=[a, b]), material=mat)
+                for a, b, r in zip(starts, ends, rads)]
+        else:
+            pieces = []
+            for a, b, r in zip(starts, ends, rads):
+                v, f, nrm = self._uv_cylinder(a, b, float(r), n_phi, capped=True)
+                pieces.append(MeshInformation(v, f, normals=nrm, material=mat))
+        return self._emit(MeshInformation.concatenate(pieces, material=mat, name='cylinder'))
+
+    def draw_cone(self, starts, ends, rads, top_rads=0.0, method=None, n_phi=32,
+                  capped=True, **styles):
+        """
+        Cone (or frustum, via `top_rads`) from base `starts` to tip/top `ends`.
+        method None/'uv' -> smooth slant normals + flat caps (default);
+        'trimesh' -> trimesh.creation.cone (frustum falls back to 'uv').
+        """
+        mat = self._material_from_styles(styles)
+        starts = np.atleast_2d(np.asanyarray(starts, dtype=float))
+        ends = np.atleast_2d(np.asanyarray(ends, dtype=float))
+        rads = np.broadcast_to(np.asanyarray(rads, dtype=float), (len(starts),))
+        top_rads = np.broadcast_to(np.asanyarray(top_rads, dtype=float), (len(starts),))
+
+        use_tm = self._uses_trimesh(method) and np.allclose(top_rads, 0.0)
+        pieces = []
+        for a, b, r, tr in zip(starts, ends, rads, top_rads):
+            if use_tm:
+                tm = MeshAPIManager.trimesh()
+                h = float(np.linalg.norm(b - a))
+                c = tm.creation.cone(radius=float(r), height=h)
+                # trimesh builds along +z from origin; align to the a->b segment
+                c.apply_transform(tm.geometry.align_vectors([0, 0, 1], (b - a) / h))
+                c.apply_translation(a)
+                pieces.append(MeshInformation.from_trimesh(c, material=mat))
+            else:
+                v, f, nrm = self._uv_cone(a, b, float(r), float(tr), n_phi, capped)
+                pieces.append(MeshInformation(v, f, normals=nrm, material=mat))
+        return self._emit(MeshInformation.concatenate(pieces, material=mat, name='cone'))
+
+    def draw_box(self, start, end, method=None, **styles):
+        """
+        method None/'uv' -> flat-shaded box with per-face normals (default);
+        'hull' -> convex hull of the 8 corners (no normals); 'trimesh' -> creation.box.
+        """
+        mat = self._material_from_styles(styles)
+        if self._uses_trimesh(method):
+            tm = MeshAPIManager.trimesh()
+            start = np.asanyarray(start, dtype=float)
+            end = np.asanyarray(end, dtype=float)
+            b = tm.creation.box(extents=np.abs(end - start))
+            b.apply_translation((start + end) / 2)
+            mesh = MeshInformation.from_trimesh(b, material=mat, name='box')
+        else:
+            v, f, nrm = nput.uv_box(start, end)
+            mesh = MeshInformation(v, f, normals=nrm, material=mat, name='box')
+        return self._emit(mesh)
+
+    def draw_triangle(self, points, indices=None, **styles):
+        mat = self._material_from_styles(styles)
+        points = np.asanyarray(points, dtype=float).reshape(-1, 3)
+        if indices is None:
+            indices = np.arange(len(points)).reshape(-1, 3)
+        return self._emit(MeshInformation(points, indices, material=mat, name='mesh'))
+
+    # alias to match the other 3D axes
+    def draw_mesh(self, points, indices, **styles):
+        return self.draw_triangle(points, indices, **styles)
+
+    def draw_line(self, points, tessellate=True, method=None, line_thickness=0.02, **styles):
+        points = np.asanyarray(points, dtype=float).reshape(-1, 3)
+        if tessellate:
+            return self.draw_cylinder(points[:-1], points[1:], line_thickness,
+                                      method=method, **styles)
+        return self._emit(MeshInformation(points, None,
+                                          material=self._material_from_styles(styles),
+                                          mode='lines', name='line'))
+
+    def draw_point(self, points, tessellate=True, method=None, point_radius=0.03, **styles):
+        points = np.atleast_2d(np.asanyarray(points, dtype=float))
+        if tessellate:
+            return self.draw_sphere(points, point_radius, method=method, **styles)
+        return self._emit(MeshInformation(points, None,
+                                          material=self._material_from_styles(styles),
+                                          mode='points', name='points'))
+
+    # 2D-only / unsupported on a 3D export target
+    def draw_disk(self, *a, **kw):
+        raise NotImplementedError("3D export target")
+
+    def draw_rect(self, *a, **kw):
+        raise NotImplementedError("3D export target")
+
+    def draw_poly(self, *a, **kw):
+        raise NotImplementedError("3D export target")
+
+    def draw_arrow(self, points, radius=0.05, method=None, n_phi=32,
+                   head_length=0.25, head_width=2.0, **styles):
+        """Arrow = cylinder shaft + cone head. `points` is a (start, end) pair."""
+        points = np.asanyarray(points, dtype=float).reshape(-1, 3)
+        start, end = points[0], points[-1]
+        axis = end - start
+        length = np.linalg.norm(axis)
+        unit = axis / length
+        neck = end - unit * (head_length * length)
+        return [
+            self.draw_cylinder(neck[None], start[None], radius, method=method,
+                           n_phi=n_phi, capped=True, **styles),
+            self.draw_cone(neck[None], end[None], radius * head_width, 0.0,
+                              method=method, n_phi=n_phi, capped=True, **styles)
+        ]
+
+    def draw_text(self, *a, **kw):
+        raise NotImplementedError("no text primitive in glTF")
+
+    def draw_path(self, *a, **kw):
+        raise NotImplementedError("3D export target")
+
+    # ---- conversions ------------------------------------------------------- #
+    def to_mesh_list(self) -> list[MeshInformation]:
+        return list(self.meshes)
+
+    def to_trimesh(self):
+        tm = MeshAPIManager.trimesh()
+        scene = tm.Scene()
+        for i, m in enumerate(self.meshes):
+            if m.mode == 'triangles' and m.faces is not None and len(m.faces):
+                scene.add_geometry(m.to_trimesh(), geom_name=m.name or f"mesh-{i}")
+        return scene
+
+
+# ----------------------------------------------------------------------------- #
+#  figure: owns axes + save dispatch
+# ----------------------------------------------------------------------------- #
+class Mesh3DFigure(GraphicsFigure):
+    Axes = Mesh3DAxes
+
+    def __init__(self, width=640, height=500, background='white',
+                 figsize=None, id=None, **opts):
+        self.id = id or f"gltf-{uuid.uuid4()}"
+        self.opts = dict(opts)
+        self.width = width; self.height = height
+        if figsize is not None:
+            self.set_size_inches(*figsize)
+        self.background = background
+        self.shown = False
+        super().__init__()
+
+    def __setitem__(self, k, v): self.opts[k] = v
+    def __getitem__(self, k): return self.opts[k]
+
+    @classmethod
+    def construct(cls, **kw) -> 'Mesh3DFigure': return cls(**kw)
+
+    def create_inset(self, bbox, **kw): raise NotImplementedError("not possible")
+
+    def create_axes(self, rows=1, cols=1, spans=1, **kw):
+        if (rows, cols, spans) != (1, 1, 1):
+            raise NotImplementedError("can't create subcanvases")
+        return self.add_axes(self.Axes(**kw))
+
+    def clear(self, *, backend): self.axes = []
+    def close(self, *, backend): self.clear(backend=backend)
+
+    def get_size_inches(self): return [self.width / DPI_SCALING, self.height / DPI_SCALING]
+    def set_size_inches(self, w, h): self.width, self.height = w * DPI_SCALING, h * DPI_SCALING
+    def set_extents(self, extents): ...
+    def get_facecolor(self): return self.background
+    def set_facecolor(self, fg): self.background = fg
+
+    def iter_meshes(self) -> 'Iterable[MeshInformation]':
+        for ax in (self.axes or []):
+            yield from ax.to_mesh_list()
+
+    # -- trimesh passthrough ------------------------------------------------- #
+    def to_trimesh(self):
+        tm = MeshAPIManager.trimesh()
+        scene = tm.Scene()
+        for i, m in enumerate(self.iter_meshes()):
+            if m.mode == 'triangles' and m.faces is not None and len(m.faces):
+                scene.add_geometry(m.to_trimesh(), geom_name=m.name or f"mesh-{i}")
+        return scene
+
+    def to_x3d(self):
+        figure = None
+        for i, m in enumerate(self.iter_meshes()):
+            m: MeshInformation
+            _ = m.to_zachary().plot(
+                background=self.background,
+                figure=figure
+            )
+            if figure is None:
+                figure = _
+        return figure
+
+    # -- glTF via pygltflib (reads MeshInformation directly) ----------------- #
+    def to_gltf(self):
+        g = MeshAPIManager.gltf()
+        gltf = g.GLTF2()
+        gltf.scenes = [g.Scene(nodes=[])]
+        gltf.scene = 0
+        blob = bytearray()
+
+        def _accessor(array, target, comp_type, vec=True):
+            data = np.ascontiguousarray(array).tobytes()
+            pad = (4 - len(blob) % 4) % 4
+            blob.extend(b'\x00' * pad)
+            offset = len(blob)
+            blob.extend(data)
+            gltf.bufferViews.append(
+                g.BufferView(buffer=0, byteOffset=offset, byteLength=len(data), target=target))
+            acc = g.Accessor(bufferView=len(gltf.bufferViews) - 1, componentType=comp_type,
+                             count=len(array), type="VEC3" if vec else "SCALAR")
+            if vec:
+                acc.max = array.max(axis=0).tolist()
+                acc.min = array.min(axis=0).tolist()
+            gltf.accessors.append(acc)
+            return len(gltf.accessors) - 1
+
+        for i, m in enumerate(self.iter_meshes()):
+            material_idx = self._append_material(gltf, g, m.material or {})
+            pos = _accessor(m.vertices.astype(np.float32), g.ARRAY_BUFFER, g.FLOAT)
+            attrs = g.Attributes(POSITION=pos)
+            if m.normals is not None and len(m.normals) == len(m.vertices):
+                attrs.NORMAL = _accessor(np.asarray(m.normals, np.float32),
+                                         g.ARRAY_BUFFER, g.FLOAT)
+
+            prim_mode = {'triangles': 4, 'lines': 1, 'points': 0}[m.mode]
+            idx = None
+            if m.faces is not None and len(m.faces):
+                idx = _accessor(m.faces.astype(np.uint32).ravel(),
+                                g.ELEMENT_ARRAY_BUFFER, g.UNSIGNED_INT, vec=False)
+            prim = g.Primitive(attributes=attrs, indices=idx,
+                               material=material_idx, mode=prim_mode)
+            gltf.meshes.append(g.Mesh(primitives=[prim], name=m.name or f"mesh-{i}"))
+            gltf.nodes.append(g.Node(mesh=len(gltf.meshes) - 1, name=m.name or f"mesh-{i}"))
+            gltf.scenes[0].nodes.append(len(gltf.nodes) - 1)
+
+        gltf.buffers = [g.Buffer(byteLength=len(blob))]
+        gltf.set_binary_blob(bytes(blob))
+        return gltf
+
+    @classmethod
+    def _srgb_to_linear(cls, rgb):
+        """
+        glTF `baseColorFactor`/`emissiveFactor` are LINEAR-space; ColorPalette colours
+        are sRGB. Without this conversion, materials render washed-out / too bright in
+        PowerPoint, Windows 3D Viewer, Blender, etc. Applied only at glTF-write time
+        so the stored material dict keeps intuitive sRGB values (the trimesh
+        vertex-colour path wants sRGB too).
+
+        NOTE: this is for scalar *factors* only. Base-color/emissive *textures* are
+        declared sRGB and decoded by the renderer, so their pixels must NOT be
+        linearized -- see the color-space note in `_append_material`.
+        """
+        c = np.asarray(rgb, dtype=float)
+        return np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
+
+    @classmethod
+    def _append_material(cls, gltf, g, mat):
+        base = mat.get("base_color", [0.5, 0.5, 0.5, 1.0])
+        base_lin = cls._srgb_to_linear(base[:3]).tolist() + [float(base[3])]
+        shininess = mat.get("shininess")
+        pbr = g.PbrMetallicRoughness(
+            baseColorFactor=base_lin,
+            metallicFactor=0.0,
+            roughnessFactor=(1.0 - min(max(shininess / 128.0, 0.0), 1.0))
+            if shininess is not None else 0.8,
+        )
+        material = g.Material(pbrMetallicRoughness=pbr,
+                              doubleSided=bool(mat.get("double_sided", False)))
+        if base[3] < 1.0:
+            material.alphaMode = "BLEND"
+        if mat.get("emissive") is not None:
+            material.emissiveFactor = cls._srgb_to_linear(list(mat["emissive"])[:3]).tolist()
+        # --- COLOR SPACE NOTE for whoever adds textures here -----------------
+        # The scalar *factors* above (baseColorFactor, emissiveFactor) are
+        # LINEAR, so they are run through _srgb_to_linear. A base-color or
+        # emissive *texture* is the OPPOSITE: glTF declares it sRGB and the
+        # renderer decodes it, so its pixels must stay sRGB -- do NOT linearize
+        # texture image data, or it will come out too dark. Concretely:
+        #   * baseColorTexture / emissiveTexture image bytes -> sRGB (as-is)
+        #   * normal / metallicRoughness / occlusion textures -> linear (as-is)
+        #   * scalar factors (here)                            -> linearized
+        # The factor and its texture multiply, so keep the factor linearized and
+        # leave the texture in its declared space.
+        # e.g.  pbr.baseColorTexture = g.TextureInfo(index=tex_idx)  # sRGB image
+        gltf.materials.append(material)
+        return len(gltf.materials) - 1
+
+    # -- unified save -------------------------------------------------------- #
+    def savefig(self, file, format=None, **opts):
+        fmt = (format or (str(file).rsplit('.', 1)[-1] if isinstance(file, str) else 'glb')).lower()
+        if fmt == 'trimesh':
+            return self.to_trimesh()
+        if fmt in ('glb', 'gltf'):
+            gltf = self.to_gltf()
+            if isinstance(file, str):
+                gltf.save(file); return file
+            file.write(b"".join(gltf.save_to_bytes()))
+            return file
+        scene = self.to_trimesh()
+        if isinstance(file, str):
+            scene.export(file); return file
+        file.write(scene.export(file_type=fmt))
+        return file
+
+    def animate_frames(self, frames, **animation_opts):
+        raise NotImplementedError(...)
+
+# ----------------------------------------------------------------------------- #
+#  backend
+# ----------------------------------------------------------------------------- #
+class Mesh3DBackend(GraphicsBackend):
+    Figure = Mesh3DFigure
+
+    def create_raw_figure(self, *args, **kwargs):
+        figure = self.Figure.construct(**kwargs)
+        axes = figure.create_axes()
+        return figure, axes
+
+    class ThemeContextManager(GraphicsBackend.ThemeContextManager):
+        theme_stack = []
+        @classmethod
+        def canonicalize_theme_opts(self, theme_parents, theme_spec): return [], {}
+        def begin_context(self): return self
+        def end_context(self, exc_type, exc_val, exc_tb): ...
+
+    def show_figure(self, graphics: 'Mesh3DFigure', reshow=None):
+        if not graphics.shown:
+            graphics.shown = True
+            graphics.to_x3d().show()
+
+    def get_interactive_status(self) -> bool: return False
+    def disable_interactivity(self): ...
+    def enable_interactivity(self): ...
+    def get_available_themes(self): return []

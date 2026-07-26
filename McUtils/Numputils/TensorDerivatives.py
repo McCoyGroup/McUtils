@@ -1553,7 +1553,7 @@ def odd_fac(x):
     :rtype: int
     """
     return np.prod([2*o+1 for o in range((x-1)//2)])
-def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_failure=True):
+def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_failure=False):
     """
     **LLM Docstring**
 
@@ -1584,12 +1584,13 @@ def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_fail
     mask_pos = r < Options.zero_threshold
     multdim = a.ndim > 1
 
+    base_shape = a.shape[:-1]
     if not multdim:
         if mask_pos:
             if raise_on_failure:
                 raise ValueError("can't get derivatives of zero vector")
             else:
-                return None, None
+                return 0, 0 #TODO: get the shapes right
         else:
             bad_pos = None
     else:
@@ -1609,7 +1610,8 @@ def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_fail
     if not is_numeric(order):
         order = max(order)
 
-    base_expansion = []
+    if base_expansion is None:
+        base_expansion = []
     shared = len(a.shape[:-1])
     for o in range(order + 2):
         if o == 0:
@@ -1636,8 +1638,6 @@ def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_fail
             t += factor * pref
         base_expansion.append(t)
 
-    if bad_pos is not None:
-        raise NotImplementedError("need vectorization cleanup for bad structs")
     # if base_expansion is None:
     #     a = vec_expansion[0]
     #     r = np.linalg.norm(a, axis=-1)
@@ -1665,6 +1665,11 @@ def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_fail
 
     # print([b.shape for b in base_expansion])
     # print([v.shape for v in vec_expansion])
+    if bad_pos is not None:
+        vec_expansion = [
+            v[good_pos]
+            for v in vec_expansion
+        ]
 
     # reexpand in terms of original vectors
     norm_expansion = [base_expansion[0]] + (
@@ -1684,6 +1689,26 @@ def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_fail
             # shared=vec_expansion[0].ndim - 1
         ) if order > 0 else []
     )
+
+    if bad_pos is not None:
+        # need to inject back in the missing positions
+        # we do this by creating a tensor of the appropriate shape at
+        # each depth and injecting constant -1 arrays everywhere
+        new_norm_expansion = []
+        for i,n in enumerate(norm_expansion):
+            full_tensor = np.zeros(base_shape + n.shape[shared:], dtype=float)
+            ix = good_pos + (slice(None),)*i
+            full_tensor[ix] = n
+            new_norm_expansion.append(full_tensor)
+        norm_expansion = new_norm_expansion
+
+        new_unit_expansion = []
+        for i, n in enumerate(unit_expansion):
+            full_tensor = np.zeros(base_shape + n.shape[shared:], dtype=float)
+            ix = good_pos + (slice(None),) * i
+            full_tensor[ix] = n
+            new_unit_expansion.append(full_tensor)
+        unit_expansion = new_unit_expansion
 
     return norm_expansion, unit_expansion
 
@@ -2627,7 +2652,6 @@ def get_nca_symmetrizing_perms(partition,
         if len(perm_inds) != nterms:
             raise ValueError(f"mismatch between reduced perms and actual number, expected {nterms}, got {len(perm_inds)} for partition {partition}")
     elif filter_unique:
-        raise Exception("?")
         all_perm_inds, _ = get_unique_permutations(perm_idx)
         counts = np.unique(partition, return_counts=True)
         inv_perms = np.argsort(all_perm_inds, axis=1)
@@ -2640,7 +2664,6 @@ def get_nca_symmetrizing_perms(partition,
         if len(perm_inds) != nterms:
             raise ValueError(f"mismatch between reduced perms and actual number, expected {nterms}, got {len(perm_inds)} for partition {partition}")
     else:
-        raise Exception("?")
         perm_inds, _ = get_unique_permutations(perm_idx)
         overcount = len(perm_inds) / nterms
         scaling = 1 / overcount

@@ -2799,3 +2799,28 @@ class NumputilsTests(TestCase):
         # print(point)
 
         plt.Plot(*point.T).show()
+
+    @validationTest
+    def test_NormUnitVectorization(self):
+        h_pos = np.array([
+            np.zeros(9),
+            np.zeros(9),
+            np.linspace(-1, 1, 9)
+        ]).T
+        o_pos = np.zeros_like(h_pos)
+        coords = np.concatenate([o_pos[..., np.newaxis, :], h_pos[..., np.newaxis, :]], axis=-2)
+        uuuh = dist_vec(coords, [0, 0], [1, 1], order=1, raise_on_failure=False)
+        print([u.shape for u in uuuh])
+
+    @debugTest
+    def test_SimpleMeshes(self):
+        from McUtils.Zachary import SphereUnionSurfaceMesh
+
+        pts, inds = uv_box(allow_normals=False)
+        print(pts)
+        print(inds)
+
+        SphereUnionSurfaceMesh(
+            pts,
+            inds
+        ).plot().show()

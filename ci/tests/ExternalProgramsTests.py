@@ -385,3 +385,25 @@ class ExternalProgramsTest(TestCase):
                                             add_implicit_hydrogens='full')
 
         Molecule.from_string(template).plot(highlight_atoms=[0, 1, 2, 3]).show()
+
+    @debugTest
+    def test_SMILESBipy(self):
+        from Psience.Molecools import Molecule
+        from McUtils.Data import SMILESData
+        from McUtils.ExternalPrograms import build_templated_smiles
+
+        prod = build_templated_smiles(
+            SMILESData.functional_group('ketone'),
+            SMILESData.functional_group('imine'),
+            {
+                'functional_group': SMILESData.functional_group('carbamate'),
+                'new_bonds': [
+                    [1, 0],
+                    [2, 1]
+                ]
+            },
+            SMILESData.scaffold('m_phenylene'),
+        )
+        print(prod)
+
+        Molecule.from_string(prod).plot(backend='mesh3D').savefig('/Users/Mark/Desktop/whack.glb')
