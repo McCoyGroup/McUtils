@@ -411,7 +411,8 @@ class ExternalProgramsTest(TestCase):
             if 'color' in opts:
                 opts['color'] = plt.prep_color(opts['color'], lighten=-.1)
             return opts
-        fig = Molecule.from_string(prod).plot(
+        mol = Molecule.from_string(prod)
+        fig = mol.plot(
             backend='mesh3D',
             atom_text={7:'asdasd'},
             # display_atom_numbers=True,
@@ -422,8 +423,15 @@ class ExternalProgramsTest(TestCase):
                 (4, 0):{'line_color':"red"}
             },
             principle_axes=True,
+            # reflectiveness=1,
+            # roughness=.2,
+            # metallic=.6
             # theme_function=darken
         )
-
+        iso = mol.get_surface().get_triangulation(method='isosurface',
+                                                  probe_radius=1,
+                                                  probe_type='ses',
+                                                  grid_samples=50)
+        fig = iso.plot(figure=fig, transparency=.8, line_color=None)
         fig.show()
-        # fig.savefig('/Users/Mark/Desktop/whack.glb')
+        fig.savefig('/Users/Mark/Desktop/whack.glb')

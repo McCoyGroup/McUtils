@@ -3974,7 +3974,6 @@ class SphereUnionSurfaceMesh:
         :type distance_units: str
         :param etc: extra plotting options
         :return: the figure
-        :rtype: object
         """
         styles = self.styles
         if styles is None:

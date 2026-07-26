@@ -14731,6 +14731,9 @@ class MeshInformation:
             glow = styles.pop('emissive', None)
             if glow is not None:
                 styles['glow'] = glow
+            double_sided = styles.pop('double_sided')
+            if double_sided:
+                styles['solid'] = False
         return SphereUnionSurfaceMesh(
             self.vertices,
             self.faces,
@@ -14798,6 +14801,8 @@ class Mesh3DAxes(GraphicsAxes3D):
             "base_color": [rgb[0], rgb[1], rgb[2], alpha],
             "emissive": emissive,
             "shininess": styles.get('shininess'),
+            "roughness": styles.get('roughness'),  # explicit override, else from shininess
+            "metallic": styles.get('metallic'),  # explicit override, else 0
             "double_sided": styles.get('solid', True) is False,
         }
 
@@ -15573,16 +15578,41 @@ class Mesh3DFigure(GraphicsFigure):
         c = np.asarray(rgb, dtype=float)
         return np.where(c <= 0.04045, c / 12.92, ((c + 0.055) / 1.055) ** 2.4)
 
+    preblend_glows = True
     @classmethod
     def _append_material(cls, gltf, g, mat):
-        base = mat.get("base_color", [0.5, 0.5, 0.5, 1.0])
+        base = np.array(mat.get("base_color", [0.5, 0.5, 0.5, 1.0]))
+        if cls.preblend_glows and mat.get("emissive") is not None:
+            glow = np.array(mat.get("emissive"))
+            blend = ColorPalette.prep_color(
+                palette=[
+                    ColorPalette.rgb_code(base[:3] * 255),
+                    ColorPalette.rgb_code(glow * 255)
+                ], blending=.5, return_color_code=False)
+            base[:3] = blend
         base_lin = cls._srgb_to_linear(base[:3]).tolist() + [float(base[3])]
+        # Roughness: explicit override wins; else convert Phong shininess with the
+        # standard perceptual map roughness = sqrt(2/(shininess+2)); else a glossy
+        # plastic default. The old linear map (1 - shininess/128) left typical
+        # shininess (~30) at ~0.77 -- so matte that bright viewer IBL washed the
+        # colors out with no specular highlight. sqrt(2/(30+2)) ~= 0.25 keeps the
+        # crisp highlight that gives the render its contrast/saturation.
         shininess = mat.get("shininess")
+        if mat.get("roughness") is not None:
+            roughness = float(mat["roughness"])
+        elif shininess is not None:
+            roughness = float(np.sqrt(2.0 / (float(shininess) + 2.0)))
+        else:
+            if mat.get("emissive") is None:
+                roughness = 0.4
+            else:
+                roughness = 0.0
+        roughness = float(np.clip(roughness, 0.00, 1.0))
+        metallic = float(mat["metallic"]) if mat.get("metallic") is not None else 0.0
         pbr = g.PbrMetallicRoughness(
             baseColorFactor=base_lin,
-            metallicFactor=0.0,
-            roughnessFactor=(1.0 - min(max(shininess / 128.0, 0.0), 1.0))
-            if shininess is not None else 0.8,
+            metallicFactor=metallic,
+            roughnessFactor=roughness,
         )
         material = g.Material(pbrMetallicRoughness=pbr,
                               doubleSided=bool(mat.get("double_sided", False)))
@@ -15590,6 +15620,21 @@ class Mesh3DFigure(GraphicsFigure):
             material.alphaMode = "BLEND"
         if mat.get("emissive") is not None:
             material.emissiveFactor = cls._srgb_to_linear(list(mat["emissive"])[:3]).tolist()
+            # Emissive is ADDED to the lit base and the factor is clamped to [0,1].
+            # Under a bright-IBL viewer the lit base already sits near that level,
+            # so a factor<=1 emissive doesn't out-shine it and reads as washed. The
+            # KHR_materials_emissive_strength extension lifts emissive above 1 so it
+            # actually glows. (For a *pure* glow, also darken the base color so the
+            # emissive isn't diluted by the lit surface.)
+            strength = mat.get("emissive_strength", 2)
+            if strength is not None and float(strength) != 1.0:
+                material.extensions = dict(getattr(material, "extensions", None) or {})
+                material.extensions["KHR_materials_emissive_strength"] = {
+                    "emissiveStrength": float(strength)}
+                used = list(getattr(gltf, "extensionsUsed", None) or [])
+                if "KHR_materials_emissive_strength" not in used:
+                    used.append("KHR_materials_emissive_strength")
+                gltf.extensionsUsed = used
         # --- COLOR SPACE NOTE for whoever adds textures here -----------------
         # The scalar *factors* above (baseColorFactor, emissiveFactor) are
         # LINEAR, so they are run through _srgb_to_linear. A base-color or
