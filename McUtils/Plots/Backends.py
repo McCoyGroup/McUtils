@@ -8356,7 +8356,7 @@ class SVGAxes(GraphicsAxes):
         glow = styles.pop('glow', None)
         if glow is not None:
             color = styles.pop('color')
-            if color is None:
+            if color is None or dev.str_is(color, 'none'):
                 color = glow
             else:
                 color = ColorPalette.prep_color(palette=[glow, color], blending=.5)
@@ -8808,7 +8808,7 @@ class SVGFigure(GraphicsFigure):
         """
         self.kwargs['background'] = fg
 
-    def savefig(self, file, **opts):
+    def savefig(self, file, format="html", **opts):
         """
         **LLM Docstring**
 
@@ -8817,7 +8817,13 @@ class SVGFigure(GraphicsFigure):
         :param file: the destination file/path
         :param opts: extra options
         """
-        return self.to_widget().write(file, **opts)
+        if format == "svg":
+            dev.write_file(
+                file,
+                self.to_svg()
+            )
+        else:
+            return self.to_widget().write(file, **opts)
 
     def animate_frames(self, frames, **animation_opts):
         """
@@ -8853,7 +8859,7 @@ class SVGFigure(GraphicsFigure):
         """
         kwargs = self.kwargs | opts
         ...
-    def to_svg_figure(self, **opts):
+    def to_svg_figure(self, wrap=True, **opts):
         """
         **LLM Docstring**
 

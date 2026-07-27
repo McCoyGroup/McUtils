@@ -386,7 +386,7 @@ class ExternalProgramsTest(TestCase):
 
         Molecule.from_string(template).plot(highlight_atoms=[0, 1, 2, 3]).show()
 
-    @debugTest
+    @validationTest
     def test_SMILESBipy(self):
         from Psience.Molecools import Molecule
         from McUtils.Data import SMILESData
@@ -413,8 +413,8 @@ class ExternalProgramsTest(TestCase):
             return opts
         mol = Molecule.from_string(prod)
         fig = mol.plot(
-            backend='mesh3D',
-            atom_text={7:'asdasd'},
+            backend='svg3D',
+            # atom_text={7:'asdasd'},
             # display_atom_numbers=True,
             highlight_atoms=[0, 9, 15, 4],
             draw_coords={
@@ -426,12 +426,30 @@ class ExternalProgramsTest(TestCase):
             # reflectiveness=1,
             # roughness=.2,
             # metallic=.6
+            theme='simple'
             # theme_function=darken
         )
-        iso = mol.get_surface().get_triangulation(method='isosurface',
-                                                  probe_radius=1,
-                                                  probe_type='ses',
-                                                  grid_samples=50)
-        fig = iso.plot(figure=fig, transparency=.8, line_color=None)
+        # iso = mol.get_surface().get_triangulation(method='isosurface',
+        #                                           probe_radius=1,
+        #                                           probe_type='ses',
+        #                                           grid_samples=50)
+        # fig = iso.plot(figure=fig, transparency=.8, line_color=None)
         fig.show()
-        fig.savefig('/Users/Mark/Desktop/whack.glb')
+        # fig.savefig('/Users/Mark/Desktop/whack.svg')
+        # fig.savefig('/Users/Mark/Desktop/whack.glb')
+
+    def test_BindingSites(self):
+        from Psience.Molecools import Molecule
+        from McUtils.Data import SMILESData
+        import McUtils.Plots as plt
+
+        print(
+            smiles_binding_sites(SMILESData.scaffold('m_phenylene'))
+        )
+        print(
+            smiles_binding_sites("C=CC(O)(O)c1ccccc1")
+        )
+
+        # Molecule.from_string(
+        #     "C=CC(O)(O)c1ccccc1"
+        # ).plot().show()
