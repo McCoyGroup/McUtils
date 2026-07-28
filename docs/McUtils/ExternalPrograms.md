@@ -341,43 +341,54 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[smiles_binding_sites](ExternalPrograms/SMILES/smiles_binding_sites.md)   
+</div>
+   <div class="col" markdown="1">
 [set_smiles_binding_sites](ExternalPrograms/SMILES/set_smiles_binding_sites.md)   
 </div>
    <div class="col" markdown="1">
 [remove_smiles_binding_sites](ExternalPrograms/SMILES/remove_smiles_binding_sites.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [substitute_smiles_atoms](ExternalPrograms/SMILES/substitute_smiles_atoms.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [parse_smiles_and_atom_map](ExternalPrograms/SMILES/parse_smiles_and_atom_map.md)   
 </div>
    <div class="col" markdown="1">
 [build_templated_smiles](ExternalPrograms/SMILES/build_templated_smiles.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [QM9](ExternalPrograms/QM9/QM9.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [SingularityLauncher](ExternalPrograms/Containers/SingularityLauncher.md)   
 </div>
    <div class="col" markdown="1">
 [DockerLauncher](ExternalPrograms/Containers/DockerLauncher.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [PodmanLauncher](ExternalPrograms/Containers/PodmanLauncher.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [CharliecloudLauncher](ExternalPrograms/Containers/CharliecloudLauncher.md)   
 </div>
    <div class="col" markdown="1">
 [CubePropEvaluator](ExternalPrograms/CubeProp/CubePropEvaluator.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
+   
 </div>
    <div class="col" markdown="1">
    
@@ -503,9 +514,9 @@ print("PDB lines:", len(pdb.splitlines()))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-12ff1d" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-12ff1d"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-a773cd" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a773cd"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-12ff1d" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a773cd" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [ParseReports](#ParseReports)
@@ -526,12 +537,13 @@ print("PDB lines:", len(pdb.splitlines()))
 - [RandomSMILESManip](#RandomSMILESManip)
 - [AromaticSMILESManip](#AromaticSMILESManip)
 - [SMILESBipy](#SMILESBipy)
+- [BindingSites](#BindingSites)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-2221cc" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-2221cc"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-63c923" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-63c923"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-2221cc" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-63c923" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -970,8 +982,8 @@ class ExternalProgramsTest(TestCase):
             return opts
         mol = Molecule.from_string(prod)
         fig = mol.plot(
-            backend='mesh3D',
-            atom_text={7:'asdasd'},
+            backend='svg3D',
+            # atom_text={7:'asdasd'},
             # display_atom_numbers=True,
             highlight_atoms=[0, 9, 15, 4],
             draw_coords={
@@ -983,15 +995,30 @@ class ExternalProgramsTest(TestCase):
             # reflectiveness=1,
             # roughness=.2,
             # metallic=.6
+            theme='simple'
             # theme_function=darken
         )
-        iso = mol.get_surface().get_triangulation(method='isosurface',
-                                                  probe_radius=1,
-                                                  probe_type='ses',
-                                                  grid_samples=50)
-        fig = iso.plot(figure=fig, transparency=.8, line_color=None)
+        # iso = mol.get_surface().get_triangulation(method='isosurface',
+        #                                           probe_radius=1,
+        #                                           probe_type='ses',
+        #                                           grid_samples=50)
+        # fig = iso.plot(figure=fig, transparency=.8, line_color=None)
         fig.show()
-        fig.savefig('/Users/Mark/Desktop/whack.glb')
+```
+
+#### <a name="BindingSites">BindingSites</a>
+```python
+    def test_BindingSites(self):
+        from Psience.Molecools import Molecule
+        from McUtils.Data import SMILESData
+        import McUtils.Plots as plt
+
+        print(
+            smiles_binding_sites(SMILESData.scaffold('m_phenylene'))
+        )
+        print(
+            smiles_binding_sites("C=CC(O)(O)c1ccccc1")
+        )
 ```
 
  </div>
