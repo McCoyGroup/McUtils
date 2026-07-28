@@ -870,13 +870,13 @@ class ColorPalette:
         :return: the hex code(s)
         :rtype: str | list
         """
-        if not isinstance(rgb[0], (int, float, np.floating, np.integer)):
+        if nput.is_numeric_array_like(rgb[0]):
             return [
-                cls.rgb_code([r, g, b])
-                for r, g, b in zip(*rgb)
+                cls.rgb_code(list(p), padding=padding)
+                for p in zip(*rgb)
             ]
         rgb = np.round(np.clip(rgb, 0, 255)).astype(int)
-        return f"#{rgb[0]:0>{padding}x}{rgb[1]:0>{padding}x}{rgb[2]:0>{padding}x}"
+        return "#"+"".join(f"{r:0>{padding}x}" for r in rgb)
     @classmethod
     def parse_rgb_code(cls, code, padding=None, return_padding=False, num_channels=None):
         """

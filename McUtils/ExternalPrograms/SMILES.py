@@ -18,6 +18,7 @@ __all__ = [
     "set_smiles_stereochemistry",
     "set_smiles_bond_order",
     "renumber_smiles_atom_map",
+    "smiles_binding_sites",
     "set_smiles_binding_sites",
     "remove_smiles_binding_sites",
     "substitute_smiles_atoms",
@@ -905,6 +906,37 @@ def remove_smiles_binding_sites(smi,
         mol = Chem.RemoveHs(mol)
 
     return Chem.MolToSmiles(mol)
+def _is_valence_site(a):
+    if (
+            a.GetNumImplicitHs() > 0
+            or a.GetNumExplicitHs() > 0
+    ):
+        return True
+    for b in a.GetNeighbors():
+        if b.GetSymbol() == 'H':
+            return True
+    else:
+        for b in a.GetBonds():
+            t = b.GetBondTypeAsDouble()
+            if t > 1:
+                return True
+    return False
+def _get_mol_valence_sites(mol):
+    sites = []
+    for i,a in enumerate(mol.GetAtoms()):
+        if _is_valence_site(a):  sites.append(i)
+    return sites
+def smiles_binding_sites(smi,
+                         cache=None,
+                        valence_site_fallback=True,
+                         add_implicit_hydrogens='full'):
+    # Chem = RDMolecule.allchem_api()
+    mol_data = parse_smiles_and_atom_map(smi, cache=cache, add_implicit_hydrogens=add_implicit_hydrogens)
+    map = mol_data['map']
+    if len(map) == 0:
+        return _get_mol_valence_sites(mol_data['mol'])
+    else:
+        return [k-1 for k in map.keys()]
 def set_smiles_binding_sites(smi,
                              site_map,
                              cache=None,
