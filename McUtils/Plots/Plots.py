@@ -727,6 +727,25 @@ class FilledPlot(Plot):
     known_styles = { "where", "interpolate", "step", "data" } | Plot.patch_parms
     method = "fill_between"
 
+    def _get_plot_data(self, func, xrange, fill_range=None):
+        """
+        **LLM Docstring**
+
+        Resolve the plot's positional arguments into the `(xrange, values)` the plot
+        method expects.
+
+        :param func: a callable or the x data
+        :param xrange: the x range/values
+        :return: the resolved plot data
+        :rtype: tuple
+        """
+        xrange, fvalues = _get_2D_plotdata(func, xrange)
+        if fill_range is None:
+            return xrange, fvalues
+        else:
+            _, fill_range = _get_2D_plotdata(fill_range, xrange)
+            return xrange, fvalues, fill_range
+
 @Plot.register
 class ScatterPlot(Plot):
     """
@@ -910,7 +929,7 @@ class SemilogYPlot(Plot):
     method = 'semilogy'
     # known_styles = {}
 @Plot.register
-class HorizontalFilledPlot(Plot):
+class HorizontalFilledPlot(FilledPlot):
     method = 'fill_betweenx'
     known_styles = {'where', 'step', 'interpolate', 'data'} | Plot.patch_parms
 @Plot.register
