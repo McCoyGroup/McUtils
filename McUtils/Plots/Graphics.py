@@ -1669,6 +1669,10 @@ class Graphics(GraphicsBase):
         self._update_copy_opt('legend_style', value)
         self._prop_manager.legend_style = value
 
+    def invert_axes(self, which='y', **kwargs):
+        self.axes.invert_axes(which=which, **kwargs)
+        return self
+
     @property
     def axes_labels(self):
         """

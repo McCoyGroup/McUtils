@@ -24,6 +24,8 @@ __all__ = [
     "plot_multi"
 ]
 
+__reload_hook__ = [".Graphics", ".Backends"]
+
 ######################################################################################################
 #
 #                                    'adaptive' function sampling
@@ -303,6 +305,8 @@ class Plot(Graphics):
                  figure=None, axes=None, subplot_kw=None,
                  plot_style=None, theme=None,
                  display_format=None,
+                 postprocessor=None,
+                 invert_axes=False,
                  **opts
                  ):
         """
@@ -316,6 +320,10 @@ class Plot(Graphics):
         :type figure: Graphics | None
         :param axes: the axes on which to plot (used in constructing a Graphics, None means make a new one)
         :type axes: None
+        :param postprocessor: a postprocessing function to call after plotting
+        :type postprocessor: Callable
+        :param invert_axes: whether or not to invert the axes
+        :type invert_axes: bool | dict | str
         :param subplot_kw: the keywords to pass on when initializing the plot
         :type subplot_kw: dict | None
         :param colorbar: whether to use a colorbar or what options to pass to the colorbar
@@ -346,6 +354,7 @@ class Plot(Graphics):
         self._initialized = False
         self._data = None
         self.display_format = display_format
+        self.postprocessor = self._resolve_postprocessor(postprocessor, invert_axes)
 
         super().__init__(figure=figure, axes=axes, theme=theme, subplot_kw=subplot_kw, **opts)
         self._init_opts['plot_style'] = plot_style
@@ -357,6 +366,22 @@ class Plot(Graphics):
 
         if len(params) > 0:
             self.plot(*params)
+
+    @classmethod
+    def _resolve_postprocessor(cls, postprocessor, invert_axes):
+        if invert_axes:
+            if invert_axes is True: invert_axes = 'y'
+            if not dev.is_dict_like(invert_axes): invert_axes = {'which':invert_axes}
+            def invert(self):
+                return self.invert_axes(**invert_axes)
+            if postprocessor is None:
+                postprocessor = invert
+            else:
+                def postprocessor(self, _old=postprocessor):
+                    self = invert(self)
+                    self = _old(self)
+                    return self
+        return postprocessor
 
     known_keys = Graphics.known_keys | {
         'method',
@@ -425,6 +450,13 @@ class Plot(Graphics):
         xrange, fvalues = _get_2D_plotdata(func, xrange)
         return xrange, fvalues
 
+    def _prep_data_and_opts(self, data, plot_style):
+        data = self._get_plot_data(*data)
+        return data, plot_style, None
+
+    def _adjust_graphics(self, graphics, data, plot_style, context):
+        return graphics
+
     def _plot_data(self, *data, **plot_style):
         """
         **LLM Docstring**
@@ -435,7 +467,10 @@ class Plot(Graphics):
         :param plot_style: the styling options
         :return: the backend graphics object
         """
-        return self._method(*self._get_plot_data(*data), **plot_style)
+        data, plot_style, context = self._prep_data_and_opts(data, plot_style)
+        graphics = self._method(*data, **plot_style)
+        graphics = self._adjust_graphics(graphics, data, plot_style, context)
+        return graphics
 
     def prep_styles(self, c=None, edgecolors=None, facecolors=None, cmap=None, prep_colors=False, color_value_rescaling=True, **styles):
         """
@@ -507,7 +542,9 @@ class Plot(Graphics):
             if v is not None
         } | styles
         return new_opts
-    def plot(self, *params, insert_default_styles=True, **plot_style):
+    def plot(self, *params,
+             insert_default_styles=True,
+             **plot_style):
         """
         Plots a set of data & stores the result
         :return: the graphics that matplotlib made
@@ -525,6 +562,8 @@ class Plot(Graphics):
                     self.figure.figure.display_format = self.display_format
                 else:
                     self.figure.display_format = self.display_format
+            if self.postprocessor is not None:
+                self.postprocessor(self)
         return self.graphics
     @property
     def artists(self):
@@ -986,19 +1025,7 @@ class VerticalLinePlot(Plot):
         """
         if isinstance(y, (int, float)):
             y = [0, y]
-        return (x, y)
-    def _plot_data(self, *data, **plot_style):
-        """
-        **LLM Docstring**
-
-        Draw the vertical lines via the backend `vlines` method.
-
-        :param data: the resolved `(x, y)` data
-        :param plot_style: the styling options
-        :return: the backend graphics object
-        """
-        x, y = data
-        return self._method(x, *y, **plot_style)
+        return (x,) + tuple(y)
 @Plot.register
 class HorizontalLinePlot(Plot):
     """
@@ -1024,20 +1051,7 @@ class HorizontalLinePlot(Plot):
             x = 1.0
         if isinstance(x, (int, float)):
             x = [0, x]
-        return (x, y)
-    def _plot_data(self, *data, **plot_style):
-        """
-        **LLM Docstring**
-
-        Draw the horizontal lines via the backend `hlines` method.
-
-        :param data: the resolved `(x, y)` data
-        :param plot_style: the styling options
-        :return: the backend graphics object
-        """
-        x, y = data
-        return self._method(y, *x, **plot_style)
-#     known_styles = {'xmin', 'xmax', 'colors', 'linestyles', 'label', 'data'}
+        return (x,) + tuple(y)
 @Plot.register
 class PolygonPlot(Plot):
     method = 'fill'
@@ -1169,7 +1183,46 @@ class HistogramPlot(DataPlot):
     method = 'hist'
     known_styles = {'bins', 'range', 'density', 'weights', 'cumulative',
                     'bottom', 'histtype', 'align', 'orientation', 'rwidth', 'log', 'color',
-                    'label', 'stacked', 'data'}
+                    'label', 'stacked', 'data', 'invert', 'normalize', 'scaling'}
+
+    def _prep_data_and_opts(self, data, plot_style):
+        context = {
+            k: plot_style.pop(k, None)
+            for k in ['invert', 'normalize']
+        }
+        data, plot_style, _ = super()._prep_data_and_opts(data, plot_style)
+        return data, plot_style, context
+
+    def _adjust_graphics(self, graphics, data, plot_style, context):
+        adjusted = False
+        if len(graphics) == 3:
+            _, _, container = graphics
+            if isinstance(container, np.ndarray): container = None
+        else:
+            container = None
+        if container is not None:
+            if context.get('normalize'):
+                max_height = max(patch.get_height() for patch in container.patches)
+                for patch in container.patches:
+                    h = patch.get_height()
+                    patch.set_height(h / max_height)
+                adjusted = True
+            if context.get('scaling'):
+                s = context['scaling']
+                for patch in container.patches:
+                    h = patch.get_height()
+                    patch.set_height(h * s)
+                adjusted = True
+            if context.get('invert'):
+                min_val = min(np.min(patch.get_y()) for patch in container.patches)
+                for patch in container.patches:
+                    h = patch.get_height()
+                    old_y = patch.get_y()
+                    patch.set_y(min_val - old_y - h)
+                adjusted = True
+        if adjusted:
+            self.axes.adjust_view_limits()
+        return graphics
 
 @Plot.register
 class HistogramPlot2D(DataPlot):
@@ -1750,6 +1803,13 @@ class Plot3D(Graphics3D):  # basically a mimic of the Plot class but inheriting 
         """
         return _get_3D_plotdata(func, xrange, yrange)
 
+    def _adjust_graphics(self, graphics, data, plot_style, context):
+        return graphics
+
+    def _prep_data_and_opts(self, data, plot_style):
+        data = self._get_plot_data(*data)
+        return data, plot_style, None
+
     def _plot_data(self, *data, **plot_style):
         """
         **LLM Docstring**
@@ -1760,7 +1820,7 @@ class Plot3D(Graphics3D):  # basically a mimic of the Plot class but inheriting 
         :param plot_style: the styling options
         :return: the backend graphics object
         """
-        return self._method(*self._get_plot_data(*data), **plot_style)
+        return Plot._plot_data(self, *data, **plot_style)
 
     def plot(self, *params, **plot_style):
         """
@@ -1773,11 +1833,7 @@ class Plot3D(Graphics3D):  # basically a mimic of the Plot class but inheriting 
         :param plot_style: the styling options (merged with the defaults)
         :return: the backend graphics object
         """
-        plot_style = dict(self.plot_style, **plot_style)
-        self.graphics = self._plot_data(*params, **plot_style)
-        if not self._initialized:
-            self._initialize()
-        return self.graphics
+        return Plot.plot(self, *params, **plot_style)
     def add_colorbar(self, **kw):
         """
         **LLM Docstring**

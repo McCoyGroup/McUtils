@@ -188,9 +188,9 @@ Components["CartesianAUCoordinates"] = {
 
 freqs_start_tag = FileStreamerTag(
     """VIBRATIONAL FREQUENCIES""",
-    follow_ups="-----------------------"
+    follow_ups="Scaling factor for frequencies"
 )
-freqs_end_tag = "\n\n\n"
+freqs_end_tag = "\n\n\n" # from normal modes
 
 FreqsParser = StringParser(
     Repeating(
@@ -266,6 +266,7 @@ def parse_orca_matrix(orca_mat):
     :return: the parsed matrix
     :rtype: np.ndarray
     """
+    if orca_mat is None: return None
 
     parse = np.concatenate(
         [
@@ -283,7 +284,7 @@ def parse_orca_matrix(orca_mat):
 
 nms_start_tag = FileStreamerTag(
     """NORMAL MODES""",
-    follow_ups="------------"
+    follow_ups="orthogonal"
 )
 nms_end_tag = "\n\n\n"
 

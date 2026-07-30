@@ -1218,15 +1218,14 @@ def set_smiles_bond_order(smiles, start, end, order,
     else:
         return Chem.MolToSmiles(mol)
 
-def set_smiles_chiralities(base_smiles, site_chirality_map):
+def set_smiles_chiralities(base_smiles, site_chirality_map, cache=None,
+                           add_implicit_hydrogens='full',
+                           return_mol=False):
     Chem = RDMolecule.allchem_api()
-    if not isinstance(base_smiles, str):
-        mol = Chem.Mol(base_smiles)
-    else:
-        mol = Chem.MolFromSmiles(base_smiles)
-    atom_map_pos = {atom.GetAtomMapNum(): atom.GetIdx() for atom in mol.GetAtoms()}
-    atom_map_pos.pop(0, None)
+    mol_data = parse_smiles_and_atom_map(base_smiles, cache=cache, add_implicit_hydrogens=add_implicit_hydrogens)
+    mol = Chem.Mol(mol_data['mol'])
 
+    atom_map_pos = mol_data['map']
     for map_num, winding in site_chirality_map.items():
         atom_idx = atom_map_pos[map_num+1]
         winding_map = {
@@ -1241,52 +1240,88 @@ def set_smiles_chiralities(base_smiles, site_chirality_map):
         atom.SetChiralTag(winding_map[winding.upper()])
 
     Chem.AssignStereochemistry(mol, cleanIt=True, force=True)
-    return Chem.MolToSmiles(mol)
-
-def set_smiles_stereochemistry(base_smiles, active_sites,  stereo):
-    Chem = RDMolecule.allchem_api()
-    # inject stereo information in the RDKit graph
-    if not isinstance(base_smiles, str):
-        mol = Chem.Mol(base_smiles)
+    if add_implicit_hydrogens is not None:
+        mol = Chem.RemoveHs(mol)
+    if return_mol:
+        return mol
     else:
-        mol = Chem.MolFromSmiles(base_smiles)
-    atom_map_pos = {atom.GetAtomMapNum():atom.GetIdx() for atom in mol.GetAtoms()}
-    atom_map_pos.pop(0, None)
+        return Chem.MolToSmiles(mol)
 
-    if nput.is_int(active_sites[0]):
-        active_sites = [active_sites]
-    for a,b,c,d in active_sites:
-        i, j, k, l = atom_map_pos[a], atom_map_pos[b], atom_map_pos[c], atom_map_pos[d]
-        # TODO: ensure this is robust, might need to iterate on thiz
-        mol.GetBondBetweenAtoms(j, k).SetStereo(Chem.BondStereo.STEREOE if stereo == "trans" else Chem.BondStereo.STEREOZ)
-        mol.GetBondBetweenAtoms(i, j).SetBondDir(Chem.BondDir.ENDDOWNRIGHT)
-        mol.GetBondBetweenAtoms(k, l).SetBondDir(Chem.BondDir.ENDUPRIGHT)
-        set_smiles_stereochemistry = False
-        with RDMolecule.quiet_errors():
-            for a, b in [(j, k), (k, j)]:
-                if set_smiles_stereochemistry: break
-                for c, d in [(i, l), (l, i)]:
-                    # this is bad practice, I should look up what they are actually doing
-                    # but we are going quick and dirty
-                    try:
-                        mol.GetBondBetweenAtoms(a, b).SetStereoAtoms(c, d)
-                    except RuntimeError:
-                        ...
-                    else:
-                        set_smiles_stereochemistry = True
-                        break
-            else:
-                raise ValueError(f"failed to set stereo atoms for {i},{j},{k},{l}")
+def _get_stereoreference_index(atom, other_index):
+    valid_neighbors = []
+    for neighbor in atom.GetNeighbors():
+        n_idx = neighbor.GetIdx()
+        if n_idx == other_index: continue
 
+        if neighbor.HasProp('_CIPRank'):
+            rank = neighbor.GetIntProp('_CIPRank')
+        else:
+            rank = -1  # Fallback for implicit or unranked atoms (like Hydrogens)
+
+        valid_neighbors.append((rank, n_idx))
+    valid_neighbors.sort(reverse=True, key=lambda x: x[0])
+    return valid_neighbors[0][1] if valid_neighbors else None
+def set_smiles_stereochemistry(base_smiles,
+                               site_pair_stereo_map,
+                               cache=None,
+                               add_implicit_hydrogens='full',
+                               return_mol=False):
+    Chem = RDMolecule.allchem_api()
+    mol_data = parse_smiles_and_atom_map(base_smiles, cache=cache, add_implicit_hydrogens=add_implicit_hydrogens)
+    mol = Chem.Mol(mol_data['mol'])
+
+    atom_map_pos = mol_data['map']
+    stereo_map = {
+        'trans':Chem.BondStereo.STEREOE,
+        'e':Chem.BondStereo.STEREOE,
+        'cis':Chem.BondStereo.STEREOZ,
+        'z':Chem.BondStereo.STEREOZ,
+        'any':Chem.BondStereo.STEREOANY
+    }
+
+    for bond, stereo_atag in site_pair_stereo_map.items():
+        if len(bond) == 4:
+            i, j, k, l = [atom_map_pos[a+1] if a is not None else None for a in bond]
+        else:
+            j, k = [atom_map_pos[a+1] for a in bond]
+            i, l = None, None
+        if i is None:
+            i = _get_stereoreference_index(mol.GetAtomWithIdx(j), k)
+        if l is None:
+            l = _get_stereoreference_index(mol.GetAtomWithIdx(k), j)
+        if i is None or l is None:
+            if add_implicit_hydrogens is not None:
+                mol = Chem.RemoveHs(mol)
+            smi = Chem.MolToSmiles(mol)
+            raise ValueError(f"bad stereorefs ({i}, {l}) for bond ({j}, {k}) in {smi} ")
+        stereo = stereo_map[stereo_atag.lower()]
+        # TODO: ensure this is robust, might need to iterate on this
+        bond = mol.GetBondBetweenAtoms(j, k)
+        bond.SetStereo(stereo)
+        bond.SetStereoAtoms(i, l)
+        if stereo == Chem.BondStereo.STEREOE:
+            mol.GetBondBetweenAtoms(i, j).SetBondDir(Chem.BondDir.ENDDOWNRIGHT)
+            mol.GetBondBetweenAtoms(k, l).SetBondDir(Chem.BondDir.ENDDOWNRIGHT)
+        elif stereo == Chem.BondStereo.STEREOZ:
+            mol.GetBondBetweenAtoms(i, j).SetBondDir(Chem.BondDir.ENDUPRIGHT)
+            mol.GetBondBetweenAtoms(k, l).SetBondDir(Chem.BondDir.ENDDOWNRIGHT)
+        elif stereo == Chem.BondStereo.STEREOANY:
+            mol.GetBondBetweenAtoms(i, j).SetBondDir(Chem.BondDir.EITHERDOUBLE)
+            mol.GetBondBetweenAtoms(k, l).SetBondDir(Chem.BondDir.EITHERDOUBLE)
     Chem.AssignStereochemistry(mol, cleanIt=True, force=True)
-    smi = Chem.MolToSmiles(mol)
-    return smi
+    if add_implicit_hydrogens is not None:
+        mol = Chem.RemoveHs(mol)
+    if return_mol:
+        return mol
+    else:
+        return Chem.MolToSmiles(mol)
 
 def build_templated_smiles(
         scaffold,
         *replacements,
         active_sites=None,
         chiralities=None,
+        stereos=None,
         bond_orders=None,
         atom_replacements=None,
         cache=None,
@@ -1321,12 +1356,16 @@ def build_templated_smiles(
             scaffold = set_smiles_bond_order(scaffold, start, end, t,
                                                cache=cache,
                                                add_implicit_hydrogens=add_implicit_hydrogens)
-
     if chiralities is not None:
         scaffold = set_smiles_chiralities(scaffold,
                                           chiralities,
                                           cache=cache,
                                           add_implicit_hydrogens=add_implicit_hydrogens)
+    if stereos is not None:
+        scaffold = set_smiles_stereochemistry(scaffold,
+                                              stereos,
+                                              cache=cache,
+                                              add_implicit_hydrogens=add_implicit_hydrogens)
     if remove_sites:
         if remove_sites is True: remove_sites = None
         scaffold = remove_smiles_binding_sites(scaffold, remove_sites,

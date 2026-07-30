@@ -329,6 +329,11 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
     def set_grid_style(self, grid_spec):
         raise NotImplementedError(...)
 
+    def invert_axes(self, which='y', **opts):
+        raise NotImplementedError(...)
+    def adjust_view_limits(self):
+        raise NotImplementedError(...)
+
     @abc.abstractmethod
     def get_xlabel(self):
         """
@@ -2116,6 +2121,20 @@ class MPLAxes(GraphicsAxes):
                 self.obj.grid(axis='x', **x)
             if y:
                 self.obj.grid(axis='y', **y)
+
+    def invert_axes(self, which='y', **opts):
+        if which == 'both':
+            self.obj.invert_xaxis()
+            self.obj.invert_yaxis()
+        elif which == 'y':
+            self.obj.invert_yaxis()
+        elif which == 'x':
+            self.obj.invert_xaxis()
+        else:
+            raise ValueError("")
+    def adjust_view_limits(self):
+        self.obj.relim()
+        self.obj.autoscale_view()
 
     def get_xlabel(self):
         """

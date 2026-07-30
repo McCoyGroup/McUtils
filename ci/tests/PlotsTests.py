@@ -489,7 +489,7 @@ class PlotsTests(TestCase):
         ], stroke='pink', use_polyline=True).plot(fig)
         fig.show()
 
-    @debugTest
+    @validationTest
     def test_MeshBackend(self):
         from Psience.Molecools import Molecule
 
@@ -506,3 +506,14 @@ class PlotsTests(TestCase):
         #                  })
         # Sphere([1, 0, 0], .1, color='red', transparency=.2).plot(fig)
         # fig.show()
+
+    @debugTest
+    def test_InvertAxes(self):
+        import matplotlib as mpl
+        # ['gtk3agg', 'gtk3cairo', 'gtk4agg', 'gtk4cairo', 'macosx', 'nbagg', 'notebook', 'qtagg', 'qtcairo', 'qt5agg', 'qt5cairo', 'tkagg', 'tkcairo', 'webagg', 'wx', 'wxagg', 'wxcairo', 'agg', 'cairo', 'pdf', 'pgf', 'ps', 'svg', 'template', 'inline']
+        mpl.use('macosx')
+
+        HistogramPlot(np.random.normal(size=1000),
+                      density=True,
+                      invert=True,
+                      normalize=True).show()
