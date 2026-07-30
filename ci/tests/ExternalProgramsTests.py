@@ -438,6 +438,7 @@ class ExternalProgramsTest(TestCase):
         # fig.savefig('/Users/Mark/Desktop/whack.svg')
         # fig.savefig('/Users/Mark/Desktop/whack.glb')
 
+    @validationTest
     def test_BindingSites(self):
         from Psience.Molecools import Molecule
         from McUtils.Data import SMILESData
@@ -453,3 +454,37 @@ class ExternalProgramsTest(TestCase):
         # Molecule.from_string(
         #     "C=CC(O)(O)c1ccccc1"
         # ).plot().show()
+
+    @debugTest
+    def test_SmilesChiralities(self):
+        print(
+            build_templated_smiles(
+                '[C:1]=[C:2]',
+                '[C:1]C(C)(C)(C)',
+                '[C:1]C(C)(C)(C)',
+                stereos={(0, 1):'cis'}
+            )
+        )
+
+        print(
+            w := build_templated_smiles(
+                '[C:1]=[C:2]',
+                '[C:1]C(C)(C)(C)',
+                '[C:1]C(C)(C)(C)',
+                stereos={(0, 1): 'trans'}
+            )
+        )
+
+        print(
+            build_templated_smiles(
+                w,
+                stereos={(0, 1): 'cis'}
+            )
+        )
+
+        print(
+            build_templated_smiles(
+                w,
+                stereos={(0, 1): 'any'}
+            )
+        )
