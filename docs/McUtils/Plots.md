@@ -608,9 +608,9 @@ figure.show()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-6854ce" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-6854ce"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-03cad1" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-03cad1"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-6854ce" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-03cad1" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -636,12 +636,13 @@ figure.show()
 - [SVGBackend3D](#SVGBackend3D)
 - [MPLPath](#MPLPath)
 - [MeshBackend](#MeshBackend)
+- [InvertAxes](#InvertAxes)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-e6a6e2" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e6a6e2"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-3460d1" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-3460d1"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e6a6e2" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-3460d1" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1171,6 +1172,19 @@ class PlotsTests(TestCase):
         from Psience.Molecools import Molecule
 
         Molecule.from_string('').plot(backend='mesh3D').savefig("/Users/Mark/Desktop/water.glb")
+```
+
+#### <a name="InvertAxes">InvertAxes</a>
+```python
+    def test_InvertAxes(self):
+        import matplotlib as mpl
+        # ['gtk3agg', 'gtk3cairo', 'gtk4agg', 'gtk4cairo', 'macosx', 'nbagg', 'notebook', 'qtagg', 'qtcairo', 'qt5agg', 'qt5cairo', 'tkagg', 'tkcairo', 'webagg', 'wx', 'wxagg', 'wxcairo', 'agg', 'cairo', 'pdf', 'pgf', 'ps', 'svg', 'template', 'inline']
+        mpl.use('macosx')
+
+        HistogramPlot(np.random.normal(size=1000),
+                      density=True,
+                      invert=True,
+                      normalize=True).show()
 ```
 
  </div>

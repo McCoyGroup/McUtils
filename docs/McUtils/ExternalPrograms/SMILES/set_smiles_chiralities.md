@@ -5,7 +5,7 @@
 </div>
 
 ```python
-set_smiles_chiralities(base_smiles, site_chirality_map): 
+set_smiles_chiralities(base_smiles, site_chirality_map, cache=None, add_implicit_hydrogens='full', return_mol=False): 
 ```
 
 

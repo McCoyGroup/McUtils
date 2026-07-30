@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Graphics.GraphicsGrid">GraphicsGrid</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics.py#L2557)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L2557?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics.py#L2561)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L2561?message=Update%20Docs)]
 </div>
 
 A class for easily building sophisticated multi-panel figures.
@@ -32,8 +32,8 @@ GraphicsStack: GraphicsStack
 __init__(self, *args, nrows=None, ncols=None, graphics_class=<class 'McUtils.Plots.Graphics.Graphics'>, figure=None, axes=None, subplot_kw=None, subimage_size=(310, 310), subimage_aspect_ratio='auto', padding=None, spacings=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics.py#L2570)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L2570?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics.py#L2574)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L2574?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -71,8 +71,8 @@ panels.
 initialize_figure_and_axes(self, figure, axes, *, nrows=None, ncols=None, graphics_class=None, fig_kw=None, subplot_kw=None, padding=None, spacings=None, subimage_size=None, subimage_aspect_ratio=None, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2847)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2847?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2851)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2851?message=Update%20Docs)]
 </div>
 Initializes the subplots for the Graphics object
   - `figure`: `Any`
@@ -92,8 +92,8 @@ Initializes the subplots for the Graphics object
 set_options(self, padding=None, spacings=None, background=None, colorbar=None, figure_label=None, **parent_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2942)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2942?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2946)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2946?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -118,8 +118,8 @@ colorbar) on top of the base options, recomputing the image size.
 __iter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2979)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2979?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2983)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2983?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -133,8 +133,8 @@ Iterate over the grid's panels.
 __getitem__(self, item): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2988)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2988?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2992)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L2992?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -150,8 +150,8 @@ Get a panel by `(row, col)` (or a flat index).
 __setitem__(self, item, val): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3004)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3004?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3008)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3008?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -168,8 +168,8 @@ it onto the grid's figure.
 set_image(self, pos, val, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3026)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3026?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3030)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3030?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -190,8 +190,8 @@ figure with the given options.
 calc_image_size(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3045)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3045?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3049)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3049?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -207,8 +207,8 @@ spacings, and the padding.
 image_size(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3081)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3081?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3085)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3085?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -223,8 +223,8 @@ The grid's overall image size (recomputed from the panels on access).
 figure_label(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3107)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3107?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3111)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3111?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -240,8 +240,8 @@ the change for copying).
 padding(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3129)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3129?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3133)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3133?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -257,8 +257,8 @@ the change for copying).
 padding_left(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3151)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3151?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3155)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3155?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -274,8 +274,8 @@ the change for copying).
 padding_right(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3173)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3173?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3177)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3177?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -291,8 +291,8 @@ the change for copying).
 padding_top(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3195)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3195?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3199)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3199?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -308,8 +308,8 @@ the change for copying).
 padding_bottom(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3217)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3217?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3221)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3221?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -325,8 +325,8 @@ the change for copying).
 spacings(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3240)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3240?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3244)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3244?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -342,8 +342,8 @@ the change for copying).
 background(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3263)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3263?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3267)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3267?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -359,8 +359,8 @@ the change for copying).
 colorbar(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3286)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3286?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3290)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics/GraphicsGrid.py#L3290?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -421,7 +421,7 @@ the change for copying).
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Graphics/GraphicsGrid.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Graphics/GraphicsGrid.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L2557?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Graphics.py#L2561?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

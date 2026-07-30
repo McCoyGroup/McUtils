@@ -514,9 +514,9 @@ print("PDB lines:", len(pdb.splitlines()))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-a773cd" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a773cd"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-2696a8" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-2696a8"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a773cd" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-2696a8" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [ParseReports](#ParseReports)
@@ -538,12 +538,13 @@ print("PDB lines:", len(pdb.splitlines()))
 - [AromaticSMILESManip](#AromaticSMILESManip)
 - [SMILESBipy](#SMILESBipy)
 - [BindingSites](#BindingSites)
+- [SmilesChiralities](#SmilesChiralities)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-63c923" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-63c923"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-ac8d7c" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ac8d7c"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-63c923" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ac8d7c" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1018,6 +1019,42 @@ class ExternalProgramsTest(TestCase):
         )
         print(
             smiles_binding_sites("C=CC(O)(O)c1ccccc1")
+        )
+```
+
+#### <a name="SmilesChiralities">SmilesChiralities</a>
+```python
+    def test_SmilesChiralities(self):
+        print(
+            build_templated_smiles(
+                '[C:1]=[C:2]',
+                '[C:1]C(C)(C)(C)',
+                '[C:1]C(C)(C)(C)',
+                stereos={(0, 1):'cis'}
+            )
+        )
+
+        print(
+            w := build_templated_smiles(
+                '[C:1]=[C:2]',
+                '[C:1]C(C)(C)(C)',
+                '[C:1]C(C)(C)(C)',
+                stereos={(0, 1): 'trans'}
+            )
+        )
+
+        print(
+            build_templated_smiles(
+                w,
+                stereos={(0, 1): 'cis'}
+            )
+        )
+
+        print(
+            build_templated_smiles(
+                w,
+                stereos={(0, 1): 'any'}
+            )
         )
 ```
 

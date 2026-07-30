@@ -1,11 +1,11 @@
 # <a id="McUtils.ExternalPrograms.SMILES.build_templated_smiles">build_templated_smiles</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/SMILES.py#L1285)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L1285?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/SMILES.py#L1319)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L1319?message=Update%20Docs)]
 </div>
 
 ```python
-build_templated_smiles(scaffold, *replacements, active_sites=None, chiralities=None, bond_orders=None, atom_replacements=None, cache=None, add_implicit_hydrogens='full', remove_sites=False): 
+build_templated_smiles(scaffold, *replacements, active_sites=None, chiralities=None, stereos=None, bond_orders=None, atom_replacements=None, cache=None, add_implicit_hydrogens='full', remove_sites=False): 
 ```
 
 
@@ -59,7 +59,7 @@ build_templated_smiles(scaffold, *replacements, active_sites=None, chiralities=N
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/SMILES/build_templated_smiles.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/SMILES/build_templated_smiles.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L1285?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L1319?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
