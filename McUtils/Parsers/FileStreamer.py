@@ -1111,7 +1111,14 @@ class SearchStreamReader:
             if follow_ups is not None:
                 prev_tag = tag
                 for tag in follow_ups:
-                    prev_size = self.stream.tag_size(prev_tag)
+                    # `pos` already sits *after* `prev_tag` whenever it was produced by a
+                    # `skip_tag=True` match (the default case), since `_find_tag` adds
+                    # `tag_size` internally before returning that position. Only add
+                    # `prev_size` here when that skip hasn't already happened -- otherwise
+                    # we double count the tag length, overshoot past the very next
+                    # occurrence of the follow-up delimiter, and can end up latching onto
+                    # a much later (and wrong) match of it instead.
+                    prev_size = 0 if skip_tag else self.stream.tag_size(prev_tag)
                     if forward:
                         self.stream.seek(pos+prev_size)
                     else:

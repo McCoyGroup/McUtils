@@ -141,6 +141,70 @@ class CIFParser(FileLineByLineReader):
         """
         super().__init__(file, max_nesting_depth=1, **kw)
         self.fields = fields
+
+    @staticmethod
+    def _tokenize(line):
+        """
+        Whitespace-split a CIF line, keeping ``'...'``/``"..."``-quoted spans as single
+        tokens so values like ``'Bi2.22 O4 Sr0.78'`` or ``'Sillen, L G'`` survive intact.
+
+        :param line: the line to tokenize
+        :type line: str
+        :return: the tokens
+        :rtype: list[str]
+        """
+        tokens = []
+        i, n = 0, len(line)
+        while i < n:
+            c = line[i]
+            if c.isspace():
+                i += 1
+                continue
+            if c in "'\"":
+                q, j = c, i + 1
+                while j < n and not (line[j] == q and (j + 1 >= n or line[j + 1].isspace())):
+                    j += 1
+                tokens.append(line[i + 1:j])
+                i = j + 1
+            else:
+                j = i
+                while j < n and not line[j].isspace():
+                    j += 1
+                tokens.append(line[i:j])
+                i = j
+        return tokens
+
+    @staticmethod
+    def _unquote(s):
+        """
+        Strip one layer of matching surrounding quotes from a CIF value.
+
+        :param s: the value
+        :type s: str
+        :return: the value without surrounding quotes
+        :rtype: str
+        """
+        if len(s) >= 2 and s[0] == s[-1] and s[0] in "'\"":
+            return s[1:-1]
+        return s
+
+    @classmethod
+    def _finalize_scalar(cls, block_data):
+        """
+        Turn the accumulated lines of a scalar item into its value: a ``;``-delimited
+        multi-line text field becomes the text between the ``;`` markers, otherwise the
+        joined, un-quoted value.
+
+        :param block_data: the accumulated lines
+        :type block_data: list[str]
+        :return: the scalar value
+        :rtype: str
+        """
+        semis = [k for k, l in enumerate(block_data) if l.strip() == ";"]
+        if len(semis) >= 2:
+            return "\n".join(t.strip() for t in block_data[semis[0] + 1:semis[1]]).strip()
+        return cls._unquote("".join(block_data).strip())
+
     def check_tag(self, line:str, depth:int=0, active_tag=None, label:str=None, history:list[str]=None):
         """
         **LLM Docstring**
@@ -163,7 +227,9 @@ class CIFParser(FileLineByLineReader):
         if len(line) == 0:
             return self.LineReaderTags.SKIP
         elif line.startswith('data_'):
-            return self.LineReaderTags.BLOCK_START, line[5:], None
+            # unlabeled block start: the whole data block is returned as one flat dict
+            # (a labeled start would nest every item under the data name)
+            return self.LineReaderTags.BLOCK_START
         elif line.startswith('#'):
             if line == '#END':
                 return self.LineReaderTags.BLOCK_END
@@ -298,8 +364,16 @@ class CIFParser(FileLineByLineReader):
                 if not join or isinstance(block_data, str) or not all(isinstance(b, str) for b in block_data):
                     return block_data
                 else:
-                    return "".join(block_data).strip()
+                    return self._finalize_scalar(block_data)
             else:
+                # an unlabeled container block (the data_ block) holds its items as
+                # sub-dicts -> merge them into one flat property dict
+                if any(isinstance(b, dict) for b in block_data):
+                    merged = {}
+                    for b in block_data:
+                        if isinstance(b, dict):
+                            merged.update(b)
+                    return merged
                 key_list = []
                 datasets = {}
                 key_parse = True
@@ -311,7 +385,8 @@ class CIFParser(FileLineByLineReader):
                             key_parse = False # keys come first done
                             for k in key_list:
                                 datasets[k] = []
-                        for k,v in zip(key_list, line.split()):
+                        # quote-aware split so quoted loop values survive
+                        for k, v in zip(key_list, self._tokenize(line)):
                             datasets[k].append(v)
                 return {k:self.handle_block(k, v, join=False) for k,v in datasets.items()}
 

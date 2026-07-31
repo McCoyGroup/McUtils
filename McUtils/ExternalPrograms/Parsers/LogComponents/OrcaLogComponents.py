@@ -188,7 +188,7 @@ Components["CartesianAUCoordinates"] = {
 
 freqs_start_tag = FileStreamerTag(
     """VIBRATIONAL FREQUENCIES""",
-    follow_ups="Scaling factor for frequencies"
+    follow_ups="--------------------"
 )
 freqs_end_tag = "\n\n\n" # from normal modes
 
