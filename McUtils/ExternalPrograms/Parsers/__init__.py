@@ -21,3 +21,5 @@ from .Crest import *; from .Crest import __all__ as exposed
 __all__ += exposed
 from .MOLPRO import *; from .MOLPRO import __all__ as exposed
 __all__ += exposed
+from .QChem import *; from .QChem import __all__ as exposed
+__all__ += exposed

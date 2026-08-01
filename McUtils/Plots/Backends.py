@@ -2513,11 +2513,11 @@ class MPLAxes(GraphicsAxes):
         heights = points[:, 1, 1] - points[:, 0, 1]
 
         rects = coll.PatchCollection([
-            patches.Rectangle(a, w, h, **styles)
+            patches.Rectangle(a, w, h)
             for a,w,h in zip(anchors, widths, heights)
-        ])
+        ], **styles)
 
-        self.obj.add_patch(rects)
+        self.obj.add_collection(rects)
 
     def draw_poly(self, points, **styles):
         """
@@ -2535,10 +2535,10 @@ class MPLAxes(GraphicsAxes):
             points = points[np.newaxis]
 
         polys = coll.PatchCollection([
-            patches.Polygon(pt, **styles) for pt in points
-        ])
+            patches.Polygon(pt) for pt in points
+        ], **styles)
 
-        self.obj.add_patch(polys)
+        return coll.add_collection(polys)
 
     def draw_arrow(self, points, **styles):
         """
