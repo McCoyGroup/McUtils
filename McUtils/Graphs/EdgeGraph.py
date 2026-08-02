@@ -1037,9 +1037,9 @@ class EdgeGraph:
                 for r in rings
             ]
             new_valencies = [
-                cls.compute_edge_centralities(r, map)
-                if len(np.unique(v)) == 1 else
-                v
+                cls.compute_edge_centralities(r, map) + v
+                #     if len(np.unique(v)) == 1 else
+                # v
                 for r, v in zip(rings, new_valencies)
             ]
             break_pos = [
@@ -1074,7 +1074,8 @@ class EdgeGraph:
                                             shortest_path_data=None,
                                             raise_on_failure=True,
                                             allow_intermediate_breaks=True,
-                                            return_breakpoints=False
+                                            return_breakpoints=False,
+                                            max_tries=100
                                             ):
         """
         **LLM Docstring**
@@ -1141,12 +1142,15 @@ class EdgeGraph:
             test_rings = {tuple(sorted(r)) for r in rings}
             chain = None
             breakpoints = None
+            best_chain = None
             if allow_intermediate_breaks is None:
                 allow_intermediate_breaks = len(break_bonds) > cls.intermediate_break_threshold
             while chain is None and len(test_rings) > len(old_rings):
                 n_inds = len(map)
                 prev_rings = None
-                for p_list in itut.unique_product(*break_bonds):
+                for n_try,p_list in enumerate(itut.unique_product(*break_bonds)):
+                    if n_try > max_tries and best_chain is not None:
+                        break
                     if len({tuple(sorted(p)) for p in p_list}) < len(p_list): continue # dupe bond in fused ring
                     # print(p_list)
                     new_map: dict[int, set[int]] = {k: v.copy() for k, v in map.items()}
@@ -1164,7 +1168,10 @@ class EdgeGraph:
                         )
                         breakpoints = p_list
                         if chain is not None:
-                            break
+                            if best_chain is None or len(best_chain[0]) < len(chain):
+                                best_chain = chain, breakpoints
+                            chain = None
+                            # break
                     elif allow_intermediate_breaks:
                         new_tests = [tuple(sorted(r)) for r in new_rings]
                         proper_new_rings = [
@@ -1179,6 +1186,7 @@ class EdgeGraph:
                             break_bonds = break_bonds + new_breaks
                             old_rings = test_rings
                             test_rings = test_rings | new_tests
+                            #TODO: determine whether I continue going here or not...
                             break
                         else:
                             if prev_rings is None:
@@ -1195,10 +1203,15 @@ class EdgeGraph:
                                 break
                                 # raise ValueError(f"different breakpoints lead to same rings: {new_rings}")
                 else:
-                    if raise_on_failure:
-                        raise ValueError("couldn't find a way to break rings?")
+                    if best_chain is None:
+                        if raise_on_failure:
+                            raise ValueError("couldn't find a way to break rings?")
+                        else:
+                            return None
                     else:
-                        return None
+                        break
+            if best_chain is not None:
+                chain, breakpoints = best_chain
             if return_breakpoints:
                 return chain, breakpoints
             else:

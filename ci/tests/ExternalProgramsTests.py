@@ -455,7 +455,7 @@ class ExternalProgramsTest(TestCase):
         #     "C=CC(O)(O)c1ccccc1"
         # ).plot().show()
 
-    @debugTest
+    @validationTest
     def test_SmilesChiralities(self):
         print(
             build_templated_smiles(
@@ -488,3 +488,43 @@ class ExternalProgramsTest(TestCase):
                 stereos={(0, 1): 'any'}
             )
         )
+
+    @debugTest
+    def test_SmilesTokens(self):
+        from Psience.Molecools import Molecule
+        import base64
+
+        smi0, i0 = build_templated_smiles(
+            '[C:1]=[C:2]',
+            '[C:1]C(C)(C)(C)',
+            '[C:1]C(C)(C)(C)',
+            stereos={(0, 1): 'cis'},
+            return_fagment_indices=True
+        )
+        # print(smi0)
+        # print(i0)
+        # return
+        # smi = remove_smiles_binding_sites(smi)
+        mol0 = Molecule.from_string(smi0)
+
+        # need canonicalization to have valid comparisons
+        mol = Molecule.from_string(mol0.to_string('smi'), remove_hydrogens=True)
+        for encoding in [16, 32, 64, 85]:
+            print("==="*10, encoding, "==="*10)
+            RDMolecule.default_tag_byte_encoding = encoding
+            smi2 = mol.to_string('smi', remove_hydrogens=True, include_tag=True)
+            smi, tag = smi2.split('_', 1)
+            tokens = list(SMILESTokenizer().tokenize(smi))
+            print()
+            print("Atoms:", len(tokens))
+            print("SMI:", len(smi))
+            print(smi)
+            print("Tag:", len(tag))
+            print(tag)
+            # print("Bytes:", len(base64.b64decode(tag.encode('utf-8'))))
+            mol2 = Molecule.from_string(smi2, 'smi').get_embedded_molecule(ref=mol, sel=list(range(4)))
+            print(mol2.get_rmsd(mol, sel=list(range(4))))
+            # f1 = mol.plot(backend='x3d')
+            # mol2.plot(backend='x3d', figure=f1, highlight_atoms=True)
+            # mol2.plot(backend='x3d', display_atom_numbers=True).show()
+            # f1.show()

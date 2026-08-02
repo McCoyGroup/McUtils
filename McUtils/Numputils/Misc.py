@@ -15,6 +15,7 @@ __all__ = [
     'is_zero',
     'is_array_like',
     'is_numeric_array_like',
+    'arrays_are_equal',
     'flatten_inds'
 ]
 
@@ -87,7 +88,7 @@ def is_zero(obj, numeric_types=None):
     """
     return is_numeric(obj, types=numeric_types) and obj == 0
 
-def is_array_like(obj, valid_dtypes=None, ndim=None):
+def is_array_like(obj, valid_dtypes=None, ndim=None, return_array=False):
     """
     **LLM Docstring**
 
@@ -108,29 +109,34 @@ def is_array_like(obj, valid_dtypes=None, ndim=None):
     """
     if isinstance(obj, np.ndarray):
         if ndim is None:
-            return True
+            mask = True
         else:
-            return obj.ndim == ndim
+            mask = obj.ndim == ndim
     elif is_atomic(obj):
-        return False
+        mask = False
     else:
         try:
             arr = np.asanyarray(obj)
         except ValueError:
-            return False
+            mask = False
         else:
+            obj = arr
             if (
                     valid_dtypes is not None
                     and not any(np.issubdtype(arr.dtype, dt) for dt in valid_dtypes)
             ):
-                return False
+                mask = False
             elif arr.dtype == np.dtype(object):
                 return False
             elif ndim is None:
-                return True
+                mask = True
             else:
-                return arr.ndim == ndim
-def is_numeric_array_like(obj, ndim=None):
+                mask = arr.ndim == ndim
+    if return_array:
+        return mask, obj
+    else:
+        return mask
+def is_numeric_array_like(obj, ndim=None, return_array=False):
     """
     **LLM Docstring**
 
@@ -146,7 +152,25 @@ def is_numeric_array_like(obj, ndim=None):
     :return: whether the object is a numeric array
     :rtype: bool
     """
-    return is_array_like(obj, [np.number], ndim=ndim)
+    return is_array_like(obj, [np.number], ndim=ndim, return_array=return_array)
+
+def arrays_are_equal(a, b, rtol=1e-09, atol=1e-09, ignore_non_numeric=True, return_arrays=False):
+    numeric_array, a = is_numeric_array_like(a, return_array=True)
+    numeric_array2, b = is_numeric_array_like(b, return_array=True)
+    if numeric_array and numeric_array2:
+        mask = np.allclose(a, b, rtol=rtol, atol=atol)
+    elif not ignore_non_numeric:
+        if isinstance(a, np.ndarray) and isinstance(b, np.ndarray):
+            mask = np.all(a == b)
+        else:
+            mask = None
+    else:
+        mask = None
+
+    if return_arrays:
+        return mask, (a, b)
+    else:
+        return mask
 
 def downcast_index_array(a, max_val):
     """

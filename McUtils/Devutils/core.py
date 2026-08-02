@@ -5,6 +5,7 @@ import itertools
 # import enum
 import types
 import numbers
+import math
 
 __all__ = [
     "default",
@@ -35,7 +36,8 @@ __all__ = [
     "merge_dicts",
     "context_wrap",
     "slice_dict",
-    "dict_take"
+    "dict_take",
+    "is_equal"
 ]
 
 class SingletonType:
@@ -138,6 +140,25 @@ def is_int(obj,
     **LLM Docstring**
 
     Test whether an object is an integer.
+
+    :param obj: the object to test
+    :param interface_types: the integral types
+    :param exlusion_types: types to exclude
+    :param implementation_props: attributes an object must have to qualify
+    :return: whether the object is an integer
+    :rtype: bool
+    """
+    return is_interface_like(obj, interface_types, exlusion_types, implementation_props)
+
+def is_float(obj,
+           interface_types=(numbers.Number,),
+           exlusion_types=(numbers.Integral,),
+           implementation_props=None
+           ):
+    """
+    **LLM Docstring**
+
+    Test whether an object is a float, not an int.
 
     :param obj: the object to test
     :param interface_types: the integral types
@@ -707,3 +728,35 @@ def dict_take(dict_obj:types.MappingProxyType, spec):
             raise IndexError("can't take elements {rem}")
 
         return dict(results[n] for n in spec)
+
+def is_equal(a, b, rel_tol=1e-09, abs_tol=1e-09, check_arrays=True):
+    #TODO: make this more flexible
+    check_floats = rel_tol > 0 and abs_tol > 0
+    if check_floats and is_float(a) or is_float(b):
+        return math.isclose(a, b, rel_tol=rel_tol, abs_tol=abs_tol)
+    elif is_atomic(a):
+        if is_atomic(b):
+            return a == b
+        else:
+            return False
+    elif is_atomic(b):
+        return False
+    else:
+        if check_floats:
+            eq = None
+            if check_arrays:
+                from ..Numputils import arrays_are_equal
+                eq, (a, b) = arrays_are_equal(a, b, rtol=rel_tol, atol=abs_tol,
+                                              ignore_non_numeric=False,
+                                              return_arrays=True)
+            if eq is None:
+                eq = all(
+                    is_equal(x, y, rel_tol=rel_tol, abs_tol=abs_tol)
+                    for x, y in zip(a, b)
+                )
+            return eq
+        else:
+            eq = a == b
+            if check_arrays and not eq is True or eq is False:
+                eq = eq.all()
+            return eq

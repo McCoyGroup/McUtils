@@ -778,11 +778,13 @@ class FilledPlot(Plot):
         :return: the resolved plot data
         :rtype: tuple
         """
+        og_xrange = xrange
         xrange, fvalues = _get_2D_plotdata(func, xrange)
         if fill_range is None:
             return xrange, fvalues
         else:
-            _, fill_range = _get_2D_plotdata(fill_range, xrange)
+            if callable(fill_range):
+                fill_range = fill_range(xrange)
             return xrange, fvalues, fill_range
 
 @Plot.register
