@@ -6,6 +6,7 @@ import base64
 import itertools
 import functools
 import tempfile as tf
+import json
 import numpy as np, io, os
 from .. import Numputils as nput
 from .. import Devutils as dev
@@ -884,13 +885,21 @@ class RDMolecule(ExternalMolecule):
                         #         # edit_mol.RemoveBond(b)
                         # if did_edits:
                         #     rdkit_mol = edit_mol.GetMol()
-
-            rdkit_mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
+            elif dev.str_is(add_implicit_hydrogens, 'strip'):
+                add_implicit_hydrogens = False
+                for atom in rdkit_mol.GetAtoms():
+                    if atom.GetAtomMapNum() != 0:  # only fix mapped atoms
+                        atom.SetNoImplicit(False)  # allow implicit Hs again
+                        atom.SetNumExplicitHs(0)  # clear any explicit H count
+            if add_implicit_hydrogens:
+                rdkit_mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
 
         if reorder_from_atom_map:
             base_map = [a.GetAtomMapNum() for a in rdkit_mol.GetAtoms()]
             base_map = [len(base_map)+1 if a == 0 else a for a in base_map]
             # need to use a stable sort
+            for i,a in enumerate(rdkit_mol.GetAtoms()):
+                a.SetIntProp("og_idx", i)
             rdkit_mol = Chem.RenumberAtoms(rdkit_mol, np.argsort(base_map, kind='merge').tolist())
 
         return rdkit_mol
@@ -980,15 +989,26 @@ class RDMolecule(ExternalMolecule):
             strict_cxsmiles=strict_cxsmiles,
             remove_hydrogens=remove_hydrogens,
             replacements=replacements,
-            add_implicit_hydrogens=add_implicit_hydrogens,
+            add_implicit_hydrogens=(
+                'strip'
+                    if conf_tag is not None else
+                add_implicit_hydrogens
+            ),
             reorder_from_atom_map=reorder_from_atom_map,
             **opts
         )
 
         if coords is None and conf_tag is not None:
             #TODO: add precision support
-            graph = cls.get_mol_edge_graph(rdkit_mol)
+            if reorder_from_atom_map:
+                reordering = [a.GetIntProp('og_idx') for a in rdkit_mol.GetAtoms()]
+            else:
+                reordering = None
+            graph = cls.get_mol_edge_graph(rdkit_mol, reordering=reordering)
             coords = cls.conformer_from_smiles_tag(conf_tag, graph)
+            if reordering is not None:
+                new_ord = np.argsort(reordering)
+                coords = coords[reordering,]
 
         if coords is None:
             if call_add_hydrogens: # RDKit is super borked for most molecules
@@ -1676,9 +1696,11 @@ class RDMolecule(ExternalMolecule):
         if remove_hydrogens:
             if remove_implicit_hydrogens is None: remove_implicit_hydrogens = False
             mol = Chem.Mol(mol)
-            if include_tag and not preserve_atom_order:
-                for atom in mol.GetAtoms():
-                    atom.SetAtomMapNum(atom.GetIdx()+1)
+            for atom in mol.GetAtoms():
+                atom.SetIntProp('preremoval_idx', atom.GetIdx())
+            # if include_tag and not preserve_atom_order:
+            #     for atom in mol.GetAtoms():
+            #         atom.SetAtomMapNum(atom.GetIdx()+1)
             mol = Chem.RemoveHs(mol, implicitOnly=remove_implicit_hydrogens, sanitize=False, updateExplicitCount=False)
         new_opts = {
             self._camel_case(k):v for k,v in opts.items()
@@ -1687,43 +1709,54 @@ class RDMolecule(ExternalMolecule):
             if coords is None:
                 coords = self.coords
             if remove_hydrogens:
-                if not preserve_atom_order:
-                    coords = [
-                        coords[atom.GetAtomMapNum() - 1] for atom in mol.GetAtoms()
-                    ]
-                    for atom in mol.GetAtoms():
-                        atom.SetAtomMapNum(og_atom_map[atom.GetAtomMapNum() - 1])
-                else:
-                    remapping = np.array([
-                        atom.GetAtomMapNum() - 1
-                        for atom in mol.GetAtoms()
-                    ])
-                    suborder = np.argsort(remapping, kind='merge')
-                    coords = [
-                        coords[o]
-                        for o in remapping[suborder]
-                    ]
-                    for atom,o in zip(mol.GetAtoms(), suborder):
-                        atom.SetAtomMapNum(int(o+1))
-            smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
-            # track coordinates into new Mol
-            if not preserve_atom_order:
-                mol = Chem.Mol(mol)
-                for atom in mol.GetAtoms():
-                    atom.SetAtomMapNum(atom.GetIdx()+1)
-                ord_smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
-                ord_mol = self.parse_smiles(ord_smi, remove_hydrogens=False)
-                coords = [
-                    coords[atom.GetAtomMapNum()-1]
-                    for atom in ord_mol.GetAtoms()
+                subord = [
+                    atom.GetIntProp('preremoval_idx')
+                    for atom in mol.GetAtoms()
                 ]
-            else:
-                ord_mol = self.parse_smiles(smi, remove_hydrogens=remove_hydrogens)
-                base_map = [a.GetAtomMapNum() for a in ord_mol.GetAtoms()]
-                base_map = [len(base_map) + 1 if a == 0 else a for a in base_map]
-                # need to use a stable sort
-                ord_mol = Chem.RenumberAtoms(ord_mol, np.argsort(base_map, kind='merge').tolist())
-            graph = self.get_edge_graph(ord_mol)
+                coords = coords[subord,]
+            #     if not preserve_atom_order:
+            #         coords = [
+            #             coords[atom.GetAtomMapNum() - 1] for atom in mol.GetAtoms()
+            #         ]
+            #         for atom in mol.GetAtoms():
+            #             atom.SetAtomMapNum(og_atom_map[atom.GetAtomMapNum() - 1])
+            #     else:
+            #         remapping = np.array([
+            #             atom.GetAtomMapNum() - 1
+            #             for atom in mol.GetAtoms()
+            #         ])
+            #         suborder = np.argsort(remapping, kind='merge')
+            #         coords = [
+            #             coords[o]
+            #             for o in remapping[suborder]
+            #         ]
+            #         for atom,o in zip(mol.GetAtoms(), suborder):
+            #             atom.SetAtomMapNum(int(o+1))
+
+            ## we have to infer how the atom ordering will change
+            smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
+            order_str = mol.GetProp('_smilesAtomOutputOrder')
+            reordering = json.loads(order_str)
+            coords = coords[reordering,]
+            # track coordinates into new Mol
+            # if not preserve_atom_order:
+            #     mol = Chem.Mol(mol)
+            #     for atom in mol.GetAtoms():
+            #         atom.SetAtomMapNum(atom.GetIdx()+1)
+            #     ord_smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
+            #     ord_mol = self.parse_smiles(ord_smi, remove_hydrogens=False, reorder_from_atom_map=False)
+            #     coords = [
+            #         coords[atom.GetAtomMapNum()-1]
+            #         for atom in ord_mol.GetAtoms()
+            #     ]
+            # else:
+            #     ord_mol = self.parse_smiles(smi, remove_hydrogens=remove_hydrogens, reorder_from_atom_map=False)
+            #     base_map = [a.GetAtomMapNum() for a in ord_mol.GetAtoms()]
+            #     base_map = [len(base_map) + 1 if a == 0 else a for a in base_map]
+            #     # need to use a stable sort
+            #     ord_mol = Chem.RenumberAtoms(ord_mol, np.argsort(base_map, kind='merge').tolist())
+            # mol = Chem.RenumberAtoms(mol, reordering)
+            graph = self.get_edge_graph(mol, reordering=np.argsort(reordering))
             tag = self.conformer_smiles_tag(coords=coords, graph=graph, binary=binary)
             if binary:
                 smi = smi.encode()
@@ -3671,8 +3704,15 @@ class RDMolecule(ExternalMolecule):
             raise ValueError(f"unhandled byte size {byte_size}")
         return np.frombuffer(buffer, dtype)
 
+    compressed_bond_range = (0.5, 2.5)
+    compressed_angle_range = (0, np.pi)
+    compressed_dihedral_range = (0, 2*np.pi)
     @classmethod
-    def _compressed_encode(cls, flat_z, byte_size, primary_bond_range=(.5, 2.5), pack_angles=True):
+    def _compressed_encode(cls, flat_z, byte_size,
+                           primary_bond_range=None,
+                           angle_range=None,
+                           dihedral_range=None,
+                           pack_angles=True):
         """
         Compress distances such that if they are between 1 and 2 angstroms, we get
         an extra digit of precision
@@ -3704,6 +3744,13 @@ class RDMolecule(ExternalMolecule):
         else:
             raise ValueError(f"can't pack into byte size {byte_size}")
 
+        if primary_bond_range is None:
+            primary_bond_range = cls.compressed_bond_range
+        if angle_range is None:
+            angle_range = cls.compressed_angle_range
+        if dihedral_range is None:
+            dihedral_range = cls.compressed_dihedral_range
+
         flat_z = np.asanyarray(flat_z)
         dists = np.concatenate([flat_z[:2], flat_z[3::3]])
         compressed = (dists >= primary_bond_range[0]) & (dists < primary_bond_range[1])
@@ -3725,12 +3772,14 @@ class RDMolecule(ExternalMolecule):
         else:
             pack_max = full_max
         angles = np.concatenate([flat_z[[2],], flat_z[4::3]])
-        first_angle = np.round(full_max * angles[0] / np.pi).astype(base_type)
-        scaled_angles = np.round(pack_max * angles[1:] / np.pi).astype(base_type)
+        shift_scale_angles = (angles - angle_range[0]) / (angle_range[1] - angle_range[0])
+        first_angle = np.round(full_max * shift_scale_angles[0]).astype(base_type)
+        scaled_angles = np.round(pack_max * shift_scale_angles[1:]).astype(base_type)
         dihedrals = flat_z[5::3].copy()
         mask = dihedrals < 0
         dihedrals[mask] = 2*np.pi + dihedrals[mask]
-        scaled_dihedrals = np.round(pack_max * dihedrals / (2*np.pi)).astype(base_type)
+        shift_scaled_dihedrals = (dihedrals - dihedral_range[0]) / (dihedral_range[1] - dihedral_range[0])
+        scaled_dihedrals = np.round(pack_max * shift_scaled_dihedrals).astype(base_type)
 
         if pack_angles:
             full_pack = np.zeros(len(dists) + len(angles), dtype=base_type)
@@ -3753,7 +3802,10 @@ class RDMolecule(ExternalMolecule):
         return full_pack
 
     @classmethod
-    def _compressed_decode(cls, buffer, byte_size, primary_bond_range=(.5, 2.5), pack_angles=True):
+    def _compressed_decode(cls, buffer, byte_size,
+                           primary_bond_range=None,
+                           angle_range=None,
+                           dihedral_range=None, pack_angles=True):
         """
         Compress distances such that if they are between 1 and 2 angstroms, we get
         an extra digit of precision
@@ -3791,6 +3843,13 @@ class RDMolecule(ExternalMolecule):
         else:
             dists = np.concatenate([uint_stream[:2], uint_stream[3::3]])
 
+        if primary_bond_range is None:
+            primary_bond_range = cls.compressed_bond_range
+        if angle_range is None:
+            angle_range = cls.compressed_angle_range
+        if dihedral_range is None:
+            dihedral_range = cls.compressed_dihedral_range
+
         step_max = 2 ** (byte_size - 1) - 1
         compressed = dists < step_max
         decompressed_dists = np.zeros(len(dists), dtype=float)
@@ -3815,8 +3874,14 @@ class RDMolecule(ExternalMolecule):
             angles = np.concatenate([uint_stream[[2],], uint_stream[4::3]])
             dihedrals = uint_stream[5::3]
 
-        full_angles = np.pi*np.concatenate([angles[:1] / full_max, angles[1:] / pack_max])
-        full_dihedrals = (2*np.pi * dihedrals / pack_max)
+        full_angles = (
+                (angle_range[1]-angle_range[0])
+                * np.concatenate([angles[:1] / full_max, angles[1:] / pack_max])
+        ) + angle_range[0]
+        full_dihedrals = (
+            (dihedral_range[1]-dihedral_range[0])
+            * (dihedrals / pack_max)
+        ) + dihedral_range[0]
 
         full_pack[:2] = decompressed_dists[:2]
         full_pack[2] = full_angles[0]
@@ -3973,7 +4038,7 @@ class RDMolecule(ExternalMolecule):
         return coords
 
     @classmethod
-    def get_mol_edge_graph(cls, mol):
+    def get_mol_edge_graph(cls, mol, bonds=None, reordering=None):
         """
         **LLM Docstring**
 
@@ -3986,12 +4051,18 @@ class RDMolecule(ExternalMolecule):
         """
         from .. import Graphs
         atoms = np.arange(len(mol.GetAtoms()))
-        bonds = [
-            [b.GetBeginAtomIdx(), b.GetEndAtomIdx()]
-            for b in mol.GetBonds()
-        ]
+        if bonds is None:
+            bonds = [
+                [b.GetBeginAtomIdx(), b.GetEndAtomIdx()]
+                for b in mol.GetBonds()
+            ]
+        if reordering is not None:
+            bonds = [
+                (reordering[i], reordering[j])
+                for i,j in bonds
+            ]
         return Graphs.EdgeGraph(atoms, bonds)
-    def get_edge_graph(self, mol=None):
+    def get_edge_graph(self, mol=None, reordering=None):
         """
         **LLM Docstring**
 
@@ -4004,10 +4075,11 @@ class RDMolecule(ExternalMolecule):
         """
         from .. import Graphs
         if mol is None:
-            atoms, bonds = np.arange(len(self.atoms)), [b[:2] for b in self.bonds]
-            return Graphs.EdgeGraph(atoms, bonds)
+            return self.get_mol_edge_graph(self.mol,
+                                           bonds=[b[:2] for b in self.bonds],
+                                           reordering=reordering)
         else:
-            return self.get_mol_edge_graph(mol)
+            return self.get_mol_edge_graph(mol, reordering=reordering)
 
     def _ipython_display_(self):
         """

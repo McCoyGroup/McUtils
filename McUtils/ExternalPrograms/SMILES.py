@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import functools
 import multiprocessing
 
@@ -7,6 +9,17 @@ from .RDKit import RDMolecule
 import numpy as np
 import hashlib
 import itertools
+import json
+
+import re
+from typing import (
+    Any,
+    Callable,
+    ClassVar,
+    Collection,
+    Iterator,
+    NamedTuple,
+)
 
 __all__ = [
     "SMILESSupplier",
@@ -18,12 +31,14 @@ __all__ = [
     "set_smiles_stereochemistry",
     "set_smiles_bond_order",
     "renumber_smiles_atom_map",
+    "get_canonical_smiles_renumbering",
     "smiles_binding_sites",
     "set_smiles_binding_sites",
     "remove_smiles_binding_sites",
     "substitute_smiles_atoms",
     "parse_smiles_and_atom_map",
-    "build_templated_smiles"
+    "build_templated_smiles",
+    "SMILESTokenizer"
 ]
 
 class SMILESSupplier:
@@ -845,17 +860,22 @@ def _add_hydrogen(new_mol, idx1, allow_explicit=True):
         idx2 = new_mol.AddAtom(a)
         new_mol.AddBond(idx2, idx1, Chem.BondType.SINGLE)
         return True
-def parse_smiles_and_atom_map(smiles1, cache, add_implicit_hydrogens=False):
+def parse_smiles_and_atom_map(smiles1, cache,
+                              add_implicit_hydrogens=False,
+                              reorder_from_atom_map=True):
     if cache is None: cache = {}
-    if smiles1 not in cache:
-        mol = RDMolecule.parse_smiles(smiles1, remove_hydrogens=True, add_implicit_hydrogens=add_implicit_hydrogens)
+    key = (smiles1, add_implicit_hydrogens, reorder_from_atom_map)
+    if key not in cache:
+        mol = RDMolecule.parse_smiles(smiles1, remove_hydrogens=True,
+                                      add_implicit_hydrogens=add_implicit_hydrogens,
+                                      reorder_from_atom_map=reorder_from_atom_map)
         if mol is not None:
             map = {a.GetAtomMapNum(): a.GetIdx() for a in mol.GetAtoms()}
             map.pop(0, None)
         else:
             map = None
-        cache[smiles1] = {'mol': mol, 'map': map}
-    return cache[smiles1]
+        cache[key] = {'mol': mol, 'map': map}
+    return cache[key]
 def get_rdkit_bond_type(t, as_number=False):
     Chem = RDMolecule.allchem_api()
     if nput.is_numeric(t):
@@ -1020,7 +1040,8 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
                           decrement_hydrogens=True,
                           prekekulize=True,
                           push_bonds=False,
-                          return_mol=False) -> str:
+                          return_fagment_indices=False,
+                          return_mol=False) -> str | tuple['str', tuple[list[int], list[int]]]:
     Chem = RDMolecule.allchem_api()
     if cache is None:
         cache = {}
@@ -1041,6 +1062,14 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
     map2 = {m+offset: i+offset for m,i in map2.items()}
 
     # Combine both molecules into one (no bond yet)
+    if return_fagment_indices:
+        mol1 = Chem.Mol(mol1)
+        for b in mol1.GetAtoms():
+            b.SetIntProp("mol_idx", 0)
+        mol2 = Chem.Mol(mol2)
+        for b in mol2.GetAtoms():
+            b.SetIntProp("mol_idx", 1)
+
     combined = Chem.CombineMols(mol1, mol2)
     editable = Chem.RWMol(combined)
 
@@ -1137,10 +1166,50 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
         if atom.GetPropsAsDict().get('dearomitized'):
             atom.SetIsAromatic(False)
 
+    if return_fagment_indices:
+        f1 = []
+        f2 = []
+        for a in joined.GetAtoms():
+            if a.GetIntProp('mol_idx') == 0:
+                f1.append(a.GetIdx())
+            else:
+                f2.append(a.GetIdx())
     if return_mol:
-        return joined
+        if return_fagment_indices:
+            return joined, (f1, f2)
+        else:
+            return joined
     else:
-        return Chem.MolToSmiles(joined)
+        smi = Chem.MolToSmiles(joined)
+        if return_fagment_indices:
+            idx = json.loads(joined.GetProp("_smilesAtomOutputOrder"))
+            j1, j2 = [], []
+            for n,i in enumerate(idx):
+                if i in f1:
+                    j1.append(n)
+                else:
+                    j2.append(n)
+            return smi, (j1, j2)
+        else:
+            return smi
+
+def get_canonical_smiles_renumbering(smiles,
+                                     cache=None,
+                                     reorder_from_atom_map=False,
+                                     add_implicit_hydrogens=False):
+    Chem = RDMolecule.allchem_api()
+    if cache is None:
+        cache = {}
+    mol_data = parse_smiles_and_atom_map(smiles, cache,
+                                         add_implicit_hydrogens=add_implicit_hydrogens,
+                                         reorder_from_atom_map=reorder_from_atom_map)
+    mol = mol_data['mol']
+    if add_implicit_hydrogens:
+        mol = Chem.RemoveHs(mol)
+
+    smi = Chem.MolToSmiles(mol)
+    idx = json.loads(mol.GetProp("_smilesAtomOutputOrder"))
+    return smi, idx
 
 def renumber_smiles_atom_map(smiles,
                              remapping,
@@ -1327,6 +1396,7 @@ def build_templated_smiles(
         cache=None,
         add_implicit_hydrogens='full',
         remove_sites=False,
+        return_fagment_indices=False,
 ):
     if cache is None: cache = {}
     if active_sites is not None:
@@ -1334,6 +1404,7 @@ def build_templated_smiles(
                                             active_sites,
                                             cache=cache,
                                             add_implicit_hydrogens=add_implicit_hydrogens)
+    fragments = None
     for i,replacement in enumerate(replacements):
         if isinstance(replacement, str):
             replacement = {
@@ -1346,7 +1417,17 @@ def build_templated_smiles(
         scaffold = join_smiles_fragments(scaffold,
                                          cache=cache,
                                          add_implicit_hydrogens=add_implicit_hydrogens,
+                                         return_fagment_indices=return_fagment_indices,
                                          **replacement)
+        if return_fagment_indices:
+            scaffold, (f1, f2) = scaffold
+            if fragments is not None:
+                fragments = tuple(
+                    [f1[i] for i in f]
+                    for f in fragments
+                ) + (f2,)
+            else:
+                fragments = (f1, f2)
     if atom_replacements is not None:
         scaffold = substitute_smiles_atoms(scaffold, atom_replacements,
                                            cache=cache,
@@ -1372,4 +1453,430 @@ def build_templated_smiles(
                                                cache=cache,
                                                add_implicit_hydrogens=add_implicit_hydrogens)
 
-    return scaffold
+    if return_fagment_indices:
+        return scaffold, fragments
+    else:
+        return scaffold
+
+
+Metadata = dict[str, Any]
+
+
+class SMILESAtom(NamedTuple):
+    index: int
+    symbol: str
+    previous: int | None
+    bond_order: float | None
+    bond_stereochemistry: str | None
+    stereochemistry: str | None
+    metadata: Metadata
+
+class AnnotatedAtom(NamedTuple):
+    atom: SMILESAtom
+    annotation: str
+    annotation_start: int
+    annotation_end: int
+
+class SMILESTokenizer:
+    """
+    Atom-only SMILES tokenizer.
+
+    Regular expressions are compiled lazily and cached at the class
+    level. Each instance controls which bracket metadata fields are
+    retained.
+    """
+
+    SUPPORTED_METADATA: ClassVar[frozenset[str]] = frozenset({
+        "isotope",
+        "hydrogens",
+        "charge",
+        "atom_map",
+    })
+
+    BOND_ORDERS: ClassVar[dict[str, float]] = {
+        "-": 1.0,
+        "=": 2.0,
+        "#": 3.0,
+        "$": 4.0,
+        ":": 1.5,
+        "/": 1.0,
+        "\\": 1.0,
+    }
+
+    BOND_STEREOCHEMISTRY: ClassVar[frozenset[str]] = frozenset({
+        "/",
+        "\\",
+    })
+
+    UNBRACKETED_ATOMS: ClassVar[frozenset[str]] = frozenset({
+        "B", "C", "N", "O", "P", "S", "F", "I",
+        "Cl", "Br",
+        "b", "c", "n", "o", "p", "s",
+        "*",
+    })
+
+    AROMATIC_ATOMS: ClassVar[frozenset[str]] = frozenset({
+        "b", "c", "n", "o", "p", "s", "se", "as",
+    })
+
+    _REGEX_SOURCES: ClassVar[dict[str, str]] = {
+        "bracket_atom": (
+            r"^(?P<isotope>\d+)?"
+            r"(?P<symbol>[A-Z][a-z]?|[bcnops]|se|as|\*)"
+            r"(?P<body>.*)$"
+        ),
+        "chirality": (
+            r"@(?:@|TH\d*|AL\d*|SP\d*|TB\d*|OH\d*)?"
+        ),
+        "hydrogens": r"H(?P<count>\d*)",
+        "charge": r"(?P<charge>[+-]\d+|\++|-+)",
+        "atom_map": r":(?P<map>\d+)",
+    }
+
+    _REGEX_CACHE: ClassVar[dict[str, re.Pattern[str]]] = {}
+
+    def __init__(
+        self,
+        *,
+        metadata_fields: Collection[str] | None = None,
+    ) -> None:
+        if metadata_fields is None:
+            metadata_fields = self.SUPPORTED_METADATA
+
+        self.metadata_fields = frozenset(metadata_fields)
+        unknown = self.metadata_fields - self.SUPPORTED_METADATA
+
+        if unknown:
+            raise ValueError(
+                f"Unsupported metadata fields: {sorted(unknown)}"
+            )
+
+    @classmethod
+    def _regex(cls, name: str) -> re.Pattern[str]:
+        """
+        Compile a named regular expression on first use.
+        """
+        try:
+            return cls._REGEX_CACHE[name]
+        except KeyError:
+            try:
+                source = cls._REGEX_SOURCES[name]
+            except KeyError:
+                raise KeyError(f"Unknown regular expression {name!r}") from None
+
+            pattern = re.compile(source)
+            cls._REGEX_CACHE[name] = pattern
+            return pattern
+
+    @staticmethod
+    def _parse_charge(text: str) -> int:
+        sign = 1 if text[0] == "+" else -1
+        suffix = text[1:]
+
+        if suffix.isdigit():
+            return sign * int(suffix)
+
+        return sign * len(text)
+
+    def _parse_bracket_atom(
+        self,
+        token: str,
+    ) -> tuple[str, str | None, Metadata]:
+        match = self._regex("bracket_atom").fullmatch(token[1:-1])
+
+        if match is None:
+            raise ValueError(f"Invalid bracket atom: {token!r}")
+
+        symbol = match.group("symbol")
+        body = match.group("body")
+        metadata: Metadata = {}
+
+        chirality_match = self._regex("chirality").search(body)
+        stereochemistry = (
+            chirality_match.group()
+            if chirality_match is not None
+            else None
+        )
+
+        if "isotope" in self.metadata_fields:
+            isotope = match.group("isotope")
+            metadata["isotope"] = int(isotope) if isotope else None
+
+        if "hydrogens" in self.metadata_fields:
+            hydrogen_match = self._regex("hydrogens").search(body)
+
+            if hydrogen_match is None:
+                metadata["hydrogens"] = 0
+            else:
+                count = hydrogen_match.group("count")
+                metadata["hydrogens"] = int(count) if count else 1
+
+        if "charge" in self.metadata_fields:
+            charge_match = self._regex("charge").search(body)
+            metadata["charge"] = (
+                self._parse_charge(charge_match.group("charge"))
+                if charge_match is not None
+                else 0
+            )
+
+        if "atom_map" in self.metadata_fields:
+            map_match = self._regex("atom_map").search(body)
+            metadata["atom_map"] = (
+                int(map_match.group("map"))
+                if map_match is not None
+                else None
+            )
+
+        return symbol, stereochemistry, metadata
+
+    def _default_bond_order(
+        self,
+        previous_symbol: str,
+        symbol: str,
+    ) -> float:
+        if (
+            previous_symbol in self.AROMATIC_ATOMS
+            and symbol in self.AROMATIC_ATOMS
+        ):
+            return 1.5
+
+        return 1.0
+
+    @staticmethod
+    def _read_ring_label(
+        smiles: str,
+        position: int,
+    ) -> tuple[str, int]:
+        """
+        Consume ``1``, ``%12``, or ``%(123)`` ring syntax.
+        """
+        if smiles[position].isdigit():
+            return smiles[position], position + 1
+
+        if position + 1 >= len(smiles):
+            raise ValueError(
+                f"Incomplete ring label at position {position}"
+            )
+
+        if smiles[position + 1] == "(":
+            end = smiles.find(")", position + 2)
+
+            if end < 0:
+                raise ValueError(
+                    f"Unclosed ring label at position {position}"
+                )
+
+            label = smiles[position + 2:end]
+            if not label.isdigit():
+                raise ValueError(
+                    f"Invalid ring label {smiles[position:end + 1]!r}"
+                )
+
+            return label, end + 1
+
+        label = smiles[position + 1:position + 3]
+
+        if len(label) != 2 or not label.isdigit():
+            raise ValueError(
+                f"Invalid ring label at position {position}"
+            )
+
+        return label, position + 3
+
+    def tokenize(self, smiles: str) -> Iterator[SMILESAtom]:
+        """
+        Generate atom tokens in SMILES traversal order.
+
+        Non-atom tokens are consumed but not yielded. ``previous`` is
+        the index of the atom from which the generated atom branches.
+        """
+        atoms: list[SMILESAtom] = []
+        branches: list[int] = []
+        current: int | None = None
+        pending_bond: str | None = None
+        position = 0
+
+        def add_atom(
+            symbol: str,
+            stereochemistry: str | None = None,
+            metadata: Metadata | None = None,
+        ) -> None:
+            nonlocal current, pending_bond
+
+            bond_stereochemistry = (
+                pending_bond
+                if pending_bond in self.BOND_STEREOCHEMISTRY
+                else None
+            )
+
+            if current is None:
+                bond_order = None
+            elif pending_bond is not None:
+                bond_order = self.BOND_ORDERS[pending_bond]
+            else:
+                bond_order = self._default_bond_order(
+                    atoms[current].symbol,
+                    symbol,
+                )
+
+            atoms.append(
+                SMILESAtom(
+                    index=len(atoms),
+                    symbol=symbol,
+                    previous=current,
+                    bond_order=bond_order,
+                    bond_stereochemistry=bond_stereochemistry,
+                    stereochemistry=stereochemistry,
+                    metadata=metadata or {},
+                )
+            )
+
+            current = len(atoms) - 1
+            pending_bond = None
+
+        while position < len(smiles):
+            character = smiles[position]
+
+            if character.isspace():
+                position += 1
+                continue
+
+            if character == "[":
+                end = smiles.find("]", position + 1)
+
+                if end < 0:
+                    raise ValueError(
+                        f"Unclosed bracket atom at position {position}"
+                    )
+
+                symbol, stereochemistry, metadata = (
+                    self._parse_bracket_atom(
+                        smiles[position:end + 1]
+                    )
+                )
+                add_atom(symbol, stereochemistry, metadata)
+                position = end + 1
+                continue
+
+            pair = smiles[position:position + 2]
+
+            if pair in {"Cl", "Br"}:
+                add_atom(pair)
+                position += 2
+                continue
+
+            if character in self.UNBRACKETED_ATOMS:
+                add_atom(character)
+                position += 1
+                continue
+
+            if character in self.BOND_ORDERS:
+                if pending_bond is not None:
+                    raise ValueError(
+                        f"Consecutive bond symbols at position {position}"
+                    )
+
+                pending_bond = character
+                position += 1
+                continue
+
+            if character == "(":
+                if current is None:
+                    raise ValueError(
+                        f"Branch before an atom at position {position}"
+                    )
+
+                branches.append(current)
+                position += 1
+                continue
+
+            if character == ")":
+                if not branches:
+                    raise ValueError(
+                        f"Unmatched ')' at position {position}"
+                    )
+
+                if pending_bond is not None:
+                    raise ValueError(
+                        f"Branch ends after a bond at position {position}"
+                    )
+
+                current = branches.pop()
+                position += 1
+                continue
+
+            if character == ".":
+                if pending_bond is not None:
+                    raise ValueError(
+                        f"Bond immediately before '.' at position {position}"
+                    )
+
+                current = None
+                position += 1
+                continue
+
+            if character.isdigit() or character == "%":
+                _, position = self._read_ring_label(smiles, position)
+                pending_bond = None
+                continue
+
+            raise ValueError(
+                f"Unrecognized SMILES character {character!r} "
+                f"at position {position}"
+            )
+
+        if branches:
+            raise ValueError(
+                f"{len(branches)} unclosed branch expression(s)"
+            )
+
+        if pending_bond is not None:
+            raise ValueError(
+                f"SMILES ends after bond symbol {pending_bond!r}"
+            )
+
+        yield from atoms
+
+    def annotate(
+        self,
+        smiles: str,
+        annotation: str,
+        k: int,
+        *,
+        require_all_annotations: bool = True,
+    ) -> Iterator[AnnotatedAtom]:
+        """
+        Add annotation slices and offsets to the base atom stream.
+        """
+        if k <= 0 or k % 2:
+            raise ValueError(
+                f"k must be a positive even integer; received {k}"
+            )
+
+        offset = 0
+
+        for atom in self.tokenize(smiles):
+            width = k // 2 if atom.index == 0 else k
+            end = offset + width
+
+            if end > len(annotation):
+                raise ValueError(
+                    f"Annotation ended before atom {atom.index}: "
+                    f"needed [{offset}:{end}], but its length is "
+                    f"{len(annotation)}"
+                )
+
+            yield AnnotatedAtom(
+                atom=atom,
+                annotation=annotation[offset:end],
+                annotation_start=offset,
+                annotation_end=end,
+            )
+
+            offset = end
+
+        if require_all_annotations and offset != len(annotation):
+            raise ValueError(
+                f"{len(annotation) - offset} unused annotation "
+                f"characters remain at offset {offset}"
+            )
