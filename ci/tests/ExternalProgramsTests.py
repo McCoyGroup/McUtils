@@ -501,15 +501,15 @@ class ExternalProgramsTest(TestCase):
             stereos={(0, 1): 'cis'},
             return_fagment_indices=True
         )
-        print(smi0)
-        print(i0)
-        return
+        # print(smi0)
+        # print(i0)
+        # return
         # smi = remove_smiles_binding_sites(smi)
         mol0 = Molecule.from_string(smi0)
 
         # need canonicalization to have valid comparisons
         mol = Molecule.from_string(mol0.to_string('smi'), remove_hydrogens=True)
-        for encoding in [16]:#, 32, 64, 85]:
+        for encoding in [16, 32, 64, 85]:
             print("==="*10, encoding, "==="*10)
             RDMolecule.default_tag_byte_encoding = encoding
             smi2 = mol.to_string('smi', remove_hydrogens=True, include_tag=True)
