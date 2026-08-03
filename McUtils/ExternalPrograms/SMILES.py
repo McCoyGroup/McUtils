@@ -948,7 +948,7 @@ def _get_mol_valence_sites(mol):
     return sites
 def smiles_binding_sites(smi,
                          cache=None,
-                        valence_site_fallback=True,
+                         valence_site_fallback=True,
                          add_implicit_hydrogens='full'):
     # Chem = RDMolecule.allchem_api()
     mol_data = parse_smiles_and_atom_map(smi, cache=cache, add_implicit_hydrogens=add_implicit_hydrogens)
