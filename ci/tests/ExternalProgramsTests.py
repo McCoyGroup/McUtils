@@ -494,13 +494,15 @@ class ExternalProgramsTest(TestCase):
         from Psience.Molecools import Molecule
         import base64
 
-        smi0, i0 = build_templated_smiles(
+        smi0, i0, b0 = build_templated_smiles(
             '[C:1]=[C:2]',
             '[C:1]C(C)(C)(C)',
             '[C:1]C(C)(C)(C)',
             stereos={(0, 1): 'cis'},
-            return_fagment_indices=True
+            return_fragment_indices=True,
+            return_new_bonds=True
         )
+        print(b0)
         # print(smi0)
         # print(i0)
         # return

@@ -1040,7 +1040,8 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
                           decrement_hydrogens=True,
                           prekekulize=True,
                           push_bonds=False,
-                          return_fagment_indices=False,
+                          return_fragment_indices=False,
+                          return_bond_indices=False,
                           return_mol=False) -> str | tuple['str', tuple[list[int], list[int]]]:
     Chem = RDMolecule.allchem_api()
     if cache is None:
@@ -1062,7 +1063,7 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
     map2 = {m+offset: i+offset for m,i in map2.items()}
 
     # Combine both molecules into one (no bond yet)
-    if return_fagment_indices:
+    if return_fragment_indices:
         mol1 = Chem.Mol(mol1)
         for b in mol1.GetAtoms():
             b.SetIntProp("mol_idx", 0)
@@ -1087,6 +1088,7 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
 
     original_aromaticity_map = [a.GetIsAromatic() for a in combined.GetAtoms()]
     dearomitized_atoms = []
+    bond_indices = []
     for b in new_bonds:
         if len(b) == 2:
             m1, m2 = b
@@ -1145,6 +1147,7 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
                     if not dearomitized_mods[1]:
                         dearomitized_mods[1] = True
                         dearomitized_atoms.append(editable.GetAtomWithIdx(idx2))
+        bond_indices.append([idx1, idx2]) # can be modified
     dearomitized_atoms = [a.GetIdx() for a in dearomitized_atoms]
     joined = editable.GetMol()
 
@@ -1160,13 +1163,15 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
         joined.GetAtomWithIdx(i).SetAtomMapNum(m - offset + len(map1))
 
     if add_implicit_hydrogens:
+        for i,a in enumerate(joined.GetAtoms()):
+            a.SetIntProp('preremoval_idx', i)
         joined = Chem.RemoveHs(joined, sanitize=resanitize)
 
     for atom in joined.GetAtoms():
         if atom.GetPropsAsDict().get('dearomitized'):
             atom.SetIsAromatic(False)
 
-    if return_fagment_indices:
+    if return_fragment_indices:
         f1 = []
         f2 = []
         for a in joined.GetAtoms():
@@ -1175,23 +1180,36 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
             else:
                 f2.append(a.GetIdx())
     if return_mol:
-        if return_fagment_indices:
-            return joined, (f1, f2)
+        if return_fragment_indices:
+            res = (joined, (f1, f2))
         else:
-            return joined
+            res = (joined,)
+        if return_bond_indices:
+            res += (new_bonds,)
     else:
         smi = Chem.MolToSmiles(joined)
-        if return_fagment_indices:
+        res = (smi,)
+        if return_fragment_indices or return_bond_indices:
             idx = json.loads(joined.GetProp("_smilesAtomOutputOrder"))
+        if return_fragment_indices:
             j1, j2 = [], []
             for n,i in enumerate(idx):
                 if i in f1:
                     j1.append(n)
                 else:
                     j2.append(n)
-            return smi, (j1, j2)
-        else:
-            return smi
+            res += ((j1, j2),)
+        if return_bond_indices:
+            idx_map = {i:a.GetIntProp('preremoval_idx') for i,a in enumerate(joined.GetAtoms())}
+            map = {idx_map[i]:n for n,i in enumerate(idx)}
+            new_bonds = [
+                (map[b[0]], map[b[1]])
+                for b in bond_indices
+            ]
+            res += (new_bonds,)
+    if len(res) == 1:
+        res = res[0]
+    return res
 
 def get_canonical_smiles_renumbering(smiles,
                                      cache=None,
@@ -1396,7 +1414,8 @@ def build_templated_smiles(
         cache=None,
         add_implicit_hydrogens='full',
         remove_sites=False,
-        return_fagment_indices=False,
+        return_fragment_indices=False,
+        return_new_bonds=False,
 ):
     if cache is None: cache = {}
     if active_sites is not None:
@@ -1405,6 +1424,12 @@ def build_templated_smiles(
                                             cache=cache,
                                             add_implicit_hydrogens=add_implicit_hydrogens)
     fragments = None
+    rfi = (
+            return_fragment_indices
+            or return_new_bonds
+    )
+    bond_indices = []
+    new_bonds = []
     for i,replacement in enumerate(replacements):
         if isinstance(replacement, str):
             replacement = {
@@ -1417,17 +1442,40 @@ def build_templated_smiles(
         scaffold = join_smiles_fragments(scaffold,
                                          cache=cache,
                                          add_implicit_hydrogens=add_implicit_hydrogens,
-                                         return_fagment_indices=return_fagment_indices,
+                                         return_fragment_indices=rfi,
+                                         return_bond_indices=return_new_bonds,
                                          **replacement)
-        if return_fagment_indices:
+        if return_new_bonds:
+            bond_indices = scaffold[2]
+            scaffold = scaffold[:2]
+        if rfi:
             scaffold, (f1, f2) = scaffold
             if fragments is not None:
+                new_bonds = [
+                    [(f1[b[0]], f1[b[1]]) + b[2:]  for b in nb_list]
+                    for nb_list in new_bonds
+                ]
                 fragments = tuple(
                     [f1[i] for i in f]
                     for f in fragments
                 ) + (f2,)
             else:
                 fragments = (f1, f2)
+        if return_new_bonds:
+            new_bonds.append([
+                (x[0], x[1], b[2] if len(b) > 2 else 1)
+                for x, b in zip(bond_indices, replacement['new_bonds'])
+            ])
+
+    # _ = []
+    # if return_new_bonds:
+    #     for i, (bi, bb) in enumerate(zip(bond_indices, new_bonds)):
+    #         f = sum(fragments[:i + 2], [])
+    #         _.append([
+    #             (f[x[0]], f[x[1]], b[2] if len(b) > 2 else 1)
+    #             for x, b in zip(bi, bb)
+    #         ])
+    # new_bonds = _
     if atom_replacements is not None:
         scaffold = substitute_smiles_atoms(scaffold, atom_replacements,
                                            cache=cache,
@@ -1452,11 +1500,14 @@ def build_templated_smiles(
         scaffold = remove_smiles_binding_sites(scaffold, remove_sites,
                                                cache=cache,
                                                add_implicit_hydrogens=add_implicit_hydrogens)
-
-    if return_fagment_indices:
-        return scaffold, fragments
-    else:
-        return scaffold
+    res = (scaffold,)
+    if return_fragment_indices:
+        res += (fragments,)
+    if return_new_bonds:
+        res += (new_bonds,)
+    if len(res) == 1:
+        res = res[0]
+    return res
 
 
 Metadata = dict[str, Any]

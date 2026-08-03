@@ -63,6 +63,12 @@ class RDMolecule(ExternalMolecule):
         """
         mol = self.rdmol
         return [atom.GetSymbol() for atom in mol.GetAtoms()]
+    @classmethod
+    def get_bonds(cls, mol):
+        return [
+            [b.GetBeginAtomIdx(), b.GetEndAtomIdx(), b.GetBondTypeAsDouble()]
+            for b in mol.GetBonds()
+        ]
     @property
     def bonds(self):
         """
@@ -73,11 +79,7 @@ class RDMolecule(ExternalMolecule):
         :return: the bond list
         :rtype: list[list]
         """
-        mol = self.rdmol
-        return [
-            [b.GetBeginAtomIdx(), b.GetEndAtomIdx(), b.GetBondTypeAsDouble()]
-            for b in mol.GetBonds()
-        ]
+        return self.get_bonds(self.rdmol)
     @property
     def coords(self):
         """
@@ -1633,6 +1635,7 @@ class RDMolecule(ExternalMolecule):
                   compute_stereo=False,
                   remove_stereo=False,
                   preserve_atom_order=False,
+                  return_reordering=False,
                   binary=False,
                   coords=None,
                   mol=None,
@@ -1765,7 +1768,19 @@ class RDMolecule(ExternalMolecule):
                 smi = smi+"_"+tag
         else:
             smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
-        return smi
+            if return_reordering:
+                order_str = mol.GetProp('_smilesAtomOutputOrder')
+                reordering = json.loads(order_str)
+        if return_reordering:
+            if remove_hydrogens:
+                og_idx = [
+                    atom.GetIntProp('preremoval_idx')
+                    for atom in mol.GetAtoms()
+                ]
+                reordering = [og_idx[i] for i in reordering]
+            return smi, reordering
+        else:
+            return smi
 
     draw_options_mapping = {
 

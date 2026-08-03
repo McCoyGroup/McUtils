@@ -752,7 +752,8 @@ def view_matrix(
         view_vector = np.array([0, 0, 1])
         alt_view = np.array([1, 0, 0])
         view_vector = np.expand_dims(view_vector, list(range(up_vector.ndim-1)))
-        view_vector, _ = np.broadcast_arrays(view_vector, up_vector).copy()
+        view_vector, _ = np.broadcast_arrays(view_vector, up_vector)
+        view_vector = view_vector.copy()
         alt_view = np.expand_dims(alt_view, list(range(up_vector.ndim-1)))
         alt_view, _= np.broadcast_arrays(alt_view, up_vector)
         mask = np.abs(vec_ops.vec_dots(up_vector, view_vector)) > .99
