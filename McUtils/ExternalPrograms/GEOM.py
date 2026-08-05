@@ -16,13 +16,12 @@ import requests
 
 from .RDKit import RDMolecule
 
+__all__ = [
+    "GEOMLoader",
+    "GEOMDownloader"
+]
+
 class GEOMLoader:
-    """
-    Streams (smiles, conformer) or (RDKit Mol, conformer) records one at a
-    time from a GEOM rdkit_folder dump, without loading the whole dataset
-    into memory. Only the summary JSON is held in memory across calls; each
-    molecule's pickle is loaded, consumed, and discarded in turn.
-    """
 
     def __init__(
             self,
