@@ -509,8 +509,6 @@ class ExternalProgramsTest(TestCase):
         # smi = remove_smiles_binding_sites(smi)
         mol0 = Molecule.from_string(smi0)
 
-        # need canonicalization to have valid comparisons
-        mol = Molecule.from_string(mol0.to_string('smi'), remove_hydrogens=True)
         for encoding in [16, 32, 64, 85]:
             print("==="*10, encoding, "==="*10)
             RDMolecule.default_tag_byte_encoding = encoding

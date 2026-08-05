@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Callable, Sequence, TypeAlias, Any
+from typing import Callable, Sequence, Any
 from .. import Devutils as dev
 
 __all__ = [
@@ -8,8 +8,8 @@ __all__ = [
 ]
 
 
-Match: TypeAlias = tuple[int, int, Any]
-Overlap: TypeAlias = list[Match]
+# Match: TypeAlias = tuple[int, int, Any]
+# Overlap: TypeAlias = list[Match]
 def find_overlaps(
         s1: Sequence[Any],
         s2: Sequence[Any],
@@ -17,7 +17,7 @@ def find_overlaps(
         rel_tol: float = 1e-9,
         abs_tol: float = 1e-12,
         equals: Callable[[Any, Any], bool] | None = None,
-) -> list[Overlap]:
+) -> list[list[tuple[int, int, Any]]]:
     """
     Find a longest common subsequence of `s1` and `s2`, then divide it
     into contiguous overlap blocks.
@@ -58,7 +58,7 @@ def find_overlaps(
                 dp[i][j] = max(dp[i + 1][j], dp[i][j + 1])
 
     # Reconstruct one deterministic LCS.
-    matches: list[Match] = []
+    matches: list[tuple[int, int, Any]] = []
     i = j = 0
 
     while i < n1 and j < n2:
@@ -72,7 +72,7 @@ def find_overlaps(
             j += 1
 
     # Split the LCS wherever either sequence contains an intervening gap.
-    overlaps: list[Overlap] = []
+    overlaps: list[list[tuple[int, int, Any]]] = []
 
     for match in matches:
         if (

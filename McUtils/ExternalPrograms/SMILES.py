@@ -95,8 +95,8 @@ class SMILESSupplier:
             'split_idx': 0
         },
         "emols": {
-            'smiles_file': 'emolecule_sc_2026_01_01.smi',
-            'line_indices': 'molecule_sc_2026_01_01_idx.npy',
+            'smiles_file': 'emols_sc_2026_01_01.smi',
+            'line_indices': 'emols_sc_2026_01_01_idx.npy',
             'split_idx': 0
         },
         "pubchem":{
@@ -1042,12 +1042,15 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
                           push_bonds=False,
                           return_fragment_indices=False,
                           return_bond_indices=False,
+                          reorder_from_atom_map=True,
                           return_mol=False) -> str | tuple['str', tuple[list[int], list[int]]]:
     Chem = RDMolecule.allchem_api()
     if cache is None:
         cache = {}
-    mol_data1 = parse_smiles_and_atom_map(scaffold, cache, add_implicit_hydrogens=add_implicit_hydrogens)
-    mol_data2 = parse_smiles_and_atom_map(functional_group, cache, add_implicit_hydrogens=add_implicit_hydrogens)
+    mol_data1 = parse_smiles_and_atom_map(scaffold, cache, add_implicit_hydrogens=add_implicit_hydrogens,
+                                          reorder_from_atom_map=reorder_from_atom_map)
+    mol_data2 = parse_smiles_and_atom_map(functional_group, cache, add_implicit_hydrogens=add_implicit_hydrogens,
+                                          reorder_from_atom_map=reorder_from_atom_map)
     mol1 = mol_data1['mol']
     mol2 = mol_data2['mol']
 
@@ -1065,10 +1068,12 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
     # Combine both molecules into one (no bond yet)
     if return_fragment_indices:
         mol1 = Chem.Mol(mol1)
-        for b in mol1.GetAtoms():
+        for i,b in enumerate(mol1.GetAtoms()):
+            b.SetIntProp("sub_idx", b.GetIdx())
             b.SetIntProp("mol_idx", 0)
         mol2 = Chem.Mol(mol2)
-        for b in mol2.GetAtoms():
+        for i,b in enumerate(mol2.GetAtoms()):
+            b.SetIntProp("sub_idx", b.GetIdx())
             b.SetIntProp("mol_idx", 1)
 
     combined = Chem.CombineMols(mol1, mol2)
@@ -1176,9 +1181,11 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
         f2 = []
         for a in joined.GetAtoms():
             if a.GetIntProp('mol_idx') == 0:
-                f1.append(a.GetIdx())
+                f1.append((a.GetIdx(), a.GetIntProp('sub_idx')))
             else:
-                f2.append(a.GetIdx())
+                f2.append((a.GetIdx(), a.GetIntProp('sub_idx')))
+        f1 = [f[0] for f in sorted(f1, key=lambda x: x[1])]
+        f2 = [f[0] for f in sorted(f2, key=lambda x: x[1])]
     if return_mol:
         if return_fragment_indices:
             res = (joined, (f1, f2))
@@ -1192,12 +1199,8 @@ def join_smiles_fragments(scaffold: str, functional_group: str,
         if return_fragment_indices or return_bond_indices:
             idx = json.loads(joined.GetProp("_smilesAtomOutputOrder"))
         if return_fragment_indices:
-            j1, j2 = [], []
-            for n,i in enumerate(idx):
-                if i in f1:
-                    j1.append(n)
-                else:
-                    j2.append(n)
+            j1 = [idx.index(i) for i in f1]
+            j2 = [idx.index(i) for i in f2]
             res += ((j1, j2),)
         if return_bond_indices:
             idx_map = {i:a.GetIntProp('preremoval_idx') for i,a in enumerate(joined.GetAtoms())}
@@ -1416,6 +1419,7 @@ def build_templated_smiles(
         remove_sites=False,
         return_fragment_indices=False,
         return_new_bonds=False,
+        reorder_from_atom_map=True,
 ):
     if cache is None: cache = {}
     if active_sites is not None:
@@ -1444,6 +1448,7 @@ def build_templated_smiles(
                                          add_implicit_hydrogens=add_implicit_hydrogens,
                                          return_fragment_indices=rfi,
                                          return_bond_indices=return_new_bonds,
+                                         reorder_from_atom_map=reorder_from_atom_map,
                                          **replacement)
         if return_new_bonds:
             bond_indices = scaffold[2]
@@ -1889,28 +1894,30 @@ class SMILESTokenizer:
         yield from atoms
 
     def annotate(
-        self,
-        smiles: str,
-        annotation: str,
-        k: int,
-        *,
-        require_all_annotations: bool = True,
+            self,
+            smiles: str,
+            annotation: str,
+            block_size: int | list[int],
+            *,
+            require_all_annotations: bool = True
     ) -> Iterator[AnnotatedAtom]:
         """
         Add annotation slices and offsets to the base atom stream.
         """
-        if k <= 0 or k % 2:
-            raise ValueError(
-                f"k must be a positive even integer; received {k}"
-            )
+
+        if nput.is_int(block_size):
+            block_size = [block_size]
 
         offset = 0
-
+        nblock = len(block_size) - 1
         for atom in self.tokenize(smiles):
-            width = k // 2 if atom.index == 0 else k
+            i = atom.index
+            if i > nblock: #TODO: speed this up if it matters
+                i = nblock
+            width = block_size[i]
             end = offset + width
 
-            if end > len(annotation):
+            if require_all_annotations and end > len(annotation):
                 raise ValueError(
                     f"Annotation ended before atom {atom.index}: "
                     f"needed [{offset}:{end}], but its length is "

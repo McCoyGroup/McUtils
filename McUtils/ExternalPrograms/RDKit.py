@@ -14,6 +14,7 @@ from ..Data import AtomData
 
 from .ChemToolkits import RDKitInterface
 from .ExternalMolecule import ExternalMolecule
+from .Conformers import ConformerEncoder
 from .. import Coordinerds as coordops
 from ..Jupyter import DisplayImage
 
@@ -2720,9 +2721,6 @@ class RDMolecule(ExternalMolecule):
                     p = Chem.AddHs(p, explicitOnly=False)
                     # RDKit will destroy hydrogens sometimes in "RunReactants"
                     # we just need to ensure this doesn't reorder anything...
-                # for a in p.GetAtoms():
-                #     x = a.GetPropsAsDict().get('react_atom_idx', a.GetAtomMapNum())
-                #     print(x, a.GetSymbol(), a.GetPropsAsDict())
                 for a in p.GetAtoms():
                     x = a.GetPropsAsDict().get('react_atom_idx', a.GetAtomMapNum())
                     if x == 0 and a.GetSymbol() in ['H', 'D', 'T']:
@@ -2732,13 +2730,10 @@ class RDMolecule(ExternalMolecule):
                                 b.GetPropsAsDict().get('react_atom_idx', b.GetAtomMapNum())
                             )
                         key = tuple(sorted(bond_atoms))
-                        # print("!", key, [b.GetSymbol() for b in a.GetNeighbors()])
                         x = h_map[key].pop()
                     # a.SetAtomMapNum(x)
                     perm.append(x)
                 add_h_p.append(p)
-            # print(perm)
-            # print(*[Chem.MolToSmiles(i) for i in p_group])
 
             p = functools.reduce(Chem.CombineMols, add_h_p)
             p = Chem.RenumberAtoms(p, np.argsort(perm, kind='merge').tolist())
@@ -3719,194 +3714,31 @@ class RDMolecule(ExternalMolecule):
             raise ValueError(f"unhandled byte size {byte_size}")
         return np.frombuffer(buffer, dtype)
 
-    compressed_bond_range = (0.5, 2.5)
-    compressed_angle_range = (0, np.pi)
-    compressed_dihedral_range = (0, 2*np.pi)
     @classmethod
     def _compressed_encode(cls, flat_z, byte_size,
                            primary_bond_range=None,
                            angle_range=None,
                            dihedral_range=None,
-                           pack_angles=True):
-        """
-        Compress distances such that if they are between 1 and 2 angstroms, we get
-        an extra digit of precision
-        :param flat_z:
-        :param dtype:
-        :return:
-        """
-        if byte_size == 16:
-            base_type = np.uint16
-            float_type = np.float16
-            if pack_angles:
-                pack_type = np.uint8
-            else:
-                pack_type = np.uint16
-        elif byte_size == 32:
-            base_type = np.uint32
-            float_type = np.float32
-            if pack_angles:
-                pack_type = np.uint16
-            else:
-                pack_type = np.uint32
-        elif byte_size == 64:
-            base_type = np.uint64
-            float_type = np.float64
-            if pack_angles:
-                pack_type = np.uint32
-            else:
-                pack_type = np.uint64
-        else:
-            raise ValueError(f"can't pack into byte size {byte_size}")
-
-        if primary_bond_range is None:
-            primary_bond_range = cls.compressed_bond_range
-        if angle_range is None:
-            angle_range = cls.compressed_angle_range
-        if dihedral_range is None:
-            dihedral_range = cls.compressed_dihedral_range
-
-        flat_z = np.asanyarray(flat_z)
-        dists = np.concatenate([flat_z[:2], flat_z[3::3]])
-        compressed = (dists >= primary_bond_range[0]) & (dists < primary_bond_range[1])
-        comp_vals = dists[compressed]
-
-        step_max = 2**(byte_size-1) - 1
-        total_bond_range =  primary_bond_range[1] -  primary_bond_range[0]
-        comp_vals = np.round(step_max * (comp_vals - primary_bond_range[0]) / total_bond_range).astype(base_type)
-        packaged_dists = np.zeros(len(dists), dtype=base_type)
-        packaged_dists[compressed] = comp_vals
-        # takes advantage of the fact that we are never negative to use that
-        # bit for this encoding
-        dx = dists[~compressed].astype(float_type)
-        packaged_dists[~compressed] = dx.view(base_type) + step_max
-
-        full_max = 2 ** byte_size - 1
-        if pack_angles:
-            pack_max = 2 ** (byte_size//2) - 1
-        else:
-            pack_max = full_max
-        angles = np.concatenate([flat_z[[2],], flat_z[4::3]])
-        shift_scale_angles = (angles - angle_range[0]) / (angle_range[1] - angle_range[0])
-        first_angle = np.round(full_max * shift_scale_angles[0]).astype(base_type)
-        scaled_angles = np.round(pack_max * shift_scale_angles[1:]).astype(base_type)
-        dihedrals = flat_z[5::3].copy()
-        mask = dihedrals < 0
-        dihedrals[mask] = 2*np.pi + dihedrals[mask]
-        shift_scaled_dihedrals = (dihedrals - dihedral_range[0]) / (dihedral_range[1] - dihedral_range[0])
-        scaled_dihedrals = np.round(pack_max * shift_scaled_dihedrals).astype(base_type)
-
-        if pack_angles:
-            full_pack = np.zeros(len(dists) + len(angles), dtype=base_type)
-        else:
-            full_pack = np.zeros(len(flat_z), dtype=base_type)
-
-        full_pack[:2] = packaged_dists[:2]
-        full_pack[2] = first_angle
-
-        packaged_angles = np.zeros(len(angles), dtype=base_type)
-        if pack_angles:
-            full_pack[3::2] = packaged_dists[2:]
-            packaged_angles[1:] = (scaled_angles << (byte_size // 2) | scaled_dihedrals)
-            full_pack[4::2] = packaged_angles[1:]
-        else:
-            full_pack[3::3] = packaged_dists[2:]
-            full_pack[4::3] = scaled_angles
-            full_pack[5::3] = scaled_dihedrals
-
-        return full_pack
+                           pack_angles=False):
+        return ConformerEncoder.encode(flat_z, byte_size,
+                                       primary_bond_range=primary_bond_range,
+                                       angle_range=angle_range,
+                                       dihedral_range=dihedral_range,
+                                       pack_angles=pack_angles
+                                       )
 
     @classmethod
     def _compressed_decode(cls, buffer, byte_size,
                            primary_bond_range=None,
                            angle_range=None,
-                           dihedral_range=None, pack_angles=True):
-        """
-        Compress distances such that if they are between 1 and 2 angstroms, we get
-        an extra digit of precision
-        :param flat_z:
-        :param dtype:
-        :return:
-        """
-        if byte_size == 16:
-            base_type = np.uint16
-            float_type = np.float16
-            if pack_angles:
-                pack_type = np.uint8
-            else:
-                pack_type = np.uint16
-        elif byte_size == 32:
-            base_type = np.uint32
-            float_type = np.float32
-            if pack_angles:
-                pack_type = np.uint16
-            else:
-                pack_type = np.uint32
-        elif byte_size == 64:
-            base_type = np.uint64
-            float_type = np.float64
-            if pack_angles:
-                pack_type = np.uint32
-            else:
-                pack_type = np.uint64
-        else:
-            raise ValueError(f"can't pack into byte size {byte_size}")
+                           dihedral_range=None, pack_angles=False):
+        return ConformerEncoder.decode(buffer, byte_size,
+                                       primary_bond_range=primary_bond_range,
+                                       angle_range=angle_range,
+                                       dihedral_range=dihedral_range,
+                                       pack_angles=pack_angles)
 
-        uint_stream = np.frombuffer(buffer, base_type)
-        if pack_angles:
-            dists = np.concatenate([uint_stream[:2], uint_stream[3::2]])
-        else:
-            dists = np.concatenate([uint_stream[:2], uint_stream[3::3]])
-
-        if primary_bond_range is None:
-            primary_bond_range = cls.compressed_bond_range
-        if angle_range is None:
-            angle_range = cls.compressed_angle_range
-        if dihedral_range is None:
-            dihedral_range = cls.compressed_dihedral_range
-
-        step_max = 2 ** (byte_size - 1) - 1
-        compressed = dists < step_max
-        decompressed_dists = np.zeros(len(dists), dtype=float)
-
-        total_bond_range = primary_bond_range[1] - primary_bond_range[0]
-        decompressed_dists[compressed] = (total_bond_range *  dists[compressed] / step_max) + primary_bond_range[0]
-        decompressed_dists[~compressed] = (dists[~compressed] - step_max).view(float_type)
-
-        full_max = 2 ** byte_size - 1
-        if pack_angles:
-            pack_max = 2 ** (byte_size // 2) - 1
-        else:
-            pack_max = full_max
-
-        if pack_angles:
-            full_pack = np.zeros(3*(len(dists) - 1) , dtype=float)
-            packed_angles = np.concatenate([uint_stream[[2],], uint_stream[4::2]])
-            angles = np.concatenate([packed_angles[[0],], packed_angles[1:] >> (byte_size // 2)])
-            dihedrals = packed_angles[1:] & (2**(byte_size // 2) - 1)
-        else:
-            full_pack = np.zeros(len(uint_stream) , dtype=float)
-            angles = np.concatenate([uint_stream[[2],], uint_stream[4::3]])
-            dihedrals = uint_stream[5::3]
-
-        full_angles = (
-                (angle_range[1]-angle_range[0])
-                * np.concatenate([angles[:1] / full_max, angles[1:] / pack_max])
-        ) + angle_range[0]
-        full_dihedrals = (
-            (dihedral_range[1]-dihedral_range[0])
-            * (dihedrals / pack_max)
-        ) + dihedral_range[0]
-
-        full_pack[:2] = decompressed_dists[:2]
-        full_pack[2] = full_angles[0]
-        full_pack[3::3] = decompressed_dists[2:]
-        full_pack[4::3] = full_angles[1:]
-        full_pack[5::3] = full_dihedrals
-
-        return full_pack
-
-    defaul_conformer_compression = 'compressed'
+    default_conformer_compression = 'compressed'
     default_tag_byte_size = 16
     default_tag_byte_encoding = 64
     def conformer_smiles_tag(self,
@@ -3953,11 +3785,11 @@ class RDMolecule(ExternalMolecule):
         zdata = coordops.cartesian_to_zmatrix(coords, zmatrix)
         flat_z = coordops.extract_zmatrix_values(zdata.coords, partial_embedding=True)
         if encoder is None:
-            encoder = self.defaul_conformer_compression
+            encoder = self.default_conformer_compression
         if dev.str_is(encoder, 'plain'):
             zmat_coords = self._plain_encode(flat_z, byte_size)
         elif encoder == 'compressed':
-            zmat_coords = self._compressed_encode(flat_z, byte_size)
+            zmat_coords = self._compressed_encode(flat_z, byte_size, pack_angles=True)
         elif encoder == 'precision':
             zmat_coords = self._compressed_encode(flat_z, byte_size, pack_angles=False)
         else:
@@ -3988,7 +3820,6 @@ class RDMolecule(ExternalMolecule):
             if binary:
                 ztag = zinds.data
             else:
-
                 ztag = byte_encoding(zinds.data)
                 if isinstance(ztag, bytes):
                     ztag = ztag.decode()
@@ -4039,11 +3870,11 @@ class RDMolecule(ExternalMolecule):
 
         buffer = byte_encoding(tag.encode())
         if decoder is None:
-            decoder = cls.defaul_conformer_compression
+            decoder = cls.default_conformer_compression
         if dev.str_is(decoder, 'plain'):
             flat_z = cls._plain_decode(buffer, byte_size)
         elif decoder == 'compressed':
-            flat_z = cls._compressed_decode(buffer, byte_size)
+            flat_z = cls._compressed_decode(buffer, byte_size, pack_angles=True)
         elif decoder == 'precision':
             flat_z = cls._compressed_decode(buffer, byte_size, pack_angles=False)
         else:
@@ -4513,6 +4344,8 @@ class RDMolecule(ExternalMolecule):
                            filename=None,
                            mode='w+',
                            binary=False,
+                           remove_hydrogens=False,
+                           mol=None,
                            **converter_opts):
         """
         **LLM Docstring**
@@ -4535,6 +4368,11 @@ class RDMolecule(ExternalMolecule):
         :return: the file path, or the serialized string
         :rtype: str | bytes
         """
+        Chem = self.allchem_api()
+        if mol is None:
+            mol = self.rdmol
+        if remove_hydrogens:
+            mol = Chem.RemoveHs(mol)
         if filename is None:
             if string_writer is None:
                 if binary:
@@ -4551,10 +4389,10 @@ class RDMolecule(ExternalMolecule):
                         res = dev.read_file(file.name, mode='r')
                     return res
             else:
-                return string_writer(self.rdmol, **converter_opts)
+                return string_writer(mol, **converter_opts)
         else:
             if file_writer is None:
-                string = string_writer(self.rdmol, **converter_opts)
+                string = string_writer(mol, **converter_opts)
                 if binary:
                     string = string.encode('utf-8')
                     mode = mode.replace('b', '')+"b"
@@ -4563,7 +4401,7 @@ class RDMolecule(ExternalMolecule):
                                string,
                                mode=mode)
             else:
-                return file_writer(self.rdmol, filename, **converter_opts)
+                return file_writer(mol, filename, **converter_opts)
 
     def to_xyz(self, filename=None, conf_id=None, **opts):
         """

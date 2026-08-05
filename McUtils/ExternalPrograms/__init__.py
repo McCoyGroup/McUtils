@@ -46,3 +46,5 @@ from .Containers import *; from .Containers import __all__ as exposed
 __all__ += exposed
 from .CubeProp import *; from .CubeProp import __all__ as exposed
 __all__ += exposed
+from .Conformers import *; from .Conformers import __all__ as exposed
+__all__ += exposed

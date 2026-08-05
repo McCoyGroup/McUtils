@@ -266,7 +266,7 @@ def unembedded_pts_rmsd(coords, ref, return_diffs=False, averaged=False, total=F
 
     diffs = ref - coords
     base_rmsd = np.linalg.norm(diffs, axis=-1).reshape(base_shape)
-    if total:
+    if not total:
         if averaged:
             base_rmsd = base_rmsd / np.sqrt(base_ref[-2])
         else:

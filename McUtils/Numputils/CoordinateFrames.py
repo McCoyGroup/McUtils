@@ -1247,6 +1247,8 @@ def eckart_rmsd(coords, ref,
     :rtype: np.ndarray | tuple
     """
     if embed:
+        if embedding_sel is None:
+            embedding_sel = comparison_sel
         ref = np.asanyarray(ref)
         eckart_data:EckartData = eckart_embedding(
             ref, coords,

@@ -30,6 +30,7 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
                      return_derivs=False,
                      order=None,
                      check_overlapping=False,
+                     check_angles=True,
                      check_ordering=False,
                      use_direct_expansions=False,
                      orthogonalize_derivatives=True,
@@ -187,6 +188,11 @@ class ZMatrixToCartesianConverter(CoordinateSystemConverter):
             ref_coords2 = ordering[:, i, 1] # reference atom numbers for second coordinate
             refs2 = total_points[np.arange(sysnum), ref_coords2.astype(int)] # get the actual reference coordinates for the angle
             angle = coordlist[:, i, 1] # pull the requisite angle values
+            if check_angles:
+                mask = np.where(np.abs(angle - np.pi) < 1e-8)
+                if len(mask[0]) > 0:
+                    angle = angle.copy()
+                    angle[mask] = np.pi - 1e-4
             if not use_rad:
                 angle = np.deg2rad(angle)
 
