@@ -287,242 +287,487 @@ class ConformerEncoder:
 
         return result.item() if result.ndim == 0 else result
 
-    @classmethod
-    def encode(cls, flat_z, byte_size,
-               primary_bond_range=None,
-               angle_range=None,
-               dihedral_range=None,
-               pack_angles=False):
-        """
-        Compress distances such that if they are between 1 and 2 angstroms, we get
-        an extra digit of precision
-        :param flat_z:
-        :param dtype:
-        :return:
-        """
+    @staticmethod
+    def _encoding_types(byte_size):
         if byte_size == 16:
-            base_type = np.uint16
-            float_type = np.float16
-            if pack_angles:
-                pack_type = np.uint8
-            else:
-                pack_type = np.uint16
-        elif byte_size == 32:
-            base_type = np.uint32
-            float_type = np.float32
-            if pack_angles:
-                pack_type = np.uint16
-            else:
-                pack_type = np.uint32
-        elif byte_size == 64:
-            base_type = np.uint64
-            float_type = np.float64
-            if pack_angles:
-                pack_type = np.uint32
-            else:
-                pack_type = np.uint64
+            return np.uint16, np.float16
+        if byte_size == 32:
+            return np.uint32, np.float32
+        if byte_size == 64:
+            return np.uint64, np.float64
+
+        raise ValueError(
+            f"can't pack into byte size {byte_size}"
+        )
+
+    @staticmethod
+    def _encoding_limits(byte_size, pack_angles=False):
+        full_max = 2**byte_size - 1
+        step_max = 2**(byte_size - 1) - 1
+
+        if pack_angles:
+            pack_max = 2**(byte_size // 2) - 1
         else:
-            raise ValueError(f"can't pack into byte size {byte_size}")
+            pack_max = full_max
+
+        return step_max, pack_max, full_max
+
+    @classmethod
+    def bond_encoder(
+        cls,
+        bonds,
+        byte_size,
+        primary_bond_range=None,
+    ):
+        """
+        Encode a standalone bond-length stream.
+        """
+        base_type, float_type = cls._encoding_types(byte_size)
+        step_max, _, _ = cls._encoding_limits(byte_size)
 
         if primary_bond_range is None:
             primary_bond_range = cls.compressed_bond_range
+
+        bonds = np.asanyarray(bonds)
+        encoded = np.zeros(bonds.shape, dtype=base_type)
+
+        lower, upper = primary_bond_range
+        compressed = (bonds >= lower) & (bonds < upper)
+
+        total_range = upper - lower
+        encoded[compressed] = np.round(
+            step_max
+            * (bonds[compressed] - lower)
+            / total_range
+        ).astype(base_type)
+
+        # Values outside the primary range are retained in the
+        # corresponding floating-point representation.
+        raw_values = bonds[~compressed].astype(float_type)
+        encoded[~compressed] = (
+            raw_values.view(base_type) + step_max
+        )
+
+        return encoded
+
+    @classmethod
+    def bond_decoder(
+        cls,
+        encoded_bonds,
+        byte_size,
+        primary_bond_range=None,
+    ):
+        """
+        Decode a standalone encoded bond-length stream.
+        """
+        base_type, float_type = cls._encoding_types(byte_size)
+        step_max, _, _ = cls._encoding_limits(byte_size)
+
+        if primary_bond_range is None:
+            primary_bond_range = cls.compressed_bond_range
+
+        encoded_bonds = np.asarray(
+            encoded_bonds,
+            dtype=base_type,
+        )
+
+        compressed = encoded_bonds < step_max
+        bonds = np.zeros(encoded_bonds.shape, dtype=float)
+
+        lower, upper = primary_bond_range
+        total_range = upper - lower
+
+        bonds[compressed] = (
+            total_range
+            * encoded_bonds[compressed]
+            / step_max
+        ) + lower
+
+        raw_values = (
+            encoded_bonds[~compressed] - step_max
+        ).astype(base_type)
+
+        bonds[~compressed] = raw_values.view(float_type)
+
+        return bonds
+
+    @classmethod
+    def angle_encoder(
+        cls,
+        angles,
+        byte_size,
+        angle_range=None,
+        pack_angles=False,
+    ):
+        """
+        Encode a standalone angle stream.
+
+        The first angle always uses the full integer width. Remaining
+        angles use either the full width or half width depending on
+        `pack_angles`.
+        """
+        base_type, _ = cls._encoding_types(byte_size)
+        _, pack_max, full_max = cls._encoding_limits(
+            byte_size,
+            pack_angles,
+        )
+
         if angle_range is None:
             angle_range = cls.compressed_angle_range
-        if dihedral_range is None:
-            dihedral_range = cls.compressed_dihedral_range
 
-        flat_z = np.asanyarray(flat_z)
-        dists = np.concatenate([flat_z[:2], flat_z[3::3]])
-        compressed = (dists >= primary_bond_range[0]) & (dists < primary_bond_range[1])
-        comp_vals = dists[compressed]
+        angles = np.asanyarray(angles)
 
-        step_max = 2 ** (byte_size - 1) - 1
-        total_bond_range = primary_bond_range[1] - primary_bond_range[0]
-        comp_vals = np.round(step_max * (comp_vals - primary_bond_range[0]) / total_bond_range).astype(base_type)
-        packaged_dists = np.zeros(len(dists), dtype=base_type)
-        packaged_dists[compressed] = comp_vals
-        # takes advantage of the fact that we are never negative to use that
-        # bit for this encoding
-        dx = dists[~compressed].astype(float_type)
-        packaged_dists[~compressed] = dx.view(base_type) + step_max
-
-        full_max = 2 ** byte_size - 1
-        if pack_angles:
-            pack_max = 2 ** (byte_size // 2) - 1
-        else:
-            pack_max = full_max
-        angles = np.concatenate([
-            flat_z[[2]],
-            flat_z[4::3],
-        ])
-
-        normalized_angles = (
-                (angles - angle_range[0])
-                / (angle_range[1] - angle_range[0])
+        normalized = (
+            (angles - angle_range[0])
+            / (angle_range[1] - angle_range[0])
         )
-        # normalized_angles = np.clip(normalized_angles, 0.0, 1.0)
 
-        # Map physical positions into uniform CDF quantiles.
-        angle_quantiles = cls._distribution_cdf(
-            normalized_angles,
+        quantiles = cls._distribution_cdf(
+            normalized,
             cls.angle_distribution,
         )
 
-        first_angle = np.round(
-            full_max * angle_quantiles[0]
-        ).astype(base_type)
+        encoded = np.empty(angles.shape, dtype=base_type)
 
-        scaled_angles = np.round(
-            pack_max * angle_quantiles[1:]
-        ).astype(base_type)
+        if encoded.size:
+            encoded[0] = np.round(
+                full_max * quantiles[0]
+            ).astype(base_type)
 
-        dihedrals = flat_z[5::3].copy()
+            encoded[1:] = np.round(
+                pack_max * quantiles[1:]
+            ).astype(base_type)
 
-        # Preserve the existing conversion of negative dihedrals into [0, 2π).
+        return encoded
+
+    @classmethod
+    def angle_decoder(
+        cls,
+        encoded_angles,
+        byte_size,
+        angle_range=None,
+        pack_angles=False,
+    ):
+        """
+        Decode a standalone angle stream.
+        """
+        base_type, _ = cls._encoding_types(byte_size)
+        _, pack_max, full_max = cls._encoding_limits(
+            byte_size,
+            pack_angles,
+        )
+
+        if angle_range is None:
+            angle_range = cls.compressed_angle_range
+
+        encoded_angles = np.asarray(
+            encoded_angles,
+            dtype=base_type,
+        )
+
+        quantiles = np.empty(
+            encoded_angles.shape,
+            dtype=float,
+        )
+
+        if quantiles.size:
+            quantiles[0] = encoded_angles[0] / full_max
+            quantiles[1:] = encoded_angles[1:] / pack_max
+
+        normalized = cls._distribution_ppf(
+            quantiles,
+            cls.angle_distribution,
+        )
+
+        return (
+            angle_range[0]
+            + (angle_range[1] - angle_range[0])
+            * normalized
+        )
+
+    @classmethod
+    def dihedral_encoder(
+        cls,
+        dihedrals,
+        byte_size,
+        dihedral_range=None,
+        pack_angles=False,
+    ):
+        """
+        Encode a standalone dihedral stream.
+        """
+        base_type, _ = cls._encoding_types(byte_size)
+        _, pack_max, _ = cls._encoding_limits(
+            byte_size,
+            pack_angles,
+        )
+
+        if dihedral_range is None:
+            dihedral_range = cls.compressed_dihedral_range
+
+        dihedrals = np.asanyarray(dihedrals).copy()
+
+        # Convert negative dihedrals into the default [0, 2π) range.
         dihedrals[dihedrals < 0] += 2 * np.pi
 
-        normalized_dihedrals = (
-                (dihedrals - dihedral_range[0])
-                / (dihedral_range[1] - dihedral_range[0])
+        normalized = (
+            (dihedrals - dihedral_range[0])
+            / (dihedral_range[1] - dihedral_range[0])
         )
-        # normalized_dihedrals = np.clip(normalized_dihedrals, 0.0, 1.0)
 
-        dihedral_quantiles = cls._distribution_cdf(
-            normalized_dihedrals,
+        quantiles = cls._distribution_cdf(
+            normalized,
             cls.dihedral_distribution,
         )
 
-        scaled_dihedrals = np.round(
-            pack_max * dihedral_quantiles
+        return np.round(
+            pack_max * quantiles
         ).astype(base_type)
 
-        if pack_angles:
-            full_pack = np.zeros(len(dists) + len(angles), dtype=base_type)
-        else:
-            full_pack = np.zeros(len(flat_z), dtype=base_type)
-
-        full_pack[:2] = packaged_dists[:2]
-        full_pack[2] = first_angle
-
-        packaged_angles = np.zeros(len(angles), dtype=base_type)
-        if pack_angles:
-            full_pack[3::2] = packaged_dists[2:]
-            packaged_angles[1:] = (scaled_angles << (byte_size // 2) | scaled_dihedrals)
-            full_pack[4::2] = packaged_angles[1:]
-        else:
-            full_pack[3::3] = packaged_dists[2:]
-            full_pack[4::3] = scaled_angles
-            full_pack[5::3] = scaled_dihedrals
-
-        return full_pack
-
     @classmethod
-    def decode(cls, buffer, byte_size,
-               primary_bond_range=None,
-               angle_range=None,
-               dihedral_range=None, pack_angles=False):
+    def dihedral_decoder(
+        cls,
+        encoded_dihedrals,
+        byte_size,
+        dihedral_range=None,
+        pack_angles=False,
+    ):
         """
-        Compress distances such that if they are between 1 and 2 angstroms, we get
-        an extra digit of precision
-        :param flat_z:
-        :param dtype:
-        :return:
+        Decode a standalone dihedral stream.
         """
-        if byte_size == 16:
-            base_type = np.uint16
-            float_type = np.float16
-            if pack_angles:
-                pack_type = np.uint8
-            else:
-                pack_type = np.uint16
-        elif byte_size == 32:
-            base_type = np.uint32
-            float_type = np.float32
-            if pack_angles:
-                pack_type = np.uint16
-            else:
-                pack_type = np.uint32
-        elif byte_size == 64:
-            base_type = np.uint64
-            float_type = np.float64
-            if pack_angles:
-                pack_type = np.uint32
-            else:
-                pack_type = np.uint64
-        else:
-            raise ValueError(f"can't pack into byte size {byte_size}")
+        base_type, _ = cls._encoding_types(byte_size)
+        _, pack_max, _ = cls._encoding_limits(
+            byte_size,
+            pack_angles,
+        )
 
-        uint_stream = np.frombuffer(buffer, base_type)
-        if pack_angles:
-            dists = np.concatenate([uint_stream[:2], uint_stream[3::2]])
-        else:
-            dists = np.concatenate([uint_stream[:2], uint_stream[3::3]])
-
-        if primary_bond_range is None:
-            primary_bond_range = cls.compressed_bond_range
-        if angle_range is None:
-            angle_range = cls.compressed_angle_range
         if dihedral_range is None:
             dihedral_range = cls.compressed_dihedral_range
 
-        step_max = 2 ** (byte_size - 1) - 1
-        compressed = dists < step_max
-        decompressed_dists = np.zeros(len(dists), dtype=float)
-
-        total_bond_range = primary_bond_range[1] - primary_bond_range[0]
-        decompressed_dists[compressed] = (total_bond_range *  dists[compressed] / step_max) + primary_bond_range[0]
-        decompressed_dists[~compressed] = (dists[~compressed] - step_max).view(float_type)
-
-        full_max = 2 ** byte_size - 1
-        if pack_angles:
-            pack_max = 2 ** (byte_size // 2) - 1
-        else:
-            pack_max = full_max
-
-        if pack_angles:
-            full_pack = np.zeros(3*(len(dists) - 1) , dtype=float)
-            packed_angles = np.concatenate([uint_stream[[2],], uint_stream[4::2]])
-            angles = np.concatenate([packed_angles[[0],], packed_angles[1:] >> (byte_size // 2)])
-            dihedrals = packed_angles[1:] & (2**(byte_size // 2) - 1)
-        else:
-            full_pack = np.zeros(len(uint_stream) , dtype=float)
-            angles = np.concatenate([uint_stream[[2],], uint_stream[4::3]])
-            dihedrals = uint_stream[5::3]
-
-        angle_quantiles = np.concatenate([
-            angles[:1] / full_max,
-            angles[1:] / pack_max,
-        ])
-
-        normalized_angles = cls._distribution_ppf(
-            angle_quantiles,
-            cls.angle_distribution,
+        encoded_dihedrals = np.asarray(
+            encoded_dihedrals,
+            dtype=base_type,
         )
 
-        full_angles = (
-                angle_range[0]
-                + (angle_range[1] - angle_range[0]) * normalized_angles
-        )
+        quantiles = encoded_dihedrals / pack_max
 
-        dihedral_quantiles = dihedrals / pack_max
-
-        normalized_dihedrals = cls._distribution_ppf(
-            dihedral_quantiles,
+        normalized = cls._distribution_ppf(
+            quantiles,
             cls.dihedral_distribution,
         )
 
-        full_dihedrals = (
-                dihedral_range[0]
-                + (
-                        dihedral_range[1] - dihedral_range[0]
-                ) * normalized_dihedrals
+        dihedrals = (
+            dihedral_range[0]
+            + (dihedral_range[1] - dihedral_range[0])
+            * normalized
         )
-        full_dihedrals[full_dihedrals > np.pi] -= 2 * np.pi
 
-        full_pack[:2] = decompressed_dists[:2]
-        full_pack[2] = full_angles[0]
-        full_pack[3::3] = decompressed_dists[2:]
-        full_pack[4::3] = full_angles[1:]
-        full_pack[5::3] = full_dihedrals
+        # Restore the original [-π, π] convention.
+        dihedrals[dihedrals > np.pi] -= 2 * np.pi
 
-        return full_pack
+        return dihedrals
+
+    @staticmethod
+    def _split_coordinate_streams(flat_z):
+        """
+        Split a flattened Z-matrix into bond, angle, and dihedral streams.
+        """
+        flat_z = np.asanyarray(flat_z)
+
+        bonds = np.concatenate((
+            flat_z[:2],
+            flat_z[3::3],
+        ))
+
+        angles = np.concatenate((
+            flat_z[[2]],
+            flat_z[4::3],
+        ))
+
+        dihedrals = flat_z[5::3]
+
+        return bonds, angles, dihedrals
+
+    @staticmethod
+    def _merge_coordinate_streams(
+        bonds,
+        angles,
+        dihedrals,
+    ):
+        """
+        Reconstruct a flattened Z-matrix from separate coordinate streams.
+        """
+        flat_z = np.empty(
+            3 * (len(bonds) - 1),
+            dtype=float,
+        )
+
+        flat_z[:2] = bonds[:2]
+        flat_z[2] = angles[0]
+        flat_z[3::3] = bonds[2:]
+        flat_z[4::3] = angles[1:]
+        flat_z[5::3] = dihedrals
+
+        return flat_z
+
+    @classmethod
+    def encode(
+            cls,
+            flat_z,
+            byte_size,
+            primary_bond_range=None,
+            angle_range=None,
+            dihedral_range=None,
+            pack_angles=False,
+    ):
+        """
+        Encode a flattened Z-matrix coordinate stream.
+        """
+        base_type, _ = cls._encoding_types(byte_size)
+
+        bonds, angles, dihedrals = (
+            cls._split_coordinate_streams(flat_z)
+        )
+
+        encoded_bonds = cls.bond_encoder(
+            bonds,
+            byte_size,
+            primary_bond_range=primary_bond_range,
+        )
+
+        encoded_angles = cls.angle_encoder(
+            angles,
+            byte_size,
+            angle_range=angle_range,
+            pack_angles=pack_angles,
+        )
+
+        encoded_dihedrals = cls.dihedral_encoder(
+            dihedrals,
+            byte_size,
+            dihedral_range=dihedral_range,
+            pack_angles=pack_angles,
+        )
+
+        if pack_angles:
+            encoded = np.zeros(
+                len(bonds) + len(angles),
+                dtype=base_type,
+            )
+
+            encoded[:2] = encoded_bonds[:2]
+            encoded[2] = encoded_angles[0]
+            encoded[3::2] = encoded_bonds[2:]
+
+            half_width = byte_size // 2
+
+            encoded[4::2] = (
+                                    encoded_angles[1:] << half_width
+                            ) | encoded_dihedrals
+
+        else:
+            encoded = np.zeros(
+                len(flat_z),
+                dtype=base_type,
+            )
+
+            encoded[:2] = encoded_bonds[:2]
+            encoded[2] = encoded_angles[0]
+            encoded[3::3] = encoded_bonds[2:]
+            encoded[4::3] = encoded_angles[1:]
+            encoded[5::3] = encoded_dihedrals
+
+        return encoded
+
+    @classmethod
+    def _split_encoded_streams(
+            cls,
+            uint_stream,
+            byte_size,
+            pack_angles=False,
+    ):
+        """
+        Split the encoded buffer into bond, angle, and dihedral streams.
+        """
+        if pack_angles:
+            half_width = byte_size // 2
+            half_mask = 2 ** half_width - 1
+
+            bonds = np.concatenate((
+                uint_stream[:2],
+                uint_stream[3::2],
+            ))
+
+            packed_angles = uint_stream[4::2]
+
+            angles = np.concatenate((
+                uint_stream[[2]],
+                packed_angles >> half_width,
+            ))
+
+            dihedrals = packed_angles & half_mask
+
+        else:
+            bonds = np.concatenate((
+                uint_stream[:2],
+                uint_stream[3::3],
+            ))
+
+            angles = np.concatenate((
+                uint_stream[[2]],
+                uint_stream[4::3],
+            ))
+
+            dihedrals = uint_stream[5::3]
+
+        return bonds, angles, dihedrals
+
+    @classmethod
+    def decode(
+        cls,
+        buffer,
+        byte_size,
+        primary_bond_range=None,
+        angle_range=None,
+        dihedral_range=None,
+        pack_angles=False,
+    ):
+        """
+        Decode a packed flattened Z-matrix coordinate stream.
+        """
+        base_type, _ = cls._encoding_types(byte_size)
+        uint_stream = np.frombuffer(buffer, dtype=base_type)
+
+        encoded_bonds, encoded_angles, encoded_dihedrals = (
+            cls._split_encoded_streams(
+                uint_stream,
+                byte_size,
+                pack_angles=pack_angles,
+            )
+        )
+
+        bonds = cls.bond_decoder(
+            encoded_bonds,
+            byte_size,
+            primary_bond_range=primary_bond_range,
+        )
+
+        angles = cls.angle_decoder(
+            encoded_angles,
+            byte_size,
+            angle_range=angle_range,
+            pack_angles=pack_angles,
+        )
+
+        dihedrals = cls.dihedral_decoder(
+            encoded_dihedrals,
+            byte_size,
+            dihedral_range=dihedral_range,
+            pack_angles=pack_angles,
+        )
+
+        return cls._merge_coordinate_streams(
+            bonds,
+            angles,
+            dihedrals,
+        )

@@ -1988,7 +1988,8 @@ class RDMolecule(ExternalMolecule):
         'atom_note_color':'atom_note_colour',
         'bond_note_color':'atom_note_colour',
         'query_color':'query_colour',
-        'font_family':(_get_font_file, _set_font_file)
+        'font_family':(_get_font_file, _set_font_file),
+
     }
     @classmethod
     def _handle_color(cls, v):
@@ -2215,6 +2216,7 @@ class RDMolecule(ExternalMolecule):
                               highlight_bond_colors=None,
                               highlight_atom_radii=None,
                               highlight_bond_radii=None,
+                              blend_highlights=True,
                               coords=None,
                               draw_coords=None,
                               plot_range=None,
@@ -2222,6 +2224,7 @@ class RDMolecule(ExternalMolecule):
                               predraw=None,
                               return_splits=False,
                               no_free_type=None,
+                              draw_implicit_hydrogens=None,
                               **opts
                               ):
         """
@@ -2321,6 +2324,11 @@ class RDMolecule(ExternalMolecule):
             split_start = len(drawer.GetDrawingText())
         if "highlightBondRadii" in opts:
             mol = rdMolDraw2D.PrepareMolForDrawing(mol, kekulize=False, addChiralHs=False)
+            if draw_implicit_hydrogens is False:
+                for atom in mol.GetAtoms():
+                    lab = atom.GetPropsAsDict().get("atomLabel", '')
+                    if "H" in lab:
+                        atom.SetProp("atomLabel", atom.GetSymbol())
             conf = mol.GetConformer()
             conf.SetPositions(_coords)
             opts['confId'] = conf.GetId()
@@ -2333,6 +2341,11 @@ class RDMolecule(ExternalMolecule):
                                               )
         else:
             mol = rdMolDraw2D.PrepareMolForDrawing(mol, kekulize=False, addChiralHs=False)
+            if draw_implicit_hydrogens is False:
+                for atom in mol.GetAtoms():
+                    lab = atom.GetPropsAsDict().get("atomLabel", '')
+                    if "H" in lab:
+                        atom.SetProp("atomLabel", atom.GetSymbol())
             conf = mol.GetConformer()
             conf.SetPositions(_coords)
             opts['confId'] = conf.GetId()
@@ -3065,7 +3078,6 @@ class RDMolecule(ExternalMolecule):
              bond_radius=None,
              allow_radius_rescaling=True,
              draw_coords=None,
-             highlight_rings=None,
              label_offset=1,
              conf_id=None,
              include_save_buttons=False,
@@ -3396,6 +3408,8 @@ class RDMolecule(ExternalMolecule):
                         bond.SetProp("bondNote", label)
 
         if highlight_atoms is not None:
+            highlight_atoms = [int(a) for a in highlight_atoms]
+
             bond_set = {}
             for i,b in enumerate(self.bonds):
                 if b[0] not in bond_set:
@@ -3436,7 +3450,7 @@ class RDMolecule(ExternalMolecule):
                     i,j = b
                     _.append(mol.GetBondBetweenAtoms(int(i),int(j)).GetIdx())
                 else:
-                    _.append(b)
+                    _.append(int(b))
             highlight_bonds = _
 
         if highlight_bonds is not None:
@@ -3487,9 +3501,11 @@ class RDMolecule(ExternalMolecule):
             for b,v in highlight_bond_colors.items():
                 if not nput.is_int(b):
                     i,j = b
+                    i, j = int(i), int(j)
                     x = mol.GetBondBetweenAtoms(int(i),int(j)).GetIdx()
                     _[x] = v
                 else:
+                    b = int(b)
                     _[b] = v
             highlight_bond_colors = _
 
@@ -3500,6 +3516,7 @@ class RDMolecule(ExternalMolecule):
         if highlight_atom_colors is not None:
             _ = {}
             for b, c in highlight_atom_colors.items():
+                b = int(b)
                 _[b] = self._handle_color(c)
             highlight_atom_colors = _
 
