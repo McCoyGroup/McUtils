@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.GEOM.GEOMDownloader">GEOMDownloader</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM.py#L584)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM.py#L584?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM.py#L585)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM.py#L585?message=Update%20Docs)]
 </div>
 
 Downloads and extracts the GEOM `rdkit_folder` archive.
@@ -44,8 +44,8 @@ RDKIT_DATA_ID: int
 __init__(self, out_dir: 'str | Path', persistent_id: 'str' = None, server_url: 'str' = None, file_id: 'Optional[str]' = None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM.py#L610)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM.py#L610?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM.py#L611)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM.py#L611?message=Update%20Docs)]
 </div>
 
 
@@ -54,8 +54,8 @@ __init__(self, out_dir: 'str | Path', persistent_id: 'str' = None, server_url: '
 download(self, keep_archive: 'bool' = False, skip_download: 'bool' = False) -> 'Path': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM/GEOMDownloader.py#L749)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM/GEOMDownloader.py#L749?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM/GEOMDownloader.py#L750)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM/GEOMDownloader.py#L750?message=Update%20Docs)]
 </div>
 Download (unless skip_download) and extract the GEOM archive.
 
@@ -113,7 +113,7 @@ Returns the path to the extracted `rdkit_folder` directory.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/GEOM/GEOMDownloader.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/GEOM/GEOMDownloader.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM.py#L584?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM.py#L585?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
