@@ -57,6 +57,7 @@ class GEOMLoader:
         self._member_index: list[tarfile.TarInfo] = []  # fallback tar-order index (lazy)
         self._member_by_relpath: dict[str, tarfile.TarInfo] = {}  # name-keyed cache (lazy)
         self._offset_by_relpath: dict[str, int] = {}  # precompiled name -> header-offset, if loaded
+        self._offset_keys = None
         self._tar_exhausted = False  # True once we've hit EOF scanning
         self._summary_search_done = False  # True once we've looked for summary in tar
 
@@ -151,7 +152,11 @@ class GEOMLoader:
         data = np.load(path, allow_pickle=False, mmap_mode='r')
         keys = data["keys"]
         offsets = data["offsets"]
-        self._offset_by_relpath = {str(k): int(o) for k, o in zip(keys, offsets)}
+        self._offset_by_relpath = {
+            str(k): int(o) for k, o in zip(keys, offsets)
+            if k[:len(self.subset)] == self.subset
+        }
+        self._offset_keys = list(self._offset_by_relpath.keys())
         # print(f"Loaded {len(self._offset_by_relpath)} cached jump offsets from {path}")
 
     def _read_member_at_offset(self, offset: int) -> Optional[tarfile.TarInfo]:
@@ -345,8 +350,16 @@ class GEOMLoader:
 
         if self.is_tar:  # plain/uncompressed tar
             self._try_load_summary_from_tar()
+            rel_path = None
+            if len(self._offset_by_relpath) > 0:
+                if index >= len(self._offset_by_relpath):
+                    raise IndexError(
+                        f"Index {index} out of range: summary lists "
+                        f"{len(self._offset_by_relpath)} molecule(s)."
+                    )
+                rel_path = self._offset_keys[index]
 
-            if self._pickle_paths is not None:
+            elif self._pickle_paths is not None:
                 # Summary was found in the archive: index means exactly what
                 # it means in directory mode — position in the summary's
                 # pickle_path list. Look the file up by its known name.
@@ -356,6 +369,8 @@ class GEOMLoader:
                         f"{len(self._pickle_paths)} molecule(s)."
                     )
                 rel_path = self._pickle_paths[index]
+
+            if rel_path is not None:
                 member = self._find_member_by_relpath(rel_path)
                 fileobj = self._tar_handle.extractfile(member)
                 mol_dict = pickle.loads(fileobj.read())
