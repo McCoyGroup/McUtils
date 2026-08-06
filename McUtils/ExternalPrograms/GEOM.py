@@ -21,6 +21,11 @@ __all__ = [
     "GEOMDownloader"
 ]
 
+_TAR_SUFFIXES = {".tar.gz", ".tgz"}
+
+def _has_tar_suffix(path: Path) -> bool:
+    return path.suffix == ".tgz" or "".join(path.suffixes[-2:]) == ".tar.gz"
+
 class GEOMLoader:
 
     def __init__(
@@ -30,14 +35,120 @@ class GEOMLoader:
             summary_path: str = "summary_dic.json",
     ):
         self.root = Path(root)
-        self.summary_path = self.root / subset / summary_path
+        self.subset = subset
+        self.summary_path = summary_path
+        self.is_tar = self.root.is_file() and _has_tar_suffix(self.root)
 
-        if not self.summary_path.exists():
-            raise FileNotFoundError(f"Could not find {self.summary_path}")
+        self.summary: Optional[dict] = None
+        if not self.is_tar:
+            summary_file = self.root / summary_path
+            if not summary_file.exists():
+                raise FileNotFoundError(f"Could not find {summary_file}")
+            with open(summary_file) as f:
+                self.summary = json.load(f)  # {smiles: {"pickle_path": ..., ...}}
+        elif not self.root.exists():
+            raise FileNotFoundError(f"Could not find archive {self.root}")
 
-        with open(self.summary_path) as f:
-            self.summary: dict = json.load(f)  # {smiles: {"pickle_path": ..., ...}}
+    # ------------------------------------------------------------------
+    # Shared per-molecule -> per-conformer expansion
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _expand_molecule(
+            mol_dict: dict,
+            fallback_smiles: str,
+            pickle_rel_path: str,
+            max_confs_per_mol: Optional[int]
+    ) -> Iterator[tuple[RDMolecule, dict]]:
+        confs = mol_dict.get("conformers", [])
+        if max_confs_per_mol is not None:
+            confs = confs[:max_confs_per_mol]
 
+        resolved_smiles = mol_dict.get("smiles", fallback_smiles)
+
+        for conf_idx, conf in enumerate(confs):
+            rd_mol = conf["rd_mol"]
+
+            meta = {
+                "smiles": resolved_smiles,
+                "pickle_path": pickle_rel_path,
+                "conformer_index": conf_idx,
+                "total_energy": conf.get("totalenergy"),
+                "boltzmann_weight": conf.get("boltzmannweight"),
+            }
+
+            yield RDMolecule.from_rdmol(rd_mol, conf_id=None), meta
+
+
+
+    # ------------------------------------------------------------------
+    # Mode A: extracted directory
+    # ------------------------------------------------------------------
+    def _iter_from_directory(
+            self,
+            max_mols: Optional[int],
+            max_confs_per_mol: Optional[int]
+    ) -> Iterator[tuple[RDMolecule, dict]]:
+        n_mols = 0
+        for smiles, mol_meta in self.summary.items():
+            pickle_rel_path = mol_meta.get("pickle_path")
+            if pickle_rel_path is None:
+                continue
+
+            pickle_path = self.root / pickle_rel_path
+            if not pickle_path.exists():
+                continue
+
+            with open(pickle_path, "rb") as f:
+                mol_dict = pickle.load(f)
+
+            yield from self._expand_molecule(
+                mol_dict, smiles, pickle_rel_path, max_confs_per_mol
+            )
+            del mol_dict
+
+            n_mols += 1
+            if max_mols is not None and n_mols >= max_mols:
+                return
+
+    # ------------------------------------------------------------------
+    # Mode B: direct tar.gz streaming (no extraction to disk)
+    # ------------------------------------------------------------------
+    def _iter_from_tar(
+            self,
+            max_mols: Optional[int],
+            max_confs_per_mol: Optional[int]
+    ) -> Iterator[tuple[RDMolecule, dict]]:
+        subset_marker = f"/{self.subset}/"
+        n_mols = 0
+
+        # "r|gz" = streaming mode: forward-only single pass, no member
+        # index is built, nothing is written to disk.
+        with tarfile.open(self.root, "r") as tf:
+            for member in tf:
+                if not member.isfile() or not member.name.endswith(".pickle"):
+                    continue
+                if subset_marker not in f"/{member.name}":
+                    continue
+
+                fileobj = tf.extractfile(member)
+                if fileobj is None:
+                    continue
+
+                mol_dict = pickle.loads(fileobj.read())
+
+                yield from self._expand_molecule(
+                    mol_dict, mol_dict.get("smiles", "<unknown>"),
+                    member.name, max_confs_per_mol,
+                )
+                del mol_dict
+
+                n_mols += 1
+                if max_mols is not None and n_mols >= max_mols:
+                    return
+
+    # ------------------------------------------------------------------
+    # Public entry point
+    # ------------------------------------------------------------------
     def iter_geom_records(
             self,
             max_mols: Optional[int] = None,
@@ -47,52 +158,21 @@ class GEOMLoader:
         Yield (record, meta) pairs, one per conformer.
 
         record:
-            - RDMolecule wrapping the conformer data
+            - if return_mols=False: (smiles, coords) where coords is an
+              (n_atoms, 3) float64 numpy array of Angstrom coordinates.
+            - if return_mols=True: the RDKit Chem.Mol for that conformer.
 
         meta:
             dict with smiles, pickle_path, conformer_index, n_atoms,
             atomic_numbers, total_energy, boltzmann_weight.
+
+        In tar-streaming mode this is a strict single forward pass over
+        the archive; calling it twice re-reads the archive from the start.
         """
-        n_mols = 0
-        for smiles, mol_meta in self.summary.items():
-            pickle_rel_path = mol_meta.get("pickle_path")
-            if pickle_rel_path is None:
-                continue  # no conformers generated for this entry
-
-            pickle_path = self.root / pickle_rel_path
-            if not pickle_path.exists():
-                continue
-
-            with open(pickle_path, "rb") as f:
-                mol_dict = pickle.load(f)
-
-            confs = mol_dict.get("conformers", [])
-            if max_confs_per_mol is not None:
-                confs = confs[:max_confs_per_mol]
-
-            resolved_smiles = mol_dict.get("smiles", smiles)
-
-            for conf_idx, conf in enumerate(confs):
-                rd_mol = conf["rd_mol"]
-
-                meta = {
-                    "smiles": resolved_smiles,
-                    "pickle_path": pickle_rel_path,
-                    "conformer_index": conf_idx,
-                    "n_atoms": rd_mol.GetNumAtoms(),
-                    "total_energy": conf.get("totalenergy"),
-                    "boltzmann_weight": conf.get("boltzmannweight"),
-                }
-
-                yield RDMolecule.from_rdmol(rd_mol, conf_id=None), meta
-
-            # free explicitly before moving to next molecule's pickle
-            del mol_dict, confs
-
-            n_mols += 1
-            if max_mols is not None and n_mols >= max_mols:
-                return
-
+        if self.is_tar:
+            yield from self._iter_from_tar(max_mols, max_confs_per_mol)
+        else:
+            yield from self._iter_from_directory(max_mols, max_confs_per_mol)
 
 class GEOMDownloader:
     """
@@ -190,7 +270,7 @@ class GEOMDownloader:
             downloaded = 0
 
             with open(dest, "wb") as f:
-                for chunk in resp.iter_content(chunk_size=CHUNK_SIZE):
+                for chunk in resp.iter_content(chunk_size=self.CHUNK_SIZE):
                     if not chunk:
                         continue
                     f.write(chunk)
