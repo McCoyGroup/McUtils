@@ -11,6 +11,7 @@ import sys
 import tarfile
 import zipfile
 from urllib.parse import urlencode
+import numpy as np
 
 from .RDKit import RDMolecule
 
@@ -44,6 +45,7 @@ class GEOMLoader:
             root: Union[str, Path],
             subset: str,
             summary_path: str = "summary_dic.json",
+            jump_index_path: Optional[Union[str, Path]] = None,
     ):
         self.root = Path(root)
         self.subset = subset
@@ -54,6 +56,7 @@ class GEOMLoader:
         self._tar_handle: Optional[tarfile.TarFile] = None
         self._member_index: list[tarfile.TarInfo] = []  # fallback tar-order index (lazy)
         self._member_by_relpath: dict[str, tarfile.TarInfo] = {}  # name-keyed cache (lazy)
+        self._offset_by_relpath: dict[str, int] = {}  # precompiled name -> header-offset, if loaded
         self._tar_exhausted = False  # True once we've hit EOF scanning
         self._summary_search_done = False  # True once we've looked for summary in tar
 
@@ -66,8 +69,10 @@ class GEOMLoader:
             if self.tar_compression == "plain":
                 # Open the handle only — do NOT call getmembers()/getnames(),
                 # since those force a full scan. Everything else is built on
-                # demand, on first actual use (see _ensure_ready_for_random_access).
+                # demand, on first actual use.
                 self._tar_handle = tarfile.open(self.root, "r")
+                if jump_index_path is not None:
+                    self._load_jump_indices(jump_index_path)
             # gz mode: nothing to build eagerly; streaming only.
         else:
             summary_file = self.root / summary_path
@@ -81,11 +86,11 @@ class GEOMLoader:
                 if meta.get("pickle_path")
             ]
 
-        # ------------------------------------------------------------------
-        # Tail-path helper: tar entries carry a leading top-level directory
-        # (e.g. "rdkit_folder/drugs/x.pickle") that summary pickle_paths don't
-        # (e.g. "drugs/x.pickle"). Strip it so the two can be matched by name.
-        # ------------------------------------------------------------------
+    # ------------------------------------------------------------------
+    # Tail-path helper: tar entries carry a leading top-level directory
+    # (e.g. "rdkit_folder/drugs/x.pickle") that summary pickle_paths don't
+    # (e.g. "drugs/x.pickle"). Strip it so the two can be matched by name.
+    # ------------------------------------------------------------------
 
     @staticmethod
     def _tail_relpath(name: str) -> str:
@@ -134,11 +139,88 @@ class GEOMLoader:
         self._summary_search_done = True
         return False
 
+    # ------------------------------------------------------------------
+    # Precompiled jump index: name -> tar header offset, persisted as a
+    # compressed .npz so future runs skip the scan entirely for any path
+    # already recorded. See compile_jump_indices() to build one.
+    # ------------------------------------------------------------------
+    def _load_jump_indices(self, path: Union[str, Path]) -> None:
+        path = Path(path)
+        if not path.exists():
+            raise FileNotFoundError(f"Jump index file not found: {path}")
+        data = np.load(path, allow_pickle=False, mmap_mode='r')
+        keys = data["keys"]
+        offsets = data["offsets"]
+        self._offset_by_relpath = {str(k): int(o) for k, o in zip(keys, offsets)}
+        # print(f"Loaded {len(self._offset_by_relpath)} cached jump offsets from {path}")
+
+    def _read_member_at_offset(self, offset: int) -> Optional[tarfile.TarInfo]:
+        """Parse a single tar header at a previously recorded byte offset —
+        one seek + one 512-byte header read, no scanning."""
+        try:
+            self._tar_handle.fileobj.seek(offset)
+            self._tar_handle.offset = offset
+            return tarfile.TarInfo.fromtarfile(self._tar_handle)
+        except tarfile.TarError:
+            return None
+
+    def compile_jump_indices(self, out_path: Union[str, Path] = "geom_jump_indices.npz") -> Path:
+        """
+        Fully scan the archive once (every *.pickle, any subset), recording
+        each member's tar header offset, and save the name -> offset
+        mapping as a compressed .npz with arrays "keys" and "offsets".
+        Pass the resulting file back in as `jump_index_path` on a future
+        GEOMLoader(...) call to skip scanning for any path it covers.
+        """
+        if not (self.is_tar and self.tar_compression == "plain"):
+            raise RuntimeError(
+                "compile_jump_indices() requires an uncompressed tar archive: "
+                "gzip has no reusable random-access offsets, and directory "
+                "mode doesn't need an index (files are already addressable "
+                "by path)."
+            )
+
+        while not self._tar_exhausted:
+            member = self._tar_handle.next()
+            if member is None:
+                self._tar_exhausted = True
+                break
+            if member.isfile() and member.name.endswith(".pickle"):
+                tail = self._tail_relpath(member.name)
+                self._member_by_relpath[tail] = member
+                if self._matches_subset(member):
+                    self._member_index.append(member)
+
+        keys = np.array(list(self._member_by_relpath.keys()))
+        offsets = np.array(
+            [m.offset for m in self._member_by_relpath.values()], dtype=np.int64
+        )
+
+        out_path = Path(out_path)
+        np.savez(out_path, keys=keys, offsets=offsets)
+        # print(f"Wrote jump index with {len(keys)} entries -> {out_path}")
+        return out_path
+
     def _find_member_by_relpath(self, rel_path: str) -> tarfile.TarInfo:
-        """Locate a specific pickle by its summary-relative path, scanning
-        forward only as far as necessary and caching everything passed."""
+        """Locate a specific pickle by its summary-relative path.
+
+        Resolution order:
+          1. Already-cached TarInfo (from any prior scan or jump lookup).
+          2. A precompiled offset from a loaded jump index -> single seek
+             + single header parse, no scanning at all.
+          3. Fall back to scanning forward, caching everything passed.
+        """
         if rel_path in self._member_by_relpath:
             return self._member_by_relpath[rel_path]
+
+        if rel_path in self._offset_by_relpath:
+            offset = self._offset_by_relpath.pop(rel_path)
+            member = self._read_member_at_offset(offset)
+            if member is not None and self._tail_relpath(member.name) == rel_path:
+                self._member_by_relpath[rel_path] = member
+                return member
+            # Stale/mismatched index entry (archive changed since the index
+            # was built) — fall through to a normal scan instead of trusting it.
 
         while not self._tar_exhausted:
             member = self._tar_handle.next()
