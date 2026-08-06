@@ -96,16 +96,16 @@ class ScaffoldingTests(TestCase):
             'g': {"c": np.full(5, None)}
         }
 
-        archive = NumpyTreeArchive.from_tree(data)
-
-        buf = io.BytesIO()
-        archive.save(buf)
-        buf.seek(0)
-
-        new_archive = NumpyTreeArchive.load(buf)
-        print(new_archive)
-
-        print(new_archive['a'])
+        # archive = NumpyTreeArchive.from_tree(data)
+        #
+        # buf = io.BytesIO()
+        # archive.save(buf)
+        # buf.seek(0)
+        #
+        # new_archive = NumpyTreeArchive.load(buf)
+        # print(new_archive)
+        #
+        # print(new_archive['a'])
 
         big_data = {
             f'entry_{i}':{
@@ -113,17 +113,25 @@ class ScaffoldingTests(TestCase):
                 'energy':np.random.rand(1, 2),
                 'coords':np.random.rand(1000, 3)
             }
-            for i in range(1000)
+            for i in range(30000)
         }
 
         archive = NumpyTreeArchive.from_tree(big_data)
 
         buf = io.BytesIO()
-        archive.save(buf)
+        archive.save(buf, save_jump_table=True)
         buf.seek(0)
 
         new_archive = NumpyTreeArchive.load(buf)
         print(new_archive)
+
+        import json
+        import orjson
+        print(buf.getbuffer().nbytes)
+        huh = orjson.dumps(big_data, option=orjson.OPT_SERIALIZE_NUMPY)
+        print(len(huh))
+        print(huh.decode()[:1000])
+
 
         print(new_archive['entry_100'])
 

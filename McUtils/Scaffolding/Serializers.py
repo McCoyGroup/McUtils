@@ -9,7 +9,7 @@ import collections
 import uuid
 from collections import OrderedDict
 from .. import Devutils as dev
-from .. import Iterators as itut
+from .. import Numputils as nput
 
 __all__= [
     "PseudoPickler",
@@ -2452,17 +2452,27 @@ def unflatten_tree(serial_tree,
 # Jump table: index every node (or up to max_depth) by path for lazy access
 # --------------------------------------------------------------------------
 
-def build_jump_table(serial_tree, max_depth=0, path_sep='/'):
+def build_jump_table(serial_tree, max_depth=None, path_sep='/'):
     """
     Scan `visited_keys` once and record, for every node (leaf or nested
     dict) up to `max_depth`, the (start, end) span in visited_keys and the
     block_pointers snapshot needed to resume unflatten_tree there directly.
 
+    Each entry also carries 'key_path': the full tuple of raw key_map ids
+    from the root down to that node (not just its own terminal id). This
+    is what lets _encode_jump_table serialize and later reconstruct the
+    exact human path ("ep_001/obs") rather than colliding on a shared
+    terminal key name -- key_map ids are shared across sibling records by
+    design (e.g. every episode's "obs" field uses the same id, since
+    that's what lets flatten_tree concatenate them into one array), so a
+    terminal id alone can't disambiguate "ep_000/obs" from "ep_001/obs",
+    but the full id *path* can.
+
     :param serial_tree: flat-tree metadata and arrays (as returned by flatten_tree)
     :param max_depth: if set, only index nodes at depth <= max_depth
                        (0 = top-level records only). None indexes every node.
     :param path_sep: separator used to join path components into a lookup key
-    :return: dict mapping path string -> {'start', 'end', 'block_pointers'}
+    :return: dict mapping path string -> {'start', 'end', 'block_pointers', 'key_path'}
     """
     key_map = serial_tree['key_map']
     aliases = serial_tree['aliases']
@@ -2470,7 +2480,9 @@ def build_jump_table(serial_tree, max_depth=0, path_sep='/'):
 
     block_pointers = {}
     prefix = ()
+    prefix_ids = ()
     prefix_stack = collections.deque()
+    prefix_ids_stack = collections.deque()
     open_entries = collections.deque()
     jump_table = {}
 
@@ -2478,6 +2490,7 @@ def build_jump_table(serial_tree, max_depth=0, path_sep='/'):
         if k >= 0:
             s = aliases.get(key_map[k], key_map[k])
             path = prefix + (s,)
+            key_path = prefix_ids + (k,)
             depth = len(prefix)
             index_this = (max_depth is None or depth <= max_depth)
             data = serial_tree.get(k)
@@ -2488,6 +2501,7 @@ def build_jump_table(serial_tree, max_depth=0, path_sep='/'):
                         'start': i,
                         'end': i + 1,
                         'block_pointers': dict(block_pointers),
+                        'key_path': key_path,
                     }
                 shape_pointer, array_pointer = block_pointers.get(k, (0, 0))
                 shape_data, array_data = data
@@ -2501,68 +2515,122 @@ def build_jump_table(serial_tree, max_depth=0, path_sep='/'):
                 block_size = 1 if shape == (0,) else np.prod(shape, dtype=int)
                 block_pointers[k] = (shape_offset + 1, array_pointer + block_size)
             else:
-                open_entries.append((path, i, dict(block_pointers)) if index_this else None)
+                open_entries.append((path, key_path, i, dict(block_pointers)) if index_this else None)
                 prefix_stack.append(prefix)
+                prefix_ids_stack.append(prefix_ids)
                 prefix = path
+                prefix_ids = key_path
         else:
             prefix = prefix_stack.pop()
+            prefix_ids = prefix_ids_stack.pop()
             entry = open_entries.pop()
             if entry is not None:
-                path, start, bp_snapshot = entry
+                path, key_path, start, bp_snapshot = entry
                 jump_table[path_sep.join(path)] = {
                     'start': start,
                     'end': i + 1,
                     'block_pointers': bp_snapshot,
+                    'key_path': key_path,
                 }
 
     return jump_table
 
+def _downcast_uint(array):
+    return array.astype(nput.infer_inds_dtype(np.max(array)))
 
-def _encode_jump_table(jump_table, index_remapping, num_keys):
+def _encode_jump_table(jump_table, index_remapping):
     """
     Convert an in-memory jump_table into plain arrays suitable for
-    np.savez without allow_pickle: record names (strings), start/end
-    indices (ints), and a dense (num_records, num_keys, 2) pointer matrix.
+    np.savez without allow_pickle:
+
+      - jt_key_paths: (num_records, max_depth) table of key_map indices,
+                      one row per record, padded with 0 past each row's
+                      real length (padding is disambiguated by jt_depths,
+                      not by value, since 0 is itself a valid key id).
+      - jt_depths:    (num_records,) true length of each row in jt_key_paths.
+      - jt_starts / jt_ends: (num_records,) span into visited_keys.
+      - jt_ptr_rows / jt_ptr_cols / jt_ptr_sp / jt_ptr_ap: sparse (COO-style)
+                      encoding of the block-pointers matrix. Only nonzero
+                      (sp, ap) pairs are stored -- (0, 0) is indistinguishable
+                      from "absent" anyway, since unflatten_tree defaults any
+                      key missing from block_pointers to (0, 0) on first use.
+                      This matters because the dense matrix is typically
+                      >99.99% zero on large datasets (most keys are
+                      irrelevant to most records).
+
+    Every array is downcast to the smallest uint dtype that fits its own
+    values.
     """
     record_names = list(jump_table.keys())
+    key_paths = [jump_table[n]['key_path'] for n in record_names]
+
     starts = np.array([jump_table[n]['start'] for n in record_names], dtype=np.int64)
     ends = np.array([jump_table[n]['end'] for n in record_names], dtype=np.int64)
+    depths = np.array([len(p) for p in key_paths], dtype=np.int64)
+    max_depth = int(depths.max(initial=0))
 
-    pointer_matrix = np.zeros((len(record_names), num_keys, 2), dtype=np.int64)
+    key_path_table = np.zeros((len(record_names), max_depth), dtype=np.int64)
+    for r, kp in enumerate(key_paths):
+        for d, k in enumerate(kp):
+            key_path_table[r, d] = index_remapping[k]
+
+    rows, cols, sps, aps = [], [], [], []
     for r, name in enumerate(record_names):
         for k, (sp, ap) in jump_table[name]['block_pointers'].items():
-            j = index_remapping[k]
-            pointer_matrix[r, j, 0] = sp
-            pointer_matrix[r, j, 1] = ap
+            if sp == 0 and ap == 0:
+                continue
+            rows.append(r)
+            cols.append(index_remapping[k])
+            sps.append(sp)
+            aps.append(ap)
 
     return {
-        'jt_record_names': np.array(record_names),
-        'jt_starts': starts,
-        'jt_ends': ends,
-        'jt_pointers': pointer_matrix,
+        'jt_key_paths': _downcast_uint(key_path_table),
+        'jt_depths': _downcast_uint(depths),
+        'jt_starts': _downcast_uint(starts),
+        'jt_ends': _downcast_uint(ends),
+        'jt_ptr_rows': _downcast_uint(np.array(rows, dtype=np.int64)),
+        'jt_ptr_cols': _downcast_uint(np.array(cols, dtype=np.int64)),
+        'jt_ptr_sp': _downcast_uint(np.array(sps, dtype=np.int64)),
+        'jt_ptr_ap': _downcast_uint(np.array(aps, dtype=np.int64)),
     }
 
 
-def _decode_jump_table(zdata, array_keys):
+def _decode_jump_table(zdata, key_map, aliases, path_sep='/'):
     """
     Reconstruct the in-memory jump_table dict from the arrays written by
-    _encode_jump_table.
+    _encode_jump_table. Dict keys are the full human path strings (e.g.
+    "ep_001/obs"), rebuilt from each row's key_path ids -- no collisions
+    between sibling records that happen to share a terminal field name.
+
+    :param key_map: {id: name} as reconstructed by read_flat_tree
+    :param aliases: alias-rename dict as reconstructed by read_flat_tree
     """
-    record_names = zdata['jt_record_names']
+    key_path_table = zdata['jt_key_paths']
+    depths = zdata['jt_depths']
     starts = zdata['jt_starts']
     ends = zdata['jt_ends']
-    pointer_matrix = zdata['jt_pointers']
+
+    rows = zdata['jt_ptr_rows']
+    cols = zdata['jt_ptr_cols']
+    sps = zdata['jt_ptr_sp']
+    aps = zdata['jt_ptr_ap']
+
+    per_record_pointers = collections.defaultdict(dict)
+    for r, j, sp, ap in zip(rows, cols, sps, aps):
+        per_record_pointers[int(r)][int(j)] = (int(sp), int(ap))
 
     jump_table = {}
-    for r, name in enumerate(record_names):
-        block_pointers = {
-            j: (int(pointer_matrix[r, j, 0]), int(pointer_matrix[r, j, 1]))
-            for j in array_keys
-        }
-        jump_table[str(name)] = {
+    for r in range(key_path_table.shape[0]):
+        d = int(depths[r])
+        path = tuple(
+            aliases.get(key_map[int(key_path_table[r, i])], key_map[int(key_path_table[r, i])])
+            for i in range(d)
+        )
+        jump_table[path_sep.join(path)] = {
             'start': int(starts[r]),
             'end': int(ends[r]),
-            'block_pointers': block_pointers,
+            'block_pointers': per_record_pointers.get(r, {}),
         }
     return jump_table
 
@@ -2614,7 +2682,7 @@ def write_flat_tree(file, tree, flatten=None, allow_pickle=False, writer=None,
     jt_arrays = {}
     if jump_table:
         jt = jump_table if isinstance(jump_table, dict) else build_jump_table(tree, max_depth=max_depth)
-        jt_arrays = _encode_jump_table(jt, index_remapping, len(tree['key_map']))
+        jt_arrays = _encode_jump_table(jt, index_remapping)
 
     return writer(
         file,
@@ -2667,8 +2735,8 @@ def read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False,
         data[k] = (shape, zdata[f'arr_{k}'])
 
     jump_table = None
-    if 'jt_record_names' in zdata.files:
-        jump_table = _decode_jump_table(zdata, array_keys)
+    if 'jt_key_paths' in zdata.files:
+        jump_table = _decode_jump_table(zdata, data['key_map'], aliases)
 
     if record is not None:
         if jump_table is None:
@@ -2749,10 +2817,10 @@ class NumpyTreeArchive:
 
     # -- persistence -----------------------------------------------------
 
-    def save(self, file, writer=None, max_depth=0, **writer_options):
+    def save(self, file, writer=None, max_depth=0, save_jump_table=True, **writer_options):
         """Write this archive to an NPZ file (or file-like/path)."""
         return write_flat_tree(file, self._serial_tree, flatten=False,
-                               jump_table=self._jump_table or True,
+                               jump_table=False if not save_jump_table else (self._jump_table or True),
                                max_depth=max_depth, writer=writer,
                                **writer_options)
 
