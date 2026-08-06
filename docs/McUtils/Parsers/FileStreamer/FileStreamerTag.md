@@ -30,22 +30,22 @@ __init__(self, tag_alternatives=None, follow_ups=None, offset=None, direction='f
 **LLM Docstring**
 
 Normalize one or more alternative delimiters plus optional follow-up delimiters, offset, direction, skip, and seek behavior into a tag specification.
-  - `tag_alternatives`: `object`
+  - `tag_alternatives`: `Any`
     > one delimiter or a collection of alternative delimiters
 
-  - `follow_ups`: `object`
+  - `follow_ups`: `Any`
     > additional delimiters that must be located in sequence after the first tag
 
-  - `offset`: `object`
+  - `offset`: `Any`
     > an additional cursor displacement applied after a match
 
-  - `direction`: `object`
+  - `direction`: `Any`
     > the direction in which delimiters are searched
 
-  - `skip_tag`: `object`
+  - `skip_tag`: `Any`
     > whether the returned position should lie after the matched delimiter
 
-  - `seek`: `object`
+  - `seek`: `Any`
     > whether finding a delimiter should move the stream cursor
 
 

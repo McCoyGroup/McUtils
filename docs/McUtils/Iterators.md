@@ -65,10 +65,10 @@ Useful little iteration tools
 </div>
   <div class="row">
    <div class="col" markdown="1">
-   
+[find_overlaps](Iterators/Subsequences/find_overlaps.md)   
 </div>
    <div class="col" markdown="1">
-   
+[find_tree_overlaps](Iterators/Subsequences/find_tree_overlaps.md)   
 </div>
    <div class="col" markdown="1">
    

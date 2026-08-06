@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.Misc.is_array_like">is_array_like</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L90)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L90?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L91)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L91?message=Update%20Docs)]
 </div>
 
 ```python
-is_array_like(obj, valid_dtypes=None, ndim=None): 
+is_array_like(obj, valid_dtypes=None, ndim=None, return_array=False): 
 ```
 **LLM Docstring**
 
@@ -72,7 +72,7 @@ with `np.asanyarray` and validated against `valid_dtypes` and `ndim`.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Misc/is_array_like.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Misc/is_array_like.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L90?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L91?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

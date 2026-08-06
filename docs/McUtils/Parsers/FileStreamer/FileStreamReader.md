@@ -30,16 +30,16 @@ __init__(self, file, mode='r', encoding='utf-8', **kw):
 **LLM Docstring**
 
 Wrap a path or file object in `FileSearchStream` and initialize tagged-block parsing over it.
-  - `file`: `object`
+  - `file`: `Any`
     > a filesystem path or open file object
 
-  - `mode`: `object`
+  - `mode`: `Any`
     > the file open mode or parser multiplicity mode
 
-  - `encoding`: `object`
+  - `encoding`: `Any`
     > the text encoding used to convert between bytes and strings
 
-  - `kw`: `object`
+  - `kw`: `Any`
     > extra keyword arguments forwarded to the underlying stream constructor
  </div>
 </div>

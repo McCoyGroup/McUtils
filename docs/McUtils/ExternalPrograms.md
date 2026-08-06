@@ -99,266 +99,277 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[QChemLogReader](ExternalPrograms/Parsers/QChem/QChemLogReader.md)   
+</div>
+   <div class="col" markdown="1">
 [ExternalProgramRunner](ExternalPrograms/Runner/ExternalProgramRunner.md)   
 </div>
    <div class="col" markdown="1">
 [OpenBabelInterface](ExternalPrograms/ChemToolkits/OpenBabelInterface.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [PybelInterface](ExternalPrograms/ChemToolkits/PybelInterface.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [RDKitInterface](ExternalPrograms/ChemToolkits/RDKitInterface.md)   
 </div>
    <div class="col" markdown="1">
 [ASEInterface](ExternalPrograms/ChemToolkits/ASEInterface.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [OpenChemistryInterface](ExternalPrograms/ChemToolkits/OpenChemistryInterface.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [CCLibInterface](ExternalPrograms/ChemToolkits/CCLibInterface.md)   
 </div>
    <div class="col" markdown="1">
 [PILInterface](ExternalPrograms/ImageKits/PILInterface.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [OpenCVInterface](ExternalPrograms/ImageKits/OpenCVInterface.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Open3DInterface](ExternalPrograms/Toolkits3D/Open3DInterface.md)   
 </div>
    <div class="col" markdown="1">
 [VPythonInterface](ExternalPrograms/Visualizers/VPythonInterface.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [VTKInterface](ExternalPrograms/Visualizers/VTKInterface.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [RDMolecule](ExternalPrograms/RDKit/RDMolecule.md)   
 </div>
    <div class="col" markdown="1">
 [ASEMolecule](ExternalPrograms/ASE/ASEMolecule.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ASECalculator](ExternalPrograms/ASE/ASECalculator.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [PysisCalculator](ExternalPrograms/Pysisyphus/PysisCalculator.md)   
 </div>
    <div class="col" markdown="1">
 [patch_pysis_logging](ExternalPrograms/Pysisyphus/patch_pysis_logging.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [run_pysisyphus](ExternalPrograms/Pysisyphus/run_pysisyphus.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [pysis_interpolate](ExternalPrograms/Pysisyphus/pysis_interpolate.md)   
 </div>
    <div class="col" markdown="1">
 [prep_pysis_images](ExternalPrograms/Pysisyphus/prep_pysis_images.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [OBMolecule](ExternalPrograms/OpenBabel/OBMolecule.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [WebRequestHandler](ExternalPrograms/WebAPI/WebRequestHandler.md)   
 </div>
    <div class="col" markdown="1">
 [WebAPIConnection](ExternalPrograms/WebAPI/WebAPIConnection.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [WebSubAPIConnection](ExternalPrograms/WebAPI/WebSubAPIConnection.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [WebResourceManager](ExternalPrograms/WebAPI/WebResourceManager.md)   
 </div>
    <div class="col" markdown="1">
 [GitHubReleaseManager](ExternalPrograms/WebAPI/GitHubReleaseManager.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ReleaseZIPManager](ExternalPrograms/WebAPI/ReleaseZIPManager.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ChemSpiderAPI](ExternalPrograms/ChemicalResourceAPIs/ChemSpiderAPI.md)   
 </div>
    <div class="col" markdown="1">
 [PubChemAPI](ExternalPrograms/ChemicalResourceAPIs/PubChemAPI.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [env_proc_call](ExternalPrograms/Subprocesses/env_proc_call.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [env_pip](ExternalPrograms/Subprocesses/env_pip.md)   
 </div>
    <div class="col" markdown="1">
 [NodeCommTCPServer](ExternalPrograms/Servers/NodeCommServer/NodeCommTCPServer.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [NodeCommUnixServer](ExternalPrograms/Servers/NodeCommServer/NodeCommUnixServer.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [NodeCommHandler](ExternalPrograms/Servers/NodeCommServer/NodeCommHandler.md)   
 </div>
    <div class="col" markdown="1">
 [NodeCommClient](ExternalPrograms/Servers/NodeCommServer/NodeCommClient.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ShellCommHandler](ExternalPrograms/Servers/NodeCommServer/ShellCommHandler.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [setup_parent_terminated_listener](ExternalPrograms/Servers/NodeCommServer/setup_parent_terminated_listener.md)   
 </div>
    <div class="col" markdown="1">
 [setup_server](ExternalPrograms/Servers/NodeCommServer/setup_server.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [handle_command_line](ExternalPrograms/Servers/NodeCommServer/handle_command_line.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [GitClient](ExternalPrograms/Servers/GitServer/GitClient.md)   
 </div>
    <div class="col" markdown="1">
 [SLURMClient](ExternalPrograms/Servers/SLURMServer/SLURMClient.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [EvaluationHandler](ExternalPrograms/Servers/EvaluationServer/EvaluationHandler.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [EvaluationClient](ExternalPrograms/Servers/EvaluationServer/EvaluationClient.md)   
 </div>
    <div class="col" markdown="1">
 [ExecutionStatus](ExternalPrograms/ExecutionEngine/ExecutionStatus.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ExecutionQueue](ExternalPrograms/ExecutionEngine/ExecutionQueue.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ExecutionEngine](ExternalPrograms/ExecutionEngine/ExecutionEngine.md)   
 </div>
    <div class="col" markdown="1">
 [ManagedJobQueueExecutionEngine](ExternalPrograms/ExecutionEngine/ManagedJobQueueExecutionEngine.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [SLURMExecutionEngine](ExternalPrograms/ExecutionEngine/SLURMExecutionEngine.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ManagedJobQueueJobStatus](ExternalPrograms/ManagedJobQueues/ManagedJobQueueJobStatus.md)   
 </div>
    <div class="col" markdown="1">
 [ManagedJobQueueSubmissionHandler](ExternalPrograms/ManagedJobQueues/ManagedJobQueueSubmissionHandler.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ManagedJobQueueInformationHandler](ExternalPrograms/ManagedJobQueues/ManagedJobQueueInformationHandler.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ManagedJobQueueHandler](ExternalPrograms/ManagedJobQueues/ManagedJobQueueHandler.md)   
 </div>
    <div class="col" markdown="1">
 [SLURMInformationHandler](ExternalPrograms/ManagedJobQueues/SLURMInformationHandler.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [SLURMSubmissionHandler](ExternalPrograms/ManagedJobQueues/SLURMSubmissionHandler.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [SLURMHandler](ExternalPrograms/ManagedJobQueues/SLURMHandler.md)   
 </div>
    <div class="col" markdown="1">
 [serialize_python_job](ExternalPrograms/ManagedJobQueues/serialize_python_job.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [sbatch_python_job](ExternalPrograms/ManagedJobQueues/sbatch_python_job.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [SMILESSupplier](ExternalPrograms/SMILES/SMILESSupplier.md)   
 </div>
    <div class="col" markdown="1">
 [consume_smiles_supplier](ExternalPrograms/SMILES/consume_smiles_supplier.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [match_smiles_supplier](ExternalPrograms/SMILES/match_smiles_supplier.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [smarts_matcher](ExternalPrograms/SMILES/smarts_matcher.md)   
 </div>
    <div class="col" markdown="1">
 [join_smiles_fragments](ExternalPrograms/SMILES/join_smiles_fragments.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [set_smiles_chiralities](ExternalPrograms/SMILES/set_smiles_chiralities.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [set_smiles_stereochemistry](ExternalPrograms/SMILES/set_smiles_stereochemistry.md)   
 </div>
    <div class="col" markdown="1">
 [set_smiles_bond_order](ExternalPrograms/SMILES/set_smiles_bond_order.md)   
 </div>
-   <div class="col" markdown="1">
-[renumber_smiles_atom_map](ExternalPrograms/SMILES/renumber_smiles_atom_map.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[renumber_smiles_atom_map](ExternalPrograms/SMILES/renumber_smiles_atom_map.md)   
+</div>
+   <div class="col" markdown="1">
+[get_canonical_smiles_renumbering](ExternalPrograms/SMILES/get_canonical_smiles_renumbering.md)   
+</div>
+   <div class="col" markdown="1">
 [smiles_binding_sites](ExternalPrograms/SMILES/smiles_binding_sites.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [set_smiles_binding_sites](ExternalPrograms/SMILES/set_smiles_binding_sites.md)   
 </div>
    <div class="col" markdown="1">
 [remove_smiles_binding_sites](ExternalPrograms/SMILES/remove_smiles_binding_sites.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [substitute_smiles_atoms](ExternalPrograms/SMILES/substitute_smiles_atoms.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [parse_smiles_and_atom_map](ExternalPrograms/SMILES/parse_smiles_and_atom_map.md)   
 </div>
    <div class="col" markdown="1">
 [build_templated_smiles](ExternalPrograms/SMILES/build_templated_smiles.md)   
+</div>
+   <div class="col" markdown="1">
+[SMILESTokenizer](ExternalPrograms/SMILES/SMILESTokenizer.md)   
 </div>
 </div>
   <div class="row">
@@ -366,21 +377,32 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 [QM9](ExternalPrograms/QM9/QM9.md)   
 </div>
    <div class="col" markdown="1">
+[GEOMLoader](ExternalPrograms/GEOM/GEOMLoader.md)   
+</div>
+   <div class="col" markdown="1">
+[GEOMDownloader](ExternalPrograms/GEOM/GEOMDownloader.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
 [SingularityLauncher](ExternalPrograms/Containers/SingularityLauncher.md)   
 </div>
    <div class="col" markdown="1">
 [DockerLauncher](ExternalPrograms/Containers/DockerLauncher.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [PodmanLauncher](ExternalPrograms/Containers/PodmanLauncher.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [CharliecloudLauncher](ExternalPrograms/Containers/CharliecloudLauncher.md)   
 </div>
    <div class="col" markdown="1">
 [CubePropEvaluator](ExternalPrograms/CubeProp/CubePropEvaluator.md)   
+</div>
+   <div class="col" markdown="1">
+[ConformerEncoder](ExternalPrograms/Conformers/ConformerEncoder.md)   
 </div>
 </div>
   <div class="row">
@@ -514,9 +536,9 @@ print("PDB lines:", len(pdb.splitlines()))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-8fb8eb" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-8fb8eb"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-70f6ee" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-70f6ee"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-8fb8eb" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-70f6ee" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [ParseReports](#ParseReports)
@@ -539,12 +561,13 @@ print("PDB lines:", len(pdb.splitlines()))
 - [SMILESBipy](#SMILESBipy)
 - [BindingSites](#BindingSites)
 - [SmilesChiralities](#SmilesChiralities)
+- [SmilesTokens](#SmilesTokens)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-6d5275" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-6d5275"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-638030" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-638030"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-6d5275" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-638030" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1056,6 +1079,44 @@ class ExternalProgramsTest(TestCase):
                 stereos={(0, 1): 'any'}
             )
         )
+```
+
+#### <a name="SmilesTokens">SmilesTokens</a>
+```python
+    def test_SmilesTokens(self):
+        from Psience.Molecools import Molecule
+        import base64
+
+        smi0, i0, b0 = build_templated_smiles(
+            '[C:1]=[C:2]',
+            '[C:1]C(C)(C)(C)',
+            '[C:1]C(C)(C)(C)',
+            stereos={(0, 1): 'cis'},
+            return_fragment_indices=True,
+            return_new_bonds=True
+        )
+        print(b0)
+        # print(smi0)
+        # print(i0)
+        # return
+        # smi = remove_smiles_binding_sites(smi)
+        mol0 = Molecule.from_string(smi0)
+
+        for encoding in [16, 32, 64, 85]:
+            print("==="*10, encoding, "==="*10)
+            RDMolecule.default_tag_byte_encoding = encoding
+            smi2 = mol.to_string('smi', remove_hydrogens=True, include_tag=True)
+            smi, tag = smi2.split('_', 1)
+            tokens = list(SMILESTokenizer().tokenize(smi))
+            print()
+            print("Atoms:", len(tokens))
+            print("SMI:", len(smi))
+            print(smi)
+            print("Tag:", len(tag))
+            print(tag)
+            # print("Bytes:", len(base64.b64decode(tag.encode('utf-8'))))
+            mol2 = Molecule.from_string(smi2, 'smi').get_embedded_molecule(ref=mol, sel=list(range(4)))
+            print(mol2.get_rmsd(mol, sel=list(range(4))))
 ```
 
  </div>

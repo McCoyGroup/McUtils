@@ -30,7 +30,7 @@ __init__(self, string):
 **LLM Docstring**
 
 Wrap a string in `StringSearchStream` and initialize tagged-block parsing over it.
-  - `string`: `object`
+  - `string`: `Any`
     > the source string or byte sequence wrapped by the reader
  </div>
 </div>

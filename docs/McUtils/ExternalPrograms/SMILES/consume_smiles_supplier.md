@@ -1,11 +1,11 @@
 # <a id="McUtils.ExternalPrograms.SMILES.consume_smiles_supplier">consume_smiles_supplier</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/SMILES.py#L504)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L504?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/SMILES.py#L519)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L519?message=Update%20Docs)]
 </div>
 
 ```python
-consume_smiles_supplier(supplier: McUtils.ExternalPrograms.SMILES.SMILESSupplier, consumer, pool=None, start_at=None, upto=None, initializer=None): 
+consume_smiles_supplier(supplier: 'SMILESSupplier', consumer, pool=None, start_at=None, upto=None, initializer=None): 
 ```
 **LLM Docstring**
 
@@ -76,7 +76,7 @@ blocks).
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/SMILES/consume_smiles_supplier.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/SMILES/consume_smiles_supplier.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L504?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L519?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -30,13 +30,13 @@ __init__(self, string, ignore_comments=False, max_nesting_depth=-1):
 **LLM Docstring**
 
 Create a text-mode line parser over an in-memory string.
-  - `string`: `object`
+  - `string`: `Any`
     > the source string or byte sequence wrapped by the reader
 
-  - `ignore_comments`: `object`
+  - `ignore_comments`: `Any`
     > whether comment-tagged lines are discarded
 
-  - `max_nesting_depth`: `object`
+  - `max_nesting_depth`: `Any`
     > the maximum recursive block depth, with a negative value meaning unlimited
  </div>
 </div>

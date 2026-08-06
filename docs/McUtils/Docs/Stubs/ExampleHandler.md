@@ -35,7 +35,7 @@ EXAMPLES_PARSE_ERROR_TEMPLATE: str
 ```
 <a id="McUtils.Docs.Stubs.ExampleHandler.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, dispatcher, filter=None, exclude=<function default_exclude at 0x7f75e39e75e0>): 
+__init__(self, dispatcher, filter=None, exclude=<function default_exclude at 0x7fbda7fd4a60>): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L1301)/

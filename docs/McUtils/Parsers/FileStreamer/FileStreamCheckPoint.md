@@ -30,10 +30,10 @@ __init__(self, parent, revert=True):
 **LLM Docstring**
 
 Record the reader's current byte/character offset and configure whether leaving the context restores that position.
-  - `parent`: `object`
+  - `parent`: `Any`
     > the parent reader or regex node
 
-  - `revert`: `object`
+  - `revert`: `Any`
     > whether to restore the captured position on context exit
 
 
@@ -93,7 +93,7 @@ __enter__(self):
 **LLM Docstring**
 
 Return this checkpoint for use in a `with` statement.
-  - `:returns`: `object`
+  - `:returns`: `Any`
     > The opened stream, reader, parser, or checkpoint object.
 
 
@@ -108,13 +108,13 @@ __exit__(self, exc_type, exc_val, exc_tb):
 **LLM Docstring**
 
 Restore the captured stream position when reversion is enabled; exceptions are not suppressed.
-  - `exc_type`: `object`
+  - `exc_type`: `Any`
     > the exception class raised in the context, if any
 
-  - `exc_val`: `object`
+  - `exc_val`: `Any`
     > the exception instance raised in the context, if any
 
-  - `exc_tb`: `object`
+  - `exc_tb`: `Any`
     > the traceback raised in the context, if any
  </div>
 </div>

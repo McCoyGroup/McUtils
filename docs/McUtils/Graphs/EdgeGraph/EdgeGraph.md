@@ -722,7 +722,7 @@ Count how many supplied rings contain each requested node.
 <a id="McUtils.Graphs.EdgeGraph.EdgeGraph.find_longest_chain_from_breakpoints" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
-find_longest_chain_from_breakpoints(cls, map, graph=None, rings=None, root=None, use_highest_valencies=True, shortest_path_data=None, raise_on_failure=True, allow_intermediate_breaks=True, return_breakpoints=False): 
+find_longest_chain_from_breakpoints(cls, map, graph=None, rings=None, root=None, use_highest_valencies=True, shortest_path_data=None, raise_on_failure=True, allow_intermediate_breaks=True, return_breakpoints=False, max_tries=100): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1067)/
@@ -767,8 +767,8 @@ Search combinations of ring-bond cuts until the graph becomes acyclic, then retu
 find_longest_chain(self, rings=None, use_highest_valencies=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1207)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1207?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1220)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1220?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -788,8 +788,8 @@ Find a longest chain after breaking rings using the graph’s cached topology.
 segment_by_chains(self, rings=None, root=None, use_highest_valencies=True, validate=True, backbone=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1236)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1236?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1249)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1249?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -818,8 +818,8 @@ Segment the graph recursively into a longest backbone and chain segments from th
 get_canonical_fragments(self, ordering=None, validate=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1280)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1280?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1293)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1293?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -840,8 +840,8 @@ Partition an ordering into contiguous bonded fragments and derive three-point at
 find_graph_centroid(cls, graph, shortest_path_data=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1370)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1370?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1383)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1383?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -861,8 +861,8 @@ Choose the graph center minimizing the maximum shortest-path distance to all nod
 get_centroid(self, check_fragments=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1394)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1394?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1407)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1407?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -880,8 +880,8 @@ Return component-local centroids for disconnected graphs or the centroid of a co
 get_graph_fragment_indices(cls, graph): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1417)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1417?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1430)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1430?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -898,8 +898,8 @@ Group node indices by connected-component labels.
 get_fragments(self, return_labels=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1434)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1434?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1447)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1447?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -917,8 +917,8 @@ Return connected components as indices or original labels.
 segment_graph_by_chains(cls, map: 'dict[int, set[int]]', graph: "'sparse.coo_matrix|sparse.csr_matrix|sparse.csc_matrix'" = None, rings=None, root=None, use_highest_valencies=True, shortest_path_data=None, validate=True, backbone=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1479)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1479?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1492)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1492?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -957,8 +957,8 @@ Recursively remove a longest backbone, decompose the remainder into components, 
 get_maximum_overlap_permutation(cls, graph_1: "'EdgeGraph'", graph_2: "'EdgeGraph'"): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1619)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1619?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1632)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1632?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -978,8 +978,8 @@ Search label-preserving permutations of differing atoms to minimize the symmetri
 get_reindexing(self, other_graph): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1691)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1691?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1704)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1704?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -996,8 +996,8 @@ Return the label-preserving permutation that best aligns another graph to this o
 align_labels(self, other_graph): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1704)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1704?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1717)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/EdgeGraph/EdgeGraph.py#L1717?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 

@@ -1,11 +1,11 @@
 # <a id="McUtils.Numputils.Misc.is_numeric_array_like">is_numeric_array_like</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L133)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L133?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Numputils/Misc.py#L139)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L139?message=Update%20Docs)]
 </div>
 
 ```python
-is_numeric_array_like(obj, ndim=None): 
+is_numeric_array_like(obj, ndim=None, return_array=False): 
 ```
 **LLM Docstring**
 
@@ -69,7 +69,7 @@ Convenience wrapper around `is_array_like` restricted to numeric dtypes.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Numputils/Misc/is_numeric_array_like.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Numputils/Misc/is_numeric_array_like.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L133?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Numputils/Misc.py#L139?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

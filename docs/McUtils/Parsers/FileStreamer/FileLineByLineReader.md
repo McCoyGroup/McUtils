@@ -30,25 +30,25 @@ __init__(self, file, mode='r', binary=False, encoding='utf-8', ignore_comments=F
 **LLM Docstring**
 
 Create a line-oriented parser over a file-backed search stream with configured binary, encoding, comment, and nesting behavior.
-  - `file`: `object`
+  - `file`: `Any`
     > a filesystem path or open file object
 
-  - `mode`: `object`
+  - `mode`: `Any`
     > the file open mode or parser multiplicity mode
 
-  - `binary`: `object`
+  - `binary`: `Any`
     > whether stream values should remain bytes
 
-  - `encoding`: `object`
+  - `encoding`: `Any`
     > the text encoding used to convert between bytes and strings
 
-  - `ignore_comments`: `object`
+  - `ignore_comments`: `Any`
     > whether comment-tagged lines are discarded
 
-  - `max_nesting_depth`: `object`
+  - `max_nesting_depth`: `Any`
     > the maximum recursive block depth, with a negative value meaning unlimited
 
-  - `kw`: `object`
+  - `kw`: `Any`
     > extra keyword arguments forwarded to the underlying stream constructor
  </div>
 </div>
