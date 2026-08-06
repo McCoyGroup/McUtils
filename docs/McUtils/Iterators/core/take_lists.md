@@ -1,7 +1,7 @@
 # <a id="McUtils.Iterators.core.take_lists">take_lists</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Iterators/core.py#L175)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L175?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Iterators/core.py#L177)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L177?message=Update%20Docs)]
 </div>
 
 ```python
@@ -68,7 +68,7 @@ Fixed-size inputs are sliced without copying where the input type supports that 
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Iterators/core/take_lists.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Iterators/core/take_lists.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L175?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L177?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

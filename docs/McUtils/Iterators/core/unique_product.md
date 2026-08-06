@@ -1,7 +1,7 @@
 # <a id="McUtils.Iterators.core.unique_product">unique_product</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Iterators/core.py#L446)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L446?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Iterators/core.py#L476)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L476?message=Update%20Docs)]
 </div>
 
 ```python
@@ -70,7 +70,7 @@ A depth-first deque traversal builds one value from each input. By default, a ca
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Iterators/core/unique_product.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Iterators/core/unique_product.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L446?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L476?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,7 +1,7 @@
 # <a id="McUtils.Iterators.core.delete_duplicates">delete_duplicates</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Iterators/core.py#L404)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L404?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Iterators/core.py#L434)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L434?message=Update%20Docs)]
 </div>
 
 ```python
@@ -72,7 +72,7 @@ The function uses a set by default and automatically falls back to a list when a
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Iterators/core/delete_duplicates.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Iterators/core/delete_duplicates.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L404?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L434?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

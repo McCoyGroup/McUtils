@@ -1,7 +1,7 @@
 # <a id="McUtils.Iterators.core.consume">consume</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Iterators/core.py#L38)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L38?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Iterators/core.py#L40)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L40?message=Update%20Docs)]
 </div>
 
 ```python
@@ -70,7 +70,7 @@ When `return_values` is true, the consumed items are materialized in a list. Oth
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Iterators/core/consume.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Iterators/core/consume.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L38?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L40?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

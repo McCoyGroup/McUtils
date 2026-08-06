@@ -1,7 +1,7 @@
 # <a id="McUtils.Iterators.core.zigzag_product">zigzag_product</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Iterators/core.py#L527)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L527?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Iterators/core.py#L557)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L557?message=Update%20Docs)]
 </div>
 
 ```python
@@ -70,7 +70,7 @@ Inputs are materialized, optionally taking only the supplied `iterator_lengths`.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Iterators/core/zigzag_product.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Iterators/core/zigzag_product.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L527?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Iterators/core.py#L557?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

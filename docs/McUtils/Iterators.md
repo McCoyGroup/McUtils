@@ -32,43 +32,54 @@ Useful little iteration tools
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[group_by](Iterators/core/group_by.md)   
+</div>
+   <div class="col" markdown="1">
+[index_groups](Iterators/core/index_groups.md)   
+</div>
+   <div class="col" markdown="1">
 [counts](Iterators/core/counts.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [dict_diff](Iterators/core/dict_diff.md)   
 </div>
    <div class="col" markdown="1">
 [transpose](Iterators/core/transpose.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [riffle](Iterators/core/riffle.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [flatten](Iterators/core/flatten.md)   
 </div>
    <div class="col" markdown="1">
 [first](Iterators/core/first.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [delete_duplicates](Iterators/core/delete_duplicates.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [unique_product](Iterators/core/unique_product.md)   
 </div>
    <div class="col" markdown="1">
 [zigzag_product](Iterators/core/zigzag_product.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [find_overlaps](Iterators/Subsequences/find_overlaps.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [find_tree_overlaps](Iterators/Subsequences/find_tree_overlaps.md)   
+</div>
+   <div class="col" markdown="1">
+   
 </div>
    <div class="col" markdown="1">
    
