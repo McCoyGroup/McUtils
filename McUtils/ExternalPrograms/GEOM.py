@@ -50,10 +50,12 @@ class GEOMLoader:
         self.summary_path = summary_path
 
         self.summary: Optional[dict] = None
-        self._pickle_paths: Optional[list[str]] = None   # directory mode index
+        self._pickle_paths: Optional[list[str]] = None  # index -> relpath, once known
         self._tar_handle: Optional[tarfile.TarFile] = None
-        self._member_index: list[tarfile.TarInfo] = []   # plain-tar mode index, built lazily
-        self._tar_exhausted = False                        # True once we've hit EOF scanning
+        self._member_index: list[tarfile.TarInfo] = []  # fallback tar-order index (lazy)
+        self._member_by_relpath: dict[str, tarfile.TarInfo] = {}  # name-keyed cache (lazy)
+        self._tar_exhausted = False  # True once we've hit EOF scanning
+        self._summary_search_done = False  # True once we've looked for summary in tar
 
         self.tar_compression = _detect_tar_compression(self.root)  # "gz" | "plain" | None
         self.is_tar = self.tar_compression is not None
@@ -63,8 +65,8 @@ class GEOMLoader:
                 raise FileNotFoundError(f"Could not find archive {self.root}")
             if self.tar_compression == "plain":
                 # Open the handle only — do NOT call getmembers()/getnames(),
-                # since those force a full scan. Index is built on demand
-                # by _extend_index_until() / _ensure_fully_indexed().
+                # since those force a full scan. Everything else is built on
+                # demand, on first actual use (see _ensure_ready_for_random_access).
                 self._tar_handle = tarfile.open(self.root, "r")
             # gz mode: nothing to build eagerly; streaming only.
         else:
@@ -79,8 +81,86 @@ class GEOMLoader:
                 if meta.get("pickle_path")
             ]
 
+        # ------------------------------------------------------------------
+        # Tail-path helper: tar entries carry a leading top-level directory
+        # (e.g. "rdkit_folder/drugs/x.pickle") that summary pickle_paths don't
+        # (e.g. "drugs/x.pickle"). Strip it so the two can be matched by name.
+        # ------------------------------------------------------------------
+
+    @staticmethod
+    def _tail_relpath(name: str) -> str:
+        parts = name.split("/")
+        return "/".join(parts[1:]) if len(parts) > 1 else name
+
     # ------------------------------------------------------------------
-    # Lazy index construction (plain/uncompressed tar only)
+    # Preferred lazy path: locate summary_{subset}.json *inside* the tar
+    # itself and use its pickle_path list as the index -> file mapping,
+    # exactly like directory mode. Any .pickle members passed while
+    # scanning for the summary get cached too, so that work isn't wasted
+    # even if the summary turns out to be near the end (or absent).
+    # ------------------------------------------------------------------
+    def _try_load_summary_from_tar(self) -> bool:
+        if self._summary_search_done:
+            return self.summary is not None
+
+        while not self._tar_exhausted:
+            member = self._tar_handle.next()
+            if member is None:
+                self._tar_exhausted = True
+                break
+            if not member.isfile():
+                continue
+
+            tail = self._tail_relpath(member.name)
+            if tail.endswith(".pickle"):
+                self._member_by_relpath[tail] = member
+                # Also keep the tar-order fallback index warm in case the
+                # summary search comes up empty.
+                if self._matches_subset(member):
+                    self._member_index.append(member)
+                continue
+
+            if tail == self.summary_path or member.name.endswith(self.summary_path):
+                fileobj = self._tar_handle.extractfile(member)
+                self.summary = json.loads(fileobj.read())
+                self._pickle_paths = [
+                    meta["pickle_path"]
+                    for meta in self.summary.values()
+                    if meta.get("pickle_path")
+                ]
+                self._summary_search_done = True
+                return True
+
+        self._summary_search_done = True
+        return False
+
+    def _find_member_by_relpath(self, rel_path: str) -> tarfile.TarInfo:
+        """Locate a specific pickle by its summary-relative path, scanning
+        forward only as far as necessary and caching everything passed."""
+        if rel_path in self._member_by_relpath:
+            return self._member_by_relpath[rel_path]
+
+        while not self._tar_exhausted:
+            member = self._tar_handle.next()
+            if member is None:
+                self._tar_exhausted = True
+                break
+            if not member.isfile():
+                continue
+            tail = self._tail_relpath(member.name)
+            if tail.endswith(".pickle"):
+                self._member_by_relpath[tail] = member
+                if self._matches_subset(member):
+                    self._member_index.append(member)
+                if tail == rel_path:
+                    return member
+
+        raise KeyError(f"Could not find pickle for '{rel_path}' in archive (exhausted).")
+
+    # ------------------------------------------------------------------
+    # Fallback lazy index construction (used only if no summary was found
+    # inside the tar): scan by subset-directory naming instead of by exact
+    # relative path.
     #
     # tarfile.TarFile.next() reads exactly one header, advances the file
     # position past that member's data (a seek, not a read, for
@@ -106,9 +186,10 @@ class GEOMLoader:
                 break
             if self._matches_subset(member):
                 self._member_index.append(member)
+                self._member_by_relpath[self._tail_relpath(member.name)] = member
 
     def _ensure_fully_indexed(self) -> None:
-        """Finish scanning the archive. Only pay this cost when truly needed (e.g. len())."""
+        """Finish scanning the archive. Only pay this cost when truly needed."""
         while not self._tar_exhausted:
             member = self._tar_handle.next()
             if member is None:
@@ -116,6 +197,7 @@ class GEOMLoader:
                 break
             if self._matches_subset(member):
                 self._member_index.append(member)
+                self._member_by_relpath[self._tail_relpath(member.name)] = member
 
     def supports_random_access(self) -> bool:
         return not (self.is_tar and self.tar_compression == "gz")
@@ -127,9 +209,11 @@ class GEOMLoader:
                 "(no member index available; use iter_geom_records() instead)."
             )
         if self.is_tar:
-            # Length isn't knowable without finishing the scan at least once.
-            # Cheap if already exhausted by prior access; otherwise this is
-            # the one place laziness can't help.
+            self._try_load_summary_from_tar()
+            if self._pickle_paths is not None:
+                return len(self._pickle_paths)  # known instantly from summary, no scan needed
+            # No summary found anywhere in the archive — length isn't
+            # knowable without finishing the scan at least once.
             self._ensure_fully_indexed()
             return len(self._member_index)
         return len(self._pickle_paths)
@@ -176,6 +260,25 @@ class GEOMLoader:
             )
 
         if self.is_tar:  # plain/uncompressed tar
+            self._try_load_summary_from_tar()
+
+            if self._pickle_paths is not None:
+                # Summary was found in the archive: index means exactly what
+                # it means in directory mode — position in the summary's
+                # pickle_path list. Look the file up by its known name.
+                if index >= len(self._pickle_paths):
+                    raise IndexError(
+                        f"Index {index} out of range: summary lists "
+                        f"{len(self._pickle_paths)} molecule(s)."
+                    )
+                rel_path = self._pickle_paths[index]
+                member = self._find_member_by_relpath(rel_path)
+                fileobj = self._tar_handle.extractfile(member)
+                mol_dict = pickle.loads(fileobj.read())
+                return mol_dict, rel_path
+
+            # Fallback: no summary in the archive — index means position in
+            # tar storage order among files matching the subset directory.
             self._extend_index_until(index + 1)
             if index >= len(self._member_index):
                 raise IndexError(
@@ -258,6 +361,31 @@ class GEOMLoader:
             max_mols: Optional[int],
             max_confs_per_mol: Optional[int]
     ) -> Iterator[tuple[RDMolecule, dict]]:
+        self._try_load_summary_from_tar()
+
+        if self._pickle_paths is not None:
+            # Follow summary order (same as directory mode), looking each
+            # relpath up lazily — reuses whatever's cached, extends as needed.
+            n_mols = 0
+            for rel_path in self._pickle_paths:
+                try:
+                    member = self._find_member_by_relpath(rel_path)
+                except KeyError:
+                    continue  # listed in summary but not present in this archive
+                fileobj = self._tar_handle.extractfile(member)
+                mol_dict = pickle.loads(fileobj.read())
+
+                yield from self._expand_molecule(
+                    mol_dict, mol_dict.get("smiles", "<unknown>"), rel_path,
+                    max_confs_per_mol,
+                )
+                del mol_dict
+
+                n_mols += 1
+                if max_mols is not None and n_mols >= max_mols:
+                    return
+            return
+
         # Interleave scanning with consumption: extend the cached index one
         # slot at a time rather than requiring it be fully built up front.
         # This reuses whatever's already cached from prior random access,
