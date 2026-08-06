@@ -75,21 +75,43 @@ class GEOMLoader:
                 if meta.get("pickle_path")
             ]
 
-        # ------------------------------------------------------------------
-        # Index construction (plain/uncompressed tar only)
-        # ------------------------------------------------------------------
-
-    def _build_tar_index(self) -> None:
-        self._tar_handle = tarfile.open(self.root, "r")
+    # ------------------------------------------------------------------
+    # Lazy index construction (plain/uncompressed tar only)
+    #
+    # tarfile.TarFile.next() reads exactly one header, advances the file
+    # position past that member's data (a seek, not a read, for
+    # uncompressed tars), and appends the TarInfo to tf.members as a side
+    # effect. getmembers()/getnames() just loop next() until EOF — we do
+    # the same loop ourselves, but stop as soon as we've found enough
+    # matching (*.pickle, right subset) members to satisfy the current
+    # request, so a request for index 0 doesn't pay for scanning the
+    # whole archive.
+    # ------------------------------------------------------------------
+    def _matches_subset(self, member: tarfile.TarInfo) -> bool:
         subset_marker = f"/{self.subset}/"
-        members = [
-            m
-            for m in self._tar_handle.getmembers()
-            if m.isfile() and m.name.endswith(".pickle") and subset_marker in f"/{m.name}"
-        ]
-        # Sort for a stable, reproducible index -> molecule mapping.
-        members.sort(key=lambda m: m.name)
-        self._member_index = members
+        return member.isfile() and member.name.endswith(".pickle") and (
+                subset_marker in f"/{member.name}"
+        )
+
+    def _extend_index_until(self, min_count: int) -> None:
+        """Scan forward only as far as needed to have >= min_count matches cached."""
+        while len(self._member_index) < min_count and not self._tar_exhausted:
+            member = self._tar_handle.next()
+            if member is None:
+                self._tar_exhausted = True
+                break
+            if self._matches_subset(member):
+                self._member_index.append(member)
+
+    def _ensure_fully_indexed(self) -> None:
+        """Finish scanning the archive. Only pay this cost when truly needed (e.g. len())."""
+        while not self._tar_exhausted:
+            member = self._tar_handle.next()
+            if member is None:
+                self._tar_exhausted = True
+                break
+            if self._matches_subset(member):
+                self._member_index.append(member)
 
     def supports_random_access(self) -> bool:
         return not (self.is_tar and self.tar_compression == "gz")
@@ -100,7 +122,13 @@ class GEOMLoader:
                 "Length is unknown for gzip-compressed tar archives "
                 "(no member index available; use iter_geom_records() instead)."
             )
-        return len(self._member_index) if self.is_tar else len(self._pickle_paths)
+        if self.is_tar:
+            # Length isn't knowable without finishing the scan at least once.
+            # Cheap if already exhausted by prior access; otherwise this is
+            # the one place laziness can't help.
+                self._ensure_fully_indexed()
+                return len(self._member_index)
+            return len(self._pickle_paths)
 
         # ------------------------------------------------------------------
         # Shared per-molecule -> per-conformer expansion
@@ -145,6 +173,12 @@ class GEOMLoader:
             )
 
         if self.is_tar:  # plain/uncompressed tar
+            self._extend_index_until(index + 1)
+            if index >= len(self._member_index):
+                raise IndexError(
+                    f"Index {index} out of range: archive only contains "
+                    f"{len(self._member_index)} matching molecule(s)."
+                )
             member = self._member_index[index]
             fileobj = self._tar_handle.extractfile(member)
             mol_dict = pickle.loads(fileobj.read())
@@ -221,8 +255,16 @@ class GEOMLoader:
             max_mols: Optional[int],
             max_confs_per_mol: Optional[int]
     ) -> Iterator[tuple[RDMolecule, dict]]:
+        # Interleave scanning with consumption: extend the cached index one
+        # slot at a time rather than requiring it be fully built up front.
+        # This reuses whatever's already cached from prior random access,
+        # and in turn leaves the cache populated for random access after.
         n_mols = 0
-        for member in self._member_index:
+        idx = 0
+        while True:
+            self._extend_index_until(idx + 1)
+
+            member = self._member_index[idx]
             fileobj = self._tar_handle.extractfile(member)
             mol_dict = pickle.loads(fileobj.read())
 
