@@ -360,7 +360,7 @@ class GEOMLoader:
     @classmethod
     def _patch_bonds(cls, mol1, mol2):
         patch_check = mol1.to_smiles(remove_hydrogens=True)
-        ref_check = mol1.to_smiles(remove_hydrogens=True)
+        ref_check = mol2.to_smiles(remove_hydrogens=True)
         if ref_check != patch_check:
             mol_new = mol2.add_bonds(cls._find_bond_fixes(mol1, mol2),
                                      sanitize=False,
@@ -383,14 +383,26 @@ class GEOMLoader:
                 mol = Chem.Mol(mol)
             return Chem.MolToSmiles(mol, canonical=canonical)
 
+    CHECK_LOADED_BONDS = True
+    PERMUTE_ATOMS = None
     @classmethod
-    def _load_rdmol(cls, mol, meta, check=True):
+    def _load_rdmol(cls, mol, meta, check=None, permute=None):
         import rdkit.Chem.AllChem as Chem
         mol0 = RDMolecule.parse_smiles(meta['smiles'], add_implicit_hydrogens=False, sanitize=False)
         mol2 = RDMolecule.from_rdmol(mol, charge=Chem.GetFormalCharge(mol0))
+        if check is None:
+            check = cls.CHECK_LOADED_BONDS
+        if permute is None:
+            permute = cls.PERMUTE_ATOMS
+            if permute is None:
+                permute = check
         if check:
-            #TODO: handle patches properly
+            # TODO: handle patches properly
             mol2, _, _ = cls._patch_bonds(cls.MolStub(mol0), mol2)
+        if permute:
+            _, canonical_order = mol2.to_smiles(remove_hydrogens=False, return_reordering=True)
+            mol2 = mol2.permute(canonical_order)
+
         return mol2, meta
 
     @classmethod
