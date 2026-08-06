@@ -196,9 +196,9 @@ builder.build()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-a2c6e3" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a2c6e3"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-184d22" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-184d22"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a2c6e3" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-184d22" markdown="1">
  - [McUtilsDoc](#McUtilsDoc)
 - [PsienceDoc](#PsienceDoc)
 - [ParseExamples](#ParseExamples)
@@ -206,9 +206,9 @@ builder.build()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-a24526" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-a24526"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-2568ad" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-2568ad"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-a24526" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-2568ad" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
