@@ -13,6 +13,7 @@ import zipfile
 from urllib.parse import urlencode
 import numpy as np
 
+from .. import Devutils as dev
 from .. import Iterators as itut
 from .. import Numputils as nput
 from .RDKit import RDMolecule
@@ -329,7 +330,7 @@ class GEOMLoader:
         return {k: v for k, v in diffs.items() if v != 0}
 
     @classmethod
-    def _find_bond_fixes(cls, mol1, mol2):
+    def _find_bond_fixes(cls, mol1, mol2, allow_bond_formation=False):
         diffs = cls._bond_type_differences(mol1, mol2)
         coords2 = mol2.coords
         atom_map = itut.index_groups(mol2.atoms)
@@ -339,7 +340,11 @@ class GEOMLoader:
         for ti, tj in bonds:
             dm[ti, tj] = dm[tj, ti] = 1000000
         for (t1, t2), deficit in diffs.items():
-            if deficit < 0: raise ValueError("need to handle bond formation")
+            if deficit < 0:
+                if allow_bond_formation:
+                    continue
+                else:
+                    raise ValueError("need to handle bond formation")
             for _ in range(deficit):
                 new_pair = cls._find_replacement_candidates(atom_map, dm, t1, t2)
                 new_bonds.append(new_pair)
@@ -358,14 +363,18 @@ class GEOMLoader:
         return i[ri], j[rj]
 
     @classmethod
-    def _patch_bonds(cls, mol1, mol2):
+    def _patch_bonds(cls, mol1, mol2, allow_bond_formation=False):
         patch_check = mol1.to_smiles(remove_hydrogens=True)
         ref_check = mol2.to_smiles(remove_hydrogens=True)
         if ref_check != patch_check:
-            mol_new = mol2.add_bonds(cls._find_bond_fixes(mol1, mol2),
-                                     sanitize=False,
-                                     adjust_charges=True,
-                                     reguess_bonds=False)
+            new_bonds = cls._find_bond_fixes(mol1, mol2, allow_bond_formation=allow_bond_formation)
+            if len(new_bonds) > 0:
+                mol_new = mol2.add_bonds(new_bonds,
+                                         sanitize=False,
+                                         adjust_charges=True,
+                                         reguess_bonds=False)
+            else:
+                mol_new = mol2
             patch_check = mol_new.to_smiles(remove_hydrogens=True, compute_stereo=True)
             return mol_new, ref_check == patch_check, (ref_check, patch_check)
         else:
@@ -383,7 +392,7 @@ class GEOMLoader:
                 mol = Chem.Mol(mol)
             return Chem.MolToSmiles(mol, canonical=canonical)
 
-    CHECK_LOADED_BONDS = True
+    CHECK_LOADED_BONDS = 'broken'
     PERMUTE_ATOMS = None
     @classmethod
     def _load_rdmol(cls, mol, meta, check=None, permute=None):
@@ -398,7 +407,8 @@ class GEOMLoader:
                 permute = check
         if check:
             # TODO: handle patches properly
-            mol2, _, _ = cls._patch_bonds(cls.MolStub(mol0), mol2)
+            mol2, _, _ = cls._patch_bonds(cls.MolStub(mol0), mol2,
+                                          allow_bond_formation=dev.str_is(check, 'broken'))
         if permute:
             _, canonical_order = mol2.to_smiles(remove_hydrogens=False, return_reordering=True)
             mol2 = mol2.permute(canonical_order)

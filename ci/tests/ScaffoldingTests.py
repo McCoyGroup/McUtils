@@ -79,7 +79,7 @@ class ScaffoldingTests(TestCase):
         rev2 = read_flat_tree(buf)
         print(rev2)
 
-    @debugTest
+    @validationTest
     def test_TreeArchiveJumps(self):
         data = {
             'file': 'test.txt',
@@ -113,7 +113,7 @@ class ScaffoldingTests(TestCase):
                 'energy':np.random.rand(1, 2),
                 'coords':np.random.rand(1000, 3)
             }
-            for i in range(30000)
+            for i in range(100000)
         }
 
         archive = NumpyTreeArchive.from_tree(big_data)
@@ -131,13 +131,18 @@ class ScaffoldingTests(TestCase):
         new_archive = NumpyTreeArchive.load(buf)
         print(new_archive)
 
+        NumpyTreeArchive.from_tree(big_data)
+        archive.save('/Users/Mark/Desktop/tree_save.npz')
+        new_archive = NumpyTreeArchive.load('/Users/Mark/Desktop/tree_save.npz')
+        print(new_archive['entry_100'])
+
         import orjson
         huh = orjson.dumps(big_data, option=orjson.OPT_SERIALIZE_NUMPY)
         print(len(huh))
         print(huh.decode()[:1000])
 
-
-        print(new_archive['entry_100'])
+        with open('/Users/Mark/Desktop/tree_save.json', 'w+') as jsdump:
+            jsdump.write(huh.decode())
 
 
     #region Checkpointing
