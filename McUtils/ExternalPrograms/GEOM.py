@@ -19,10 +19,23 @@ __all__ = [
     "GEOMDownloader"
 ]
 
-_TAR_SUFFIXES = {".tar.gz", ".tgz"}
+_GZIP_MAGIC = b"\x1f\x8b"
 
-def _has_tar_suffix(path: Path) -> bool:
-    return path.suffix == ".tgz" or "".join(path.suffixes[-2:]) == ".tar.gz"
+def _detect_tar_compression(path: Path) -> Optional[str]:
+    """
+    Return "gz" if the file is gzip-compressed (checked via magic bytes,
+    not extension), "plain" if it's an uncompressed tar, or None if it's
+    neither (e.g. a directory, or not a tar at all).
+    """
+    if not path.is_file():
+        return None
+    with open(path, "rb") as f:
+        magic = f.read(2)
+    if magic == _GZIP_MAGIC:
+        return "gz"
+    if tarfile.is_tarfile(path):
+        return "plain"
+    return None
 
 class GEOMLoader:
 
@@ -35,21 +48,64 @@ class GEOMLoader:
         self.root = Path(root)
         self.subset = subset
         self.summary_path = summary_path
-        self.is_tar = self.root.is_file() and _has_tar_suffix(self.root)
 
         self.summary: Optional[dict] = None
-        if not self.is_tar:
+        self._pickle_paths: Optional[list[str]] = None  # directory mode index
+        self._tar_handle: Optional[tarfile.TarFile] = None
+        self._member_index: Optional[list[tarfile.TarInfo]] = None  # plain-tar mode index
+
+        self.tar_compression = _detect_tar_compression(self.root)  # "gz" | "plain" | None
+        self.is_tar = self.tar_compression is not None
+
+        if self.is_tar:
+            if not self.root.exists():
+                raise FileNotFoundError(f"Could not find archive {self.root}")
+            if self.tar_compression == "plain":
+                self._build_tar_index()
+            # gz mode: nothing to build eagerly; streaming only.
+        else:
             summary_file = self.root / summary_path
             if not summary_file.exists():
                 raise FileNotFoundError(f"Could not find {summary_file}")
             with open(summary_file) as f:
                 self.summary = json.load(f)  # {smiles: {"pickle_path": ..., ...}}
-        elif not self.root.exists():
-            raise FileNotFoundError(f"Could not find archive {self.root}")
+            self._pickle_paths = [
+                meta["pickle_path"]
+                for meta in self.summary.values()
+                if meta.get("pickle_path")
+            ]
 
-    # ------------------------------------------------------------------
-    # Shared per-molecule -> per-conformer expansion
-    # ------------------------------------------------------------------
+        # ------------------------------------------------------------------
+        # Index construction (plain/uncompressed tar only)
+        # ------------------------------------------------------------------
+
+    def _build_tar_index(self) -> None:
+        self._tar_handle = tarfile.open(self.root, "r")
+        subset_marker = f"/{self.subset}/"
+        members = [
+            m
+            for m in self._tar_handle.getmembers()
+            if m.isfile() and m.name.endswith(".pickle") and subset_marker in f"/{m.name}"
+        ]
+        # Sort for a stable, reproducible index -> molecule mapping.
+        members.sort(key=lambda m: m.name)
+        self._member_index = members
+
+    def supports_random_access(self) -> bool:
+        return not (self.is_tar and self.tar_compression == "gz")
+
+    def __len__(self) -> int:
+        if not self.supports_random_access():
+            raise RuntimeError(
+                "Length is unknown for gzip-compressed tar archives "
+                "(no member index available; use iter_geom_records() instead)."
+            )
+        return len(self._member_index) if self.is_tar else len(self._pickle_paths)
+
+        # ------------------------------------------------------------------
+        # Shared per-molecule -> per-conformer expansion
+        # ------------------------------------------------------------------
+
     @staticmethod
     def _expand_molecule(
             mol_dict: dict,
@@ -76,10 +132,66 @@ class GEOMLoader:
 
             yield RDMolecule.from_rdmol(rd_mol, conf_id=None), meta
 
+    # ------------------------------------------------------------------
+    # Random access (directory mode + plain/uncompressed tar mode)
+    # ------------------------------------------------------------------
+    def _load_mol_dict_by_index(self, index: int) -> tuple[dict, str]:
+        """Return (mol_dict, path_string) for molecule `index`."""
+        if not self.supports_random_access():
+            raise RuntimeError(
+                "Random access isn't supported for gzip-compressed tar "
+                "archives (gzip has no member index). Use "
+                "iter_geom_records() for a single forward pass instead."
+            )
 
+        if self.is_tar:  # plain/uncompressed tar
+            member = self._member_index[index]
+            fileobj = self._tar_handle.extractfile(member)
+            mol_dict = pickle.loads(fileobj.read())
+            return mol_dict, member.name
+        else:  # extracted directory
+            rel_path = self._pickle_paths[index]
+            with open(self.root / rel_path, "rb") as f:
+                mol_dict = pickle.load(f)
+            return mol_dict, rel_path
+
+    def get_molecule_records(
+            self,
+            index: int,
+            max_confs_per_mol: Optional[int] = None
+    ) -> list[tuple[RDMolecule, dict]]:
+        """Return every (record, meta) conformer pair for molecule `index`."""
+        mol_dict, path_str = self._load_mol_dict_by_index(index)
+        return list(
+            self._expand_molecule(
+                mol_dict,
+                mol_dict.get("smiles", "<unknown>"),
+                path_str,
+                max_confs_per_mol
+            )
+        )
+
+    def get_record(
+            self,
+            index: int,
+            conformer_index: int = 0
+    ) -> tuple[RDMolecule, dict]:
+        """Return a single (record, meta) for molecule `index`, conformer `conformer_index`."""
+        records = self.get_molecule_records(
+            index, max_confs_per_mol=conformer_index + 1
+        )
+        if conformer_index >= len(records):
+            raise IndexError(
+                f"Molecule {index} has only {len(records)} conformer(s); "
+                f"requested conformer_index={conformer_index}"
+            )
+        return records[conformer_index]
+
+    def __getitem__(self, index: int) -> tuple:
+        return self.get_record(index)
 
     # ------------------------------------------------------------------
-    # Mode A: extracted directory
+    # Sequential iteration (all modes)
     # ------------------------------------------------------------------
     def _iter_from_directory(
             self,
@@ -87,20 +199,16 @@ class GEOMLoader:
             max_confs_per_mol: Optional[int]
     ) -> Iterator[tuple[RDMolecule, dict]]:
         n_mols = 0
-        for smiles, mol_meta in self.summary.items():
-            pickle_rel_path = mol_meta.get("pickle_path")
-            if pickle_rel_path is None:
-                continue
-
-            pickle_path = self.root / pickle_rel_path
+        for rel_path in self._pickle_paths:
+            pickle_path = self.root / rel_path
             if not pickle_path.exists():
                 continue
-
             with open(pickle_path, "rb") as f:
                 mol_dict = pickle.load(f)
 
             yield from self._expand_molecule(
-                mol_dict, smiles, pickle_rel_path, max_confs_per_mol
+                mol_dict, mol_dict.get("smiles", "<unknown>"), rel_path,
+                max_confs_per_mol,
             )
             del mol_dict
 
@@ -108,10 +216,27 @@ class GEOMLoader:
             if max_mols is not None and n_mols >= max_mols:
                 return
 
-    # ------------------------------------------------------------------
-    # Mode B: direct tar.gz streaming (no extraction to disk)
-    # ------------------------------------------------------------------
-    def _iter_from_tar(
+    def _iter_from_plain_tar(
+            self,
+            max_mols: Optional[int],
+            max_confs_per_mol: Optional[int]
+    ) -> Iterator[tuple[RDMolecule, dict]]:
+        n_mols = 0
+        for member in self._member_index:
+            fileobj = self._tar_handle.extractfile(member)
+            mol_dict = pickle.loads(fileobj.read())
+
+            yield from self._expand_molecule(
+                mol_dict, mol_dict.get("smiles", "<unknown>"), member.name,
+                max_confs_per_mol,
+            )
+            del mol_dict
+
+            n_mols += 1
+            if max_mols is not None and n_mols >= max_mols:
+                return
+
+    def _iter_from_gz_tar(
             self,
             max_mols: Optional[int],
             max_confs_per_mol: Optional[int]
@@ -121,7 +246,7 @@ class GEOMLoader:
 
         # "r|gz" = streaming mode: forward-only single pass, no member
         # index is built, nothing is written to disk.
-        with tarfile.open(self.root, "r") as tf:
+        with tarfile.open(self.root, "r|gz") as tf:
             for member in tf:
                 if not member.isfile() or not member.name.endswith(".pickle"):
                     continue
@@ -131,12 +256,11 @@ class GEOMLoader:
                 fileobj = tf.extractfile(member)
                 if fileobj is None:
                     continue
-
                 mol_dict = pickle.loads(fileobj.read())
 
                 yield from self._expand_molecule(
-                    mol_dict, mol_dict.get("smiles", "<unknown>"),
-                    member.name, max_confs_per_mol,
+                    mol_dict, mol_dict.get("smiles", "<unknown>"), member.name,
+                    max_confs_per_mol,
                 )
                 del mol_dict
 
@@ -144,19 +268,17 @@ class GEOMLoader:
                 if max_mols is not None and n_mols >= max_mols:
                     return
 
-    # ------------------------------------------------------------------
-    # Public entry point
-    # ------------------------------------------------------------------
     def iter_geom_records(
             self,
             max_mols: Optional[int] = None,
             max_confs_per_mol: Optional[int] = None
     ) -> Iterator[tuple[RDMolecule, dict]]:
         """
-        Yield (record, meta) pairs, one per conformer.
+        Yield (record, meta) pairs, one per conformer, in whatever order the
+        underlying storage returns molecules.
 
         record:
-            - if return_mols=False: (smiles, coords) where coords is an
+            - if return_mols=False: (smiles, coords), coords an
               (n_atoms, 3) float64 numpy array of Angstrom coordinates.
             - if return_mols=True: the RDKit Chem.Mol for that conformer.
 
@@ -164,13 +286,28 @@ class GEOMLoader:
             dict with smiles, pickle_path, conformer_index, n_atoms,
             atomic_numbers, total_energy, boltzmann_weight.
 
-        In tar-streaming mode this is a strict single forward pass over
-        the archive; calling it twice re-reads the archive from the start.
+        Gzip-tar mode is a strict single forward pass: re-decompresses
+        from the start on every call. Directory and plain-tar modes are
+        cheap to call repeatedly.
         """
-        if self.is_tar:
-            yield from self._iter_from_tar(max_mols, max_confs_per_mol)
+        if self.is_tar and self.tar_compression == "gz":
+            yield from self._iter_from_gz_tar(max_mols, max_confs_per_mol)
+        elif self.is_tar:  # plain/uncompressed
+            yield from self._iter_from_plain_tar(max_mols, max_confs_per_mol)
         else:
             yield from self._iter_from_directory(max_mols, max_confs_per_mol)
+
+    # ------------------------------------------------------------------
+    def close(self) -> None:
+        if self._tar_handle is not None:
+            self._tar_handle.close()
+            self._tar_handle = None
+
+    def __enter__(self) -> "GEOMLoader":
+        return self
+
+    def __exit__(self, exc_type, exc, tb) -> None:
+        self.close()
 
 class GEOMDownloader:
     """
