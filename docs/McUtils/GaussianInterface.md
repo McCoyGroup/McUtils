@@ -416,9 +416,9 @@ print("basis:", header.basis)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-725640" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-725640"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-9e3af3" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-9e3af3"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-725640" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-9e3af3" markdown="1">
  - [GetLogInfo](#GetLogInfo)
 - [DefaultLogParse](#DefaultLogParse)
 - [GetDipoles](#GetDipoles)
@@ -440,9 +440,9 @@ print("basis:", header.basis)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-ad3bd5" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ad3bd5"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-e5edfd" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e5edfd"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ad3bd5" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e5edfd" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
