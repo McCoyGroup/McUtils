@@ -349,7 +349,6 @@ class GEOMLoader:
             )
 
         if self.is_tar:  # plain/uncompressed tar
-            self._try_load_summary_from_tar()
             rel_path = None
             if len(self._offset_by_relpath) > 0:
                 if index >= len(self._offset_by_relpath):
@@ -359,16 +358,18 @@ class GEOMLoader:
                     )
                 rel_path = self._offset_keys[index]
 
-            elif self._pickle_paths is not None:
-                # Summary was found in the archive: index means exactly what
-                # it means in directory mode — position in the summary's
-                # pickle_path list. Look the file up by its known name.
-                if index >= len(self._pickle_paths):
-                    raise IndexError(
-                        f"Index {index} out of range: summary lists "
-                        f"{len(self._pickle_paths)} molecule(s)."
-                    )
-                rel_path = self._pickle_paths[index]
+            if rel_path is None:
+                self._try_load_summary_from_tar()
+                if self._pickle_paths is not None:
+                    # Summary was found in the archive: index means exactly what
+                    # it means in directory mode — position in the summary's
+                    # pickle_path list. Look the file up by its known name.
+                    if index >= len(self._pickle_paths):
+                        raise IndexError(
+                            f"Index {index} out of range: summary lists "
+                            f"{len(self._pickle_paths)} molecule(s)."
+                        )
+                    rel_path = self._pickle_paths[index]
 
             if rel_path is not None:
                 member = self._find_member_by_relpath(rel_path)
