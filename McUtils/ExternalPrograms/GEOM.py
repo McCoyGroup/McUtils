@@ -12,8 +12,6 @@ import tarfile
 import zipfile
 from urllib.parse import urlencode
 
-import requests
-
 from .RDKit import RDMolecule
 
 __all__ = [
@@ -263,6 +261,8 @@ class GEOMDownloader:
 
     def _chunked_download(self, url: str, dest: Path) -> Path:
         """Pure-Python streaming download fallback using requests."""
+        import requests
+
         print(f"Falling back to chunked Python download: {url}")
         with requests.get(url, stream=True, timeout=60) as resp:
             resp.raise_for_status()
