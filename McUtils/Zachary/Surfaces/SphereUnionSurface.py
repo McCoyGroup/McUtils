@@ -1583,7 +1583,7 @@ class SphereUnionSurface:
         return a
 
     @classmethod
-    def _monte_carlo_volume(cls, points, centers, radii, interior_test=None, center_volumes=None, **test_args):
+    def _monte_carlo_volume(cls, points, centers, radii, interior_test=None, center_volumes=None, integrand=None, **test_args):
         """
         **LLM Docstring**
 
@@ -1614,7 +1614,10 @@ class SphereUnionSurface:
         for cv, points in zip(center_volumes, points):
             mask = interior_test(points, centers, radii, return_components=True, **test_args)
             mask_sums = np.sum(mask, axis=1)
-            perc_inc = np.average(1 / mask_sums)
+            if integrand is None:
+                perc_inc = np.average(1 / mask_sums)
+            else:
+                perc_inc = np.average(integrand(points) / mask_sums)
             v += perc_inc * cv
         return v
 
@@ -1704,7 +1707,7 @@ class SphereUnionSurface:
         return vecs * subrads[:, np.newaxis] + center[np.newaxis, :]
 
     @classmethod
-    def volume_union_mc(cls, centers, radii, n_samples=100000, seed=None):
+    def volume_union_mc(cls, centers, radii, n_samples=100000, integrand=None, seed=None):
         """
         **LLM Docstring**
 
@@ -1732,7 +1735,7 @@ class SphereUnionSurface:
             cls.random_sphere_sampling(c, r, n_samples, rng=rng)
             for c, r in zip(centers, radii)
         ]
-        return cls._monte_carlo_volume(points, centers, radii)
+        return cls._monte_carlo_volume(points, centers, radii, integrand=integrand)
 
     @classmethod
     def volume_voxel(cls, centers, radii, resolution=200):
@@ -2732,11 +2735,19 @@ class SphereUnionSurface:
         elif method == 'monte-carlo':
             return self.volume_union_mc(self.centers, self.radii, **opts)
         elif method == 'mesh':
-            return self.get_triangulation().volume()
+            return self.get_triangulation(**opts).volume()
         elif method == 'pcmesh':
             return self.generate_mesh().volume()
         else:
             raise ValueError(f"unknown surface area method '{method}'")
+
+    def integral(self, integrand, method='monte-carlo', **opts):
+        if method == 'monte-carlo':
+            return self.volume_union_mc(self.centers, self.radii, integrand=integrand, **opts)
+        elif method == 'mesh':
+            return self.get_triangulation(**opts).volume(integrand=integrand)
+        else:
+            raise ValueError(f"unknown integral method '{method}'")
 
     def plot(self,
              figure=None,
