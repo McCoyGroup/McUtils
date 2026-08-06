@@ -282,6 +282,24 @@ class RDMolecule(ExternalMolecule):
             rdDetermineBonds.DetermineConnectivity(rdmol, charge=charge)
         return rdmol
     @classmethod
+    def sanitize_rdkit_mol(cls, rdmol, sanitize_ops=None):
+        Chem = cls.chem_api() # to get nice errors
+        rdmolops = RDKitInterface.submodule("Chem.rdmolops")
+        if sanitize_ops is None:
+            sanitize_ops = (
+                    rdmolops.SANITIZE_ALL
+                    ^ rdmolops.SANITIZE_PROPERTIES
+                    # ^rdmolops.SANITIZE_ADJUSTHS
+                    # ^rdmolops.SANITIZE_CLEANUP
+                    ^ rdmolops.SANITIZE_CLEANUP_ORGANOMETALLICS
+            )
+
+        rdmol = Chem.Mol(rdmol)
+        try:
+            Chem.SanitizeMol(rdmol, sanitize_ops)
+        except Chem.rdchem.MolSanitizeException:
+            cls._prep_mol(rdmol)
+    @classmethod
     def from_rdmol(cls, rdmol, conf_id=0, charge=None, guess_bonds=False, sanitize=True,
                    add_implicit_hydrogens=False,
                    sanitize_ops=None,
@@ -329,21 +347,7 @@ class RDMolecule(ExternalMolecule):
         if guess_bonds:
             rdmol = cls.guess_rdmol_bonds(rdmol, charge, determine_orders=True, in_place=True)
         if sanitize:
-            rdmolops = RDKitInterface.submodule("Chem.rdmolops")
-            if sanitize_ops is None:
-                sanitize_ops = (
-                        rdmolops.SANITIZE_ALL
-                        ^rdmolops.SANITIZE_PROPERTIES
-                        # ^rdmolops.SANITIZE_ADJUSTHS
-                        # ^rdmolops.SANITIZE_CLEANUP
-                        ^rdmolops.SANITIZE_CLEANUP_ORGANOMETALLICS
-                )
-
-            rdmol = Chem.Mol(rdmol)
-            try:
-                Chem.SanitizeMol(rdmol, sanitize_ops)
-            except Chem.rdchem.MolSanitizeException:
-                cls._prep_mol(rdmol)
+            cls.sanitize_rdkit_mol(rdmol, sanitize_ops)
 
         if conf_id is None:
             confs = [cls(conf, charge=charge) for conf in rdmol.GetConformers()]
@@ -2862,6 +2866,7 @@ class RDMolecule(ExternalMolecule):
                     bonds,
                     add_dummies=False,
                     reguess_bonds=True,
+                    new_charge=None,
                     return_fragments=False):
         """
         **LLM Docstring**
@@ -2883,6 +2888,8 @@ class RDMolecule(ExternalMolecule):
         Chem = self.chem_api()
         from rdkit.Chem.rdmolops import FragmentOnBonds
 
+        if return_fragments: raise NotImplementedError("direct fragment generation still TBD")
+
         nats = self.coords.shape[0]
         conf_id = self.mol.GetId()
         bond_indices = []
@@ -2899,11 +2906,125 @@ class RDMolecule(ExternalMolecule):
         broke_mol.AddConformer(conf)
         conf = broke_mol.GetConformer(conf_id)
 
+        if new_charge is None:
+            new_charge = self.charge
+
         if reguess_bonds:
             import rdkit.Chem.rdDetermineBonds as rdDetermineBonds
-            rdDetermineBonds.DetermineBondOrders(broke_mol, charge=self.charge, embedChiral=False)
+            rdDetermineBonds.DetermineBondOrders(broke_mol, charge=new_charge, embedChiral=False)
 
         return type(self)(conf, charge=self.charge)
+
+    @staticmethod
+    def _equalize_formal_charges(rw_mol, i, j):
+        """
+        **LLM Docstring**
+
+        If the two atoms `i` and `j` (now bonded) carry different formal
+        charges, redistribute the combined charge between them as evenly
+        as possible, conserving the total. When the combined charge is odd,
+        the larger (in magnitude/sign) share is left on whichever atom
+        already had the higher charge, so the "direction" of the original
+        imbalance is preserved.
+
+        :param rw_mol: the editable mol containing the newly added bond
+        :type rw_mol: rdkit.Chem.RWMol
+        :param i: index of the first bonded atom
+        :type i: int
+        :param j: index of the second bonded atom
+        :type j: int
+        :return: None, mutates `rw_mol` in place
+        :rtype: None
+        """
+        atom_i = rw_mol.GetAtomWithIdx(i)
+        atom_j = rw_mol.GetAtomWithIdx(j)
+        qi = atom_i.GetFormalCharge()
+        qj = atom_j.GetFormalCharge()
+
+        if qi == qj:
+            return
+
+        total = qi + qj
+        half = total / 2
+        low = int(np.floor(half))
+        high = int(np.ceil(half))
+
+        if low == high:
+            atom_i.SetFormalCharge(low)
+            atom_j.SetFormalCharge(low)
+        elif qi >= qj:
+            atom_i.SetFormalCharge(high)
+            atom_j.SetFormalCharge(low)
+        else:
+            atom_i.SetFormalCharge(low)
+            atom_j.SetFormalCharge(high)
+
+    def add_bonds(self,
+                  bonds,
+                  new_charge=None,
+                  sanitize=False,
+                  adjust_charges=False,
+                  reguess_bonds=True):
+        """
+        **LLM Docstring**
+
+        Add the given bonds and return the resulting (merged) molecule, carrying
+        over coordinates and optionally re-perceiving bond orders.
+
+        :param bonds: the `(i, j)` bonds to add, or `(i, j, order)` if you want to
+            specify a bond order/type per-bond (overrides `bond_type` for that bond)
+        :type bonds: Sequence
+        :param reguess_bonds: re-perceive bond orders afterward
+        :type reguess_bonds: bool
+        :param return_fragments: unused flag
+        :type return_fragments: bool
+        :return: the molecule with new bonds added
+        :rtype: RDMolecule
+        """
+        Chem = self.chem_api()
+
+        nats = self.coords.shape[0]
+        conf_id = self.mol.GetId()
+        mol = self.rdmol
+
+        rw_mol = Chem.RWMol(mol)
+        for bond in bonds:
+            if len(bond) == 2:
+                i, j = bond
+                t = 1
+            else:
+                i, j, t = bond
+            if nput.is_numeric(t):
+                t = self.resolve_bond_type(t)
+            else:
+                t = Chem.BondType.names[t]
+            existing = rw_mol.GetBondBetweenAtoms(i, j)
+            if existing is not None:
+                rw_mol.RemoveBond(i, j)
+            rw_mol.AddBond(i, j, t)
+
+            if adjust_charges:
+                self._equalize_formal_charges(rw_mol, i, j)
+
+        new_mol = rw_mol.GetMol()
+        if sanitize:
+            self.sanitize_rdkit_mol(new_mol)
+
+        conf = Chem.Conformer(nats)
+        copy_coords = self.coords.copy()
+        conf.SetPositions(copy_coords)
+        conf.SetId(conf_id)
+        new_mol.AddConformer(conf)
+        conf = new_mol.GetConformer(conf_id)
+
+        if new_charge is None:
+            new_charge = self.charge
+
+        if reguess_bonds:
+            import rdkit.Chem.rdDetermineBonds as rdDetermineBonds
+            rdDetermineBonds.DetermineBondOrders(new_mol, charge=new_charge, embedChiral=False)
+
+        return type(self)(conf, charge=new_charge)
 
     @classmethod
     def fragment_rdmol(cls, mol, inds):

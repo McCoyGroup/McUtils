@@ -9,6 +9,8 @@ __all__ = [
     "take_lists",
     "split",
     "split_by",
+    "group_by",
+    "index_groups",
     "counts",
     "dict_diff",
     "transpose",
@@ -236,6 +238,34 @@ def counts(iterable, test=None, hashable=True):
                 counts[i] += 1
 
         return keys, counts
+
+def group_by(iterable, key, hashable=True):
+    if hashable:
+        group_dict = {}
+        for v in iterable:
+            k = key(v)
+            if k not in group_dict:
+                group_dict[k] = []
+            group_dict[k].append(v)
+        return group_dict
+    else:
+        keys = []
+        counts = []
+        for v in iterable:
+            k = key(v)
+            try:
+                i = keys.index(k)
+            except ValueError:
+                keys.append(k)
+                counts.append([])
+            else:
+                counts[i].append(v)
+        return keys, counts
+def index_groups(iterable, hashable=True):
+    if not is_fixed_size(iterable):
+        iterable = list(iterable)
+    return group_by(range(len(iterable)), lambda i:iterable[i], hashable=hashable)
+
 
 def dict_diff(iterable1:dict, iterable2):
     """
