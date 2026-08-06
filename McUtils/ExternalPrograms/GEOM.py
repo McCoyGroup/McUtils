@@ -50,9 +50,10 @@ class GEOMLoader:
         self.summary_path = summary_path
 
         self.summary: Optional[dict] = None
-        self._pickle_paths: Optional[list[str]] = None  # directory mode index
+        self._pickle_paths: Optional[list[str]] = None   # directory mode index
         self._tar_handle: Optional[tarfile.TarFile] = None
-        self._member_index: Optional[list[tarfile.TarInfo]] = None  # plain-tar mode index
+        self._member_index: list[tarfile.TarInfo] = []   # plain-tar mode index, built lazily
+        self._tar_exhausted = False                        # True once we've hit EOF scanning
 
         self.tar_compression = _detect_tar_compression(self.root)  # "gz" | "plain" | None
         self.is_tar = self.tar_compression is not None
