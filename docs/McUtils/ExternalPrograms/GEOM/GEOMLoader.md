@@ -101,8 +101,8 @@ __getitem__(self, index: 'int') -> 'tuple':
 iter_geom_records(self, max_mols: 'Optional[int]' = None, max_confs_per_mol: 'Optional[int]' = None) -> 'Iterator[tuple[RDMolecule, dict]]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L544)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L544?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L565)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L565?message=Update%20Docs)]
 </div>
 Yield (record, meta) pairs, one per conformer, in whatever order the
 underlying storage returns molecules.
@@ -126,8 +126,8 @@ cheap to call repeatedly.
 close(self) -> 'None': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L574)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L574?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L595)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L595?message=Update%20Docs)]
 </div>
 
 
@@ -136,8 +136,8 @@ close(self) -> 'None':
 __enter__(self) -> "'GEOMLoader'": 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L579)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L579?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L600)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L600?message=Update%20Docs)]
 </div>
 
 
@@ -146,8 +146,8 @@ __enter__(self) -> "'GEOMLoader'":
 __exit__(self, exc_type, exc, tb) -> 'None': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L582)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L582?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L603)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM/GEOMLoader.py#L603?message=Update%20Docs)]
 </div>
  </div>
 </div>
