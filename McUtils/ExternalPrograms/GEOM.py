@@ -291,6 +291,8 @@ class GEOMLoader:
                 "(no member index available; use iter_geom_records() instead)."
             )
         if self.is_tar:
+            if len(self._offset_by_relpath) > 0:
+                return len(self._offset_by_relpath)
             self._try_load_summary_from_tar()
             if self._pickle_paths is not None:
                 return len(self._pickle_paths)  # known instantly from summary, no scan needed
