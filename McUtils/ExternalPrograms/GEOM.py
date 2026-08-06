@@ -61,7 +61,10 @@ class GEOMLoader:
             if not self.root.exists():
                 raise FileNotFoundError(f"Could not find archive {self.root}")
             if self.tar_compression == "plain":
-                self._build_tar_index()
+                # Open the handle only — do NOT call getmembers()/getnames(),
+                # since those force a full scan. Index is built on demand
+                # by _extend_index_until() / _ensure_fully_indexed().
+                self._tar_handle = tarfile.open(self.root, "r")
             # gz mode: nothing to build eagerly; streaming only.
         else:
             summary_file = self.root / summary_path
@@ -126,14 +129,13 @@ class GEOMLoader:
             # Length isn't knowable without finishing the scan at least once.
             # Cheap if already exhausted by prior access; otherwise this is
             # the one place laziness can't help.
-                self._ensure_fully_indexed()
-                return len(self._member_index)
-            return len(self._pickle_paths)
+            self._ensure_fully_indexed()
+            return len(self._member_index)
+        return len(self._pickle_paths)
 
-        # ------------------------------------------------------------------
-        # Shared per-molecule -> per-conformer expansion
-        # ------------------------------------------------------------------
-
+    # ------------------------------------------------------------------
+    # Shared per-molecule -> per-conformer expansion
+    # ------------------------------------------------------------------
     @staticmethod
     def _expand_molecule(
             mol_dict: dict,
