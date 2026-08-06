@@ -26,10 +26,11 @@ class GEOMLoader:
     def __init__(
             self,
             root: Union[str, Path],
-            summary_path: str = "summary_drugs.json",
+            subset: str,
+            summary_path: str = "summary_dic.json",
     ):
         self.root = Path(root)
-        self.summary_path = self.root / summary_path
+        self.summary_path = self.root / subset / summary_path
 
         if not self.summary_path.exists():
             raise FileNotFoundError(f"Could not find {self.summary_path}")
@@ -83,7 +84,7 @@ class GEOMLoader:
                     "boltzmann_weight": conf.get("boltzmannweight"),
                 }
 
-                yield RDMolecule.from_rdmol(rd_mol, conf_id=conf_idx), meta
+                yield RDMolecule.from_rdmol(rd_mol, conf_id=None), meta
 
             # free explicitly before moving to next molecule's pickle
             del mol_dict, confs
@@ -242,7 +243,7 @@ class GEOMDownloader:
     def _extract_tar_gz(self, tar_path: Path) -> Path:
         """Extract rdkit_folder.tar.gz, showing progress by member count."""
         print(f"Extracting {tar_path.name} -> {self.out_dir} ...")
-        with tarfile.open(tar_path, "r:gz") as tf:
+        with tarfile.open(tar_path, "r") as tf:
             members = tf.getmembers()
             total = len(members)
             for i, member in enumerate(members, 1):

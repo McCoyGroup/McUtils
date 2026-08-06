@@ -345,6 +345,13 @@ class RDMolecule(ExternalMolecule):
             except Chem.rdchem.MolSanitizeException:
                 cls._prep_mol(rdmol)
 
+        if conf_id is None:
+            confs = [cls(conf, charge=charge) for conf in rdmol.GetConformers()]
+            if len(confs) == 0:
+                conf_id = 0
+            else:
+                return confs
+
         no_confs = False
         try:
             conf = rdmol.GetConformer(conf_id)
