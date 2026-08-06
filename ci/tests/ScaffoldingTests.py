@@ -53,7 +53,7 @@ class ScaffoldingTests(TestCase):
         }
         self.assertFalse(schema.validate(data, throw=False))
 
-    @debugTest
+    @validationTest
     def test_TreeFlattening(self):
         data = {
             'file': 'test.txt',
@@ -78,6 +78,72 @@ class ScaffoldingTests(TestCase):
         buf.seek(0)
         rev2 = read_flat_tree(buf)
         print(rev2)
+
+    @validationTest
+    def test_TreeArchiveJumps(self):
+        data = {
+            'file': 'test.txt',
+            'filesystem': {'file': [['a'], ['b', 'c']]},
+            'coords': 123,
+            'initial': {
+                'coords': np.random.rand(5, 3)
+            },
+            'final': {
+                'coords': np.random.rand(1, 2)
+            },
+            'a': {'thing': {'b': 1, 'c': 2, "_type": "A", 'other': None}, 'other': None},
+            'c': {'thing': None, 'other': 9.1},
+            'g': {"c": np.full(5, None)}
+        }
+
+        archive = NumpyTreeArchive.from_tree(data)
+
+        buf = io.BytesIO()
+        archive.save(buf)
+        buf.seek(0)
+
+        new_archive = NumpyTreeArchive.load(buf)
+        print(new_archive)
+
+        print(new_archive['a'])
+
+        big_data = {
+            f'entry_{i}':{
+                'state_index':i,
+                'energy':np.random.rand(1, 2),
+                'coords':np.random.rand(1000, 3)
+            }
+            for i in range(100000)
+        }
+
+        archive = NumpyTreeArchive.from_tree(big_data)
+
+        buf = io.BytesIO()
+        archive.save(buf, save_jump_table=False)
+        buf.seek(0)
+        print(buf.getbuffer().nbytes)
+
+        buf = io.BytesIO()
+        archive.save(buf, save_jump_table=True)
+        buf.seek(0)
+        print(buf.getbuffer().nbytes)
+
+        new_archive = NumpyTreeArchive.load(buf)
+        print(new_archive)
+
+        NumpyTreeArchive.from_tree(big_data)
+        archive.save('/Users/Mark/Desktop/tree_save.npz')
+        new_archive = NumpyTreeArchive.load('/Users/Mark/Desktop/tree_save.npz')
+        print(new_archive['entry_100'])
+
+        import orjson
+        huh = orjson.dumps(big_data, option=orjson.OPT_SERIALIZE_NUMPY)
+        print(len(huh))
+        print(huh.decode()[:1000])
+
+        with open('/Users/Mark/Desktop/tree_save.json', 'w+') as jsdump:
+            jsdump.write(huh.decode())
+
 
     #region Checkpointing
     @validationTest

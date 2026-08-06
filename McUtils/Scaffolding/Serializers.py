@@ -9,7 +9,7 @@ import collections
 import uuid
 from collections import OrderedDict
 from .. import Devutils as dev
-from .. import Iterators as itut
+from .. import Numputils as nput
 
 __all__= [
     "PseudoPickler",
@@ -23,7 +23,8 @@ __all__= [
     "flatten_tree",
     "unflatten_tree",
     "write_flat_tree",
-    "read_flat_tree"
+    "read_flat_tree",
+    "NumpyTreeArchive"
 ]
 
 
@@ -2183,22 +2184,20 @@ def disambiguate_tree(tree_obj, type_map=None, aliases=None):
         new_tree[k] = v
     return new_tree, aliases
 
+# --------------------------------------------------------------------------
+# Core flatten / merge
+# --------------------------------------------------------------------------
+
 def flatten_tree(tree_obj, top_level=True, prep_tree=True, allow_pickle=False):
     """
-    **LLM Docstring**
-
-    Encode a nested dictionary as traversal metadata plus flattened value arrays and shape/sentinel streams.
+    Encode a nested dictionary as traversal metadata plus flattened value
+    arrays and shape/sentinel streams.
 
     :param tree_obj: nested dictionary to encode
-    :type tree_obj: object
     :param top_level: whether this is the outermost flattening call
-    :type top_level: object
     :param prep_tree: whether list normalization and key disambiguation should run
-    :type prep_tree: object
     :param allow_pickle: whether unsupported values may fall back to pickle
-    :type allow_pickle: object
-    :return: The converted representation described above.
-    :rtype: object
+    :return: flattened representation (dict of key_map / aliases / per-key (shape, values))
     """
     if prep_tree:
         tree_obj = dictify_lists(tree_obj)
@@ -2208,22 +2207,18 @@ def flatten_tree(tree_obj, top_level=True, prep_tree=True, allow_pickle=False):
 
     subtrees = {
         'key_map': {},
-        'aliases':aliases
+        'aliases': aliases
     }
-    for k,(s,v) in enumerate(tree_obj.items()):
+    for k, (s, v) in enumerate(tree_obj.items()):
         subtrees['key_map'][k] = s
         if isinstance(v, dict):
             subtrees[k] = flatten_tree(v, top_level=False, prep_tree=False)
         elif dev.is_atomic(v):
-            subtrees[k] = ((0,-1), np.array([v]))
+            subtrees[k] = ((0, -1), np.array([v]))
         elif v is None:
-            subtrees[k] = ((0,-1), np.array([np.nan]))
+            subtrees[k] = ((0, -1), np.array([np.nan]))
         else:
-            # try:
             v = np.asanyarray(v)
-            # except ValueError:
-            #     print(k, s, v)
-            #     raise
             sentinel = -1
             if np.issubdtype(v.dtype, np.dtype('object')):
                 if all(u is None for u in v.flatten()):
@@ -2232,77 +2227,68 @@ def flatten_tree(tree_obj, top_level=True, prep_tree=True, allow_pickle=False):
                 elif not allow_pickle:
                     raise ValueError("mixed object arrays not supported")
             if v.shape == ():
-                subtrees[k] = ((0,sentinel), np.array([v]))
+                subtrees[k] = ((0, sentinel), np.array([v]))
             else:
                 subtrees[k] = (v.shape + (sentinel,), v.flatten())
 
     return merge_trees(subtrees, top_level=top_level)
 
+
 def merge_trees(subtrees, top_level=True):
     """
-    **LLM Docstring**
-
-    Merge recursively flattened subtrees into shared key tables, traversal markers, shape streams, and concatenated value arrays.
-
-    :param subtrees: flattened child structures to merge
-    :type subtrees: object
-    :param top_level: whether this is the outermost flattening call
-    :type top_level: object
-    :return: The converted representation described above.
-    :rtype: object
+    Merge recursively flattened subtrees into shared key tables, traversal
+    markers, shape streams, and concatenated value arrays.
     """
     key_lists = {
         'visited_keys': subtrees.pop('visited_keys', []),
         'key_map': subtrees.pop('key_map', {}),
         'aliases': subtrees.pop('aliases', {})
-        # 'key_depths':[]
     }
     key_map = key_lists['key_map']
     aliases = key_lists['aliases']
-    inv_map = {k:v for v,k in key_map.items()}
+    inv_map = {k: v for v, k in key_map.items()}
 
-    for k,s in subtrees.items():
+    for k, s in subtrees.items():
         key_lists['visited_keys'].append(k)
         if isinstance(s, dict):
             s_map = s.pop('key_map', {})
             a_map = s.pop('aliases', {})
             renaming = {}
-            for a,k in a_map.items():
+            for a, k in a_map.items():
                 if a in aliases:
-                    new_alias = a+"-"+str(uuid.uuid4())[:6]
+                    new_alias = a + "-" + str(uuid.uuid4())[:6]
                     aliases[new_alias] = k
                     renaming[a] = new_alias
             s_map = {
                 renaming.get(vv, vv): sk
-                for vv,sk in s_map.items()
+                for vv, sk in s_map.items()
             }
-            for vv,sk in s_map.items():
+            for vv, sk in s_map.items():
                 if sk not in inv_map:
                     n = max(key_map.keys()) + 1
                     key_map[n] = sk
                     inv_map[sk] = n
-            for sk,v in s.items():
+            for sk, v in s.items():
                 if sk == 'visited_keys':
-                    # if not bottom_level:
-                    #     key_lists['visited_keys'].append(-1)
-
                     key_lists['visited_keys'].extend(
                         inv_map[s_map[vv]]
-                            if vv >= 0 else
+                        if vv >= 0 else
                         vv
-                            for vv in v
+                        for vv in v
                     )
                 else:
                     sk = inv_map[s_map[sk]]
-                    if sk not in key_lists: key_lists[sk] = []
+                    if sk not in key_lists:
+                        key_lists[sk] = []
                     key_lists[sk].append(v)
         else:
-            if k not in key_lists: key_lists[k] = []
+            if k not in key_lists:
+                key_lists[k] = []
             key_lists[k].append(s)
     if not top_level:
         key_lists['visited_keys'].append(-1)
 
-    for key,value_list in key_lists.items():
+    for key, value_list in key_lists.items():
         if key in {'key_map', 'visited_keys', 'aliases'}:
             key_lists[key] = value_list
             continue
@@ -2317,19 +2303,13 @@ def merge_trees(subtrees, top_level=True):
 
     return key_lists
 
-def undictify_lists(tree:dict):
+def undictify_lists(tree: dict):
     """
-    **LLM Docstring**
-
-    Recursively reconstruct numbered dictionary encodings back into Python lists.
-
-    :param tree: nested structure or recursion tracker
-    :type tree: dict
-    :return: The converted representation described above.
-    :rtype: object
+    Recursively reconstruct numbered dictionary encodings back into Python
+    lists.
     """
     tree = tree.copy()
-    for k,subtree in tree.items():
+    for k, subtree in tree.items():
         if isinstance(subtree, dict):
             if '_num_list_items' in subtree:
                 tree[k] = [
@@ -2339,34 +2319,56 @@ def undictify_lists(tree:dict):
             else:
                 tree[k] = undictify_lists(subtree)
     return tree
+
+# --------------------------------------------------------------------------
+# Unflatten (supports full walk, or a jump-table-driven partial walk)
+# --------------------------------------------------------------------------
+
 def unflatten_tree(serial_tree,
                    unprep_tree=True,
                    max_leaf_elements=None,
                    block_pointers=None,
-                   prefix_filter=None):
+                   prefix_filter=None,
+                   jump_table=None,
+                   record=None):
     """
-    **LLM Docstring**
+    Replay traversal markers and per-key shape/value pointers to rebuild
+    the nested tree and restore list/`None` sentinels.
 
-    Replay traversal markers and per-key shape/value pointers to rebuild the nested tree and restore list/`None` sentinels.
+    If `jump_table` and `record` are both given, resumes the walk directly
+    at that record's span instead of starting from the beginning -- no
+    need to replay everything before it.
 
-    :param serial_tree: flat-tree metadata and arrays
-    :type serial_tree: object
+    :param serial_tree: flat-tree metadata and arrays. NOT mutated (key_map
+                        is read, not popped), so this can be called
+                        repeatedly against the same loaded data.
     :param unprep_tree: whether numbered list dictionaries should be restored
-    :type unprep_tree: object
-    :return: The reconstructed, loaded, or selected Python value.
-    :rtype: object
+    :param jump_table: optional dict from build_jump_table
+    :param record: optional path string to jump to (requires jump_table)
+    :return: the reconstructed nested dict
     """
     tree = {}
     tree_stack = collections.deque()
     prefix = ()
     prefix_stack = collections.deque()
     skipped_stack = [False]
-    key_map = serial_tree.pop('key_map')
+    key_map = serial_tree['key_map']
     if block_pointers is None:
         block_pointers = {}
     aliases = serial_tree['aliases']
     skipped_sentinel = object()
-    for i,k in enumerate(serial_tree['visited_keys']):
+
+    visited_keys = serial_tree['visited_keys']
+    start_index, end_index = 0, len(visited_keys)
+
+    if jump_table is not None and record is not None:
+        entry = jump_table[record]
+        start_index = entry['start']
+        end_index = entry['end']
+        block_pointers = dict(entry['block_pointers'])
+
+    for i in range(start_index, end_index):
+        k = visited_keys[i]
         if k >= 0:
             s = key_map[k]
             s = aliases.get(s, s)
@@ -2380,17 +2382,19 @@ def unflatten_tree(serial_tree,
                 sentinel = None
                 for shape_offset in range(shape_pointer, len(shape_data)):
                     sentinel = shape_data[shape_offset]
-                    if sentinel < 0: break
+                    if sentinel < 0:
+                        break
                 shape = tuple(shape_data[shape_pointer:shape_offset])
                 if shape == (0,):
                     block_size = 1
                     shape = ()
                 else:
                     block_size = np.prod(shape, dtype=int)
-                block_pointers[k] = (shape_offset+1, array_pointer + block_size)
-                if skipped_stack[-1]: continue
+                block_pointers[k] = (shape_offset + 1, array_pointer + block_size)
+                if skipped_stack[-1]:
+                    continue
                 try:
-                    arr = array_data[array_pointer:array_pointer+block_size].reshape(shape)
+                    arr = array_data[array_pointer:array_pointer + block_size].reshape(shape)
                 except ValueError:
                     print(k, s, block_size)
                     raise
@@ -2418,7 +2422,7 @@ def unflatten_tree(serial_tree,
                             max_cutoff = max_leaf_elements[skip_depth]
                             skipped = max_cutoff < len(tree)
                             if skipped and skip_depth == 0:
-                                break # fast early exit
+                                break  # fast early exit
                 skipped_stack.append(skipped)
                 tree[s] = {}
                 tree_stack.append(tree)
@@ -2427,49 +2431,228 @@ def unflatten_tree(serial_tree,
                     tree[skipped_sentinel] = True
         else:
             if len(tree_stack) == 0:
-                block = serial_tree['visited_keys'][max(i - 6, 0):i]
+                block = visited_keys[max(i - 6, 0):i]
                 prev = [
                     key_map[k] if k > 0 else "<reset>"
                     for k in block
                 ]
                 raise ValueError(f"exhausted tree stack, previous tree entries (max 6): {prev}")
             tree = tree_stack.pop()
-            for k,v in tree.items():
+            for k, v in tree.items():
                 if isinstance(v, dict) and skipped_sentinel in v:
                     del tree[k]
             prefix = prefix_stack.pop()
-            skipped = skipped_stack.pop()
+            skipped_stack.pop()
     if unprep_tree:
         tree = undictify_lists(tree)
     return tree
 
-def write_flat_tree(file, tree, flatten=None, allow_pickle=False, writer=None, **writer_options):
+
+# --------------------------------------------------------------------------
+# Jump table: index every node (or up to max_depth) by path for lazy access
+# --------------------------------------------------------------------------
+
+def build_jump_table(serial_tree, max_depth=None, path_sep='/'):
     """
-    **LLM Docstring**
+    Scan `visited_keys` once and record, for every node (leaf or nested
+    dict) up to `max_depth`, the (start, end) span in visited_keys and the
+    block_pointers snapshot needed to resume unflatten_tree there directly.
 
-    Flatten a tree when needed and write metadata, shape streams, and value arrays to an NPZ-style writer.
+    Each entry also carries 'key_path': the full tuple of raw key_map ids
+    from the root down to that node (not just its own terminal id). This
+    is what lets _encode_jump_table serialize and later reconstruct the
+    exact human path ("ep_001/obs") rather than colliding on a shared
+    terminal key name -- key_map ids are shared across sibling records by
+    design (e.g. every episode's "obs" field uses the same id, since
+    that's what lets flatten_tree concatenate them into one array), so a
+    terminal id alone can't disambiguate "ep_000/obs" from "ep_001/obs",
+    but the full id *path* can.
 
-    :param file: path or file-like object
-    :type file: object
-    :param tree: nested structure or recursion tracker
-    :type tree: object
-    :param flatten: whether input should be flattened before writing
-    :type flatten: object
-    :param allow_pickle: whether unsupported values may fall back to pickle
-    :type allow_pickle: object
-    :param writer: NPZ-compatible writer callable
-    :type writer: object
-    :param writer_options: options forwarded to the writer
-    :type writer_options: object
-    :return: the return value from the selected NPZ writer
-    :rtype: object
+    :param serial_tree: flat-tree metadata and arrays (as returned by flatten_tree)
+    :param max_depth: if set, only index nodes at depth <= max_depth
+                       (0 = top-level records only). None indexes every node.
+    :param path_sep: separator used to join path components into a lookup key
+    :return: dict mapping path string -> {'start', 'end', 'block_pointers', 'key_path'}
+    """
+    key_map = serial_tree['key_map']
+    aliases = serial_tree['aliases']
+    visited_keys = serial_tree['visited_keys']
+
+    block_pointers = {}
+    prefix = ()
+    prefix_ids = ()
+    prefix_stack = collections.deque()
+    prefix_ids_stack = collections.deque()
+    open_entries = collections.deque()
+    jump_table = {}
+
+    for i, k in enumerate(visited_keys):
+        if k >= 0:
+            s = aliases.get(key_map[k], key_map[k])
+            path = prefix + (s,)
+            key_path = prefix_ids + (k,)
+            depth = len(prefix)
+            index_this = (max_depth is None or depth <= max_depth)
+            data = serial_tree.get(k)
+
+            if data is not None:
+                if index_this:
+                    jump_table[path_sep.join(path)] = {
+                        'start': i,
+                        'end': i + 1,
+                        'block_pointers': dict(block_pointers),
+                        'key_path': key_path,
+                    }
+                shape_pointer, array_pointer = block_pointers.get(k, (0, 0))
+                shape_data, array_data = data
+                shape_offset = shape_pointer
+                sentinel = None
+                for shape_offset in range(shape_pointer, len(shape_data)):
+                    sentinel = shape_data[shape_offset]
+                    if sentinel < 0:
+                        break
+                shape = tuple(shape_data[shape_pointer:shape_offset])
+                block_size = 1 if shape == (0,) else np.prod(shape, dtype=int)
+                block_pointers[k] = (shape_offset + 1, array_pointer + block_size)
+            else:
+                open_entries.append((path, key_path, i, dict(block_pointers)) if index_this else None)
+                prefix_stack.append(prefix)
+                prefix_ids_stack.append(prefix_ids)
+                prefix = path
+                prefix_ids = key_path
+        else:
+            prefix = prefix_stack.pop()
+            prefix_ids = prefix_ids_stack.pop()
+            entry = open_entries.pop()
+            if entry is not None:
+                path, key_path, start, bp_snapshot = entry
+                jump_table[path_sep.join(path)] = {
+                    'start': start,
+                    'end': i + 1,
+                    'block_pointers': bp_snapshot,
+                    'key_path': key_path,
+                }
+
+    return jump_table
+
+def _downcast_uint(array):
+    return array.astype(nput.infer_inds_dtype(np.max(array)))
+
+def _encode_jump_table(jump_table, index_remapping):
+    """
+    Convert an in-memory jump_table into plain arrays suitable for
+    np.savez without allow_pickle:
+
+      - jt_key_paths: (num_records, max_depth) table of key_map indices,
+                      one row per record, padded with 0 past each row's
+                      real length (padding is disambiguated by jt_depths,
+                      not by value, since 0 is itself a valid key id).
+      - jt_depths:    (num_records,) true length of each row in jt_key_paths.
+      - jt_starts / jt_ends: (num_records,) span into visited_keys.
+      - jt_ptr_rows / jt_ptr_cols / jt_ptr_sp / jt_ptr_ap: sparse (COO-style)
+                      encoding of the block-pointers matrix. Only nonzero
+                      (sp, ap) pairs are stored -- (0, 0) is indistinguishable
+                      from "absent" anyway, since unflatten_tree defaults any
+                      key missing from block_pointers to (0, 0) on first use.
+                      This matters because the dense matrix is typically
+                      >99.99% zero on large datasets (most keys are
+                      irrelevant to most records).
+
+    Every array is downcast to the smallest uint dtype that fits its own
+    values.
+    """
+    record_names = list(jump_table.keys())
+    key_paths = [jump_table[n]['key_path'] for n in record_names]
+
+    starts = np.array([jump_table[n]['start'] for n in record_names], dtype=np.int64)
+    ends = np.array([jump_table[n]['end'] for n in record_names], dtype=np.int64)
+    depths = np.array([len(p) for p in key_paths], dtype=np.int64)
+    max_depth = int(depths.max(initial=0))
+
+    key_path_table = np.zeros((len(record_names), max_depth), dtype=np.int64)
+    for r, kp in enumerate(key_paths):
+        for d, k in enumerate(kp):
+            key_path_table[r, d] = index_remapping[k]
+
+    rows, cols, sps, aps = [], [], [], []
+    for r, name in enumerate(record_names):
+        for k, (sp, ap) in jump_table[name]['block_pointers'].items():
+            if sp == 0 and ap == 0:
+                continue
+            rows.append(r)
+            cols.append(index_remapping[k])
+            sps.append(sp)
+            aps.append(ap)
+
+    return {
+        'jt_key_paths': _downcast_uint(key_path_table),
+        'jt_depths': _downcast_uint(depths),
+        'jt_starts': _downcast_uint(starts),
+        'jt_ends': _downcast_uint(ends),
+        'jt_ptr_rows': _downcast_uint(np.array(rows, dtype=np.int64)),
+        'jt_ptr_cols': _downcast_uint(np.array(cols, dtype=np.int64)),
+        'jt_ptr_sp': _downcast_uint(np.array(sps, dtype=np.int64)),
+        'jt_ptr_ap': _downcast_uint(np.array(aps, dtype=np.int64)),
+    }
+
+
+def _decode_jump_table(zdata, key_map, aliases, path_sep='/'):
+    """
+    Reconstruct the in-memory jump_table dict from the arrays written by
+    _encode_jump_table. Dict keys are the full human path strings (e.g.
+    "ep_001/obs"), rebuilt from each row's key_path ids -- no collisions
+    between sibling records that happen to share a terminal field name.
+
+    :param key_map: {id: name} as reconstructed by read_flat_tree
+    :param aliases: alias-rename dict as reconstructed by read_flat_tree
+    """
+    key_path_table = zdata['jt_key_paths']
+    depths = zdata['jt_depths']
+    starts = zdata['jt_starts']
+    ends = zdata['jt_ends']
+
+    rows = zdata['jt_ptr_rows']
+    cols = zdata['jt_ptr_cols']
+    sps = zdata['jt_ptr_sp']
+    aps = zdata['jt_ptr_ap']
+
+    per_record_pointers = collections.defaultdict(dict)
+    for r, j, sp, ap in zip(rows, cols, sps, aps):
+        per_record_pointers[int(r)][int(j)] = (int(sp), int(ap))
+
+    jump_table = {}
+    for r in range(key_path_table.shape[0]):
+        d = int(depths[r])
+        path = tuple(
+            aliases.get(key_map[int(key_path_table[r, i])], key_map[int(key_path_table[r, i])])
+            for i in range(d)
+        )
+        jump_table[path_sep.join(path)] = {
+            'start': int(starts[r]),
+            'end': int(ends[r]),
+            'block_pointers': per_record_pointers.get(r, {}),
+        }
+    return jump_table
+
+
+# --------------------------------------------------------------------------
+# NPZ persistence
+# --------------------------------------------------------------------------
+
+def write_flat_tree(file, tree, flatten=None, allow_pickle=False, writer=None,
+                    jump_table=True, max_depth=0, **writer_options):
+    """
+    Flatten a tree when needed and write metadata, shape streams, value
+    arrays, and (optionally) a jump table to an NPZ-style writer.
+
+    :param jump_table: True to auto-build a jump table via build_jump_table,
+                       False to skip it, or a pre-built jump_table dict to
+                       use as-is.
+    :param max_depth: forwarded to build_jump_table when jump_table=True.
     """
     if writer is None:
         compress = writer_options.pop('compress', False)
-        if compress:
-            writer = np.savez_compressed
-        else:
-            writer = np.savez
+        writer = np.savez_compressed if compress else np.savez
     if flatten is None:
         flatten = (
                 'key_map' not in tree
@@ -2478,10 +2661,12 @@ def write_flat_tree(file, tree, flatten=None, allow_pickle=False, writer=None, *
         )
     if flatten:
         tree = flatten_tree(tree, allow_pickle=allow_pickle)
+
     key_names = list(tree['key_map'].values())
     aliases = np.array(list(tree['aliases'].items()))
     index_remapping = {k: i for i, k in enumerate(tree['key_map'].keys())}
     visited_keys = [index_remapping[i] if i >= 0 else i for i in tree['visited_keys']]
+
     arrays = {}
     shapes = []
     array_keys = []
@@ -2493,6 +2678,12 @@ def write_flat_tree(file, tree, flatten=None, allow_pickle=False, writer=None, *
             i = index_remapping[k]
             arrays[f'arr_{i}'] = array_data
             array_keys.append(i)
+
+    jt_arrays = {}
+    if jump_table:
+        jt = jump_table if isinstance(jump_table, dict) else build_jump_table(tree, max_depth=max_depth)
+        jt_arrays = _encode_jump_table(jt, index_remapping)
+
     return writer(
         file,
         shapes=shapes,
@@ -2501,30 +2692,24 @@ def write_flat_tree(file, tree, flatten=None, allow_pickle=False, writer=None, *
         array_keys=array_keys,
         visited_keys=visited_keys,
         **arrays,
+        **jt_arrays,
         **writer_options
     )
+
 
 def read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False,
                    max_leaf_elements=None,
                    prefix_filter=None,
+                   record=None,
                    **reader_options):
     """
-    **LLM Docstring**
+    Read the NPZ-style flat-tree representation, rebuild its metadata
+    structure, and optionally unflatten it fully or jump straight to a
+    single record/sub-record.
 
-    Read the NPZ-style flat-tree representation, rebuild its metadata structure, and optionally unflatten it.
-
-    :param file: path or file-like object
-    :type file: object
-    :param unflatten: whether read data should be reconstructed into a nested tree
-    :type unflatten: object
-    :param reader: NPZ-compatible reader callable
-    :type reader: object
-    :param allow_pickle: whether unsupported values may fall back to pickle
-    :type allow_pickle: object
-    :param reader_options: options forwarded to the reader
-    :type reader_options: object
-    :return: The reconstructed, loaded, or selected Python value.
-    :rtype: object
+    :param record: if given, only unflatten this path (requires a jump
+                   table to have been written). Overrides `unflatten`.
+    :return: nested dict (if unflatten or record given), else (data, jump_table)
     """
     if reader is None:
         reader = np.load
@@ -2537,10 +2722,8 @@ def read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False,
     aliases = dict(zdata['aliases'].tolist())
     data = {
         'visited_keys': visited_keys,
-        'key_map': {
-            i: k for i, k in enumerate(key_names)
-        },
-        'aliases':aliases
+        'key_map': {i: k for i, k in enumerate(key_names)},
+        'aliases': aliases,
     }
 
     shape_pointer = 0
@@ -2549,11 +2732,139 @@ def read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False,
         new_pointer = shape_pointer + 1 + ls
         shape = shapes[shape_pointer + 1:new_pointer]
         shape_pointer = new_pointer
-        array = zdata[f'arr_{k}']
-        data[k] = (shape, array)
+        data[k] = (shape, zdata[f'arr_{k}'])
+
+    jump_table = None
+    if 'jt_key_paths' in zdata.files:
+        jump_table = _decode_jump_table(zdata, data['key_map'], aliases)
+
+    if record is not None:
+        if jump_table is None:
+            raise ValueError("file has no jump table; can't look up a record")
+        return unflatten_tree(data,
+                              max_leaf_elements=max_leaf_elements,
+                              prefix_filter=prefix_filter,
+                              jump_table=jump_table,
+                              record=record)
 
     if unflatten:
-        data = unflatten_tree(data,
+        return unflatten_tree(data,
                               max_leaf_elements=max_leaf_elements,
                               prefix_filter=prefix_filter)
-    return data
+
+    return data, jump_table
+
+
+# --------------------------------------------------------------------------
+# Convenience wrapper
+# --------------------------------------------------------------------------
+
+class NumpyTreeArchive:
+    """
+    Wraps a flattened tree (as produced by flatten_tree) plus an optional
+    jump table, supporting both full eager unflattening and lazy,
+    path-based sub-record access ("ep_001", "ep_001/obs", ...) without
+    walking the whole visited_keys sequence.
+
+    Usage:
+        archive = NumpyTreeArchive.from_tree(data)
+        archive.save("dataset.npz")
+
+        archive = NumpyTreeArchive.load("dataset.npz")
+        archive["ep_001/obs"]        # lazy sub-record access
+        archive.unpack()             # full eager unflatten
+        list(archive.keys())         # all indexed paths
+        for path, value in archive.items(): ...
+        len(archive)                 # number of indexed paths
+        "ep_001" in archive
+    """
+
+    def __init__(self, serial_tree, jump_table=None, path_sep='/'):
+        self._serial_tree = serial_tree
+        self._jump_table = jump_table or {}
+        self._path_sep = path_sep
+
+    def _unpack_record(self, path, max_leaf_elements=None, prefix_filter=None):
+        """
+        unflatten_tree, when resuming at a jump-table span, still nests the
+        result one level under that node's own key (e.g. jumping to
+        "ep_001/obs" yields {"obs": array}, not the array itself) because
+        that's how the traversal naturally encodes a node's span. Unwrap by
+        the path's last segment so callers get the value directly.
+        """
+        result = unflatten_tree(dict(self._serial_tree),
+                                max_leaf_elements=max_leaf_elements,
+                                prefix_filter=prefix_filter,
+                                jump_table=self._jump_table, record=path)
+        last_key = path.rsplit(self._path_sep, 1)[-1]
+        return result[last_key]
+
+    # -- construction --------------------------------------------------
+
+    @classmethod
+    def from_tree(cls, tree, allow_pickle=False, build_jt=True, max_depth=0, path_sep='/'):
+        """Build an archive directly from a nested Python dict."""
+        flat = flatten_tree(tree, allow_pickle=allow_pickle)
+        jt = build_jump_table(flat, max_depth=max_depth, path_sep=path_sep) if build_jt else None
+        return cls(flat, jump_table=jt, path_sep=path_sep)
+
+    @classmethod
+    def load(cls, file, reader=None, allow_pickle=False, path_sep='/', **reader_options):
+        """Load an archive from an NPZ file (or file-like/path)."""
+        data, jt = read_flat_tree(file, unflatten=False, reader=reader,
+                                  allow_pickle=allow_pickle, **reader_options)
+        return cls(data, jump_table=jt, path_sep=path_sep)
+
+    # -- persistence -----------------------------------------------------
+
+    def save(self, file, writer=None, max_depth=0, save_jump_table=True, **writer_options):
+        """Write this archive to an NPZ file (or file-like/path)."""
+        return write_flat_tree(file, self._serial_tree, flatten=False,
+                               jump_table=False if not save_jump_table else (self._jump_table or True),
+                               max_depth=max_depth, writer=writer,
+                               **writer_options)
+
+    # -- unpacking ---------------------------------------------------------
+
+    def unpack(self, max_leaf_elements=None, prefix_filter=None):
+        """Fully unflatten the archive into a nested dict."""
+        return unflatten_tree(dict(self._serial_tree),
+                              max_leaf_elements=max_leaf_elements,
+                              prefix_filter=prefix_filter)
+
+    def get(self, path, default=None):
+        """Lazily unpack the sub-record at `path`, or return `default`."""
+        if path not in self._jump_table:
+            return default
+        return self._unpack_record(path)
+
+    # -- dict-like interface ------------------------------------------------
+
+    def __getitem__(self, path):
+        if path not in self._jump_table:
+            raise KeyError(f"no jump-table entry for {path!r}")
+        return self._unpack_record(path)
+
+    def __contains__(self, path):
+        return path in self._jump_table
+
+    def __len__(self):
+        return len(self._jump_table)
+
+    def __iter__(self):
+        return iter(self._jump_table)
+
+    def keys(self):
+        """All indexed paths (records and, if built with max_depth=None, sub-records)."""
+        return self._jump_table.keys()
+
+    def values(self):
+        for path in self._jump_table:
+            yield self[path]
+
+    def items(self):
+        for path in self._jump_table:
+            yield path, self[path]
+
+    def __repr__(self):
+        return f"{type(self).__name__}(<{len(self)}>)"

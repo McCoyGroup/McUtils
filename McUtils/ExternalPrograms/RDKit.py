@@ -2767,6 +2767,13 @@ class RDMolecule(ExternalMolecule):
 
         return prods
 
+    def permute(self, perm):
+        Chem = self.allchem_api()
+        perm = np.array(perm, dtype=int).tolist()
+        new_mol = Chem.RenumberAtoms(self.rdmol, perm)
+        conf_id = self.mol.GetId()
+        return type(self).from_rdmol(new_mol, conf_id=conf_id, charge=self.charge)
+
     def apply_smarts(self, tf):
         """
         **LLM Docstring**
@@ -2964,6 +2971,7 @@ class RDMolecule(ExternalMolecule):
                   new_charge=None,
                   sanitize=False,
                   adjust_charges=False,
+                  compute_stereo=False,
                   reguess_bonds=True):
         """
         **LLM Docstring**
@@ -3023,6 +3031,9 @@ class RDMolecule(ExternalMolecule):
         if reguess_bonds:
             import rdkit.Chem.rdDetermineBonds as rdDetermineBonds
             rdDetermineBonds.DetermineBondOrders(new_mol, charge=new_charge, embedChiral=False)
+
+        if compute_stereo:
+            Chem.AssignStereochemistryFrom3D(new_mol, confId=conf_id)
 
         return type(self)(conf, charge=new_charge)
 
