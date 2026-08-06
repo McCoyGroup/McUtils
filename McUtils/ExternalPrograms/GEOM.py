@@ -334,7 +334,7 @@ class GEOMLoader:
                 "boltzmann_weight": conf.get("boltzmannweight"),
             }
 
-            yield RDMolecule.from_rdmol(rd_mol, conf_id=None), meta
+            yield RDMolecule.from_rdmol(rd_mol), meta
 
     # ------------------------------------------------------------------
     # Random access (directory mode + plain/uncompressed tar mode)
@@ -461,13 +461,10 @@ class GEOMLoader:
             max_mols: Optional[int],
             max_confs_per_mol: Optional[int]
     ) -> Iterator[tuple[RDMolecule, dict]]:
-        self._try_load_summary_from_tar()
-
-        if self._pickle_paths is not None:
-            # Follow summary order (same as directory mode), looking each
-            # relpath up lazily — reuses whatever's cached, extends as needed.
+        if len(self._offset_by_relpath) > 0:
             n_mols = 0
-            for rel_path in self._pickle_paths:
+            for rel_path in self._offset_keys:
+
                 try:
                     member = self._find_member_by_relpath(rel_path)
                 except KeyError:
@@ -485,6 +482,30 @@ class GEOMLoader:
                 if max_mols is not None and n_mols >= max_mols:
                     return
             return
+        else:
+            self._try_load_summary_from_tar()
+            if self._pickle_paths is not None:
+                # Follow summary order (same as directory mode), looking each
+                # relpath up lazily — reuses whatever's cached, extends as needed.
+                n_mols = 0
+                for rel_path in self._pickle_paths:
+                    try:
+                        member = self._find_member_by_relpath(rel_path)
+                    except KeyError:
+                        continue  # listed in summary but not present in this archive
+                    fileobj = self._tar_handle.extractfile(member)
+                    mol_dict = pickle.loads(fileobj.read())
+
+                    yield from self._expand_molecule(
+                        mol_dict, mol_dict.get("smiles", "<unknown>"), rel_path,
+                        max_confs_per_mol,
+                    )
+                    del mol_dict
+
+                    n_mols += 1
+                    if max_mols is not None and n_mols >= max_mols:
+                        return
+                return
 
         # Interleave scanning with consumption: extend the cached index one
         # slot at a time rather than requiring it be fully built up front.
