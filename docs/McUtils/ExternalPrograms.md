@@ -536,9 +536,9 @@ print("PDB lines:", len(pdb.splitlines()))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-d1d821" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-d1d821"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-530a56" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-530a56"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-d1d821" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-530a56" markdown="1">
  - [CIFFiles](#CIFFiles)
 - [ParseGaussianLogFile](#ParseGaussianLogFile)
 - [ParseReports](#ParseReports)
@@ -565,9 +565,9 @@ print("PDB lines:", len(pdb.splitlines()))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-aa6c5a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-aa6c5a"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-45d6ae" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-45d6ae"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-aa6c5a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-45d6ae" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
