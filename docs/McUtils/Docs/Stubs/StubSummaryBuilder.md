@@ -95,7 +95,7 @@ SYNTAX_ERROR_WARNING_TEMPLATE: str
 ```
 <a id="McUtils.Docs.Stubs.StubSummaryBuilder.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, out_dir='stubs', max_doc_len=800, min_words=5, write_sidecar_file=False, verbose=False, dispatcher=None, filter=None, exclude=<function default_exclude at 0x7f919b6928b0>): 
+__init__(self, out_dir='stubs', max_doc_len=800, min_words=5, write_sidecar_file=False, verbose=False, dispatcher=None, filter=None, exclude=<function default_exclude at 0x7fd92334c670>): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Docs/Stubs.py#L306)/

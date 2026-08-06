@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Serializers.PseudoPickler">PseudoPickler</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L30)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L30?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L31)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L31?message=Update%20Docs)]
 </div>
 
 A simple plugin to work _like_ pickle, in that it should
@@ -30,8 +30,8 @@ Falls back to naive pickling when necessary.
 __init__(self, allow_pickle=False, protocol=1, b64encode=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L42)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L42?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L43)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L43?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -51,8 +51,8 @@ Configure pseudo-pickling fallback, protocol marker, and optional base64 encodin
 to_state(self, obj, cache=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L181)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L181?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L182)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L182?message=Update%20Docs)]
 </div>
 Tries to extract state from `obj`, first through its `to_state`
 interface, but that failing by recursively walking the object
@@ -68,8 +68,8 @@ tree
 serialize(self, obj, cache=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L212)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L212?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L213)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L213?message=Update%20Docs)]
 </div>
 Serializes an object first by checking for a `to_state`
 method, and that missing, by converting to primitive-ish types
@@ -86,8 +86,8 @@ falling back to `pickle`
 deserialize(self, spec): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L256)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L256?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L257)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/PseudoPickler.py#L257?message=Update%20Docs)]
 </div>
 Deserializes from an object spec, dispatching
 to regular pickle where necessary
@@ -148,7 +148,7 @@ to regular pickle where necessary
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Serializers/PseudoPickler.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/PseudoPickler.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L30?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L31?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

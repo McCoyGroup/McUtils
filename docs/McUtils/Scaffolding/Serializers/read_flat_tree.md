@@ -1,27 +1,20 @@
 # <a id="McUtils.Scaffolding.Serializers.read_flat_tree">read_flat_tree</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L2507)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L2507?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L2700)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L2700?message=Update%20Docs)]
 </div>
 
 ```python
-read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False, max_leaf_elements=None, prefix_filter=None, **reader_options): 
+read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False, max_leaf_elements=None, prefix_filter=None, record=None, **reader_options): 
 ```
-**LLM Docstring**
-
-Read the NPZ-style flat-tree representation, rebuild its metadata structure, and optionally unflatten it.
-  - `file`: `object`
-    > path or file-like object
-  - `unflatten`: `object`
-    > whether read data should be reconstructed into a nested tree
-  - `reader`: `object`
-    > NPZ-compatible reader callable
-  - `allow_pickle`: `object`
-    > whether unsupported values may fall back to pickle
-  - `reader_options`: `object`
-    > options forwarded to the reader
-  - `:returns`: `object`
-    > The reconstructed, loaded, or selected Python value.
+Read the NPZ-style flat-tree representation, rebuild its metadata
+structure, and optionally unflatten it fully or jump straight to a
+single record/sub-record.
+  - `record`: `Any`
+    > if given, only unflatten this path (requires a jump
+               table to have been written). Overrides `unflatten`.
+  - `:returns`: `_`
+    > nested dict (if unflatten or record given), else (data, jump_table)
 
 
 
@@ -72,7 +65,7 @@ Read the NPZ-style flat-tree representation, rebuild its metadata structure, and
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Serializers/read_flat_tree.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/read_flat_tree.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L2507?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L2700?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

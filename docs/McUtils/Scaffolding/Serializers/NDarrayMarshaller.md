@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Serializers.NDarrayMarshaller">NDarrayMarshaller</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L881)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L881?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L882)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L882?message=Update%20Docs)]
 </div>
 
 Support class for `HDF5Serializer` and other
@@ -28,8 +28,8 @@ atomic_types: tuple
 __init__(self, base_serializer=None, allow_pickle=True, psuedopickler=None, allow_records=False, all_dicts=False, converters=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L888)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L888?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L889)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L889?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -56,8 +56,8 @@ Configure recursive conversion to NumPy-compatible trees, pseudo-pickle fallback
 get_default_converters(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L930)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L930?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L931)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L931?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -72,8 +72,8 @@ Build the ordered type/duck-type dispatch table used to coerce values into NumPy
 converter_dispatch(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L950)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L950?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L951)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L951?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -87,8 +87,8 @@ Return the custom converter mapping or create the default ordered dispatch table
 convert(self, data, allow_pickle=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L1208)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L1208?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L1209)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L1209?message=Update%20Docs)]
 </div>
 Recursively loop through, test data, make sure HDF5 compatible
   - `data`: `Any`
@@ -102,8 +102,8 @@ Recursively loop through, test data, make sure HDF5 compatible
 deconvert(self, data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L1264)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L1264?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L1265)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L1265?message=Update%20Docs)]
 </div>
 Reverses the conversion process
 used to marshall the data
@@ -118,8 +118,8 @@ used to marshall the data
 __call__(self, data, allow_pickle=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L1314)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L1314?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L1315)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NDarrayMarshaller.py#L1315?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -183,7 +183,7 @@ Invoke recursive conversion, using the marshaller default pickle policy unless o
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Serializers/NDarrayMarshaller.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/NDarrayMarshaller.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L881?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L882?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

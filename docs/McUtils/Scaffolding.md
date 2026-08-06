@@ -74,84 +74,84 @@ In order of usefulness, the design is:
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[NumpyTreeArchive](Scaffolding/Serializers/NumpyTreeArchive.md)   
+</div>
+   <div class="col" markdown="1">
 [LogParser](Scaffolding/Logging/LogParser.md)   
 </div>
    <div class="col" markdown="1">
 [Checkpointer](Scaffolding/Checkpointing/Checkpointer.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [CheckpointerKeyError](Scaffolding/Checkpointing/CheckpointerKeyError.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [DumpCheckpointer](Scaffolding/Checkpointing/DumpCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
 [JSONCheckpointer](Scaffolding/Checkpointing/JSONCheckpointer.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [NumPyCheckpointer](Scaffolding/Checkpointing/NumPyCheckpointer.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [HDF5Checkpointer](Scaffolding/Checkpointing/HDF5Checkpointer.md)   
 </div>
    <div class="col" markdown="1">
 [DictCheckpointer](Scaffolding/Checkpointing/DictCheckpointer.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [NullCheckpointer](Scaffolding/Checkpointing/NullCheckpointer.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [PersistenceLocation](Scaffolding/Persistence/PersistenceLocation.md)   
 </div>
    <div class="col" markdown="1">
 [PersistenceManager](Scaffolding/Persistence/PersistenceManager.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [ResourceManager](Scaffolding/Persistence/ResourceManager.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [BaseObjectManager](Scaffolding/ObjectBackers/BaseObjectManager.md)   
 </div>
    <div class="col" markdown="1">
 [FileBackedObjectManager](Scaffolding/ObjectBackers/FileBackedObjectManager.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Config](Scaffolding/Configurations/Config.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ParameterManager](Scaffolding/Configurations/ParameterManager.md)   
 </div>
    <div class="col" markdown="1">
 [Job](Scaffolding/Jobs/Job.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [JobManager](Scaffolding/Jobs/JobManager.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [CLI](Scaffolding/CLIs/CLI.md)   
 </div>
    <div class="col" markdown="1">
 [CommandGroup](Scaffolding/CLIs/CommandGroup.md)   
 </div>
-   <div class="col" markdown="1">
-[Command](Scaffolding/CLIs/Command.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-   
+[Command](Scaffolding/CLIs/Command.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -293,11 +293,12 @@ print("saved energy span:", energies[order[-1]] - energies[order[0]])
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-6ec74f" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-6ec74f"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-87172b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-87172b"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-6ec74f" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-87172b" markdown="1">
  - [Schema](#Schema)
 - [TreeFlattening](#TreeFlattening)
+- [TreeArchiveJumps](#TreeArchiveJumps)
 - [Pseudopickle](#Pseudopickle)
 - [HDF5Serialization](#HDF5Serialization)
 - [JSONSerialization](#JSONSerialization)
@@ -322,9 +323,9 @@ print("saved energy span:", energies[order[-1]] - energies[order[0]])
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-7c6e0f" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-7c6e0f"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-dce58d" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-dce58d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-7c6e0f" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-dce58d" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -420,6 +421,73 @@ class ScaffoldingTests(TestCase):
         buf.seek(0)
         rev2 = read_flat_tree(buf)
         print(rev2)
+```
+
+#### <a name="TreeArchiveJumps">TreeArchiveJumps</a>
+```python
+    def test_TreeArchiveJumps(self):
+        data = {
+            'file': 'test.txt',
+            'filesystem': {'file': [['a'], ['b', 'c']]},
+            'coords': 123,
+            'initial': {
+                'coords': np.random.rand(5, 3)
+            },
+            'final': {
+                'coords': np.random.rand(1, 2)
+            },
+            'a': {'thing': {'b': 1, 'c': 2, "_type": "A", 'other': None}, 'other': None},
+            'c': {'thing': None, 'other': 9.1},
+            'g': {"c": np.full(5, None)}
+        }
+
+        archive = NumpyTreeArchive.from_tree(data)
+
+        buf = io.BytesIO()
+        archive.save(buf)
+        buf.seek(0)
+
+        new_archive = NumpyTreeArchive.load(buf)
+        print(new_archive)
+
+        print(new_archive['a'])
+
+        big_data = {
+            f'entry_{i}':{
+                'state_index':i,
+                'energy':np.random.rand(1, 2),
+                'coords':np.random.rand(1000, 3)
+            }
+            for i in range(100000)
+        }
+
+        archive = NumpyTreeArchive.from_tree(big_data)
+
+        buf = io.BytesIO()
+        archive.save(buf, save_jump_table=False)
+        buf.seek(0)
+        print(buf.getbuffer().nbytes)
+
+        buf = io.BytesIO()
+        archive.save(buf, save_jump_table=True)
+        buf.seek(0)
+        print(buf.getbuffer().nbytes)
+
+        new_archive = NumpyTreeArchive.load(buf)
+        print(new_archive)
+
+        NumpyTreeArchive.from_tree(big_data)
+        archive.save('/Users/Mark/Desktop/tree_save.npz')
+        new_archive = NumpyTreeArchive.load('/Users/Mark/Desktop/tree_save.npz')
+        print(new_archive['entry_100'])
+
+        import orjson
+        huh = orjson.dumps(big_data, option=orjson.OPT_SERIALIZE_NUMPY)
+        print(len(huh))
+        print(huh.decode()[:1000])
+
+        with open('/Users/Mark/Desktop/tree_save.json', 'w+') as jsdump:
+            jsdump.write(huh.decode())
 ```
 
 #### <a name="Pseudopickle">Pseudopickle</a>
