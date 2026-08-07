@@ -496,9 +496,9 @@ fig.show()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-9b8fbd" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-9b8fbd"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-684612" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-684612"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-9b8fbd" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-684612" markdown="1">
  - [stirs](#stirs)
 - [bin_gs](#bin_gs)
 - [bins](#bins)
@@ -551,9 +551,9 @@ fig.show()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-fb3a09" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-fb3a09"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-f54938" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-f54938"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-fb3a09" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-f54938" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
