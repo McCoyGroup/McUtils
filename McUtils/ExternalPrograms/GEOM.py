@@ -222,7 +222,7 @@ class GEOMLoader:
             return self._member_by_relpath[rel_path]
 
         if rel_path in self._offset_by_relpath:
-            offset = self._offset_by_relpath.pop(rel_path)
+            offset = self._offset_by_relpath[rel_path]
             member = self._read_member_at_offset(offset)
             if member is not None and self._tail_relpath(member.name) == rel_path:
                 self._member_by_relpath[rel_path] = member
