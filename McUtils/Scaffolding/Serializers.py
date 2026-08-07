@@ -2359,7 +2359,7 @@ def unflatten_tree(serial_tree,
     skipped_sentinel = object()
 
     visited_keys = serial_tree['visited_keys']
-    start_index, end_index = 0, len(visited_keys)
+    start_index, end_index = 0, (visited_keys.shape[0] if hasattr(visited_keys, 'shape') else len(visited_keys))
 
     if jump_table is not None and record is not None:
         entry = jump_table[record]
@@ -2367,8 +2367,16 @@ def unflatten_tree(serial_tree,
         end_index = entry['end']
         block_pointers = dict(entry['block_pointers'])
 
-    for i in range(start_index, end_index):
-        k = visited_keys[i]
+    # Slice the needed span once rather than indexing element-by-element.
+    # This is a no-op cost difference for a plain list/ndarray, but it's
+    # what makes this loop safe to run against a lazy, chunked backend
+    # (e.g. a zarr.Array): one bulk read of the span instead of one
+    # round trip per element.
+    visited_slice = np.asarray(visited_keys[start_index:end_index])
+
+    for offset, k in enumerate(visited_slice):
+        i = start_index + offset
+        k = int(k)
         if k >= 0:
             s = key_map[k]
             s = aliases.get(s, s)
@@ -2431,7 +2439,8 @@ def unflatten_tree(serial_tree,
                     tree[skipped_sentinel] = True
         else:
             if len(tree_stack) == 0:
-                block = visited_keys[max(i - 6, 0):i]
+                local_i = i - start_index
+                block = visited_slice[max(local_i - 6, 0):local_i]
                 prev = [
                     key_map[k] if k > 0 else "<reset>"
                     for k in block
@@ -2443,6 +2452,7 @@ def unflatten_tree(serial_tree,
                     del tree[k]
             prefix = prefix_stack.pop()
             skipped_stack.pop()
+
     if unprep_tree:
         tree = undictify_lists(tree)
     return tree
@@ -2755,6 +2765,171 @@ def read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False,
     return data, jump_table
 
 
+
+
+# --------------------------------------------------------------------------
+# Zarr persistence (lazy, chunked backend)
+# --------------------------------------------------------------------------
+#
+# Unlike np.savez, a zarr Group stores each array as its own independently
+# addressable, chunked dataset. That maps naturally onto what the jump
+# table already does conceptually: block_pointers identify a (start, end)
+# byte range within a concatenated per-key array. With NPZ, "loading" an
+# array means decompressing the *whole* thing into memory even if you only
+# want one record's slice out of it -- the laziness this module provides
+# is purely in the *unflattening logic*, not in disk I/O. With zarr, a
+# slice like `arr_i[array_pointer:array_pointer+block_size]` only reads
+# the chunk(s) covering that range, so laziness extends all the way to
+# storage. This matters most for exactly the workload the sparse pointer
+# encoding targets: huge datasets where you only ever want a handful of
+# records at a time, possibly from a remote store (S3, GCS, ...).
+#
+# Metadata (key_names, aliases, array_keys, shapes, and the jump-table
+# arrays) stays small regardless of dataset size, so it's read eagerly
+# into memory as plain numpy/dict objects, same as the NPZ path. Only the
+# genuinely large arrays -- visited_keys and each per-key arr_i -- are
+# kept as zarr.Array references and left lazy; unflatten_tree's slicing
+# (`array_data[a:b]`) works on those unchanged, since zarr.Array supports
+# the same slicing protocol as ndarray.
+
+def write_flat_tree_zarr(store, tree, flatten=None, allow_pickle=False,
+                         jump_table=True, max_depth=0,
+                         chunks='auto', compressors=None, overwrite=True):
+    """
+    Flatten a tree when needed and write it to a zarr group.
+    """
+    import zarr
+
+    root = zarr.open_group(store, mode='w' if overwrite else 'a')
+
+    if flatten is None:
+        flatten = (
+                'key_map' not in tree
+                or 'aliases' not in tree
+                or 'visited_keys' not in tree
+        )
+    if flatten:
+        tree = flatten_tree(tree, allow_pickle=allow_pickle)
+
+    key_names = list(tree['key_map'].values())
+    index_remapping = {k: i for i, k in enumerate(tree['key_map'].keys())}
+    visited_keys = np.array(
+        [index_remapping[i] if i >= 0 else i for i in tree['visited_keys']],
+        dtype=np.int64,
+    )
+
+    # Small metadata -> group attrs (plain JSON, no pickling concerns:
+    # aliases' int values round-trip through JSON natively, unlike the
+    # NPZ path's np.array(list(aliases.items())), which silently upcasts
+    # everything to strings if the tuples are mixed str/int).
+    root.attrs['key_names'] = key_names
+    root.attrs['aliases'] = dict(tree['aliases'])
+
+    shapes = []
+    array_keys = []
+    for k in tree['key_map'].keys():
+        if k in tree:
+            shape_data, array_data = tree[k]
+            shapes.append(len(shape_data))
+            shapes.extend(shape_data)
+            i = index_remapping[k]
+            arr = root.create_array(f'arr_{i}', shape=array_data.shape,
+                                    dtype=array_data.dtype, chunks=chunks,
+                                    compressors=compressors)
+            arr[:] = array_data
+            array_keys.append(i)
+    root.attrs['array_keys'] = array_keys
+    root.attrs['shapes'] = shapes
+
+    vk = root.create_array('visited_keys', shape=visited_keys.shape,
+                           dtype=visited_keys.dtype, chunks=chunks,
+                           compressors=compressors)
+    vk[:] = visited_keys
+
+    if jump_table:
+        jt = jump_table if isinstance(jump_table, dict) else build_jump_table(tree, max_depth=max_depth)
+        jt_arrays = _encode_jump_table(jt, index_remapping)
+        jt_group = root.create_group('jump_table')
+        for name, arr in jt_arrays.items():
+            # jump-table arrays are already small and pre-downcast; no
+            # need for chunking/compression overhead on them.
+            ds = jt_group.create_array(name, shape=arr.shape, dtype=arr.dtype)
+            ds[:] = arr
+
+    return root
+
+
+def read_flat_tree_zarr(store, unflatten=True, max_leaf_elements=None,
+                        prefix_filter=None, record=None, lazy=True):
+    """
+    Read a zarr-backed flat tree, rebuild its metadata, and either
+    unflatten it fully, jump to a single record/sub-record, or return
+    (data, jump_table) for repeated manual lookups.
+
+    :param lazy: if True (default), visited_keys and each per-key value
+                array stay as zarr.Array references and are only read
+                (chunk-by-chunk) as unflatten_tree actually needs them --
+                this is what makes single-record access on a huge on-disk
+                or remote archive cheap. If False, everything is
+                materialized into plain numpy arrays up front, matching
+                the NPZ path's behavior exactly (e.g. useful if you know
+                you'll immediately call .unpack() and want one bulk read
+                instead of many small ones).
+    :param record: if given, only unflatten this path (requires a jump
+                   table to have been written). Overrides `unflatten`.
+    """
+    import zarr
+
+    root = zarr.open_group(store, mode='r')
+
+    key_names = root.attrs['key_names']
+    aliases = {a: int(k) for a, k in root.attrs['aliases'].items()}
+    array_keys = root.attrs['array_keys']
+    shapes = np.array(root.attrs['shapes'], dtype=np.int64)
+
+    visited_keys = root['visited_keys']
+    if not lazy:
+        visited_keys = visited_keys[:]
+
+    data = {
+        'visited_keys': visited_keys,
+        'key_map': {i: k for i, k in enumerate(key_names)},
+        'aliases': aliases,
+    }
+
+    shape_pointer = 0
+    for k in array_keys:
+        ls = shapes[shape_pointer]
+        new_pointer = shape_pointer + 1 + ls
+        shape = shapes[shape_pointer + 1:new_pointer]
+        shape_pointer = new_pointer
+        arr = root[f'arr_{k}']
+        data[k] = (shape, arr[:] if not lazy else arr)
+
+    jump_table = None
+    if 'jump_table' in root:
+        jt_group = root['jump_table']
+        # Jump-table arrays are always small -- materialize regardless of `lazy`.
+        jt_zdata = {name: jt_group[name][:] for name in jt_group.array_keys()}
+        jump_table = _decode_jump_table(jt_zdata, data['key_map'], aliases)
+
+    if record is not None:
+        if jump_table is None:
+            raise ValueError("store has no jump table; can't look up a record")
+        return unflatten_tree(data,
+                              max_leaf_elements=max_leaf_elements,
+                              prefix_filter=prefix_filter,
+                              jump_table=jump_table,
+                              record=record)
+
+    if unflatten:
+        return unflatten_tree(data,
+                              max_leaf_elements=max_leaf_elements,
+                              prefix_filter=prefix_filter)
+
+    return data, jump_table
+
+
 # --------------------------------------------------------------------------
 # Convenience wrapper
 # --------------------------------------------------------------------------
@@ -2809,20 +2984,47 @@ class NumpyTreeArchive:
         return cls(flat, jump_table=jt, path_sep=path_sep)
 
     @classmethod
-    def load(cls, file, reader=None, allow_pickle=False, path_sep='/', **reader_options):
-        """Load an archive from an NPZ file (or file-like/path)."""
-        data, jt = read_flat_tree(file, unflatten=False, reader=reader,
-                                  allow_pickle=allow_pickle, **reader_options)
+    def load(cls, file, reader=None, allow_pickle=False, path_sep='/',
+             backend='npz', lazy=True, **reader_options):
+        """
+        Load an archive.
+
+        :param backend: 'npz' (default) or 'zarr'. 'zarr' additionally
+                        accepts `lazy` (default True) to control whether
+                        the big arrays (visited_keys, per-key values) stay
+                        as lazy zarr.Array references or get fully
+                        materialized up front.
+        """
+        if backend == 'npz':
+            data, jt = read_flat_tree(file, unflatten=False, reader=reader,
+                                      allow_pickle=allow_pickle, **reader_options)
+        elif backend == 'zarr':
+            data, jt = read_flat_tree_zarr(file, unflatten=False, lazy=lazy, **reader_options)
+        else:
+            raise ValueError(f"unknown backend {backend!r}")
         return cls(data, jump_table=jt, path_sep=path_sep)
 
     # -- persistence -----------------------------------------------------
 
-    def save(self, file, writer=None, max_depth=0, save_jump_table=True, **writer_options):
-        """Write this archive to an NPZ file (or file-like/path)."""
-        return write_flat_tree(file, self._serial_tree, flatten=False,
-                               jump_table=False if not save_jump_table else (self._jump_table or True),
-                               max_depth=max_depth, writer=writer,
-                               **writer_options)
+    def save(self, file, writer=None, max_depth=None, backend='npz', save_jump_table=True, **writer_options):
+        """
+        Write this archive.
+
+        :param backend: 'npz' (default) or 'zarr'. zarr-specific options
+                        (`chunks`, `compressors`, `overwrite`) go in
+                        **writer_options when backend='zarr'.
+        """
+        if backend == 'npz':
+            return write_flat_tree(file, self._serial_tree, flatten=False,
+                                   jump_table=False if not save_jump_table else (self._jump_table or True),
+                                   max_depth=max_depth, writer=writer,
+                                   **writer_options)
+        elif backend == 'zarr':
+            return write_flat_tree_zarr(file, self._serial_tree, flatten=False,
+                                        jump_table=False if not save_jump_table else (self._jump_table or True),
+                                        max_depth=max_depth, **writer_options)
+        else:
+            raise ValueError(f"unknown backend {backend!r}")
 
     # -- unpacking ---------------------------------------------------------
 

@@ -504,27 +504,33 @@ class GEOMLoader:
     def get_molecule_records(
             self,
             index: int,
-            max_confs_per_mol: Optional[int] = None
+            max_confs_per_mol: Optional[int] = None,
+            create_mols = True
     ) -> list[tuple[RDMolecule, dict]]:
         """Return every (record, meta) conformer pair for molecule `index`."""
         mol_dict, path_str = self._load_mol_dict_by_index(index)
-        return list(
-            self._expand_molecule(
-                mol_dict,
-                mol_dict.get("smiles", "<unknown>"),
-                path_str,
-                max_confs_per_mol
+        if create_mols:
+            return list(
+                self._expand_molecule(
+                    mol_dict,
+                    mol_dict.get("smiles", "<unknown>"),
+                    path_str,
+                    max_confs_per_mol
+                )
             )
-        )
+        else:
+            return [(None, mol_dict)]
 
     def get_record(
             self,
             index: int,
-            conformer_index: int = 0
+            conformer_index: int = 0,
+            create_mols: bool = True
     ) -> tuple[RDMolecule, dict]:
         """Return a single (record, meta) for molecule `index`, conformer `conformer_index`."""
         records = self.get_molecule_records(
-            index, max_confs_per_mol=conformer_index + 1
+            index, max_confs_per_mol=conformer_index + 1,
+            create_mols=create_mols
         )
         if conformer_index >= len(records):
             raise IndexError(
@@ -542,7 +548,8 @@ class GEOMLoader:
     def _iter_from_directory(
             self,
             max_mols: Optional[int],
-            max_confs_per_mol: Optional[int]
+            max_confs_per_mol: Optional[int],
+            create_mols: bool = True
     ) -> Iterator[tuple[RDMolecule, dict]]:
         n_mols = 0
         for rel_path in self._pickle_paths:
@@ -552,10 +559,14 @@ class GEOMLoader:
             with open(pickle_path, "rb") as f:
                 mol_dict = pickle.load(f)
 
-            yield from self._expand_molecule(
-                mol_dict, mol_dict.get("smiles", "<unknown>"), rel_path,
-                max_confs_per_mol,
-            )
+            if create_mols:
+                yield from self._expand_molecule(
+                    mol_dict, mol_dict.get("smiles", "<unknown>"), rel_path,
+                    max_confs_per_mol,
+                )
+            else:
+                yield (None, mol_dict)
+
             del mol_dict
 
             n_mols += 1
@@ -565,7 +576,8 @@ class GEOMLoader:
     def _iter_from_plain_tar(
             self,
             max_mols: Optional[int],
-            max_confs_per_mol: Optional[int]
+            max_confs_per_mol: Optional[int],
+            create_mols: bool = True
     ) -> Iterator[tuple[RDMolecule, dict]]:
         if len(self._offset_by_relpath) > 0:
             n_mols = 0
@@ -578,10 +590,14 @@ class GEOMLoader:
                 fileobj = self._tar_handle.extractfile(member)
                 mol_dict = pickle.loads(fileobj.read())
 
-                yield from self._expand_molecule(
-                    mol_dict, mol_dict.get("smiles", "<unknown>"), rel_path,
-                    max_confs_per_mol,
-                )
+                if create_mols:
+                    yield from self._expand_molecule(
+                        mol_dict, mol_dict.get("smiles", "<unknown>"), rel_path,
+                        max_confs_per_mol,
+                    )
+                else:
+                    yield (None, mol_dict)
+
                 del mol_dict
 
                 n_mols += 1
@@ -602,10 +618,13 @@ class GEOMLoader:
                     fileobj = self._tar_handle.extractfile(member)
                     mol_dict = pickle.loads(fileobj.read())
 
-                    yield from self._expand_molecule(
-                        mol_dict, mol_dict.get("smiles", "<unknown>"), rel_path,
-                        max_confs_per_mol,
-                    )
+                    if create_mols:
+                        yield from self._expand_molecule(
+                            mol_dict, mol_dict.get("smiles", "<unknown>"), rel_path,
+                            max_confs_per_mol,
+                        )
+                    else:
+                        yield (None, mol_dict)
                     del mol_dict
 
                     n_mols += 1
@@ -626,10 +645,13 @@ class GEOMLoader:
             fileobj = self._tar_handle.extractfile(member)
             mol_dict = pickle.loads(fileobj.read())
 
-            yield from self._expand_molecule(
-                mol_dict, mol_dict.get("smiles", "<unknown>"), member.name,
-                max_confs_per_mol,
-            )
+            if create_mols:
+                yield from self._expand_molecule(
+                    mol_dict, mol_dict.get("smiles", "<unknown>"), member.name,
+                    max_confs_per_mol,
+                )
+            else:
+                yield (None, mol_dict)
             del mol_dict
 
             n_mols += 1
@@ -639,7 +661,8 @@ class GEOMLoader:
     def _iter_from_gz_tar(
             self,
             max_mols: Optional[int],
-            max_confs_per_mol: Optional[int]
+            max_confs_per_mol: Optional[int],
+            create_mols: bool = True
     ) -> Iterator[tuple[RDMolecule, dict]]:
         subset_marker = f"/{self.subset}/"
         n_mols = 0
@@ -658,10 +681,13 @@ class GEOMLoader:
                     continue
                 mol_dict = pickle.loads(fileobj.read())
 
-                yield from self._expand_molecule(
-                    mol_dict, mol_dict.get("smiles", "<unknown>"), member.name,
-                    max_confs_per_mol,
-                )
+                if create_mols:
+                    yield from self._expand_molecule(
+                        mol_dict, mol_dict.get("smiles", "<unknown>"), member.name,
+                        max_confs_per_mol,
+                    )
+                else:
+                    yield (None, mol_dict)
                 del mol_dict
 
                 n_mols += 1
@@ -671,7 +697,8 @@ class GEOMLoader:
     def iter_geom_records(
             self,
             max_mols: Optional[int] = None,
-            max_confs_per_mol: Optional[int] = None
+            max_confs_per_mol: Optional[int] = None,
+            create_mols: bool = True
     ) -> Iterator[tuple[RDMolecule, dict]]:
         """
         Yield (record, meta) pairs, one per conformer, in whatever order the
@@ -691,11 +718,11 @@ class GEOMLoader:
         cheap to call repeatedly.
         """
         if self.is_tar and self.tar_compression == "gz":
-            yield from self._iter_from_gz_tar(max_mols, max_confs_per_mol)
+            yield from self._iter_from_gz_tar(max_mols, max_confs_per_mol, create_mols=create_mols)
         elif self.is_tar:  # plain/uncompressed
-            yield from self._iter_from_plain_tar(max_mols, max_confs_per_mol)
+            yield from self._iter_from_plain_tar(max_mols, max_confs_per_mol, create_mols=create_mols)
         else:
-            yield from self._iter_from_directory(max_mols, max_confs_per_mol)
+            yield from self._iter_from_directory(max_mols, max_confs_per_mol, create_mols=create_mols)
 
     # ------------------------------------------------------------------
     def close(self) -> None:
