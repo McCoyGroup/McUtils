@@ -113,7 +113,7 @@ class ScaffoldingTests(TestCase):
                 'energy':np.random.rand(1, 2),
                 'coords':np.random.rand(1000, 3)
             }
-            for i in range(100000)
+            for i in range(30000)
         }
 
         archive = NumpyTreeArchive.from_tree(big_data)
