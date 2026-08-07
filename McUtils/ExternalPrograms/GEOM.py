@@ -339,6 +339,7 @@ class GEOMLoader:
         dm = nput.distance_matrix(coords2)
         for ti, tj in bonds:
             dm[ti, tj] = dm[tj, ti] = 1000000
+        np.fill_diagonal(dm, 1000000)
         for (t1, t2), deficit in diffs.items():
             if deficit < 0:
                 if allow_bond_formation:
@@ -445,6 +446,7 @@ class GEOMLoader:
     # ------------------------------------------------------------------
     # Random access (directory mode + plain/uncompressed tar mode)
     # ------------------------------------------------------------------
+    USE_OFFSET_INDEX = True
     def _load_mol_dict_by_index(self, index: int | str) -> tuple[dict, str]:
         """Return (mol_dict, path_string) for molecule `index`."""
         if not self.supports_random_access():
@@ -459,10 +461,10 @@ class GEOMLoader:
                 rel_path = index
             else:
                 rel_path = None
-                if len(self._offset_by_relpath) > 0:
+                if self.USE_OFFSET_INDEX and len(self._offset_by_relpath) > 0:
                     if index >= len(self._offset_by_relpath):
                         raise IndexError(
-                            f"Index {index} out of range: summary lists "
+                            f"Index {index} out of range: jump table lists "
                             f"{len(self._offset_by_relpath)} molecule(s)."
                         )
                     rel_path = self._offset_keys[index]
