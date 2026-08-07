@@ -445,7 +445,7 @@ class GEOMLoader:
     # ------------------------------------------------------------------
     # Random access (directory mode + plain/uncompressed tar mode)
     # ------------------------------------------------------------------
-    def _load_mol_dict_by_index(self, index: int) -> tuple[dict, str]:
+    def _load_mol_dict_by_index(self, index: int | str) -> tuple[dict, str]:
         """Return (mol_dict, path_string) for molecule `index`."""
         if not self.supports_random_access():
             raise RuntimeError(
@@ -455,27 +455,30 @@ class GEOMLoader:
             )
 
         if self.is_tar:  # plain/uncompressed tar
-            rel_path = None
-            if len(self._offset_by_relpath) > 0:
-                if index >= len(self._offset_by_relpath):
-                    raise IndexError(
-                        f"Index {index} out of range: summary lists "
-                        f"{len(self._offset_by_relpath)} molecule(s)."
-                    )
-                rel_path = self._offset_keys[index]
-
-            if rel_path is None:
-                self._try_load_summary_from_tar()
-                if self._pickle_paths is not None:
-                    # Summary was found in the archive: index means exactly what
-                    # it means in directory mode — position in the summary's
-                    # pickle_path list. Look the file up by its known name.
-                    if index >= len(self._pickle_paths):
+            if isinstance(index, str):
+                rel_path = index
+            else:
+                rel_path = None
+                if len(self._offset_by_relpath) > 0:
+                    if index >= len(self._offset_by_relpath):
                         raise IndexError(
                             f"Index {index} out of range: summary lists "
-                            f"{len(self._pickle_paths)} molecule(s)."
+                            f"{len(self._offset_by_relpath)} molecule(s)."
                         )
-                    rel_path = self._pickle_paths[index]
+                    rel_path = self._offset_keys[index]
+
+                if rel_path is None:
+                    self._try_load_summary_from_tar()
+                    if self._pickle_paths is not None:
+                        # Summary was found in the archive: index means exactly what
+                        # it means in directory mode — position in the summary's
+                        # pickle_path list. Look the file up by its known name.
+                        if index >= len(self._pickle_paths):
+                            raise IndexError(
+                                f"Index {index} out of range: summary lists "
+                                f"{len(self._pickle_paths)} molecule(s)."
+                            )
+                        rel_path = self._pickle_paths[index]
 
             if rel_path is not None:
                 member = self._find_member_by_relpath(rel_path)
@@ -496,14 +499,14 @@ class GEOMLoader:
             mol_dict = pickle.loads(fileobj.read())
             return mol_dict, member.name
         else:  # extracted directory
-            rel_path = self._pickle_paths[index]
+            rel_path = self._pickle_paths[index] if not isinstance(index, str) else index
             with open(self.root / rel_path, "rb") as f:
                 mol_dict = pickle.load(f)
             return mol_dict, rel_path
 
     def get_molecule_records(
             self,
-            index: int,
+            index: int | str,
             max_confs_per_mol: Optional[int] = None,
             create_mols = True
     ) -> list[tuple[RDMolecule, dict]]:
