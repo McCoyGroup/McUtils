@@ -773,8 +773,40 @@ class MixtureDistribution:
         Mixture CDF at `x`: sum of weighted per-component CDFs. Always
         available in closed form (every kernel supplies `.cdf` via
         scipy), even for kernels/mixtures with no closed-form `.ppf`.
+
+        Note: for a periodic mixture this is itself periodic --
+        cdf(x) == cdf(x + 2*pi) exactly, since they're the same physical
+        angle. That's correct for density/mass questions (and matches
+        pdf's periodicity), but it is *not* usable as a monotonic
+        quantile map across a full period -- see `unwrapped_cdf` for
+        that.
         """
         return self.component_cdfs(x).sum(axis=-1)
+
+    def unwrapped_cdf(self, x, grid_size=2000, eps=1e-9, rebuild=False):
+        """
+        A monotonically increasing "unwrapped" CDF across one full
+        period (0 -> 1 as x sweeps from the period's start to its end),
+        for periodic mixtures. Non-periodic mixtures just delegate to
+        the ordinary `.cdf()`, which is already monotonic.
+
+        Built from the same (q, x) PPF grid used by `.ppf()` (lazily
+        built on first call, exactly like `.ppf()`), inverted the other
+        way via interpolation -- i.e. this and `.ppf()` are exact
+        inverses of each other by construction, which `.cdf()` is not
+        for a periodic mixture.
+
+        This exists for callers that need a proper quantile map spanning
+        a full period (e.g. truncated-quantile encoding schemes) rather
+        than the periodic `.cdf()`, which wraps back to its starting
+        value before reaching 1.
+        """
+        if not self.periodic:
+            return self.cdf(x)
+        if self._ppf_grid is None or rebuild:
+            self._build_ppf_grid(grid_size=grid_size, eps=eps)
+        x = np.asarray(x, dtype=np.float64)
+        return np.interp(x, self._ppf_values, self._ppf_grid)
 
     def _support_bounds(self, eps):
         """
@@ -823,18 +855,31 @@ class MixtureDistribution:
         if self.periodic:
             lo, hi = self._support_bounds(eps)
             x_fine = np.linspace(lo, hi, per_component_grid_size * max(self.k, 1))
+            # Periodic kernels' own .cdf() is correct for single-point
+            # queries (deliberately periodic: cdf(x) == cdf(x + 2*pi)),
+            # but that means it's *discontinuous* when swept continuously
+            # across a full period -- exactly what building this grid
+            # needs. Building the cumulative distribution by numerically
+            # integrating the (always-correct, genuinely periodic) pdf
+            # instead sidesteps that, and works for any kernel without
+            # needing a kernel-specific "unwrapped cdf" implementation.
+            pdf_fine = self.pdf(x_fine)
+            segment_areas = 0.5 * (pdf_fine[:-1] + pdf_fine[1:]) * np.diff(x_fine)
+            cdf_fine = np.concatenate(([0.0], np.cumsum(segment_areas)))
+            if cdf_fine[-1] > 0:
+                cdf_fine = cdf_fine / cdf_fine[-1]
         else:
             qs = np.linspace(eps, 1 - eps, per_component_grid_size)
             x_points = []
-            for kernel in self.kernels:
+            for kernel, p in zip(self.kernels, self.params):
                 try:
-                    x_points.append(np.atleast_1d(kernel.ppf(qs)))
+                    x_points.append(np.atleast_1d(kernel.ppf(qs, p)))
                 except NotImplementedError:
-                    lo, hi = _bisect_support_bounds(kernel, eps)
+                    lo, hi = _bisect_support_bounds(kernel, p, eps)
                     x_points.append(np.linspace(lo, hi, per_component_grid_size))
             x_fine = np.unique(np.concatenate(x_points))
+            cdf_fine = self.cdf(x_fine)
 
-        cdf_fine = self.cdf(x_fine)
         # guard against tiny numerical non-monotonicity before inverting
         cdf_fine = np.maximum.accumulate(cdf_fine)
         cdf_fine = np.clip(cdf_fine, 0.0, 1.0)

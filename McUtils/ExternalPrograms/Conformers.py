@@ -1,10 +1,11 @@
 
 import numpy as np
 
+from ..Zachary import MixtureDistribution
+
 __all__ = [
     "ConformerEncoder",
 ]
-
 
 class DistributionDataEncoder:
     def __init__(self, data_range, byte_size=None, distribution=None, assume_in_range=False):
@@ -16,24 +17,74 @@ class DistributionDataEncoder:
         self.byte_size = byte_size
         self.base_type, self.float_type = self._encoding_types(byte_size)
         self.encoding_limits = self._encoding_limits(byte_size, pack_angles=True)
+        self._initialized = False
+
+    def initialize(self):
+        if not self._initialized:
+            self._initialized = True
+            self._initialize_distribution_ppf()
+
+    def _initialize_distribution_ppf(self):
+        # Periodic distributions need their unwrapped-CDF/PPF grid built
+        # at higher resolution than the library default: the "cut point"
+        # chosen for unwrapping a circle onto a line can sit right next
+        # to a real density mode (the same physical peak then contributes
+        # steep CDF rise on *both* sides of the cut), and a coarse grid
+        # resolves that badly right at the seam. Pre-warming here with a
+        # finer grid once, at construction, avoids paying for that
+        # resolution repeatedly on every encode/decode call.
+        if getattr(self.distribution, "periodic", False):
+            self.distribution.ppf(np.array([0.5]), grid_size=20_000)
 
     @classmethod
     def _truncated_cdf_bounds(cls, distribution, data_range):
+        """
+        (cdf_lower, cdf_upper, cdf_span) for rescaling `distribution`'s
+        CDF so that the portion of its mass inside `data_range` maps onto
+        the *full* [0, 1] quantile range -- i.e. the truncated/conditional
+        CDF, not the raw one. `distribution=None` means "uniform on
+        data_range," matching the old bond_encoder's plain linear scaling
+        exactly (cdf_lower=lower, cdf_upper=upper, so the formula below
+        reduces to (x - lower) / (upper - lower)).
+
+        Periodic distributions (e.g. angle/dihedral mixtures) are
+        expected to have `data_range` span exactly one full period, in
+        which case *all* of the distribution's mass is inside range by
+        definition -- no truncation is needed, so bounds are fixed at
+        (0, 1, 1) rather than evaluated via `.cdf()`, which is itself
+        periodic and would give cdf_lower == cdf_upper (a divide-by-zero)
+        for a range spanning a full period.
+        """
         lower, upper = data_range
         if distribution is None:
             return lower, upper, (upper - lower)
+        if getattr(distribution, "periodic", False):
+            return 0.0, 1.0, 1.0
         cdf_lower = float(distribution.cdf(np.asarray([lower]))[0])
         cdf_upper = float(distribution.cdf(np.asarray([upper]))[0])
         return cdf_lower, cdf_upper, (cdf_upper - cdf_lower)
 
     @classmethod
     def _truncated_quantiles(cls, values, distribution, cdf_bounds):
+        """Map raw values -> quantiles in [0, 1] via distribution's CDF,
+        truncated to the range implied by `cdf_bounds`. Periodic
+        distributions use `unwrapped_cdf` instead of `cdf` -- see
+        `_truncated_cdf_bounds` for why the ordinary `cdf` doesn't work
+        here for a full-period range."""
+        if distribution is not None and getattr(distribution, "periodic", False):
+            return distribution.unwrapped_cdf(values)
         cdf_lower, _, cdf_span = cdf_bounds
         raw = values if distribution is None else distribution.cdf(values)
         return (raw - cdf_lower) / cdf_span
 
     @classmethod
     def _untruncate_quantiles(cls, quantiles, distribution, cdf_bounds):
+        """Inverse of `_truncated_quantiles`: quantiles in [0, 1] -> raw
+        values, via distribution's PPF, un-truncated from the range
+        implied by `cdf_bounds`. For periodic distributions cdf_span=1
+        and cdf_lower=0 (see `_truncated_cdf_bounds`), so this reduces to
+        a plain `distribution.ppf(quantiles)` call, the exact inverse of
+        `unwrapped_cdf`."""
         cdf_lower, _, cdf_span = cdf_bounds
         rescaled = cdf_lower + quantiles * cdf_span
         return rescaled if distribution is None else distribution.ppf(rescaled)
@@ -71,6 +122,8 @@ class DistributionDataEncoder:
         return step_max, pack_max, full_max
 
     def encode(self, data, packing_offset=-1):
+        self.initialize()
+
         base_type, float_type = self.base_type, self.float_type
         step_max, pack_max, full_max = self.encoding_limits
 
@@ -487,3 +540,79 @@ class ConformerEncoder:
         dihedrals = np.where(dihedrals > np.pi, dihedrals - 2 * np.pi, dihedrals)
 
         return self.stream_packer.interleave_coordinate_streams(bonds, angles, dihedrals)
+
+    @classmethod
+    def from_distribution_files(
+        cls,
+        byte_size,
+        angle_ppf_path=None,
+        dihedral_ppf_path=None,
+        primary_bond_range=None,
+        angle_range=None,
+        dihedral_range=None,
+        bond_encoder=None,
+        stream_packer=None,
+    ):
+        """
+        Build a ConformerEncoder whose angle and/or dihedral encoders use
+        distributions loaded from saved PPF-grid files -- i.e. `.npz`
+        files written by `MixtureDistribution.save_ppf_grid` (after
+        fitting a `FittedMixtureDistribution` via `fit_mixture`) -- rather
+        than the plain uniform-on-range default.
+
+        Parameters
+        ----------
+        angle_ppf_path, dihedral_ppf_path : str or os.PathLike, optional
+            Paths to `.npz` PPF-grid files. Loaded via
+            `MixtureDistribution.load_ppf_grid`, which reconstructs the
+            distribution's kernels/params/weights plus its precomputed
+            PPF lookup -- no re-fitting needed at load time. If either
+            is omitted, that encoder falls back to the usual
+            uniform-distribution default (`distribution=None`), exactly
+            like the plain constructor.
+        bond_encoder : object, optional
+            Bonds aren't periodic and don't currently have a saved-file
+            path here -- pass a pre-built encoder directly if you want a
+            non-uniform bond distribution; otherwise the usual uniform
+            default is used.
+        (all other parameters as in `__init__`)
+
+        Returns
+        -------
+        ConformerEncoder
+        """
+        angle_distribution = (
+            MixtureDistribution.load_ppf_grid(angle_ppf_path)
+            if angle_ppf_path is not None else None
+        )
+        dihedral_distribution = (
+            MixtureDistribution.load_ppf_grid(dihedral_ppf_path)
+            if dihedral_ppf_path is not None else None
+        )
+
+        resolved_angle_range = angle_range or cls.compressed_angle_range
+        resolved_dihedral_range = dihedral_range or cls.compressed_dihedral_range
+
+        angle_encoder = DistributionDataEncoder(
+            data_range=resolved_angle_range,
+            byte_size=byte_size,
+            distribution=angle_distribution,
+            assume_in_range=True,
+        )
+        dihedral_encoder = DistributionDataEncoder(
+            data_range=resolved_dihedral_range,
+            byte_size=byte_size,
+            distribution=dihedral_distribution,
+            assume_in_range=True,
+        )
+
+        return cls(
+            byte_size=byte_size,
+            bond_encoder=bond_encoder,
+            angle_encoder=angle_encoder,
+            dihedral_encoder=dihedral_encoder,
+            stream_packer=stream_packer,
+            primary_bond_range=primary_bond_range,
+            angle_range=angle_range,
+            dihedral_range=dihedral_range,
+        )
