@@ -128,6 +128,16 @@ get_internals(self, mol):
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM/GEOMInternalsWrapper.py#L1036)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM/GEOMInternalsWrapper.py#L1036?message=Update%20Docs)]
 </div>
+
+
+<a id="McUtils.ExternalPrograms.GEOM.GEOMInternalsWrapper.block_iter" class="docs-object-method">&nbsp;</a> 
+```python
+block_iter(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/GEOM/GEOMInternalsWrapper.py#L1039)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/GEOM/GEOMInternalsWrapper.py#L1039?message=Update%20Docs)]
+</div>
  </div>
 </div>
 
