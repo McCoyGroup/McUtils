@@ -1034,4 +1034,11 @@ class GEOMInternalsWrapper:
                     base_data[k] = np.concatenate([base_data[k], v], axis=0)
             return base
     def get_internals(self, mol):
+        from Psience.Molecools import Molecule # get this out of here
         return Molecule.from_rdmol(mol).get_bond_graph_internals(include_fragments=False)
+    def block_iter(self):
+        tags = self.zdata['tags']
+        types = self.zdata['types']
+        vals = self.zdata['vals']
+        for t,y,v in zip(tags.blocks, types.blocks, vals.blocks):
+            yield {'tags':t, 'types':y, 'vals':v}
