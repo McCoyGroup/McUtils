@@ -826,7 +826,7 @@ class MixtureDistribution:
                 lo = float(kernel.ppf(eps))
                 hi = float(kernel.ppf(1 - eps))
             except NotImplementedError:
-                lo, hi = _bisect_support_bounds(kernel, eps)
+                lo, hi = self._bisect_support_bounds(kernel, eps)
             los.append(lo)
             his.append(hi)
         return min(los), max(his)
@@ -871,11 +871,11 @@ class MixtureDistribution:
         else:
             qs = np.linspace(eps, 1 - eps, per_component_grid_size)
             x_points = []
-            for kernel, p in zip(self.kernels, self.params):
+            for kernel in self.kernels:
                 try:
-                    x_points.append(np.atleast_1d(kernel.ppf(qs, p)))
+                    x_points.append(np.atleast_1d(kernel.ppf(qs)))
                 except NotImplementedError:
-                    lo, hi = _bisect_support_bounds(kernel, p, eps)
+                    lo, hi = self._bisect_support_bounds(kernel, eps)
                     x_points.append(np.linspace(lo, hi, per_component_grid_size))
             x_fine = np.unique(np.concatenate(x_points))
             cdf_fine = self.cdf(x_fine)
@@ -963,32 +963,32 @@ class MixtureDistribution:
             )
         return "\n".join([header, *rows])
 
+    @staticmethod
+    def _bisect_support_bounds(kernel, eps, max_expansions=200):
+        """
+        Generic fallback for kernels with no closed-form `.ppf`: find x-bounds
+        such that kernel.cdf(lo) <= eps and kernel.cdf(hi) >= 1-eps, by
+        expanding a bracket outward from the kernel's own location parameter.
+        Only used when a custom kernel doesn't override `Kernel.ppf`.
+        """
+        loc, scale = kernel.params #TODO: make this less specific
+        scale = max(abs(scale), 1e-6)
 
-def _bisect_support_bounds(kernel, eps, max_expansions=200):
-    """
-    Generic fallback for kernels with no closed-form `.ppf`: find x-bounds
-    such that kernel.cdf(lo) <= eps and kernel.cdf(hi) >= 1-eps, by
-    expanding a bracket outward from the kernel's own location parameter.
-    Only used when a custom kernel doesn't override `Kernel.ppf`.
-    """
-    loc, scale = kernel.params #TODO: make this less specific
-    scale = max(abs(scale), 1e-6)
+        lo, step = loc, scale
+        for _ in range(max_expansions):
+            if kernel.cdf(np.array([lo]))[0] <= eps:
+                break
+            lo -= step
+            step *= 2
 
-    lo, step = loc, scale
-    for _ in range(max_expansions):
-        if kernel.cdf(np.array([lo]))[0] <= eps:
-            break
-        lo -= step
-        step *= 2
+        hi, step = loc, scale
+        for _ in range(max_expansions):
+            if kernel.cdf(np.array([hi]))[0] >= 1 - eps:
+                break
+            hi += step
+            step *= 2
 
-    hi, step = loc, scale
-    for _ in range(max_expansions):
-        if kernel.cdf(np.array([hi]))[0] >= 1 - eps:
-            break
-        hi += step
-        step *= 2
-
-    return lo, hi
+        return lo, hi
 
 
 @dataclass(kw_only=True)
