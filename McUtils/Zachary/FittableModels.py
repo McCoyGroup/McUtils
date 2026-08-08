@@ -1113,7 +1113,6 @@ class FittedMixtureDistribution(MixtureDistribution):
         self._fit_kwargs["data"] = data
         return self
 
-
 # ---------------------------------------------------------------------------
 # Public API
 # ---------------------------------------------------------------------------
@@ -1164,7 +1163,7 @@ def fit_distribution_mixture_model(
     -------
     FittedMixtureDistribution
     """
-    kernels = [k.copy() for k in kernels]
+    kernels = [k.copy() if hasattr(k, "cdf") else DistributionKernel.resolve(**k) for k in kernels]
     k = len(kernels)
     periodic_flags = {kernel.periodic for kernel in kernels}
     if len(periodic_flags) > 1:
