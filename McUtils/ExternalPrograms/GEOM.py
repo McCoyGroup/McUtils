@@ -12,6 +12,7 @@ import tarfile
 import zipfile
 from urllib.parse import urlencode
 import numpy as np
+import os
 
 from .. import Devutils as dev
 from .. import Iterators as itut
@@ -20,7 +21,8 @@ from .RDKit import RDMolecule
 
 __all__ = [
     "GEOMLoader",
-    "GEOMDownloader"
+    "GEOMDownloader",
+    "GEOMInternalsWrapper"
 ]
 
 _GZIP_MAGIC = b"\x1f\x8b"
@@ -937,3 +939,99 @@ class GEOMDownloader:
         print(f"\nDone. Data extracted to: {extracted_dir}")
         print("Expected contents: summary_drugs.json, summary_qm9.json, drugs/, qm9/")
         return extracted_dir
+
+class GEOMInternalsWrapper:
+    def __init__(self, loader, zdata, managed_store=None):
+        self.loader = loader
+        self.zdata = zdata
+        self._system_offsets = None
+        self.managed_store = managed_store
+    @classmethod
+    def from_files(cls,
+                   root=None,
+                   geom_file='geom_dataset.tar.gz',
+                   jump_index_path='geom_jump_indices.npz',
+                   coords_zip='geom_coordinates.zip'):
+        import zarr
+
+        if root is not None:
+            geom_file = os.path.join(root, geom_file)
+            jump_index_path = os.path.join(root, jump_index_path)
+            coords_zip = os.path.join(root, coords_zip)
+        loader = GEOMLoader(geom_file, 'drugs', jump_index_path=jump_index_path)
+        store = zarr.ZipStore(coords_zip, mode='r')
+        zdata = zarr.open_group(store=store, path='combined.zarr', mode='r')
+        return cls(loader, zdata, managed_store=store)
+    def close(self):
+        if self.managed_store is not None:
+            self.managed_store.close()
+    def __enter__(self):
+        return self
+    def __exit__(self, *exit_args):
+        self.close()
+    def load_chunk(self, i):
+        if nput.is_int(i):
+            zdata = self.zdata
+            offsets = zdata['conformer_offsets']
+            start, end = offsets[i], offsets[i+1]
+            return {
+                'vals':zdata['vals'][start:end],
+                'types':zdata['types'][start:end],
+                'tags':zdata['tags'][start:end]
+            }
+        else:
+            base = self.load_chunk(i[0])
+            for j in i[1:]:
+                for k,v in self.load_chunk(j).items():
+                    base[k] = np.concatenate([base[k], v], axis=0)
+            return base
+    def load_conformer(self, i):
+        return self.loader.get_record(
+            self.zdata['system_identifiers'][i],
+            self.zdata['conformer_identifiers'][i]
+        )
+    def get_system_offsets(self):
+        if self._system_offsets is None:
+            self._system_offsets = np.concatenate([[0], np.where(np.diff(self.zdata['system_identifiers']) != 0)[0]])
+        return self._system_offsets
+    def system_offset(self, i, return_nconfs=True):
+        offs = self.get_system_offsets()
+        if return_nconfs:
+            nconfs = self.zdata['conformer_identifiers'][offs[i+1] - 1] + 1
+            return offs[i], nconfs
+        else:
+            return offs[i]
+    def load_system_chunks(self, i, load_confs=False, load_representative=True):
+        if nput.is_int(i):
+            offset, nrec = self.system_offset(i, return_nconfs=True)
+            data = self.load_chunk(list(range(offset, offset+nrec)))
+            if load_confs:
+                mols = [self.load_conformer(i) for i in range(offset, offset+nrec)]
+                return mols, data
+            elif load_representative:
+                return self.load_conformer(offset), data
+            else:
+                return data
+        else:
+            base = self.load_system_chunks(i[0])
+            for j in i[1:]:
+                subchunk_data = self.load_system_chunks(j)
+                if load_confs:
+                    base_systems, base_data = base
+                    systems, subchunk_data = subchunk_data
+                    base_systems = base_systems + systems
+                    base = (base_systems, base_data)
+                elif load_representative:
+                    system, subchunk_data = subchunk_data
+                    base_systems, base_data = base
+                    if not isinstance(base_systems, list):
+                        base_systems = [base_systems]
+                    base_systems = base_systems + [system]
+                    base = (base_systems, base_data)
+                else:
+                    base_data = base
+                for k,v in subchunk_data.items():
+                    base_data[k] = np.concatenate([base_data[k], v], axis=0)
+            return base
+    def get_internals(self, mol):
+        return Molecule.from_rdmol(mol).get_bond_graph_internals(include_fragments=False)
