@@ -944,14 +944,23 @@ class GEOMInternalsWrapper:
     def __init__(self, loader, zdata, managed_store=None):
         self.loader = loader
         self.zdata = zdata
-        self._system_offsets = None
         self.managed_store = managed_store
+
+        # cached, fully in-memory copies of small index/metadata arrays.
+        # these are read constantly (once per chunk / per system lookup),
+        # so paying for one zarr read up front avoids hundreds of tiny
+        # random-access reads against the (zipped) store later.
+        self._conformer_offsets = None
+        self._system_identifiers = None
+        self._conformer_identifiers = None
+        self._system_offsets = None
+
     @classmethod
     def from_files(cls,
-                   root=None,
-                   geom_file='geom_dataset.tar.gz',
-                   jump_index_path='geom_jump_indices.npz',
-                   coords_zip='geom_coordinates.zip'):
+                    root=None,
+                    geom_file='geom_dataset.tar.gz',
+                    jump_index_path='geom_jump_indices.npz',
+                    coords_zip='geom_coordinates.zip'):
         import zarr
 
         if root is not None:
@@ -962,83 +971,184 @@ class GEOMInternalsWrapper:
         store = zarr.ZipStore(coords_zip, mode='r')
         zdata = zarr.open_group(store=store, path='combined.zarr', mode='r')
         return cls(loader, zdata, managed_store=store)
+
     def close(self):
         if self.managed_store is not None:
             self.managed_store.close()
+
     def __enter__(self):
         return self
+
     def __exit__(self, *exit_args):
         self.close()
-    def load_chunk(self, i):
-        if nput.is_int(i):
-            zdata = self.zdata
-            offsets = zdata['conformer_offsets']
-            start, end = offsets[i], offsets[i+1]
-            return {
-                'vals':zdata['vals'][start:end],
-                'types':zdata['types'][start:end],
-                'tags':zdata['tags'][start:end]
-            }
-        else:
-            base = self.load_chunk(i[0])
-            for j in i[1:]:
-                for k,v in self.load_chunk(j).items():
-                    base[k] = np.concatenate([base[k], v], axis=0)
-            return base
-    def load_conformer(self, i):
-        return self.loader.get_record(
-            self.zdata['system_identifiers'][i],
-            self.zdata['conformer_identifiers'][i]
-        )
+
+    # ---- cached metadata ----------------------------------------------
+
+    @property
+    def conformer_offsets(self):
+        if self._conformer_offsets is None:
+            self._conformer_offsets = self.zdata['conformer_offsets'][:]
+        return self._conformer_offsets
+
+    @property
+    def system_identifiers(self):
+        if self._system_identifiers is None:
+            self._system_identifiers = self.zdata['system_identifiers'][:]
+        return self._system_identifiers
+
+    @property
+    def conformer_identifiers(self):
+        if self._conformer_identifiers is None:
+            self._conformer_identifiers = self.zdata['conformer_identifiers'][:]
+        return self._conformer_identifiers
+
     def get_system_offsets(self):
         if self._system_offsets is None:
-            self._system_offsets = np.concatenate([[0], np.where(np.diff(self.zdata['system_identifiers']) != 0)[0]])
+            sysids = self.system_identifiers
+            self._system_offsets = np.concatenate([[0], np.where(np.diff(sysids) != 0)[0] + 1])
         return self._system_offsets
+
     def system_offset(self, i, return_nconfs=True):
         offs = self.get_system_offsets()
         if return_nconfs:
-            nconfs = self.zdata['conformer_identifiers'][offs[i+1] - 1] + 1
+            confids = self.conformer_identifiers
+            nconfs = confids[offs[i + 1] - 1] + 1
             return offs[i], nconfs
         else:
             return offs[i]
+
+    # ---- bulk conformer reads -------------------------------------------
+
+    @staticmethod
+    def _is_int(i):
+        return nput.is_int(i)
+
+    @staticmethod
+    def _contiguous_runs(idx):
+        """Group a (possibly non-contiguous) list of indices into
+        maximal contiguous runs, e.g. [0,1,2,5,6,9] -> [(0,2),(5,6),(9,9)]."""
+        idx = list(idx)
+        if not idx:
+            return []
+        runs = []
+        run_start = prev = idx[0]
+        for x in idx[1:]:
+            if x != prev + 1:
+                runs.append((run_start, prev))
+                run_start = x
+            prev = x
+        runs.append((run_start, prev))
+        return runs
+
+    def _read_conformer_range(self, start, end):
+        """Single bulk read of vals/types/tags over a contiguous
+        conformer index range [start, end)."""
+        offsets = self.conformer_offsets
+        lo, hi = offsets[start], offsets[end]
+        zdata = self.zdata
+        return {
+            'vals': zdata['vals'][lo:hi],
+            'types': zdata['types'][lo:hi],
+            'tags': zdata['tags'][lo:hi],
+        }
+
+    def load_chunk(self, i):
+        """Load conformer data for a single index, a contiguous range,
+        or an arbitrary iterable of indices. Contiguous spans are always
+        collapsed into one zarr read instead of one-per-index."""
+        if self._is_int(i):
+            return self._read_conformer_range(i, i + 1)
+
+        # range objects and sorted contiguous lists both resolve to one read
+        if isinstance(i, range) and (i.step == 1 or i.step is None):
+            if len(i) == 0:
+                return self._read_conformer_range(0, 0)
+            return self._read_conformer_range(i.start, i.stop)
+
+        runs = self._contiguous_runs(i)
+        if not runs:
+            return self._read_conformer_range(0, 0)
+        if len(runs) == 1:
+            start, end = runs[0]
+            return self._read_conformer_range(start, end + 1)
+
+        # non-contiguous: still only one read per contiguous run,
+        # not one per index
+        parts = [self._read_conformer_range(a, b + 1) for a, b in runs]
+        keys = parts[0].keys()
+        return {k: np.concatenate([p[k] for p in parts], axis=0) for k in keys}
+
+    def load_conformer(self, i):
+        return self.loader.get_record(
+            self.system_identifiers[i],
+            self.conformer_identifiers[i]
+        )
+
+    # ---- system-level access -------------------------------------------
+
     def load_system_chunks(self, i, load_confs=False, load_representative=True):
-        if nput.is_int(i):
+        if self._is_int(i):
             offset, nrec = self.system_offset(i, return_nconfs=True)
-            data = self.load_chunk(list(range(offset, offset+nrec)))
+            data = self.load_chunk(range(offset, offset + nrec))
             if load_confs:
-                mols = [self.load_conformer(i) for i in range(offset, offset+nrec)]
+                mols = [self.load_conformer(k) for k in range(offset, offset + nrec)]
                 return mols, data
             elif load_representative:
                 return self.load_conformer(offset), data
             else:
                 return data
+
+        idx = list(i)
+        if not idx:
+            return ([], {}) if load_confs or load_representative else {}
+
+        runs = self._contiguous_runs(idx)
+
+        # fast path: one contiguous span of systems -> exactly one
+        # bulk conformer read for the whole span, regardless of how
+        # many systems it covers
+        if len(runs) == 1:
+            start_sys, end_sys = runs[0]
+            conf_start = self.system_offset(start_sys, return_nconfs=False)
+            conf_end_start, end_nconfs = self.system_offset(end_sys, return_nconfs=True)
+            conf_end = conf_end_start + end_nconfs
+            data = self.load_chunk(range(conf_start, conf_end))
+
+            if load_confs:
+                mols = [self.load_conformer(k) for k in range(conf_start, conf_end)]
+                return mols, data
+            elif load_representative:
+                reps = [self.load_conformer(self.system_offset(s, return_nconfs=False))
+                        for s in range(start_sys, end_sys + 1)]
+                return reps, data
+            else:
+                return data
+
+        # fallback: multiple disjoint spans of systems -> one bulk
+        # read per span (still far fewer reads than per-system/per-conformer)
+        results = [
+            self.load_system_chunks(range(a, b + 1), load_confs=load_confs,
+                                     load_representative=load_representative)
+            for a, b in runs
+        ]
+        if load_confs or load_representative:
+            systems, datas = zip(*results)
+            merged_systems = [s for group in systems for s in group]
         else:
-            base = self.load_system_chunks(i[0])
-            for j in i[1:]:
-                subchunk_data = self.load_system_chunks(j)
-                if load_confs:
-                    base_systems, base_data = base
-                    systems, subchunk_data = subchunk_data
-                    base_systems = base_systems + systems
-                    base = (base_systems, base_data)
-                elif load_representative:
-                    system, subchunk_data = subchunk_data
-                    base_systems, base_data = base
-                    if not isinstance(base_systems, list):
-                        base_systems = [base_systems]
-                    base_systems = base_systems + [system]
-                    base = (base_systems, base_data)
-                else:
-                    base_data = base
-                for k,v in subchunk_data.items():
-                    base_data[k] = np.concatenate([base_data[k], v], axis=0)
-            return base
+            datas = results
+            merged_systems = None
+
+        keys = datas[0].keys()
+        merged_data = {k: np.concatenate([d[k] for d in datas], axis=0) for k in keys}
+        return (merged_systems, merged_data) if merged_systems is not None else merged_data
+
     def get_internals(self, mol):
-        from Psience.Molecools import Molecule # get this out of here
+        from Psience.Molecools import Molecule  # get this out of here
         return Molecule.from_rdmol(mol).get_bond_graph_internals(include_fragments=False)
+
     def block_iter(self):
         tags = self.zdata['tags']
         types = self.zdata['types']
         vals = self.zdata['vals']
-        for t,y,v in zip(tags.blocks, types.blocks, vals.blocks):
-            yield {'tags':t, 'types':y, 'vals':v}
+        for t, y, v in zip(tags.blocks, types.blocks, vals.blocks):
+            yield {'tags': t, 'types': y, 'vals': v}
