@@ -512,7 +512,7 @@ class ExternalProgramsTest(TestCase):
         for encoding in [16, 32, 64, 85]:
             print("==="*10, encoding, "==="*10)
             RDMolecule.default_tag_byte_encoding = encoding
-            smi2 = mol.to_string('smi', remove_hydrogens=True, include_tag=True)
+            smi2 = mol0.to_string('smi', remove_hydrogens=True, include_tag=True)
             smi, tag = smi2.split('_', 1)
             tokens = list(SMILESTokenizer().tokenize(smi))
             print()
@@ -522,8 +522,8 @@ class ExternalProgramsTest(TestCase):
             print("Tag:", len(tag))
             print(tag)
             # print("Bytes:", len(base64.b64decode(tag.encode('utf-8'))))
-            mol2 = Molecule.from_string(smi2, 'smi').get_embedded_molecule(ref=mol, sel=list(range(4)))
-            print(mol2.get_rmsd(mol, sel=list(range(4))))
+            mol2 = Molecule.from_string(smi2, 'smi').get_embedded_molecule(ref=mol0, sel=list(range(4)))
+            print(mol2.get_rmsd(mol0, sel=list(range(4))))
             # f1 = mol.plot(backend='x3d')
             # mol2.plot(backend='x3d', figure=f1, highlight_atoms=True)
             # mol2.plot(backend='x3d', display_atom_numbers=True).show()

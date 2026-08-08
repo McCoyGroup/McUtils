@@ -1649,6 +1649,7 @@ class RDMolecule(ExternalMolecule):
                   preserve_atom_order=False,
                   return_reordering=False,
                   binary=False,
+                  conformer_encoder=None,
                   coords=None,
                   mol=None,
                   **opts):
@@ -1772,7 +1773,8 @@ class RDMolecule(ExternalMolecule):
             #     ord_mol = Chem.RenumberAtoms(ord_mol, np.argsort(base_map, kind='merge').tolist())
             # mol = Chem.RenumberAtoms(mol, reordering)
             graph = self.get_edge_graph(mol, reordering=np.argsort(reordering))
-            tag = self.conformer_smiles_tag(coords=coords, graph=graph, binary=binary)
+            tag = self.conformer_smiles_tag(coords=coords, graph=graph, binary=binary,
+                                            encoder=conformer_encoder)
             if binary:
                 smi = smi.encode()
                 smi = smi + b"_" + tag
@@ -3871,36 +3873,66 @@ class RDMolecule(ExternalMolecule):
         return np.frombuffer(buffer, dtype)
 
     @classmethod
-    def _compressed_encode(cls, flat_z, byte_size,
-                           primary_bond_range=None,
-                           angle_range=None,
-                           dihedral_range=None,
-                           pack_angles=False):
-        return ConformerEncoder.encode(flat_z, byte_size,
-                                       primary_bond_range=primary_bond_range,
-                                       angle_range=angle_range,
-                                       dihedral_range=dihedral_range,
-                                       pack_angles=pack_angles
-                                       )
+    def _compressed_encode(
+        cls,
+        flat_z,
+        byte_size,
+        conformer_encoder=None,
+        primary_bond_range=None,
+        angle_range=None,
+        dihedral_range=None,
+        pack_angles=False,
+    ):
+        """
+        Encode a flattened Z-matrix via a ConformerEncoder. Uses
+        `conformer_encoder` directly if supplied; otherwise builds a
+        plain uniform-distribution one from `byte_size` and the given
+        ranges (falling back to ConformerEncoder's own class-level
+        defaults for any range left as None).
+        """
+        if conformer_encoder is None:
+            conformer_encoder = ConformerEncoder(
+                byte_size=byte_size,
+                primary_bond_range=primary_bond_range,
+                angle_range=angle_range,
+                dihedral_range=dihedral_range,
+            )
+        return conformer_encoder.encode(flat_z, pack_angles=pack_angles)
 
     @classmethod
-    def _compressed_decode(cls, buffer, byte_size,
-                           primary_bond_range=None,
-                           angle_range=None,
-                           dihedral_range=None, pack_angles=False):
-        return ConformerEncoder.decode(buffer, byte_size,
-                                       primary_bond_range=primary_bond_range,
-                                       angle_range=angle_range,
-                                       dihedral_range=dihedral_range,
-                                       pack_angles=pack_angles)
+    def _compressed_decode(
+        cls,
+        buffer,
+        byte_size,
+        conformer_encoder=None,
+        primary_bond_range=None,
+        angle_range=None,
+        dihedral_range=None,
+        pack_angles=False,
+    ):
+        """
+        Decode a flattened Z-matrix via a ConformerEncoder. Same
+        conformer_encoder-or-build-default logic as `_compressed_encode`.
+        """
+        if conformer_encoder is None:
+            conformer_encoder = ConformerEncoder(
+                byte_size=byte_size,
+                primary_bond_range=primary_bond_range,
+                angle_range=angle_range,
+                dihedral_range=dihedral_range,
+            )
+        return conformer_encoder.decode(buffer, pack_angles=pack_angles)
 
     default_conformer_compression = 'compressed'
     default_tag_byte_size = 16
     default_tag_byte_encoding = 64
-    def conformer_smiles_tag(self,
-                             coords=None, graph=None, zmatrix=None,
-                             encoder=None, byte_size=None, byte_encoding=None,
-                             binary=False, include_zmatrix=False):
+    def conformer_smiles_tag(
+        self,
+        coords=None, graph=None, zmatrix=None,
+        encoder=None, byte_size=None, byte_encoding=None,
+        conformer_encoder=None,
+        binary=False, include_zmatrix=False,
+    ):
         """
         **LLM Docstring**
 
@@ -3914,10 +3946,21 @@ class RDMolecule(ExternalMolecule):
         :param zmatrix: an explicit Z-matrix connectivity (built if omitted)
         :param encoder: the value encoder (`'plain'`/`'compressed'`/`'precision'` or a callable)
         :type encoder: str | Callable | None
-        :param byte_size: the per-value bit width
+        :param byte_size: the per-value bit width. If omitted and
+            `conformer_encoder` is given, inferred from
+            `conformer_encoder.byte_size`; otherwise falls back to
+            `default_tag_byte_size`.
         :type byte_size: int | None
         :param byte_encoding: the base-N text encoding (16/32/64/85)
         :type byte_encoding: int | Callable | None
+        :param conformer_encoder: a pre-built ConformerEncoder to use for
+            the 'compressed'/'precision' encoders (e.g. one built via
+            `ConformerEncoder.from_distribution_files`, so real fitted
+            angle/dihedral distributions are used instead of the plain
+            uniform default). Ignored for the 'plain' encoder or a
+            custom callable `encoder`. If omitted, a plain uniform
+            ConformerEncoder is built fresh from `byte_size` each call.
+        :type conformer_encoder: ConformerEncoder | None
         :param binary: return raw bytes rather than text
         :type binary: bool
         :param include_zmatrix: also return the encoded Z-matrix connectivity
@@ -3934,7 +3977,11 @@ class RDMolecule(ExternalMolecule):
             coords = self.coords
 
         if byte_size is None:
-            byte_size = self.default_tag_byte_size
+            byte_size = (
+                conformer_encoder.byte_size
+                if conformer_encoder is not None
+                else self.default_tag_byte_size
+            )
         if byte_encoding is None:
             byte_encoding = self.default_tag_byte_encoding
 
@@ -3945,9 +3992,17 @@ class RDMolecule(ExternalMolecule):
         if dev.str_is(encoder, 'plain'):
             zmat_coords = self._plain_encode(flat_z, byte_size)
         elif encoder == 'compressed':
-            zmat_coords = self._compressed_encode(flat_z, byte_size, pack_angles=True)
+            zmat_coords = self._compressed_encode(
+                flat_z, byte_size,
+                conformer_encoder=conformer_encoder,
+                pack_angles=True,
+            )
         elif encoder == 'precision':
-            zmat_coords = self._compressed_encode(flat_z, byte_size, pack_angles=False)
+            zmat_coords = self._compressed_encode(
+                flat_z, byte_size,
+                conformer_encoder=conformer_encoder,
+                pack_angles=False,
+            )
         else:
             zmat_coords = encoder(flat_z, byte_size)
 
@@ -3984,7 +4039,11 @@ class RDMolecule(ExternalMolecule):
             return tag
 
     @classmethod
-    def conformer_from_smiles_tag(cls, tag, graph, decoder=None, byte_size=None, byte_encoding=None, zmatrix=None):
+    def conformer_from_smiles_tag(
+        cls, tag, graph, decoder=None, byte_size=None,
+        byte_encoding=None, zmatrix=None,
+        conformer_encoder=None,
+    ):
         """
         **LLM Docstring**
 
@@ -3996,11 +4055,20 @@ class RDMolecule(ExternalMolecule):
         :param graph: the molecular edge graph
         :param decoder: the value decoder (`'plain'`/`'compressed'`/`'precision'` or a callable)
         :type decoder: str | Callable | None
-        :param byte_size: the per-value bit width
+        :param byte_size: the per-value bit width. If omitted and
+            `conformer_encoder` is given, inferred from
+            `conformer_encoder.byte_size`; otherwise falls back to
+            `default_tag_byte_size`.
         :type byte_size: int | None
         :param byte_encoding: the base-N text encoding
         :type byte_encoding: int | Callable | None
         :param zmatrix: an explicit Z-matrix connectivity (built if omitted)
+        :param conformer_encoder: a pre-built ConformerEncoder to use for
+            the 'compressed'/'precision' decoders -- must match whatever
+            was used to encode the tag (same byte_size, ranges, and
+            distributions), or decoding will silently produce wrong
+            values. See `conformer_smiles_tag`.
+        :type conformer_encoder: ConformerEncoder | None
         :return: the decoded Cartesian coordinates
         :rtype: np.ndarray
         """
@@ -4009,7 +4077,11 @@ class RDMolecule(ExternalMolecule):
             zmatrix = coordops.canonical_fragment_zmatrix(frags, validate_additions=True)
 
         if byte_size is None:
-            byte_size = cls.default_tag_byte_size
+            byte_size = (
+                conformer_encoder.byte_size
+                if conformer_encoder is not None
+                else cls.default_tag_byte_size
+            )
         if byte_encoding is None:
             byte_encoding = cls.default_tag_byte_encoding
         if nput.is_int(byte_encoding):
@@ -4030,13 +4102,21 @@ class RDMolecule(ExternalMolecule):
         if dev.str_is(decoder, 'plain'):
             flat_z = cls._plain_decode(buffer, byte_size)
         elif decoder == 'compressed':
-            flat_z = cls._compressed_decode(buffer, byte_size, pack_angles=True)
+            flat_z = cls._compressed_decode(
+                buffer, byte_size,
+                conformer_encoder=conformer_encoder,
+                pack_angles=True,
+            )
         elif decoder == 'precision':
-            flat_z = cls._compressed_decode(buffer, byte_size, pack_angles=False)
+            flat_z = cls._compressed_decode(
+                buffer, byte_size,
+                conformer_encoder=conformer_encoder,
+                pack_angles=False,
+            )
         else:
             flat_z = decoder(buffer, byte_size)
         zcoords = coordops.zmatrix_from_values(flat_z, partial_embedding=True)
-        coords = coordops.zmatrix_to_cartesian(zcoords, np.array(zmatrix)) # very borked
+        coords = coordops.zmatrix_to_cartesian(zcoords, np.array(zmatrix))  # very borked
         return coords
 
     @classmethod
