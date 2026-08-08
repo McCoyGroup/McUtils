@@ -1,291 +1,105 @@
 
 import numpy as np
-from scipy.special import ndtr, ndtri
+
+from ..Zachary import MixtureDistribution
 
 __all__ = [
-    "ConformerEncoder"
+    "ConformerEncoder",
 ]
 
-class ConformerEncoder:
-    compressed_bond_range = (0.5, 2.5)
-    compressed_angle_range = (0, np.pi - 1e-6)
-    compressed_dihedral_range = (0, 2 * np.pi)
+class DistributionDataEncoder:
+    def __init__(self, data_range, byte_size=None, distribution=None, assume_in_range=False):
+        self.data_range = data_range
+        self.distribution = distribution
+        self._cdf_bounds = None
+        self._quantiles = None
+        self.assume_in_range = assume_in_range
+        self.byte_size = byte_size
+        self.base_type, self.float_type = self._encoding_types(byte_size)
+        self.encoding_limits = self._encoding_limits(byte_size, pack_angles=True)
+        self._initialized = False
 
-    # Distributions are expressed over normalized coordinates [0, 1].
-    # angle_distribution = {
-    #     "means": (2 / 3,),
-    #     "stds": (0.5,),
-    # }
-    angle_distribution = {}
+    def initialize(self):
+        if not self._initialized:
+            self._initialized = True
+            self._initialize_distribution_ppf()
 
-    # dihedral_distribution = {
-    #     "means": (0.0, 0.5, 1.0),
-    #     "stds": (0.5, 0.5, 0.5),
-    # }
-    dihedral_distribution = {}
-
-    distribution_grid_size = 1001
-    _inverse_distribution_cache = {}
-
-    @staticmethod
-    def _distribution_parameters(distribution):
-        """
-        Normalize a distribution specification.
-
-        Returns
-        -------
-        None
-            For a uniform distribution.
-        tuple[np.ndarray, np.ndarray, np.ndarray]
-            Means, standard deviations, and normalized weights for a
-            Gaussian mixture.
-        """
-        if distribution is None or not distribution:
-            return None
-
-        means = distribution.get("means")
-        weights = distribution.get("weights")
-
-        # No means and no weights indicates a uniform distribution.
-        if means is None and weights is None:
-            return None
-
-        if means is None:
-            raise ValueError(
-                "distribution weights were provided without component means"
-            )
-
-        means = np.atleast_1d(
-            np.asarray(means, dtype=float)
-        )
-
-        if means.ndim != 1 or means.size == 0:
-            raise ValueError(
-                "distribution means must be a nonempty 1D sequence"
-            )
-
-        stds = distribution.get("stds")
-        if stds is None:
-            raise ValueError(
-                "distribution stds are required when means are provided"
-            )
-
-        stds = np.asarray(stds, dtype=float)
-
-        # Permit a scalar standard deviation for all components.
-        if stds.ndim == 0:
-            stds = np.full(means.shape, stds.item())
-        elif stds.shape != means.shape:
-            raise ValueError(
-                "distribution stds must be scalar or match means"
-            )
-
-        if np.any(stds <= 0):
-            raise ValueError(
-                "distribution standard deviations must be positive"
-            )
-
-        # Omitted weights mean equal component weights.
-        if weights is None:
-            weights = np.full(means.shape, 1 / means.size)
-        else:
-            weights = np.asarray(weights, dtype=float)
-
-            if weights.ndim == 0 and means.size == 1:
-                weights = weights.reshape(1)
-
-            if weights.shape != means.shape:
-                raise ValueError(
-                    "distribution weights must match means"
-                )
-
-            if np.any(weights < 0) or not np.any(weights > 0):
-                raise ValueError(
-                    "distribution weights must be nonnegative with "
-                    "at least one positive value"
-                )
-
-            weights = weights / weights.sum()
-
-        return means, stds, weights
+    def _initialize_distribution_ppf(self):
+        # Periodic distributions need their unwrapped-CDF/PPF grid built
+        # at higher resolution than the library default: the "cut point"
+        # chosen for unwrapping a circle onto a line can sit right next
+        # to a real density mode (the same physical peak then contributes
+        # steep CDF rise on *both* sides of the cut), and a coarse grid
+        # resolves that badly right at the seam. Pre-warming here with a
+        # finer grid once, at construction, avoids paying for that
+        # resolution repeatedly on every encode/decode call.
+        if getattr(self.distribution, "periodic", False):
+            self.distribution.ppf(np.array([0.5]), grid_size=20_000)
 
     @classmethod
-    def _distribution_cdf(cls, x, distribution=None):
+    def _truncated_cdf_bounds(cls, distribution, data_range):
         """
-        Evaluate a distribution CDF truncated and normalized to [0, 1].
+        (cdf_lower, cdf_upper, cdf_span) for rescaling `distribution`'s
+        CDF so that the portion of its mass inside `data_range` maps onto
+        the *full* [0, 1] quantile range -- i.e. the truncated/conditional
+        CDF, not the raw one. `distribution=None` means "uniform on
+        data_range," matching the old bond_encoder's plain linear scaling
+        exactly (cdf_lower=lower, cdf_upper=upper, so the formula below
+        reduces to (x - lower) / (upper - lower)).
 
-        A missing or empty distribution specification represents a uniform
-        distribution, for which the CDF is the identity.
+        Periodic distributions (e.g. angle/dihedral mixtures) are
+        expected to have `data_range` span exactly one full period, in
+        which case *all* of the distribution's mass is inside range by
+        definition -- no truncation is needed, so bounds are fixed at
+        (0, 1, 1) rather than evaluated via `.cdf()`, which is itself
+        periodic and would give cdf_lower == cdf_upper (a divide-by-zero)
+        for a range spanning a full period.
         """
-        x = np.asarray(x, dtype=float)
-        parameters = cls._distribution_parameters(distribution)
-
-        if parameters is None:
-            return np.clip(x, 0.0, 1.0)
-
-        means, stds, weights = parameters
-
-        lower_cdf = ndtr(-means / stds)
-        upper_cdf = ndtr((1 - means) / stds)
-
-        normalization = weights @ (upper_cdf - lower_cdf)
-
-        if normalization <= 0:
-            raise ValueError(
-                "distribution has no numerically resolvable mass in [0, 1]"
-            )
-
-        component_cdfs = ndtr(
-            (x[..., np.newaxis] - means) / stds
-        )
-
-        result = (
-                         (component_cdfs - lower_cdf) @ weights
-                 ) / normalization
-
-        return np.clip(result, 0.0, 1.0)
+        lower, upper = data_range
+        if distribution is None:
+            return lower, upper, (upper - lower)
+        if getattr(distribution, "periodic", False):
+            return 0.0, 1.0, 1.0
+        cdf_lower = float(distribution.cdf(np.asarray([lower]))[0])
+        cdf_upper = float(distribution.cdf(np.asarray([upper]))[0])
+        return cdf_lower, cdf_upper, (cdf_upper - cdf_lower)
 
     @classmethod
-    def _inverse_distribution_grid(cls, distribution):
-        """
-        Build and cache an inverse-CDF interpolation grid for a Gaussian
-        mixture containing two or more components.
-        """
-        parameters = cls._distribution_parameters(distribution)
-
-        if parameters is None:
-            return (
-                np.array([0.0, 1.0]),
-                np.array([0.0, 1.0]),
-            )
-
-        means, stds, weights = parameters
-
-        if means.size == 1:
-            raise ValueError(
-                "A single Gaussian uses the direct inverse-CDF path"
-            )
-
-        key = (
-            tuple(means),
-            tuple(stds),
-            tuple(weights),
-            cls.distribution_grid_size,
-        )
-
-        try:
-            return cls._inverse_distribution_cache[key]
-        except KeyError:
-            pass
-
-        positions = np.linspace(
-            0.0,
-            1.0,
-            cls.distribution_grid_size,
-        )
-
-        probabilities = cls._distribution_cdf(
-            positions,
-            distribution,
-        )
-
-        probabilities[0] = 0.0
-        probabilities[-1] = 1.0
-
-        # Exclude saturated endpoints before removing duplicate CDF values.
-        interior = (
-                (probabilities > 0.0)
-                & (probabilities < 1.0)
-        )
-
-        interior_probabilities = probabilities[interior]
-        interior_positions = positions[interior]
-
-        if interior_probabilities.size:
-            keep = np.concatenate((
-                [True],
-                np.diff(interior_probabilities) > 0,
-            ))
-
-            interior_probabilities = interior_probabilities[keep]
-            interior_positions = interior_positions[keep]
-
-        probabilities = np.concatenate((
-            [0.0],
-            interior_probabilities,
-            [1.0],
-        ))
-
-        positions = np.concatenate((
-            [0.0],
-            interior_positions,
-            [1.0],
-        ))
-
-        result = probabilities, positions
-        cls._inverse_distribution_cache[key] = result
-
-        return result
+    def _truncated_quantiles(cls, values, distribution, cdf_bounds):
+        """Map raw values -> quantiles in [0, 1] via distribution's CDF,
+        truncated to the range implied by `cdf_bounds`. Periodic
+        distributions use `unwrapped_cdf` instead of `cdf` -- see
+        `_truncated_cdf_bounds` for why the ordinary `cdf` doesn't work
+        here for a full-period range."""
+        if distribution is not None and getattr(distribution, "periodic", False):
+            return distribution.unwrapped_cdf(values)
+        cdf_lower, _, cdf_span = cdf_bounds
+        raw = values if distribution is None else distribution.cdf(values)
+        return (raw - cdf_lower) / cdf_span
 
     @classmethod
-    def _distribution_ppf(cls, probability, distribution=None):
-        """
-        Evaluate an inverse CDF on [0, 1].
+    def _untruncate_quantiles(cls, quantiles, distribution, cdf_bounds):
+        """Inverse of `_truncated_quantiles`: quantiles in [0, 1] -> raw
+        values, via distribution's PPF, un-truncated from the range
+        implied by `cdf_bounds`. For periodic distributions cdf_span=1
+        and cdf_lower=0 (see `_truncated_cdf_bounds`), so this reduces to
+        a plain `distribution.ppf(quantiles)` call, the exact inverse of
+        `unwrapped_cdf`."""
+        cdf_lower, _, cdf_span = cdf_bounds
+        rescaled = cdf_lower + quantiles * cdf_span
+        return rescaled if distribution is None else distribution.ppf(rescaled)
 
-        Uniform distributions use the identity, single Gaussians use the
-        analytic truncated-normal inverse, and mixtures use the cached
-        dense interpolation.
-        """
-        probability = np.asarray(probability, dtype=float)
+    @property
+    def cdf_bounds(self):
+        if self._cdf_bounds is None:
+            self._cdf_bounds = self._truncated_cdf_bounds(self.distribution, self.data_range)
+        return self._cdf_bounds
 
-        if np.any((probability < 0) | (probability > 1)):
-            raise ValueError("probabilities must lie in [0, 1]")
+    def quantiles(self, values):
+        return self._truncated_quantiles(values, self.distribution, self.cdf_bounds)
 
-        parameters = cls._distribution_parameters(distribution)
-
-        # Uniform distribution: Q(p) = p.
-        if parameters is None:
-            result = probability.copy()
-
-        else:
-            means, stds, weights = parameters
-
-            if means.size == 1:
-                # Exact inverse CDF for a Gaussian truncated to [0, 1].
-                mean = means[0]
-                std = stds[0]
-
-                lower_cdf = ndtr(-mean / std)
-                upper_cdf = ndtr((1 - mean) / std)
-
-                untruncated_probability = (
-                        lower_cdf
-                        + probability * (upper_cdf - lower_cdf)
-                )
-
-                result = (
-                        mean
-                        + std * ndtri(untruncated_probability)
-                )
-
-                result = np.clip(result, 0.0, 1.0)
-
-            else:
-                probabilities, positions = (
-                    cls._inverse_distribution_grid(distribution)
-                )
-
-                result = np.interp(
-                    probability,
-                    probabilities,
-                    positions,
-                )
-
-        # Ensure exact bounds in every branch.
-        result = np.where(probability == 0, 0.0, result)
-        result = np.where(probability == 1, 1.0, result)
-
-        return result.item() if result.ndim == 0 else result
+    def data_values(self, quantiles):
+        return self._untruncate_quantiles(quantiles, self.distribution, self.cdf_bounds)
 
     @staticmethod
     def _encoding_types(byte_size):
@@ -295,479 +109,510 @@ class ConformerEncoder:
             return np.uint32, np.float32
         if byte_size == 64:
             return np.uint64, np.float64
-
-        raise ValueError(
-            f"can't pack into byte size {byte_size}"
-        )
+        raise ValueError(f"can't pack into byte size {byte_size}")
 
     @staticmethod
     def _encoding_limits(byte_size, pack_angles=False):
         full_max = 2**byte_size - 1
         step_max = 2**(byte_size - 1) - 1
-
         if pack_angles:
             pack_max = 2**(byte_size // 2) - 1
         else:
             pack_max = full_max
-
         return step_max, pack_max, full_max
 
-    @classmethod
-    def bond_encoder(
-        cls,
-        bonds,
-        byte_size,
-        primary_bond_range=None,
-    ):
-        """
-        Encode a standalone bond-length stream.
-        """
-        base_type, float_type = cls._encoding_types(byte_size)
-        step_max, _, _ = cls._encoding_limits(byte_size)
+    def encode(self, data, packing_offset=-1):
+        self.initialize()
 
-        if primary_bond_range is None:
-            primary_bond_range = cls.compressed_bond_range
+        base_type, float_type = self.base_type, self.float_type
+        step_max, pack_max, full_max = self.encoding_limits
 
-        bonds = np.asanyarray(bonds)
-        encoded = np.zeros(bonds.shape, dtype=base_type)
+        data = np.asanyarray(data)
 
-        lower, upper = primary_bond_range
-        compressed = (bonds >= lower) & (bonds < upper)
+        if self.assume_in_range:
+            quantiles = self.quantiles(data)
+            if packing_offset < 0:
+                quant_max = full_max
+            elif packing_offset == 0:
+                quant_max = pack_max
+            else:
+                position = np.arange(data.shape[0])
+                quant_max = np.where(position < packing_offset, full_max, pack_max)
+            return np.round(quant_max * quantiles).astype(base_type)
+        else:
+            lower, upper = self.data_range
+            encoded = np.zeros(data.shape, dtype=base_type)
+            in_range = (data >= lower) & (data < upper)
 
-        total_range = upper - lower
-        encoded[compressed] = np.round(
-            step_max
-            * (bonds[compressed] - lower)
-            / total_range
-        ).astype(base_type)
+            quantiles = self.quantiles(data[in_range])
+            encoded[in_range] = np.round(step_max * quantiles).astype(base_type)
 
-        # Values outside the primary range are retained in the
-        # corresponding floating-point representation.
-        raw_values = bonds[~compressed].astype(float_type)
-        encoded[~compressed] = (
-            raw_values.view(base_type) + step_max
-        )
+            raw_values = data[~in_range].astype(float_type)
+            encoded[~in_range] = raw_values.view(base_type) + step_max
 
-        return encoded
+            return encoded
 
-    @classmethod
-    def bond_decoder(
-        cls,
-        encoded_bonds,
-        byte_size,
-        primary_bond_range=None,
-    ):
-        """
-        Decode a standalone encoded bond-length stream.
-        """
-        base_type, float_type = cls._encoding_types(byte_size)
-        step_max, _, _ = cls._encoding_limits(byte_size)
+    def decode(self, encoded_data, packing_offset=-1):
+        base_type, float_type = self.base_type, self.float_type
+        step_max, pack_max, full_max = self.encoding_limits
 
-        if primary_bond_range is None:
-            primary_bond_range = cls.compressed_bond_range
+        encoded_data = np.asarray(encoded_data, dtype=base_type)
 
-        encoded_bonds = np.asarray(
-            encoded_bonds,
-            dtype=base_type,
-        )
+        if self.assume_in_range:
+            if packing_offset < 0:
+                quant_max = full_max
+            elif packing_offset == 0:
+                quant_max = pack_max
+            else:
+                position = np.arange(encoded_data.shape[0])
+                quant_max = np.where(position < packing_offset, full_max, pack_max)
+            quantiles = encoded_data / quant_max
+            return self.data_values(quantiles)
+        else:
+            in_range = encoded_data < step_max
+            data = np.zeros(encoded_data.shape, dtype=float)
 
-        compressed = encoded_bonds < step_max
-        bonds = np.zeros(encoded_bonds.shape, dtype=float)
+            quantiles = encoded_data[in_range] / step_max
+            data[in_range] = self.data_values(quantiles)
 
-        lower, upper = primary_bond_range
-        total_range = upper - lower
+            raw_values = (encoded_data[~in_range] - step_max).astype(base_type)
+            data[~in_range] = raw_values.view(float_type)
 
-        bonds[compressed] = (
-            total_range
-            * encoded_bonds[compressed]
-            / step_max
-        ) + lower
+            return data
 
-        raw_values = (
-            encoded_bonds[~compressed] - step_max
-        ).astype(base_type)
 
-        bonds[~compressed] = raw_values.view(float_type)
-
-        return bonds
-
-    @classmethod
-    def angle_encoder(
-        cls,
-        angles,
-        byte_size,
-        angle_range=None,
-        pack_angles=False,
-    ):
-        """
-        Encode a standalone angle stream.
-
-        The first angle always uses the full integer width. Remaining
-        angles use either the full width or half width depending on
-        `pack_angles`.
-        """
-        base_type, _ = cls._encoding_types(byte_size)
-        _, pack_max, full_max = cls._encoding_limits(
-            byte_size,
-            pack_angles,
-        )
-
-        if angle_range is None:
-            angle_range = cls.compressed_angle_range
-
-        angles = np.asanyarray(angles)
-
-        normalized = (
-            (angles - angle_range[0])
-            / (angle_range[1] - angle_range[0])
-        )
-
-        quantiles = cls._distribution_cdf(
-            normalized,
-            cls.angle_distribution,
-        )
-
-        encoded = np.empty(angles.shape, dtype=base_type)
-
-        if encoded.size:
-            encoded[0] = np.round(
-                full_max * quantiles[0]
-            ).astype(base_type)
-
-            encoded[1:] = np.round(
-                pack_max * quantiles[1:]
-            ).astype(base_type)
-
-        return encoded
-
-    @classmethod
-    def angle_decoder(
-        cls,
-        encoded_angles,
-        byte_size,
-        angle_range=None,
-        pack_angles=False,
-    ):
-        """
-        Decode a standalone angle stream.
-        """
-        base_type, _ = cls._encoding_types(byte_size)
-        _, pack_max, full_max = cls._encoding_limits(
-            byte_size,
-            pack_angles,
-        )
-
-        if angle_range is None:
-            angle_range = cls.compressed_angle_range
-
-        encoded_angles = np.asarray(
-            encoded_angles,
-            dtype=base_type,
-        )
-
-        quantiles = np.empty(
-            encoded_angles.shape,
-            dtype=float,
-        )
-
-        if quantiles.size:
-            quantiles[0] = encoded_angles[0] / full_max
-            quantiles[1:] = encoded_angles[1:] / pack_max
-
-        normalized = cls._distribution_ppf(
-            quantiles,
-            cls.angle_distribution,
-        )
-
-        return (
-            angle_range[0]
-            + (angle_range[1] - angle_range[0])
-            * normalized
-        )
-
-    @classmethod
-    def dihedral_encoder(
-        cls,
-        dihedrals,
-        byte_size,
-        dihedral_range=None,
-        pack_angles=False,
-    ):
-        """
-        Encode a standalone dihedral stream.
-        """
-        base_type, _ = cls._encoding_types(byte_size)
-        _, pack_max, _ = cls._encoding_limits(
-            byte_size,
-            pack_angles,
-        )
-
-        if dihedral_range is None:
-            dihedral_range = cls.compressed_dihedral_range
-
-        dihedrals = np.asanyarray(dihedrals).copy()
-
-        # Convert negative dihedrals into the default [0, 2π) range.
-        dihedrals[dihedrals < 0] += 2 * np.pi
-
-        normalized = (
-            (dihedrals - dihedral_range[0])
-            / (dihedral_range[1] - dihedral_range[0])
-        )
-
-        quantiles = cls._distribution_cdf(
-            normalized,
-            cls.dihedral_distribution,
-        )
-
-        return np.round(
-            pack_max * quantiles
-        ).astype(base_type)
-
-    @classmethod
-    def dihedral_decoder(
-        cls,
-        encoded_dihedrals,
-        byte_size,
-        dihedral_range=None,
-        pack_angles=False,
-    ):
-        """
-        Decode a standalone dihedral stream.
-        """
-        base_type, _ = cls._encoding_types(byte_size)
-        _, pack_max, _ = cls._encoding_limits(
-            byte_size,
-            pack_angles,
-        )
-
-        if dihedral_range is None:
-            dihedral_range = cls.compressed_dihedral_range
-
-        encoded_dihedrals = np.asarray(
-            encoded_dihedrals,
-            dtype=base_type,
-        )
-
-        quantiles = encoded_dihedrals / pack_max
-
-        normalized = cls._distribution_ppf(
-            quantiles,
-            cls.dihedral_distribution,
-        )
-
-        dihedrals = (
-            dihedral_range[0]
-            + (dihedral_range[1] - dihedral_range[0])
-            * normalized
-        )
-
-        # Restore the original [-π, π] convention.
-        dihedrals[dihedrals > np.pi] -= 2 * np.pi
-
-        return dihedrals
+class DataStreamPacker:
+    @staticmethod
+    def _pack_streams(values_list, pack_offsets, dtype):
+        packed = np.zeros(values_list[0].shape, dtype=dtype)
+        for values, offset in zip(values_list, pack_offsets):
+            packed |= (values.astype(dtype) << np.array(offset, dtype=dtype))
+        return packed
 
     @staticmethod
-    def _split_coordinate_streams(flat_z):
+    def _unpack_streams(packed, pack_offsets, total_bits):
+        pack_offsets = np.asarray(pack_offsets)
+        order = np.argsort(pack_offsets)
+        sorted_offsets = pack_offsets[order]
+        boundaries = np.append(sorted_offsets, total_bits)
+        widths = np.diff(boundaries)
+
+        unpacked_sorted = []
+        for offset, width in zip(sorted_offsets, widths):
+            mask = (1 << int(width)) - 1
+            unpacked_sorted.append((packed >> int(offset)) & mask)
+
+        unpacked = [None] * len(pack_offsets)
+        for sorted_idx, orig_idx in enumerate(order):
+            unpacked[orig_idx] = unpacked_sorted[sorted_idx]
+        return unpacked
+
+    @staticmethod
+    def _merge_streams(streams, interleaving_offsets, period, header_lengths=None):
+        n = len(streams)
+        if header_lengths is None:
+            header_lengths = [0] * n
+
+        header_parts = [s[:h] for s, h in zip(streams, header_lengths)]
+        header = (
+            np.concatenate(header_parts) if any(header_lengths)
+            else np.empty(0, dtype=streams[0].dtype)
+        )
+        remainders = [s[h:] for s, h in zip(streams, header_lengths)]
+
+        total_length = len(header) + sum(len(r) for r in remainders)
+        flat = np.empty(total_length, dtype=streams[0].dtype)
+        flat[: len(header)] = header
+
+        for remainder, offset in zip(remainders, interleaving_offsets):
+            flat[offset::period] = remainder
+
+        return flat
+
+    @staticmethod
+    def _split_streams(flat, interleaving_offsets, period, header_lengths=None):
+        n = len(interleaving_offsets)
+        if header_lengths is None:
+            header_lengths = [0] * n
+
+        header = flat[: sum(header_lengths)]
+
+        streams = []
+        cursor = 0
+        for i in range(n):
+            h = header_lengths[i]
+            header_part = header[cursor: cursor + h]
+            cursor += h
+            interleaved_part = flat[interleaving_offsets[i]::period]
+            streams.append(np.concatenate([header_part, interleaved_part]))
+        return streams
+
+
+class CoordinateStreamPacker(DataStreamPacker):
+    def __init__(self, byte_size=None, bond_header_length=2, angle_header_length=1):
         """
-        Split a flattened Z-matrix into bond, angle, and dihedral streams.
+        byte_size : int, optional
+            Bit width of the encoded uint streams this packer will see.
+            If omitted (None), it's inferred on each call from the given
+            stream's own dtype (`array.dtype.itemsize * 8`) instead --
+            no need to know it up front. If given, it's still checked
+            against that same inference wherever a stream is available,
+            so a mismatch (e.g. handing a uint16 stream to a packer
+            configured for 32 bits) raises immediately instead of
+            silently producing wrong bit-shifts.
         """
+        self.byte_size = byte_size
+        self.header_lengths = [bond_header_length, angle_header_length, 0]
+        offset = bond_header_length + angle_header_length
+        self.interleaving_offsets = [offset, offset + 1, offset + 2]
+
+    def _resolve_byte_size(self, array):
+        """Infer bit width from `array`'s dtype, guarding it against
+        `self.byte_size` when that was explicitly set."""
+        inferred = array.dtype.itemsize * 8
+        if self.byte_size is None:
+            return inferred
+        if self.byte_size != inferred:
+            raise ValueError(
+                f"byte_size mismatch: packer configured for "
+                f"{self.byte_size} bits, but the given stream's dtype "
+                f"({array.dtype}) implies {inferred} bits."
+            )
+        return self.byte_size
+
+    def interleave_coordinate_streams(self, bonds, angles, dihedrals):
+        return self._merge_streams(
+            streams=[bonds, angles, dihedrals],
+            interleaving_offsets=self.interleaving_offsets,
+            period=3,
+            header_lengths=self.header_lengths,
+        )
+
+    def split_interleaved_streams(self, flat_z):
         flat_z = np.asanyarray(flat_z)
+        bonds, angles, dihedrals = self._split_streams(
+            flat_z,
+            interleaving_offsets=self.interleaving_offsets,
+            period=3,
+            header_lengths=self.header_lengths,
+        )
+        return bonds, angles, dihedrals
 
-        bonds = np.concatenate((
-            flat_z[:2],
-            flat_z[3::3],
-        ))
+    def unpack_coordinate_streams(self, uint_stream, pack_angles=False):
+        if pack_angles:
+            byte_size = self._resolve_byte_size(uint_stream)
+            half_width = byte_size // 2
 
-        angles = np.concatenate((
-            flat_z[[2]],
-            flat_z[4::3],
-        ))
+            bonds, angle_or_packed = self._split_streams(
+                uint_stream,
+                interleaving_offsets=self.interleaving_offsets[:2],
+                period=2,
+                header_lengths=self.header_lengths[:2],
+            )
 
-        dihedrals = flat_z[5::3]
+            header_angle = angle_or_packed[:1]
+            packed_angles = angle_or_packed[1:]
+
+            angle_high, dihedral_low = self._unpack_streams(
+                packed_angles,
+                pack_offsets=[half_width, 0],
+                total_bits=byte_size,
+            )
+
+            angles = np.concatenate([header_angle, angle_high])
+            dihedrals = dihedral_low
+        else:
+            bonds, angles, dihedrals = self.split_interleaved_streams(uint_stream)
 
         return bonds, angles, dihedrals
 
-    @staticmethod
-    def _merge_coordinate_streams(
-        bonds,
-        angles,
-        dihedrals,
+    def _merge_encoded_streams(self, bonds, angles, dihedrals, pack_angles=False):
+        if pack_angles:
+            byte_size = self._resolve_byte_size(bonds)
+            half_width = byte_size // 2
+
+            header_angle = angles[: self.header_lengths[1]]
+            angle_remainder = angles[self.header_lengths[1]:]
+            dihedral_remainder = dihedrals
+
+            packed_angles = self._pack_streams(
+                [angle_remainder, dihedral_remainder],
+                pack_offsets=[half_width, 0],
+                dtype=bonds.dtype,
+            )
+
+            angle_or_packed = np.concatenate((header_angle, packed_angles))
+
+            return self._merge_streams(
+                streams=[bonds, angle_or_packed],
+                interleaving_offsets=self.interleaving_offsets[:2],
+                period=2,
+                header_lengths=self.header_lengths[:2],
+            )
+        else:
+            return self.interleave_coordinate_streams(bonds, angles, dihedrals)
+
+
+class ConformerEncoder:
+    compressed_bond_range = (0.5, 2.5)
+    compressed_angle_range = (0, np.pi - 1e-6)
+    compressed_dihedral_range = (0, 2 * np.pi)
+
+    def __init__(
+        self,
+        byte_size=None,
+        bond_encoder=None,
+        angle_encoder=None,
+        dihedral_encoder=None,
+        stream_packer=None,
+        primary_bond_range=None,
+        angle_range=None,
+        dihedral_range=None,
     ):
         """
-        Reconstruct a flattened Z-matrix from separate coordinate streams.
+        Parameters
+        ----------
+        byte_size : int, optional
+            Bit width (16/32/64) used to build whichever of the default
+            encoders below aren't overridden, and to interpret buffers
+            in `decode`. If omitted (None), it's resolved from the first
+            supplied `bond_encoder` / `angle_encoder` / `dihedral_encoder`
+            / `stream_packer` that exposes its own `.byte_size`. If none
+            of those are supplied either, there's nothing to build the
+            defaults from, so construction raises immediately rather
+            than failing later with a confusing error. `decode` can
+            still work even with `byte_size=None` here, by inferring bit
+            width directly from a typed buffer at call time -- see
+            `decode`.
+        ... (see previous docstring for the rest of the parameters)
         """
-        flat_z = np.empty(
-            3 * (len(bonds) - 1),
-            dtype=float,
+        if byte_size is None:
+            for candidate in (bond_encoder, angle_encoder, dihedral_encoder, stream_packer):
+                inferred = getattr(candidate, "byte_size", None)
+                if inferred is not None:
+                    byte_size = inferred
+                    break
+
+        need_defaults = any(
+            e is None for e in (bond_encoder, angle_encoder, dihedral_encoder, stream_packer)
+        )
+        if byte_size is None and need_defaults:
+            raise ValueError(
+                "byte_size was not given and could not be inferred from "
+                "any supplied bond_encoder/angle_encoder/dihedral_encoder/"
+                "stream_packer, but at least one of those wasn't supplied "
+                "and would need byte_size to build a default. Pass "
+                "byte_size explicitly, or supply all four pre-built."
+            )
+
+        self.byte_size = byte_size
+        if byte_size is not None:
+            self.base_type, self.float_type = DistributionDataEncoder._encoding_types(byte_size)
+        else:
+            # All four were supplied (need_defaults is False), so nothing
+            # here needs byte_size directly; base_type stays unresolved
+            # until decode() sees an actual typed buffer to infer it from.
+            self.base_type, self.float_type = None, None
+
+        self.primary_bond_range = primary_bond_range or self.compressed_bond_range
+        self.angle_range = angle_range or self.compressed_angle_range
+        self.dihedral_range = dihedral_range or self.compressed_dihedral_range
+
+        self.bond_encoder = bond_encoder or DistributionDataEncoder(
+            data_range=self.primary_bond_range,
+            byte_size=byte_size,
+            distribution=None,
+            assume_in_range=False,
+        )
+        self.angle_encoder = angle_encoder or DistributionDataEncoder(
+            data_range=self.angle_range,
+            byte_size=byte_size,
+            distribution=None,
+            assume_in_range=True,
+        )
+        self.dihedral_encoder = dihedral_encoder or DistributionDataEncoder(
+            data_range=self.dihedral_range,
+            byte_size=byte_size,
+            distribution=None,
+            assume_in_range=True,
         )
 
-        flat_z[:2] = bonds[:2]
-        flat_z[2] = angles[0]
-        flat_z[3::3] = bonds[2:]
-        flat_z[4::3] = angles[1:]
-        flat_z[5::3] = dihedrals
+        self.stream_packer = stream_packer or CoordinateStreamPacker(byte_size=byte_size)
 
-        return flat_z
-
-    @classmethod
-    def encode(
-            cls,
-            flat_z,
-            byte_size,
-            primary_bond_range=None,
-            angle_range=None,
-            dihedral_range=None,
-            pack_angles=False,
-    ):
+    def encode(self, flat_z, pack_angles=False):
         """
         Encode a flattened Z-matrix coordinate stream.
         """
-        base_type, _ = cls._encoding_types(byte_size)
+        bonds, angles, dihedrals = self.stream_packer.split_interleaved_streams(flat_z)
 
-        bonds, angles, dihedrals = (
-            cls._split_coordinate_streams(flat_z)
-        )
+        # Dihedral wraparound: [-pi, pi] -> [0, 2*pi), a presentation
+        # convention DistributionDataEncoder itself knows nothing about.
+        dihedrals = np.asanyarray(dihedrals).copy()
+        dihedrals[dihedrals < 0] += 2 * np.pi
 
-        encoded_bonds = cls.bond_encoder(
-            bonds,
-            byte_size,
-            primary_bond_range=primary_bond_range,
-        )
+        encoded_bonds = self.bond_encoder.encode(bonds)
 
-        encoded_angles = cls.angle_encoder(
+        angle_header = self.stream_packer.header_lengths[1]
+        encoded_angles = self.angle_encoder.encode(
             angles,
-            byte_size,
-            angle_range=angle_range,
-            pack_angles=pack_angles,
+            packing_offset=(angle_header if pack_angles else -1),
         )
 
-        encoded_dihedrals = cls.dihedral_encoder(
+        # Dihedral has no full-width header element (unlike angle) --
+        # matches the old dihedral_encoder, which always used pack_max
+        # uniformly for every element.
+        encoded_dihedrals = self.dihedral_encoder.encode(
             dihedrals,
-            byte_size,
-            dihedral_range=dihedral_range,
+            packing_offset=(0 if pack_angles else -1),
+        )
+
+        return self.stream_packer._merge_encoded_streams(
+            encoded_bonds,
+            encoded_angles,
+            encoded_dihedrals,
             pack_angles=pack_angles,
         )
 
-        if pack_angles:
-            encoded = np.zeros(
-                len(bonds) + len(angles),
-                dtype=base_type,
-            )
-
-            encoded[:2] = encoded_bonds[:2]
-            encoded[2] = encoded_angles[0]
-            encoded[3::2] = encoded_bonds[2:]
-
-            half_width = byte_size // 2
-
-            encoded[4::2] = (
-                                    encoded_angles[1:] << half_width
-                            ) | encoded_dihedrals
-
-        else:
-            encoded = np.zeros(
-                len(flat_z),
-                dtype=base_type,
-            )
-
-            encoded[:2] = encoded_bonds[:2]
-            encoded[2] = encoded_angles[0]
-            encoded[3::3] = encoded_bonds[2:]
-            encoded[4::3] = encoded_angles[1:]
-            encoded[5::3] = encoded_dihedrals
-
-        return encoded
-
-    @classmethod
-    def _split_encoded_streams(
-            cls,
-            uint_stream,
-            byte_size,
-            pack_angles=False,
-    ):
+    def _resolve_decode_base_type(self, buffer):
         """
-        Split the encoded buffer into bond, angle, and dihedral streams.
+        Determine the dtype to interpret `buffer` as. If `buffer` is
+        already a typed numpy array, its dtype's bit width is inferred
+        directly; if `self.byte_size` was also set, that inference is
+        checked against it (a cheap guard against e.g. accidentally
+        decoding a 16-bit stream with a 32-bit-configured encoder) rather
+        than silently trusting whichever one happens to be used. If
+        `self.byte_size` is None, the inferred dtype is used directly --
+        this is what lets `ConformerEncoder(byte_size=None, ...)` still
+        decode, as long as `buffer` carries its own dtype.
         """
-        if pack_angles:
-            half_width = byte_size // 2
-            half_mask = 2 ** half_width - 1
+        if isinstance(buffer, np.ndarray):
+            inferred_byte_size = buffer.dtype.itemsize * 8
+            if self.byte_size is not None and inferred_byte_size != self.byte_size:
+                raise ValueError(
+                    f"byte_size mismatch: this ConformerEncoder is "
+                    f"configured for {self.byte_size} bits, but the given "
+                    f"buffer's dtype ({buffer.dtype}) implies "
+                    f"{inferred_byte_size} bits."
+                )
+            return buffer.dtype.type
 
-            bonds = np.concatenate((
-                uint_stream[:2],
-                uint_stream[3::2],
-            ))
+        if self.byte_size is None:
+            raise ValueError(
+                "byte_size was not set at construction and could not be "
+                "inferred (`buffer` is raw bytes, not a typed numpy "
+                "array). Pass byte_size explicitly at construction, or "
+                "pass `buffer` as a numpy array with a concrete dtype."
+            )
+        return self.base_type
 
-            packed_angles = uint_stream[4::2]
-
-            angles = np.concatenate((
-                uint_stream[[2]],
-                packed_angles >> half_width,
-            ))
-
-            dihedrals = packed_angles & half_mask
-
-        else:
-            bonds = np.concatenate((
-                uint_stream[:2],
-                uint_stream[3::3],
-            ))
-
-            angles = np.concatenate((
-                uint_stream[[2]],
-                uint_stream[4::3],
-            ))
-
-            dihedrals = uint_stream[5::3]
-
-        return bonds, angles, dihedrals
-
-    @classmethod
-    def decode(
-        cls,
-        buffer,
-        byte_size,
-        primary_bond_range=None,
-        angle_range=None,
-        dihedral_range=None,
-        pack_angles=False,
-    ):
+    def decode(self, buffer, pack_angles=False):
         """
         Decode a packed flattened Z-matrix coordinate stream.
         """
-        base_type, _ = cls._encoding_types(byte_size)
-        uint_stream = np.frombuffer(buffer, dtype=base_type)
+        base_type = self._resolve_decode_base_type(buffer)
+        uint_stream = (
+            buffer.astype(base_type, copy=False)
+            if isinstance(buffer, np.ndarray)
+            else np.frombuffer(buffer, dtype=base_type)
+        )
 
         encoded_bonds, encoded_angles, encoded_dihedrals = (
-            cls._split_encoded_streams(
+            self.stream_packer.unpack_coordinate_streams(
                 uint_stream,
-                byte_size,
                 pack_angles=pack_angles,
             )
         )
 
-        bonds = cls.bond_decoder(
-            encoded_bonds,
-            byte_size,
-            primary_bond_range=primary_bond_range,
-        )
+        bonds = self.bond_encoder.decode(encoded_bonds)
 
-        angles = cls.angle_decoder(
+        angle_header = self.stream_packer.header_lengths[1]
+        angles = self.angle_encoder.decode(
             encoded_angles,
-            byte_size,
-            angle_range=angle_range,
-            pack_angles=pack_angles,
+            packing_offset=(angle_header if pack_angles else -1),
         )
 
-        dihedrals = cls.dihedral_decoder(
+        dihedrals = self.dihedral_encoder.decode(
             encoded_dihedrals,
-            byte_size,
-            dihedral_range=dihedral_range,
-            pack_angles=pack_angles,
+            packing_offset=(0 if pack_angles else -1),
         )
 
-        return cls._merge_coordinate_streams(
-            bonds,
-            angles,
-            dihedrals,
+        # Restore the [-pi, pi] convention.
+        dihedrals = np.where(dihedrals > np.pi, dihedrals - 2 * np.pi, dihedrals)
+
+        return self.stream_packer.interleave_coordinate_streams(bonds, angles, dihedrals)
+
+    @classmethod
+    def from_distribution_files(
+        cls,
+        byte_size,
+        angle_ppf_path=None,
+        dihedral_ppf_path=None,
+        primary_bond_range=None,
+        angle_range=None,
+        dihedral_range=None,
+        bond_encoder=None,
+        stream_packer=None,
+    ):
+        """
+        Build a ConformerEncoder whose angle and/or dihedral encoders use
+        distributions loaded from saved PPF-grid files -- i.e. `.npz`
+        files written by `MixtureDistribution.save_ppf_grid` (after
+        fitting a `FittedMixtureDistribution` via `fit_mixture`) -- rather
+        than the plain uniform-on-range default.
+
+        Parameters
+        ----------
+        angle_ppf_path, dihedral_ppf_path : str or os.PathLike, optional
+            Paths to `.npz` PPF-grid files. Loaded via
+            `MixtureDistribution.load_ppf_grid`, which reconstructs the
+            distribution's kernels/params/weights plus its precomputed
+            PPF lookup -- no re-fitting needed at load time. If either
+            is omitted, that encoder falls back to the usual
+            uniform-distribution default (`distribution=None`), exactly
+            like the plain constructor.
+        bond_encoder : object, optional
+            Bonds aren't periodic and don't currently have a saved-file
+            path here -- pass a pre-built encoder directly if you want a
+            non-uniform bond distribution; otherwise the usual uniform
+            default is used.
+        (all other parameters as in `__init__`)
+
+        Returns
+        -------
+        ConformerEncoder
+        """
+        angle_distribution = (
+            MixtureDistribution.load_ppf_grid(angle_ppf_path)
+            if angle_ppf_path is not None else None
+        )
+        dihedral_distribution = (
+            MixtureDistribution.load_ppf_grid(dihedral_ppf_path)
+            if dihedral_ppf_path is not None else None
+        )
+
+        resolved_angle_range = angle_range or cls.compressed_angle_range
+        resolved_dihedral_range = dihedral_range or cls.compressed_dihedral_range
+
+        angle_encoder = DistributionDataEncoder(
+            data_range=resolved_angle_range,
+            byte_size=byte_size,
+            distribution=angle_distribution,
+            assume_in_range=True,
+        )
+        dihedral_encoder = DistributionDataEncoder(
+            data_range=resolved_dihedral_range,
+            byte_size=byte_size,
+            distribution=dihedral_distribution,
+            assume_in_range=True,
+        )
+
+        return cls(
+            byte_size=byte_size,
+            bond_encoder=bond_encoder,
+            angle_encoder=angle_encoder,
+            dihedral_encoder=dihedral_encoder,
+            stream_packer=stream_packer,
+            primary_bond_range=primary_bond_range,
+            angle_range=angle_range,
+            dihedral_range=dihedral_range,
         )
