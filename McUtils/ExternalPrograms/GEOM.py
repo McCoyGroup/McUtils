@@ -1001,10 +1001,13 @@ class GEOMInternalsWrapper:
         flat_idx = np.concatenate([np.arange(s, e) for s, e in zip(starts, ends)])
 
         zdata = self.zdata
+        # zarr v2's plain __getitem__ (BasicIndexer) only accepts ints/
+        # slices; a numpy integer array needs the explicit .oindex (or
+        # .vindex) accessor for fancy/vectorized indexing.
         data = {
-            'vals': zdata['vals'][flat_idx],
-            'types': zdata['types'][flat_idx],
-            'tags': zdata['tags'][flat_idx],
+            'vals': zdata['vals'].oindex[flat_idx],
+            'types': zdata['types'].oindex[flat_idx],
+            'tags': zdata['tags'].oindex[flat_idx],
         }
 
         lengths = ends - starts
@@ -1032,11 +1035,12 @@ class GEOMInternalsWrapper:
         ends = offs[sys_idx + 1]
         conf_idx = np.concatenate([np.arange(s, e) for s, e in zip(starts, ends)])
 
+        #TODO: set up better v2 -> v3 migration path
         zdata = self.zdata
         data = {
-            'vals': zdata['vals'][conf_idx],
-            'types': zdata['types'][conf_idx],
-            'tags': zdata['tags'][conf_idx],
+            'vals': zdata['vals'].oindex[conf_idx],
+            'types': zdata['types'].oindex[conf_idx],
+            'tags': zdata['tags'].oindex[conf_idx],
         }
 
         if load_confs:
