@@ -954,7 +954,11 @@ class GEOMInternalsWrapper:
 
     @property
     def total_conformers(self):
-        return self.zdata['vals'].shape[0]
+        # conformer_offsets has one entry per conformer plus a trailing
+        # sentinel (see load_chunk / _read_conformer_range), so the
+        # number of conformers is len(offsets) - 1 -- NOT vals.shape[0],
+        # which is the total number of points across all conformers.
+        return len(self.conformer_offsets) - 1
 
     @property
     def total_systems(self):
@@ -969,22 +973,44 @@ class GEOMInternalsWrapper:
         contribute -- this is uniform over *conformers*, not systems;
         see sample_systems for the other kind of uniformity).
 
-        Draws the indices, sorts them, then does a single vectorized
-        fancy-index read across vals/types/tags. Each zarr chunk touched
-        is decompressed once no matter how many sampled indices fall in
-        it -- one request per chunk touched, not one per sample.
+        Each conformer i occupies the block vals[conformer_offsets[i]:
+        conformer_offsets[i+1]], not a single row -- so this samples
+        conformer indices, resolves each to its block, flattens all
+        sampled blocks into one index array, and does a single
+        vectorized fancy-index read across vals/types/tags. Each zarr
+        chunk touched is decompressed once no matter how many sampled
+        blocks intersect it -- one request per chunk touched, not one
+        per sample.
+
+        Returns:
+            idx: the sampled conformer indices (sorted)
+            data: dict of concatenated 'vals'/'types'/'tags' arrays,
+                  points from all sampled conformers stacked together
+            block_offsets: array of length n+1 such that conformer
+                  idx[k]'s points are data['vals'][block_offsets[k]:
+                  block_offsets[k+1]] (mirrors conformer_offsets, but
+                  local to this sample)
         """
         rng = np.random.default_rng() if rng is None else rng
         idx = rng.choice(self.total_conformers, size=n, replace=replace)
         idx.sort()  # improves chunk locality; doesn't bias the sample
 
+        offsets = self.conformer_offsets
+        starts = offsets[idx]
+        ends = offsets[idx + 1]
+        flat_idx = np.concatenate([np.arange(s, e) for s, e in zip(starts, ends)])
+
         zdata = self.zdata
         data = {
-            'vals': zdata['vals'][idx],
-            'types': zdata['types'][idx],
-            'tags': zdata['tags'][idx],
+            'vals': zdata['vals'][flat_idx],
+            'types': zdata['types'][flat_idx],
+            'tags': zdata['tags'][flat_idx],
         }
-        return idx, data
+
+        lengths = ends - starts
+        block_offsets = np.concatenate([[0], np.cumsum(lengths)])
+
+        return idx, data, block_offsets
 
     def sample_systems(self, n, replace=False, rng=None,
                         load_confs=False, load_representative=True):
