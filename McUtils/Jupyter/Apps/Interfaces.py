@@ -100,7 +100,9 @@ __all__ = [
     "Layout",
     "Grid",
     "Table",
-    "Flex"
+    "Flex",
+    "Notification",
+    "Alert"
 ]
 __reload_hook__ = ["..JHTML", "..WidgetTools"]
 
@@ -3581,3 +3583,26 @@ class DelayedResult(WidgetInterface):
         """
         self.start_process()
         return self.output
+
+
+
+class ScriptComponent(WrapperComponent):
+    wrappers = {"wrapper":JHTML.Script}
+    def __init__(self, *script_args, **opts):
+        super().__init__(self.format_script(*script_args), **opts)
+    @abc.abstractmethod
+    def format_script(self, *args):
+        ...
+
+class Notification(ScriptComponent):
+    def format_script(self, title, body, request_permission=True):
+        request_permission = "true" if request_permission else "false"
+        return f"""
+                if ({request_permission} && Notification.permission !== "granted")
+                    Notification.requestPermission();
+                new Notification("{title}", {{ body: "{body}" }});
+            """
+
+class Alert(ScriptComponent):
+    def format_script(self, body):
+        return f"""alert("{body}")"""
