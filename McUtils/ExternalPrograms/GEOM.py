@@ -1003,19 +1003,91 @@ class GEOMInternalsWrapper:
         return self._conformer_identifiers
 
     def get_system_offsets(self):
+        # includes a trailing sentinel (= total conformer count) so that
+        # both start and end of any system are plain offs[i]/offs[i+1]
+        # lookups, matching how conformer_offsets already works.
         if self._system_offsets is None:
             sysids = self.system_identifiers
-            self._system_offsets = np.concatenate([[0], np.where(np.diff(sysids) != 0)[0] + 1])
+            starts = np.concatenate([[0], np.where(np.diff(sysids) != 0)[0] + 1])
+            self._system_offsets = np.concatenate([starts, [len(sysids)]])
         return self._system_offsets
 
     def system_offset(self, i, return_nconfs=True):
         offs = self.get_system_offsets()
         if return_nconfs:
-            confids = self.conformer_identifiers
-            nconfs = confids[offs[i + 1] - 1] + 1
-            return offs[i], nconfs
+            return offs[i], offs[i + 1] - offs[i]
         else:
             return offs[i]
+
+    @property
+    def total_conformers(self):
+        return self.zdata['vals'].shape[0]
+
+    @property
+    def total_systems(self):
+        return len(self.get_system_offsets()) - 1
+
+    # ---- random sampling -------------------------------------------------
+
+    def sample_conformers(self, n, replace=False, rng=None):
+        """
+        Uniformly sample `n` conformers at random from the whole dataset
+        (systems with more conformers are proportionally more likely to
+        contribute -- this is uniform over *conformers*, not systems;
+        see sample_systems for the other kind of uniformity).
+
+        Draws the indices, sorts them, then does a single vectorized
+        fancy-index read across vals/types/tags. Each zarr chunk touched
+        is decompressed once no matter how many sampled indices fall in
+        it -- one request per chunk touched, not one per sample.
+        """
+        rng = np.random.default_rng() if rng is None else rng
+        idx = rng.choice(self.total_conformers, size=n, replace=replace)
+        idx.sort()  # improves chunk locality; doesn't bias the sample
+
+        zdata = self.zdata
+        data = {
+            'vals': zdata['vals'][idx],
+            'types': zdata['types'][idx],
+            'tags': zdata['tags'][idx],
+        }
+        return idx, data
+
+    def sample_systems(self, n, replace=False, rng=None,
+                        load_confs=False, load_representative=True):
+        """
+        Uniformly sample `n` systems (molecules) at random, pulling all
+        (or a representative) conformer(s) per system.
+
+        All sampled systems' conformer ranges are flattened into a single
+        index array up front, so there is exactly one fancy-index read
+        across vals/types/tags for the entire sample -- not one read per
+        system.
+        """
+        rng = np.random.default_rng() if rng is None else rng
+        sys_idx = rng.choice(self.total_systems, size=n, replace=replace)
+        sys_idx.sort()  # improves chunk locality
+
+        offs = self.get_system_offsets()
+        starts = offs[sys_idx]
+        ends = offs[sys_idx + 1]
+        conf_idx = np.concatenate([np.arange(s, e) for s, e in zip(starts, ends)])
+
+        zdata = self.zdata
+        data = {
+            'vals': zdata['vals'][conf_idx],
+            'types': zdata['types'][conf_idx],
+            'tags': zdata['tags'][conf_idx],
+        }
+
+        if load_confs:
+            mols = [self.load_conformer(k) for k in conf_idx]
+            return sys_idx, mols, data
+        elif load_representative:
+            reps = [self.load_conformer(s) for s in starts]
+            return sys_idx, reps, data
+        else:
+            return sys_idx, data
 
     # ---- bulk conformer reads -------------------------------------------
 

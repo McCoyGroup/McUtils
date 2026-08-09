@@ -937,6 +937,7 @@ class RDMolecule(ExternalMolecule):
                     check_tag=True,
                     coords=None,
                     conf_tag=None,
+                    conformer_encoder=None,
                     **opts):
         """
         **LLM Docstring**
@@ -1019,7 +1020,7 @@ class RDMolecule(ExternalMolecule):
             else:
                 reordering = None
             graph = cls.get_mol_edge_graph(rdkit_mol, reordering=reordering)
-            coords = cls.conformer_from_smiles_tag(conf_tag, graph)
+            coords = cls.conformer_from_smiles_tag(conf_tag, graph, conformer_encoder=conformer_encoder)
             if reordering is not None:
                 new_ord = np.argsort(reordering)
                 coords = coords[reordering,]
@@ -1774,7 +1775,7 @@ class RDMolecule(ExternalMolecule):
             # mol = Chem.RenumberAtoms(mol, reordering)
             graph = self.get_edge_graph(mol, reordering=np.argsort(reordering))
             tag = self.conformer_smiles_tag(coords=coords, graph=graph, binary=binary,
-                                            encoder=conformer_encoder)
+                                            conformer_encoder=conformer_encoder)
             if binary:
                 smi = smi.encode()
                 smi = smi + b"_" + tag

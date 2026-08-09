@@ -99,7 +99,28 @@ class DistributionDataEncoder:
         return self._truncated_quantiles(values, self.distribution, self.cdf_bounds)
 
     def data_values(self, quantiles):
-        return self._untruncate_quantiles(quantiles, self.distribution, self.cdf_bounds)
+        """
+        Inverse of `quantiles`: q in [0, 1] -> x in `self.data_range`.
+
+        Clipped to `self.data_range` before returning. This isn't just
+        defensive rounding: q in [0, 1] mapping into [lower, upper] is
+        the entire definition of truncation, so any excursion outside it
+        is never a meaningful answer -- it's a grid-resolution artifact.
+        This bites hardest right at q=0/q=1 (or generally whenever
+        `distribution.cdf(lower)` isn't genuinely ~0, e.g. a hand-built
+        MixtureDistribution with a component whose tail leaks past a
+        physical boundary): ppf's grid is spaced uniformly in q, so an
+        extreme, rare corner of q-space gets almost no resolution,  and
+        interpolating through it can land far outside the valid range
+        entirely (see conversation: a component 3.5 std from the
+        boundary leaking ~1.9e-5 probability mass past it produced a
+        result 27 degrees outside a (0, 180) degree angle range).
+        """
+        raw = self._untruncate_quantiles(quantiles, self.distribution, self.cdf_bounds)
+        if not getattr(self.distribution, "periodic", False):
+            lower, upper = self.data_range
+            raw = np.clip(raw, lower, upper)
+        return raw
 
     @staticmethod
     def _encoding_types(byte_size):
@@ -542,11 +563,11 @@ class ConformerEncoder:
         return self.stream_packer.interleave_coordinate_streams(bonds, angles, dihedrals)
 
     @classmethod
-    def from_distribution_files(
+    def from_distributions(
         cls,
         byte_size,
-        angle_ppf_path=None,
-        dihedral_ppf_path=None,
+        angle_distribution=None,
+        dihedral_distribution=None,
         primary_bond_range=None,
         angle_range=None,
         dihedral_range=None,
@@ -581,14 +602,10 @@ class ConformerEncoder:
         -------
         ConformerEncoder
         """
-        angle_distribution = (
-            MixtureDistribution.load_ppf_grid(angle_ppf_path)
-            if angle_ppf_path is not None else None
-        )
-        dihedral_distribution = (
-            MixtureDistribution.load_ppf_grid(dihedral_ppf_path)
-            if dihedral_ppf_path is not None else None
-        )
+        if isinstance(angle_distribution, str):
+            angle_distribution =  MixtureDistribution.load_ppf_grid(angle_distribution)
+        if isinstance(dihedral_distribution, str):
+            dihedral_distribution =  MixtureDistribution.load_ppf_grid(dihedral_distribution)
 
         resolved_angle_range = angle_range or cls.compressed_angle_range
         resolved_dihedral_range = dihedral_range or cls.compressed_dihedral_range
