@@ -1065,7 +1065,7 @@ class GEOMInternalsWrapper:
         offs = self.get_system_offsets()
         starts = offs[sys_idx]
         ends = offs[sys_idx + 1]
-        conf_idx = np.concatenate([np.arange(s, e) for s, e in zip(starts, ends)])
+        conf_idx = np.concatenate([np.arange(s, e, dtype=int) for s, e in zip(starts, ends)])
 
         if len(conf_idx) == 0:
             data = {'vals': self.zdata['vals'][:0],
@@ -1171,7 +1171,7 @@ class GEOMInternalsWrapper:
         offsets = self.conformer_offsets
         starts = offsets[[a for a, b in runs]]
         ends = offsets[[b + 1 for a, b in runs]]
-        flat_idx = np.concatenate([np.arange(s, e) for s, e in zip(starts, ends)])
+        flat_idx = np.concatenate([np.arange(s, e, dtype=int) for s, e in zip(starts, ends)])
 
         zdata = self.zdata
         return {
