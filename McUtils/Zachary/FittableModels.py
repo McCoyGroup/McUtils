@@ -738,6 +738,7 @@ class MixtureDistribution:
 
     def __post_init__(self):
         self.weights = np.asarray(self.weights, dtype=np.float64)
+        self.weights = self.weights / np.sum(self.weights)
 
     @property
     def k(self) -> int:
