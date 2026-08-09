@@ -966,65 +966,97 @@ class GEOMInternalsWrapper:
 
     # ---- random sampling -------------------------------------------------
 
-    def sample_conformers(self, n, replace=False, rng=None):
+    def sample_conformers(self, n, replace=False, rng=None, chunk_size=None, check_runs=False):
         """
         Uniformly sample `n` conformers at random from the whole dataset
         (systems with more conformers are proportionally more likely to
         contribute -- this is uniform over *conformers*, not systems;
         see sample_systems for the other kind of uniformity).
 
+        The sample itself is always `n` fully independent scattered
+        conformer indices -- chunk_size does not change what gets
+        sampled or bias it toward correlated neighbors, it only controls
+        how the resulting reads are batched.
+
+        chunk_size: if None (default), read the entire sample in one
+        oindex call per key -- simplest, but a single call has to
+        resolve and gather across however many chunks the full scatter
+        touches. If given, the (already independently sampled) indices
+        are split into batches of at most `chunk_size` conformers each,
+        read with separate oindex calls, and concatenated -- bounding
+        how much data any single zarr call has to touch/materialize at
+        once, at the cost of issuing more (smaller) calls.
+
+        check_runs: passed through to load_chunk for each batch.
+        Defaults to False since a uniform random sample is essentially
+        never contiguous, so scanning for runs is wasted work.
+
         Each conformer i occupies the block vals[conformer_offsets[i]:
         conformer_offsets[i+1]], not a single row -- so this samples
-        conformer indices, resolves each to its block, flattens all
-        sampled blocks into one index array, and does a single
-        vectorized fancy-index read across vals/types/tags. Each zarr
-        chunk touched is decompressed once no matter how many sampled
-        blocks intersect it -- one request per chunk touched, not one
-        per sample.
+        conformer indices, then load_chunk resolves each to its block.
 
         Returns:
             idx: the sampled conformer indices (sorted)
             data: dict of concatenated 'vals'/'types'/'tags' arrays,
                   points from all sampled conformers stacked together
-            block_offsets: array of length n+1 such that conformer
-                  idx[k]'s points are data['vals'][block_offsets[k]:
-                  block_offsets[k+1]] (mirrors conformer_offsets, but
-                  local to this sample)
+            block_offsets: array such that conformer idx[k]'s points are
+                  data['vals'][block_offsets[k]:block_offsets[k+1]]
+                  (mirrors conformer_offsets, but local to this sample)
         """
         rng = np.random.default_rng() if rng is None else rng
         idx = rng.choice(self.total_conformers, size=n, replace=replace)
         idx.sort()  # improves chunk locality; doesn't bias the sample
 
+        if len(idx) == 0:
+            data = {'vals': self.load_chunk(idx, check_runs=check_runs)['vals'][:0],
+                    'types': self.zdata['types'][:0], 'tags': self.zdata['tags'][:0]}
+            return idx, data, np.array([0])
+
+        if chunk_size is None:
+            data = self.load_chunk(idx, check_runs=check_runs)
+        else:
+            # same sampled indices as above -- just batched so no single
+            # oindex call has to gather more than chunk_size conformers'
+            # worth of data at once.
+            batches = [
+                self.load_chunk(idx[i:i + chunk_size], check_runs=check_runs)
+                for i in range(0, len(idx), chunk_size)
+            ]
+            keys = batches[0].keys()
+            data = {k: np.concatenate([b[k] for b in batches], axis=0) for k in keys}
+
         offsets = self.conformer_offsets
-        starts = offsets[idx]
-        ends = offsets[idx + 1]
-        flat_idx = np.concatenate([np.arange(s, e) for s, e in zip(starts, ends)])
-
-        zdata = self.zdata
-        # zarr v2's plain __getitem__ (BasicIndexer) only accepts ints/
-        # slices; a numpy integer array needs the explicit .oindex (or
-        # .vindex) accessor for fancy/vectorized indexing.
-        data = {
-            'vals': zdata['vals'].oindex[flat_idx],
-            'types': zdata['types'].oindex[flat_idx],
-            'tags': zdata['tags'].oindex[flat_idx],
-        }
-
-        lengths = ends - starts
+        lengths = offsets[idx + 1] - offsets[idx]
         block_offsets = np.concatenate([[0], np.cumsum(lengths)])
 
         return idx, data, block_offsets
 
     def sample_systems(self, n, replace=False, rng=None,
-                        load_confs=False, load_representative=True):
+                        load_confs=False, load_representative=True,
+                        chunk_size=None, check_runs=True):
         """
         Uniformly sample `n` systems (molecules) at random, pulling all
         (or a representative) conformer(s) per system.
 
-        All sampled systems' conformer ranges are flattened into a single
-        index array up front, so there is exactly one fancy-index read
-        across vals/types/tags for the entire sample -- not one read per
-        system.
+        The sample is always `n` fully independent system indices;
+        chunk_size does not change what gets sampled, only how the
+        resulting conformer data is read.
+
+        chunk_size: if None (default), read all sampled systems'
+        conformers in one call per key. If given, the flattened
+        conformer-index array is split into batches of at most
+        `chunk_size` conformers each and read/concatenated separately,
+        bounding how much a single zarr call has to gather at once.
+        Note each sampled system's own conformers are contiguous by
+        construction, so a batch boundary can occasionally split one
+        system's block in two -- a minor loss of contiguity within that
+        one batch, not a correctness issue.
+
+        check_runs: passed through to load_chunk. Defaults to True here
+        (unlike sample_conformers) because each sampled system
+        contributes a contiguous run of conformers, so the run-scan
+        reliably finds real structure to collapse into slice reads
+        rather than scanning fruitlessly.
         """
         rng = np.random.default_rng() if rng is None else rng
         sys_idx = rng.choice(self.total_systems, size=n, replace=replace)
@@ -1033,15 +1065,24 @@ class GEOMInternalsWrapper:
         offs = self.get_system_offsets()
         starts = offs[sys_idx]
         ends = offs[sys_idx + 1]
-        conf_idx = np.concatenate([np.arange(s, e) for s, e in zip(starts, ends)])
+        conf_idx = np.concatenate([np.arange(s, e, dtype=int) for s, e in zip(starts, ends)])
 
-        #TODO: set up better v2 -> v3 migration path
-        zdata = self.zdata
-        data = {
-            'vals': zdata['vals'].oindex[conf_idx],
-            'types': zdata['types'].oindex[conf_idx],
-            'tags': zdata['tags'].oindex[conf_idx],
-        }
+        if len(conf_idx) == 0:
+            data = {'vals': self.zdata['vals'][:0],
+                    'types': self.zdata['types'][:0],
+                    'tags': self.zdata['tags'][:0]}
+        elif chunk_size is None:
+            # conf_idx holds conformer indices, not point indices --
+            # load_chunk resolves each conformer to its point range via
+            # conformer_offsets before reading vals/types/tags.
+            data = self.load_chunk(conf_idx, check_runs=check_runs)
+        else:
+            batches = [
+                self.load_chunk(conf_idx[i:i + chunk_size], check_runs=check_runs)
+                for i in range(0, len(conf_idx), chunk_size)
+            ]
+            keys = batches[0].keys()
+            data = {k: np.concatenate([b[k] for b in batches], axis=0) for k in keys}
 
         if load_confs:
             mols = [self.load_conformer(k) for k in conf_idx]
@@ -1087,10 +1128,21 @@ class GEOMInternalsWrapper:
             'tags': zdata['tags'][lo:hi],
         }
 
-    def load_chunk(self, i):
+    def load_chunk(self, i, check_runs=True):
         """Load conformer data for a single index, a contiguous range,
         or an arbitrary iterable of indices. Contiguous spans are always
-        collapsed into one zarr read instead of one-per-index."""
+        collapsed into one zarr read instead of one-per-index.
+
+        check_runs: if True (default), scan the given indices for
+        accidental contiguous runs before falling back to a scattered
+        oindex read -- worth it whenever the indices might actually be
+        block-structured (e.g. sample_conformers(chunk_size=...)).
+        If False, skip the scan entirely and treat every index as its
+        own singleton run. Set this when you already know the indices
+        are essentially all scattered (e.g. a large uniform random
+        sample) -- the scan would cost O(n) and correctly find nothing,
+        so skipping it is pure savings.
+        """
         if self._is_int(i):
             return self._read_conformer_range(i, i + 1)
 
@@ -1100,18 +1152,33 @@ class GEOMInternalsWrapper:
                 return self._read_conformer_range(0, 0)
             return self._read_conformer_range(i.start, i.stop)
 
-        runs = self._contiguous_runs(i)
-        if not runs:
+        idx = list(i)
+        if not idx:
             return self._read_conformer_range(0, 0)
+
+        runs = self._contiguous_runs(idx) if check_runs else [(x, x) for x in idx]
         if len(runs) == 1:
             start, end = runs[0]
             return self._read_conformer_range(start, end + 1)
 
-        # non-contiguous: still only one read per contiguous run,
-        # not one per index
-        parts = [self._read_conformer_range(a, b + 1) for a, b in runs]
-        keys = parts[0].keys()
-        return {k: np.concatenate([p[k] for p in parts], axis=0) for k in keys}
+        # non-contiguous: flatten every run's point range into one index
+        # array and read with a single oindex call per key. This avoids
+        # decompressing the same chunk twice when two runs happen to
+        # land in it, and avoids paying per-call overhead once per run
+        # (this branch is only reached when contiguity has already
+        # failed, so "many small runs" is the expected case, not the
+        # exception).
+        offsets = self.conformer_offsets
+        starts = offsets[[a for a, b in runs]]
+        ends = offsets[[b + 1 for a, b in runs]]
+        flat_idx = np.concatenate([np.arange(s, e, dtype=int) for s, e in zip(starts, ends)])
+
+        zdata = self.zdata
+        return {
+            'vals': zdata['vals'].oindex[flat_idx],
+            'types': zdata['types'].oindex[flat_idx],
+            'tags': zdata['tags'].oindex[flat_idx],
+        }
 
     def load_conformer(self, i):
         return self.loader.get_record(
