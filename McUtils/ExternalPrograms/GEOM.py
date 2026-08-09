@@ -15,9 +15,9 @@ import numpy as np
 import os
 
 from .. import Devutils as dev
-from .. import Iterators as itut
 from .. import Numputils as nput
 from .RDKit import RDMolecule
+from .Conformers import BondPatcher
 
 __all__ = [
     "GEOMLoader",
@@ -315,73 +315,6 @@ class GEOMLoader:
     # ------------------------------------------------------------------
     # Shared per-molecule -> per-conformer expansion with optional bond fixing
     # ------------------------------------------------------------------
-    @classmethod
-    def _get_tagged_bond_types(cls, mol):
-        a = mol.atoms
-        b = mol.bonds
-        return itut.counts(tuple(sorted((a[i], a[j]))) for i, j, _ in b)
-
-    @classmethod
-    def _bond_type_differences(cls, mol1, mol2):
-        c1 = cls._get_tagged_bond_types(mol1)
-        c2 = cls._get_tagged_bond_types(mol2)
-        diffs = {
-            k: (c1.get(k, 0) - c2.get(k, 0))
-            for k in c1.keys()
-        }
-        return {k: v for k, v in diffs.items() if v != 0}
-
-    @classmethod
-    def _find_bond_fixes(cls, mol1, mol2, allow_bond_formation=False):
-        diffs = cls._bond_type_differences(mol1, mol2)
-        coords2 = mol2.coords
-        atom_map = itut.index_groups(mol2.atoms)
-        bonds = [b[:2] for b in mol2.bonds]
-        new_bonds = []
-        dm = nput.distance_matrix(coords2)
-        for ti, tj in bonds:
-            dm[ti, tj] = dm[tj, ti] = 1000000
-        np.fill_diagonal(dm, 1000000)
-        for (t1, t2), deficit in diffs.items():
-            if deficit < 0:
-                if allow_bond_formation:
-                    continue
-                else:
-                    raise ValueError("need to handle bond formation")
-            for _ in range(deficit):
-                new_pair = cls._find_replacement_candidates(atom_map, dm, t1, t2)
-                new_bonds.append(new_pair)
-                ii, jj = new_pair
-                dm[ii, jj] = 1000000
-                dm[jj, ii] = 1000000
-        return new_bonds
-
-    @classmethod
-    def _find_replacement_candidates(cls, atom_map, dm, t1, t2):
-        i = atom_map[t1]
-        j = atom_map[t2]
-        dm = dm[np.ix_(i, j)]
-        min_pos = np.argmin(dm)
-        ri, rj = np.unravel_index(min_pos, dm.shape)
-        return i[ri], j[rj]
-
-    @classmethod
-    def _patch_bonds(cls, mol1, mol2, allow_bond_formation=False):
-        patch_check = mol1.to_smiles(remove_hydrogens=True)
-        ref_check = mol2.to_smiles(remove_hydrogens=True)
-        if ref_check != patch_check:
-            new_bonds = cls._find_bond_fixes(mol1, mol2, allow_bond_formation=allow_bond_formation)
-            if len(new_bonds) > 0:
-                mol_new = mol2.add_bonds(new_bonds,
-                                         sanitize=False,
-                                         adjust_charges=True,
-                                         reguess_bonds=False)
-            else:
-                mol_new = mol2
-            patch_check = mol_new.to_smiles(remove_hydrogens=True, compute_stereo=True)
-            return mol_new, ref_check == patch_check, (ref_check, patch_check)
-        else:
-            return mol2, True, (ref_check, patch_check)
 
     class MolStub:
         def __init__(self, rdmol):
@@ -410,7 +343,7 @@ class GEOMLoader:
                 permute = check
         if check:
             # TODO: handle patches properly
-            mol2, _, _ = cls._patch_bonds(cls.MolStub(mol0), mol2,
+            mol2, _, _ = BondPatcher.patch_bonds(cls.MolStub(mol0), mol2,
                                           allow_bond_formation=dev.str_is(check, 'broken'))
         if permute:
             _, canonical_order = mol2.to_smiles(remove_hydrogens=False, return_reordering=True)

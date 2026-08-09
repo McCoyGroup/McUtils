@@ -1,10 +1,13 @@
 
 import numpy as np
 
+from .. import Iterators as itut
+from .. import Numputils as nput
 from ..Zachary import MixtureDistribution
 
 __all__ = [
     "ConformerEncoder",
+    "BondPatcher"
 ]
 
 class DistributionDataEncoder:
@@ -633,3 +636,138 @@ class ConformerEncoder:
             angle_range=angle_range,
             dihedral_range=dihedral_range,
         )
+
+class BondPatcher:
+    # Tunable thresholds for what counts as a "simple" patch vs. a
+    # wholesale rearrangement that shouldn't be heuristically patched.
+    DEFAULT_MAX_BOND_CHANGES = 4       # absolute cap on # of bonds that differ
+    DEFAULT_MAX_BOND_FRACTION = 0.15   # cap as a fraction of total bonds
+
+    @classmethod
+    def _get_tagged_bond_types(cls, mol):
+        a = mol.atoms
+        b = mol.bonds
+        return itut.counts(tuple(sorted((a[i], a[j]))) for i, j, _ in b)
+
+    @classmethod
+    def _bond_type_differences(cls, mol1, mol2):
+        c1 = cls._get_tagged_bond_types(mol1)
+        c2 = cls._get_tagged_bond_types(mol2)
+        # union of keys, not just c1 — otherwise bond types that appear
+        # only in mol2 (e.g. from a rearrangement) are invisible here.
+        keys = c1.keys() | c2.keys()
+        diffs = {
+            k: (c1.get(k, 0) - c2.get(k, 0))
+            for k in keys
+        }
+        return {k: v for k, v in diffs.items() if v != 0}
+
+    @classmethod
+    def _is_large_scale_rearrangement(
+        cls, mol1, mol2, diffs,
+        max_bond_changes=DEFAULT_MAX_BOND_CHANGES,
+        max_bond_fraction=DEFAULT_MAX_BOND_FRACTION,
+    ):
+        """
+        Heuristic gate: decide whether the bond-type differences between
+        mol1 and mol2 are small/local enough to fix with nearest-atom
+        bond patching, or whether they indicate a broad rearrangement
+        that patching shouldn't try to touch.
+        """
+        if not diffs:
+            return False
+
+        n_changed = sum(abs(v) for v in diffs.values())
+        total_bonds = max(len(mol1.bonds), len(mol2.bonds), 1)
+
+        if n_changed > max_bond_changes:
+            return True
+        if (n_changed / total_bonds) > max_bond_fraction:
+            return True
+        return False
+
+    @classmethod
+    def _find_bond_fixes_from_diffs(cls, mol2, diffs, allow_bond_formation=False):
+        coords2 = mol2.coords
+        atom_map = itut.index_groups(mol2.atoms)
+        bonds = [b[:2] for b in mol2.bonds]
+        new_bonds = []
+        dm = nput.distance_matrix(coords2)
+        for ti, tj in bonds:
+            dm[ti, tj] = dm[tj, ti] = 1000000
+        np.fill_diagonal(dm, 1000000)
+        for (t1, t2), deficit in diffs.items():
+            if deficit < 0:
+                if allow_bond_formation:
+                    continue
+                else:
+                    raise ValueError("need to handle bond formation")
+            for _ in range(deficit):
+                new_pair = cls._find_replacement_candidates(atom_map, dm, t1, t2)
+                new_bonds.append(new_pair)
+                ii, jj = new_pair
+                dm[ii, jj] = 1000000
+                dm[jj, ii] = 1000000
+        return new_bonds
+
+    @classmethod
+    def _find_bond_fixes(cls, mol1, mol2, allow_bond_formation=False):
+        # kept for backwards compatibility with any external callers
+        diffs = cls._bond_type_differences(mol1, mol2)
+        return cls._find_bond_fixes_from_diffs(mol2, diffs, allow_bond_formation=allow_bond_formation)
+
+    @classmethod
+    def _find_replacement_candidates(cls, atom_map, dm, t1, t2):
+        i = atom_map[t1]
+        j = atom_map[t2]
+        sub_dm = dm[np.ix_(i, j)]
+        min_pos = np.argmin(sub_dm)
+        ri, rj = np.unravel_index(min_pos, sub_dm.shape)
+        return i[ri], j[rj]
+
+    @classmethod
+    def patch_bonds(
+        cls, mol1, mol2,
+        allow_bond_formation=False,
+        max_bond_changes=DEFAULT_MAX_BOND_CHANGES,
+        max_bond_fraction=DEFAULT_MAX_BOND_FRACTION,
+        raise_on_large_rearrangement=False,
+    ):
+        ref_check = mol2.to_smiles(remove_hydrogens=True)
+        patch_check = mol1.to_smiles(remove_hydrogens=True)
+
+        if ref_check == patch_check:
+            return mol2, True, (ref_check, patch_check)
+
+        diffs = cls._bond_type_differences(mol1, mol2)
+
+        if cls._is_large_scale_rearrangement(
+            mol1, mol2, diffs,
+            max_bond_changes=max_bond_changes,
+            max_bond_fraction=max_bond_fraction,
+        ):
+            if raise_on_large_rearrangement:
+                raise ValueError(
+                    f"bond differences too extensive to patch safely "
+                    f"({sum(abs(v) for v in diffs.values())} bond changes); "
+                    f"looks like a large-scale rearrangement, not a local error"
+                )
+            # Don't even attempt the nearest-atom patch heuristic here —
+            # it's only reliable for a handful of local bond errors.
+            return mol2, False, (ref_check, patch_check)
+
+        new_bonds = cls._find_bond_fixes_from_diffs(
+            mol2, diffs, allow_bond_formation=allow_bond_formation
+        )
+        if len(new_bonds) > 0:
+            mol_new = mol2.add_bonds(
+                new_bonds,
+                sanitize=False,
+                adjust_charges=True,
+                reguess_bonds=False,
+            )
+        else:
+            mol_new = mol2
+
+        patch_check = mol_new.to_smiles(remove_hydrogens=True, compute_stereo=True)
+        return mol_new, ref_check == patch_check, (ref_check, patch_check)
