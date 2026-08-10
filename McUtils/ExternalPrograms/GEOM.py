@@ -1298,3 +1298,59 @@ class GEOMInternalsWrapper:
 
         return out
 
+    @staticmethod
+    def _resolve_bins(bins):
+        """Explicit bin edges pass through unchanged. A (low, high, n)
+        tuple of two numbers and an int is treated as a shorthand for
+        n bins spanning [low, high] and expanded once via
+        np.linspace(low, high, n + 1) into edges."""
+        is_num = lambda x: isinstance(x, (int, float, np.integer, np.floating))
+        if (isinstance(bins, tuple) and len(bins) == 3
+                and is_num(bins[0]) and is_num(bins[1])
+                and isinstance(bins[2], (int, np.integer))):
+            low, high, n = bins
+            return np.linspace(low, high, n + 1)
+        return np.asarray(bins)
+
+    def histogram_vals(self, specs, block_iter=None):
+        """
+        Build histograms over (filtered) 'vals' for several named
+        quantities in a single streaming pass -- never holds more than
+        one block plus the running per-spec counts arrays in memory.
+
+        specs: dict mapping name -> (filter_fn, bins).
+            filter_fn(block) -> ndarray of the values from that block
+                you want included for this spec (block is the
+                {'tags','types','vals'} dict yielded by block_iter --
+                filter on whatever combination of keys you need, e.g.
+                `lambda b: b['vals'][b['types'] == 6]`).
+            bins: either explicit bin edges (array-like), or a
+                (low, high, n_bins) tuple -- two numbers and an int --
+                which is expanded once via
+                np.linspace(low, high, n_bins + 1). Whatever form you
+                pass, it's resolved to fixed edges up front and reused
+                for every block, so per-block counts can simply be
+                summed. (An integer alone is NOT accepted here, since
+                np.histogram would then infer different edges per
+                block from that block's own min/max, silently making
+                the accumulated result meaningless.)
+
+        block_iter: optional iterable of blocks to use instead of
+        self.block_iter() (e.g. itertools.islice(...) for a partial
+        pass).
+
+        Returns: dict name -> (counts, edges)
+        """
+        resolved = {name: (fn, self._resolve_bins(bins)) for name, (fn, bins) in specs.items()}
+        counts = {name: np.zeros(len(edges) - 1, dtype=np.int64) for name, (_, edges) in resolved.items()}
+
+        for block in (block_iter or self.block_iter()):
+            for name, (filter_fn, edges) in resolved.items():
+                selected = filter_fn(block)
+                if selected.size == 0:
+                    continue
+                c, _ = np.histogram(selected, bins=edges)
+                counts[name] += c
+
+        return {name: (counts[name], edges) for name, (_, edges) in resolved.items()}
+
