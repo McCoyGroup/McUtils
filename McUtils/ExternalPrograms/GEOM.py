@@ -1254,3 +1254,18 @@ class GEOMInternalsWrapper:
         vals = self.zdata['vals']
         for t, y, v in zip(tags.blocks, types.blocks, vals.blocks):
             yield {'tags': t, 'types': y, 'vals': v}
+
+    def get_block(self, i):
+        tags = self.zdata['tags']
+        types = self.zdata['types']
+        vals = self.zdata['vals']
+        if nput.is_int(i):
+            return {'tags': tags.blocks[i], 'types': types.blocks[i], 'vals': vals.blocks[i]}
+        else:
+            j = i[0]
+            block_data = {'tags': tags.blocks[j], 'types': types.blocks[j], 'vals': vals.blocks[j]}
+            for j in i[1:]:
+                for k,v in {'tags': tags.blocks[j], 'types': types.blocks[j], 'vals': vals.blocks[j]}.items():
+                    block_data[k] = np.concatenate([block_data[k], v], axis=0)
+            return block_data
+
