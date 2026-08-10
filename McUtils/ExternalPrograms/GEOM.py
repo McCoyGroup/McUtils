@@ -1259,13 +1259,42 @@ class GEOMInternalsWrapper:
         tags = self.zdata['tags']
         types = self.zdata['types']
         vals = self.zdata['vals']
+
         if nput.is_int(i):
             return {'tags': tags.blocks[i], 'types': types.blocks[i], 'vals': vals.blocks[i]}
-        else:
-            j = i[0]
-            block_data = {'tags': tags.blocks[j], 'types': types.blocks[j], 'vals': vals.blocks[j]}
-            for j in i[1:]:
-                for k,v in {'tags': tags.blocks[j], 'types': types.blocks[j], 'vals': vals.blocks[j]}.items():
-                    block_data[k] = np.concatenate([block_data[k], v], axis=0)
-            return block_data
+
+        idx = list(i)
+        if not idx:
+            return {'tags': tags[:0], 'types': types[:0], 'vals': vals[:0]}
+
+        # physical block j covers rows [j*chunk_len : min((j+1)*chunk_len, total_len)] --
+        # known up front from the array's chunking, no read required to get its length.
+        chunk_len = vals.chunks[0]
+        total_len = vals.shape[0]
+
+        def block_len(j):
+            lo = j * chunk_len
+            hi = min(lo + chunk_len, total_len)
+            return hi - lo
+
+        lengths = [block_len(j) for j in idx]
+        n = sum(lengths)
+
+        # allocate the exact final size once, then write each block
+        # directly into its slot -- no growing/re-copying array, no
+        # transient second full-size copy the way concatenate needs.
+        out = {
+            'tags': np.empty((n,) + tags.shape[1:], dtype=tags.dtype),
+            'types': np.empty((n,) + types.shape[1:], dtype=types.dtype),
+            'vals': np.empty((n,) + vals.shape[1:], dtype=vals.dtype),
+        }
+
+        pos = 0
+        for j, length in zip(idx, lengths):
+            out['tags'][pos:pos + length] = tags.blocks[j]
+            out['types'][pos:pos + length] = types.blocks[j]
+            out['vals'][pos:pos + length] = vals.blocks[j]
+            pos += length
+
+        return out
 
