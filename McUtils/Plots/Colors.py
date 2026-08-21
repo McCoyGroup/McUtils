@@ -41,7 +41,7 @@ class ColorPalette:
             colors = self.discretize_colormap(colors)
         if not self.is_palette_list(colors):
             raise ValueError(f"{colors} is not a color palette list")
-        self.color_strings, self.lab_colors = self.prep_color_palette(colors, color_space, lab_colors=lab_colors)
+        self.color_strings, self.rgb_colors, self.lab_colors = self.prep_color_palette(colors, color_space, lab_colors=lab_colors)
         # TODO: add more sophisticated blending
         if blend_spacings is None:
             blend_spacings = np.linspace(0, 1, len(self.color_strings))
@@ -141,12 +141,12 @@ class ColorPalette:
                 else:
                     lab_colors = colors
             if color_space != 'rgb':
-                rgb_colors = cls.color_convert(colors.T, color_space, 'rgb').T
+                rgb_array = cls.color_convert(colors.T, color_space, 'rgb').T
             else:
-                rgb_colors = colors
-            color_lists = [cls.rgb_code(c, 2) for c in rgb_colors]
+                rgb_array = colors
+            color_lists = [cls.rgb_code(c, 2) for c in rgb_array]
 
-        return tuple(color_lists), lab_colors
+        return tuple(color_lists), rgb_array, lab_colors
 
     @classmethod
     def prep_color(cls,
@@ -1000,19 +1000,58 @@ class ColorPalette:
 
         xyz = np.array([x, y, z]) / 100
         rgb = np.tensordot(self.xyz_to_rbg_array, xyz, axes=[0, 0])
-        mask = rgb > 0.0031308
-        rgb[mask] = 1.055*rgb[mask]**(1/2.4) - 0.055
-        not_mask = np.logical_not(mask)
-        rgb[not_mask] = rgb[not_mask] * 12.92
-        return rgb * 255
+        return self.linear_to_rgb(*rgb)
 
     rgb_to_xyz_array = [ # just the inverse
         [0.412453, 0.357580, 0.180423],
         [0.212671, 0.715160, 0.072169],
         [0.019334, 0.119193, 0.950227],
     ]
+    gamma_point = 0.04045
     @classmethod
-    def rgb_to_xyz(self, r, g, b):
+    def rgb_to_linear(cls, r, g, b):
+        """
+        **LLM Docstring**
+
+        Convert a color from sRGB to linear RGB (i.e. undo the sRGB
+        gamma encoding). This is the shared intermediate step used by
+        both XYZ conversion and CVD simulation.
+
+        :param r: the red channel (0-255)
+        :param g: the green channel (0-255)
+        :param b: the blue channel (0-255)
+        :return: the linear RGB color, each channel in [0, 1]
+        :rtype: np.ndarray
+        """
+        rgb = np.array([r, g, b], dtype=float) / 255
+        mask = rgb > cls.gamma_point
+        rgb[mask] = ((rgb[mask] + 0.055) / 1.055) ** 2.4
+        not_mask = np.logical_not(mask)
+        rgb[not_mask] = rgb[not_mask] / 12.92
+        return rgb
+
+    @classmethod
+    def linear_to_rgb(cls, r, g, b):
+        """
+        **LLM Docstring**
+
+        Convert a linear RGB color back to gamma-encoded sRGB.
+        Inverse of `rgb_to_linear`.
+
+        :param linear_rgb: linear RGB array/sequence, each channel in [0, 1]
+        :return: the sRGB color, each channel in [0, 255], clipped and rounded
+        :rtype: np.ndarray
+        """
+        rgb = np.array([r, g, b], dtype=float)
+        rgb = np.clip(rgb, 0, 1)
+        mask = rgb > (cls.gamma_point / 12.92)
+        rgb[mask] = 1.055 * (rgb[mask] ** (1 / 2.4)) - 0.055
+        not_mask = np.logical_not(mask)
+        rgb[not_mask] = rgb[not_mask] * 12.92
+        return rgb * 255
+
+    @classmethod
+    def rgb_to_xyz(cls, r, g, b):
         """
         **LLM Docstring**
 
@@ -1024,17 +1063,65 @@ class ColorPalette:
         :return: the XYZ color
         :rtype: np.ndarray
         """
-        if not isinstance(self.rgb_to_xyz_array, np.ndarray):
-            self.rgb_to_xyz_array = np.array(self.rgb_to_xyz_array)
+        if not isinstance(cls.rgb_to_xyz_array, np.ndarray):
+            cls.rgb_to_xyz_array = np.array(cls.rgb_to_xyz_array)
 
-        rgb = np.array([r, g, b]) / 255
-        mask = rgb > 0.04045
-        rgb[mask] = ((rgb[mask] + 0.055) / 1.055)**(2.4)
-        not_mask = np.logical_not(mask)
-        rgb[not_mask] = rgb[not_mask] / 12.92
-
-        xyz = np.tensordot(self.rgb_to_xyz_array, rgb, axes=[0, 0])
+        rgb = cls.rgb_to_linear(r, g, b)
+        xyz = np.tensordot(cls.rgb_to_xyz_array, rgb, axes=[0, 0])
         return xyz * 100
+
+    CVD_MATRICES = {
+        "protanopia": np.array([
+            [0.152286, 1.052583, -0.204868],
+            [0.114503, 0.786281, 0.099216],
+            [-0.003882, -0.048116, 1.051998],
+        ]),
+        "deuteranopia": np.array([
+            [0.367322, 0.860646, -0.227968],
+            [0.280085, 0.672501, 0.047413],
+            [-0.011820, 0.042940, 0.968881],
+        ]),
+        "tritanopia": np.array([
+            [1.255528, -0.076749, -0.178779],
+            [-0.078411, 0.930809, 0.147602],
+            [0.004733, 0.691367, 0.303900],
+        ]),
+    }
+    @classmethod
+    def simulate_cvd(cls, r, g, b, cvd_type, severity=1.0):
+        """
+        **LLM Docstring**
+
+        Simulate how an sRGB color appears under a given type of color
+        vision deficiency (CVD).
+
+        :param r: the red channel (0-255)
+        :param g: the green channel (0-255)
+        :param b: the blue channel (0-255)
+        :param cvd_type: one of "protanopia", "deuteranopia", "tritanopia"
+        :param severity: 0.0 (no deficiency) to 1.0 (full dichromacy),
+            linearly interpolated between identity and the full CVD matrix
+        :return: the simulated sRGB color, each channel in [0, 255]
+        :rtype: np.ndarray
+        """
+        linear = cls.rgb_to_linear(r, g, b)
+
+        m_full = cls.CVD_MATRICES[cvd_type]
+        m = np.eye(3) * (1 - severity) + m_full * severity
+
+        sim_linear = m @ linear
+        return cls.linear_to_rgb(sim_linear)
+
+    @classmethod
+    def relative_luminance(cls, r, g, b):
+        linear = cls.rgb_to_linear(r, g, b)  # reuse existing method
+        return np.tensordot(linear, cls.rgb_to_xyz_array[1], axes=[0, 0])
+
+    @classmethod
+    def contrast_ratio(cls, rgb1, rgb2):
+        l1, l2 = cls.relative_luminance(*rgb1), cls.relative_luminance(*rgb2)
+        lighter, darker = max(l1, l2), min(l1, l2)
+        return (lighter + 0.05) / (darker + 0.05)
 
     @classmethod
     def _rgb2hue(cls, rgb, diff, max_val):
@@ -1450,6 +1537,212 @@ class ColorPalette:
     @classmethod
     def lch_to_rgb(cls, l, a, b, xyz_scaling=None):
         return cls.lab_to_rgb(*cls.lch_to_lab(l, a, b), xyz_scaling=xyz_scaling)
+
+    def _condition_colors(self, cvd_type=None, severity=1.0):
+        """
+        **LLM Docstring**
+
+        Return the palette either unmodified (cvd_type=None) or run
+        through simulate_cvd for the given condition.
+
+        :param cvd_type: one of self.DEFAULT_CVD_TYPES, or None for original
+        :param severity: passed through to simulate_cvd
+        :return: list of (r, g, b) tuples, values in 0-255
+        :rtype: list
+        """
+        if cvd_type is None:
+            return self.rgb_colors
+        return [self.simulate_cvd(*c, cvd_type, severity) for c in self.rgb_colors]
+
+    DEFAULT_CVD_TYPES = ("protanopia", "deuteranopia", "tritanopia")
+    def plot_swatch_grid(self, cvd_types=None):
+        """
+        **LLM Docstring**
+
+        Plot the palette as flat swatch strips: one row for the original
+        colors, and one row per CVD simulation, for quick visual scanning.
+
+        :param cvd_types: iterable of CVD type names to test; defaults to
+            self.DEFAULT_CVD_TYPES
+        :return: the matplotlib Figure
+        :rtype: matplotlib.figure.Figure
+        """
+        from .Graphics import GraphicsGrid
+        from .Primitives import Rectangle
+
+        cvd_types = cvd_types or self.DEFAULT_CVD_TYPES
+        conditions = ["original"] + list(cvd_types)
+
+        grid = GraphicsGrid(nrows=1, ncols=len(conditions), spacings=[0, 0])
+        for row, cond in enumerate(conditions):
+            colors = self._condition_colors(None if cond == "original" else cond)
+            fig = grid[0, row]
+            for i, c in enumerate(colors):
+                Rectangle([[0, i/len(colors)], [1, (i+1)/len(colors)]], color=np.array(c) / 255).plot(fig)
+        return grid
+
+    def plot_line_stress_test(self, cvd_type=None, severity=1.0):
+        """
+        **LLM Docstring**
+
+        Plot the palette as thin lines (the hardest case for color
+        confusion) under a single condition.
+
+        :param cvd_type: CVD type to simulate, or None for original
+        :param severity: passed through to simulate_cvd
+        :return: the matplotlib Figure
+        :rtype: matplotlib.figure.Figure
+        """
+        from .Plots import Plot
+        colors = self._condition_colors(cvd_type, severity)
+        x = np.linspace(0, 10, 100)
+
+        fig = None
+        for i, c in enumerate(colors):
+            y = np.sin(x + i * 0.5) + i * 0.3
+            fig = Plot(x, y, color=np.array(c) / 255, linewidth=2, label=f"series {i}",
+                          plot_label=f"Line test — {cvd_type or 'original'}" if i == 0 else None,
+                          plot_legend=True,
+                          figure=fig
+                          )
+        return fig
+
+    def plot_bar_stress_test(self, cvd_type=None, severity=1.0):
+        """
+        **LLM Docstring**
+
+        Plot the palette as adjacent bars (area-based confusion, as
+        opposed to the line test's thin-stroke confusion).
+
+        :param cvd_type: CVD type to simulate, or None for original
+        :param severity: passed through to simulate_cvd
+        :return: the matplotlib Figure
+        :rtype: matplotlib.figure.Figure
+        """
+        from .Plots import BarPlot
+
+        colors = self._condition_colors(cvd_type, severity)
+
+        return BarPlot(range(len(colors)), [1] * len(colors),
+                       color=[np.array(c) / 255 for c in colors],
+                       plot_label=f"Bar test — {cvd_type or 'original'}",
+                       ticks=[[], None])
+
+    def delta_e_matrix(self, cvd_type=None, severity=1.0):
+        """
+        **LLM Docstring**
+
+        Compute the pairwise LAB distance (ΔE) matrix for the palette
+        under a given condition.
+
+        :param cvd_type: CVD type to simulate, or None for original
+        :param severity: passed through to simulate_cvd
+        :return: n x n matrix of pairwise distances
+        :rtype: np.ndarray
+        """
+        colors = self._condition_colors(cvd_type, severity)
+        n = len(colors)
+        labs = [self.rgb_to_lab(*c) for c in colors]
+
+        mat = np.zeros((n, n))
+        for i in range(n):
+            for j in range(n):
+                mat[i, j] = np.linalg.norm(labs[i] - labs[j])
+        return mat
+
+    def plot_delta_e_heatmap(self, cvd_type=None, severity=1.0, threshold=15):
+        """
+        **LLM Docstring**
+
+        Plot the pairwise ΔE matrix as a heatmap for a given condition,
+        annotated with values so failing pairs (below threshold) are
+        easy to spot.
+
+        :param cvd_type: CVD type to simulate, or None for original
+        :param severity: passed through to simulate_cvd
+        :param threshold: ΔE below this is considered a collision risk
+        :return: the matplotlib Figure
+        :rtype: matplotlib.figure.Figure
+        """
+        from .Plots import ArrayPlot
+        from .Primitives import Text
+
+        mat = self.delta_e_matrix(cvd_type, severity)
+        n = mat.shape[0]
+
+        im = ArrayPlot(mat, cmap="RdYlGn", vmin=0, vmax=30, colorbar=True,
+                       plot_label=f"ΔE pairwise — {cvd_type or 'original'} (threshold={threshold})"
+                       )
+        for i in range(n):
+            for j in range(n):
+                color = "black" if mat[i, j] > 10 else "white"
+                Text(f"{mat[i, j]:.0f}", [j, i],
+                     ha="center",
+                     va="center",
+                     color=color, fontsize=8).plot(im)
+        return im
+
+    def plot_contrast_heatmap(self):
+        """
+        **LLM Docstring**
+
+        Plot the pairwise WCAG contrast ratio matrix as a heatmap.
+        This checks legibility, independent of CVD simulation.
+
+        :return: the matplotlib Figure
+        :rtype: matplotlib.figure.Figure
+        """
+        from .Plots import ArrayPlot
+        from .Primitives import Text
+
+        colors = self.rgb_colors
+        n = len(colors)
+        mat = np.zeros((n, n))
+        for i in range(n):
+            for j in range(n):
+                mat[i, j] = self.contrast_ratio(colors[i], colors[j])
+
+        fig = ArrayPlot(mat, cmap="RdYlGn", vmin=0, vmax=7, colorbar=True,
+                  plot_label=f"WCAG contrast ratio (need ≥4.5 for text)"
+                  )
+        for i in range(n):
+            for j in range(n):
+                Text(f"{mat[i, j]:.1f}", [j, i], ha="center", va="center", fontsize=8).plot(fig)
+        return fig
+
+    def run_palette_quality_dashboard(self, cvd_types=None, threshold=15):
+        """
+        **LLM Docstring**
+
+        Generate the full test suite: swatch/line/bar grids across all
+        conditions, plus ΔE and contrast heatmaps.
+
+        :param cvd_types: iterable of CVD types to test; defaults to
+            self.DEFAULT_CVD_TYPES
+        :param threshold: ΔE pass/fail threshold, also used for the
+            printed summary
+        :return: dict of {name: Figure}
+        :rtype: dict
+        """
+        cvd_types = cvd_types or self.DEFAULT_CVD_TYPES
+        figures = {
+            "swatches": self.plot_swatch_grid(cvd_types),
+            "contrast": self.plot_contrast_heatmap(),
+        }
+
+        for cvd in cvd_types:
+            figures[f"line_{cvd}"] = self.plot_line_stress_test(cvd)
+            figures[f"bar_{cvd}"] = self.plot_bar_stress_test(cvd)
+            figures[f"delta_e_{cvd}"] = self.plot_delta_e_heatmap(cvd, threshold=threshold)
+
+        worst = min(
+            self.delta_e_matrix(cvd)[np.triu_indices(len(self.rgb_colors), k=1)].min()
+            for cvd in cvd_types
+        )
+        status = "PASS" if worst >= threshold else "FAIL"
+        print(f"[{status}] worst-case ΔE across all CVD types: {worst:.1f} (threshold={threshold})")
+
+        return figures
 
 def prep_color(
         base=None,

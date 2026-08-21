@@ -2654,7 +2654,7 @@ def composed_dihedral(d_ijka, d_ijkb): # gives d_ajkb
     d_ijkb = np.asanyarray(d_ijkb)
     diffs = d_ijkb - d_ijka
     ad = np.asanyarray(np.abs(diffs))
-    print(diffs, d_ijkb,  d_ijka)
+    # print(diffs, d_ijkb,  d_ijka)
     if ad.ndim == 0:
         if ad > np.pi:
             if diffs > 0:

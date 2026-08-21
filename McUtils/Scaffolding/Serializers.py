@@ -2711,6 +2711,7 @@ def read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False,
                    max_leaf_elements=None,
                    prefix_filter=None,
                    record=None,
+                   require_aliases=True,
                    **reader_options):
     """
     Read the NPZ-style flat-tree representation, rebuild its metadata
@@ -2729,7 +2730,13 @@ def read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False,
     visited_keys = zdata['visited_keys']
     shapes = zdata['shapes']
     array_keys = zdata['array_keys']
-    aliases = dict(zdata['aliases'].tolist())
+    if require_aliases:
+        aliases = dict(zdata['aliases'].tolist())
+    else:
+        try:
+            aliases = dict(zdata['aliases'].tolist())
+        except KeyError:
+            aliases = {}
     data = {
         'visited_keys': visited_keys,
         'key_map': {i: k for i, k in enumerate(key_names)},
