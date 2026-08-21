@@ -341,6 +341,7 @@ class RDMolecule(ExternalMolecule):
         :rtype: RDMolecule
         """
         Chem = cls.chem_api() # to get nice errors
+        cls._prep_mol(rdmol)
         rdmol = Chem.AddHs(rdmol, explicitOnly=not add_implicit_hydrogens)
         if charge is None:
             charge = Chem.GetFormalCharge(rdmol)
