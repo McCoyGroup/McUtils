@@ -23,6 +23,7 @@ class CoordinateSystem:
     to unify internal, cartesian, derived type coordinates
 
     """
+    name_format = None
     def __init__(self,
                  name=None, basis=None, matrix=None, inverse=None,
                  dimension=None, origin=None, coordinate_shape=None,

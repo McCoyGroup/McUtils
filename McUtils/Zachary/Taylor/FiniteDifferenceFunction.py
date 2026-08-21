@@ -2,6 +2,7 @@
 Provides a general, convenient FiniteDifferenceFunction class to handle all of our difference FD imps
 """
 import numpy as np, scipy.sparse as sparse, math
+from ... import Numputils as nput
 from ..Mesh import Mesh, MeshType
 __reload_hook__ = [ '..Mesh' ]
 
@@ -651,7 +652,7 @@ class IrregularGridFiniteDifference(FiniteDifference1D):
         return UnevenFiniteDifferenceWeights(m, z, x).T
 
     @classmethod
-    def finite_difference_data(cls, grid, order, stencil, end_point_precision):
+    def finite_difference_data(cls, grid, order, stencil, end_point_precision, return_all_orders=False):
         """Constructs a finite-difference function that computes the nth derivative with a given width
 
                 :param deriv:
@@ -678,7 +679,21 @@ class IrregularGridFiniteDifference(FiniteDifference1D):
             ]
         widths = [(outer_stencil, 0), (left_pad, right_pad), (0, outer_stencil)]
 
-        return FiniteDifferenceData(coeffs, widths, order)
+        if return_all_orders:
+            all_orders = []
+            for i in range(order):
+                coeffs = [
+                    [c[i] for c in coeff_block]
+                    for coeff_block in coeffs
+                ]
+                all_orders.append(FiniteDifferenceData(coeffs, widths, order))
+            return all_orders
+        else:
+            coeffs = [
+                [c[-1] for c in coeff_block]
+                for coeff_block in coeffs
+            ]
+            return FiniteDifferenceData(coeffs, widths, order)
 
 ##########################################################################################
 #
@@ -1058,9 +1073,11 @@ class FiniteDifferenceMatrix:
             c_left, c_center, c_right = [np.array(x, dtype=dtype) / (h**o) for x in self.weights]
         else:
             c_left, c_center, c_right = [np.array(x, dtype=dtype) for x in self.weights]
+        if c_left.shape[0] + c_center.shape[0] + c_right.shape[0] != npts:
+            raise ValueError("weights don't match points")
         mode = self.mode
 
-        if isinstance(c_center[0], (int, float, np.integer, np.floating)):
+        if nput.is_numeric(c_center[0]):
             fdm = self._fdm_regular(c_left, c_center, c_right, npts, only_core, only_center, mode, dtype)
         else:
             fdm = self._fdm_irregular(c_left, c_center, c_right, npts, only_core, only_center, mode, dtype)
@@ -1093,10 +1110,7 @@ class FiniteDifferenceMatrix:
         lcc = len(c_center)
         if only_center:
             shape = (1, npts)
-            if mode == "sparse":
-                fdm = sparse.lil_matrix(shape)
-            else:
-                fdm = np.zeros(shape)
+            fdm = np.zeros(shape)
             lcf = len(c_left)
             mid = math.floor(lcc)
             x = c_center[mid]
@@ -1105,28 +1119,27 @@ class FiniteDifferenceMatrix:
         elif only_core:
             lcf = len(c_left)
             shape = (npts - lcc + (lcc % 2), npts)
-            if mode == "sparse":
-                fdm = sparse.lil_matrix(shape)
-            else:
-                fdm = np.zeros(shape)
+            fdm = np.zeros(shape)
             for i, x in enumerate(c_center):
                 p = lcf+i
                 fdm[i, p:p+lcc] = x
         else:
             shape = (npts, npts)
-            if mode == "sparse":
-                fdm = sparse.lil_matrix(shape)
-            else:
-                fdm = np.zeros(shape)
+            fdm = np.zeros(shape)
             lcf = len(c_left)
             for i, x in enumerate(c_left):
-                fdm[i, i:i+lcf] = x
+                fdm[i, i:i+len(x)] = x
             for j, x in enumerate(c_center):
-                fdm[j, j:j+lcc] = x
+                j = j + lcf
+                o_l = len(x) // 2
+                o_r = o_l + (len(x) % 2)
+                fdm[j, j-o_l:j+o_r] = x
             lcr = len(c_right)
             for k, x in enumerate(c_right):
-                fdm[-k, -(k+lcr):-k] = x
-
+                k = k + lcf + lcc
+                fdm[k, -len(x):] = x
+        if mode == 'sparse':
+            fdm = sparse.lil_matrix(fdm)
         return fdm
 
     @classmethod

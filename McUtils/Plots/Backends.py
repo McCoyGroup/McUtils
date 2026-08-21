@@ -333,6 +333,26 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
         raise NotImplementedError(...)
     def adjust_view_limits(self):
         raise NotImplementedError(...)
+    def get_autoscale_on(self):
+        raise NotImplementedError(...)
+    def set_autoscale_on(self, is_on):
+        raise NotImplementedError(...)
+
+    class _limit_adjuster_context:
+        def __init__(self, ax, adjust_limits):
+            self.ax = ax
+            self.adjust_limits = adjust_limits
+            self._cur = None
+        def __enter__(self):
+            if self.adjust_limits is not None:
+                self._cur = self.ax.get_autoscale_on()
+                self.ax.set_autoscale_on(self.adjust_limits)
+        def __exit__(self, exc_type, exc_val, exc_tb):
+            if self._cur is not None:
+                self.ax.set_autoscale_on(self._cur)
+    def adjustable_limits_enabled(self, adjust_limits):
+        return self._limit_adjuster_context(self, adjust_limits)
+
 
     @abc.abstractmethod
     def get_xlabel(self):
@@ -2135,6 +2155,10 @@ class MPLAxes(GraphicsAxes):
     def adjust_view_limits(self):
         self.obj.relim()
         self.obj.autoscale_view()
+    def get_autoscale_on(self):
+        return self.obj.get_autoscale_on()
+    def set_autoscale_on(self, is_on):
+        return self.obj.set_autoscale_on(is_on)
 
     def get_xlabel(self):
         """
@@ -2453,7 +2477,7 @@ class MPLAxes(GraphicsAxes):
 
         return setp(obj, **props)
 
-    def draw_line(self, points, **styles):
+    def draw_line(self, points, adjust_limits=None, color=None, linewidth=None, s=None, edgecolors=None, **styles):
         """
         **LLM Docstring**
 
@@ -2465,13 +2489,22 @@ class MPLAxes(GraphicsAxes):
         points = np.asanyarray(points)
         if points.ndim == 2:
             points = points[np.newaxis]
-        return self.get_plotter('plot')(
-            points[:, 0],
-            points[:, 1],
-            **styles
-        )
+        if edgecolors is not None and color is None:
+            color = edgecolors
+        if color is not None:
+            styles['color'] = color
+        if s is not None and linewidth is None:
+            linewidth = s[0]
+        if linewidth is not None:
+            styles['linewidth'] = linewidth
+        with self.adjustable_limits_enabled(adjust_limits):
+            return self.get_plotter('plot')(
+                points[:, 0],
+                points[:, 1],
+                **styles
+            )
 
-    def draw_disk(self, points, radius=None, s=None, **styles):
+    def draw_disk(self, points, radius=None, s=None, adjust_limits=None, **styles):
         """
         **LLM Docstring**
 
@@ -2487,13 +2520,14 @@ class MPLAxes(GraphicsAxes):
             points = points[np.newaxis]
         if radius is not None and s is None:
             s = radius * 100
-        return self.get_plotter('scatter')(
-            points[:, 0],
-            points[:, 1],
-            **styles
-        )
+        with self.adjustable_limits_enabled(adjust_limits):
+            return self.get_plotter('scatter')(
+                points[:, 0],
+                points[:, 1],
+                **styles
+            )
 
-    def draw_rect(self, points, **styles):
+    def draw_rect(self, points, adjust_limits=None, **styles):
         """
         **LLM Docstring**
 
@@ -2517,9 +2551,10 @@ class MPLAxes(GraphicsAxes):
             for a,w,h in zip(anchors, widths, heights)
         ], **styles)
 
-        self.obj.add_collection(rects)
+        with self.adjustable_limits_enabled(adjust_limits):
+            return self.obj.add_collection(rects, autolim=adjust_limits or (adjust_limits is None))
 
-    def draw_poly(self, points, **styles):
+    def draw_poly(self, points, adjust_limits=None, **styles):
         """
         **LLM Docstring**
 
@@ -2538,9 +2573,10 @@ class MPLAxes(GraphicsAxes):
             patches.Polygon(pt) for pt in points
         ], **styles)
 
-        return coll.add_collection(polys)
+        with self.adjustable_limits_enabled(adjust_limits):
+            return self.obj.add_collection(polys, autolim=adjust_limits or (adjust_limits is None))
 
-    def draw_arrow(self, points, **styles):
+    def draw_arrow(self, points, adjust_limits=None, **styles):
         """
         **LLM Docstring**
 
@@ -2552,13 +2588,14 @@ class MPLAxes(GraphicsAxes):
         points = np.asanyarray(points)
         if points.ndim == 2:
             points = points[np.newaxis]
-        return self.get_plotter('arrow')(
-            *points[0],
-            *(points[1] - points[0]),
-            **styles
-        )
+        with self.adjustable_limits_enabled(adjust_limits):
+            return self.get_plotter('arrow')(
+                *points[0],
+                *(points[1] - points[0]),
+                **styles
+            )
 
-    def draw_text(self, points, vals, **styles):
+    def draw_text(self, points, vals, adjust_limits=None, **styles):
         """
         **LLM Docstring**
 
@@ -2579,10 +2616,11 @@ class MPLAxes(GraphicsAxes):
             o.partition("_")[-1] if o.startswith('font_') else o:v
             for o,v in styles.items()
         }
-        text = [
-             text_plotter(*pt, txt, **styles)
-             for pt, txt in zip(points, vals)
-        ]
+        with self.adjustable_limits_enabled(adjust_limits):
+            text = [
+                 text_plotter(*pt, txt, **styles)
+                 for pt, txt in zip(points, vals)
+            ]
 
         return text
 
@@ -2728,7 +2766,7 @@ class MPLAxes(GraphicsAxes):
         ax.set_xlim(new_xmin - pad * xspan, new_xmax + pad * xspan)
         ax.set_ylim(new_ymin - pad * yspan, new_ymax + pad * yspan)
         ax.set_autoscale_on(False)  # freeze after first path is added
-    def draw_path(self, commands, **styles):
+    def draw_path(self, commands, adjust_limits=None, **styles):
         """
         **LLM Docstring**
 
@@ -2745,7 +2783,8 @@ class MPLAxes(GraphicsAxes):
             bbox.x0, bbox.x1,
             bbox.y0, bbox.y1
         )
-        self.obj.add_patch(path)
+        with self._limit_adjuster(adjust_limits):
+            self.obj.add_patch(path, autolim=adjust_limits or (adjust_limits is None))
         return path
 
 class MPLAxes3D(MPLAxes):

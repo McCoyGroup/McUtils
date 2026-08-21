@@ -138,12 +138,14 @@ def PysisCalculator(
     :rtype: PysisyphusTermCalculator
     """
     from .PysisyphusCalculator import PysisyphusTermCalculator
+    from pysisyphus.config import OUT_DIR_DEFAULT # usually patched
 
     return PysisyphusTermCalculator(
         energy_evaluator,
         batched_orders=batched_orders,
         distance_units=distance_units,
         energy_units=energy_units,
+        out_dir=OUT_DIR_DEFAULT,
         **kwargs
     )
 

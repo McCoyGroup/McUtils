@@ -1196,6 +1196,7 @@ class GraphicsBase(metaclass=ABCMeta):
                      orientation='vertical',
                      origin=None,
                      tick_padding=40,
+                     alignment=None,
                      colorbar_axes=None,
                      cax=None,
                      **kw
@@ -1236,7 +1237,8 @@ class GraphicsBase(metaclass=ABCMeta):
                     size=size,
                     tick_padding=tick_padding,
                     origin=origin,
-                    orientation=orientation
+                    orientation=orientation,
+                    alignment=alignment
                 )
         if self._colorbar_axis is None:
             self._colorbar_axis = colorbar_axes
@@ -2197,6 +2199,34 @@ class Graphics(GraphicsBase):
         self._update_copy_opt('colorbar', value)
         self._prop_manager.colorbar = value
 
+    def _handle_add_legend(self):
+        if self.plot_legend or any(hasattr(c, 'plot_legend') and c.plot_legend for c in self.children):
+            pls = self.plot_legend
+            ls = self.legend_style if self.legend_style is not None else {}
+            PlotLegend.check_styles(ls)
+            if isinstance(pls, PlotLegend):
+                self.axes.legend(handles=pls, **pls.opts, **ls)
+            else:
+                self.axes.legend(**ls)
+    def _handle_add_colorbar(self):
+        if self._colorbar_axis is None:
+            if self.colorbar is True:
+                self._colorbar_axis = self.add_colorbar()
+            elif isinstance(self.colorbar, dict):
+                self._colorbar_axis = self.add_colorbar(**self.colorbar)
+        elif self.colorbar is None:
+            pass
+        elif self._colorbar_axis is not None:
+            self.backend.remove_axes(self._colorbar_axis)
+    def _handle_set_ticks(self):
+        if 'ticks' in self._init_opts:
+            self.ticks = self._init_opts['ticks']
+    def _prep_show_steps(self):
+        return [
+            self._handle_add_legend,
+            self._handle_add_colorbar,
+            self._handle_set_ticks,
+        ]
     def _prep_show(self, parent=False):
         """
         **LLM Docstring**
@@ -2209,16 +2239,8 @@ class Graphics(GraphicsBase):
         """
         super()._prep_show(parent=parent)
         if parent:
-            if self.plot_legend or any(hasattr(c, 'plot_legend') and c.plot_legend for c in self.children):
-                pls = self.plot_legend
-                ls = self.legend_style if self.legend_style is not None else {}
-                PlotLegend.check_styles(ls)
-                if isinstance(pls, PlotLegend):
-                    self.axes.legend(handles=pls, **pls.opts, **ls)
-                else:
-                    self.axes.legend(**ls)
-            if 'ticks' in self._init_opts:
-                self.ticks = self._init_opts['ticks']
+            for step in self._prep_show_steps():
+                step()
 
     def get_padding_offsets(self):
         """

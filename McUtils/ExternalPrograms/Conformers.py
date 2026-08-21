@@ -10,6 +10,143 @@ __all__ = [
     "BondPatcher"
 ]
 
+_SOURCE_FLOAT_DTYPES = {32: np.float32, 64: np.float64}
+_SOURCE_UINT_DTYPES  = {32: np.uint32,  64: np.uint64}
+def max_exp_field_of(exp_bits):
+    return (1 << exp_bits) - 1
+
+IEEE754_PARAMS = {
+    2:  dict(exp_bits=5,  mant_bits=10),   # half
+    4:  dict(exp_bits=8,  mant_bits=23),   # single
+    8:  dict(exp_bits=11, mant_bits=52),   # double
+}
+def make_ufloat_codec(total_bits, exp_bits, reserved_bits=0, source_bits=None):
+    """
+    Build pack/unpack functions for a custom unsigned-float format:
+    - exp_bits bits of exponent (IEEE-style bias)
+    - (total_bits - exp_bits - reserved_bits) bits of mantissa (implicit leading 1)
+    - no sign bit (values must be >= 0)
+    - reserved_bits: top bits of the container left as 0 / free for external
+      use (e.g. a type tag). Taken out of the mantissa, not the exponent.
+
+    source_bits: precision to do the intermediate math in (32 or 64).
+    Auto-picked to be the smallest that can hold the requested mantissa
+    if not given.
+    """
+    mant_bits = total_bits - exp_bits - reserved_bits
+    if mant_bits < 1:
+        raise ValueError("Not enough bits left for a mantissa after "
+                          "exponent and reserved bits")
+
+    if source_bits is None:
+        source_bits = 32 if mant_bits <= 23 else 64
+    if mant_bits > {32: 23, 64: 52}[source_bits]:
+        raise ValueError(f"mant_bits={mant_bits} exceeds float{source_bits}'s "
+                          f"{ {32: 23, 64: 52}[source_bits] }-bit mantissa")
+
+    src_float = _SOURCE_FLOAT_DTYPES[source_bits]
+    src_uint = _SOURCE_UINT_DTYPES[source_bits]
+    src_exp_bits = {32: 8, 64: 11}[source_bits]
+    src_mant_bits = {32: 23, 64: 52}[source_bits]
+    src_bias = (1 << (src_exp_bits - 1)) - 1
+
+    bias = (1 << (exp_bits - 1)) - 1
+    max_exp_field = (1 << exp_bits) - 1
+    shift = src_mant_bits - mant_bits
+    usable_bits = total_bits - reserved_bits   # exponent + mantissa span
+    usable_mask = (1 << usable_bits) - 1       # masks off any caller-set tag bits
+
+    # container is sized by the *nominal* total_bits, so reserved bits
+    # still physically live in the same word (e.g. uint16 for total_bits=16)
+    for container in (np.uint8, np.uint16, np.uint32, np.uint64):
+        if total_bits <= np.dtype(container).itemsize * 8:
+            break
+    else:
+        raise ValueError("total_bits too large")
+
+    def to_ufloat(x):
+        x = np.asarray(x, dtype=src_float)
+        if np.any(x < 0):
+            raise ValueError("ufloat requires non-negative values")
+
+        bits = x.view(src_uint)
+        exp_src = ((bits >> src_mant_bits) & ((1 << src_exp_bits) - 1)).astype(np.int64)
+        mant_src = (bits & ((1 << src_mant_bits) - 1)).astype(np.int64)
+
+        exp_new = exp_src - src_bias + bias
+
+        if shift > 0:
+            mant_new = (mant_src + (1 << (shift - 1))) >> shift
+            carry = mant_new >> mant_bits
+            exp_new += carry
+            mant_new &= (1 << mant_bits) - 1
+        else:
+            mant_new = mant_src << (-shift)
+
+        exp_new = np.where(exp_new >= max_exp_field, max_exp_field, exp_new)
+        exp_new = np.where(exp_new <= 0, 0, exp_new)
+        mant_new = np.where(exp_new == 0, 0, mant_new)
+
+        # top reserved_bits are 0 by construction: max possible value here
+        # is (2^exp_bits - 1) << mant_bits | (2^mant_bits - 1) == 2^usable_bits - 1
+        out = (exp_new.astype(container) << mant_bits) | mant_new.astype(container)
+        return out.astype(container)
+
+    def from_ufloat(bits):
+        bits = np.asarray(bits, dtype=container) & container(usable_mask)  # strip any tag
+        exp_field = (bits >> mant_bits) & max_exp_field
+        mant_field = bits & ((1 << mant_bits) - 1)
+
+        exp_src = exp_field.astype(np.int64) - bias + src_bias
+        mant_src = mant_field.astype(np.int64) << shift
+
+        out_bits = (exp_src.astype(src_uint) << src_mant_bits) | mant_src.astype(src_uint)
+        return out_bits.view(src_float)
+
+    sig_bits = mant_bits + 1
+    info = {
+        "total_bits": total_bits,
+        "exp_bits": exp_bits,
+        "mant_bits": mant_bits,
+        "reserved_bits": reserved_bits,
+        "usable_bits": usable_bits,
+        "tag_shift": usable_bits,        # caller: tagged = packed | (tag << tag_shift)
+        "bias": bias,
+        "container_dtype": container,
+        "source_dtype": src_float,
+        "sig_decimal_digits": sig_bits * np.log10(2),
+        "machine_eps": 2.0 ** -sig_bits,
+    }
+    return to_ufloat, from_ufloat, info
+
+
+def ieee_ufloat_codec(byte_size, reserved_bits=0):
+    if byte_size not in IEEE754_PARAMS:
+        raise ValueError(f"No IEEE 754 standard format for {byte_size} bytes; "
+                          f"supported: {sorted(IEEE754_PARAMS)}")
+    params = IEEE754_PARAMS[byte_size]
+    total_bits = byte_size * 8
+    target_mant_bits = total_bits - params["exp_bits"] - reserved_bits
+
+    if target_mant_bits <= 23:
+        source_bits = 32
+    elif target_mant_bits <= 52:
+        source_bits = 64
+    else:
+        raise ValueError(f"needs {target_mant_bits} mantissa bits; no safe source")
+
+    return make_ufloat_codec(total_bits=total_bits,
+                              exp_bits=params["exp_bits"],
+                              reserved_bits=reserved_bits,
+                              source_bits=source_bits)
+
+codec_cache = {}
+def ufloat_converters(bit_size, reserved_bits=0, cache=None):
+    if cache is None: cache = codec_cache
+    if (bit_size, reserved_bits) not in codec_cache:
+        codec_cache[(bit_size, reserved_bits)] = ieee_ufloat_codec(bit_size // 8, reserved_bits=reserved_bits)
+    return codec_cache[(bit_size, reserved_bits)]
+
 class DistributionDataEncoder:
     def __init__(self, data_range, byte_size=None, distribution=None, assume_in_range=False):
         self.data_range = data_range

@@ -292,7 +292,11 @@ class Plot(Graphics):
         "transform", "url", "visible", "zorder"
     }
 
-    opt_keys = Graphics.opt_keys | {"plot_style", "display_format", 'prep_colors', 'color_value_scaling'}
+    opt_keys = Graphics.opt_keys | {
+        "plot_style", "display_format",
+        'prep_colors', 'color_value_scaling',
+        "adjust_limits"
+    }
 
     default_plot_style = {}
     default_colormap = 'viridis'
@@ -387,6 +391,7 @@ class Plot(Graphics):
         'method',
         'plot_style',
         'display_format',
+        'adjust_limits',
         'insert_default_styles'
     }
     @classmethod
@@ -468,11 +473,15 @@ class Plot(Graphics):
         :return: the backend graphics object
         """
         data, plot_style, context = self._prep_data_and_opts(data, plot_style)
-        graphics = self._method(*data, **plot_style)
-        graphics = self._adjust_graphics(graphics, data, plot_style, context)
+        adjust_limits = plot_style.pop('adjust_limits', None)
+        with self.axes.adjustable_limits_enabled(adjust_limits):
+            graphics = self._method(*data, **plot_style)
+            graphics = self._adjust_graphics(graphics, data, plot_style, context)
         return graphics
 
-    def prep_styles(self, c=None, edgecolors=None, facecolors=None, cmap=None, prep_colors=False, color_value_rescaling=True, **styles):
+    def prep_styles(self, c=None, edgecolors=None, facecolors=None, cmap=None, prep_colors=False,
+                    color_value_rescaling=True,
+                    **styles):
         """
         **LLM Docstring**
 
@@ -1053,7 +1062,7 @@ class HorizontalLinePlot(Plot):
             x = 1.0
         if isinstance(x, (int, float)):
             x = [0, x]
-        return (x,) + tuple(y)
+        return (y,) + tuple(x)
 @Plot.register
 class PolygonPlot(Plot):
     method = 'fill'
@@ -1785,10 +1794,10 @@ class Plot3D(Graphics3D):  # basically a mimic of the Plot class but inheriting 
         """
         self._initialized = True
         self.set_options(**self.plot_opts)
-        if self.colorbar:
-            self.add_colorbar()
-        elif isinstance(self.colorbar, dict):
+        if isinstance(self.colorbar, dict):
             self.add_colorbar(**self.colorbar)
+        elif self.colorbar:
+            self.add_colorbar()
 
     def _get_plot_data(self, func, xrange, yrange):
         """
