@@ -864,11 +864,12 @@ class BondPatcher:
 
     @classmethod
     def patch_bonds(
-        cls, mol1, mol2,
-        allow_bond_formation=False,
-        max_bond_changes=DEFAULT_MAX_BOND_CHANGES,
-        max_bond_fraction=DEFAULT_MAX_BOND_FRACTION,
-        raise_on_large_rearrangement=False,
+            cls, mol1, mol2,
+            allow_bond_formation=False,
+            max_bond_changes=DEFAULT_MAX_BOND_CHANGES,
+            max_bond_fraction=DEFAULT_MAX_BOND_FRACTION,
+            raise_on_large_rearrangement=False,
+            patch_hydrogens=False,
     ):
         ref_check = mol2.to_smiles(remove_hydrogens=True)
         patch_check = mol1.to_smiles(remove_hydrogens=True)
@@ -877,6 +878,9 @@ class BondPatcher:
             return mol2, True, (ref_check, patch_check)
 
         diffs = cls._bond_type_differences(mol1, mol2)
+        if not patch_hydrogens:
+            for k in list(diffs.keys()):
+                if "H" in k: diffs.pop(k)
 
         if cls._is_large_scale_rearrangement(
             mol1, mol2, diffs,
