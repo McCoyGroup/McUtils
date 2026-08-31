@@ -3849,7 +3849,7 @@ class RDMolecule(ExternalMolecule):
         return np.array(flat_z).astype(dtype)
 
     @classmethod
-    def _plain_decode(cls, buffer, byte_size):
+    def _plain_decode(cls, buffer, byte_size, return_streams=False):
         """
         **LLM Docstring**
 
@@ -3863,11 +3863,11 @@ class RDMolecule(ExternalMolecule):
         :rtype: np.ndarray
         """
         if byte_size == 16:
-            dtype = np.float16
+            dtype = np.float16 if return_streams else np.uint16
         elif byte_size == 32:
-            dtype = np.float32
+            dtype = np.float32 if return_streams else np.uint32
         elif byte_size == 64:
-            dtype = np.float64
+            dtype = np.float64 if return_streams else np.uint64
         elif byte_size == 128:
             dtype = np.float128
         else:
@@ -3903,14 +3903,15 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def _compressed_decode(
-        cls,
-        buffer,
-        byte_size,
-        conformer_encoder=None,
-        primary_bond_range=None,
-        angle_range=None,
-        dihedral_range=None,
-        pack_angles=False,
+            cls,
+            buffer,
+            byte_size,
+            conformer_encoder=None,
+            primary_bond_range=None,
+            angle_range=None,
+            dihedral_range=None,
+            pack_angles=False,
+            return_streams=False,
     ):
         """
         Decode a flattened Z-matrix via a ConformerEncoder. Same
@@ -3923,7 +3924,7 @@ class RDMolecule(ExternalMolecule):
                 angle_range=angle_range,
                 dihedral_range=dihedral_range,
             )
-        return conformer_encoder.decode(buffer, pack_angles=pack_angles)
+        return conformer_encoder.decode(buffer, pack_angles=pack_angles, return_streams=return_streams)
 
     default_conformer_compression = 'compressed'
     default_tag_byte_size = 16
@@ -4042,9 +4043,10 @@ class RDMolecule(ExternalMolecule):
 
     @classmethod
     def conformer_from_smiles_tag(
-        cls, tag, graph, decoder=None, byte_size=None,
-        byte_encoding=None, zmatrix=None,
-        conformer_encoder=None,
+            cls, tag, graph, decoder=None, byte_size=None,
+            byte_encoding=None, zmatrix=None,
+            conformer_encoder=None,
+            return_streams=False
     ):
         """
         **LLM Docstring**
@@ -4081,8 +4083,8 @@ class RDMolecule(ExternalMolecule):
         if byte_size is None:
             byte_size = (
                 conformer_encoder.byte_size
-                if conformer_encoder is not None
-                else cls.default_tag_byte_size
+                    if conformer_encoder is not None else
+                cls.default_tag_byte_size
             )
         if byte_encoding is None:
             byte_encoding = cls.default_tag_byte_encoding
@@ -4102,24 +4104,29 @@ class RDMolecule(ExternalMolecule):
         if decoder is None:
             decoder = cls.default_conformer_compression
         if dev.str_is(decoder, 'plain'):
-            flat_z = cls._plain_decode(buffer, byte_size)
+            flat_z = cls._plain_decode(buffer, byte_size, return_streams=return_streams)
         elif decoder == 'compressed':
             flat_z = cls._compressed_decode(
                 buffer, byte_size,
                 conformer_encoder=conformer_encoder,
                 pack_angles=True,
+                return_streams=return_streams
             )
         elif decoder == 'precision':
             flat_z = cls._compressed_decode(
                 buffer, byte_size,
                 conformer_encoder=conformer_encoder,
                 pack_angles=False,
+                return_streams=return_streams
             )
         else:
-            flat_z = decoder(buffer, byte_size)
+            flat_z = decoder(buffer, byte_size, return_streams=return_streams)
         zcoords = coordops.zmatrix_from_values(flat_z, partial_embedding=True)
-        coords = coordops.zmatrix_to_cartesian(zcoords, np.array(zmatrix))  # very borked
-        return coords
+        if not return_streams:
+            coords = coordops.zmatrix_to_cartesian(zcoords, np.array(zmatrix))
+            return coords
+        else:
+            return zcoords
 
     @classmethod
     def get_mol_edge_graph(cls, mol, bonds=None, reordering=None):

@@ -8,8 +8,10 @@ from .. import Numputils as nput
 from .RDKit import RDMolecule
 import numpy as np
 import hashlib
-import itertools
 import json
+import io
+import os
+import tarfile
 
 import re
 from typing import (
@@ -41,11 +43,74 @@ __all__ = [
     "SMILESTokenizer"
 ]
 
+class _FileWrapper:
+    def __init__(self, stream: 'File', mode: str = 'rb', encoding: str = 'utf-8'):
+        self.stream = stream
+        self.mode = mode
+        self.encoding = encoding
+    def read(self, n=None):
+        if n is None:
+            return self.stream.read()
+        else:
+            return self.stream.read(n)
+    def readline(self, n=None):
+        return self.stream.readline(n)
+    def seek(self, n, *args):
+        self.stream.seek(n, *args)
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        ...
+
+def _memmap_npy_member(tar_path, member):
+    """
+    Memory-maps a `.npy` array stored as a member of an *uncompressed* tar
+    file, directly at its byte offset in the underlying archive -- no
+    extraction, no temp file. This only works because tar member data is
+    stored as a single contiguous, unpadded run of bytes at a fixed file
+    offset when the archive itself isn't compressed.
+    """
+    with open(tar_path, "rb") as fh:
+        fh.seek(member.offset_data)
+        version = np.lib.format.read_magic(fh)
+        if version[0] == 1:
+            shape, fortran_order, dtype = np.lib.format.read_array_header_1_0(fh)
+        elif version[0] == 2:
+            shape, fortran_order, dtype = np.lib.format.read_array_header_2_0(fh)
+        else:
+            # fall back to numpy's own (private but stable) dispatcher for
+            # any future format versions
+            shape, fortran_order, dtype = np.lib.format._read_array_header(fh, version)
+        data_offset = fh.tell()
+    order = "F" if fortran_order else "C"
+    return np.memmap(tar_path, dtype=dtype, mode="r", offset=data_offset, shape=shape, order=order)
+
 class SMILESSupplier:
+    """
+    Provides fast, offset-indexed random access into large `.smi` files.
+
+    Normally this needs *two* files: the `.smi` file itself and a `.npy`
+    array of line-start byte offsets (see `known_suppliers`, e.g.
+    `ZINC20.smi` + `ZINC20_idx.npy`). It can also transparently load a
+    single packaged `line_index_smiles_database` archive -- an uncompressed
+    tar file bundling both together plus a little metadata -- produced by
+    `build_line_index_smiles_database`/`package_known_supplier`. Just pass
+    the archive's path as `smiles_file` and leave `line_indices` unset:
+
+        supplier = SMILESSupplier("ZINC20.lismi")
+        with supplier:
+            for smi in supplier.consume_iter(upto=10):
+                print(smi)
+    """
+
+    # canonical member names inside a packaged `line_index_smiles_database` archive
+    LISMI_SMI_MEMBER = "lines.smi"
+    LISMI_IDX_MEMBER = "line_indices.npy"
+    LISMI_META_MEMBER = "meta.json"
+
     def __init__(self, smiles_file, line_indices=None, name=None,
                  size=int(1e3),
                  split_idx=0,
                  split_char=None,
+                 managed_streams=None,
                  line_parser=None):
         """
         **LLM Docstring**
@@ -87,6 +152,8 @@ class SMILESSupplier:
         self.split_idx = split_idx
         self._line_parser = line_parser
         self.line_parser = line_parser
+        self.managed_streams = managed_streams
+        self._exit_codes = (None, None, None)
 
     known_suppliers = {
         "zinc20": {
@@ -107,18 +174,84 @@ class SMILESSupplier:
     }
     @classmethod
     def from_name(cls, name):
-        """
-        **LLM Docstring**
-
-        Build a supplier for one of the known SMILES databases (e.g. `zinc20`,
-        `emols`, `pubchem`).
-
-        :param name: the database name
-        :type name: str
-        :return: the supplier
-        :rtype: SMILESSupplier
-        """
         return cls(**cls.known_suppliers[name], name=name)
+
+    @classmethod
+    def from_line_index_database(cls,
+                                 database_file,
+                                 name=None,
+                                 split_idx=dev.default,
+                                 split_char=None,
+                                 **extra):
+        """
+        Explicit, self-documenting alias for constructing a supplier
+        directly from a packaged `line_index_smiles_database` archive.
+        (`SMILESSupplier(database_file)` works identically, since the
+        archive is auto-detected in `__init__`.)
+        """
+        smiles_file, line_indices, meta, streams = cls._load_database_archive(database_file)
+        if meta is not None:
+            if name is None:
+                name = meta.get('name')
+            if dev.is_default(split_idx, allow_None=False):
+                split_idx = meta.get('split_idx', dev.default)
+            if split_char is None:
+                split_char = meta.get('split_char')
+        if dev.is_default(split_idx, allow_None=True):
+            split_idx = 0  # matches the pre-existing default
+
+        return cls(
+            smiles_file=smiles_file,
+            line_indices=line_indices,
+            name=name,
+            split_idx=split_idx,
+            split_char=split_char,
+            managed_streams=streams,
+            **extra
+        )
+
+    @classmethod
+    def _load_database_archive(self, path):
+        """
+        If `path` is a `line_index_smiles_database` archive (an uncompressed
+        tar containing `LISMI_SMI_MEMBER` and `LISMI_IDX_MEMBER`), extract
+        both members to real temp files -- so that plain file reads and
+        `np.load(..., mmap_mode='r')` keep working exactly as they do for
+        an ordinary (smi, idx) file pair -- and return
+        `(smi_path, idx_path, meta_dict)`.
+
+        Otherwise, returns `(path, None, None)` unchanged so ordinary
+        construction (a bare `.smi` path, an open stream, raw bytes, an
+        unrelated tar file, etc.) proceeds as before.
+        """
+        if not isinstance(path, (str, os.PathLike)):
+            return path, None, None, None
+        if not os.path.exists(path):
+            return path, None, None, None
+        if not tarfile.is_tarfile(path):
+            return path, None, None, None
+
+        tar_path = os.fspath(path)
+        tar = tarfile.open(tar_path, mode="r:").__enter__()
+        # "r:" forbids compression
+        names = set(tar.getnames())
+        if self.LISMI_SMI_MEMBER not in names or self.LISMI_IDX_MEMBER not in names:
+            # a tar file, but not one of ours -- leave it alone
+            return path, None, None, None
+
+        smi_path = _FileWrapper(tar.extractfile(self.LISMI_SMI_MEMBER))
+        idx_member = tar.getmember(self.LISMI_IDX_MEMBER)
+        idx_array = _memmap_npy_member(tar_path, idx_member)
+
+        meta = None
+        if self.LISMI_META_MEMBER in names:
+            meta_f = tar.extractfile(tar.getmember(self.LISMI_META_MEMBER))
+            try:
+                meta = json.loads(meta_f.read().decode("utf-8"))
+            finally:
+                meta_f.close()
+
+        return smi_path, idx_array, meta, [tar]
 
     def to_mp_state(self):
         """
@@ -197,6 +330,7 @@ class SMILESSupplier:
                 self._assignable_offsets = False
             if self._max_offset is None:
                 self._max_offset = len(self._offsets) - 1
+        self._exit_codes = (None, None, None)
         return self._stream
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
@@ -218,6 +352,12 @@ class SMILESSupplier:
             if self._flexible_offsets:
                 self.line_indices = self._offsets
             self._offsets = None
+            self._exit_codes = (exc_type, exc_val, exc_tb)
+
+    def __del__(self):
+        if hasattr(self, 'managed_streams') and self.managed_streams is not None:
+            for s in self.managed_streams:
+                s.__exit__(*self._exit_codes)
 
     def __len__(self):
         """
@@ -488,6 +628,95 @@ class SMILESSupplier:
                 line_index = line_index.astype(dtype)
                 break
         return np.save(file, line_index)
+
+    def write_database_index(self, target, **etc):
+        return self.build_line_index_smiles_database_from_source(
+            self,
+            target,
+            **etc
+        )
+
+    @classmethod
+    def build_line_index_smiles_database_from_source(
+            cls,
+            supplier_or_smiles_file,
+            out_file,
+            line_indices=None,
+            name=None,
+            split_idx=0,
+            split_char=None,
+            overwrite=False,
+    ):
+        """
+        Build a `line_index_smiles_database` archive: a single uncompressed tar
+        file bundling a `.smi` file together with its line-offset index, so
+        that `SMILESSupplier(out_file)` can load both at once.
+
+        :param supplier_or_smiles_file: either an existing `SMILESSupplier`
+            instance (backed by a real file path -- its `.smi` file and, if
+            available, its already-computed line index are reused), or a path
+            to a raw `.smi`/`.smiles` file.
+        :param out_file: path to write the archive to.
+        :param line_indices: path to a prebuilt `.npy` index (as produced by
+            `SMILESSupplier.save_line_index`) or an array of offsets. If
+            omitted and `supplier_or_smiles_file` doesn't already carry one,
+            the index is generated by scanning the SMILES file, which can be
+            slow for large databases.
+        :param name: optional name to record in the archive metadata.
+        :param split_idx: forwarded to `SMILESSupplier` / recorded in metadata.
+        :param split_char: forwarded to `SMILESSupplier` / recorded in metadata.
+        :param overwrite: if `False` (default), raises if `out_file` exists.
+        """
+        if not overwrite and os.path.exists(out_file):
+            raise FileExistsError(f"{out_file} already exists; pass overwrite=True to replace it")
+
+        if isinstance(supplier_or_smiles_file, SMILESSupplier):
+            supplier = supplier_or_smiles_file
+            smi_path = supplier.smi._input
+            if not isinstance(smi_path, (str, os.PathLike)):
+                raise ValueError("can only package a SMILESSupplier backed by a real file path")
+            if line_indices is None:
+                line_indices = supplier.line_indices
+            if name is None:
+                name = supplier.name
+            split_idx = supplier.split_idx
+            split_char = supplier.split_char
+        else:
+            smi_path = supplier_or_smiles_file
+
+        if line_indices is None:
+            # no prebuilt index available -- scan the file to generate one
+            scanner = SMILESSupplier(smi_path, split_idx=split_idx, split_char=split_char)
+            with scanner:
+                line_indices = scanner.create_line_index(return_index=True)
+
+        # normalize the index down to the on-disk `.npy` bytes
+        if isinstance(line_indices, (str, os.PathLike)):
+            with open(line_indices, "rb") as f:
+                idx_bytes = f.read()
+        else:
+            buf = io.BytesIO()
+            SMILESSupplier.save_line_index(buf, np.asarray(line_indices))
+            idx_bytes = buf.getvalue()
+
+        meta_bytes = json.dumps({
+            "name": name,
+            "split_idx": split_idx,
+            "split_char": split_char
+        }).encode("utf-8")
+
+        with tarfile.open(out_file, mode="w") as tar:  # mode="w" == uncompressed tar
+            tar.add(smi_path, arcname=SMILESSupplier.LISMI_SMI_MEMBER)
+
+            info = tarfile.TarInfo(name=SMILESSupplier.LISMI_IDX_MEMBER)
+            info.size = len(idx_bytes)
+            tar.addfile(info, io.BytesIO(idx_bytes))
+
+            info = tarfile.TarInfo(name=SMILESSupplier.LISMI_META_MEMBER)
+            info.size = len(meta_bytes)
+            tar.addfile(info, io.BytesIO(meta_bytes))
+
+        return out_file
 
 def _consume_supplier_mp(state, consumer, line_offset, block_size):
     """

@@ -1,3 +1,5 @@
+import tempfile
+
 from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.ExternalPrograms import *
@@ -489,7 +491,7 @@ class ExternalProgramsTest(TestCase):
             )
         )
 
-    @debugTest
+    @validationTest
     def test_SmilesTokens(self):
         from Psience.Molecools import Molecule
         import base64
@@ -528,3 +530,15 @@ class ExternalProgramsTest(TestCase):
             # mol2.plot(backend='x3d', figure=f1, highlight_atoms=True)
             # mol2.plot(backend='x3d', display_atom_numbers=True).show()
             # f1.show()
+
+
+    @debugTest
+    def test_SMIToDB(self):
+        samp = TestManager.test_data('a2bbb-substances.smi')
+        vendor = SMILESSupplier(samp)
+        with tempfile.NamedTemporaryFile() as db_file:
+            db_file = db_file.name
+            vendor.write_database_index(db_file, overwrite=True)
+            vendor2 = SMILESSupplier.from_line_index_database(db_file)
+            with vendor2:
+                print(vendor2.find_smi(88))

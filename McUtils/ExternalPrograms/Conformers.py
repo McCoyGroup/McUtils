@@ -666,7 +666,7 @@ class ConformerEncoder:
             )
         return self.base_type
 
-    def decode(self, buffer, pack_angles=False):
+    def decode(self, buffer, pack_angles=False, return_streams=False):
         """
         Decode a packed flattened Z-matrix coordinate stream.
         """
@@ -684,21 +684,31 @@ class ConformerEncoder:
             )
         )
 
-        bonds = self.bond_encoder.decode(encoded_bonds)
+        return self.decode_from_data(encoded_bonds, encoded_angles, encoded_dihedrals,
+                                     pack_angles=pack_angles, return_streams=return_streams)
 
-        angle_header = self.stream_packer.header_lengths[1]
-        angles = self.angle_encoder.decode(
-            encoded_angles,
-            packing_offset=(angle_header if pack_angles else -1),
-        )
+    def decode_from_data(self, encoded_bonds, encoded_angles, encoded_dihedrals,
+                         pack_angles=False, return_streams=False):
+        if not return_streams:
+            bonds = self.bond_encoder.decode(encoded_bonds)
 
-        dihedrals = self.dihedral_encoder.decode(
-            encoded_dihedrals,
-            packing_offset=(0 if pack_angles else -1),
-        )
+            angle_header = self.stream_packer.header_lengths[1]
+            angles = self.angle_encoder.decode(
+                encoded_angles,
+                packing_offset=(angle_header if pack_angles else -1),
+            )
 
-        # Restore the [-pi, pi] convention.
-        dihedrals = np.where(dihedrals > np.pi, dihedrals - 2 * np.pi, dihedrals)
+            dihedrals = self.dihedral_encoder.decode(
+                encoded_dihedrals,
+                packing_offset=(0 if pack_angles else -1),
+            )
+
+            # Restore the [-pi, pi] convention.
+            dihedrals = np.where(dihedrals > np.pi, dihedrals - 2 * np.pi, dihedrals)
+        else:
+            bonds = encoded_bonds
+            angles = encoded_angles
+            dihedrals = encoded_dihedrals
 
         return self.stream_packer.interleave_coordinate_streams(bonds, angles, dihedrals)
 
