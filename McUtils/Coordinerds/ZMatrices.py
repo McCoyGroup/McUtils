@@ -32,6 +32,7 @@ __all__ = [
     "add_missing_zmatrix_bonds",
     "bond_graph_zmatrix",
     "canonical_fragment_zmatrix",
+    "canonicalize_zmatrix",
     "reindex_zmatrix",
     "sort_complex_attachment_points",
     "complex_zmatrix",
@@ -1453,7 +1454,7 @@ def reindex_zmatrix(zm, perm):
         for row in zm
     ]
 
-def canonicalize_zmatrix(zm):
+def canonicalize_zmatrix(zm, pad=True, set_embedding=True):
     """
     **LLM Docstring**
 
@@ -1466,13 +1467,16 @@ def canonicalize_zmatrix(zm):
     :return: Original atom-label vector and equivalent row-indexed Z-matrix.
     :rtype: tuple[np.ndarray, list[list[int]]]
     """
-    if len(zm[0]) == 3:
+    if pad and len(zm[0]) == 3:
         zm = [
             [0, -1, -2, -3]
         ] + [
             [i+1] + z
             for i,z in enumerate(zm)
         ]
+
+    if set_embedding:
+        zm = set_zmatrix_embedding(zm, partial_embedding=len(zm[0]) == 3)
 
     z_vec = np.array([z[0] for z in zm])
     perm = {z:i for i,z in enumerate(z_vec)}

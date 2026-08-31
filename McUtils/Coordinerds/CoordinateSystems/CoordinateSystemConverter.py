@@ -62,6 +62,26 @@ except NameError:
     # referenceable at all (rare; this can leak for the lifetime of the process in that case)
     _CONVERTER_ID_NAME_CACHE = {}
 
+try:
+    _CONVERTER_CHAINED_KEYS
+except NameError:
+    # keys in _CONVERTER_REGISTRY whose value is a ChainedCoordinateSystemConverter, so
+    # deregistration can find dead composite entries without scanning the whole registry
+    _CONVERTER_CHAINED_KEYS = set()
+
+try:
+    _CONVERTER_FINAL_NODES
+except NameError:
+    # the (small, bounded-by-the-number-of-canonical-types) set of *final* graph nodes.
+    # The "alias across compatible systems" pass in `_register` only ever needs to compare
+    # against other final nodes -- but the shared conversion graph also holds every fast-path
+    # (non-final, typically per-molecule) node, which grows without bound over a long session.
+    # Scanning `graph.keys()` directly for that pass means re-scanning the *entire* graph on
+    # every single registration that touches a final system, which is O(n) per call and O(n^2)
+    # overall as the fast-path population grows. Keeping final nodes in their own set makes
+    # that pass O(#final types) per call instead -- effectively constant.
+    _CONVERTER_FINAL_NODES = set()
+
 ######################################################################################################
 ##
 ##                                   CoordinateSystemConverter Class
@@ -106,7 +126,7 @@ class CoordinateSystemConverter(metaclass=abc.ABCMeta):
         """
         pass
 
-    def register(self, where=None, check=True, name_format=None):
+    def register(self, where=None, check=True, name_format=None, final=None):
         """
         Registers the CoordinateSystemConverter
 
@@ -118,7 +138,7 @@ class CoordinateSystemConverter(metaclass=abc.ABCMeta):
             if where is None:
                 type(self).converters = weakref.ref(CoordinateSystemConverters)
                 where = type(self).converters()
-        where.register_converter(*self.types, self, check=check, name_format=name_format)
+        where.register_converter(*self.types, self, check=check, name_format=name_format, final=final)
     def deregister(self, where=None, check=True):
         """
         Registers the CoordinateSystemConverter
@@ -148,12 +168,21 @@ class CoordinateSystemConverters:
     """
     A coordinate converter class. It's a singleton so can't be instantiated.
 
-    Internally, converters are keyed by *string names* resolved from the systems being converted,
-    never by the class/instance objects themselves. Class objects are recreated by
-    `importlib.reload`, so keying on them directly means a reload can silently split the registry
-    into disconnected islands (old-generation keys vs. new-generation keys) that fail to find each
-    other even though the "same" conversion rule was registered on both sides. Strings compare by
-    value, so this problem goes away entirely.
+    Registry keys are, by default, the system objects themselves -- cheap identity-based
+    hashing, exactly like the original implementation, with no string work at all. That's fine
+    for the overwhelming majority of registrations (typically short-lived, per-molecule
+    instances that never need to be looked up across an `importlib.reload` boundary in
+    practice, since they get rebuilt from scratch whenever the thing that reload affected --
+    e.g. a molecule -- gets rebuilt too).
+
+    Only systems explicitly marked *final* -- via an `is_final_coordinate_system` attribute, or
+    by having a `.name` in `cls.final_system_names` -- get resolved to a stable string key
+    instead. Those are the small set of canonical, singleton-ish types (`CartesianCoordinates3D`,
+    `ZMatrixCoordinateSystem`, etc.) that are actually defined in code subject to reload, and are
+    therefore the only ones where object identity is untrustworthy across a reload. Confining the
+    string resolution (and the "alias across compatible systems" registration pass, which is the
+    expensive part) to just those systems keeps registration/deregistration/lookup for everything
+    else at the original O(1)-ish cost.
     """
 
     # bound to the module-level, reload-persistent objects -- see block above. Every generation of
@@ -171,7 +200,16 @@ class CoordinateSystemConverters:
     # used to mint a name for any system that doesn't provide a stable `.name`; override by
     # passing `name_format` through to `register`/`register_converter` if you want something
     # more descriptive than a bare uuid for a particular family of anonymous systems
-    default_anonymous_name_format = None # "AnonymousCoordinateSystem<{uuid}>"
+    default_anonymous_name_format = "AnonymousCoordinateSystem<{uuid}>"
+
+    # fallback allowlist for marking systems "final" by name, for cases where you'd rather not
+    # (or can't) add an `is_final_coordinate_system = True` attribute to the class itself.
+    # Pre-populated with the built-in canonical types; extend/replace as needed --
+    # `CoordinateSystemConverters.final_system_names |= {"MyCustomSingletonSystem"}`.
+    final_system_names = frozenset({
+        "Cartesian3D", "ZMatrix", "SphericalCoordinates",
+        "GenericInternals", "IterativeZMatrix",
+    })
 
     def __init__(self):
         raise NotImplementedError("{} is a singleton".format(type(self)))
@@ -210,34 +248,61 @@ class CoordinateSystemConverters:
             pass
 
     @classmethod
+    def _is_final(cls, system):
+        """
+        Whether `system` should be treated as "final" -- i.e. stable/canonical enough that it
+        needs a reload-proof string key. Checked, in order: an explicit
+        `is_final_coordinate_system` attribute (set this on your canonical classes, e.g.
+        `CartesianCoordinates3D.is_final_coordinate_system = True`, to opt in explicitly), then
+        membership of `.name` in `cls.final_system_names` as a no-code-changes-needed fallback.
+        Everything else is treated as an ordinary, cheaply-object-keyed system.
+        """
+        flag = getattr(system, 'is_final_coordinate_system', None)
+        if flag is not None:
+            return bool(flag)
+        return getattr(system, 'name', None) in cls.final_system_names
+
+    @classmethod
+    def _resolve_key(cls, system, name_format=None, final=None):
+        """
+        The actual registry key for `system`: the object itself (fast path) unless it's final
+        (or `final=True` is forced explicitly), in which case it's resolved to a stable string.
+        """
+        is_final = cls._is_final(system) if final is None else final
+        if not is_final:
+            return system
+        return cls._resolve_name(system, name_format=name_format)
+
+    @classmethod
     def _resolve_name(cls, system, name_format=None):
         """
-        Resolves a stable string identifier for a CoordinateSystem class or instance.
+        Resolves a stable string identifier for a CoordinateSystem class or instance. Only ever
+        called for systems that are "final" (see `_is_final`) -- everything else is keyed by the
+        object itself and never pays this cost.
 
-        Uses `.name` when present (this is what stays stable across a reload, even though the
-        class object carrying it does not). Instances that additionally carry a `.dimension`
-        get the dimension folded into the key so that, e.g., two differently-sized
-        `MolecularCartesians` systems don't collide under the same name. Anything with no
-        `.name` at all (`name is None`) gets a uuid-based name minted via `name_format` (falling
-        back to `default_anonymous_name_format`), cached against the object so repeated lookups
-        of the *same* object are stable for the life of that object.
+        Uses `.name` when present -- and *only* `.name`. This deliberately does NOT fold in
+        `.dimension` or anything else: whether an attribute like `.dimension` is populated (and
+        to what) can differ across the different call sites that touch what is logically the
+        same system (e.g. a generic class-level registration vs. a bound instance later), which
+        would split one logical system into multiple registry keys that never match each other.
+        Distinguishing genuinely different systems that happen to share a base name (e.g. two
+        differently-shaped `MolecularCartesians`) is expected to be handled by `.name` itself --
+        which this codebase already does by minting per-instance names (e.g.
+        `MolecularCartesians-<uuid>`) wherever that distinction actually matters.
+
+        Anything with no `.name` at all (`name is None`) gets a uuid-based name minted via
+        `name_format` (falling back to `default_anonymous_name_format`), cached against the
+        object so repeated lookups of the *same* object are stable for its lifetime.
         """
         base = getattr(system, 'name', None)
         if base:
-            # dim = getattr(system, 'dimension', None)
-            # if dim is not None:
-            #     return "{}[{}]".format(base, dim)
             return base
 
         cached = cls._get_cached_name(system)
         if cached is not None:
             return cached
 
-        fmt = (
-                name_format
-                or system.name_format
-                or cls.default_anonymous_name_format
-        )
+        fmt = name_format or cls.default_anonymous_name_format
         new_name = fmt.format(uuid=uuid.uuid4().hex)
 
         # best effort: stash the name directly on the object so that even a *different*
@@ -339,36 +404,40 @@ class CoordinateSystemConverters:
 
         cls._preload_converters()
 
-        n1 = cls._resolve_name(system1)
-        n2 = cls._resolve_name(system2)
-        cls._cache_object(n1, system1)
-        cls._cache_object(n2, system2)
+        k1 = cls._resolve_key(system1)
+        k2 = cls._resolve_key(system2)
+        if isinstance(k1, str):
+            cls._cache_object(k1, system1)
+        if isinstance(k2, str):
+            cls._cache_object(k2, system2)
 
-        if (n1, n2) in cls.converters:
-            name_path = [(n1, n2)]
+        if (k1, k2) in cls.converters:
+            key_path = [(k1, k2)]
         else:
-            name_path = cls.converter_graph.find_path_bfs(n1, n2)
+            key_path = cls.converter_graph.find_path_bfs(k1, k2)
 
-        if name_path is None:
+        if key_path is None:
             raise KeyError(
                 "{}: no rules for converting coordinate system {} to {} in {}".format(
                     cls.__name__, system1, system2,
                     ["{}=>{}".format(a, b) for a, b in cls.converters]
                 )
             )
-        elif len(name_path) == 1:
-            return cls.converters[name_path[0]]
+        elif len(key_path) == 1:
+            return cls.converters[key_path[0]]
         else:
-            def _obj_for(name):
-                if name == n1:
+            def _obj_for(key):
+                if key == k1:
                     return system1
-                if name == n2:
+                if key == k2:
                     return system2
-                return _CONVERTER_OBJECT_CACHE.get(name, name)
+                if isinstance(key, str):
+                    return _CONVERTER_OBJECT_CACHE.get(key, key)
+                return key  # already a live object -- fast-path key
 
             conversions = [
                 (cls.converters[p], (_obj_for(p[0]), _obj_for(p[1])))
-                for p in name_path
+                for p in key_path
             ]
             return ChainedCoordinateSystemConverter((system1, system2), conversions)
 
@@ -377,7 +446,7 @@ class CoordinateSystemConverters:
     ##################################################################################################
 
     @classmethod
-    def register_converter(cls, system1, system2, converter, check=True, name_format=None):
+    def register_converter(cls, system1, system2, converter, check=True, name_format=None, final=None):
         """
         Registers a converter between two coordinate systems
 
@@ -385,6 +454,9 @@ class CoordinateSystemConverters:
         :type system1: CoordinateSystem
         :param system2:
         :type system2: CoordinateSystem
+        :param final: force the "final" (string-keyed) treatment on or off for this
+            registration, instead of relying on auto-detection via `_is_final`. Pass a single
+            bool for both systems, or a `(final1, final2)` pair to set them independently.
         :return:
         :rtype:
         """
@@ -396,7 +468,7 @@ class CoordinateSystemConverters:
                 type(converter),
                 ["{} <{}>".format(x, id(x)) for x in type(converter).__bases__]
             ))
-        cls._register(system1, system2, converter, name_format=name_format)
+        cls._register(system1, system2, converter, name_format=name_format, final=final)
 
     @classmethod
     def deregister_converter(cls, system1, system2, converter, check=True):
@@ -410,48 +482,74 @@ class CoordinateSystemConverters:
         :return:
         :rtype:
         """
-        n1, n2 = cls._resolve_name(system1), cls._resolve_name(system2)
-        if cls.converters.get((n1, n2)) is converter:
-            del cls.converters[(n1, n2)]
-            dead = []
-            for k, v in cls.converters.items():
-                if isinstance(v, ChainedCoordinateSystemConverter) and (n1, n2) in getattr(v, 'edges', ()):
-                    dead.append(k)
-            for k in dead:
-                del cls.converters[k]
+        k1, k2 = cls._resolve_key(system1), cls._resolve_key(system2)
+        if cls.converters.get((k1, k2)) is converter:
+            del cls.converters[(k1, k2)]
+            _CONVERTER_CHAINED_KEYS.discard((k1, k2))
+            # only scan the (typically tiny) set of explicitly-registered composite converters,
+            # rather than the whole registry, to find any that routed through this edge
+            if _CONVERTER_CHAINED_KEYS:
+                dead = []
+                for k in list(_CONVERTER_CHAINED_KEYS):
+                    v = cls.converters.get(k)
+                    if v is None:
+                        _CONVERTER_CHAINED_KEYS.discard(k)
+                        continue
+                    if (k1, k2) in getattr(v, 'edges', ()):
+                        dead.append(k)
+                for k in dead:
+                    del cls.converters[k]
+                    _CONVERTER_CHAINED_KEYS.discard(k)
 
     @classmethod
-    def _register(cls, system1, system2, converter, move_to_end=False, name_format=None):
-        n1 = cls._resolve_name(system1, name_format)
-        n2 = cls._resolve_name(system2, name_format)
-        cls._cache_object(n1, system1)
-        cls._cache_object(n2, system2)
+    def _register(cls, system1, system2, converter, move_to_end=False, name_format=None, final=None):
+        if final is None:
+            final1 = final2 = None
+        elif isinstance(final, (tuple, list)):
+            final1, final2 = final
+        else:
+            final1 = final2 = final
 
-        cls.converters[(n1, n2)] = converter
+        k1 = cls._resolve_key(system1, name_format, final1)
+        k2 = cls._resolve_key(system2, name_format, final2)
+        is_final1 = isinstance(k1, str)
+        is_final2 = isinstance(k2, str)
+        if is_final1:
+            cls._cache_object(k1, system1)
+            _CONVERTER_FINAL_NODES.add(k1)
+        if is_final2:
+            cls._cache_object(k2, system2)
+            _CONVERTER_FINAL_NODES.add(k2)
+
+        cls.converters[(k1, k2)] = converter
         if move_to_end:
-            cls.converters.move_to_end((n1, n2))
+            cls.converters.move_to_end((k1, k2))
+        if isinstance(converter, ChainedCoordinateSystemConverter):
+            _CONVERTER_CHAINED_KEYS.add((k1, k2))
 
         graph = cls.converter_graph
-        graph.add(n1, n2)
+        graph.add(k1, k2)
 
-        # preserve the original "alias converters across compatible systems" behavior, just
-        # operating over the name graph. Any cross-generation weirdness in `is_compatible`
-        # (e.g. an isinstance check against a class from a different reload generation) is
-        # swallowed by `_systems_compatible` rather than aborting registration.
-        for k_name in list(graph.keys()):
-            if k_name in (n1, n2):
+        # the "alias across compatible systems" pass only ever compares against *other final*
+        # nodes -- scan the small, bounded final-node set, never the full (unboundedly large,
+        # fast-path-dominated) graph.
+        if not (is_final1 or is_final2):
+            return
+
+        for k_name in list(_CONVERTER_FINAL_NODES):
+            if k_name in (k1, k2):
                 continue
             k_obj = _CONVERTER_OBJECT_CACHE.get(k_name)
             if k_obj is None:
                 continue
-            if cls._systems_compatible(system1, k_obj):
-                cls.converters[(k_name, n2)] = converter
+            if is_final1 and cls._systems_compatible(system1, k_obj):
+                cls.converters[(k_name, k2)] = converter
                 if move_to_end:
-                    cls.converters.move_to_end((k_name, n2))
-            elif cls._systems_compatible(system2, k_obj):
-                cls.converters[(n1, k_name)] = converter
+                    cls.converters.move_to_end((k_name, k2))
+            elif is_final2 and cls._systems_compatible(system2, k_obj):
+                cls.converters[(k1, k_name)] = converter
                 if move_to_end:
-                    cls.converters.move_to_end((n1, k_name))
+                    cls.converters.move_to_end((k1, k_name))
 
 class ConversionGraph:
     """
