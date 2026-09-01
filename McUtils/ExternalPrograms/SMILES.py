@@ -57,6 +57,10 @@ class _FileWrapper:
         return self.stream.readline(n)
     def seek(self, n, *args):
         self.stream.seek(n, *args)
+    def tell(self):
+        return self.stream.tell()
+    def peek(self, n=1):
+        return self.stream.peek(n) if hasattr(self.stream, 'peek') else b""
     def __exit__(self, exc_type, exc_val, exc_tb):
         ...
 
@@ -82,6 +86,21 @@ def _memmap_npy_member(tar_path, member):
         data_offset = fh.tell()
     order = "F" if fortran_order else "C"
     return np.memmap(tar_path, dtype=dtype, mode="r", offset=data_offset, shape=shape, order=order)
+
+def _load_npy_member_bytes(tar, member):
+    """
+    Fully reads and parses a `.npy` array stored as a tar member, via
+    `np.load`. Used for `metadata_arrays` members: these are typically far
+    smaller than the line-offset index, and may hold dtypes (strings,
+    objects) that `np.memmap`/`open_memmap` can't handle, so unlike
+    `_memmap_npy_member`, this just reads the member's bytes and parses
+    them in memory rather than mapping them against the archive file.
+    """
+    f = tar.extractfile(member)
+    try:
+        return np.load(io.BytesIO(f.read()), allow_pickle=True)
+    finally:
+        f.close()
 
 class SMILESSupplier:
     """
@@ -111,7 +130,8 @@ class SMILESSupplier:
                  split_idx=0,
                  split_char=None,
                  managed_streams=None,
-                 line_parser=None):
+                 line_parser=None,
+                 metadata_arrays=None):
         """
         **LLM Docstring**
 
@@ -154,6 +174,7 @@ class SMILESSupplier:
         self.line_parser = line_parser
         self.managed_streams = managed_streams
         self._exit_codes = (None, None, None)
+        self.metadata_arrays = metadata_arrays
 
     known_suppliers = {
         "zinc20": {
@@ -182,14 +203,26 @@ class SMILESSupplier:
                                  name=None,
                                  split_idx=dev.default,
                                  split_char=None,
+                                 metadata_arrays=None,
                                  **extra):
         """
         Explicit, self-documenting alias for constructing a supplier
         directly from a packaged `line_index_smiles_database` archive.
         (`SMILESSupplier(database_file)` works identically, since the
         archive is auto-detected in `__init__`.)
+
+        `database_file` may also be a *directory* holding the same
+        members as plain files -- e.g. the result of expanding a packaged
+        archive with `tar -xf whatever.lismi -C some_dir/` -- in which
+        case everything is loaded directly as normal files (no tar
+        streaming or held-open handles involved).
+
+        Any `metadata_arrays` packaged into the archive (see
+        `build_line_index_smiles_database_from_source`) are loaded back
+        automatically. Passing `metadata_arrays` here adds to/overrides
+        those by key, rather than replacing them outright.
         """
-        smiles_file, line_indices, meta, streams = cls._load_database_archive(database_file)
+        smiles_file, line_indices, meta, streams, archive_metadata_arrays = cls._load_database_archive(database_file)
         if meta is not None:
             if name is None:
                 name = meta.get('name')
@@ -200,6 +233,13 @@ class SMILESSupplier:
         if dev.is_default(split_idx, allow_None=True):
             split_idx = 0  # matches the pre-existing default
 
+        if metadata_arrays is None:
+            metadata_arrays = archive_metadata_arrays
+        elif archive_metadata_arrays:
+            merged = dict(archive_metadata_arrays)
+            merged.update(metadata_arrays)
+            metadata_arrays = merged
+
         return cls(
             smiles_file=smiles_file,
             line_indices=line_indices,
@@ -207,6 +247,7 @@ class SMILESSupplier:
             split_idx=split_idx,
             split_char=split_char,
             managed_streams=streams,
+            metadata_arrays=metadata_arrays,
             **extra
         )
 
@@ -218,18 +259,32 @@ class SMILESSupplier:
         both members to real temp files -- so that plain file reads and
         `np.load(..., mmap_mode='r')` keep working exactly as they do for
         an ordinary (smi, idx) file pair -- and return
-        `(smi_path, idx_path, meta_dict)`.
+        `(smi_path, idx_path, meta_dict, streams, metadata_arrays)`.
 
-        Otherwise, returns `(path, None, None)` unchanged so ordinary
-        construction (a bare `.smi` path, an open stream, raw bytes, an
-        unrelated tar file, etc.) proceeds as before.
+        If `path` is instead a *directory* containing the same members as
+        plain files (e.g. the result of `tar -xf` on a packaged archive),
+        it's loaded directly as normal files via `_load_database_directory`
+        -- no tar streaming, no wrapper objects, no held-open handles.
+
+        Any packaged `metadata_arrays` (see
+        `build_line_index_smiles_database_from_source`) are read back
+        fully via `np.load` (not memory-mapped -- these members may hold
+        arbitrary dtypes, and are typically much smaller than the index)
+        and returned as a `{name: array}` dict, or `None` if the archive
+        didn't package any.
+
+        Otherwise, returns `(path, None, None, None, None)` unchanged so
+        ordinary construction (a bare `.smi` path, an open stream, raw
+        bytes, an unrelated tar file or directory, etc.) proceeds as before.
         """
         if not isinstance(path, (str, os.PathLike)):
-            return path, None, None, None
+            return path, None, None, None, None
         if not os.path.exists(path):
-            return path, None, None, None
+            return path, None, None, None, None
+        if os.path.isdir(path):
+            return self._load_database_directory(path)
         if not tarfile.is_tarfile(path):
-            return path, None, None, None
+            return path, None, None, None, None
 
         tar_path = os.fspath(path)
         tar = tarfile.open(tar_path, mode="r:").__enter__()
@@ -237,13 +292,15 @@ class SMILESSupplier:
         names = set(tar.getnames())
         if self.LISMI_SMI_MEMBER not in names or self.LISMI_IDX_MEMBER not in names:
             # a tar file, but not one of ours -- leave it alone
-            return path, None, None, None
+            tar.__exit__(None, None, None)
+            return path, None, None, None, None
 
         smi_path = _FileWrapper(tar.extractfile(self.LISMI_SMI_MEMBER))
         idx_member = tar.getmember(self.LISMI_IDX_MEMBER)
         idx_array = _memmap_npy_member(tar_path, idx_member)
 
         meta = None
+        metadata_arrays = None
         if self.LISMI_META_MEMBER in names:
             meta_f = tar.extractfile(tar.getmember(self.LISMI_META_MEMBER))
             try:
@@ -251,7 +308,59 @@ class SMILESSupplier:
             finally:
                 meta_f.close()
 
-        return smi_path, idx_array, meta, [tar]
+            metadata_members = meta.get("metadata_arrays") if meta is not None else None
+            if metadata_members:
+                metadata_arrays = {
+                    key: _load_npy_member_bytes(tar, tar.getmember(member_name))
+                    for key, member_name in metadata_members.items()
+                }
+
+        return smi_path, idx_array, meta, [tar], metadata_arrays
+
+    @classmethod
+    def _load_database_directory(self, dir_path):
+        """
+        Loads an *expanded* `line_index_smiles_database` -- a directory
+        containing the same members a packaged archive would (as you'd
+        get by running `tar -xf whatever.lismi -C some_dir/`), directly as
+        plain files: `LISMI_SMI_MEMBER`/`LISMI_IDX_MEMBER` are real files
+        on disk, so the `.smi` file is passed straight through as a path
+        (no `_FileWrapper` needed) and the index is `np.load`'d with
+        `mmap_mode='r'` exactly like a standalone `_idx.npy` file would
+        be. No streams need to be held open, so `managed_streams` is
+        `None`.
+
+        Returns `(smi_path, idx_array, meta_dict, None, metadata_arrays)`,
+        matching `_load_database_archive`'s return shape.
+
+        Returns `(dir_path, None, None, None, None)` unchanged if the
+        directory doesn't contain the expected members (i.e. it's just an
+        ordinary directory, not one of ours).
+        """
+        dir_path = os.fspath(dir_path)
+        smi_path = os.path.join(dir_path, self.LISMI_SMI_MEMBER)
+        idx_path = os.path.join(dir_path, self.LISMI_IDX_MEMBER)
+        if not (os.path.isfile(smi_path) and os.path.isfile(idx_path)):
+            # a directory, but not one of ours -- leave it alone
+            return dir_path, None, None, None, None
+
+        idx_array = np.load(idx_path, mmap_mode='r')
+
+        meta = None
+        metadata_arrays = None
+        meta_path = os.path.join(dir_path, self.LISMI_META_MEMBER)
+        if os.path.isfile(meta_path):
+            with open(meta_path, 'r', encoding='utf-8') as meta_f:
+                meta = json.load(meta_f)
+
+            metadata_members = meta.get("metadata_arrays") if meta is not None else None
+            if metadata_members:
+                metadata_arrays = {
+                    key: np.load(os.path.join(dir_path, member_name), allow_pickle=True)
+                    for key, member_name in metadata_members.items()
+                }
+
+        return smi_path, idx_array, meta, None, metadata_arrays
 
     def to_mp_state(self):
         """
@@ -320,18 +429,31 @@ class SMILESSupplier:
                 #      in case the SMI file is too big for even uint64
                 self._max_offset = 0
                 self.line_indices = np.zeros(self._size, dtype='uint64')
-            if isinstance(self.line_indices, np.ndarray):
+            if isinstance(self.line_indices, np.ndarray) and not isinstance(self.line_indices, np.memmap):
+                # a plain, freshly-allocated (or user-supplied) growable
+                # buffer of offsets -- e.g. `np.zeros(...)` above, or the
+                # per-block offsets multiprocessing hands to worker suppliers
                 self._offsets = self.line_indices
                 self._flexible_offsets = True
                 self._assignable_offsets = True
             else:
-                self._offsets = np.load(self.line_indices, mmap_mode='r')
+                # a fixed, already-complete index: either a path to load
+                # via `np.load(..., mmap_mode='r')`, or an `np.memmap`
+                # already opened directly against a packaged archive by
+                # `_load_database_archive`/`_memmap_npy_member`. Treating
+                # this as flexible/assignable would try to write into a
+                # read-only memmap and call `.tell()` on streams that may
+                # not support it while iterating.
+                if isinstance(self.line_indices, np.memmap):
+                    self._offsets = self.line_indices
+                else:
+                    self._offsets = np.load(self.line_indices, mmap_mode='r')
                 self._flexible_offsets = False
                 self._assignable_offsets = False
             if self._max_offset is None:
                 self._max_offset = len(self._offsets) - 1
         self._exit_codes = (None, None, None)
-        return self._stream
+        return self, self._stream
     def __exit__(self, exc_type, exc_val, exc_tb):
         """
         **LLM Docstring**
@@ -431,7 +553,13 @@ class SMILESSupplier:
             return line
         else:
             return parser(line)
-    def find_smi(self, n, block_size=None):
+    def _metadata_at(self, n):
+        return {key: arr[n] for key, arr in self.metadata_arrays.items()}
+
+    def _metadata_slice(self, start, stop):
+        return {key: arr[start:stop] for key, arr in self.metadata_arrays.items()}
+
+    def find_smi(self, n, block_size=None, include_metadata=None):
         """
         **LLM Docstring**
 
@@ -445,14 +573,25 @@ class SMILESSupplier:
         :return: the SMILES entry, or a list of entries
         :rtype: str | list[str]
         """
-        with self as db:
+        if include_metadata is None:
+            include_metadata = self.metadata_arrays is not None
+        elif include_metadata and self.metadata_arrays is None:
+            raise ValueError(
+                f"{type(self).__name__} has no `metadata_arrays`; "
+                f"pass `metadata_arrays=...` to the constructor to use `include_metadata`"
+            )
+        with self as (_, db):
             #TODO: add ability to stream line indices to avoid reading them into memory
             if n >= self._max_offset:
                 self.create_line_index(n, return_index=False)
             db.seek(self._offsets[n])
             if block_size is None:
                 self._cur = n
-                return self._consume_next(db, self.line_parser)
+                smi = self._consume_next(db, self.line_parser)
+                if include_metadata:
+                    return smi, self._metadata_at(n)
+                else:
+                    return smi
             else:
                 self._cur = n + block_size
                 if n + block_size >= self._max_offset:
@@ -462,13 +601,16 @@ class SMILESSupplier:
                             self._expand_offset_if_needed(n+m)
                             self._offsets[n+m] = db.tell()
                         blocks.append(self._consume_next(db, self.line_parser))
-                    return blocks
                 else:
-                    return [
+                    blocks = [
                         self._consume_next(db, self.line_parser)
                         for _ in range(block_size)
                     ]
-    def consume_iter(self, start_at=None, upto=None):
+                if include_metadata:
+                    return blocks, self._metadata_slice(n, n + block_size)
+                else:
+                    return blocks
+    def consume_iter(self, start_at=None, upto=None, include_metadata=None):
         """
         **LLM Docstring**
 
@@ -482,7 +624,14 @@ class SMILESSupplier:
         :return: a generator of SMILES strings
         :rtype: Iterator[str]
         """
-        with self as db:
+        if include_metadata is None:
+            include_metadata = self.metadata_arrays is not None
+        elif include_metadata and self.metadata_arrays is None:
+            raise ValueError(
+                f"{type(self).__name__} has no `metadata_arrays`; "
+                f"pass `metadata_arrays=...` to the constructor to use `include_metadata`"
+            )
+        with self as (_, db):
             if start_at is None:
                 start_at = self._cur
             else:
@@ -497,7 +646,10 @@ class SMILESSupplier:
                         if self._assignable_offsets:
                             self._expand_offset_if_needed(ninds)
                             self._offsets[ninds] = db.tell()
-                        yield smi
+                        if include_metadata:
+                            yield smi, self._metadata_at(ninds - 1)
+                        else:
+                            yield smi
                         smi = self._consume_next(db, self.line_parser)
                 else:
                     if ninds >= upto: return
@@ -507,7 +659,10 @@ class SMILESSupplier:
                         if self._assignable_offsets:
                             self._expand_offset_if_needed(ninds)
                             self._offsets[ninds] = db.tell()
-                        yield smi
+                        if include_metadata:
+                            yield smi, self._metadata_at(ninds - 1)
+                        else:
+                            yield smi
                         smi = self._consume_next(db, self.line_parser)
             finally:
                 self._cur = ninds
@@ -526,7 +681,7 @@ class SMILESSupplier:
         if self._stream is None:
             cls = type(self)
             raise ValueError(f"{cls.__name__} must be opened via `with` before it can be iterated over")
-        with self as db:
+        with self as (_, db):
             db.seek(self._offsets[self._cur])
             return self._consume_next(db, self.line_parser)
 
@@ -573,7 +728,7 @@ class SMILESSupplier:
         :return: the offset index, or `None`
         :rtype: np.ndarray | None
         """
-        with self as db:
+        with self as (_, db):
             if not self._assignable_offsets:
                 if return_index:
                     return self._offsets[:self._max_offset]
@@ -636,6 +791,24 @@ class SMILESSupplier:
             **etc
         )
 
+    @staticmethod
+    def _metadata_member_name(key, disambiguator=None):
+        """
+        Builds a self-describing archive member name for a
+        `metadata_arrays` entry: `metadata_{keyname}.npy`, sitting flat at
+        the top level of the archive (no subdirectory) so it's immediately
+        recognizable if the tar is expanded as a plain directory, without
+        needing to consult `meta.json` first. The exact `key -> member
+        name` mapping is still recorded in `meta.json`'s
+        `"metadata_arrays"` dict, since arbitrary keys can't always be
+        losslessly reversed out of a filesystem-safe slug.
+        """
+        slug = re.sub(r'[^A-Za-z0-9_.-]+', '_', str(key)).strip('_') or "field"
+        name = f"metadata_{slug}"
+        if disambiguator is not None:
+            name = f"{name}_{disambiguator}"
+        return f"{name}.npy"
+
     @classmethod
     def build_line_index_smiles_database_from_source(
             cls,
@@ -645,6 +818,7 @@ class SMILESSupplier:
             name=None,
             split_idx=0,
             split_char=None,
+            metadata_arrays=None,
             overwrite=False,
     ):
         """
@@ -665,6 +839,14 @@ class SMILESSupplier:
         :param name: optional name to record in the archive metadata.
         :param split_idx: forwarded to `SMILESSupplier` / recorded in metadata.
         :param split_char: forwarded to `SMILESSupplier` / recorded in metadata.
+        :param metadata_arrays: a `{name: array_like}` dict of per-line
+            metadata, index-aligned with the `.smi` file (as consumed by
+            `SMILESSupplier(..., metadata_arrays=...)` /
+            `find_smi(..., include_metadata=True)`). Each array is saved
+            as its own `.npy` archive member; the `name -> member name`
+            mapping is recorded under `"metadata_arrays"` in `meta.json`.
+            If omitted and `supplier_or_smiles_file` is a `SMILESSupplier`
+            that already carries `metadata_arrays`, those are reused.
         :param overwrite: if `False` (default), raises if `out_file` exists.
         """
         if not overwrite and os.path.exists(out_file):
@@ -681,6 +863,8 @@ class SMILESSupplier:
                 name = supplier.name
             split_idx = supplier.split_idx
             split_char = supplier.split_char
+            if metadata_arrays is None:
+                metadata_arrays = supplier.metadata_arrays
         else:
             smi_path = supplier_or_smiles_file
 
@@ -699,11 +883,32 @@ class SMILESSupplier:
             SMILESSupplier.save_line_index(buf, np.asarray(line_indices))
             idx_bytes = buf.getvalue()
 
-        meta_bytes = json.dumps({
+        meta = {
             "name": name,
             "split_idx": split_idx,
             "split_char": split_char
-        }).encode("utf-8")
+        }
+
+        # save each metadata array as its own .npy member, and record the
+        # name -> member-name mapping in meta.json so they can be found
+        # again on read
+        metadata_payloads = {}
+        if metadata_arrays:
+            member_names = {}
+            used_names = set()
+            for i, (key, arr) in enumerate(metadata_arrays.items()):
+                member_name = cls._metadata_member_name(key)
+                if member_name in used_names:
+                    # two keys sanitized to the same slug -- disambiguate
+                    member_name = cls._metadata_member_name(key, disambiguator=i)
+                used_names.add(member_name)
+                buf = io.BytesIO()
+                np.save(buf, np.asarray(arr))
+                metadata_payloads[member_name] = buf.getvalue()
+                member_names[key] = member_name
+            meta["metadata_arrays"] = member_names
+
+        meta_bytes = json.dumps(meta).encode("utf-8")
 
         with tarfile.open(out_file, mode="w") as tar:  # mode="w" == uncompressed tar
             tar.add(smi_path, arcname=SMILESSupplier.LISMI_SMI_MEMBER)
@@ -711,6 +916,11 @@ class SMILESSupplier:
             info = tarfile.TarInfo(name=SMILESSupplier.LISMI_IDX_MEMBER)
             info.size = len(idx_bytes)
             tar.addfile(info, io.BytesIO(idx_bytes))
+
+            for member_name, payload in metadata_payloads.items():
+                info = tarfile.TarInfo(name=member_name)
+                info.size = len(payload)
+                tar.addfile(info, io.BytesIO(payload))
 
             info = tarfile.TarInfo(name=SMILESSupplier.LISMI_META_MEMBER)
             info.size = len(meta_bytes)
