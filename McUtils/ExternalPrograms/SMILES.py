@@ -785,11 +785,14 @@ class SMILESSupplier:
         return np.save(file, line_index)
 
     def write_database_index(self, target, **etc):
-        return self.build_line_index_smiles_database_from_source(
-            self,
-            target,
-            **etc
-        )
+        with self:
+            self.create_line_index(return_index=False)
+            return self.build_line_index_smiles_database_from_source(
+                self,
+                target,
+                line_indices=self._offsets[:self._max_offset],
+                **etc
+            )
 
     @staticmethod
     def _metadata_member_name(key, disambiguator=None):
