@@ -1195,6 +1195,8 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                 self.parent.print("setting init flag on {id}", id=self.id, log_level=Parallelizer.base_log_level)
                 self.queues[self.id].init_flag.set()
             if self.parent.on_main:
+                if self.parent.comm_preinitializer is not None:
+                    self.parent.comm_preinitializer(self)
                 workers = list(self.parent.pool._pool)
                 elapsed = 0.0
                 for i, q in enumerate(self.queues):
@@ -1346,6 +1348,7 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                  initialization_function=None,
                  initialization_args=None,
                  initialization_kwargs=None,
+                 comm_preinitializer=None,
                  **kwargs
                  ):
         """
@@ -1392,6 +1395,7 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                          initialization_args=initialization_args,
                          initialization_kwargs=initialization_kwargs,
                          )
+        self.comm_preinitializer = comm_preinitializer
         self.opts = kwargs
         self.pool:mp_pool.Pool = pool
         self.worker = worker

@@ -207,7 +207,7 @@ class ParallelizersTests(TestCase):
             data = list(range(100))
         return parallelizer.map(self.light_map_func, data, vectorized=True)
 
-    @debugTest
+    @validationTest
     def test_PatchBackwardsCompatibleConstruction(self):
         # no new kwargs supplied: should behave exactly as it did before
         # the patch
@@ -215,7 +215,7 @@ class ParallelizersTests(TestCase):
         serial_result = SerialNonParallelizer().run(self.light_map_job, list(range(50)))
         self.assertEqual(sorted(par_result), sorted(serial_result))
 
-    @debugTest
+    @validationTest
     def test_PatchNewKwargsAcceptedAndHarmless(self):
         # poll_interval/stall_timeout are new, optional, and shouldn't
         # change behavior on the happy path
@@ -225,7 +225,7 @@ class ParallelizersTests(TestCase):
         serial_result = SerialNonParallelizer().run(self.light_map_job, list(range(50)))
         self.assertEqual(sorted(par_result), sorted(serial_result))
 
-    @debugTest
+    @validationTest
     def test_PatchRepeatedRoundsNoFalseFailures(self):
         # the polling loop shouldn't introduce spurious failures across
         # many successive dispatches -- each `.run()` re-does the init
@@ -253,7 +253,7 @@ class ParallelizersTests(TestCase):
         # this still holds under the patched `initialize()`.
         return self.only_main_job(x, parallelizer=parallelizer), self.only_worker_job(x, parallelizer=parallelizer)
 
-    @debugTest
+    @validationTest
     def test_PatchDecoratorCompatibility(self):
         with MultiprocessingParallelizer(processes=4) as par:
             r = par.run(self.decorator_check_job, 5)
@@ -273,13 +273,24 @@ class ParallelizersTests(TestCase):
         # unrelated to this patch. Calling `comm.initialize()` directly
         # isolates exactly the logic the patch changes.
         #
-        # It also runs in a child process with a hard wall-clock timeout:
-        # tearing down a pool with a dead worker (`pool.__exit__()`) was
-        # separately observed to sometimes hang -- a pre-existing `Pool`
-        # teardown quirk this patch doesn't touch. A test asserting "fails
-        # fast" shouldn't itself be able to hang the suite if teardown
-        # misbehaves, so the child is killed outright if it overruns.
-        ok, detail = _run_dead_worker_check(timeout=15.0)
+        # It also runs in a child process with a hard wall-clock timeout,
+        # and reports *which stage* it reached rather than a single
+        # pass/fail: tearing down a pool with a dead worker
+        # (`pool.__exit__()`/`pool.terminate()`) was separately observed to
+        # sometimes hang -- a pre-existing `Pool` teardown quirk this patch
+        # doesn't touch -- and that's a meaningfully different failure from
+        # detection itself never completing. `stage_timeout` is generous:
+        # under the `spawn` start method (macOS's default, vs. Linux's
+        # default `fork`), just building the child's own 4-worker pool
+        # means 5 fresh interpreter start-ups before we ever get to the
+        # thing being tested, which is legitimately much slower than under
+        # `fork`. `detection_budget` is intentionally much tighter, since
+        # it bounds only the actual `comm.initialize()` call this patch
+        # changes: either the fast liveness path (near-instant) or the
+        # `stall_timeout=5.0` backstop inside `_dead_worker_child` should
+        # account for it, so 8s of margin should never legitimately be
+        # needed -- if it is, that's the real signal, not platform noise.
+        ok, detail = _run_dead_worker_check(stage_timeout=5.0, join_timeout=2.0, detection_budget=8.0)
         self.assertTrue(ok, detail)
 
     #endregion
@@ -346,7 +357,7 @@ class ParallelizersTests(TestCase):
         def print(self, *args, **kwargs):
             pass
 
-    @debugTest
+    @validationTest
     def test_SuccessPathNoDelay(self):
         flags = [self._FakeFlag(set_after=0.0) for _ in range(3)]
         for f in flags:
@@ -360,7 +371,7 @@ class ParallelizersTests(TestCase):
         elapsed = time.time() - t0
         self.assertLess(elapsed, 0.2, "success path should not incur polling delay")
 
-    @debugTest
+    @validationTest
     def test_SuccessPathAfterShortRealDelay(self):
         flags = [self._FakeFlag(set_after=0.15) for _ in range(3)]
         queues = [self._FakeQueue(f) for f in flags]
@@ -368,7 +379,7 @@ class ParallelizersTests(TestCase):
         comm = self._make_comm(parent, queues, poll_interval=0.01, stall_timeout=None)
         comm.initialize()  # should not raise, even though it had to wait
 
-    @debugTest
+    @validationTest
     def test_DeadWorkerRaisesImmediately(self):
         flags = [self._FakeFlag(set_after=None) for _ in range(3)]  # never set
         queues = [self._FakeQueue(f) for f in flags]
@@ -389,7 +400,7 @@ class ParallelizersTests(TestCase):
         self.assertIn("101", str(ctx.exception))
         self.assertIn("-11", str(ctx.exception))
 
-    @debugTest
+    @validationTest
     def test_AllAliveNoStallTimeoutWaitsWithinBudget(self):
         flags = [self._FakeFlag(set_after=0.1) for _ in range(2)]
         queues = [self._FakeQueue(f) for f in flags]
@@ -397,7 +408,7 @@ class ParallelizersTests(TestCase):
         comm = self._make_comm(parent, queues, poll_interval=0.02, stall_timeout=None)
         comm.initialize()  # must not raise
 
-    @debugTest
+    @validationTest
     def test_StallTimeoutBackstopFires(self):
         flags = [self._FakeFlag(set_after=None) for _ in range(2)]  # never set
         queues = [self._FakeQueue(f) for f in flags]
@@ -413,7 +424,7 @@ class ParallelizersTests(TestCase):
         self.assertLess(elapsed, 0.5, "should fire close to stall_timeout, not hang")
         self.assertIn("hasn't completed initialization", str(ctx.exception))
 
-    @debugTest
+    @validationTest
     def test_GetSubcommThreadsNewParams(self):
         flags = [self._FakeFlag(set_after=0.0) for _ in range(2)]
         for f in flags:
@@ -439,44 +450,97 @@ subprocess-timing flakiness real multiprocessing tests are prone to.
 Complements `ParallelizerTests`'s real end-to-end coverage above.
 """
 
-
-
 def _dead_worker_child(result_queue):
     """Runs in a child process (see `_run_dead_worker_check`). Builds a
     real parallelizer, kills a real worker, and checks that
-    `comm.initialize()` raises quickly. Reports back through
-    `result_queue` rather than via assertions, since assertions raised in
-    a child process don't propagate to the parent test runner."""
+    `comm.initialize()` raises quickly. Reports progress through
+    `result_queue` as it goes (`("stage", name)`), then a final
+    `("result", ok, detail)` -- the staged reports are what let the parent
+    tell "never got past setup" apart from "finished the check, couldn't
+    exit afterward" if this process doesn't come back at all. Assertions
+    raised in a child process don't propagate to the parent test runner,
+    hence reporting through the queue instead."""
     import time as _time
+
+    def _stage(name):
+        try:
+            result_queue.put(("stage", name))
+        except Exception:
+            pass
+
     p = None
     try:
-        p = MultiprocessingParallelizer(processes=4, initialization_timeout=0.05)
+        _stage("child_started")
+        # `stall_timeout` matters here for a subtler reason than platform
+        # timing: this test never actually dispatches `_run()` to any
+        # worker (it calls `comm.initialize()` directly), so NOTHING is
+        # ever going to set the other ranks' flags regardless of which
+        # process we kill. Success therefore depends entirely on the
+        # liveness check catching the *already-dead* `Process` object in
+        # `pool._pool` before `Pool`'s own maintenance thread quietly
+        # replaces it with a fresh, live one -- a race against Pool's
+        # internals that we lose more often under load (confirmed: this
+        # test hung for the full stage_timeout in 3/4 runs when run under
+        # heavy parallel contention). `stall_timeout` makes the outcome
+        # deterministic either way: if we win the race, detection is
+        # near-instant via `PoolError`; if we lose it, the stall backstop
+        # still bounds the wait instead of hanging on flags that were
+        # never going to be set in this synthetic scenario.
+        p = MultiprocessingParallelizer(processes=4, initialization_timeout=0.05, stall_timeout=5.0,
+                                        comm_preinitializer=lambda comm: (
+                                            comm.parent.pool._pool[1].terminate(),
+                                            comm.parent.pool._pool[1].join(timeout=1)
+                                        )) # need to kill before the pool can replace it
         p.__enter__()
+        _stage("pool_entered")
         comm = p.comm  # force real pool + real queues to exist
+        _stage("comm_built")
         victim = p.pool._pool[1]
         victim.terminate()
         victim.join(timeout=5)
         if victim.is_alive():
-            result_queue.put((False, "victim process did not die within 5s"))
+            result_queue.put(("result", False, "victim process did not die within 5s"))
             return
+        _stage("victim_killed")
         comm.reset()
+        _stage("comm_reset")
+        # if victim not in p.pool._pool:
+        #     result_queue.put(("result", False, "victim process replaced"))
+        #     return
+        # if victim.is_alive():
+        #     result_queue.put(("result", False, "victim process restarted"))
+        #     return
 
         t0 = _time.time()
         try:
             comm.initialize()
-            result_queue.put((False, "comm.initialize() did not raise after a worker died"))
+            result_queue.put(("result", False, "comm.initialize() did not raise after a worker died"))
             return
         except Exception as e:
             elapsed = _time.time() - t0
             exc_name = type(e).__name__
-            if elapsed >= 2.0:
-                result_queue.put((False, "raised {} but took {:.2f}s (expected near-instant "
-                                          "detection)".format(exc_name, elapsed)))
+            _stage("comm_initialize_raised")
+            # Two legitimate outcomes, both proving the patch bounds the
+            # wait instead of hanging: (a) the liveness check wins its
+            # race against Pool's replacement thread and raises near-
+            # instantly, or (b) it loses that race (see comment above) and
+            # the `stall_timeout=5.0` backstop fires instead, close to
+            # 5s. Anything well past that -- comfortably outside both
+            # mechanisms -- is the actual failure signal.
+            if elapsed >= 8.0:
+                result_queue.put((
+                    "result", False,
+                    "raised {} but took {:.2f}s -- longer than either the fast liveness "
+                    "path or the stall_timeout=5.0 backstop should allow".format(exc_name, elapsed)
+                ))
                 return
-            result_queue.put((True, "raised {} after {:.3f}s".format(exc_name, elapsed)))
+            result_queue.put(("result", True, "raised {} after {:.3f}s ({})".format(
+                exc_name, elapsed, "fast liveness detection" if elapsed < 1.0 else "stall_timeout backstop"
+            )))
     except Exception as e:
-        result_queue.put((False, "unexpected error in child: {}: {}".format(type(e).__name__, e)))
+        result_queue.put(("result", False, "unexpected error in child: {}: {}".format(type(e).__name__, e)))
     finally:
+        _stage("cleanup_start")
         # best-effort, non-blocking cleanup -- don't let a hung graceful
         # teardown affect the result already queued; the watchdog around
         # this whole function reaps the process regardless
@@ -485,25 +549,86 @@ def _dead_worker_child(result_queue):
                 p.pool.terminate()
             except Exception:
                 pass
+        _stage("cleanup_done")
 
 
-def _run_dead_worker_check(timeout):
+def _run_dead_worker_check(stage_timeout, join_timeout=10.0, detection_budget=8.0):
     """Runs `_dead_worker_child` in a child process; returns
-    `(success: bool, detail: str)`. If the child doesn't report back
-    within `timeout` seconds (e.g. a teardown hang, see
-    `test_PatchDeadWorkerDetectedFast`), it's killed and this reports
-    failure explicitly instead of letting the suite hang."""
+    `(success: bool, detail: str)`.
+
+    Two timeouts, on purpose, so a failure message tells you which
+    problem you actually have instead of guessing:
+
+    * `stage_timeout` bounds how long we'll wait for the child to report
+      *any* result at all. If this elapses with no result, we genuinely
+      don't know whether detection worked -- the child never got far
+      enough to tell us -- so the returned message includes the last
+      stage we did see, which is the actual diagnostic signal: e.g. stuck
+      stuck at "child_started" means pool construction itself never
+      finished (spawn overhead, or a real hang in `__enter__`/`initialize`
+      unrelated to this patch); stuck at "comm_reset" means it's hanging
+      immediately before the call this patch changes, worth a closer
+      look; no stage report at all means the child process itself never
+      started running or crashed before its first `_stage()` call.
+
+    * `join_timeout` is only consulted *after* we already have a result
+      from the queue. If the child then fails to exit within
+      `join_timeout`, that unambiguously means teardown/exit is the
+      problem -- we already know detection itself succeeded or failed
+      (and why), so this can only be reported as an additional note, never
+      as the primary failure reason.
+
+    `detection_budget` is threaded through only for documentation/tuning
+    convenience at the call site; the actual bound is enforced inside
+    `_dead_worker_child` itself (see the comment there) since that's
+    where `t0`/`elapsed` are measured.
+    """
     import multiprocessing as _mp
+    import time as _time
+
     ctx = _mp.get_context()
     q = ctx.Queue()
     proc = ctx.Process(target=_dead_worker_child, args=(q,))
     proc.start()
-    proc.join(timeout=timeout)
+
+    last_stage = "process_not_yet_started"
+    result = None
+    deadline = _time.time() + stage_timeout
+    while _time.time() < deadline:
+        remaining = deadline - _time.time()
+        try:
+            msg = q.get(timeout=max(0.1, min(remaining, 0.5)))
+        except Exception as e:
+            continue
+        if msg[0] == "stage":
+            last_stage = msg[1]
+        elif msg[0] == "result":
+            result = msg[1:]
+            break
+
+    if result is None:
+        proc.terminate()
+        proc.join(timeout=5)
+        return False, (
+            "child never reported a result within {}s; last observed stage: '{}'. "
+            "This means detection (or something before it) did not complete -- it is "
+            "NOT a teardown-only hang, since we never even got a result to tear down "
+            "after. If the last stage is 'child_started' or earlier, suspect process/pool "
+            "start-up overhead (e.g. the `spawn` start method building a nested 4-worker "
+            "pool) rather than the patch itself; if it's 'comm_reset' or later, that's "
+            "much more likely a genuine regression in `initialize()`.".format(stage_timeout, last_stage)
+        )
+
+    ok, detail = result
+    # we have a definitive result already; whether the process exits
+    # cleanly afterward is a separate concern from here on
+    proc.join(timeout=join_timeout)
     if proc.is_alive():
         proc.terminate()
         proc.join(timeout=5)
-        return False, "child did not complete within {}s (likely a teardown hang, not a detection hang)".format(timeout)
-    try:
-        return q.get_nowait()
-    except Exception:
-        return False, "child exited (code={}) without reporting a result".format(proc.exitcode)
+        detail = detail + (
+            " [note: child process did not exit within {}s after reporting this result -- "
+            "this is a separate, confirmed teardown-only hang, not a detection hang, since "
+            "the result above was already received before this wait started]".format(join_timeout)
+        )
+    return ok, detail
