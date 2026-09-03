@@ -1119,6 +1119,8 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                      id:int,
                      queues: typing.Iterable['MultiprocessingParallelizer.SendRecvQueuePair'],
                      initialization_timeout:float=None,
+                     poll_interval:float=0.02,
+                     stall_timeout:float=None,
                      group:typing.Iterable['MultiprocessingParallelizer.PoolCommunicator']=None
                      ):
             """
@@ -1143,6 +1145,8 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
             self.id = id
             self.queues = tuple(queues)
             self.initialization_timeout=initialization_timeout
+            self.poll_interval=poll_interval
+            self.stall_timeout=stall_timeout
             self.group = tuple(group) if group is not None else None
 
         def __repr__(self):
@@ -1168,6 +1172,22 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
             """
             Performs initialization of the communicator
             (basically just waits until all threads say all is well)
+
+            Rather than waiting on a single fixed `initialization_timeout`
+            and inferring failure from it expiring (which can't tell "still
+            starting up" from "a worker died"), this polls the flag in short
+            intervals and checks the pool's actual worker processes for
+            liveness between polls. `self.parent.pool` is a real local
+            `multiprocessing.pool.Pool`, so `pool._pool` gives real `Process`
+            objects with `.is_alive()`/`.exitcode` -- a worker that has
+            actually died is detected (and reported, with pid/exitcode)
+            within one `poll_interval`, with no need to guess how long
+            startup should legitimately take. `stall_timeout`, if set, is
+            purely a last-resort backstop against a worker that's alive but
+            permanently wedged (which no process-external check can detect
+            directly) -- unlike the old `initialization_timeout`, it doesn't
+            need to be tuned tightly, since real crashes are now caught
+            immediately regardless of what it's set to.
             :return:
             :rtype:
             """
@@ -1175,12 +1195,27 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                 self.parent.print("setting init flag on {id}", id=self.id, log_level=Parallelizer.base_log_level)
                 self.queues[self.id].init_flag.set()
             if self.parent.on_main:
+                workers = list(self.parent.pool._pool)
+                elapsed = 0.0
                 for i, q in enumerate(self.queues):
-                    if not q.init_flag.is_set():
+                    while not q.init_flag.is_set():
                         self.parent.print("checking init flag on {i}".format(i=i), log_level=Parallelizer.base_log_level)
-                        wat = q.init_flag.wait(self.initialization_timeout)
-                        if not wat:
-                            raise self.PoolError("Failed to initialize pool")
+                        wat = q.init_flag.wait(self.poll_interval)
+                        if wat:
+                            break
+                        elapsed += self.poll_interval
+                        dead = [(w.pid, w.exitcode) for w in workers if not w.is_alive()]
+                        if dead:
+                            raise self.PoolError(
+                                "Pool worker(s) died before completing initialization "
+                                "(pid, exitcode): {}".format(dead)
+                            )
+                        if self.stall_timeout is not None and elapsed >= self.stall_timeout:
+                            raise self.PoolError(
+                                "Worker {} still alive but hasn't completed initialization "
+                                "after {}s (stall_timeout backstop; all workers report alive, "
+                                "so this is a hang, not a crash)".format(i, self.stall_timeout)
+                            )
 
         def reset(self):
             """
@@ -1289,6 +1324,8 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                 self.id,
                 tuple(self.queues[i] for i in idx),
                 initialization_timeout=self.initialization_timeout,
+                poll_interval=self.poll_interval,
+                stall_timeout=self.stall_timeout,
                 group=None if self.group is None else tuple(self.group[i] for i in idx)
             )
 
@@ -1304,6 +1341,8 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                  rank=None,
                  allow_restart=True,
                  initialization_timeout=.5,
+                 poll_interval=0.02,
+                 stall_timeout=None,
                  initialization_function=None,
                  initialization_args=None,
                  initialization_kwargs=None,
@@ -1346,6 +1385,8 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         :rtype: None
         """
         self.initialization_timeout=initialization_timeout
+        self.poll_interval=poll_interval
+        self.stall_timeout=stall_timeout
         super().__init__(logger=logger, contract=contract,
                          initialization_function=initialization_function,
                          initialization_args=initialization_args,
@@ -1393,7 +1434,12 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         if self._comm is None:
             self.logger.log_print("initializing PoolCommunicators...", log_level=self.logger.LogLevel.MoreDebug)
             comm_list = [
-                self.PoolCommunicator(self, i, self.queues, initialization_timeout=self.initialization_timeout) for
+                self.PoolCommunicator(
+                    self, i, self.queues,
+                    initialization_timeout=self.initialization_timeout,
+                    poll_interval=self.poll_interval,
+                    stall_timeout=self.stall_timeout,
+                ) for
                 i in range(0, self.nproc)
             ]
             self.logger.log_print("got comm group {g}", g=comm_list, log_level=self.logger.LogLevel.MoreDebug)
