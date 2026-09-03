@@ -23,6 +23,8 @@ from .RegexPatterns import *; from .RegexPatterns import __all__ as exposed
 __all__ += exposed
 from .StructuredType import *; from .StructuredType import __all__ as exposed
 __all__ += exposed
+from .StorageBackends import *; from .StorageBackends import __all__ as exposed
+__all__ += exposed
 from .Parsers import *; from .Parsers import __all__ as exposed
 __all__ += exposed
 from .XYZParser import *; from .XYZParser import __all__ as exposed

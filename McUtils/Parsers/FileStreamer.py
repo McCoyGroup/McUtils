@@ -5,6 +5,7 @@ from mmap import mmap
 import abc, io
 import sys
 import textwrap
+import os
 
 __all__ = [
     "FileStreamReader",
@@ -13,7 +14,9 @@ __all__ = [
     "FileStreamReaderException",
     "StringStreamReader",
     "FileLineByLineReader",
-    "StringLineByLineReader"
+    "StringLineByLineReader",
+    "ByteLineByLineReader",
+    "line_by_line_parser"
 ]
 
 ########################################################################################################################
@@ -1949,6 +1952,8 @@ class LineByLineParser(metaclass=abc.ABCMeta):
         SKIP = "skip"
         VALUE = "value"
         CONSUME_REST = 'consume'
+        GROUP = 'group'
+        USE_HANDLER = 'use_handler'
     def read_stream_line(self, binary=None):
         """
         **LLM Docstring**
@@ -2033,6 +2038,8 @@ class LineByLineParser(metaclass=abc.ABCMeta):
         empty = True
         active_tag = None
         label = None
+        group_key = None
+        group_data = []
         try:
             sitter = self.stream_iter(binary=binary)
             for i,line in enumerate(sitter):
@@ -2068,14 +2075,34 @@ class LineByLineParser(metaclass=abc.ABCMeta):
                         stream_pos = self.stream.tell()
                         continue
 
+                if next_tag is self.LineReaderTags.GROUP:
+                    if group_key is not None and tag_label != group_key:
+                        block_data.append({group_key: self.handle_block(group_key, group_data, depth + 1)})
+                        group_data = []
+                    group_key = tag_label
+                    val = tag_body if tag_body is not None else self.handle_block_line(tag_label, line, depth, history=group_data)
+                    group_data.append(val)
+                    stream_pos = self.stream.tell()
+                    continue
+                elif group_key is not None and next_tag is not self.LineReaderTags.SKIP:
+                    block_data.append({group_key: self.handle_block(group_key, group_data, depth + 1)})
+                    group_key = None
+                    group_data = []
+
                 if next_tag is self.LineReaderTags.BLOCK_END:
-                    if tag_body is not None: block_data.append(tag_body)
+                    if tag_body is self.LineReaderTags.USE_HANDLER:
+                        block_data.append(self.handle_block_line(tag_label, line, depth, history=block_data))
+                    elif tag_body is not None:
+                        block_data.append(tag_body)
                     stream_pos = None
                     break
                 elif next_tag is self.LineReaderTags.BLOCK_START:
                     if active_tag is None:
                         label = tag_label
-                        if tag_body is not None: block_data.append(tag_body)
+                        if tag_body is self.LineReaderTags.USE_HANDLER:
+                            block_data.append(self.handle_block_line(tag_label, line, depth, history=block_data))
+                        elif tag_body is not None:
+                            block_data.append(tag_body)
                     else:
                         if max_nesting_depth < 0 or depth < max_nesting_depth:
                             self.stream.seek(stream_pos)
@@ -2089,7 +2116,10 @@ class LineByLineParser(metaclass=abc.ABCMeta):
                 elif next_tag is self.LineReaderTags.CONSUME_REST:
                     if active_tag is None:
                         label = tag_label
-                        if tag_body is not None: block_data.append(tag_body)
+                        if tag_body is self.LineReaderTags.USE_HANDLER:
+                            block_data.append(self.handle_block_line(tag_label, line, depth, history=block_data))
+                        elif tag_body is not None:
+                            block_data.append(tag_body)
                     block_data.extend(list(sitter))
                     stream_pos = None
                     break
@@ -2102,7 +2132,10 @@ class LineByLineParser(metaclass=abc.ABCMeta):
                                                          max_nesting_depth=max_nesting_depth, depth=depth + 1)
                         block_data.append(sub_block)
                 else:
-                    if tag_body is not None: block_data.append(tag_body)
+                    if tag_body is self.LineReaderTags.USE_HANDLER:
+                        block_data.append(self.handle_block_line(tag_label, line, depth, history=block_data))
+                    elif tag_body is not None:
+                        block_data.append(tag_body)
                     if next_tag is not None and active_tag is None:
                         active_tag = next_tag
                         stream_pos = None
@@ -2117,13 +2150,16 @@ class LineByLineParser(metaclass=abc.ABCMeta):
             if stream_pos is not None:
                 self.stream.seek(stream_pos)
 
+        if group_key is not None:
+            block_data.append({group_key: self.handle_block(group_key, group_data, depth + 1)})
+
         if empty:
             return None
         else:
             if label is None:
-                return self.handle_block(None, block_data)
+                return self.handle_block(None, block_data, depth=depth)
             else:
-                return {label:self.handle_block(label, block_data)}
+                return {label:self.handle_block(label, block_data, depth=depth)}
 
     MAX_BLOCKS = sys.maxsize # a debug tool
     def __iter__(self):
@@ -2229,3 +2265,100 @@ class ByteLineByLineReader(LineByLineParser):
         super().__init__(stream, binary=True, encoding=encoding,
                          ignore_comments=ignore_comments,
                          max_nesting_depth=max_nesting_depth)
+
+_unset = object() # I would use the `dev.undefined` sentinel, but this is currently standalone which is quite nice...
+class FunctionalLineParserMixin:
+    """
+    Mixin for `LineByLineParser` subclasses that implements `check_tag` and
+    `handle_block_line` from a single user-supplied `parse` function,
+    so you don't need to write two methods that both re-inspect the same line.
+
+    `parse` must have the signature
+
+        parse(line, depth=0, active_tag=None, label=None, history=None) -> (tag, data)
+
+    where `tag` is exactly what `check_tag` would normally return (a
+    `LineReaderTags` member, `None`, a bare string label, or one of the
+    `(tag, body)` / `(tag, label, body)` tuples), and `data` is the value
+    that should be used for this line if it ends up being consumed as a
+    `VALUE` line (i.e. what `handle_block_line` would otherwise compute).
+    If the line will never be treated as a `VALUE` line, `data` can just be
+    `None`.
+
+    An optional `handle_block(label, block, depth)` function can also be
+    supplied to override the default passthrough `handle_block`.
+    """
+    def _init_function_parser(self, parse, handle_block=None):
+        self._parse_fn = parse
+        self._handle_block_fn = handle_block
+        self._last_line = _unset
+        self._last_data = _unset
+
+    def check_tag(self, line, depth: int = 0, active_tag=None, label: str = None, history: list = None):
+        tag, data = self._parse_fn(line, depth=depth, active_tag=active_tag, label=label, history=history)
+        # cached for the (possible) immediately-following handle_block_line call
+        # on this same line, so `parse` only has to run once per line
+        self._last_line = line
+        self._last_data = data
+        return tag
+
+    def handle_block_line(self, label, line, depth: int = 0, history: list = None):
+        if self._last_data is not _unset and (line is self._last_line or line == self._last_line):
+            data = self._last_data
+            self._last_data = _unset
+            return data
+        # fallback: parse wasn't cached for this line (shouldn't normally happen)
+        tag, data = self._parse_fn(line, depth=depth, active_tag=None, label=label, history=history)
+        return data
+
+    def handle_block(self, label, block, depth: int = 0):
+        if self._handle_block_fn is not None:
+            return self._handle_block_fn(label, block, depth)
+        return super().handle_block(label, block, depth)
+
+
+class FunctionalStringLineByLineReader(FunctionalLineParserMixin, StringLineByLineReader):
+    """
+    `StringLineByLineReader` built from a single `parse(line, ...) -> (tag, data)` function.
+    """
+    def __init__(self, string, parse, handle_block=None, **opts):
+        super().__init__(string, **opts)
+        self._init_function_parser(parse, handle_block)
+
+
+class FunctionalFileLineByLineReader(FunctionalLineParserMixin, FileLineByLineReader):
+    """
+    `FileLineByLineReader` built from a single `parse(line, ...) -> (tag, data)` function.
+    """
+    def __init__(self, file, parse, handle_block=None, **opts):
+        super().__init__(file, **opts)
+        self._init_function_parser(parse, handle_block)
+
+
+class FunctionalByteLineByLineReader(FunctionalLineParserMixin, ByteLineByLineReader):
+    """
+    `ByteLineByLineReader` built from a single `parse(line, ...) -> (tag, data)` function.
+    """
+    def __init__(self, string, parse, handle_block=None, **opts):
+        super().__init__(string, **opts)
+        self._init_function_parser(parse, handle_block)
+
+
+def line_by_line_parser(source, parse, handle_block=None, binary=False, **opts):
+    """
+    Convenience factory that dispatches to the right `Functional*LineByLineReader`
+    based on the type of `source` (a string, a file/path, or bytes).
+
+    :param source: a string, an open file/file path, or a bytes object to parse
+    :param parse: `parse(line, depth=0, active_tag=None, label=None, history=None) -> (tag, data)`
+    :param handle_block: optional `handle_block(label, block, depth) -> block`
+    """
+    if handle_block is None:
+        handle_block = getattr(parse, 'handle_block', None)
+
+    if isinstance(source, (bytes, bytearray)) or binary:
+        return FunctionalByteLineByLineReader(source, parse, handle_block=handle_block, **opts)
+    elif isinstance(source, str) and not os.path.exists(source) and ("\n" in source or opts.pop("is_string", False)):
+        return FunctionalStringLineByLineReader(source, parse, handle_block=handle_block, **opts)
+    else:
+        return FunctionalFileLineByLineReader(source, parse, handle_block=handle_block, **opts)

@@ -1,0 +1,125 @@
+===================================SLURM JOB===================================
+    JOB: train
+    NOW: Tue Sep  1 15:16:12 CDT 2026
+  START: 1788293771
+    PWD: /scratch/user/maboyer/encoding
+     ID: 19586042
+    OUT: /scratch/user/maboyer/encoding/train-19586042.out
+ SCRIPT: /scratch/user/maboyer/encoding/run_python.sh
+   TIME: 
+  NODES: 1
+  PART.: gpu
+==============================================================================
+/scratch/user/maboyer/envs/encoding/lib/python3.12/site-packages/ocen/models/simple_featurizer.py:93: UserWarning: To copy construct from a tensor, it is recommended to use sourceTensor.detach().clone() or sourceTensor.detach().clone().requires_grad_(True), rather than torch.tensor(sourceTensor).
+  "chiral_dihedral_index": torch.tensor(chiral_dihedral_index, dtype=torch.int),  # (4, M)
+Derived node_feat_dim=4 from a sample conformer.
+Derived embedding_dim=2 for readout_vector='z_alpha' from a sample batch.
+  [train] batch 25 | rows seen 800 | running loss 0.6971 | running acc 0.510
+  [train] batch 50 | rows seen 1,600 | running loss 0.6967 | running acc 0.514
+  [train] batch 75 | rows seen 2,400 | running loss 0.6960 | running acc 0.512
+  [train] batch 100 | rows seen 3,200 | running loss 0.6963 | running acc 0.508
+  [train] batch 125 | rows seen 4,000 | running loss 0.6961 | running acc 0.508
+  [train] batch 150 | rows seen 4,800 | running loss 0.6960 | running acc 0.507
+  [train] batch 175 | rows seen 5,600 | running loss 0.6956 | running acc 0.507
+  [train] batch 200 | rows seen 6,400 | running loss 0.6956 | running acc 0.507
+  [train] batch 225 | rows seen 7,200 | running loss 0.6954 | running acc 0.506
+  [train] batch 250 | rows seen 8,000 | running loss 0.6951 | running acc 0.504
+  [train] batch 275 | rows seen 8,800 | running loss 0.6951 | running acc 0.504
+  [train] batch 300 | rows seen 9,600 | running loss 0.6947 | running acc 0.506
+  [train] batch 325 | rows seen 10,400 | running loss 0.6949 | running acc 0.505
+  [train] batch 350 | rows seen 11,200 | running loss 0.6949 | running acc 0.506
+  [train] batch 375 | rows seen 12,000 | running loss 0.6947 | running acc 0.507
+  [train] batch 400 | rows seen 12,800 | running loss 0.6949 | running acc 0.507
+  [train] batch 425 | rows seen 13,600 | running loss 0.6948 | running acc 0.506
+  [train] batch 450 | rows seen 14,400 | running loss 0.6948 | running acc 0.506
+  [train] batch 475 | rows seen 15,200 | running loss 0.6946 | running acc 0.508
+  [train] batch 500 | rows seen 16,000 | running loss 0.6946 | running acc 0.508
+  [train] batch 525 | rows seen 16,800 | running loss 0.6946 | running acc 0.508
+  [train] batch 550 | rows seen 17,600 | running loss 0.6943 | running acc 0.510
+  [train] batch 575 | rows seen 18,400 | running loss 0.6943 | running acc 0.509
+  [train] batch 600 | rows seen 19,200 | running loss 0.6943 | running acc 0.509
+  [train] batch 625 | rows seen 20,000 | running loss 0.6943 | running acc 0.509
+  [train] batch 650 | rows seen 20,800 | running loss 0.6943 | running acc 0.508
+  [train] batch 675 | rows seen 21,600 | running loss 0.6942 | running acc 0.508
+  [train] batch 700 | rows seen 22,400 | running loss 0.6942 | running acc 0.507
+  [train] batch 725 | rows seen 23,200 | running loss 0.6942 | running acc 0.508
+  [train] batch 750 | rows seen 24,000 | running loss 0.6942 | running acc 0.506
+  [train] batch 775 | rows seen 24,800 | running loss 0.6941 | running acc 0.506
+  [train] batch 800 | rows seen 25,600 | running loss 0.6942 | running acc 0.506
+  [train] batch 825 | rows seen 26,400 | running loss 0.6941 | running acc 0.506
+  [train] batch 850 | rows seen 27,200 | running loss 0.6941 | running acc 0.506
+  [train] batch 875 | rows seen 28,000 | running loss 0.6941 | running acc 0.506
+  [train] batch 900 | rows seen 28,800 | running loss 0.6940 | running acc 0.507
+  [train] batch 925 | rows seen 29,600 | running loss 0.6940 | running acc 0.507
+  [train] batch 950 | rows seen 30,400 | running loss 0.6940 | running acc 0.506
+  [train] batch 975 | rows seen 31,200 | running loss 0.6939 | running acc 0.506
+  [val] batch 25 | rows seen 800 | running loss 0.6944 | running acc 0.517
+  [val] batch 50 | rows seen 1,600 | running loss 0.6924 | running acc 0.531
+  [val] batch 75 | rows seen 2,400 | running loss 0.6931 | running acc 0.527
+  [val] batch 100 | rows seen 3,200 | running loss 0.6939 | running acc 0.520
+  [val] batch 125 | rows seen 4,000 | running loss 0.6933 | running acc 0.524
+  [val] batch 150 | rows seen 4,800 | running loss 0.6933 | running acc 0.523
+  [val] batch 175 | rows seen 5,600 | running loss 0.6942 | running acc 0.517
+  [val] batch 200 | rows seen 6,400 | running loss 0.6945 | running acc 0.516
+  [val] batch 225 | rows seen 7,200 | running loss 0.6942 | running acc 0.516
+  [val] batch 250 | rows seen 8,000 | running loss 0.6938 | running acc 0.519
+  [val] batch 275 | rows seen 8,800 | running loss 0.6938 | running acc 0.517
+  [val] batch 300 | rows seen 9,600 | running loss 0.6936 | running acc 0.519
+  [val] batch 325 | rows seen 10,400 | running loss 0.6934 | running acc 0.517
+epoch   1 | train loss 0.6915 acc 0.513 | val loss 0.6895 acc 0.517
+  [train] batch 25 | rows seen 800 | running loss 0.6922 | running acc 0.539
+  [train] batch 50 | rows seen 1,600 | running loss 0.6906 | running acc 0.524
+  [train] batch 75 | rows seen 2,400 | running loss 0.6897 | running acc 0.534
+  [train] batch 100 | rows seen 3,200 | running loss 0.6891 | running acc 0.528
+  [train] batch 125 | rows seen 4,000 | running loss 0.6890 | running acc 0.528
+  [train] batch 150 | rows seen 4,800 | running loss 0.6895 | running acc 0.528
+  [train] batch 175 | rows seen 5,600 | running loss 0.6897 | running acc 0.521
+  [train] batch 200 | rows seen 6,400 | running loss 0.6895 | running acc 0.524
+  [train] batch 225 | rows seen 7,200 | running loss 0.6894 | running acc 0.526
+  [train] batch 250 | rows seen 8,000 | running loss 0.6890 | running acc 0.528
+  [train] batch 275 | rows seen 8,800 | running loss 0.6888 | running acc 0.528
+  [train] batch 300 | rows seen 9,600 | running loss 0.6888 | running acc 0.527
+  [val] batch 25 | rows seen 800 | running loss 0.6963 | running acc 0.557
+  [val] batch 50 | rows seen 1,600 | running loss 0.6911 | running acc 0.567
+  [val] batch 75 | rows seen 2,400 | running loss 0.6917 | running acc 0.535
+  [val] batch 100 | rows seen 3,200 | running loss 0.6929 | running acc 0.528
+  [val] batch 125 | rows seen 4,000 | running loss 0.6932 | running acc 0.527
+  [val] batch 150 | rows seen 4,800 | running loss 0.6931 | running acc 0.532
+  [val] batch 175 | rows seen 5,600 | running loss 0.6944 | running acc 0.530
+  [val] batch 200 | rows seen 6,400 | running loss 0.6949 | running acc 0.530
+  [val] batch 225 | rows seen 7,200 | running loss 0.6948 | running acc 0.529
+epoch   2 | train loss 0.6882 acc 0.522 | val loss 0.6888 acc 0.517
+  [train] batch 25 | rows seen 800 | running loss 0.6812 | running acc 0.532
+  [train] batch 50 | rows seen 1,600 | running loss 0.6829 | running acc 0.526
+  [train] batch 75 | rows seen 2,400 | running loss 0.6855 | running acc 0.515
+  [train] batch 100 | rows seen 3,200 | running loss 0.6848 | running acc 0.519
+  [train] batch 125 | rows seen 4,000 | running loss 0.6866 | running acc 0.516
+  [train] batch 150 | rows seen 4,800 | running loss 0.6870 | running acc 0.518
+  [train] batch 175 | rows seen 5,600 | running loss 0.6861 | running acc 0.522
+  [train] batch 200 | rows seen 6,400 | running loss 0.6860 | running acc 0.523
+  [train] batch 225 | rows seen 7,200 | running loss 0.6862 | running acc 0.522
+  [train] batch 250 | rows seen 8,000 | running loss 0.6868 | running acc 0.521
+  [train] batch 275 | rows seen 8,800 | running loss 0.6867 | running acc 0.522
+  [train] batch 300 | rows seen 9,600 | running loss 0.6868 | running acc 0.522
+  [train] batch 325 | rows seen 10,400 | running loss 0.6867 | running acc 0.522
+  [train] batch 350 | rows seen 11,200 | running loss 0.6868 | running acc 0.522
+  [train] batch 375 | rows seen 12,000 | running loss 0.6871 | running acc 0.520
+  [train] batch 400 | rows seen 12,800 | running loss 0.6871 | running acc 0.522
+  [train] batch 425 | rows seen 13,600 | running loss 0.6875 | running acc 0.520
+  [train] batch 450 | rows seen 14,400 | running loss 0.6873 | running acc 0.521
+  [val] batch 25 | rows seen 800 | running loss 0.6947 | running acc 0.530
+  [val] batch 50 | rows seen 1,600 | running loss 0.6905 | running acc 0.539
+  [val] batch 75 | rows seen 2,400 | running loss 0.6931 | running acc 0.530
+  [val] batch 100 | rows seen 3,200 | running loss 0.6941 | running acc 0.527
+  [val] batch 125 | rows seen 4,000 | running loss 0.6935 | running acc 0.526
+  [val] batch 150 | rows seen 4,800 | running loss 0.6935 | running acc 0.526
+  [val] batch 175 | rows seen 5,600 | running loss 0.6951 | running acc 0.518
+  [val] batch 200 | rows seen 6,400 | running loss 0.6955 | running acc 0.520
+  [val] batch 225 | rows seen 7,200 | running loss 0.6953 | running acc 0.519
+  [val] batch 250 | rows seen 8,000 | running loss 0.6945 | running acc 0.522
+  [val] batch 275 | rows seen 8,800 | running loss 0.6946 | running acc 0.521
+  [val] batch 300 | rows seen 9,600 | running loss 0.6946 | running acc 0.521
+  [val] batch 325 | rows seen 10,400 | running loss 0.6945 | running acc 0.518
+  [val] batch 350 | rows seen 11,200 | running loss 0.6944 | running acc 0.518
+  [val] batch 375 | rows seen 12,000 | running loss 0.6942 | running acc 0.520
+  [val] batch 400 | rows seen 12,800 | running loss 0.6943 | running acc 0.520

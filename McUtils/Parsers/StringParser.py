@@ -8,7 +8,7 @@ __all__ = [
     "StringParserException"
 ]
 
-__reload_hook__ = ['.RegexPatterns']
+__reload_hook__ = ['.RegexPatterns', '.StorageBackends']
 
 ########################################################################################################################
 #
@@ -81,16 +81,22 @@ class StringParser:
     A convenience class that makes it easy to pull blocks out of strings and whatnot
     """
 
-    def __init__(self, regex:RegexPattern):
+    def __init__(self, regex: RegexPattern, backend=None):
         """
-        **LLM Docstring**
-
-        Store the declarative `RegexPattern` used by parsing methods when no override is supplied.
-
-        :param regex: the pattern override; defaults to the parser's stored pattern
+        :param regex: the pattern this parser matches and extracts structured data from
         :type regex: RegexPattern
+        :param backend: which `StructuredTypeArray` storage backend to use --
+            ``None``/``'numpy'`` (default, unchanged behavior), ``'python'``
+            for the tolerant, ragged-friendly pure-Python backend, or any
+            backend registered via `StorageBackends.ParserStorageBackend.register`. Also
+            accepts a `StorageBackends.ParserStorageBackend` instance directly.
+            This is the *only* new piece of state `StringParser` carries for
+            the whole backend-swapping feature -- everything else lives in
+            `StructuredTypeArray`/`StorageBackends`.
+        :type backend: str | StorageBackends.ParserStorageBackend | None
         """
         self.regex = regex
+        self.backend = backend
 
     def parse(self,
               txt,
@@ -134,7 +140,7 @@ class StringParser:
 
             iterable_regex = copy.copy(regex)
             iterable_regex.pat = lambda p, *a, **kw: p # to unbind the Repeating capture screwups
-            parser = type(self)(iterable_regex)
+            parser = type(self)(iterable_regex, backend=self.backend)
 
             # ah fack how do we handle the dtypes passing?
             # if dtypes was passed...I guess we gotta feed it through, right?
@@ -537,7 +543,7 @@ class StringParser:
         """
         # we'll always force our dtypes and results to be a StructuredType and StructuredTypeArray
         # as these will force the results to be conformaing
-        res = StructuredTypeArray(dtypes)
+        res = StructuredTypeArray(dtypes, backend=self.backend)
         return res
 
     #endregion

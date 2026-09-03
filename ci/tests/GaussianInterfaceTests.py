@@ -27,7 +27,7 @@ class GaussianInterfaceTests(TestCase):
             parse = reader.parse()
         self.assertLess(parse["OptimizedScanEnergies"][0][1], -308)
 
-    @validationTest
+    @debugTest
     def test_GetDipoles(self):
         with GaussianLogReader(self.test_log_water) as reader:
             parse = reader.parse("DipoleMoments")
