@@ -8,6 +8,13 @@ __all__ = [
     "DisappearingType"
 ]
 
+from .StorageBackends import (
+    StructuredTypeArrayException,
+    GrowthPolicy,
+    ParserStorageBackend,
+    NumpyStorageBackend,
+)
+
 class StructuredType:
     """
     Represents a structured type with a defined calculus to simplify the construction of combined types when writing
@@ -47,6 +54,14 @@ class StructuredType:
                 isinstance(base_type[1], int) or isinstance(base_type[1], tuple)
         ): # to make it possible to initialize the type like (str, 3) or (int, (3,))
             base_type, shape = base_type
+
+        if isinstance(base_type, dict) and not isinstance(base_type, OrderedDict):
+            # every downstream compound-type check special-cases
+            # OrderedDict specifically; normalize here so a plain dict
+            # (which is ordered in modern Python anyway) doesn't silently
+            # get misinterpreted as a positional tuple-of-types compound
+            # and iterated as its keys instead of its values.
+            base_type = OrderedDict(base_type)
 
         self.dtype = base_type
         self.shape = shape
@@ -365,7 +380,8 @@ class StructuredTypeArray:
 
     # at some point this should make use of the more complex structured dtypes that NumPy provides...
     # for now we'll stick with this format, but using more NumPy will make stuff more efficient and easier to post-process
-    def __init__(self, stype, num_elements = 50, padding_mode = 'fill', padding_value = None):
+    def __init__(self, stype, num_elements = 50, padding_mode = 'fill', padding_value = None,
+                 backend = None, growth = None):
         """
         :param stype:
         :type stype: StructuredType
@@ -384,12 +400,35 @@ class StructuredTypeArray:
         self._filled_to = None
 
         self._default_num_elements = num_elements
+        self._backend = ParserStorageBackend.resolve(backend)
+        self._growth = growth or GrowthPolicy()
+        self._numpy_backed = isinstance(self._backend, NumpyStorageBackend)
         self._array = None
         self._array = self.empty_array() # empty_array tries to use shape if possible
         self._append_depth = -1
 
         self.padding_mode = padding_mode
-        self.padding_value = stype.default
+        self.padding_value = stype.default if padding_value is None else padding_value
+
+    @property
+    def backend(self):
+        return self._backend
+
+    @property
+    def cast_failures(self):
+        """Only ever non-empty for a non-numpy backend."""
+        if self.is_simple:
+            return list(getattr(self._backend, "cast_failures", []))
+        return [f for a in self._subarrays for f in a.cast_failures]
+
+    def to_numpy(self, allow_object=True):
+        if self.is_simple:
+            if self._numpy_backed:
+                return self.array
+            return self._backend.to_numpy(self._array, self._stype, allow_object=allow_object)
+        if isinstance(self._array, OrderedDict):
+            return OrderedDict((k, a.to_numpy(allow_object=allow_object)) for k, a in self._array.items())
+        return tuple(a.to_numpy(allow_object=allow_object) for a in self._array)
 
     @property
     def is_simple(self):
@@ -822,6 +861,8 @@ class StructuredTypeArray:
             num_elements = self._default_num_elements
 
         if stype.is_simple:
+            if not self._numpy_backed:
+                return self._backend.empty(stype, num_elements, self._growth)
             if shape is None:
                 # means we expect to have single object, not a vector of them
                 if stype.default is None:
@@ -839,9 +880,9 @@ class StructuredTypeArray:
                     arr = np.full(shape, stype.default, dtype=dt)
             return arr
         elif isinstance(dt, OrderedDict):
-            return OrderedDict((k, StructuredTypeArray(s)) for k,s in dt.items())
+            return OrderedDict((k, StructuredTypeArray(s, backend=self._backend, growth=self._growth)) for k,s in dt.items())
         else:
-            return tuple( StructuredTypeArray(s) for s in dt )
+            return tuple( StructuredTypeArray(s, backend=self._backend, growth=self._growth) for s in dt )
 
     def extend_array(self, axis = None):
         """
@@ -855,6 +896,8 @@ class StructuredTypeArray:
         :return: None.
         :rtype: None
         """
+        if not self._numpy_backed:
+            return  # Python-list children grow themselves on append/extend
         array = self._array
         if isinstance(array, np.ndarray):
             ax = self.extension_axis if axis is None else axis
@@ -900,6 +943,14 @@ class StructuredTypeArray:
         :rtype:
         """
         if self.is_simple:
+            if not self._numpy_backed:
+                if value is None:
+                    return
+                idx = key if isinstance(key, int) else (key[0] if len(key) > 0 else 0)
+                self._array = self._backend.set_item(self._array, self._stype, idx, value, self._growth)
+                self.filled_to = [len(self._array)] + (self.filled_to[1:] if len(self.filled_to) > 1 else [])
+                return
+
             # this means that self._array is a plain numpy array
 
             append_chops = 1 if isinstance(key, int) else len(key) # how many dimensions in we dove for the append
@@ -917,11 +968,7 @@ class StructuredTypeArray:
                 residual_dims = len(self._array.shape) - append_chops
 
                 if isinstance(value, np.ndarray) and residual_dims > 0:
-                    if residual_dims == 0:
-                        # nothing to do here
-                        pass
-                    elif residual_dims == 1:
-
+                    if residual_dims == 1:
                         value = value.flatten()
                         # we can actually manage to do some padding, so why not do so?
                         if self.axis_shape_indeterminate(append_chops):
@@ -949,7 +996,6 @@ class StructuredTypeArray:
                                     raise StructuredTypeArrayException("unknown padding_mode '{}'".format(
                                         self.padding_mode
                                     ))
-
                     else:
                         # we can now determine our shape and so we will force the shape
                         take_all = slice(None, None)
@@ -977,8 +1023,49 @@ class StructuredTypeArray:
                 else:
                     # I think this is what there being no residual dims means
                     # (essentially single-element insert)
-                    print(self._array.shape)
-                    self._array[key] = value
+                    # print(self._array.shape)
+
+                    # numpy >= ~1.25 deprecated (and >= 2.0 hard-errors on)
+                    # assigning a non-0-d array into a scalar array slot.
+                    # When we're writing a genuinely scalar slot
+                    # (residual_dims == 0) and `value` is a size-1 array
+                    # left over from upstream regex-group capture, squeeze
+                    # it to a true 0-d array so the assignment still works
+                    # on modern numpy. If it's NOT size-1 here, that's a
+                    # real shape bug upstream -- raise a diagnosable
+                    # exception instead of numpy's opaque internal error.
+                    if residual_dims == 0 and value.ndim > 0:
+                        if value.size == 1:
+                            value = value.reshape(())
+                        else:
+                            raise StructuredTypeArrayException(
+                                "can't write value of shape {} into a scalar slot "
+                                "(key={}) of array with shape {}".format(
+                                    value.shape, key, self._array.shape
+                                ),
+                                stype=self._stype,
+                                expected_shape=(),
+                                actual_shape=value.shape,
+                                offending_value=value,
+                                index=key,
+                            )
+
+                    try:
+                        self._array[key] = value
+                    except (ValueError, TypeError) as e:
+                        raise StructuredTypeArrayException(
+                            "failed to write value {!r} (shape={}) to key {!r} of "
+                            "array with shape {} and dtype {}".format(
+                                value,
+                                getattr(value, "shape", None),
+                                key,
+                                self._array.shape,
+                                self._array.dtype,
+                            ),
+                            stype=self._stype,
+                            offending_value=value,
+                            index=key,
+                        ) from e
 
             if isinstance(key, int) and key == self.filled_to[0]:
                 self.filled_to[0] += 1
@@ -1071,6 +1158,17 @@ class StructuredTypeArray:
         :return:
         :rtype:
         """
+
+        if not self._numpy_backed and self.is_simple:
+            import copy
+            self._stype = copy.copy(self._stype)
+            if self._stype.shape is None:
+                self._stype.shape = (None,)
+            else:
+                self._stype.shape = (None,) + self._stype.shape
+            self._dtype = None
+            self._filled_to = None
+            return
 
         # print(">>>>>", self)
         change_shape = True # just gonna see what effect this has...?
@@ -1252,6 +1350,13 @@ class StructuredTypeArray:
             val = val.array
 
         if self.is_simple:
+            if not self._numpy_backed:
+                values = list(val) if hasattr(val, "__iter__") and not isinstance(val, str) else [val]
+                self._array, new_filled = self._backend.extend(
+                    self._array, self._stype, values, self.filled_to, self._growth, prepend=prepend
+                )
+                self.filled_to = new_filled
+                return
             # we have a minor issue here, where we might not actually have any data in our array and in that case we
             # won't know what 'extend' means
             # in that case I think we would be safe enough delegating to 'fill'
@@ -1360,6 +1465,11 @@ class StructuredTypeArray:
             array = array.array
 
         if self._is_simple:
+            if not self._numpy_backed:
+                values = list(array) if hasattr(array, "__iter__") and not isinstance(array, str) else [array]
+                self._array, new_filled = self._backend.fill(self._array, self._stype, values)
+                self.filled_to = new_filled
+                return
             # not sure why the array _wouldn't_ be an np.ndarray but there's a lot going on and I'm tired and don't
             # want to figure it out
             if isinstance(array, np.ndarray):
@@ -1445,16 +1555,18 @@ class StructuredTypeArray:
         :rtype:
         """
         if self.is_simple:
+            if not self._numpy_backed:
+                return self._backend.cast_to_array(self._array, self._stype, txt)
             if len(txt.strip()) == 0:
-                arr = np.array([], dtype=self._stype)
+                arr = np.array([], dtype=self._stype.dtype)
             else:
                 try:
                     # we'll try the base conversion first just assuming we got a number or whatever
                     # and it managed to filter through the code to here
-                    arr = np.array([txt], dtype=self._stype)
-                except TypeError:
+                    arr = np.array([txt], dtype=self._stype.dtype)
+                except (TypeError, ValueError):
                     import io
-                    arr = np.loadtxt(io.StringIO(txt), dtype=self._stype)
+                    arr = np.loadtxt(io.StringIO(txt), dtype=self._stype.dtype)
                     shape = np.array(self.shape)
                     axis = self.extension_axis
                     if shape is not None and shape[axis] > 0: # make sure arr needs to be reshaped...
@@ -1487,7 +1599,3 @@ class StructuredTypeArray:
             self.shape,
             self.dtype
         )
-
-
-class StructuredTypeArrayException(Exception):
-    pass
