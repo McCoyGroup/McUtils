@@ -449,6 +449,12 @@ class GaussianJob(ExternalProgramJob):
         GaussianRestBlock
     ]
 
+    __common_aliases__ = {
+        'memory': 'Mem',
+        'nproc': 'NProcShared',
+        'checkpoint': 'Chk',
+    }
+
     def __init__(self, *strs, **opts):
         """
         **LLM Docstring**

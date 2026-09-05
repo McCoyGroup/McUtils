@@ -532,7 +532,7 @@ class ExternalProgramsTest(TestCase):
             # f1.show()
 
 
-    @debugTest
+    @validationTest
     def test_SMIToDB(self):
         samp = TestManager.test_data('a2bbb-substances.smi')
         vendor = SMILESSupplier(samp)
@@ -542,3 +542,24 @@ class ExternalProgramsTest(TestCase):
             vendor2 = SMILESSupplier.from_line_index_database(db_file)
             with vendor2:
                 print(vendor2.find_smi(88))
+
+    @debugTest
+    def test_QChemJob(self):
+        samp = TestManager.test_data('a2bbb-substances.smi')
+        mol = RDMolecule.from_smiles(
+            SMILESSupplier(samp).find_smi(68),
+            add_implicit_hydrogens=True
+        )
+
+        huh = QChemJob(
+                          "sp",
+                          method="wb97x-d", basis_set="def2-svp",
+                          atoms=mol.atoms, cartesians=mol.coords,
+                          memory="8GB",
+                          custom_basis="H     0\nS   3   1.00\n...\n****",  # raw $basis body
+                          xc_functional="X wb97x_v 1.0\nC wb97x_v 1.0",  # raw $xc_functional body
+                          plots="Some 3-D mesh spec...",
+        )
+        print(
+            huh.format()
+        )

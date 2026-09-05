@@ -321,6 +321,11 @@ class OrcaJob(ExternalProgramJob):
         OrcaSystemBlock
     ]
 
+    __common_aliases__ = {
+        'nproc': 'pal.nprocs',  # processed first (see _common_alias_priority)
+        'memory': 'MaxCore' # this is a bit risky, not total memory, but I'm not gonna worry too much right now...
+    }
+
     def __init__(self, *strs, basis_set=None, level_of_theory=None, **opts):
         """
         **LLM Docstring**
