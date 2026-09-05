@@ -142,3 +142,18 @@ class QChemJob(ExternalProgramJob):
     @classmethod
     def load_template(cls):
         return cls.job_template
+
+    @classmethod
+    def optimization(cls, *strs, **opts):
+        """
+        Construct a Q-Chem geometry-optimization job (`JOBTYPE = OPT`). An
+        explicit `jobtype=...` (or a bare jobtype string in `strs`) takes
+        precedence over the default.
+
+        :param strs: bare positional options (first non-jobtype-overridden one
+            sets `jobtype`)
+        :param opts: the job options
+        :rtype: QChemJob
+        """
+        opts.setdefault('jobtype', 'opt')
+        return cls(*strs, **opts)

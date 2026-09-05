@@ -355,6 +355,22 @@ class OrcaJob(ExternalProgramJob):
             opts[o.lower()] = True
         super().__init__(**opts)
 
+
+    @classmethod
+    def optimization(cls, *strs, **opts):
+        """
+        Construct an ORCA geometry-optimization job (adds the `Opt` simple
+        keyword). Other keywords, `basis_set`, and `level_of_theory` pass
+        through unchanged.
+
+        :param strs: bare simple keywords
+        :param opts: the job options
+        :rtype: OrcaJob
+        """
+        if not any(s.lower() == 'opt' for s in strs) and 'opt' not in opts:
+            strs = ('Opt',) + strs
+        return cls(*strs, **opts)
+    
     # @classmethod
     # def get_extra_keys(cls):
     #     with open(cls.job_template) as r:
