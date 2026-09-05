@@ -528,3 +528,18 @@ class GaussianJob(ExternalProgramJob):
                 base_params[k] = b + "\n"
 
         return base_params
+
+    @classmethod
+    def optimization(cls, *strs, **opts):
+        """
+        Construct an ORCA geometry-optimization job (adds the `Opt` simple
+        keyword). Other keywords, `basis_set`, and `level_of_theory` pass
+        through unchanged.
+
+        :param strs: bare simple keywords
+        :param opts: the job options
+        :rtype: OrcaJob
+        """
+        if not any(s.lower() == 'opt' for s in strs) and 'opt' not in opts:
+            strs = ('Opt',) + strs
+        return cls(*strs, **opts)
