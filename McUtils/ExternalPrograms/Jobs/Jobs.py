@@ -555,6 +555,55 @@ class ExternalProgramJob(metaclass=abc.ABCMeta):
             job_class = cls.registry[job_class]
         return job_class, opts
 
+    __common_aliases__ = {}
+
+    # {common_name: canonical_prop_name | "block.subopt" | callable(value, opts)->(key, value)}
+
+    @classmethod
+    def get_common_aliases(cls):
+        return cls.__common_aliases__
+
+    _common_alias_priority = ('nproc', 'memory', 'checkpoint')
+    @classmethod
+    def translate_common_opts(cls, opts):
+        """
+        Rewrites universal option names (`memory`, `nproc`, `checkpoint`, ...) into
+        whatever this backend's `__common_aliases__` maps them to, before block
+        routing. A target can be a canonical prop name, a dotted "block.subopt"
+        path (for options nested in a `%block ... end`-style spec), or a callable
+        that gets first crack (useful when one common option depends on another,
+        e.g. ORCA's per-core `MaxCore` depending on `nproc`).
+        """
+        aliases = cls.get_common_aliases()
+        if not aliases:
+            return opts
+        opts = dict(opts)
+        ordered = sorted(
+            aliases,
+            key=lambda k: cls._common_alias_priority.index(k)
+            if k in cls._common_alias_priority else len(cls._common_alias_priority)
+        )
+        for common_name in ordered:
+            if common_name not in opts:
+                continue
+            val = opts.pop(common_name)
+            target = aliases[common_name]
+            if target is None:
+                raise ValueError(f"{cls.__name__} has no equivalent for common option {common_name!r}")
+            elif callable(target):
+                key, val = target(val, opts)
+                opts[key] = val
+            elif '.' in target:
+                block_key, sub_key = target.split('.', 1)
+                sub = opts.get(block_key, {})
+                sub = dict(sub) if dev.is_dict_like(sub) else {}
+                sub[sub_key] = val
+                opts[block_key] = sub
+            else:
+                opts[target] = val
+        return opts
+
+
     distance_units = 'Angstroms'
     @classmethod
     def get_mol_options(cls, mol, units=None, use_internals=False) -> dict:
@@ -595,6 +644,7 @@ class ExternalProgramJob(metaclass=abc.ABCMeta):
 
         :param opts: the job options, distributed across the blocks
         """
+        opts = self.translate_common_opts(opts)
         self.blocks = self.get_block_types()
         self.base_template = self.load_template()
         self._block_keys = {
@@ -645,9 +695,9 @@ class ExternalProgramJob(metaclass=abc.ABCMeta):
         bad_opts = set()
         for o,v in opts.items():
             for i,b in enumerate(self.blocks):
-                valid, o = b.check_canon(o, v)
+                valid, n = b.check_canon(o, v)
                 if valid:
-                    block_opts[i][o] = v
+                    block_opts[i][n] = v
                     break
             else:
                 bad_opts.add(o)

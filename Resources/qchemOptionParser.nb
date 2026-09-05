@@ -1,0 +1,182 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Wolfram 15.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       154,          7]
+NotebookDataLength[      7780,        174]
+NotebookOptionsPosition[      7112,        155]
+NotebookOutlinePosition[      7505,        171]
+CellTagsIndexPosition[      7462,        168]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"baseOpts", " ", "=", " ", 
+   RowBox[{"Import", "[", 
+    RowBox[{"\"\<https://manual.q-chem.com/6.4/A2.S2.SS1.html\>\"", ",", " ", 
+     "\[IndentingNewLine]", 
+     RowBox[{"{", 
+      RowBox[{"\"\<HTML\>\"", ",", " ", "\"\<XMLObject\>\""}], "}"}]}], 
+    "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.997630075295107*^9, 3.997630106770955*^9}, {
+  3.997630308300671*^9, 
+  3.997630309617464*^9}},ExpressionUUID->"9b5a3379-9b4a-4026-8499-\
+3962bdb00c95"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"parseQChemOptionsSection", "[", "baseOpts_", "]"}], ":=", 
+  "\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{
+    RowBox[{
+     RowBox[{"Cases", "[", "\[IndentingNewLine]", 
+      RowBox[{"baseOpts", ",", "\[IndentingNewLine]", 
+       RowBox[{
+        RowBox[{"s", ":", 
+         RowBox[{"XMLElement", "[", 
+          RowBox[{"\"\<section\>\"", ",", " ", 
+           RowBox[{"{", 
+            RowBox[{"___", ",", " ", 
+             RowBox[{"\"\<class\>\"", "->", "\"\<ltx_subsubsection\>\""}], ",",
+              " ", "___"}], "}"}], ",", " ", "_"}], "]"}]}], ":>", 
+        RowBox[{"Cases", "[", "\[IndentingNewLine]", 
+         RowBox[{"s", ",", "\[IndentingNewLine]", 
+          RowBox[{
+           RowBox[{"XMLElement", "[", 
+            RowBox[{"\"\<span\>\"", ",", " ", 
+             RowBox[{"{", 
+              RowBox[{"___", ",", " ", 
+               RowBox[{"\"\<class\>\"", "->", "\"\<ltx_text\>\""}], ",", " ", 
+               "___"}], "}"}], ",", " ", 
+             RowBox[{"{", "t_", "}"}]}], "]"}], ":>", "t"}], ",", 
+          "\[IndentingNewLine]", "Infinity"}], "\[IndentingNewLine]", "]"}]}],
+        ",", "\[IndentingNewLine]", "Infinity"}], "\[IndentingNewLine]", 
+      "]"}], "//", "Flatten"}], "//", "DeleteDuplicates"}], "//", 
+   "Sort"}]}]], "Input",
+ CellChangeTimes->{{3.9976305848607388`*^9, 3.997630620372528*^9}},
+ CellLabel->"In[33]:=",ExpressionUUID->"322d28a9-e197-4d61-82ab-bd79adee9d4a"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"{", "\[IndentingNewLine]", 
+  RowBox[{"\"\<JobControlOptions\>\"", "->", 
+   RowBox[{"Flatten", "@", 
+    RowBox[{"Cases", "[", "\[IndentingNewLine]", 
+     RowBox[{"baseOpts", ",", "\[IndentingNewLine]", 
+      RowBox[{
+       RowBox[{"s", ":", 
+        RowBox[{"XMLElement", "[", 
+         RowBox[{"\"\<section\>\"", ",", " ", 
+          RowBox[{"{", 
+           RowBox[{"___", ",", " ", 
+            RowBox[{"\"\<class\>\"", "->", "\"\<ltx_subsubsection\>\""}], ",",
+             " ", "___"}], "}"}], ",", " ", "_"}], "]"}]}], ":>", 
+       RowBox[{"Cases", "[", "\[IndentingNewLine]", 
+        RowBox[{"s", ",", "\[IndentingNewLine]", 
+         RowBox[{
+          RowBox[{"XMLElement", "[", 
+           RowBox[{"\"\<span\>\"", ",", " ", 
+            RowBox[{"{", 
+             RowBox[{"___", ",", " ", 
+              RowBox[{"\"\<class\>\"", "->", "\"\<ltx_text\>\""}], ",", " ", 
+              "___"}], "}"}], ",", " ", 
+            RowBox[{"{", "t_", "}"}]}], "]"}], ":>", "t"}], ",", 
+         "\[IndentingNewLine]", "Infinity"}], "\[IndentingNewLine]", "]"}]}], 
+      ",", "\[IndentingNewLine]", "Infinity"}], "\[IndentingNewLine]", 
+     "]"}]}]}], "\[IndentingNewLine]", "}"}]], "Input",
+ CellChangeTimes->{{3.997630113648711*^9, 3.9976301404262953`*^9}, {
+   3.997630201485238*^9, 3.997630275098928*^9}, 3.997630314666493*^9, {
+   3.9976305070775137`*^9, 3.99763055348849*^9}, 
+   3.9976306025512257`*^9},ExpressionUUID->"ac8e1d6c-9162-4a69-b6c3-\
+bf70e9e3612e"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"JobControlOptions\"\>", "\[Rule]", 
+   RowBox[{"{", 
+    RowBox[{"\<\"ANHAR\"\>", ",", "\<\"AO2MO_DISK\"\>", 
+     ",", "\<\"CC_MEMORY\"\>", ",", "\<\"CC_PRINT\"\>", 
+     ",", "\<\"CC_STATE_TO_OPT\"\>", ",", "\<\"CC_SYMMETRY\"\>", 
+     ",", "\<\"CHEMSOL\"\>", ",", "\<\"CHEMSOL_EFIELD\"\>", 
+     ",", "\<\"CHEMSOL_NN\"\>", ",", "\<\"CHEM_SOL_PRINT\"\>", 
+     ",", "\<\"CHEMSOL_PRINT\"\>", ",", "\<\"CIS_RELAXED_DENSITY\"\>", 
+     ",", "\<\"CIS_STATE_DERIV\"\>", ",", "\<\"CPSCF_NSEG\"\>", 
+     ",", "\<\"D_CPSCF_PERTNUM\"\>", ",", "\<\"DIIS_PRINT\"\>", 
+     ",", "\<\"DIRECT_SCF\"\>", ",", "\<\"DORAMAN\"\>", 
+     ",", "\<\"D_SCF_CONV_1\"\>", ",", "\<\"D_SCF_CONV_2\"\>", 
+     ",", "\<\"D_SCF_DIIS\"\>", ",", "\<\"D_SCF_MAX_1\"\>", 
+     ",", "\<\"D_SCF_MAX_2\"\>", ",", "\<\"ESP_GRID\"\>", 
+     ",", "\<\"FDIFF_DER\"\>", ",", "\<\"FDIFF_STEPSIZE\"\>", 
+     ",", "\<\"FDIFF_STEPSIZE_QFF\"\>", ",", "\<\"GEOM_OPT_COORDS\"\>", 
+     ",", "\<\"GEOM_OPT_DMAX\"\>", ",", "\<\"GEOM_OPTHESSIAN\"\>", 
+     ",", "\<\"GEOM_OPT_LINEAR_ANGLE\"\>", ",", "\<\"GEOM_OPT_MAX_CYCLES\"\>",
+      ",", "\<\"GEOM_OPT_MAX_DIIS\"\>", ",", "\<\"GEOM_OPT_MODE\"\>", 
+     ",", "\<\"GEOM_OPT_PRINT\"\>", ",", "\<\"GEOM_OPTSYMFLAG\"\>", 
+     ",", "\<\"GEOM_OPT_TOL_DISPLACEMENT\"\>", 
+     ",", "\<\"GEOM_OPT_TOL_ENERGY\"\>", ",", "\<\"GEOM_OPTTOL_ENERGY\"\>", 
+     ",", "\<\"GEOM_OPT_TOL_GRADIENT\"\>", ",", "\<\"GEOMP_OPT_UPDATE\"\>", 
+     ",", "\<\"IDERIV\"\>", ",", "\<\"IGNORE_LOW_FREQ\"\>", 
+     ",", "\<\"INTEGRALS_BUFFER\"\>", ",", "\<\"INTEGRAL_SYMMETRY\"\>", 
+     ",", "\<\"INTRACULE\"\>", ",", "\<\"ISOTOPES\"\>", 
+     ",", "\<\"JOBTYPE\"\>", ",", "\<\"MAGNET\"\>", 
+     ",", "\<\"MAX_SUB_FILE_NUM\"\>", ",", "\<\"MEM_STATIC\"\>", 
+     ",", "\<\"MEM_TOTAL\"\>", ",", "\<\"MODE_COUPLING\"\>", 
+     ",", "\<\"MOM_PRINT\"\>", ",", "\<\"MULTIPOLE_ORDER\"\>", 
+     ",", "\<\"NBO\"\>", ",", "\<\"POINT_GROUP_SYMMETRY\"\>", 
+     ",", "\<\"POP_MULLIKEN\"\>", ",", "\<\"PRINT_CORE_CHARACTER\"\>", 
+     ",", "\<\"PRINT_DIST_MATRIX\"\>", ",", "\<\"PRINT_GENERAL_BASIS\"\>", 
+     ",", "\<\"PRINT_ORBITALS\"\>", ",", "\<\"READ_VDW\"\>", 
+     ",", "\<\"RESPONSE\"\>", ",", "\<\"RPATH_COORDS\"\>", 
+     ",", "\<\"RPATH_DIRECTION\"\>", ",", "\<\"RPATH_MAX_CYCLES\"\>", 
+     ",", "\<\"RPATH_MAX_STEPSIZE\"\>", ",", "\<\"RPATH_PRINT\"\>", 
+     ",", "\<\"RPATH_TOL_DISPLACEMENT\"\>", ",", "\<\"SCF_FINAL_PRINT\"\>", 
+     ",", "\<\"SCF_GUESS_ALWAYS\"\>", ",", "\<\"SCF_GUESS_PRINT\"\>", 
+     ",", "\<\"SCF_PRINT\"\>", ",", "\<\"SOLUTE_RADIUS\"\>", 
+     ",", "\<\"SOLVENT_DIELECTRIC\"\>", ",", "\<\"STABILITY_ANALYSIS\"\>", 
+     ",", "\<\"SYMMETRY_DECOMPOSITION\"\>", ",", "\<\"SYM_TOL\"\>", 
+     ",", "\<\"VCI\"\>", ",", "\<\"VIBMAN_PRINT\"\>", 
+     ",", "\<\"WAVEFUNCTION_ANALYSIS\"\>", ",", "\<\"WRITE_WFN\"\>"}], 
+    "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{
+  3.997630510204735*^9, {3.997630542492412*^9, 3.9976305536666527`*^9}},
+ CellLabel->"Out[30]=",ExpressionUUID->"e8ce4af2-950f-4ea6-b911-1cad6ef3440d"]
+}, Open  ]]
+},
+WindowSize->{808, 911},
+WindowMargins->{{109, Automatic}, {Automatic, 24}},
+FrontEndVersion->"15.0 for Mac OS X ARM (64-bit) (May 19, 2026)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"e3824a76-7bf1-4a48-8fd8-636dac547422"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[554, 20, 493, 12, 49, "Input",ExpressionUUID->"9b5a3379-9b4a-4026-8499-3962bdb00c95"],
+Cell[1050, 34, 1457, 32, 213, "Input",ExpressionUUID->"322d28a9-e197-4d61-82ab-bd79adee9d4a"],
+Cell[CellGroupData[{
+Cell[2532, 70, 1498, 31, 233, "Input",ExpressionUUID->"ac8e1d6c-9162-4a69-b6c3-bf70e9e3612e"],
+Cell[4033, 103, 3063, 49, 360, "Output",ExpressionUUID->"e8ce4af2-950f-4ea6-b911-1cad6ef3440d"]
+}, Open  ]]
+}
+]
+*)
+
