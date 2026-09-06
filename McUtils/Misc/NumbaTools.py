@@ -16,18 +16,19 @@ __all__ = [
 
 class NumbaState:
     numba_disabled = False
+    numba_missing_warned = False          # new: so we only warn once
 
 class without_numba:
     def __init__(self):
         self._numba_state = None
     def __enter__(self):
         self._numba_state = NumbaState.numba_disabled
-        _numba_disabled = True
+        NumbaState.numba_disabled = True  # bug fix: this was a no-op before (set a local var)
     def __exit__(self, exc_type, exc_val, exc_tb):
         NumbaState.numba_disabled = self._numba_state
         self._numba_state = None
 
-def load_numba(warn=False):
+def load_numba(warn=True):                # was False
     if NumbaState.numba_disabled:
         return None
     try:
@@ -35,19 +36,19 @@ def load_numba(warn=False):
     except ImportError:
         if isinstance(warn, str) and warn == 'raise':
             raise
-        if warn:
-            warnings.warn("Numba not installed/code will be slower")
+        if warn and not NumbaState.numba_missing_warned:
+            NumbaState.numba_missing_warned = True
+            warnings.warn("numba not installed; falling back to uncompiled implementations (slower)")
         numba = None
-
     return numba
 
-def njit(*args, warn=False, **kwargs):
+def njit(*args, warn=True, **kwargs):                              # was False
     return numba_decorator(*args, method='njit', warn=warn, **kwargs)
 
-def jit(*args, warn=False, nopython=False, **kwargs):
+def jit(*args, warn=True, nopython=False, **kwargs):                # was False
     return numba_decorator(*args, method='jit', warn=warn, nopython=nopython, **kwargs)
 
-def numba_decorator(*args, method=None, warn=False, **kwargs):
+def numba_decorator(*args, method=None, warn=True, **kwargs):
     numba = load_numba(warn=warn)
     if numba is not None:
         return getattr(numba, method)(*args, **kwargs)
@@ -57,15 +58,15 @@ def numba_decorator(*args, method=None, warn=False, **kwargs):
         else:
             return lambda f:f
 
-def type_spec(t, warn=False):
+def type_spec(t, warn=True):
     numba = load_numba(warn=warn)
     if numba is not None:
         return getattr(numba, t)
     else:
         return typing.Any
 
-def import_from_numba(name, default):
-    numba = load_numba()
+def import_from_numba(name, default, warn=True):
+    numba = load_numba(warn=warn)
     if numba is not None:
         return getattr(numba, name)
     else:
@@ -79,5 +80,5 @@ class _noop_context:
     def __exit__(self, exc_type, exc_val, exc_tb):
         pass
 
-objmode = import_from_numba('objmode', _noop_context)
-prange = import_from_numba('prange', range)
+objmode = import_from_numba('objmode', _noop_context, warn=False)
+prange = import_from_numba('prange', range, warn=False)
