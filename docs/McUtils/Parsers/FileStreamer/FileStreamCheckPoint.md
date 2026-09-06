@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parsers.FileStreamer.FileStreamCheckPoint">FileStreamCheckPoint</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L23)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L23?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L26)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L26?message=Update%20Docs)]
 </div>
 
 A checkpoint for a file that can be returned to when parsing
@@ -24,8 +24,8 @@ A checkpoint for a file that can be returned to when parsing
 __init__(self, parent, revert=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L27)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L27?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer.py#L30)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L30?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -42,8 +42,8 @@ Record the reader's current byte/character offset and configure whether leaving 
 disable(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L42)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L42?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L45)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L45?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -57,8 +57,8 @@ Disable automatic restoration when the checkpoint context exits.
 enable(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L52)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L52?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L55)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L55?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -72,8 +72,8 @@ Enable automatic restoration when the checkpoint context exits.
 revert(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L62)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L62?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L65)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L65?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -87,8 +87,8 @@ Seek the parent reader back to the offset captured when this checkpoint was crea
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L72)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L72?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L75)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L75?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -102,8 +102,8 @@ Return this checkpoint for use in a `with` statement.
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L82)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L82?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L85)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.py#L85?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -169,7 +169,7 @@ Restore the captured stream position when reversion is enabled; exceptions are n
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parsers/FileStreamer/FileStreamCheckPoint.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L23?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parsers/FileStreamer.py#L26?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

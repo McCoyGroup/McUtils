@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.QM9.QM9">QM9</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/QM9.py#L13)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/QM9.py#L13?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/QM9.py#L15)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/QM9.py#L15?message=Update%20Docs)]
 </div>
 
 
@@ -26,8 +26,8 @@ property_array_keys: list
 __init__(self, qm9_data): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/QM9.py#L15)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/QM9.py#L15?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/QM9.py#L17)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/QM9.py#L17?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -42,8 +42,8 @@ Wrap a loaded QM9 dataset (or load it from a `.npz` path).
 build_qm9(cls, qm9_dir, pattern='*.xyz', target='qm9.npz'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L29)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L29?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L31)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L31?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -67,8 +67,8 @@ and scalar properties.
 load_qm9(cls, qm9_file): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L104)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L104?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L106)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L106?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -84,8 +84,8 @@ Load a packed QM9 `.npz` dataset, memory-mapped.
 smiles_query(self, pattern, start_at=0, upto=None, track_failures=False, quiet=True, **parser_options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/QM9/QM9.py#L119)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/QM9/QM9.py#L119?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/QM9/QM9.py#L122)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/QM9/QM9.py#L122?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -112,8 +112,8 @@ which entries failed to parse and suppressing RDKit logging.
 load_data(self, index, props=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/QM9/QM9.py#L205)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/QM9/QM9.py#L205?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/QM9/QM9.py#L208)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/QM9/QM9.py#L208?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -131,8 +131,8 @@ Load the requested properties for a single dataset entry.
 data_iter(self, props=None, start_at=None, upto=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/QM9/QM9.py#L230)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/QM9/QM9.py#L230?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/QM9/QM9.py#L233)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/QM9/QM9.py#L233?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -198,7 +198,7 @@ Iterate over the dataset entries, yielding the requested properties for each.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/QM9/QM9.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/QM9/QM9.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/QM9.py#L13?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/QM9.py#L15?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

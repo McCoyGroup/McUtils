@@ -259,84 +259,73 @@ for working in Jupyter (primarily JupterLab) environments
 [Flex](Jupyter/Apps/Interfaces/Flex.md)   
 </div>
    <div class="col" markdown="1">
-[Control](Jupyter/Apps/Controls/Control.md)   
+[Notification](Jupyter/Apps/Interfaces/Notification.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
+[Alert](Jupyter/Apps/Interfaces/Alert.md)   
+</div>
+   <div class="col" markdown="1">
+[Control](Jupyter/Apps/Controls/Control.md)   
+</div>
+   <div class="col" markdown="1">
 [InputField](Jupyter/Apps/Controls/InputField.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [StringField](Jupyter/Apps/Controls/StringField.md)   
 </div>
    <div class="col" markdown="1">
 [Slider](Jupyter/Apps/Controls/Slider.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Checkbox](Jupyter/Apps/Controls/Checkbox.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [RadioButton](Jupyter/Apps/Controls/RadioButton.md)   
 </div>
    <div class="col" markdown="1">
 [Switch](Jupyter/Apps/Controls/Switch.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [TextArea](Jupyter/Apps/Controls/TextArea.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Selector](Jupyter/Apps/Controls/Selector.md)   
 </div>
    <div class="col" markdown="1">
 [VariableDisplay](Jupyter/Apps/Controls/VariableDisplay.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [FunctionDisplay](Jupyter/Apps/Controls/FunctionDisplay.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [MenuSelect](Jupyter/Apps/Controls/MenuSelect.md)   
 </div>
    <div class="col" markdown="1">
 [DropdownSelect](Jupyter/Apps/Controls/DropdownSelect.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ProgressBar](Jupyter/Apps/Controls/ProgressBar.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [App](Jupyter/Apps/Apps/App.md)   
 </div>
    <div class="col" markdown="1">
 [SettingsPane](Jupyter/Apps/Apps/SettingsPane.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Manipulator](Jupyter/Apps/Apps/Manipulator.md)   
-</div>
-   <div class="col" markdown="1">
-[D3](Jupyter/APIs/d3/D3.md)   
-</div>
-   <div class="col" markdown="1">
-[RendererD3](Jupyter/APIs/d3_backend/RendererD3.md)   
-</div>
-</div>
-  <div class="row">
-   <div class="col" markdown="1">
-[FigureManagerD3](Jupyter/APIs/d3_backend/FigureManagerD3.md)   
-</div>
-   <div class="col" markdown="1">
-[FigureCanvasD3](Jupyter/APIs/d3_backend/FigureCanvasD3.md)   
-</div>
-   <div class="col" markdown="1">
-[_BackendD3](Jupyter/APIs/d3_backend/_BackendD3.md)   
 </div>
 </div>
   <div class="row">
@@ -475,9 +464,9 @@ JHTML.Div(scene, dynamic=False).display()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-90c51b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-90c51b"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-337ac4" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-337ac4"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-90c51b" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-337ac4" markdown="1">
  - [HTML](#HTML)
 - [Styles](#Styles)
 - [WidgetConstruction](#WidgetConstruction)
@@ -486,9 +475,9 @@ JHTML.Div(scene, dynamic=False).display()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-e0ee62" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e0ee62"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-7ef7f2" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-7ef7f2"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e0ee62" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-7ef7f2" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

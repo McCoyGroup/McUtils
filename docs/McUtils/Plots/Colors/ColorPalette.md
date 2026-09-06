@@ -22,7 +22,10 @@
 converters: dict
 xyz_to_rbg_array: list
 rgb_to_xyz_array: list
+gamma_point: float
+CVD_MATRICES: dict
 lab_scaling_reference: list
+DEFAULT_CVD_TYPES: tuple
 ```
 <a id="McUtils.Plots.Colors.ColorPalette.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
@@ -670,14 +673,57 @@ Convert a color from CIE XYZ to sRGB.
     > the RGB color
 
 
+<a id="McUtils.Plots.Colors.ColorPalette.rgb_to_linear" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+rgb_to_linear(cls, r, g, b): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1011)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1011?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Convert a color from sRGB to linear RGB (i.e. undo the sRGB
+gamma encoding). This is the shared intermediate step used by
+both XYZ conversion and CVD simulation.
+  - `r`: `Any`
+    > the red channel (0-255)
+  - `g`: `Any`
+    > the green channel (0-255)
+  - `b`: `Any`
+    > the blue channel (0-255)
+  - `:returns`: `np.ndarray`
+    > the linear RGB color, each channel in [0, 1]
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.linear_to_rgb" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+linear_to_rgb(cls, r, g, b): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1033)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1033?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Convert a linear RGB color back to gamma-encoded sRGB.
+Inverse of `rgb_to_linear`.
+  - `linear_rgb`: `Any`
+    > linear RGB array/sequence, each channel in [0, 1]
+  - `:returns`: `np.ndarray`
+    > the sRGB color, each channel in [0, 255], clipped and rounded
+
+
 <a id="McUtils.Plots.Colors.ColorPalette.rgb_to_xyz" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
-rgb_to_xyz(self, r, g, b): 
+rgb_to_xyz(cls, r, g, b): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1014)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1014?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1053)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1053?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -692,14 +738,64 @@ Convert a color from sRGB to CIE XYZ.
     > the XYZ color
 
 
+<a id="McUtils.Plots.Colors.ColorPalette.simulate_cvd" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+simulate_cvd(cls, r, g, b, cvd_type, severity=1.0): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1090)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1090?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Simulate how an sRGB color appears under a given type of color
+vision deficiency (CVD).
+  - `r`: `Any`
+    > the red channel (0-255)
+  - `g`: `Any`
+    > the green channel (0-255)
+  - `b`: `Any`
+    > the blue channel (0-255)
+  - `cvd_type`: `Any`
+    > one of "protanopia", "deuteranopia", "tritanopia"
+  - `severity`: `Any`
+    > 0.0 (no deficiency) to 1.0 (full dichromacy),
+    linearly interpolated between identity and the full CVD matrix
+  - `:returns`: `np.ndarray`
+    > the simulated sRGB color, each channel in [0, 255]
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.relative_luminance" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+relative_luminance(cls, r, g, b): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1115)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1115?message=Update%20Docs)]
+</div>
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.contrast_ratio" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+contrast_ratio(cls, rgb1, rgb2): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1120)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1120?message=Update%20Docs)]
+</div>
+
+
 <a id="McUtils.Plots.Colors.ColorPalette.rgb_to_hsl" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 rgb_to_hsl(self, r, g, b): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1072)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1072?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1159)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1159?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -720,8 +816,8 @@ Convert a color from RGB to HSL.
 hsl_to_rgb(cls, h, s, l): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1150)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1150?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1237)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1237?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -742,8 +838,8 @@ Convert a color from HSL to RGB.
 rgb_to_hsv(self, r, g, b): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1197)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1197?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1284)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1284?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -764,8 +860,8 @@ Convert a color from RGB to HSV.
 hsv_to_hsl(cls, h, s, v): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1239)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1239?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1326)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1326?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -786,8 +882,8 @@ Convert a color from HSV to HSL.
 hsv_to_rgb(cls, h, s, v): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1281)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1281?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1368)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1368?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -808,8 +904,8 @@ Convert a color from HSV to RGB (via HSL).
 xyz_to_lab(cls, x, y, z, scaling=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1297)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1297?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1384)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1384?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -832,8 +928,8 @@ Convert a color from CIE XYZ to CIE Lab.
 lab_to_xyz(cls, l, a, b, scaling=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1340)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1340?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1427)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1427?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -856,8 +952,8 @@ Convert a color from CIE Lab to CIE XYZ.
 rgb_to_lab(cls, r, g, b, xyz_scaling=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1382)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1382?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1469)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1469?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -880,8 +976,8 @@ Convert a color from RGB to CIE Lab (via XYZ).
 lab_to_rgb(cls, l, a, b, xyz_scaling=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1397)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1397?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1484)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1484?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -904,8 +1000,8 @@ Convert a color from CIE Lab to RGB (via XYZ).
 lab_to_lch(cls, l, a, b): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1413)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1413?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1500)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1500?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -926,8 +1022,8 @@ Convert a color from CIE Lab to CIE LCh.
 lch_to_lab(cls, l, c, h): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1429)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1429?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1516)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1516?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -948,8 +1044,8 @@ Convert a color from CIE LCh to CIE Lab.
 rgb_to_lch(cls, r, g, b, xyz_scaling=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1447)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1447?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1534)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1534?message=Update%20Docs)]
 </div>
 
 
@@ -959,9 +1055,149 @@ rgb_to_lch(cls, r, g, b, xyz_scaling=None):
 lch_to_rgb(cls, l, a, b, xyz_scaling=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1450)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1450?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1537)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1537?message=Update%20Docs)]
 </div>
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.plot_swatch_grid" class="docs-object-method">&nbsp;</a> 
+```python
+plot_swatch_grid(self, cvd_types=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L1558)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L1558?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Plot the palette as flat swatch strips: one row for the original
+colors, and one row per CVD simulation, for quick visual scanning.
+  - `cvd_types`: `Any`
+    > iterable of CVD type names to test; defaults to
+    self.DEFAULT_CVD_TYPES
+  - `:returns`: `matplotlib.figure.Figure`
+    > the matplotlib Figure
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.plot_line_stress_test" class="docs-object-method">&nbsp;</a> 
+```python
+plot_line_stress_test(self, cvd_type=None, severity=1.0): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L1584)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L1584?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Plot the palette as thin lines (the hardest case for color
+confusion) under a single condition.
+  - `cvd_type`: `Any`
+    > CVD type to simulate, or None for original
+  - `severity`: `Any`
+    > passed through to simulate_cvd
+  - `:returns`: `matplotlib.figure.Figure`
+    > the matplotlib Figure
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.plot_bar_stress_test" class="docs-object-method">&nbsp;</a> 
+```python
+plot_bar_stress_test(self, cvd_type=None, severity=1.0): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L1610)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L1610?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Plot the palette as adjacent bars (area-based confusion, as
+opposed to the line test's thin-stroke confusion).
+  - `cvd_type`: `Any`
+    > CVD type to simulate, or None for original
+  - `severity`: `Any`
+    > passed through to simulate_cvd
+  - `:returns`: `matplotlib.figure.Figure`
+    > the matplotlib Figure
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.delta_e_matrix" class="docs-object-method">&nbsp;</a> 
+```python
+delta_e_matrix(self, cvd_type=None, severity=1.0): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L1631)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L1631?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Compute the pairwise LAB distance (ΔE) matrix for the palette
+under a given condition.
+  - `cvd_type`: `Any`
+    > CVD type to simulate, or None for original
+  - `severity`: `Any`
+    > passed through to simulate_cvd
+  - `:returns`: `np.ndarray`
+    > n x n matrix of pairwise distances
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.plot_delta_e_heatmap" class="docs-object-method">&nbsp;</a> 
+```python
+plot_delta_e_heatmap(self, cvd_type=None, severity=1.0, threshold=15): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L1653)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L1653?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Plot the pairwise ΔE matrix as a heatmap for a given condition,
+annotated with values so failing pairs (below threshold) are
+easy to spot.
+  - `cvd_type`: `Any`
+    > CVD type to simulate, or None for original
+  - `severity`: `Any`
+    > passed through to simulate_cvd
+  - `threshold`: `Any`
+    > ΔE below this is considered a collision risk
+  - `:returns`: `matplotlib.figure.Figure`
+    > the matplotlib Figure
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.plot_contrast_heatmap" class="docs-object-method">&nbsp;</a> 
+```python
+plot_contrast_heatmap(self): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L1685)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L1685?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Plot the pairwise WCAG contrast ratio matrix as a heatmap.
+This checks legibility, independent of CVD simulation.
+  - `:returns`: `matplotlib.figure.Figure`
+    > the matplotlib Figure
+
+
+<a id="McUtils.Plots.Colors.ColorPalette.run_palette_quality_dashboard" class="docs-object-method">&nbsp;</a> 
+```python
+run_palette_quality_dashboard(self, cvd_types=None, threshold=15): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Colors/ColorPalette.py#L1713)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Colors/ColorPalette.py#L1713?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Generate the full test suite: swatch/line/bar grids across all
+conditions, plus ΔE and contrast heatmaps.
+  - `cvd_types`: `Any`
+    > iterable of CVD types to test; defaults to
+    self.DEFAULT_CVD_TYPES
+  - `threshold`: `Any`
+    > ΔE pass/fail threshold, also used for the
+    printed summary
+  - `:returns`: `dict`
+    > dict of {name: Figure}
  </div>
 </div>
 

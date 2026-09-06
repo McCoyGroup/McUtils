@@ -1,8 +1,8 @@
 ## <a id="McUtils.Scaffolding.Serializers.NumpyTreeArchive">NumpyTreeArchive</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L2937)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L2937?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L2944)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L2944?message=Update%20Docs)]
 </div>
 
 Wraps a flattened tree (as produced by flatten_tree) plus an optional
@@ -39,8 +39,8 @@ Usage:
 __init__(self, serial_tree, jump_table=None, path_sep='/'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L2957)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L2957?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers.py#L2964)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L2964?message=Update%20Docs)]
 </div>
 
 
@@ -50,8 +50,8 @@ __init__(self, serial_tree, jump_table=None, path_sep='/'):
 from_tree(cls, tree, allow_pickle=False, build_jt=True, max_depth=0, path_sep='/'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2979)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2979?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2986)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2986?message=Update%20Docs)]
 </div>
 Build an archive directly from a nested Python dict.
 
@@ -62,8 +62,8 @@ Build an archive directly from a nested Python dict.
 load(cls, file, reader=None, allow_pickle=False, path_sep='/', backend='npz', lazy=True, **reader_options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2986)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2986?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2993)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2993?message=Update%20Docs)]
 </div>
 Load an archive.
   - `backend`: `Any`
@@ -79,8 +79,8 @@ Load an archive.
 save(self, file, writer=None, max_depth=None, backend='npz', save_jump_table=True, **writer_options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3009)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3009?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3016)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3016?message=Update%20Docs)]
 </div>
 Write this archive.
   - `backend`: `Any`
@@ -94,8 +94,8 @@ Write this archive.
 unpack(self, max_leaf_elements=None, prefix_filter=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3031)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3031?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3038)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3038?message=Update%20Docs)]
 </div>
 Fully unflatten the archive into a nested dict.
 
@@ -105,8 +105,8 @@ Fully unflatten the archive into a nested dict.
 get(self, path, default=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3037)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3037?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3044)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3044?message=Update%20Docs)]
 </div>
 Lazily unpack the sub-record at `path`, or return `default`.
 
@@ -116,8 +116,8 @@ Lazily unpack the sub-record at `path`, or return `default`.
 __getitem__(self, path): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3045)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3045?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3052)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3052?message=Update%20Docs)]
 </div>
 
 
@@ -126,8 +126,8 @@ __getitem__(self, path):
 __contains__(self, path): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3050)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3050?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3057)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3057?message=Update%20Docs)]
 </div>
 
 
@@ -136,8 +136,8 @@ __contains__(self, path):
 __len__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3053)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3053?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3060)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3060?message=Update%20Docs)]
 </div>
 
 
@@ -146,8 +146,8 @@ __len__(self):
 __iter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3056)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3056?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3063)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3063?message=Update%20Docs)]
 </div>
 
 
@@ -156,8 +156,8 @@ __iter__(self):
 keys(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3059)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3059?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3066)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3066?message=Update%20Docs)]
 </div>
 All indexed paths (records and, if built with max_depth=None, sub-records).
 
@@ -167,8 +167,8 @@ All indexed paths (records and, if built with max_depth=None, sub-records).
 values(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3063)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3063?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3070)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3070?message=Update%20Docs)]
 </div>
 
 
@@ -177,8 +177,8 @@ values(self):
 items(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3067)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3067?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3074)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3074?message=Update%20Docs)]
 </div>
 
 
@@ -187,8 +187,8 @@ items(self):
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3071)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3071?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3078)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers/NumpyTreeArchive.py#L3078?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -243,7 +243,7 @@ __repr__(self):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Scaffolding/Serializers/NumpyTreeArchive.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Scaffolding/Serializers/NumpyTreeArchive.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L2937?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Scaffolding/Serializers.py#L2944?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

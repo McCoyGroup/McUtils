@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.Apps.Interfaces.WrapperComponent">WrapperComponent</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L611)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L611?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L613)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L613?message=Update%20Docs)]
 </div>
 
 Extends the base component interface to allow for the
@@ -32,8 +32,8 @@ theme: dict
 __init__(self, items: Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType, McUtils.Jupyter.Apps.types.IPyHTMLableType, McUtils.Jupyter.Apps.types.ImageableType, Tuple[Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType, McUtils.Jupyter.Apps.types.IPyHTMLableType, McUtils.Jupyter.Apps.types.ImageableType], Mapping], NoneType, Iterable[Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType, McUtils.Jupyter.Apps.types.IPyHTMLableType, McUtils.Jupyter.Apps.types.ImageableType, Tuple[Union[str, Mapping, McUtils.Jupyter.Apps.types.HTMLableType, McUtils.Jupyter.Apps.types.WidgetableType, McUtils.Jupyter.Apps.types.IPyHTMLableType, McUtils.Jupyter.Apps.types.ImageableType], Mapping]]]], wrappers=None, theme=None, extend_base_theme=True, **attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L622)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L622?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces.py#L624)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L624?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -56,8 +56,8 @@ A component that renders its items inside one or more themed wrapper elements
 handle_variants(self, theme): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L671)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L671?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L673)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L673?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -74,8 +74,8 @@ Expand a theme's `variant`/`base-cls` shorthand into the concrete
 manage_theme(self, theme, extend_base_theme=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L698)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L698?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L700)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L700?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -94,8 +94,8 @@ Resolve the effective theme, optionally merging it over the class's base theme.
 merge_themes(cls, theme: 'None|dict', attrs: dict, merge_keys=('cls',)): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L720)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L720?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L722)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L722?message=Update%20Docs)]
 </div>
 Needs to handle cases where a `theme` is provided
 which includes things like `cls` declarations and then the
@@ -109,8 +109,8 @@ declarations get appended to the theme
 manage_items(cls, items, attrs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L768)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L768?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L770)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L770?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -130,8 +130,8 @@ item in a list.
 get_child(self, key): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L808)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L808?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L810)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L810?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -147,8 +147,8 @@ Get a wrapped item by index.
 set_child(self, which, new): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L818)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L818?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L820)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L820?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -164,8 +164,8 @@ Set a wrapped item by index.
 insert_child(self, where, child): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L828)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L828?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L830)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L830?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -181,8 +181,8 @@ Insert a wrapped item at a position (appending if `where` is `None`).
 wrap_items(self, items): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L861)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L861?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L863)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L863?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -198,8 +198,8 @@ Render the items inside the wrapper element(s), applying the themed attributes.
 to_jhtml(self, parent=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L879)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L879?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L881)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.py#L881?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -261,7 +261,7 @@ Render the component by wrapping its items.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/Apps/Interfaces/WrapperComponent.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L611?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/Apps/Interfaces.py#L613?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

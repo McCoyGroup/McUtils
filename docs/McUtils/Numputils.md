@@ -1147,6 +1147,28 @@ Any lowish-level numerical operations that need to be shared go here.
 [enumerate_permutations](Numputils/PermutationOps/enumerate_permutations.md)   
 </div>
    <div class="col" markdown="1">
+[load_npz_memmap](Numputils/Serialization/load_npz_memmap.md)   
+</div>
+   <div class="col" markdown="1">
+[load_nptar](Numputils/Serialization/load_nptar.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[save_nptar](Numputils/Serialization/save_nptar.md)   
+</div>
+   <div class="col" markdown="1">
+[MemmappedNPZFile](Numputils/Serialization/MemmappedNPZFile.md)   
+</div>
+   <div class="col" markdown="1">
+[MemmappedNPTarFile](Numputils/Serialization/MemmappedNPTarFile.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
    
 </div>
    <div class="col" markdown="1">
@@ -1268,9 +1290,9 @@ print("first positions:", first)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-245c10" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-245c10"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-0edb8b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-0edb8b"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-245c10" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-0edb8b" markdown="1">
  - [VecOps](#VecOps)
 - [OptimizeClassic](#OptimizeClassic)
 - [BoysLocalize](#BoysLocalize)
@@ -1322,9 +1344,9 @@ print("first positions:", first)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-7a4441" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-7a4441"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-443de9" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-443de9"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-7a4441" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-443de9" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

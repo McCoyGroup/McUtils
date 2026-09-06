@@ -1,8 +1,8 @@
 ## <a id="McUtils.Parallelizers.Parallelizers.MPIParallelizer">MPIParallelizer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers.py#L1811)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L1811?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers.py#L1861)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L1861?message=Update%20Docs)]
 </div>
 
 Parallelizes using `mpi4py`
@@ -26,8 +26,8 @@ MPICommunicator: MPICommunicator
 __init__(self, root=0, comm=None, contract=None, logger=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers.py#L2131)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L2131?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers.py#L2181)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L2181?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -49,8 +49,8 @@ Load mpi4py, select the world or supplied communicator, and initialize the root-
 get_nprocs(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2160)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2160?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2210)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2210?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -64,8 +64,8 @@ Return the MPI communicator size.
 get_id(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2169)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2169?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2219)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2219?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -79,8 +79,8 @@ Return the current MPI rank.
 initialize(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2179)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2179?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2229)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2229?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -94,8 +94,8 @@ Perform no initialization because mpi4py owns MPI startup.
 finalize(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2189)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2189?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2239)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2239?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -116,8 +116,8 @@ Perform no finalization because mpi4py owns MPI shutdown.
 comm(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2207)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2207?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2257)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2257?message=Update%20Docs)]
 </div>
 Returns the communicator used by the paralellizer
   - `:returns`: `MPIParallelizer.MPICommunicator`
@@ -130,8 +130,8 @@ Returns the communicator used by the paralellizer
 on_main(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2216)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2216?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2266)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2266?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -145,8 +145,8 @@ Return whether the current communicator rank is zero. This ignores the configura
 broadcast(self, data, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2227)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2227?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2277)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2277?message=Update%20Docs)]
 </div>
 Sends the same data to all processes
   - `data`: `Any`
@@ -162,8 +162,8 @@ Sends the same data to all processes
 scatter(self, data, shape=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2242)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2242?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2292)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2292?message=Update%20Docs)]
 </div>
 Performs a scatter of data to the different
 available parallelizer processes.
@@ -183,8 +183,8 @@ processes
 gather(self, data, shape=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2261)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2261?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2311)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2311?message=Update%20Docs)]
 </div>
 Performs a gather of data from the different
 available parallelizer processes
@@ -201,8 +201,8 @@ available parallelizer processes
 map(self, func, data, input_shape=None, output_shape=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2277)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2277?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2327)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2327?message=Update%20Docs)]
 </div>
 Performs a parallel map of function over
 the held data on different processes
@@ -221,8 +221,8 @@ the held data on different processes
 apply(self, func, *args, cleanup=True, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2295)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2295?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2345)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MPIParallelizer.py#L2345?message=Update%20Docs)]
 </div>
 Applies func to args in parallel on all of the processes.
 For MPI, since jobs are always started with mpirun, this
@@ -243,8 +243,8 @@ is just a regular apply
 from_config(cls, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2312)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2312?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2362)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2362?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -306,7 +306,7 @@ Construct an MPI parallelizer directly from keyword options.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Parallelizers/Parallelizers/MPIParallelizer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Parallelizers/Parallelizers/MPIParallelizer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L1811?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L1861?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

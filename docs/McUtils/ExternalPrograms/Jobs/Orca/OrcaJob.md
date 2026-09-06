@@ -28,8 +28,8 @@ blocks: list
 __init__(self, *strs, basis_set=None, level_of_theory=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Orca.py#L324)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Orca.py#L324?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Orca.py#L329)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Orca.py#L329?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -45,14 +45,34 @@ arguments as simple keywords.
     > the job options
 
 
+<a id="McUtils.ExternalPrograms.Jobs.Orca.OrcaJob.optimization" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+optimization(cls, *strs, **opts): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L359)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L359?message=Update%20Docs)]
+</div>
+Construct an ORCA geometry-optimization job (adds the `Opt` simple
+keyword). Other keywords, `basis_set`, and `level_of_theory` pass
+through unchanged.
+  - `strs`: `Any`
+    > bare simple keywords
+  - `opts`: `Any`
+    > the job options
+  - `:returns`: `OrcaJob`
+    >
+
+
 <a id="McUtils.ExternalPrograms.Jobs.Orca.OrcaJob.get_block_types" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_block_types(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L359)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L359?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L380)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L380?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -67,8 +87,8 @@ Return the ordered ORCA block types.
 load_template(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L371)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L371?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L392)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L392?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 

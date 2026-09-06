@@ -1,11 +1,11 @@
 # <a id="McUtils.Misc.NumbaTools.numba_decorator">numba_decorator</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/NumbaTools.py#L50)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/NumbaTools.py#L50?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Misc/NumbaTools.py#L51)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/NumbaTools.py#L51?message=Update%20Docs)]
 </div>
 
 ```python
-numba_decorator(*args, method=None, warn=False, **kwargs): 
+numba_decorator(*args, method=None, warn=True, **kwargs): 
 ```
 
 
@@ -59,7 +59,7 @@ numba_decorator(*args, method=None, warn=False, **kwargs):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Misc/NumbaTools/numba_decorator.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Misc/NumbaTools/numba_decorator.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/NumbaTools.py#L50?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Misc/NumbaTools.py#L51?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

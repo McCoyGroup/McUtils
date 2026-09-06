@@ -25,11 +25,11 @@ PoolCommunicator: PoolCommunicator
 ```
 <a id="McUtils.Parallelizers.Parallelizers.MultiprocessingParallelizer.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, worker=False, pool: <bound method BaseContext.Pool of <multiprocessing.context.DefaultContext instance>> = None, context=None, manager=None, logger=None, contract=None, comm=None, rank=None, allow_restart=True, initialization_timeout=0.5, initialization_function=None, initialization_args=None, initialization_kwargs=None, **kwargs): 
+__init__(self, worker=False, pool: <bound method BaseContext.Pool of <multiprocessing.context.DefaultContext instance>> = None, context=None, manager=None, logger=None, contract=None, comm=None, rank=None, allow_restart=True, initialization_timeout=0.5, poll_interval=0.02, stall_timeout=None, initialization_function=None, initialization_args=None, initialization_kwargs=None, comm_preinitializer=None, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers.py#L1296)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L1296?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers.py#L1335)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers.py#L1335?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -71,8 +71,8 @@ Configure multiprocessing pool ownership, communicator state, worker rank, resta
 get_nprocs(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1364)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1364?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1409)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1409?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -86,8 +86,8 @@ Return the cached multiprocessing process count.
 get_id(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1373)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1373?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1418)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1418?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -102,8 +102,8 @@ Return the explicit rank when set, otherwise obtain the id from the current comm
 comm(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1386)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1386?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1431)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1431?message=Update%20Docs)]
 </div>
 Returns the communicator used by the paralellizer
   - `:returns`: `MultiprocessingParallelizer.PoolCommunicator`
@@ -115,8 +115,8 @@ Returns the communicator used by the paralellizer
 __getstate__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1424)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1424?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1474)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1474?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -130,8 +130,8 @@ Prepare the parallelizer for pickling by removing live pool, manager, queue, sta
 __setstate__(self, state): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1446)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1446?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1496)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1496?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -147,8 +147,8 @@ Restore pickled state and, when available, replace it with the registered parent
 apply(self, func, *args, comm=None, main_kwargs=None, cleanup=True, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1545)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1545?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1595)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1595?message=Update%20Docs)]
 </div>
 Applies func to args in parallel on all of the processes
   - `func`: `Any`
@@ -167,8 +167,8 @@ Applies func to args in parallel on all of the processes
 get_pool_context(pool): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1646)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1646?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1696)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1696?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -185,8 +185,8 @@ Return the private multiprocessing context stored by a pool.
 get_pool_nprocs(pool): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1659)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1659?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/staticmethod.py#L1709)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/staticmethod.py#L1709?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -202,8 +202,8 @@ Return the private process-count field stored by a pool.
 set_initializer(self, func, *args, **kwargs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1693)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1693?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1743)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1743?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -223,8 +223,8 @@ Install and run an initializer locally, map worker initialization across the poo
 initialize(self, allow_restart=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1719)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1719?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1769)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1769?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -240,8 +240,8 @@ Create or re-enter the pool, create manager-backed communication queues, initial
 finalize(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1765)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1765?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1815)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1815?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -262,8 +262,8 @@ Exit the owned pool on the main process and clear communication queues and the c
 on_main(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1785)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1785?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1835)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Parallelizers/Parallelizers/MultiprocessingParallelizer.py#L1835?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -278,8 +278,8 @@ Return `True` when this instance is not marked as a worker.
 from_config(cls, **kw): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1796)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1796?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1846)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1846?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 

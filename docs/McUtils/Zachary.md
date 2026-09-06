@@ -91,6 +91,17 @@ Deals with anything tensor, Taylor expansion, or interpolation related
 [FittedModel](Zachary/FittableModels/FittedModel.md)   
 </div>
    <div class="col" markdown="1">
+[DistributionKernel](Zachary/FittableModels/DistributionKernel.md)   
+</div>
+   <div class="col" markdown="1">
+[MixtureDistribution](Zachary/FittableModels/MixtureDistribution.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[fit_distribution_mixture_model](Zachary/FittableModels/fit_distribution_mixture_model.md)   
+</div>
+   <div class="col" markdown="1">
 [Interpolator](Zachary/Interpolator/Interpolator.md)   
 </div>
    <div class="col" markdown="1">
@@ -496,9 +507,9 @@ fig.show()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-0eba61" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-0eba61"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-9b689b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-9b689b"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-0eba61" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-9b689b" markdown="1">
  - [stirs](#stirs)
 - [bin_gs](#bin_gs)
 - [bins](#bins)
@@ -548,12 +559,13 @@ fig.show()
 - [Symbolics](#Symbolics)
 - [CoordinateFunctions](#CoordinateFunctions)
 - [InternalReexpansions](#InternalReexpansions)
+- [FittedMixtureModels](#FittedMixtureModels)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-2b48c6" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-2b48c6"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-4d661b" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-4d661b"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-2b48c6" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-4d661b" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -2895,6 +2907,170 @@ class ZacharyTests(TestCase):
         )
 
         raise Exception(new_surf)
+```
+
+#### <a name="FittedMixtureModels">FittedMixtureModels</a>
+```python
+    def test_FittedMixtureModels(self):
+        import matplotlib as mpl
+        mpl.use('macosx')
+
+        rng = np.random.default_rng(0)
+
+        test_linear = False
+        test_ppf = True
+
+        if test_linear or test_ppf:
+            # --- Heterogeneous linear mixture: 1 Cauchy (heavy-tailed) + 2 Gaussian ---
+            print("=== Mixed Gaussian + Cauchy kernels (linear) ===")
+            n = 300_000
+            true_weights = [0.5, 0.3, 0.2]
+            comp = rng.choice(3, size=n, p=true_weights)
+            x = np.empty(n)
+            x[comp == 0] = rng.standard_cauchy(np.sum(comp == 0)) * 0.5 + 0.0
+            x[comp == 1] = rng.normal(-5.0, 1.0, np.sum(comp == 1))
+            x[comp == 2] = rng.normal(6.0, 1.5, np.sum(comp == 2))
+
+            fit_mixed = fit_distribution_mixture_model(
+                x,
+                kernels=[
+                    DistributionKernel.resolve(
+                        'cauchy',
+                        0,
+                        1.0
+                    ),
+                    DistributionKernel.resolve(
+                        'normal',
+                        -4.0,
+                        1.0
+                    ),
+                    DistributionKernel.resolve(
+                        'normal',
+                        5.0,
+                        1.0
+                    )
+                ]
+            )
+            print(fit_mixed)
+
+            xs = np.array([-8.0, -5.0, 0.0, 6.0, 10.0])
+            print(f"\npdf at {xs}:\n  {fit_mixed.pdf(xs)}")
+            print(f"component_pdfs shape: {fit_mixed.component_pdfs(xs).shape}")
+
+            if test_linear:
+                g = np.linspace(-10, 10, 1000)
+                hist = plt.HistogramPlot(x[np.abs(x) < 20], bins=500, density=True)
+                plt.Plot(
+                    g,
+                    fit_mixed.pdf(g),
+                    figure=hist,
+                    color='green'
+                ).show()
+
+        test_periodic = False
+        if test_periodic:
+
+            # --- Periodic mixture: von Mises + wrapped Cauchy together ---
+            print("\n=== Mixed von Mises + wrapped Cauchy kernels (periodic) ===")
+
+            def sample_wrapped_cauchy(mu, rho, size, rng):
+                u = rng.random(size)
+                return mu + 2 * np.arctan(((1 - rho) / (1 + rho)) * np.tan(np.pi * (u - 0.5)))
+
+            n_theta = 300_000
+            comp_t = rng.choice(2, size=n_theta, p=[0.6, 0.4])
+            theta = np.empty(n_theta)
+            theta[comp_t == 0] = rng.vonmises(0.0, 20.0, np.sum(comp_t == 0))
+            theta[comp_t == 1] = sample_wrapped_cauchy(np.pi, 0.85, np.sum(comp_t == 1), rng)
+            theta = np.mod(theta, 2 * np.pi)
+
+            fit_periodic = fit_distribution_mixture_model(
+                theta,
+                kernels=[
+                    DistributionKernel.resolve('vonmises', 0.1, 10),
+                    DistributionKernel.resolve('wrapcauchy', 3.0, 0.5)
+                ]
+            )
+            print(fit_periodic)
+
+            xs_p = np.array([0.0, np.pi, 2 * np.pi])
+            print(f"\npdf at {xs_p} (0 and 2*pi should match): {fit_periodic.pdf(xs_p)}")
+
+            g = np.linspace(0, 2*np.pi, 1000)
+            hist = plt.HistogramPlot(theta, bins=500, density=True)
+            plt.Plot(
+                g,
+                fit_periodic.pdf(g),
+                figure=hist,
+                color='green'
+            ).show()
+
+        if test_ppf:
+
+            # --- MixtureDistribution: ppf via grid interpolation, save/load round-trip ---
+            print("\n=== ppf (grid-based inverse CDF) on the mixed linear fit ===")
+            qs = np.array([0.05, 0.25, 0.5, 0.75, 0.95])
+            xq = fit_mixed.ppf(qs)
+            print(f"q      = {qs}")
+            print(f"ppf(q) = {xq}")
+            # round-trip check: cdf(ppf(q)) should recover q
+            print(f"cdf(ppf(q)) = {fit_mixed.cdf(xq)}  (should match q above)")
+
+            save_path = "/tmp/mixed_ppf.npz"
+            fit_mixed.save_ppf_grid(save_path)
+            loaded = MixtureDistribution.load_ppf_grid(save_path)
+            print("\nLoaded from disk:")
+            print(loaded)
+            print(f"loaded.ppf(q) = {loaded.ppf(qs)}  (should match ppf(q) above)")
+            print(f"loaded.pdf(0) = {loaded.pdf(np.array([0.0]))}  vs original {fit_mixed.pdf(np.array([0.0]))}")
+
+            # --- Fallback path: a custom kernel with no closed-form ppf ---
+            print("\n=== Custom kernel with no scipy ppf (exercises bisection fallback) ===")
+
+            class LaplaceKernel(DistributionKernel):
+                """Toy kernel with no .ppf override, to test the generic fallback."""
+                param_names = ("loc", "b")
+                def __init__(self, loc, b):
+                    self.params = (loc, b)
+
+                def log_pdf(self, x, params=None):
+                    if params is None: params = self.params
+                    loc, b = params
+                    return -np.log(2 * b) - np.abs(x - loc) / b
+
+                def pdf(self, x, params=None):
+                    if params is None: params = self.params
+                    loc, b = params
+                    return np.exp(self.log_pdf(x, params))
+
+                def cdf(self, x, params=None):
+                    if params is None: params = self.params
+                    loc, b = params
+                    z = (x - loc) / b
+                    return np.where(z < 0, 0.5 * np.exp(z), 1 - 0.5 * np.exp(-z))
+
+                def new_stats(self):
+                    raise NotImplementedError(...)
+                    return {}
+
+                def accumulate(self, stats, x, resp, params):
+                    raise NotImplementedError(...)
+                    pass
+
+                def finalize(self, stats, min_scale):
+                    raise NotImplementedError(...)
+                    N = max(stats["N"], 1e-12)
+                    mean = stats["S"] / N
+                    var = max(stats["SS"] / N - mean ** 2, min_scale ** 2)
+
+            laplace_dist = MixtureDistribution(
+                kernels=[LaplaceKernel(0.0, 1.0)],
+                weights=np.array([1.0])
+            )
+            q_test = np.array([0.1, 0.5, 0.9])
+            x_test = laplace_dist.ppf(q_test)
+            print(f"ppf({q_test}) = {x_test}")
+            print(f"cdf(ppf(q)) = {laplace_dist.cdf(x_test)}  (should match q_test)")
 ```
 
  </div>

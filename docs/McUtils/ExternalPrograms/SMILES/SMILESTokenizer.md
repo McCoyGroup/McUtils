@@ -1,8 +1,8 @@
 ## <a id="McUtils.ExternalPrograms.SMILES.SMILESTokenizer">SMILESTokenizer</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/SMILES.py#L1536)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L1536?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/SMILES.py#L2128)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L2128?message=Update%20Docs)]
 </div>
 
 Atom-only SMILES tokenizer.
@@ -34,8 +34,8 @@ AROMATIC_ATOMS: frozenset
 __init__(self, *, metadata_fields: 'Collection[str] | None' = None) -> 'None': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/SMILES.py#L1594)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L1594?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/SMILES.py#L2186)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L2186?message=Update%20Docs)]
 </div>
 
 
@@ -44,8 +44,8 @@ __init__(self, *, metadata_fields: 'Collection[str] | None' = None) -> 'None':
 tokenize(self, smiles: 'str') -> 'Iterator[SMILESAtom]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/SMILES/SMILESTokenizer.py#L1742)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES/SMILESTokenizer.py#L1742?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/SMILES/SMILESTokenizer.py#L2334)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES/SMILESTokenizer.py#L2334?message=Update%20Docs)]
 </div>
 Generate atom tokens in SMILES traversal order.
 
@@ -58,8 +58,8 @@ the index of the atom from which the generated atom branches.
 annotate(self, smiles: 'str', annotation: 'str', block_size: 'int | list[int]', *, require_all_annotations: 'bool' = True) -> 'Iterator[AnnotatedAtom]': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/SMILES/SMILESTokenizer.py#L1896)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES/SMILESTokenizer.py#L1896?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/SMILES/SMILESTokenizer.py#L2488)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES/SMILESTokenizer.py#L2488?message=Update%20Docs)]
 </div>
 Add annotation slices and offsets to the base atom stream.
  </div>
@@ -115,7 +115,7 @@ Add annotation slices and offsets to the base atom stream.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/ExternalPrograms/SMILES/SMILESTokenizer.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/ExternalPrograms/SMILES/SMILESTokenizer.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L1536?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/SMILES.py#L2128?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

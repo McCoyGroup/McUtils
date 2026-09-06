@@ -29,8 +29,8 @@ non_blank_line_terminated: set
 __init__(self, *strs, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Gaussian.py#L452)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Gaussian.py#L452?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Gaussian.py#L458)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Gaussian.py#L458?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -48,8 +48,8 @@ keywords (if recognized) or the level of theory.
 get_extra_keys(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L470)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L470?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L476)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L476?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -64,8 +64,8 @@ Return the set of `{...}` placeholder names present in the job template.
 get_block_types(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L484)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L484?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L490)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L490?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -80,8 +80,8 @@ Return the ordered Gaussian block types.
 load_template(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L496)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L496?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L502)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L502?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -95,8 +95,8 @@ Return the path to the Gaussian job template.
 get_params(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Gaussian/GaussianJob.py#L509)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Gaussian/GaussianJob.py#L509?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Jobs/Gaussian/GaussianJob.py#L515)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Jobs/Gaussian/GaussianJob.py#L515?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -104,6 +104,26 @@ Assemble the job parameters, appending a trailing blank line to every section
 except the ones that must not be blank-line terminated.
   - `:returns`: `dict`
     > the template parameters
+
+
+<a id="McUtils.ExternalPrograms.Jobs.Gaussian.GaussianJob.optimization" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+optimization(cls, *strs, **opts): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L532)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L532?message=Update%20Docs)]
+</div>
+Construct an ORCA geometry-optimization job (adds the `Opt` simple
+keyword). Other keywords, `basis_set`, and `level_of_theory` pass
+through unchanged.
+  - `strs`: `Any`
+    > bare simple keywords
+  - `opts`: `Any`
+    > the job options
+  - `:returns`: `OrcaJob`
+    >
  </div>
 </div>
 
@@ -126,17 +146,17 @@ except the ones that must not be blank-line terminated.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-b88131" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-b88131"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-24a603" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-24a603"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-b88131" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-24a603" markdown="1">
  - [GaussianJobWriter](#GaussianJobWriter)
 - [LinkedModeScan](#LinkedModeScan)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-8d6526" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-8d6526"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-14193d" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-14193d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-8d6526" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-14193d" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

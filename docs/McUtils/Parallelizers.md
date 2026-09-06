@@ -336,9 +336,9 @@ finally:
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-9c9a5f" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-9c9a5f"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-0d8905" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-0d8905"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-9c9a5f" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-0d8905" markdown="1">
  - [BasicMultiprocessing](#BasicMultiprocessing)
 - [MapMultiprocessing](#MapMultiprocessing)
 - [MapMultiprocessingDataSmall](#MapMultiprocessingDataSmall)
@@ -349,12 +349,23 @@ finally:
 - [MakeSharedMem](#MakeSharedMem)
 - [DistributedDict](#DistributedDict)
 - [SimpleSharedDict](#SimpleSharedDict)
+- [PatchBackwardsCompatibleConstruction](#PatchBackwardsCompatibleConstruction)
+- [PatchNewKwargsAcceptedAndHarmless](#PatchNewKwargsAcceptedAndHarmless)
+- [PatchRepeatedRoundsNoFalseFailures](#PatchRepeatedRoundsNoFalseFailures)
+- [PatchDecoratorCompatibility](#PatchDecoratorCompatibility)
+- [PatchDeadWorkerDetectedFast](#PatchDeadWorkerDetectedFast)
+- [SuccessPathNoDelay](#SuccessPathNoDelay)
+- [SuccessPathAfterShortRealDelay](#SuccessPathAfterShortRealDelay)
+- [DeadWorkerRaisesImmediately](#DeadWorkerRaisesImmediately)
+- [AllAliveNoStallTimeoutWaitsWithinBudget](#AllAliveNoStallTimeoutWaitsWithinBudget)
+- [StallTimeoutBackstopFires](#StallTimeoutBackstopFires)
+- [GetSubcommThreadsNewParams](#GetSubcommThreadsNewParams)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-fe3a39" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-fe3a39"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-b70f8d" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-b70f8d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-fe3a39" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-b70f8d" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -362,7 +373,7 @@ will be necessary for all situations.
 
 All tests are wrapped in a test class
 ```python
-class ParallelizerTests(TestCase):
+class ParallelizersTests(TestCase):
     def __getstate__(self):
         return {}
     def __setstate__(self, state):
@@ -424,6 +435,86 @@ class ParallelizerTests(TestCase):
             d['a'][1, 0, 0] = 5
             wat['key'] = 5
         parallelizer.print('{v} {g}', v=wat, g=d['d'])
+    def light_map_func(self, chunk):
+        # a `vectorized=True`-style map function, matching `mapped_func`
+        # above: operates on the whole chunk handed to one worker, not
+        # element-by-element
+        return [x + 1 for x in chunk]
+    def light_map_job(self, data, parallelizer=None):
+        if parallelizer.on_main and data is None:
+            data = list(range(100))
+        return parallelizer.map(self.light_map_func, data, vectorized=True)
+    def only_main_job(self, x, parallelizer=None):
+        return ("main-ran", x)
+    only_main_job = Parallelizer.main_restricted(only_main_job)
+    def only_worker_job(self, x, parallelizer=None):
+        return ("worker-ran", x)
+    only_worker_job = Parallelizer.worker_restricted(only_worker_job)
+    def decorator_check_job(self, x, parallelizer=None):
+        # `main_restricted`/`worker_restricted`-decorated *bound methods*
+        # (as opposed to the module-level closures in the commented-out
+        # example at the top of this file) pickle fine under this class's
+        # `__getstate__`/`__setstate__` trick, since a bound method
+        # pickles as "look this name up on the (stripped) instance again,"
+        # not by serializing the decorator's closure directly. Confirmed
+        # this still holds under the patched `initialize()`.
+        return self.only_main_job(x, parallelizer=parallelizer), self.only_worker_job(x, parallelizer=parallelizer)
+    def _make_comm(self, parent, queues, poll_interval=0.01, stall_timeout=None, rank=0):
+        return MultiprocessingParallelizer.PoolCommunicator(
+            parent, rank, queues,
+            initialization_timeout=0.5,  # unused by initialize() itself post-patch
+            poll_interval=poll_interval,
+            stall_timeout=stall_timeout,
+        )
+    class _FakeFlag:
+        def __init__(self, set_after=None):
+            self._t0 = time.time()
+            self._set_after = set_after
+            self._forced = False
+
+        def is_set(self):
+            if self._forced:
+                return True
+            if self._set_after is None:
+                return False
+            return (time.time() - self._t0) >= self._set_after
+
+        def wait(self, timeout):
+            deadline = time.time() + timeout
+            while time.time() < deadline:
+                if self.is_set():
+                    return True
+                time.sleep(min(0.001, max(0.0, deadline - time.time())))
+            return self.is_set()
+
+        def set(self):
+            self._forced = True
+
+        def clear(self):
+            self._forced = False
+    class _FakeQueue:
+        def __init__(self, flag):
+            self.init_flag = flag
+    class _FakeProcess:
+        def __init__(self, pid, alive=True, exitcode=None):
+            self.pid = pid
+            self._alive = alive
+            self.exitcode = exitcode
+
+        def is_alive(self):
+            return self._alive
+    class _FakePool:
+        def __init__(self, processes):
+            self._pool = processes
+    class _FakeParent:
+        on_main = True
+        base_log_level = 0
+
+        def __init__(self, processes):
+            self.pool = ParallelizersTests._FakePool(processes)
+
+        def print(self, *args, **kwargs):
+            pass
 ```
 
  </div>
@@ -529,7 +620,7 @@ class ParallelizerTests(TestCase):
 #### <a name="SimpleSharedDict">SimpleSharedDict</a>
 ```python
     def test_SimpleSharedDict(self):
-        from McUtils.Parallelizers import SharedMemoryDict
+        # from McUtils.Parallelizers import SharedMemoryDict
 
         state = SharedMemoryDict({"iteration": 0, "energy": 0.0})
         try:
@@ -538,6 +629,176 @@ class ParallelizerTests(TestCase):
             print(dict(state.items()))
         finally:
             state.close()
+```
+
+#### <a name="PatchBackwardsCompatibleConstruction">PatchBackwardsCompatibleConstruction</a>
+```python
+    def test_PatchBackwardsCompatibleConstruction(self):
+        # no new kwargs supplied: should behave exactly as it did before
+        # the patch
+        par_result = MultiprocessingParallelizer(processes=5).run(self.light_map_job, list(range(50)))
+        serial_result = SerialNonParallelizer().run(self.light_map_job, list(range(50)))
+        self.assertEqual(sorted(par_result), sorted(serial_result))
+```
+
+#### <a name="PatchNewKwargsAcceptedAndHarmless">PatchNewKwargsAcceptedAndHarmless</a>
+```python
+    def test_PatchNewKwargsAcceptedAndHarmless(self):
+        # poll_interval/stall_timeout are new, optional, and shouldn't
+        # change behavior on the happy path
+        par_result = MultiprocessingParallelizer(
+            processes=4, poll_interval=0.01, stall_timeout=30.0
+        ).run(self.light_map_job, list(range(50)))
+        serial_result = SerialNonParallelizer().run(self.light_map_job, list(range(50)))
+        self.assertEqual(sorted(par_result), sorted(serial_result))
+```
+
+#### <a name="PatchRepeatedRoundsNoFalseFailures">PatchRepeatedRoundsNoFalseFailures</a>
+```python
+    def test_PatchRepeatedRoundsNoFalseFailures(self):
+        # the polling loop shouldn't introduce spurious failures across
+        # many successive dispatches -- each `.run()` re-does the init
+        # handshake, so this exercises `initialize()` repeatedly
+        with MultiprocessingParallelizer(processes=4) as par:
+            for i in range(10):
+                r = par.run(self.light_map_job, list(range(30)))
+                self.assertEqual(sorted(r), list(range(1, 31)), msg="round {} produced wrong result".format(i))
+```
+
+#### <a name="PatchDecoratorCompatibility">PatchDecoratorCompatibility</a>
+```python
+    def test_PatchDecoratorCompatibility(self):
+        with MultiprocessingParallelizer(processes=4) as par:
+            r = par.run(self.decorator_check_job, 5)
+        self.assertEqual(r[0], ("main-ran", 5))
+```
+
+#### <a name="PatchDeadWorkerDetectedFast">PatchDeadWorkerDetectedFast</a>
+```python
+    def test_PatchDeadWorkerDetectedFast(self):
+        # The actual regression test for the patch: kill a real pool
+        # worker and confirm the init handshake fails fast instead of
+        # hanging or only failing after `initialization_timeout` elapses.
+        #
+        # This intentionally does NOT redispatch through `.run()`/`.apply()`
+        # after the kill: `multiprocessing.pool.Pool` auto-respawns dead
+        # workers (and can silently requeue an in-flight task from one),
+        # which makes "kill, then `.run()` again" a race against Pool's
+        # own healing thread -- observed to occasionally hang for reasons
+        # unrelated to this patch. Calling `comm.initialize()` directly
+        # isolates exactly the logic the patch changes.
+        #
+        # It also runs in a child process with a hard wall-clock timeout,
+        # and reports *which stage* it reached rather than a single
+        # pass/fail: tearing down a pool with a dead worker
+        # (`pool.__exit__()`/`pool.terminate()`) was separately observed to
+        # sometimes hang -- a pre-existing `Pool` teardown quirk this patch
+        # doesn't touch -- and that's a meaningfully different failure from
+        # detection itself never completing. `stage_timeout` is generous:
+        # under the `spawn` start method (macOS's default, vs. Linux's
+        # default `fork`), just building the child's own 4-worker pool
+        # means 5 fresh interpreter start-ups before we ever get to the
+        # thing being tested, which is legitimately much slower than under
+        # `fork`. `detection_budget` is intentionally much tighter, since
+        # it bounds only the actual `comm.initialize()` call this patch
+        # changes: either the fast liveness path (near-instant) or the
+        # `stall_timeout=5.0` backstop inside `_dead_worker_child` should
+        # account for it, so 8s of margin should never legitimately be
+        # needed -- if it is, that's the real signal, not platform noise.
+        ok, detail = _run_dead_worker_check(stage_timeout=5.0, join_timeout=2.0, detection_budget=8.0)
+        self.assertTrue(ok, detail)
+```
+
+#### <a name="SuccessPathNoDelay">SuccessPathNoDelay</a>
+```python
+    def test_SuccessPathNoDelay(self):
+        flags = [self._FakeFlag(set_after=0.0) for _ in range(3)]
+        for f in flags:
+            f.set()
+        queues = [self._FakeQueue(f) for f in flags]
+        parent = self._FakeParent([self._FakeProcess(pid=i, alive=True) for i in range(3)])
+        comm = self._make_comm(parent, queues)
+
+        t0 = time.time()
+        comm.initialize()  # should not raise
+        elapsed = time.time() - t0
+        self.assertLess(elapsed, 0.2, "success path should not incur polling delay")
+```
+
+#### <a name="SuccessPathAfterShortRealDelay">SuccessPathAfterShortRealDelay</a>
+```python
+    def test_SuccessPathAfterShortRealDelay(self):
+        flags = [self._FakeFlag(set_after=0.15) for _ in range(3)]
+        queues = [self._FakeQueue(f) for f in flags]
+        parent = self._FakeParent([self._FakeProcess(pid=i, alive=True) for i in range(3)])
+        comm = self._make_comm(parent, queues, poll_interval=0.01, stall_timeout=None)
+        comm.initialize()
+```
+
+#### <a name="DeadWorkerRaisesImmediately">DeadWorkerRaisesImmediately</a>
+```python
+    def test_DeadWorkerRaisesImmediately(self):
+        flags = [self._FakeFlag(set_after=None) for _ in range(3)]  # never set
+        queues = [self._FakeQueue(f) for f in flags]
+        processes = [
+            self._FakeProcess(pid=100, alive=True),
+            self._FakeProcess(pid=101, alive=False, exitcode=-11),  # e.g. segfault
+            self._FakeProcess(pid=102, alive=True),
+        ]
+        parent = self._FakeParent(processes)
+        comm = self._make_comm(parent, queues, poll_interval=0.01, stall_timeout=None)
+
+        t0 = time.time()
+        with self.assertRaises(MultiprocessingParallelizer.PoolCommunicator.PoolError) as ctx:
+            comm.initialize()
+        elapsed = time.time() - t0
+
+        self.assertLess(elapsed, 0.2, "dead worker should be detected within a couple poll intervals")
+        self.assertIn("101", str(ctx.exception))
+        self.assertIn("-11", str(ctx.exception))
+```
+
+#### <a name="AllAliveNoStallTimeoutWaitsWithinBudget">AllAliveNoStallTimeoutWaitsWithinBudget</a>
+```python
+    def test_AllAliveNoStallTimeoutWaitsWithinBudget(self):
+        flags = [self._FakeFlag(set_after=0.1) for _ in range(2)]
+        queues = [self._FakeQueue(f) for f in flags]
+        parent = self._FakeParent([self._FakeProcess(pid=i, alive=True) for i in range(2)])
+        comm = self._make_comm(parent, queues, poll_interval=0.02, stall_timeout=None)
+        comm.initialize()
+```
+
+#### <a name="StallTimeoutBackstopFires">StallTimeoutBackstopFires</a>
+```python
+    def test_StallTimeoutBackstopFires(self):
+        flags = [self._FakeFlag(set_after=None) for _ in range(2)]  # never set
+        queues = [self._FakeQueue(f) for f in flags]
+        parent = self._FakeParent([self._FakeProcess(pid=i, alive=True) for i in range(2)])
+        comm = self._make_comm(parent, queues, poll_interval=0.01, stall_timeout=0.08)
+
+        t0 = time.time()
+        with self.assertRaises(MultiprocessingParallelizer.PoolCommunicator.PoolError) as ctx:
+            comm.initialize()
+        elapsed = time.time() - t0
+
+        self.assertGreaterEqual(elapsed, 0.08 * 0.5, "shouldn't fire drastically before stall_timeout")
+        self.assertLess(elapsed, 0.5, "should fire close to stall_timeout, not hang")
+        self.assertIn("hasn't completed initialization", str(ctx.exception))
+```
+
+#### <a name="GetSubcommThreadsNewParams">GetSubcommThreadsNewParams</a>
+```python
+    def test_GetSubcommThreadsNewParams(self):
+        flags = [self._FakeFlag(set_after=0.0) for _ in range(2)]
+        for f in flags:
+            f.set()
+        queues = [self._FakeQueue(f) for f in flags]
+        parent = self._FakeParent([self._FakeProcess(pid=i, alive=True) for i in range(2)])
+        comm = self._make_comm(parent, queues, poll_interval=0.05, stall_timeout=1.23)
+
+        sub = comm.get_subcomm([0])
+        self.assertEqual(sub.poll_interval, 0.05)
+        self.assertEqual(sub.stall_timeout, 1.23)
 ```
 
  </div>

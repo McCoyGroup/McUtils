@@ -5,7 +5,7 @@
 </div>
 
 ```python
-read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False, max_leaf_elements=None, prefix_filter=None, record=None, **reader_options): 
+read_flat_tree(file, unflatten=True, reader=None, allow_pickle=False, max_leaf_elements=None, prefix_filter=None, record=None, require_aliases=True, **reader_options): 
 ```
 Read the NPZ-style flat-tree representation, rebuild its metadata
 structure, and optionally unflatten it fully or jump straight to a
