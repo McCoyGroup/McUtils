@@ -11,8 +11,8 @@ from .JHTML import JHTML
 __all__ += ["JHTML"]
 from .Apps import *; from .Apps import __all__ as exposed
 __all__ += exposed
-from .APIs import *; from .APIs import __all__ as exposed
-__all__ += exposed
+# from .APIs import *; from .APIs import __all__ as exposed
+# __all__ += exposed
 from .ScriptRunner import *; from .ScriptRunner import __all__ as expose
 __all__ += exposed
 from .MoleculeGraphics import *; from .MoleculeGraphics import __all__ as exposed
