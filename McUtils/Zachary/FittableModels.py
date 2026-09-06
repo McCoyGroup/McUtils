@@ -711,7 +711,7 @@ def _kappa_from_R(R):
 # ---------------------------------------------------------------------------
 # Result objects
 # ---------------------------------------------------------------------------
-@dataclass(kw_only=True)
+@dataclass#(kw_only=True)
 class MixtureDistribution:
     """
     A k-component mixture distribution with a (possibly heterogeneous)
@@ -992,7 +992,7 @@ class MixtureDistribution:
         return lo, hi
 
 
-@dataclass(kw_only=True)
+@dataclass#(kw_only=True)
 class FittedMixtureDistribution(MixtureDistribution):
     """
     A `MixtureDistribution` that also remembers how it was fit, so it can
