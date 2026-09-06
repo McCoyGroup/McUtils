@@ -1,13 +1,19 @@
 
 import numpy as np
+import scipy
+import itertools
+from typing import NamedTuple, Optional
 
+from .. import Devutils as dev
 from .. import Iterators as itut
 from .. import Numputils as nput
 from ..Zachary import MixtureDistribution
 
 __all__ = [
     "ConformerEncoder",
-    "BondPatcher"
+    "BondPatcher",
+    "prune_conformers_by_rmsd",
+    "generate_conformer_ensemble"
 ]
 
 _SOURCE_FLOAT_DTYPES = {32: np.float32, 64: np.float64}
@@ -922,3 +928,249 @@ class BondPatcher:
 
         patch_check = mol_new.to_smiles(remove_hydrogens=True, compute_stereo=True)
         return mol_new, ref_check == patch_check, (ref_check, patch_check)
+
+
+def _pairwise_eckart_rmsd(coords: np.ndarray, masses: np.ndarray) -> np.ndarray:
+    """
+    The full `MxM` pairwise, mass-weighted RMSD matrix for a stack of `M`
+    conformers, via `McUtils.Numputils.eckart_rmsd`: each pair is optimally
+    (Eckart) aligned as part of the comparison, so no separate up-front
+    embedding step is needed.
+    """
+    n = len(coords)
+    if n <= 1:
+        return np.zeros((n, n))
+    r, c = np.triu_indices(n, k=1)
+    pair_rmsd = nput.eckart_rmsd(coords[r], coords[c], masses=masses, mass_weighted=True)
+    rmsds = np.zeros((n, n))
+    rmsds[r, c] = pair_rmsd
+    rmsds[c, r] = pair_rmsd
+    return rmsds
+
+
+def _rmsd_cluster_representatives(rmsd_matrix: np.ndarray, indices: np.ndarray, rmsd_cutoff: float) -> list:
+    """
+    Cluster `indices` by thresholding `rmsd_matrix` at `rmsd_cutoff`
+    (connected components of the "within cutoff" graph), then pick one
+    representative per cluster -- the member with the smallest average
+    RMSD to the rest of its cluster. Clusters whose internal spread is
+    more than twice the cutoff are recursively re-clustered at half the
+    cutoff, so a single loose "chain" of near-duplicates doesn't collapse
+    into one representative.
+    """
+    r, c = np.triu_indices(len(indices), k=1)
+    equiv = rmsd_matrix[r, c] < rmsd_cutoff
+    graph = np.zeros((len(indices), len(indices)), dtype=bool)
+    np.fill_diagonal(graph, True)
+    graph[r[equiv], c[equiv]] = True
+    graph[c[equiv], r[equiv]] = True
+    _, labels = scipy.sparse.csgraph.connected_components(graph, directed=False, return_labels=True)
+    _, groups = nput.group_by(np.arange(len(labels)), labels)[0]
+
+    representatives = []
+    for g in groups:
+        if len(g) == 1:
+            representatives.append(g[0])
+            continue
+        rmsd_block = rmsd_matrix[np.ix_(g, g)]
+        rr, cc = np.array(list(itertools.combinations(range(len(g)), 2))).T
+        if np.max(rmsd_block[rr, cc]) > 2 * rmsd_cutoff:
+            representatives.extend(_rmsd_cluster_representatives(rmsd_block, g, rmsd_cutoff / 2))
+        else:
+            rep = g[np.argmin(np.average(rmsd_block, axis=0))]
+            representatives.append(rep)
+    return [indices[r] for r in representatives]
+
+
+def prune_conformers_by_rmsd(coords, masses=None, rmsd_cutoff: float = .025) -> np.ndarray[int]:
+    """
+    Deduplicate a list of `Psience.Molecools.Molecule` conformers (same
+    connectivity, different geometries) by mass-weighted, Eckart-aligned
+    RMSD. No pre-alignment/embedding step is required -- the optimal
+    alignment is computed per compared pair by `McUtils.Numputils.eckart_rmsd`.
+
+    :param structs: conformers of a single molecule
+    :param rmsd_cutoff: the (per-atom, mass-weighted) RMSD below which two
+        conformers are considered duplicates
+    :return: one representative `Molecule` per RMSD cluster, in their
+        original relative order
+    """
+    coords = np.asanyarray(coords)
+    masses = np.asanyarray(masses)
+    rmsds = _pairwise_eckart_rmsd(coords, masses=masses)
+    keep = np.sort(_rmsd_cluster_representatives(rmsds, np.arange(len(coords)), rmsd_cutoff))
+    return keep
+
+
+class ConformerRecord(NamedTuple):
+    """A single optimized conformer, with enough information to reconstruct or re-optimize it."""
+    smiles: str
+    atoms: tuple
+    coords: np.ndarray
+    bonds: list
+    energy: Optional[float]
+    energy_evaluator: object = None
+    optimization_settings: Optional[dict] = None
+
+
+def _make_conformer_record(struct, energy, smiles, energy_evaluator, optimizer_settings) -> ConformerRecord:
+    return ConformerRecord(
+        smiles=smiles,
+        atoms=struct.atoms,
+        coords=struct.coords,
+        bonds=[[int(i), int(j), float(t)] for i, j, t in struct.bonds],
+        energy=float(energy) if energy is not None else None,
+        energy_evaluator=energy_evaluator,
+        optimization_settings=optimizer_settings,
+    )
+
+
+default_conformer_generator_options = dict(
+    maxAttempts=1000, pruneRmsThresh=0.1, useExpTorsionAnglePrefs=True,
+    useBasicKnowledge=True, enforceChirality=True, numThreads=0
+)
+
+def _prune_mols(structs, rmsd_cutoff):
+    struct_ids = prune_conformers_by_rmsd([c.coords for c in structs], masses=structs[0].masses,
+                                          rmsd_cutoff=rmsd_cutoff)
+    structs = [structs[i] for i in struct_ids]
+    return structs
+
+def generate_conformer_ensemble(
+        molecule_generator,
+        smiles: str,
+        *,
+        energy_evaluator=None,
+        optimizer=None,
+        target_num_structs: int = 10,
+        num_pregen: int = None,
+        conf_gen_options: Optional[dict] = None,
+        evaluate_energy: bool = True,
+        preoptimize: bool = True,
+        optimizer_settings: Optional[dict] = None,
+        rmsd_cutoff: Optional[float] = .025,
+        preopt_iterations: int = 50,
+        spin: int = 1,
+        verbose: bool = False,
+        **molecule_options
+) -> list:
+    """
+    The core, single-SMILES "generate -> dedupe -> optimize" routine.
+
+    Given one SMILES string, this:
+
+      1. embeds up to `conf_gen_options['numConfs']` (or `target_num_structs`, if
+         energies aren't being evaluated) 3D conformers with RDKit's
+         ETKDG-family embedder (via `Psience.Molecools.Molecule`),
+      2. deduplicates them by mass-weighted, Eckart-aligned RMSD
+         (`prune_conformers_by_rmsd`, `rmsd_cutoff`),
+      3. optionally pre-optimizes every surviving conformer and re-dedupes,
+      4. evaluates each conformer's energy and picks the lowest-`target_num_structs`
+         (re-optimizing -- and re-scoring -- that final set if it wasn't
+         already fully optimized in step 3), and
+      5. returns them as `ConformerRecord`s, most-favorable first.
+
+    This function is side-effect free: it never writes to disk, and it
+    never raises on chemically invalid or unembeddable SMILES -- it returns
+    an empty list instead, so batch drivers can skip bad entries without
+    special-casing them.
+
+    :param smiles: a single SMILES string
+    :param target_num_structs: number of final conformers to keep
+    :param conf_gen_options: passed through to the ETKDG embedder; merged
+        over `default_conformer_generator_options` (user options win)
+    :param energy_evaluator: the `Psience` energy evaluator (name, spec
+        dict, or a raw ASE-style calculator object)
+    :param evaluate_energy: whether to compute energies at all
+    :param preoptimize: optimize every surviving conformer up front (rather
+        than only the final selected set)
+    :param optimizer_settings: passed to `Molecule.optimize`
+    :param rmsd_cutoff: RMSD below which two conformers are considered
+        duplicates (`None` disables deduplication)
+    :param preopt_iterations: max iterations for the (cheaper)
+        pre-optimization pass
+    :param spin: passed through to `Molecule.from_string`
+    :param verbose: print basic progress information
+    :return: the selected conformers as `ConformerRecord`s (empty if the
+        SMILES couldn't be parsed, embedded, or optimized)
+    """
+    opts = dict(default_conformer_generator_options)
+    if conf_gen_options:
+        opts.update(conf_gen_options)
+
+    if energy_evaluator is None:
+        evaluate_energy = False
+    elif isinstance(energy_evaluator, str) or dev.is_dict_like(energy_evaluator):
+        molecule_options['energy_evaluator'] = energy_evaluator
+        def energy_evaluator(mol, **etc):
+            return mol.calculate_energy(**etc)
+        if optimizer is None:
+            def optimizer(mol, **etc):
+                return mol.optimize(**etc)
+
+    if num_pregen is None:
+        num_pregen = opts.pop('numConfs', 2 * target_num_structs)
+    # if not evaluate_energy:
+    #     num_pregen = target_num_structs
+
+    if optimizer_settings is None:
+        optimizer_settings = {}
+
+    if verbose:
+        print(f"Generating up to {num_pregen} conformers for {smiles}")
+
+    structs = molecule_generator(
+        smiles, 'smi',
+        num_confs=num_pregen,
+        conf_gen_options=opts,
+        spin=spin,
+        **molecule_options
+    )
+
+    if not structs:
+        return []
+
+    if rmsd_cutoff is not None:
+        structs = _prune_mols(structs, rmsd_cutoff=rmsd_cutoff)
+    if not structs:
+        return []
+
+    if optimizer is not None and preoptimize:
+        preopt_settings = dict(optimizer_settings, max_iterations=preopt_iterations)
+        structs = [optimizer(struct, **preopt_settings) for struct in structs]
+        if rmsd_cutoff is not None:
+            structs = _prune_mols(structs, rmsd_cutoff=rmsd_cutoff)
+        if not structs:
+            return []
+
+    if evaluate_energy:
+        energies = np.array([energy_evaluator(struct) for struct in structs])
+    else:
+        energies = None#np.zeros(len(structs))
+
+    if evaluate_energy:
+        if len(structs) > target_num_structs:
+            top = np.argpartition(energies, target_num_structs - 1)[:target_num_structs]
+            ord = np.argsort(energies[top])
+            top = top[ord]
+            energies = energies[ord,]
+        else:
+            top = np.argsort(energies)
+            energies = energies[top,]
+    else:
+        top = np.arange(min(len(structs), target_num_structs))
+
+    records = []
+    for i in top:
+        struct = structs[i]
+        if optimizer is not None and not preoptimize and evaluate_energy:
+            # only a cheap single-point scoring pass was done above (to
+            # pick which conformers are worth the expense); now fully
+            # optimize -- and re-score, so the reported energy matches the
+            # returned structure -- just the selected subset
+            struct = optimizer(struct, **optimizer_settings)
+            energy = energy_evaluator(struct)
+            energies[i] = energy
+        records.append(struct)
+
+    return records, energies

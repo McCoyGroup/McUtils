@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import functools
 import multiprocessing
+import itertools
+from typing import Iterable, Optional, Sequence, Union
 
 from .. import Devutils as dev
 from .. import Numputils as nput
@@ -40,6 +42,7 @@ __all__ = [
     "substitute_smiles_atoms",
     "parse_smiles_and_atom_map",
     "build_templated_smiles",
+    "templated_smiles_iterator",
     "SMILESTokenizer"
 ]
 
@@ -1956,10 +1959,157 @@ def build_templated_smiles(
         res = res[0]
     return res
 
+def templated_smiles_iterator(
+        scaffold: str,
+        fragments: Sequence[str],
+        active_sites: Sequence[int],
+        chiralities: Optional[Sequence[Union[str, Sequence[str]]]] = None,
+        stereos: Optional[dict] = None,
+        bond_orders: Optional[Sequence] = None,
+        atom_replacements: Optional[dict] = None,
+        attachment_bond_orders: Optional[Sequence[Union[int, float]]] = None,
+        binding_sites: Optional[Sequence[int]] = None,
+        cache: Optional[dict] = None,
+        add_implicit_hydrogens: Union[bool, str] = 'full',
+        remove_sites: Union[bool, Sequence[int]] = False,
+        reorder_from_atom_map: bool = True,
+        return_fragment_indices: bool = False,
+        return_new_bonds: bool = False,
+        filter: Optional[Callable[[str, Sequence[int], Sequence[str]], bool]] = None,
+        quiet: bool = False,
+        smiles_cache: set|None = None,
+        deduplicate: bool = True,
+) -> Iterable:
+    """
+    Enumerate a SMILES library by attaching one fragment (with repetition
+    allowed) from `fragments` onto each of `active_sites` on `scaffold`,
+    optionally expanded over every combination of `chiralities` at those
+    sites. Every product is built with a single call to
+    `McUtils.ExternalPrograms.SMILES.build_templated_smiles`, which is
+    given every fragment for this combination as its `*replacements`
+    together with whichever of `atom_replacements`/`bond_orders`/
+    `chiralities`/`stereos`/`remove_sites` the caller supplied, so a
+    single library-generation call can do the whole "attach substituents,
+    then fix up bond orders/atom identities/stereocenters, then strip the
+    binding-site atom maps" job in one pass, exactly as
+    `build_templated_smiles` is designed to.
+
+    This function only drives the two axes that make sense to expand
+    combinatorially (which fragment goes where, and which chirality/
+    stereo winding it's built with); every other `build_templated_smiles`
+    argument is forwarded verbatim to every product.
+
+    :param scaffold: the scaffold SMILES; if it doesn't yet carry the
+        atom-map numbers referenced by `active_sites`, pass `binding_sites`
+        (raw, 0-indexed atom positions) to have `build_templated_smiles`
+        assign them first
+    :param fragments: candidate fragment SMILES (each should carry a single
+        atom-map-numbered attachment atom), drawn from combinatorially
+        (with repetition) to fill `active_sites`
+    :param active_sites: the 0-indexed, atom-map-based attachment sites on
+        `scaffold` -- i.e. site `s` attaches to the atom carrying atom-map
+        number `s + 1`. Forwarded into each `build_templated_smiles`
+        replacement's own `new_bonds=[[site, 0, bond_order]]`.
+    :param chiralities: for each site, either a single winding ('CW'/'CCW')
+        or a list of windings to expand over combinatorially; forwarded to
+        `build_templated_smiles`'s `chiralities` (as `{site: winding, ...}`)
+        for each combination
+    :param stereos: forwarded verbatim to `build_templated_smiles`'s
+        `stereos`
+    :param bond_orders: forwarded verbatim to `build_templated_smiles`'s
+        `bond_orders`
+    :param atom_replacements: forwarded verbatim to `build_templated_smiles`'s
+        `atom_replacements`
+    :param attachment_bond_orders: the bond order used to attach each
+        fragment (parallel to `active_sites`; defaults to all single bonds)
+    :param binding_sites: forwarded verbatim to `build_templated_smiles`'s
+        own `active_sites` -- raw, 0-indexed atom positions on an
+        as-yet-unmapped `scaffold` to assign sequential atom-map numbers
+        to, *before* fragment attachment. Distinct from this function's
+        own `active_sites`, which always refers to atom-map numbers.
+    :param cache: an optional shared parse cache (see
+        `McUtils.ExternalPrograms.SMILES.parse_smiles_and_atom_map`); a
+        fresh one is created and reused across the whole iterator if
+        omitted
+    :param add_implicit_hydrogens: forwarded verbatim to
+        `build_templated_smiles`
+    :param remove_sites: forwarded verbatim to `build_templated_smiles`'s
+        `remove_sites` (strip the attachment atom maps from the final
+        product)
+    :param reorder_from_atom_map: forwarded verbatim to
+        `build_templated_smiles`
+    :param return_fragment_indices: forwarded verbatim to
+        `build_templated_smiles`; if set, each yielded item is a tuple
+        `(smiles, fragments)` rather than a bare string
+    :param return_new_bonds: forwarded verbatim to `build_templated_smiles`;
+        if set (together with `return_fragment_indices`), each yielded item
+        is a tuple `(smiles, fragments, new_bonds)`
+    :param filter: `filter(scaffold, active_sites, frags) -> bool`, applied
+        to each raw fragment combination before it's built
+    :return: an iterator of product SMILES strings (or tuples, if
+        `return_fragment_indices`/`return_new_bonds` is set)
+    """
+    Chem = RDMolecule.allchem_api()
+
+    if cache is None:
+        cache = {}
+    if attachment_bond_orders is None:
+        attachment_bond_orders = [1] * len(active_sites)
+
+    chirality_choices = None
+    if chiralities is not None:
+        chirality_choices = [
+            [c] if isinstance(c, str) else c
+            for c in chiralities
+        ]
+
+    if deduplicate:
+        if smiles_cache is None: smiles_cache = set()
+
+    nsites = len(active_sites)
+    with RDMolecule.quiet_errors(verbose=not quiet):
+        for frags in itertools.combinations_with_replacement(fragments, nsites):
+            if filter is not None and not filter(scaffold, active_sites, frags):
+                continue
+
+            replacements = [
+                {"functional_group": frag, "new_bonds": [[site, 0, order]]}
+                for site, frag, order in zip(active_sites, frags, attachment_bond_orders)
+            ]
+
+            chirality_dicts = (
+                [dict(zip(active_sites, c_set)) for c_set in itertools.product(*chirality_choices)]
+                if chirality_choices is not None
+                else [None]
+            )
+            for chirality_map in chirality_dicts:
+                try:
+                    new = build_templated_smiles(
+                        scaffold, *replacements,
+                        active_sites=binding_sites,
+                        chiralities=chirality_map,
+                        stereos=stereos,
+                        bond_orders=bond_orders,
+                        atom_replacements=atom_replacements,
+                        cache=cache,
+                        add_implicit_hydrogens=add_implicit_hydrogens,
+                        remove_sites=remove_sites,
+                        reorder_from_atom_map=reorder_from_atom_map,
+                        return_fragment_indices=return_fragment_indices,
+                        return_new_bonds=return_new_bonds,
+                    )
+                    if deduplicate:
+                        canon = Chem.CanonSmiles(remove_smiles_binding_sites(new, cache=cache))
+                        if canon not in smiles_cache:
+                            smiles_cache.add(canon)
+                            yield new
+                    else:
+                        yield new
+                except Chem.rdchem.AtomValenceException:
+                    continue
+
 
 Metadata = dict[str, Any]
-
-
 class SMILESAtom(NamedTuple):
     index: int
     symbol: str
