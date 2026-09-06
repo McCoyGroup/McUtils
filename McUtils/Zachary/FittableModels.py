@@ -708,7 +708,7 @@ def _kappa_from_R(R):
         return -0.4 + 1.39 * R + 0.43 / (1 - R)
     return 1 / (R**3 - 4 * R**2 + 3 * R)
 
-if sys.version_info > (3, 9):
+if sys.version_info >= (3, 10):
     dc_dec = dataclass(kw_only=True)
 else:
     dc_dec = dataclass(init=False)
