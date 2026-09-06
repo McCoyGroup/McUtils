@@ -50,3 +50,5 @@ from .CubeProp import *; from .CubeProp import __all__ as exposed
 __all__ += exposed
 from .Conformers import *; from .Conformers import __all__ as exposed
 __all__ += exposed
+from .ConformerLibrary import *; from .ConformerLibrary import __all__ as exposed
+__all__ += exposed

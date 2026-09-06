@@ -117,7 +117,7 @@ class SMILESSupplier:
     `build_line_index_smiles_database`/`package_known_supplier`. Just pass
     the archive's path as `smiles_file` and leave `line_indices` unset:
 
-        supplier = SMILESSupplier("ZINC20.lismi")
+        supplier = SMILESSupplier("ZINC20.tar")
         with supplier:
             for smi in supplier.consume_iter(upto=10):
                 print(smi)
@@ -216,7 +216,7 @@ class SMILESSupplier:
 
         `database_file` may also be a *directory* holding the same
         members as plain files -- e.g. the result of expanding a packaged
-        archive with `tar -xf whatever.lismi -C some_dir/` -- in which
+        archive with `tar -xf whatever.tar -C some_dir/` -- in which
         case everything is loaded directly as normal files (no tar
         streaming or held-open handles involved).
 
@@ -325,7 +325,7 @@ class SMILESSupplier:
         """
         Loads an *expanded* `line_index_smiles_database` -- a directory
         containing the same members a packaged archive would (as you'd
-        get by running `tar -xf whatever.lismi -C some_dir/`), directly as
+        get by running `tar -xf whatever.tar -C some_dir/`), directly as
         plain files: `LISMI_SMI_MEMBER`/`LISMI_IDX_MEMBER` are real files
         on disk, so the `.smi` file is passed straight through as a path
         (no `_FileWrapper` needed) and the index is `np.load`'d with

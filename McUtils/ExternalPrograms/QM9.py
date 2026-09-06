@@ -3,6 +3,8 @@ import os
 from .. import Devutils as dev
 import io, numpy as np
 
+from .. import Numputils as nput
+
 from .RDKit import RDMolecule
 from . import SMILES
 
@@ -113,6 +115,7 @@ class QM9:
         :return: the memory-mapped dataset
         :rtype: np.lib.npyio.NpzFile
         """
+        # return nput.load_npz_memmap(qm9_file, "r") #TODO: turn this on to use actual memapping
         # just memmapped numpy loading
         return np.load(qm9_file, mmap_mode="r")
 
