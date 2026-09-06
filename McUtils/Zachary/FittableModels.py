@@ -8,6 +8,7 @@ from __future__ import annotations
 import abc
 
 from .. import Devutils as dev
+import sys
 
 import numpy as np, scipy.optimize as opt, enum
 import json
@@ -707,11 +708,14 @@ def _kappa_from_R(R):
         return -0.4 + 1.39 * R + 0.43 / (1 - R)
     return 1 / (R**3 - 4 * R**2 + 3 * R)
 
-
+if sys.version_info > (3, 9):
+    dc_dec = dataclass(kw_only=True)
+else:
+    dc_dec = dataclass(init=False)
 # ---------------------------------------------------------------------------
 # Result objects
 # ---------------------------------------------------------------------------
-@dataclass#(kw_only=True)
+@dc_dec
 class MixtureDistribution:
     """
     A k-component mixture distribution with a (possibly heterogeneous)
@@ -991,8 +995,7 @@ class MixtureDistribution:
 
         return lo, hi
 
-
-@dataclass#(kw_only=True)
+@dc_dec
 class FittedMixtureDistribution(MixtureDistribution):
     """
     A `MixtureDistribution` that also remembers how it was fit, so it can
