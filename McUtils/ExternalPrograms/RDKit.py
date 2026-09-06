@@ -5010,7 +5010,7 @@ class RDMolecule(ExternalMolecule):
         if conf_id is None:
             conf_id = self.mol.GetId()
         mol = Chem.Mol(self.rdmol, confId=conf_id)
-        conf = mol.GetConformer(0)
+        conf = mol.GetConformer(conf_id)
 
         with self.quiet_errors():
             cur_geom = np.array(conf.GetPositions()).reshape(-1, 3)
