@@ -781,14 +781,29 @@ class ExternalProgramsTest(TestCase):
         os.environ["TORCH_COMPILE_DISABLE"] = "1"
 
         from Psience.Molecools import Molecule
+        from McUtils.Scaffolding import NumpyTreeArchive
 
         samp = TestManager.test_data('a2bbb-substances.smi')
-        confs, _ = generate_conformer_ensemble(
-            Molecule.from_string,
-            SMILESSupplier(samp).find_smi(68)
-        )
+        conf_lib = {}
+        for i in [33, 68, 77]:
+            smi = SMILESSupplier(samp).find_smi(i)
+            confs, engs = generate_conformer_ensemble(
+                Molecule.from_string,
+                smi
+            )
+            conf_lib[str(i)] = {
+                'smi':smi,
+                'energies':engs,
+                'coord':[c.coords for c in confs]
+            }
+
+        import io
+        buf = io.BytesIO()
+        NumpyTreeArchive.from_tree(conf_lib).save(buf)
+        print(len(buf.getvalue()))
 
         print(confs)
+
 
         confs, energies = generate_conformer_ensemble(
             Molecule.from_string,
@@ -803,3 +818,4 @@ class ExternalProgramsTest(TestCase):
 
         print(confs)
         print(energies)
+
