@@ -541,7 +541,10 @@ class ExternalProgramsTest(TestCase):
             vendor.write_database_index(db_file, overwrite=True)
             vendor2 = SMILESSupplier.from_line_index_database(db_file)
             with vendor2:
-                print(vendor2.find_smi(88))
+                self.assertEqual(
+                    vendor2.find_smi(88),
+                    vendor.find_smi(88)
+                )
 
     @validationTest
     def test_QChemJob(self):
@@ -775,7 +778,7 @@ class ExternalProgramsTest(TestCase):
             print(t.__name__)
             t(self)
 
-    @debugTest
+    @validationTest
     def test_ConformerEnsembles(self):
         import os
         os.environ["TORCH_COMPILE_DISABLE"] = "1"
@@ -819,3 +822,113 @@ class ExternalProgramsTest(TestCase):
         print(confs)
         print(energies)
 
+    @validationTest
+    def test_ConformerLibraryFromTree(self):
+        import io
+
+        os.environ["TORCH_COMPILE_DISABLE"] = "1"
+
+        from Psience.Molecools import Molecule
+
+        samp = TestManager.test_data('a2bbb-substances.smi')
+        conf_lib = {}
+        raw_confs = {}
+        for i in [33, 68, 77]:
+            smi = SMILESSupplier(samp).find_smi(i)
+            confs, engs = generate_conformer_ensemble(Molecule.from_string, smi, energy_evaluator='rdkit')
+            raw_confs[str(i)] = confs
+            conf_lib[str(i)] = {
+                'smi': smi,
+                'coord': [c.coords for c in confs],
+                'energy':engs
+            }
+
+        lib = ConformerLibrary(conf_lib)
+        self.assertEqual(len(lib), 3)
+        self.assertEqual(set(lib.keys()), {'33', '68', '77'})
+
+        rec = lib['68']
+        print(rec)
+        self.assertEqual(rec['smi'], conf_lib['68']['smi'])
+        self.assertEqual(len(rec['coord']), len(raw_confs['68']))
+        for a, c in zip(rec['coord'], raw_confs['68']):
+            np.testing.assert_array_equal(np.asarray(a), c.coords)
+
+        # round trip through `save`/`from_nparchive`, same as
+        # `NumpyTreeArchive.from_tree(conf_lib).save(buf)` directly
+        buf = io.BytesIO()
+        lib.save(buf)
+        self.assertGreater(len(buf.getvalue()), 0)
+
+        buf.seek(0)
+        reloaded = ConformerLibrary.from_nparchive(buf)
+        self.assertEqual(len(reloaded), 3)
+        self.assertEqual(reloaded.get_smiles('33'), conf_lib['33']['smi'])
+        self.assertEqual(len(reloaded['77']['coord']), len(raw_confs['77']))
+
+    @validationTest
+    def test_CreateSmilesIteratorArchive(self):
+        os.environ["TORCH_COMPILE_DISABLE"] = "1"
+
+        from Psience.Molecools import Molecule
+
+        samp = TestManager.test_data('a2bbb-substances.smi')
+        supp = SMILESSupplier(samp)
+        smis = [supp.find_smi(i) for i in [33, 68, 77]]
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            target = os.path.join(tmp_dir, "conformers.npz")
+            lib, _ = ConformerLibrary.create_smiles_iterator_archive(
+                smis, target,
+                loader=Molecule.from_string
+            )
+
+            # the in-memory library returned directly is already usable...
+            self.assertEqual(len(lib), 3)
+            self.assertEqual(lib.get_smiles('0'), smis[0])
+            self.assertGreater(len(lib['1']['coord']), 0)
+
+            # ...and so is a fresh read of what actually landed on disk
+            reloaded = ConformerLibrary.from_nparchive(target)
+            self.assertEqual(len(reloaded), 3)
+            self.assertEqual(reloaded.get_smiles('2'), smis[2])
+
+    # -- the "mostly SMILES" paradigm ----------------------------------------
+
+    @debugTest
+    def test_ConformerLibraryFromSMILESDatabase(self):
+        from Psience.Molecools import Molecule
+
+        samp = TestManager.test_data('a2bbb-substances.smi')
+
+        with tempfile.TemporaryDirectory() as tmp_dir:
+            db_file = os.path.join(tmp_dir, "substances.tar")
+            with SMILESSupplier(samp) as (supp, _):
+                supp.write_database_index(db_file)
+
+            lib = ConformerLibrary.from_smidb(db_file, loader=lambda s:Molecule.from_string(s['smi'], 'smi'))
+            direct = SMILESSupplier(samp)
+
+            for i in [33, 68, 77]:
+                self.assertEqual(lib.get_smiles(i), direct.find_smi(i))
+                print(lib[i])
+                # self.assertEqual(lib[i]['smi'], direct.find_smi(i))
+                # self.assertIsNone(lib[i]['coord'])  # no metadata_arrays packaged
+
+    # -- QM9 ------------------------------------------------------------------
+
+    @inactiveTest
+    def test_ConformerLibraryFromQM9(self):
+        lib = ConformerLibrary.qm9('qm9.npz')
+        lib.get_smiles(0)
+
+    @inactiveTest
+    def test_ConformerLibraryFromGEOM(self):
+        lib = ConformerLibrary.geom('geom_path')
+        lib.get_smiles(0)
+        # self.assertEqual(len(lib), 2)
+        # self.assertEqual(lib.get_smiles(0), 'C')
+        #
+        # rec = lib[1]
+        # self.assertEqual(rec['smi'], 'CC')
+        # np.testing.assert_array_equal(rec['coord'], coords1)
