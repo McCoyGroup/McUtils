@@ -252,9 +252,9 @@ print("tree depth:", len(paths.subtrees))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-cfbfc3" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-cfbfc3"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-acb9d1" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-acb9d1"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-cfbfc3" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-acb9d1" markdown="1">
  - [lemherCodes](#lemherCodes)
 - [YT](#YT)
 - [PrimeFactorization](#PrimeFactorization)
@@ -278,9 +278,9 @@ print("tree depth:", len(paths.subtrees))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-10d2a5" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-10d2a5"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-56dd2c" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-56dd2c"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-10d2a5" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-56dd2c" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
