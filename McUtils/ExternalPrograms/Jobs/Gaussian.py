@@ -466,7 +466,7 @@ class GaussianJob(ExternalProgramJob):
         :param opts: the job options
         """
         for o in strs:
-            rt, o = GaussianRouteBlock.check_canon(o)
+            rt, o = GaussianRouteBlock.check_canon(o, True)
             if rt:
                 opts[o] = True
             else:
