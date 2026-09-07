@@ -866,7 +866,7 @@ class ExternalProgramsTest(TestCase):
         self.assertEqual(reloaded.get_smiles('33'), conf_lib['33']['smi'])
         self.assertEqual(len(reloaded['77']['coord']), len(raw_confs['77']))
 
-    @validationTest
+    @debugTest
     def test_CreateSmilesIteratorArchive(self):
         os.environ["TORCH_COMPILE_DISABLE"] = "1"
 
@@ -895,7 +895,7 @@ class ExternalProgramsTest(TestCase):
 
     # -- the "mostly SMILES" paradigm ----------------------------------------
 
-    @debugTest
+    @validationTest
     def test_ConformerLibraryFromSMILESDatabase(self):
         from Psience.Molecools import Molecule
 
