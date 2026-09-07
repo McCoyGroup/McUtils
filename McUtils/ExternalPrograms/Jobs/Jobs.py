@@ -274,6 +274,8 @@ class OptionsBlock(JobBlock):
             opts = [[opts], {}]
         elif hasattr(opts, 'items'):
             opts = [[], opts]
+        elif not hasattr(opts, '__len__'):
+            opts = [[str(opts)], {}]
         elif not (len(opts) == 2 and hasattr(opts[1], 'items') and not hasattr(opts[0], 'items')):
             opts = [opts, {}]
         return opts
