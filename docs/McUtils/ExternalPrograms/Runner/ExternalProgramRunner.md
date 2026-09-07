@@ -61,8 +61,8 @@ Configure an external-program wrapper around a binary and persistent runtime def
 prep_dir(self, dir): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L110)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L110?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L121)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L121?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -80,8 +80,8 @@ Placeholder hook for subclasses to populate a working directory before launching
 subprocess_run(cls, binary, input_file, **subprocess_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L124)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L124?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L135)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L135?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -102,11 +102,11 @@ Run `binary input_file`, resolving a local binary to an absolute path before cal
 <a id="McUtils.ExternalPrograms.Runner.ExternalProgramRunner.run_job" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
-run_job(cls, binary, job, dir=None, dir_prefix=None, dir_suffix=None, mode='w', runner=None, prep_dir=None, prep_job=None, prep_results=None, return_auxiliary_files=True, prefix=None, suffix=None, delete=True, raise_errors=True, **subprocess_opts): 
+run_job(cls, binary, job, dir=None, dir_prefix=None, dir_suffix=None, mode='w', runner=None, prep_dir=None, prep_job=None, prep_results=None, return_auxiliary_files=True, copy_auxiliary_files=False, prefix=None, suffix=None, delete=True, raise_errors=True, **subprocess_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L184)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L184?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L211)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L211?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -168,8 +168,8 @@ Materialize a job in a named temporary input file, execute the external binary i
 run(self, job, dir=None, dir_prefix=None, dir_suffix=None, mode=None, runner=None, prep_dir=None, prep_job=None, prep_results=None, return_auxiliary_files=None, prefix=None, suffix=None, delete=None, raise_errors=None, **job_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L307)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L307?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L344)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L344?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
