@@ -346,6 +346,7 @@ class ExternalProgramRunner:
             mode=None,
             runner=None, prep_dir=None, prep_job=None, prep_results=None,
             return_auxiliary_files=None,
+            copy_auxiliary_files=None,
             prefix=None, suffix=None, delete=None,
             raise_errors=None,
             **job_opts):
@@ -410,6 +411,7 @@ class ExternalProgramRunner:
                 mode=mode,
                 runner=runner, prep_dir=prep_dir, prep_job=prep_job, prep_results=prep_results,
                 return_auxiliary_files=return_auxiliary_files,
+                copy_auxiliary_files=copy_auxiliary_files,
                 prefix=prefix, suffix=suffix, delete=delete,
                 raise_errors=raise_errors
             ).items() if v is not None
