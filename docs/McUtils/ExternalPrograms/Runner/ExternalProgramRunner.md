@@ -165,7 +165,7 @@ Materialize a job in a named temporary input file, execute the external binary i
 
 <a id="McUtils.ExternalPrograms.Runner.ExternalProgramRunner.run" class="docs-object-method">&nbsp;</a> 
 ```python
-run(self, job, dir=None, dir_prefix=None, dir_suffix=None, mode=None, runner=None, prep_dir=None, prep_job=None, prep_results=None, return_auxiliary_files=None, prefix=None, suffix=None, delete=None, raise_errors=None, **job_opts): 
+run(self, job, dir=None, dir_prefix=None, dir_suffix=None, mode=None, runner=None, prep_dir=None, prep_job=None, prep_results=None, return_auxiliary_files=None, copy_auxiliary_files=None, prefix=None, suffix=None, delete=None, raise_errors=None, **job_opts): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/ExternalPrograms/Runner/ExternalProgramRunner.py#L344)/
