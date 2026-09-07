@@ -1,5 +1,5 @@
 
-import subprocess, os, tempfile as tf
+import subprocess, os, tempfile as tf, shutil
 
 __all__ = [
     "ExternalProgramRunner"
@@ -45,7 +45,7 @@ class ExternalProgramRunner:
         self.opts = dict(self.default_opts, prefix=prefix, suffix=suffix, delete=delete, **runtime_opts)
 
     class _write_dir:
-        def __init__(self, dir=None, dir_prefix=None, dir_suffix=None, delete=True):
+        def __init__(self, dir=None, chdir=False, dir_prefix=None, dir_suffix=None, delete=True):
             """
             **LLM Docstring**
 
@@ -67,6 +67,8 @@ class ExternalProgramRunner:
             :rtype: None
             """
             self.dir = dir
+            self.chdir = chdir
+            self.dir_stack = []
             self._temp_dirs = []
             self.delete = delete
             self.opts = {'prefix':dir_prefix, 'suffix':dir_suffix}
@@ -79,11 +81,18 @@ class ExternalProgramRunner:
             :return: return the fixed directory, or create and enter a `TemporaryDirectory` when no directory was supplied.
             :rtype: str
             """
+            if self.chdir:
+                self.dir_stack.append(os.getcwd())
             if self.dir is None:
                 td = tf.TemporaryDirectory(**self.opts)
                 self._temp_dirs.append(td)
-                return td.__enter__()
+                dir = td.__enter__()
+                if self.chdir:
+                    os.chdir(dir)
+                return dir
             else:
+                if self.chdir:
+                    os.chdir(self.dir)
                 return self.dir
         def __exit__(self, exc_type, exc_val, exc_tb):
             """
@@ -106,6 +115,8 @@ class ExternalProgramRunner:
             if self.dir is None:
                 td = self._temp_dirs.pop()
                 td.__exit__(exc_type, exc_val, exc_tb)
+            if self.chdir:
+                os.chdir(self.dir_stack.pop())
 
     def prep_dir(self, dir):
         """
@@ -180,6 +191,22 @@ class ExternalProgramRunner:
             else:
                 return file
 
+    @classmethod
+    def _copy_aux_file(cls, dir, file, delete):
+        test = os.path.join(dir, file)
+        if os.path.isfile(test):
+            file = test
+        if os.path.isfile(file):
+            test2 = os.path.abspath(os.path.basename(file))
+            test = os.path.abspath(file)
+            if test == test2: return file
+            if delete:
+                os.rename(file, test2)
+                return test2
+            else:
+                shutil.copy(file, test2)
+                return test2
+
     blacklist_files = [".DS_Store", ".git"]
     @classmethod
     def run_job(cls,
@@ -188,6 +215,7 @@ class ExternalProgramRunner:
                 mode='w',
                 runner=None, prep_dir=None, prep_job=None, prep_results=None,
                 return_auxiliary_files=True,
+                copy_auxiliary_files=False,
                 prefix=None, suffix=None, delete=True,
                 raise_errors=True,
                 **subprocess_opts
@@ -274,17 +302,26 @@ class ExternalProgramRunner:
                 if return_auxiliary_files is True:
                     for file in os.listdir(dir):
                         if file not in existing_files and file not in cls.blacklist_files:
-                            results[file] = cls._load_aux_file(dir, file, delete)
+                            if copy_auxiliary_files:
+                                results[file] = cls._copy_aux_file(dir, file, delete)
+                            else:
+                                results[file] = cls._load_aux_file(dir, file, delete)
                 elif isinstance(return_auxiliary_files, dict):
                     for k,v in return_auxiliary_files.items():
-                        data = cls._load_aux_file(dir, v.format(name=inp.name), delete)
+                        if copy_auxiliary_files:
+                            data = cls._copy_aux_file(dir, v.format(name=inp.name), delete)
+                        else:
+                            data = cls._load_aux_file(dir, v.format(name=inp.name), delete)
                         if data is not None:
                             results[k] = data
                 elif return_auxiliary_files:
                     if isinstance(return_auxiliary_files, str):
                         return_auxiliary_files = [return_auxiliary_files]
                     for v in return_auxiliary_files:
-                        data = cls._load_aux_file(dir, v.format(name=inp.name), delete)
+                        if copy_auxiliary_files:
+                            data = cls._copy_aux_file(dir, v.format(name=inp.name), delete)
+                        else:
+                            data = cls._load_aux_file(dir, v.format(name=inp.name), delete)
                         if data is not None:
                             results[v] = data
                 err = res.stderr.decode().strip()
