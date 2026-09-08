@@ -523,6 +523,7 @@ class GaussianJob(ExternalProgramJob):
         :rtype: dict
         """
         base_params = super().get_params()
+        base_params['title'] = base_params.get('title', '')
         for k,b in base_params.items():
             if k not in self.non_blank_line_terminated:
                 base_params[k] = b + "\n"
