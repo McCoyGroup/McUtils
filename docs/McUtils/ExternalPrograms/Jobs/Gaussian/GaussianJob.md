@@ -112,8 +112,8 @@ except the ones that must not be blank-line terminated.
 optimization(cls, *strs, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L532)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L532?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L533)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L533?message=Update%20Docs)]
 </div>
 Construct an ORCA geometry-optimization job (adds the `Opt` simple
 keyword). Other keywords, `basis_set`, and `level_of_theory` pass
@@ -146,17 +146,17 @@ through unchanged.
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-a6f261" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-a6f261"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-11ae6b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-11ae6b"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-a6f261" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-11ae6b" markdown="1">
  - [GaussianJobWriter](#GaussianJobWriter)
 - [LinkedModeScan](#LinkedModeScan)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-0bdff2" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-0bdff2"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-be5ffc" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-be5ffc"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-0bdff2" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-be5ffc" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
