@@ -464,9 +464,9 @@ JHTML.Div(scene, dynamic=False).display()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-3c4689" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-3c4689"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-31ffb3" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-31ffb3"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-3c4689" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-31ffb3" markdown="1">
  - [HTML](#HTML)
 - [Styles](#Styles)
 - [WidgetConstruction](#WidgetConstruction)
@@ -475,9 +475,9 @@ JHTML.Div(scene, dynamic=False).display()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-0d84c7" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-0d84c7"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-716473" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-716473"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-0d84c7" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-716473" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
