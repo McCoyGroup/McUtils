@@ -81,19 +81,20 @@ class ExternalProgramRunner:
             :return: return the fixed directory, or create and enter a `TemporaryDirectory` when no directory was supplied.
             :rtype: str
             """
+            cur_dir = os.getcwd()
             if self.chdir:
-                self.dir_stack.append(os.getcwd())
+                self.dir_stack.append(cur_dir)
             if self.dir is None:
                 td = tf.TemporaryDirectory(**self.opts)
                 self._temp_dirs.append(td)
                 dir = td.__enter__()
                 if self.chdir:
                     os.chdir(dir)
-                return dir
+                return cur_dir, dir
             else:
                 if self.chdir:
                     os.chdir(self.dir)
-                return self.dir
+                return cur_dir, self.dir
         def __exit__(self, exc_type, exc_val, exc_tb):
             """
             **LLM Docstring**
@@ -192,13 +193,16 @@ class ExternalProgramRunner:
                 return file
 
     @classmethod
-    def _copy_aux_file(cls, dir, file, delete):
+    def _copy_aux_file(cls, dir, file, delete, targ_dir):
         test = os.path.join(dir, file)
         if os.path.isfile(test):
             file = test
         if os.path.isfile(file):
-            test2 = os.path.abspath(os.path.basename(file))
-            test = os.path.abspath(file)
+            dir = os.path.dirname(dir)
+            if os.path.abspath(targ_dir) == dir:
+                return file
+            file = os.path.abspath(file)
+            test2 = file.replace(dir, targ_dir, 1)
             if test == test2: return file
             if delete:
                 os.rename(file, test2)
@@ -278,7 +282,7 @@ class ExternalProgramRunner:
         """
 
         results = {}
-        with cls._write_dir(dir=dir, dir_prefix=dir_prefix, dir_suffix=dir_suffix) as dir:
+        with cls._write_dir(dir=dir, dir_prefix=dir_prefix, dir_suffix=dir_suffix) as (cur_dir, dir):
             if prep_dir is not None:
                 prep_dir(dir)
             with tf.NamedTemporaryFile(dir=dir, mode=mode, prefix=prefix, suffix=suffix, delete=False) as inp:
@@ -303,13 +307,13 @@ class ExternalProgramRunner:
                     for file in os.listdir(dir):
                         if file not in existing_files and file not in cls.blacklist_files:
                             if copy_auxiliary_files:
-                                results[file] = cls._copy_aux_file(dir, file, delete)
+                                results[file] = cls._copy_aux_file(dir, file, delete, cur_dir)
                             else:
                                 results[file] = cls._load_aux_file(dir, file, delete)
                 elif isinstance(return_auxiliary_files, dict):
                     for k,v in return_auxiliary_files.items():
                         if copy_auxiliary_files:
-                            data = cls._copy_aux_file(dir, v.format(name=inp.name), delete)
+                            data = cls._copy_aux_file(dir, v.format(name=inp.name), delete, cur_dir)
                         else:
                             data = cls._load_aux_file(dir, v.format(name=inp.name), delete)
                         if data is not None:
@@ -319,7 +323,7 @@ class ExternalProgramRunner:
                         return_auxiliary_files = [return_auxiliary_files]
                     for v in return_auxiliary_files:
                         if copy_auxiliary_files:
-                            data = cls._copy_aux_file(dir, v.format(name=inp.name), delete)
+                            data = cls._copy_aux_file(dir, v.format(name=inp.name), delete, cur_dir)
                         else:
                             data = cls._load_aux_file(dir, v.format(name=inp.name), delete)
                         if data is not None:
