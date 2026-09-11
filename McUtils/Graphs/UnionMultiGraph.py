@@ -194,7 +194,7 @@ class UnionMultiGraph(EdgeGraph):
             for k, c in enumerate(self.components or [])
         ]
 
-    def plot(self, method='default', *, component_colors=None, weight_linewidth=(0.5, 4.0),
+    def plot(self, method='default', *, component_colors=None, weight_linewidth=(.01, .1),
              edge_offset=None, **opts):
         """
         Like `EdgeGraph.plot`, but when this union carries component
