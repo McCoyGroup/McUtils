@@ -194,27 +194,53 @@ class UnionMultiGraph(EdgeGraph):
             for k, c in enumerate(self.components or [])
         ]
 
-    def plot(self, method='default', *, component_colors=None, weight_linewidth=(.01, .1),
+    def plot(self, method='default', *, graph_styles=None, component_colors=None, weight_linewidth=(.01, .1),
              edge_offset=None, **opts):
         """
         Like `EdgeGraph.plot`, but when this union carries component
-        provenance, every contributing edge is drawn on its own -- colored
-        by its component and widthed by its own (rescaled) weight -- instead
-        of collapsing same-pair edges into one pooled line. Node placement
-        still comes from the inherited `layout` (pooled per `pool_layout`);
-        only drawing is per-edge here. Edges that share a node pair are
-        fanned out by `edge_offset` (default: `0.6 *` the plotted node
-        radius) so they stay individually visible rather than overlapping
-        exactly. An explicit `edge_style`/`edges` in `opts` is left
-        untouched and simply passed through.
+        provenance, every contributing edge is drawn on its own -- styled
+        per its component and widthed by its own (rescaled) weight --
+        instead of collapsing same-pair edges into one pooled line. Node
+        placement still comes from the inherited `layout` (pooled per
+        `pool_layout`); only drawing is per-edge here. Edges that share a
+        node pair are fanned out by `edge_offset` (default: `0.6 *` the
+        plotted node radius) so they stay individually visible rather than
+        overlapping exactly. An explicit `edge_style`/`edges` in `opts` is
+        left untouched and simply passed through.
+
+        Also pins the plotted range to a square box (rather than
+        `GraphPlotter`'s default of padding each axis independently), so
+        the box's own aspect ratio matches how these are usually displayed
+        (square previews/thumbnails); the actual layout coordinates are
+        never touched, only how much margin surrounds them. Skipped if you
+        pass your own `plot_range` or `figure`.
+
+        :param graph_styles: optional list of per-component style dicts, one entry per
+            `self.components` in order (e.g. `{'stroke': 'firebrick', 'dashing': True}`
+            edges use `'stroke'` for color, matching the underlying `Line` primitive).
+            Used as each contributing edge's base style; a component's own
+            `'stroke-width'` overrides the weight-based scaling below, so one subgraph
+            can stay a fixed width regardless of its weights. Missing entries (`None`,
+            a short list, or an omitted `'stroke'`) fall back to `component_colors`/the
+            default palette.
         """
         if not self.components or 'edge_style' in opts or 'edges' in opts:
             return super().plot(method, **opts)
 
         from .Layout import GraphPlotter
         colors = component_colors or self.default_palette
+        node_radius = opts.get('node_radius', GraphPlotter.subthemes['default']['node_radius'])
         if edge_offset is None:
-            edge_offset = 0.6 * opts.get('node_radius', GraphPlotter.subthemes['default']['node_radius'])
+            edge_offset = 0.6 * np.max(node_radius)
+
+        # pin a concrete layout spec (with an explicit seed for stochastic methods
+        # like kamada_kawai) so the range computed below and the positions
+        # `super().plot()` actually draws agree -- otherwise each independently
+        # re-runs the layout and can land on two different placements
+        method_spec = dict(method) if dev.is_dict_like(method) else {'method': method}
+        if method_spec.get('method', 'default') in ('default', 'kamada_kawai'):
+            method_spec.setdefault('seed', int(np.random.SeedSequence().generate_state(1)[0]))
+        layout_kwargs = {k: v for k, v in method_spec.items() if k != 'method'}
 
         raw = [
             (int(i), int(j), k, float(w) * s)
@@ -241,7 +267,34 @@ class UnionMultiGraph(EdgeGraph):
 
         def edge_style(idx):
             k, w = meta[idx]
-            width = lo + (hi - lo) * (w - wmin) / span
-            return {'color': colors[k % len(colors)], 'stroke-width': f'{width:.3f}px'}
+            sty = dict(graph_styles[k]) if (graph_styles and k < len(graph_styles) and graph_styles[k]) else {}
+            sty.setdefault('stroke', colors[k % len(colors)])
+            if 'stroke-width' not in sty:
+                width = lo + (hi - lo) * (w - wmin) / span
+                sty['stroke-width'] = f'{width:.3f}px'
+            return sty
 
-        return super().plot(method, edges=edge_list, edge_style=edge_style, **opts)
+        if 'plot_range' not in opts and 'figure' not in opts:
+            coords = self.layout(method_spec['method'], **layout_kwargs)
+            xy = np.array(list(coords.values()))
+            # `GraphPlotter.plot()` recenters/rotates onto principal axes by default
+            # (even for a flat 2D layout) via `_apply_pose`; compute the range from
+            # that same posed geometry, or a rotation could tip a node past a
+            # bounding box sized from the pre-pose coordinates
+            posed_xy = GraphPlotter(self, xy)._apply_pose(xy, pose=opts.get('pose'))[:, :2]
+            opts['plot_range'] = self._square_plot_range(
+                posed_xy, node_radius, opts.get('plot_range_padding', 'auto')
+            )
+
+        return super().plot(method_spec, edges=edge_list, edge_style=edge_style, **opts)
+
+    @staticmethod
+    def _square_plot_range(xy, node_radius, plot_range_padding):
+        """A square `[[xmin, xmax], [ymin, ymax]]` box centered on `xy`, covering
+        whichever axis needs more room -- so the box's own aspect ratio is 1:1
+        regardless of the layout's, matching a plain square preview."""
+        lo, hi = xy.min(axis=0), xy.max(axis=0)
+        center = (lo + hi) / 2
+        pad = float(np.max(node_radius)) * 1.5 if plot_range_padding == 'auto' else float(plot_range_padding)
+        side = max(float(np.max(hi - lo)) / 2, 1e-9) + pad
+        return [[center[0] - side, center[0] + side], [center[1] - side, center[1] + side]]
