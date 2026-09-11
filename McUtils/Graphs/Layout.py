@@ -708,13 +708,19 @@ class GraphPlotter:
         by_index = edge_style if isinstance(edge_style, (list, tuple)) else None
         by_pair = edge_style if isinstance(edge_style, dict) else {}
 
-        for e_i, (i, j, _data) in enumerate(edges):
+        for e_i, (i, j, offset) in enumerate(edges):
             pi, pj = xy[i], xy[j]
             d = pj - pi
             L = np.linalg.norm(d)
             if L < 1e-8:
                 continue
             u = d / L
+            if offset:
+                # a numeric edge `data` value is treated as a perpendicular nudge,
+                # so parallel/multi-edges between the same node pair fan out
+                # instead of rendering exactly on top of one another
+                perp = np.array([-u[1], u[0]]) * offset
+                pi, pj = pi + perp, pj + perp
 
             # trim back to the node disk so the line doesn't run under the glyph;
             # only trim at an endpoint whose node is actually drawn
