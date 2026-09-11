@@ -855,14 +855,29 @@ class SVGFigure:
             opts = dict(viewBox=(l, b, r - l, t - b)) | opts
 
         if 'aspect_ratio' in opts:
-            if opts.get('height') is None:
-                opts['width'] = opts.get('width', '100%')
-                opts['height'] = 'auto'
-                opts['preserveAspectRatio'] = "y"
-            elif opts.get('width') is None:
-                opts['height'] = opts.get('height', '100%')
-                opts['width'] = 'auto'
-                opts['preserveAspectRatio'] = "x"
+            # `aspect_ratio` is only meant as an internal flag here -- it
+            # never popped off `opts`, so its raw value ('equal', not a va
+            # CSS <ratio>) was leaking straight through into `style="aspec
+            # ratio:equal;"` on the <svg> itself. That's a bogus declarati
+            # some renderers silently drop it, but at least one apparently
+            # doesn't and was instead forcing the element's own box to 1:1
+            # regardless of its actual (non-square) container -- which is
+            # exactly the wrong kind of "aspect ratio" fix for an svg that
+            # already uses `preserveAspectRatio` to keep its *content* cor
+            ar = opts.pop('aspect_ratio')
+            # fill whatever box this <svg> is embedded in, and let
+            # preserveAspectRatio (not `width`/`height`) be the thing that
+            # the content undistorted -- 'meet' scales the viewBox uniform
+            # min(box_width/viewBox_width, box_height/viewBox_height), i.e
+            # grows to whichever axis is more constraining and letterboxes
+            # other, so the content is never cropped even if the box's own
+            # aspect ratio doesn't match the viewBox's
+            if ar == 'equal':
+                opts.setdefault('width', '100%')
+                opts.setdefault('height', '100%')
+                opts.setdefault('preserveAspectRatio', 'xMinYMin meet')
+            else:
+                raise NotImplementedError(f"unknown aspect ratio {ar}")
 
         return SVG.Svg(
             *els,

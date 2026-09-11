@@ -6894,7 +6894,19 @@ class InternalCoordinateGraph:
         for k, idx in enumerate(internals):
             g = groups.setdefault(len(idx), {'edges': [], 'weights': []})
             g['edges'].append((idx[0], idx[-1]))
-            g['weights'].append(1.0 if weights is None else weights[k])
+            g['weights'].append(
+                1 / len(idx)**2
+                    if weights is None else
+                weights.get(
+                    k,
+                    weights.get(
+                        self.default_tuple_names.get(len(idx)),
+                        1 / len(idx) ** 2
+                    )
+                )
+                    if dev.is_dict_like(weights) else
+                weights[k]
+            )
 
         lengths = sorted(groups)
         if names is None:

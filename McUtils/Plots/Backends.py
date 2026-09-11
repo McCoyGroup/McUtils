@@ -8395,11 +8395,61 @@ class SVGAxes(GraphicsAxes):
 
     style_mapping = {
         'edgecolor':'stroke',
+        'edgecolors':'stroke',
         'lw':'stroke-width',
         'color':'fill',
         'line_color':'stroke',
-        'line_width':'stroke-width'
+        'line_width':'stroke-width',
+        'line_thickness':'stroke-width'
     }
+    named_dashing = {
+        # (on, off) as a fraction of the drawn line's length, since a fixed
+        # absolute dasharray only looks right when coordinates happen to be
+        # in pixel-ish units
+        'dashed': (.06, .04),
+        'dotted': (.02, .03)
+    }
+    @staticmethod
+    def path_length(points):
+        """
+        **LLM Docstring**
+
+        Return the total length of a polyline/segment through the given points.
+
+        :param points: the points
+        :type points: np.ndarray
+        :return: the path length
+        :rtype: float
+        """
+        points = np.asanyarray(points)
+        if len(points) < 2:
+            return 0
+        return float(np.sum(np.linalg.norm(np.diff(points, axis=0), axis=-1)))
+    def prep_dasharray(self, dashing, length=None):
+        """
+        **LLM Docstring**
+
+        Resolve a dash spec into an SVG `stroke-dasharray` value.
+
+        :param dashing: `True`, a named style (`"dashed"`/`"dotted"`, scaled by
+            `length`), or an explicit dasharray string/sequence of on/off lengths
+            (used as-is, unscaled)
+        :param length: the drawn line's length, used to scale named styles
+        :type length: float | None
+        :return: the `stroke-dasharray` value
+        :rtype: str
+        """
+        if dashing is True:
+            dashing = 'dashed'
+        if isinstance(dashing, str) and dashing in self.named_dashing:
+            on, off = self.named_dashing[dashing]
+            if length is None:
+                length = 1
+            return f"{on * length:.4g},{off * length:.4g}"
+        elif isinstance(dashing, str):
+            return dashing
+        else:
+            return ",".join(str(d) for d in dashing)
     def prep_styles(self, styles):
         """
         **LLM Docstring**
@@ -8423,7 +8473,10 @@ class SVGAxes(GraphicsAxes):
             self.style_mapping.get(k, k):v
             for k,v in styles.items()
         }
-    def draw_line(self, points, stroke=None, line_color=None, color=None, **styles):
+    def draw_line(self, points, stroke=None, line_color=None, color=None,
+                  edgecolors=None, line_thickness=None,
+                  line_style=None, dashing=None,
+                  **styles):
         """
         **LLM Docstring**
 
@@ -8433,14 +8486,28 @@ class SVGAxes(GraphicsAxes):
         :param stroke: the `stroke`
         :param line_color: the `line_color`
         :param color: the `color`
+        :param edgecolors: alias for `line_color` (matches the other backends)
+        :param line_thickness: alias for `stroke-width` (matches the other backends)
+        :param line_style: a named dash style (`"dashed"`/`"dotted"`), scaled to the
+            drawn line's length, as accepted by the other backends
+        :param dashing: an explicit `stroke-dasharray` spec (`True`, a dasharray
+            string, or a sequence of on/off lengths), takes precedence over `line_style`
         :param styles: the styling options
         """
         if line_color is None:
             line_color = color
             color = None
-        styles = self.prep_styles(styles | {'line_color':line_color, 'color':color})
+        if line_color is None:
+            line_color = edgecolors
+        if dashing is None and dev.str_in(line_style, self.named_dashing):
+            dashing = line_style
+        styles = self.prep_styles(styles | {
+            'line_color':line_color, 'color':color, 'line_thickness':line_thickness
+        })
         if stroke is not None:
             styles['stroke'] = stroke
+        if dashing is not None:
+            styles['stroke-dasharray'] = self.prep_dasharray(dashing, length=self.path_length(points))
         points = np.asanyarray(points)
         if len(points) > 2:
             return self.figure.add_polyline(points=points, **styles)

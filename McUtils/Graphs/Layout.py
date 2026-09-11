@@ -973,7 +973,7 @@ class GraphPlotter:
         if figure is None:
             fig_opts = dict(
                 backend='svg', image_size=image_size, aspect_ratio='equal',
-                frame=False, background=background,
+                frame=False, background=background, padding=0,
                 plot_range=self._plot_range_2d(xy, radii, plot_range_padding),
             )
             fig_opts.update(graphics_opts)
