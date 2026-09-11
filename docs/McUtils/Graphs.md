@@ -49,12 +49,12 @@ Simple graph tools, could be in misc but I can imagine building these out
 [TreeSentinels](Graphs/Trees/TreeSentinels.md)   
 </div>
    <div class="col" markdown="1">
-[merge_sets](Graphs/utils/merge_sets.md)   
+[UnionMultiGraph](Graphs/UnionMultiGraph/UnionMultiGraph.md)   
 </div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-   
+[merge_sets](Graphs/utils/merge_sets.md)   
 </div>
    <div class="col" markdown="1">
    

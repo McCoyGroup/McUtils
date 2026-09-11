@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.Styling.PlotLegend">PlotLegend</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L71)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L71?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L72)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L72?message=Update%20Docs)]
 </div>
 
 
@@ -28,8 +28,8 @@ marker_synonyms: dict
 __init__(self, components, **styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L80)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L80?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling.py#L81)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L81?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -47,8 +47,8 @@ styles and filling in defaults.
 check_styles(cls, styles): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L99)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L99?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L100)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L100?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -63,8 +63,8 @@ Raise if any style keys aren't among the known legend styles.
 could_be_legend(cls, bits): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L113)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L113?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L114)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L114?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -82,8 +82,8 @@ scalar/string).
 construct(cls, bits): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L132)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L132?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L133)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L133?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -102,8 +102,8 @@ handles.
 construct_line_marker(cls, lw=4, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L153)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L153?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L154)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L154?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -122,8 +122,8 @@ Build a line legend handle (a matplotlib `Line2D`).
 construct_dot_marker(cls, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L167)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L167?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L168)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L168?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -140,8 +140,8 @@ Build a dot/patch legend handle (a matplotlib `Patch`).
 load_constructors(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L179)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L179?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L180)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L180?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -156,8 +156,8 @@ Return the mapping of marker names to their legend-handle constructors.
 canonicalize_bit(cls, marker='-', **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L194)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L194?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L195)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L195?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -176,8 +176,8 @@ dispatching to the appropriate constructor).
 __repr__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling/PlotLegend.py#L212)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling/PlotLegend.py#L212?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/Styling/PlotLegend.py#L213)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling/PlotLegend.py#L213?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -237,7 +237,7 @@ Return a representation showing the components and options.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/Styling/PlotLegend.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/Styling/PlotLegend.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L71?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/Styling.py#L72?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

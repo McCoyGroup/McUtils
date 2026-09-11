@@ -19,6 +19,7 @@ A graph mapping out the connections between a set of atoms based on the given se
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  ```python
+default_tuple_names: dict
 GraphCheckpoint: GraphCheckpoint
 atoms: member_descriptor
 internals: member_descriptor
@@ -137,13 +138,42 @@ Return the bond graph implied by the graph’s current coordinates and triangula
     > The requested coordinate, graph, triangulation, derivative, or conversion data described above.
 
 
+<a id="McUtils.Coordinerds.Internals.InternalCoordinateGraph.get_multigraph" class="docs-object-method">&nbsp;</a> 
+```python
+get_multigraph(self, labels=None, internals=None, weights=None, names=None, scales=None, combine=None, pool_layout=True, allow_self_loops=False): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6866)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6866?message=Update%20Docs)]
+</div>
+Build a union multigraph from a flat collection of index tuples that
+mix several coordinate types -- bonds `(i, j)`, angles `(i, j, k)`,
+dihedrals `(i, j, k, l)`, or any other tuple length -- the way
+internal-coordinate specs are usually handed around. Tuple *length*
+determines which component graph a tuple's edge lands in; the edge
+itself always runs between the tuple's first and last index, so
+`(i, j, k)` contributes edge `(i, k)` to the "angles" component, etc.
+Repeated `(i, k)` pairs (e.g. two different angles sharing endpoints)
+stay distinguishable -- `plot` draws every tuple's edge separately.
+  - `index_tuples`: `Any`
+    > an iterable of `(i, ..., l)` index tuples of mixed length
+  - `weights`: `Any`
+    > optional per-tuple weights, same order/length as `index_tuples`
+    (e.g. bond lengths, angle values); defaults to 1.0 per tuple
+  - `names`: `Any`
+    > optional override for the length -> component-name mapping
+    (defaults to `default_tuple_names`, falling back to `"{n}-tuples"`)
+  - `:returns`: `UnionMultiGraph`
+    > the union multigraph
+
+
 <a id="McUtils.Coordinerds.Internals.InternalCoordinateGraph.checkpoint" class="docs-object-method">&nbsp;</a> 
 ```python
 checkpoint(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6923)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6923?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6968)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6968?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -157,8 +187,8 @@ Return a context manager for making temporary changes to the internal-coordinate
 add_internals(self, internals): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6934)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6934?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6979)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6979?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -174,8 +204,8 @@ Add coordinates to the graph, update triangulation and bond data, and refresh co
 remove_internals(self, internals): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L7018)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L7018?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L7063)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L7063?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 

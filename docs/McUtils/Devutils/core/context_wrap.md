@@ -1,8 +1,8 @@
 ## <a id="McUtils.Devutils.core.context_wrap">context_wrap</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L629)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L629?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L631)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L631?message=Update%20Docs)]
 </div>
 
 
@@ -24,8 +24,8 @@
 __init__(self, obj): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L630)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L630?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core.py#L632)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L632?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -40,8 +40,8 @@ its own `__enter__`/`__exit__` when present.
 __enter__(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core/context_wrap.py#L640)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core/context_wrap.py#L640?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core/context_wrap.py#L642)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core/context_wrap.py#L642?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -56,8 +56,8 @@ manager).
 __exit__(self, exc_type, exc_val, exc_tb): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core/context_wrap.py#L653)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core/context_wrap.py#L653?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Devutils/core/context_wrap.py#L655)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core/context_wrap.py#L655?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -123,7 +123,7 @@ Exit the wrapped object's context, if it is a context manager.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Devutils/core/context_wrap.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Devutils/core/context_wrap.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L629?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Devutils/core.py#L631?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
