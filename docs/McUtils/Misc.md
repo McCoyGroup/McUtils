@@ -161,17 +161,17 @@ print("Numba state:", NumbaState)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-e52684" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-e52684"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-f83c64" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-f83c64"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-e52684" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-f83c64" markdown="1">
  - [Symbolics](#Symbolics)
 - [TeXWriter](#TeXWriter)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-5dac7a" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-5dac7a"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-911690" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-911690"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-5dac7a" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-911690" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

@@ -1290,9 +1290,9 @@ print("first positions:", first)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-8d7e38" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-8d7e38"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-cd4f48" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-cd4f48"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-8d7e38" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-cd4f48" markdown="1">
  - [VecOps](#VecOps)
 - [OptimizeClassic](#OptimizeClassic)
 - [BoysLocalize](#BoysLocalize)
@@ -1344,9 +1344,9 @@ print("first positions:", first)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-b01307" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-b01307"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-e75215" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-e75215"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-b01307" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-e75215" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

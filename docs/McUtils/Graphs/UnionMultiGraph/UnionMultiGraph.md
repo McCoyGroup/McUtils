@@ -134,22 +134,38 @@ List of `{'name', 'color'}` entries, one per component, for building a legend.
 
 <a id="McUtils.Graphs.UnionMultiGraph.UnionMultiGraph.plot" class="docs-object-method">&nbsp;</a> 
 ```python
-plot(self, method='default', *, component_colors=None, weight_linewidth=(0.5, 4.0), edge_offset=None, **opts): 
+plot(self, method='default', *, graph_styles=None, component_colors=None, weight_linewidth=(0.01, 0.1), edge_offset=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
 [[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Graphs/UnionMultiGraph/UnionMultiGraph.py#L197)/
 [edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Graphs/UnionMultiGraph/UnionMultiGraph.py#L197?message=Update%20Docs)]
 </div>
 Like `EdgeGraph.plot`, but when this union carries component
-provenance, every contributing edge is drawn on its own -- colored
-by its component and widthed by its own (rescaled) weight -- instead
-of collapsing same-pair edges into one pooled line. Node placement
-still comes from the inherited `layout` (pooled per `pool_layout`);
-only drawing is per-edge here. Edges that share a node pair are
-fanned out by `edge_offset` (default: `0.6 *` the plotted node
-radius) so they stay individually visible rather than overlapping
-exactly. An explicit `edge_style`/`edges` in `opts` is left
-untouched and simply passed through.
+provenance, every contributing edge is drawn on its own -- styled
+per its component and widthed by its own (rescaled) weight --
+instead of collapsing same-pair edges into one pooled line. Node
+placement still comes from the inherited `layout` (pooled per
+`pool_layout`); only drawing is per-edge here. Edges that share a
+node pair are fanned out by `edge_offset` (default: `0.6 *` the
+plotted node radius) so they stay individually visible rather than
+overlapping exactly. An explicit `edge_style`/`edges` in `opts` is
+left untouched and simply passed through.
+
+Also pins the plotted range to a square box (rather than
+`GraphPlotter`'s default of padding each axis independently), so
+the box's own aspect ratio matches how these are usually displayed
+(square previews/thumbnails); the actual layout coordinates are
+never touched, only how much margin surrounds them. Skipped if you
+pass your own `plot_range` or `figure`.
+  - `graph_styles`: `Any`
+    > optional list of per-component style dicts, one entry per
+    `self.components` in order (e.g. `{'stroke': 'firebrick', 'dashing': True}`
+    edges use `'stroke'` for color, matching the underlying `Line` primitive).
+    Used as each contributing edge's base style; a component's own
+    `'stroke-width'` overrides the weight-based scaling below, so one subgraph
+    can stay a fixed width regardless of its weights. Missing entries (`None`,
+    a short list, or an omitted `'stroke'`) fall back to `component_colors`/the
+    default palette.
  </div>
 </div>
 
