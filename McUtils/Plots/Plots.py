@@ -6,6 +6,7 @@ from typing import Callable
 
 from .Graphics import Graphics, Graphics3D, GraphicsGrid
 from .Backends import GraphicsAxes, GraphicsFigure
+from .Styling import ThemeManager
 from .. import Devutils as dev
 from .. import Numputils as nput
 from . import Colors as colops
@@ -24,7 +25,7 @@ __all__ = [
     "plot_multi"
 ]
 
-__reload_hook__ = [".Graphics", ".Backends"]
+__reload_hook__ = [".Graphics", ".Backends", ".Styling"]
 
 ######################################################################################################
 #
@@ -307,7 +308,7 @@ class Plot(Graphics):
                  *params,
                  method=None,
                  figure=None, axes=None, subplot_kw=None,
-                 plot_style=None, theme=None,
+                 plot_style=None, theme=None, palette=None,
                  display_format=None,
                  postprocessor=None,
                  invert_axes=False,
@@ -332,9 +333,16 @@ class Plot(Graphics):
         :type subplot_kw: dict | None
         :param colorbar: whether to use a colorbar or what options to pass to the colorbar
         :type colorbar: None | bool | dict
+        :param palette: a `ColorPalette` name (or spec) to use for the axes' color cycle;
+            a shorthand that gets merged into `theme` as `axes.prop_cycle.color`
+        :type palette: str | list | None
         :param opts: options to be fed in when initializing the Graphics
         :type opts:
         """
+
+        if palette is not None:
+            base_theme = theme if theme is not None else self.default_style.get('theme')
+            theme = ThemeManager.merge_theme_spec(base_theme, axes={'palette': palette})
 
         self.graphics = None
 

@@ -10,7 +10,7 @@ import numpy as np
 from .. import Devutils as dev
 from .. import Numputils as nput
 from .. import Iterators as itut
-from ..Graphs import EdgeGraph, pebble_rigidity, statistically_rigid, uniquely_rigid
+from ..Graphs import EdgeGraph, pebble_rigidity, statistically_rigid, uniquely_rigid, UnionMultiGraph
 
 __all__ = [
     "canonicalize_internal",
@@ -6861,6 +6861,51 @@ class InternalCoordinateGraph:
                 return graph, (dist_set, funs)
             else:
                 return graph
+
+    default_tuple_names = {2: "bonds", 3: "angles", 4: "dihedrals"}
+    def get_multigraph(self, labels=None, internals=None, weights=None, names=None,
+                          scales=None, combine=None, pool_layout=True, allow_self_loops=False):
+        """
+        Build a union multigraph from a flat collection of index tuples that
+        mix several coordinate types -- bonds `(i, j)`, angles `(i, j, k)`,
+        dihedrals `(i, j, k, l)`, or any other tuple length -- the way
+        internal-coordinate specs are usually handed around. Tuple *length*
+        determines which component graph a tuple's edge lands in; the edge
+        itself always runs between the tuple's first and last index, so
+        `(i, j, k)` contributes edge `(i, k)` to the "angles" component, etc.
+        Repeated `(i, k)` pairs (e.g. two different angles sharing endpoints)
+        stay distinguishable -- `plot` draws every tuple's edge separately.
+
+        :param index_tuples: an iterable of `(i, ..., l)` index tuples of mixed length
+        :param weights: optional per-tuple weights, same order/length as `index_tuples`
+            (e.g. bond lengths, angle values); defaults to 1.0 per tuple
+        :param names: optional override for the length -> component-name mapping
+            (defaults to `default_tuple_names`, falling back to `"{n}-tuples"`)
+        :return: the union multigraph
+        :rtype: UnionMultiGraph
+        """
+        if labels is None:
+            labels = np.arange(self.atoms)
+
+        if internals is None:
+            internals = self.internals
+
+        groups = {}
+        for k, idx in enumerate(internals):
+            g = groups.setdefault(len(idx), {'edges': [], 'weights': []})
+            g['edges'].append((idx[0], idx[-1]))
+            g['weights'].append(1.0 if weights is None else weights[k])
+
+        lengths = sorted(groups)
+        if names is None:
+            names = [self.default_tuple_names.get(n, f"{n}-tuples") for n in lengths]
+        graphs = [
+            {'edges': np.array(groups[n]['edges'], dtype=int).reshape(-1, 2),
+             'weights': np.array(groups[n]['weights'], dtype=float)}
+            for n in lengths
+        ]
+        return UnionMultiGraph.from_graphs(labels, graphs, names=names, scales=scales, combine=combine,
+                               pool_layout=pool_layout, allow_self_loops=allow_self_loops)
 
     class GraphCheckpoint:
         def __init__(self, g, reset=True):

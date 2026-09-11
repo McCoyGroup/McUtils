@@ -7,7 +7,7 @@ from .. import Numputils as nput
 from .. import Iterators as itut
 from ..Graphs import EdgeGraph
 
-from .Internals import canonicalize_internal
+from .Internals import canonicalize_internal, InternalCoordinateGraph
 
 __all__ = [
     "zmatrix_unit_convert",
@@ -38,7 +38,8 @@ __all__ = [
     "complex_zmatrix",
     "graph_backbone_zmatrix",
     "segmented_complex_backbone_zmatrix",
-    "enforce_required_zmatrix_coordinates"
+    "enforce_required_zmatrix_coordinates",
+    "zmatrix_internals_graph"
 ]
 
 
@@ -2965,3 +2966,6 @@ def segmented_complex_backbone_zmatrix(bond_graph: EdgeGraph,
                 check_attachment_points=check_attachment_points,
                 validate_additions=validate
             )
+
+def zmatrix_internals_graph(zm):
+    return InternalCoordinateGraph(extract_zmatrix_internals(zm))

@@ -7,5 +7,7 @@ from .EdgeGraph import *; from .EdgeGraph import __all__ as exposed
 __all__ += exposed
 from .Trees import *; from .Trees import __all__ as exposed
 __all__ += exposed
+from .UnionMultiGraph import *; from .UnionMultiGraph import __all__ as exposed
+__all__ += exposed
 from .utils import *; from .utils import __all__ as exposed
 __all__ += exposed

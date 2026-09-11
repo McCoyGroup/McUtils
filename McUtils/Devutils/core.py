@@ -576,9 +576,9 @@ def resolve_key_collision(a, b, k, merge_iterables=True):
         if isinstance(a[k], set):
             if not isinstance(b[k], set):
                 return b[k]
-            a = set(a[k])
-            a.update(b)
-            return a
+            s = set(a[k])
+            s.update(b[k])
+            return s
         elif is_list_like(a[k]):
             if not is_list_like(b[k]):
                 return type(a[k])(
@@ -592,6 +592,8 @@ def resolve_key_collision(a, b, k, merge_iterables=True):
             return type(b[k])(
                 itertools.chain([a[k]], b[k])
             )
+        else:
+            return b[k]
     else:
         return b[k]
 

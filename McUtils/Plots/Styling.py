@@ -5,6 +5,7 @@ import contextlib
 from collections import deque
 from .Backends import GraphicsBackend
 from .Colors import ColorPalette
+from .. import Devutils as dev
 
 __all__ = [
     "Styled",
@@ -265,7 +266,7 @@ class ThemeManager:
             ([],),
             {
                 'axes': {
-                    'prop_cycle':{'color': ['#001C7F', '#017517', '#8C0900', '#7600A1', '#B8860B', '#006374']},
+                    'prop_cycle':{'color': "default"},
                     'labelsize':13
                 },
                 'patch': {'facecolor': '#001C7F'},
@@ -302,20 +303,17 @@ class ThemeManager:
         self.context_manager = None
         self.current_theme = None
     @classmethod
-    def from_spec(cls, theme, backend=None):
+    def parse_theme_spec(cls, theme):
         """
-        **LLM Docstring**
-
-        Build a `ThemeManager` (or a `NoThemeManager` for `None`) from a flexible theme
-        specification (a name, a properties dict, or a `(names, properties)` pair).
+        Normalizes a flexible theme specification (`None`, a name, a properties dict, or
+        a `(names, properties)` pair) into a `[theme_names, theme_properties]` pair.
 
         :param theme: the theme specification
-        :param backend: the graphics backend
-        :return: the theme manager
-        :rtype: ThemeManager | NoThemeManager
+        :return: the `[theme_names, theme_properties]` pair
+        :rtype: list
         """
         if theme is None:
-            return NoThemeManager()
+            return [[], {}]
         if isinstance(theme, str):
             theme = [theme]
         elif isinstance(theme, dict):
@@ -334,7 +332,40 @@ class ThemeManager:
         else:
             theme_names = []
             theme_properties = {}
+        return [list(theme_names), dict(theme_properties)]
+    @classmethod
+    def from_spec(cls, theme, backend=None):
+        """
+        **LLM Docstring**
+
+        Build a `ThemeManager` (or a `NoThemeManager` for `None`) from a flexible theme
+        specification (a name, a properties dict, or a `(names, properties)` pair).
+
+        :param theme: the theme specification
+        :param backend: the graphics backend
+        :return: the theme manager
+        :rtype: ThemeManager | NoThemeManager
+        """
+        if theme is None:
+            return NoThemeManager()
+        theme_names, theme_properties = cls.parse_theme_spec(theme)
         return cls(*theme_names, backend=backend, **theme_properties)
+    @classmethod
+    def merge_theme_spec(cls, theme, **style_overrides):
+        """
+        Layers style overrides (e.g. a `palette`, nested under `axes`) onto an existing
+        theme specification, preserving any base theme names and existing styles.
+        Handy for exposing a one-off style (like `palette=...`) as a keyword argument
+        without clobbering the rest of a caller's theme.
+
+        :param theme: the base theme specification (`None`, a name, a dict, or a
+            `(names, properties)` pair)
+        :param style_overrides: style properties to deep-merge over the theme's properties
+        :return: the merged `[theme_names, theme_properties]` spec
+        :rtype: list
+        """
+        theme_names, theme_properties = cls.parse_theme_spec(theme)
+        return [theme_names, dev.merge_dicts(theme_properties, style_overrides)]
     def _test_rcparam(self, k):
         """
         **LLM Docstring**
@@ -350,45 +381,48 @@ class ThemeManager:
     @classmethod
     def canonicalize_theme_props(cls, props):
         """
-        **LLM Docstring**
-
-        Recursively normalize theme properties, expanding a `palette` entry into a color
-        `prop_cycle`.
+        Recursively normalizes theme properties, resolving anywhere a color list can be
+        given as a named `ColorPalette` instead of an explicit list.
+        Supports a `palette` shorthand key (expanded into `prop_cycle.color`) and a
+        `prop_cycle.color` entry given directly as a palette name.
 
         :param props: the theme properties
+        :type props: dict
         :return: the canonicalized properties
+        :rtype: dict
         """
-        if isinstance(props, dict):
-            new_props = {}
-            for k,v in props.items():
-                if isinstance(v, dict):
-                    new_props[k] = cls.canonicalize_theme_props(v)
-                elif k == 'palette':
-                    colors = ColorPalette(v).color_strings
-                    new_props['prop_cyle'] = dict(
-                        new_props.get('prop_cycle'),
-                        color=colors
-                    )
-        else:
+        if not isinstance(props, dict):
             return props
+        new_props = {}
+        for k,v in props.items():
+            if k == 'palette':
+                colors = list(ColorPalette(v).color_strings)
+                new_props['prop_cycle'] = dict(new_props.get('prop_cycle', {}), color=colors)
+            elif k == 'prop_cycle' and isinstance(v, dict):
+                cycle = cls.canonicalize_theme_props(v)
+                if isinstance(cycle.get('color'), str):
+                    cycle['color'] = list(ColorPalette(cycle['color']).color_strings)
+                new_props['prop_cycle'] = dict(new_props.get('prop_cycle', {}), **cycle)
+            elif isinstance(v, dict):
+                new_props[k] = cls.canonicalize_theme_props(v)
+            else:
+                new_props[k] = v
+        return new_props
 
     def __enter__(self):
         """
-        **LLM Docstring**
-
-        Enter the theme context: resolve, validate, and canonicalize the theme, then
-        apply it via the backend's theme context.
+        Enters the theme context: resolves the theme, validates its names against the
+        backend, canonicalizes its styles (resolving any named `ColorPalette` color
+        lists), and applies the result via the backend's theme context.
 
         :return: the entered theme context
         """
-        theme = self.resolve_theme(None, *self.main_theme_names, **self.extra_styles)
-        name_list = self.validate_theme(*theme)
-        theme_props = self.canonicalize_theme_props(theme)
-        # name_list = list(theme[0])
-        # opts = {k:v for k,v in theme[1].items() if self._test_rcparam(k)}
+        theme_names, theme_styles = self.resolve_theme(None, *self.main_theme_names, **self.extra_styles)
+        name_list = self.validate_theme(theme_names, theme_styles)
+        theme_props = self.canonicalize_theme_props(theme_styles)
 
-        self.context_manager = self.backend.theme_context(name_list, theme[1])
-        self.current_theme = theme_props
+        self.context_manager = self.backend.theme_context(name_list, theme_props)
+        self.current_theme = [name_list, theme_props]
         self.context_manager.__enter__()
         return self
         # don't currently support any other backends...
@@ -436,7 +470,11 @@ class ThemeManager:
     @classmethod
     def resolve_theme(self, theme_name, *base_themes, **extra_styles):
         """
-        Resolves a theme so that it only uses strings for built-in styles
+        Resolves a theme so that it only uses strings for built-in styles.
+        Composition is a deep merge (via `dev.merge_dicts`), so overriding a nested
+        style (e.g. `axes={'palette': ...}`) layers onto a base theme's other nested
+        styles (e.g. `axes.labelsize`) instead of replacing the whole section.
+
         :return:
         :rtype:
         """
@@ -466,8 +504,8 @@ class ThemeManager:
                 themes = tuple(x for y in theme_stack for x in y)
                 styles = {}
                 for s in style_stack:
-                    styles.update(s)
-                styles.update(extras)
+                    styles = dev.merge_dicts(styles, s)
+                styles = dev.merge_dicts(styles, extras)
                 self._resolved_theme_cache[theme_name] = [themes, styles]
             else:
                 themes = (theme_name,)
@@ -484,13 +522,13 @@ class ThemeManager:
                 if b in self.extra_themes:
                     t, s = self.resolve_theme(b)
                     themes = tuple(t) + themes
-                    styles.update(s)
+                    styles = dev.merge_dicts(styles, s)
                 else:
                     remainder_themes.append(b)
             if len(remainder_themes) > 0:
                 themes = (remainder_themes,) + themes
 
-        styles.update(extra_styles)
+        styles = dev.merge_dicts(styles, extra_styles)
 
         return [themes, styles]
     def validate_theme(self, theme_names, theme_styless):
