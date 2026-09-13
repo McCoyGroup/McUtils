@@ -344,7 +344,18 @@ for working in Jupyter (primarily JupterLab) environments
 [NotebookReader](Jupyter/NotebookTools/NotebookReader.md)   
 </div>
    <div class="col" markdown="1">
+[NotebookWriter](Jupyter/NotebookTools/NotebookWriter.md)   
+</div>
+   <div class="col" markdown="1">
 [DisplayImage](Jupyter/ImageTools/DisplayImage.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+   
+</div>
+   <div class="col" markdown="1">
+   
 </div>
    <div class="col" markdown="1">
    
@@ -464,20 +475,26 @@ JHTML.Div(scene, dynamic=False).display()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-fd8edc" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-fd8edc"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-705790" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-705790"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-fd8edc" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-705790" markdown="1">
  - [HTML](#HTML)
 - [Styles](#Styles)
 - [WidgetConstruction](#WidgetConstruction)
 - [WidgetInteractivity](#WidgetInteractivity)
 - [SVG](#SVG)
+- [NotebookWriterFromMarkdownBlocks](#NotebookWriterFromMarkdownBlocks)
+- [NotebookWriterToJSON](#NotebookWriterToJSON)
+- [NotebookWriterNonPythonFenceStaysMarkdown](#NotebookWriterNonPythonFenceStaysMarkdown)
+- [NotebookWriterNoCodeFences](#NotebookWriterNoCodeFences)
+- [NotebookWriterCustomCodeLanguages](#NotebookWriterCustomCodeLanguages)
+- [NotebookWriterWriteToDisk](#NotebookWriterWriteToDisk)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-ec7430" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ec7430"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-982a0f" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-982a0f"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ec7430" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-982a0f" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -486,6 +503,21 @@ will be necessary for all situations.
 All tests are wrapped in a test class
 ```python
 class JupyterTests(TestCase):
+    simple_markdown = """# Title
+Some description text.
+
+```python
+import numpy as np
+x = np.arange(10)
+print(x)
+```
+
+More text after.
+
+```bash
+echo hello
+```
+"""
 ```
 
  </div>
@@ -553,6 +585,108 @@ a {
                 SVG.Rect(x=0, y=0, width=10, height=10),
             )
         uuh.display()
+```
+
+#### <a name="NotebookWriterFromMarkdownBlocks">NotebookWriterFromMarkdownBlocks</a>
+```python
+    def test_NotebookWriterFromMarkdownBlocks(self):
+        blocks = NotebookWriter.from_markdown(self.simple_markdown)
+
+        self.assertEqual([b[0] for b in blocks], ['markdown', 'code', 'markdown', 'markdown'])
+        self.assertTrue(blocks[0][1].startswith('# Title'))
+        self.assertEqual(blocks[1][1], 'import numpy as np\nx = np.arange(10)\nprint(x)')
+        self.assertIn('More text after.', blocks[2][1])
+        self.assertIn('```bash', blocks[3][1])
+```
+
+#### <a name="NotebookWriterToJSON">NotebookWriterToJSON</a>
+```python
+    def test_NotebookWriterToJSON(self):
+        writer = NotebookWriter(NotebookWriter.from_markdown(self.simple_markdown))
+        nb = writer.to_json()
+
+        self.assertEqual(nb['nbformat'], 4)
+        self.assertIn('kernelspec', nb['metadata'])
+
+        cells = nb['cells']
+        self.assertEqual(len(cells), 4)
+
+        self.assertEqual(cells[0]['cell_type'], 'markdown')
+        self.assertTrue(''.join(cells[0]['source']).startswith('# Title'))
+
+        self.assertEqual(cells[1]['cell_type'], 'code')
+        self.assertEqual(
+            ''.join(cells[1]['source']),
+            'import numpy as np\nx = np.arange(10)\nprint(x)'
+        )
+        self.assertIsNone(cells[1]['execution_count'])
+        self.assertEqual(cells[1]['outputs'], [])
+
+        self.assertEqual(cells[2]['cell_type'], 'markdown')
+        self.assertIn('More text after.', ''.join(cells[2]['source']))
+```
+
+#### <a name="NotebookWriterNonPythonFenceStaysMarkdown">NotebookWriterNonPythonFenceStaysMarkdown</a>
+```python
+    def test_NotebookWriterNonPythonFenceStaysMarkdown(self):
+        writer = NotebookWriter(NotebookWriter.from_markdown(self.simple_markdown))
+        cells = writer.to_json()['cells']
+
+        # the `bash` fence isn't a recognized code language, so it should
+        # remain inline inside a markdown cell rather than becoming a code cell
+        last_cell = cells[-1]
+        self.assertEqual(last_cell['cell_type'], 'markdown')
+        self.assertIn('```bash', ''.join(last_cell['source']))
+        self.assertEqual(sum(1 for c in cells if c['cell_type'] == 'code'), 1)
+
+        nb_dir = os.path.expanduser('~/Documents/Notebooks/tmp')
+        root_dir = os.path.expanduser('~/Documents/')
+        os.makedirs(nb_dir, exist_ok=True)
+        writer.open_temp(8844, notebook_directory=nb_dir, root_dir=root_dir, browser='safari')
+```
+
+#### <a name="NotebookWriterNoCodeFences">NotebookWriterNoCodeFences</a>
+```python
+    def test_NotebookWriterNoCodeFences(self):
+        blocks = NotebookWriter.from_markdown("# Just Text\n\nNo code here, just prose.\n")
+        cells = NotebookWriter(blocks).to_json()['cells']
+        self.assertEqual(len(cells), 1)
+        self.assertEqual(cells[0]['cell_type'], 'markdown')
+```
+
+#### <a name="NotebookWriterCustomCodeLanguages">NotebookWriterCustomCodeLanguages</a>
+```python
+    def test_NotebookWriterCustomCodeLanguages(self):
+        md = """# Header
+
+```julia
+println("hi")
+```
+"""
+        blocks = NotebookWriter.from_markdown(md, code_languages=['julia'])
+        cells = NotebookWriter(blocks).to_json()['cells']
+        code_cells = [c for c in cells if c['cell_type'] == 'code']
+        self.assertEqual(len(code_cells), 1)
+        self.assertEqual(''.join(code_cells[0]['source']), 'println("hi")')
+```
+
+#### <a name="NotebookWriterWriteToDisk">NotebookWriterWriteToDisk</a>
+```python
+    def test_NotebookWriterWriteToDisk(self):
+        with tempfile.NamedTemporaryFile(suffix=".ipynb") as nb_file:
+            nb_path = nb_file.name
+        try:
+            writer = NotebookWriter(NotebookWriter.from_markdown(self.simple_markdown))
+            ret = writer.write(nb_path)
+            self.assertEqual(ret, nb_path)
+            self.assertTrue(os.path.exists(nb_path))
+
+            reader = NotebookReader(nb_path)
+            self.assertEqual(len(reader.cell_list()), 4)
+            self.assertEqual(reader.get_notebook_name(), "Title")
+        finally:
+            if os.path.exists(nb_path):
+                os.remove(nb_path)
 ```
 
  </div>
