@@ -1,12 +1,15 @@
 import os
 import re
 import json
+import uuid
+import tempfile
 from .. import Devutils as dev
 from .JHTML import JHTML
 from ..ExternalPrograms import PILInterface
 
 __all__ = [
-    "NotebookReader"
+    "NotebookReader",
+    "NotebookWriter"
 ]
 
 class NotebookReader:
@@ -220,3 +223,190 @@ class NotebookReader:
             return None
         else:
             return cls(nb_files[0])
+
+    _mode_routes = {
+        "notebook": "notebooks",
+        "lab": "lab/tree"
+    }
+
+    @classmethod
+    def open_notebook(cls, file, port, mode='lab', host='localhost', scheme='http',
+                      root_dir=None, token=None, new=0, browser=None):
+        """
+        Opens `file` in a browser tab pointed at an already-running Jupyter server.
+
+        :param file: path to the notebook file to open
+        :param port: the port the running Jupyter server is listening on
+        :param mode: `"notebook"` to open with the classic Notebook interface,
+            `"lab"` to open with JupyterLab
+        :param host: the host the server is running on
+        :param scheme: the URL scheme (`"http"`/`"https"`)
+        :param root_dir: the directory `file` is served relative to (i.e. the
+            directory the Jupyter server was started in); defaults to `os.getcwd()`
+        :param token: an auth token to append to the URL, if the server requires one
+        :param new: forwarded to `webbrowser.open` (`0`=same window if possible,
+            `1`=new window, `2`=new tab)
+        :return: the URL that was opened
+        """
+        import webbrowser
+        from urllib.parse import quote
+
+        mode = mode.lower()
+        if mode not in cls._mode_routes:
+            raise ValueError(f"unrecognized Jupyter mode {mode!r} (expected one of {tuple(cls._mode_routes)})")
+        route = cls._mode_routes[mode]
+
+        if root_dir is None:
+            root_dir = os.getcwd()
+        rel_path = os.path.relpath(os.path.abspath(file), os.path.abspath(root_dir))
+
+        url = f"{scheme}://{host}:{port}/{route}/{quote(rel_path)}"
+        if token is not None:
+            url += f"?token={quote(token)}"
+
+        if browser is not None:
+            if not hasattr(browser, "open"):
+                browser = webbrowser.get(browser)
+        else:
+            browser = webbrowser
+        browser.open(url, new=new)
+
+        return url
+
+class NotebookWriter:
+    """
+    Converts a block of Markdown text into Jupyter notebook JSON (nbformat v4)
+    that can be written to disk and opened directly in Jupyter.
+
+    Fenced code blocks (e.g. ` ```python ... ``` `) whose language tag is in
+    `code_languages` become code cells; everything else (including fenced blocks
+    in other languages, like `bash` or `json`) stays inline in a markdown cell.
+    """
+
+    code_fence_pattern = re.compile(
+        r"^[ \t]*```(?P<lang>\S*)[ \t]*\n(?P<code>.*?)\n[ \t]*```[ \t]*$",
+        re.DOTALL | re.MULTILINE
+    )
+    default_code_languages = {"python", "py", ""}
+    default_kernelspecs = {
+        "python": {"display_name": "Python 3", "language": "python", "name": "python3"}
+    }
+
+    def __init__(self, blocks, notebook_directory=None):
+        self.blocks = blocks
+        self._notebook_directory = notebook_directory
+
+    @classmethod
+    def from_markdown(cls, markdown, code_languages=None):
+        if code_languages is None:
+            code_languages = cls.default_code_languages
+        blocks = []
+        pos = 0
+        for m in cls.code_fence_pattern.finditer(markdown):
+            if m.start() > pos:
+                chunk = markdown[pos:m.start()]
+                if chunk.strip():
+                    blocks.append(("markdown", chunk))
+            lang = m.group("lang").strip().lower()
+            if lang in code_languages:
+                blocks.append(("code", m.group("code")))
+            else:
+                blocks.append(("markdown", markdown[m.start():m.end()]))
+            pos = m.end()
+        tail = markdown[pos:]
+        if tail.strip():
+            blocks.append(("markdown", tail))
+        return blocks
+
+    @classmethod
+    def make_cell(cls, cell_type, source):
+        cell = {
+            "cell_type": cell_type,
+            "metadata": {},
+            "source": source.splitlines(keepends=True)
+        }
+        if cell_type == "code":
+            cell["execution_count"] = None
+            cell["outputs"] = []
+        return cell
+
+    def to_json(self, kernelspec=None, language="python", language_info=None, nbformat_minor=4):
+        cells = [self.make_cell(cell_type, source) for cell_type, source in self.blocks]
+
+        metadata = {}
+        if kernelspec is None:
+            kernelspec = self.default_kernelspecs.get(language)
+        if kernelspec is not None:
+            metadata["kernelspec"] = kernelspec
+        if language_info is not None:
+            metadata["language_info"] = language_info
+
+        return {
+            "cells": cells,
+            "metadata": metadata,
+            "nbformat": 4,
+            "nbformat_minor": nbformat_minor
+        }
+
+    def write(self, file, **opts):
+        dev.write_json(file, self.to_json(**opts), indent=1)
+        return file
+
+    _shared_notebook_directory = None
+    @classmethod
+    def get_default_notebook_directory(cls):
+        """
+        Resolves the `TemporaryDirectory` shared by all `NotebookWriter` instances
+        that don't specify their own `notebook_directory`, creating it the first
+        time it's needed.
+        """
+        if cls._shared_notebook_directory is None:
+            cls._shared_notebook_directory = tempfile.TemporaryDirectory()
+        return cls._shared_notebook_directory.name
+
+    @property
+    def notebook_directory(self):
+        if self._notebook_directory is None:
+            self._notebook_directory = self.get_default_notebook_directory()
+        return self._notebook_directory
+    @notebook_directory.setter
+    def notebook_directory(self, value):
+        self._notebook_directory = value
+
+    def open_temp(self, port, mode='lab', name=None, host='localhost', scheme='http',
+                  token=None, new=0, root_dir=None, notebook_directory=None, browser=None, **opts):
+        """
+        Writes this notebook into `self.notebook_directory` (a shared temp
+        directory by default) and opens it against an already-running Jupyter
+        server via `NotebookReader.open_notebook`.
+
+        :param port: the port the running Jupyter server is listening on
+        :param mode: `"notebook"` or `"lab"`
+        :param name: file name (without or with `.ipynb`) to write to within
+            `self.notebook_directory`; a unique name is generated if omitted
+        :param host: the host the server is running on
+        :param scheme: the URL scheme (`"http"`/`"https"`)
+        :param token: an auth token to append to the URL, if the server requires one
+        :param new: forwarded to `webbrowser.open`
+        :param opts: forwarded to `write`/`to_json` (e.g. `kernelspec`, `language`, `language_info`)
+        :return: the URL that was opened
+        """
+        if name is None:
+            name = f"notebook-{uuid.uuid4().hex}.ipynb"
+        elif not name.endswith(".ipynb"):
+            name = name + ".ipynb"
+
+        if notebook_directory is None:
+            notebook_directory = self.notebook_directory
+        file = os.path.join(notebook_directory, name)
+        self.write(file, **opts)
+
+        if root_dir is None:
+            root_dir = notebook_directory
+
+        return NotebookReader.open_notebook(
+            file, port,
+            mode=mode, host=host, scheme=scheme,
+            root_dir=root_dir, token=token, new=new,
+            browser=browser
+        )
