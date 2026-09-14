@@ -1,7 +1,7 @@
 # <a id="McUtils.Combinatorics.Sequences.prime_iter">prime_iter</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Combinatorics/Sequences.py#L179)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Combinatorics/Sequences.py#L179?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Combinatorics/Sequences.py#L191)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Combinatorics/Sequences.py#L191?message=Update%20Docs)]
 </div>
 
 ```python
@@ -12,6 +12,10 @@ prime_iter(primes=None):
 Yield progressively longer lists of prime numbers.
 
 The generator first yields prefixes of the provided seed list. It then searches odd candidates between the current largest prime and twice that value, accepting the first candidate not divisible by the existing primes other than `2`. Each yield is the full prime list accumulated so far.
+
+`2` is special-cased: since it's the only even prime, the "odd
+candidates in (p, 2p)" scan used for every other prime would search the
+empty range `(4, 4)` and incorrectly raise.
   - `primes`: `iterable[int] | None`
     > optional initial ordered prime sequence
   - `:returns`: `collections.abc.Iterator[list[int]]`
@@ -66,7 +70,7 @@ The generator first yields prefixes of the provided seed list. It then searches 
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Combinatorics/Sequences/prime_iter.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Combinatorics/Sequences/prime_iter.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Combinatorics/Sequences.py#L179?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Combinatorics/Sequences.py#L191?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

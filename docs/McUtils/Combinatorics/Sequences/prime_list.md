@@ -1,23 +1,44 @@
 # <a id="McUtils.Combinatorics.Sequences.prime_list">prime_list</a>
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Combinatorics/Sequences.py#L210)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Combinatorics/Sequences.py#L210?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Combinatorics/Sequences.py#L236)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Combinatorics/Sequences.py#L236?message=Update%20Docs)]
 </div>
 
 ```python
-prime_list(n, base_primes=[], piter=<generator object prime_iter at 0x7f2860e630b0>): 
+prime_list(n, base_primes=None, piter=None): 
 ```
 **LLM Docstring**
 
-Return the first `n` primes using a shared incremental cache.
+Return the first `n` primes, using a shared incremental cache by default.
 
-The default `base_primes` list and `piter` generator are intentionally persistent across calls. The cache is extended until the iterator yields more than `n` entries, then the first `n` values are returned.
+Three cases, chosen by what's supplied:
+
+- `piter=None`, `base_primes=None` (the default call): both are pulled
+  from the module-level `default_prime_iter`/`default_base_prime_list`,
+  a cache that's intentionally persistent across calls.
+- `piter=None`, `base_primes=<a list>`: a *fresh* iterator is built from
+  that list with `prime_iter(base_primes)`, instead of pulling from the
+  unrelated global cache. Previously, supplying a custom `base_primes`
+  without also supplying a matching `piter` silently ignored the
+  supplied list's content -- the shared global generator's cache won
+  regardless, so the "custom starting list" argument didn't do what it
+  looked like it did.
+- `piter=<an iterator>`: used as given; `base_primes` defaults to a new
+  empty list if not also supplied (so it isn't tied to the global cache
+  unless the caller asks for that explicitly).
+
+In every case `base_primes` is still extended in place and returned;
+supplying your own list lets you keep your own independent cache instead
+of sharing the module-level one.
   - `n`: `int`
     > number of primes requested
-  - `base_primes`: `list[int]`
-    > mutable cache populated in place
-  - `piter`: `collections.abc.Iterator[list[int]]`
-    > cumulative prime-list iterator used to extend the cache
+  - `base_primes`: `list[int] | None`
+    > mutable cache populated in place; `None` selects the
+    shared default cache (or, if `piter` is supplied, a fresh empty list)
+  - `piter`: `collections.abc.Iterator[list[int]] | None`
+    > cumulative prime-list iterator used to extend the cache;
+    `None` selects the shared default iterator, unless `base_primes` was
+    supplied, in which case a fresh iterator seeded from it is used
   - `:returns`: `list[int]`
     > the first `n` cached primes
 
@@ -70,7 +91,7 @@ The default `base_primes` list and `piter` generator are intentionally persisten
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Combinatorics/Sequences/prime_list.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Combinatorics/Sequences/prime_list.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Combinatorics/Sequences.py#L210?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Combinatorics/Sequences.py#L236?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
