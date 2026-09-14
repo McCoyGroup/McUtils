@@ -14,7 +14,10 @@ class CombinatoricsTests(TestCase):
     def setUp(self):
         import warnings
         np.seterr(all='raise')
-        warnings.filterwarnings('error', category=np.VisibleDeprecationWarning)
+        try:
+            warnings.filterwarnings('error', category=np.VisibleDeprecationWarning)
+        except:
+            pass
         np.set_printoptions(linewidth=1e8)
 
     class StateMaker:

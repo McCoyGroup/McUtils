@@ -187,6 +187,7 @@ def _prime_check(p2, prev_primes):
             return False
     return True
 
+default_base_prime_list = [2, 3, 5, 7, 11, 13, 17]
 def prime_iter(primes=None):
     """
     **LLM Docstring**
@@ -206,7 +207,7 @@ def prime_iter(primes=None):
     """
     # we will very rarely exhaust these...
     if primes is None:
-        primes = [2, 3, 5, 7, 11, 13, 17]
+        primes = default_base_prime_list
     else:
         primes = list(primes)
     for i in range(len(primes)):
@@ -226,23 +227,59 @@ def prime_iter(primes=None):
         yield primes
 
 
-def prime_list(n, base_primes=[], piter=prime_iter()):
+# Module-level cache backing `prime_list`'s default (no-argument) case, kept
+# as explicit globals rather than mutable default arguments so the "shared
+# persistent cache" behavior is opt-in and explicit rather than something
+# that silently kicks in whenever a caller happens to omit an argument.
+default_prime_iter = prime_iter()
+
+def prime_list(n, base_primes=None, piter=None):
     """
     **LLM Docstring**
 
-    Return the first `n` primes using a shared incremental cache.
+    Return the first `n` primes, using a shared incremental cache by default.
 
-    The default `base_primes` list and `piter` generator are intentionally persistent across calls. The cache is extended until the iterator yields more than `n` entries, then the first `n` values are returned.
+    Three cases, chosen by what's supplied:
+
+    - `piter=None`, `base_primes=None` (the default call): both are pulled
+      from the module-level `default_prime_iter`/`default_base_prime_list`,
+      a cache that's intentionally persistent across calls.
+    - `piter=None`, `base_primes=<a list>`: a *fresh* iterator is built from
+      that list with `prime_iter(base_primes)`, instead of pulling from the
+      unrelated global cache. Previously, supplying a custom `base_primes`
+      without also supplying a matching `piter` silently ignored the
+      supplied list's content -- the shared global generator's cache won
+      regardless, so the "custom starting list" argument didn't do what it
+      looked like it did.
+    - `piter=<an iterator>`: used as given; `base_primes` defaults to a new
+      empty list if not also supplied (so it isn't tied to the global cache
+      unless the caller asks for that explicitly).
+
+    In every case `base_primes` is still extended in place and returned;
+    supplying your own list lets you keep your own independent cache instead
+    of sharing the module-level one.
 
     :param n: number of primes requested
     :type n: int
-    :param base_primes: mutable cache populated in place
-    :type base_primes: list[int]
-    :param piter: cumulative prime-list iterator used to extend the cache
-    :type piter: collections.abc.Iterator[list[int]]
+    :param base_primes: mutable cache populated in place; `None` selects the
+        shared default cache (or, if `piter` is supplied, a fresh empty list)
+    :type base_primes: list[int] | None
+    :param piter: cumulative prime-list iterator used to extend the cache;
+        `None` selects the shared default iterator, unless `base_primes` was
+        supplied, in which case a fresh iterator seeded from it is used
+    :type piter: collections.abc.Iterator[list[int]] | None
     :return: the first `n` cached primes
     :rtype: list[int]
     """
+    if piter is None:
+        if base_primes is None:
+            base_primes = default_base_prime_list
+            piter = default_prime_iter
+        else:
+            piter = prime_iter(base_primes)
+    elif base_primes is None:
+        base_primes = []
+
     # gives a list up to the nth prime
     if n > len(base_primes):
         for p_list in piter:
