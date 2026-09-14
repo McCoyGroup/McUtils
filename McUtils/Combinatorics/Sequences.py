@@ -167,14 +167,25 @@ def _prime_check(p2, prev_primes):
 
     Test whether a candidate is indivisible by all supplied prior primes.
 
+    `prev_primes` is assumed sorted ascending (as built up by `prime_iter`),
+    so the check stops as soon as `pp*pp > p2` -- any factor of `p2` must
+    have a companion factor <= sqrt(p2), so nothing past that point can
+    possibly divide it. This avoids testing against every previously found
+    prime, which becomes the dominant cost once the prime list is long.
+
     :param p2: candidate integer
     :type p2: int
-    :param prev_primes: previously generated prime divisors to test
+    :param prev_primes: previously generated prime divisors to test, ascending
     :type prev_primes: iterable[int]
     :return: `True` when no supplied prime divides `p2`
     :rtype: bool
     """
-    return all(p2%pp > 0 for pp in prev_primes)
+    for pp in prev_primes:
+        if pp * pp > p2:
+            break
+        if p2 % pp == 0:
+            return False
+    return True
 
 def prime_iter(primes=None):
     """
@@ -183,6 +194,10 @@ def prime_iter(primes=None):
     Yield progressively longer lists of prime numbers.
 
     The generator first yields prefixes of the provided seed list. It then searches odd candidates between the current largest prime and twice that value, accepting the first candidate not divisible by the existing primes other than `2`. Each yield is the full prime list accumulated so far.
+
+    `2` is special-cased: since it's the only even prime, the "odd
+    candidates in (p, 2p)" scan used for every other prime would search the
+    empty range `(4, 4)` and incorrectly raise.
 
     :param primes: optional initial ordered prime sequence
     :type primes: iterable[int] | None
@@ -198,6 +213,10 @@ def prime_iter(primes=None):
         yield primes[:i+1]
     while True:
         p = primes[-1]
+        if p == 2:
+            primes.append(3)
+            yield primes
+            continue
         for p2 in range(p+2, 2 * p, 2):
             if _prime_check(p2, primes[1:]):
                 break
@@ -240,6 +259,23 @@ def prime_factorize(ints, primes=None):
 
     The function repeatedly applies `_sieve_core` to entries whose residual value exceeds `1`. It accepts either an iterator of individual primes or an iterator of cumulative prime lists, as produced by `prime_iter`. The returned count list contains one array per tested prime and preserves the original input shape.
 
+    When `primes` is left as `None` (the default, gapless `prime_iter()`
+    sequence), trial division stops early for any entry once its residual
+    drops to `p**2` or below for the current trial prime `p`: every prime
+    up to and including `p` has already been divided out in order, so a
+    residual that small can't have a factor <= its own square root other
+    than itself, meaning it's already prime. That residual is recorded
+    directly as an extra prime factor instead of continuing to trial-divide
+    (and generate ever-larger candidate primes) all the way up to its
+    value -- previously this made factoring a single large prime (or a
+    number with one) effectively never finish.
+
+    When a custom, possibly incomplete `primes` sequence is supplied
+    instead, that early-exit isn't safe (it can't be assumed gapless), so
+    instead a `ValueError` is raised if the sequence runs out before every
+    entry is fully factored, rather than silently returning a partial,
+    incorrect factorization.
+
     :param ints: positive integer scalar or array to factor
     :type ints: int | array-like
     :param primes: optional prime or cumulative-prime iterator
@@ -254,7 +290,8 @@ def prime_factorize(ints, primes=None):
     ints = ints.reshape(-1)
 
     log_ints = np.log(ints)
-    if primes is None:
+    generated = primes is None
+    if generated:
         primes = prime_iter()
 
     sel = np.arange(ints.shape[0])
@@ -262,25 +299,59 @@ def prime_factorize(ints, primes=None):
     sel = sel[np.where(ints > 1)]
     count_list = []
     prime_list = []
-    for p in primes:
-        if isinstance(p, (int, np.integer)):
-            prime_list.append(p)
+    extra_primes = []
+    extra_counts = []
+    if len(sel) > 0:
+        # (nothing to factor at all when every input is already <= 1, e.g.
+        # a bare `1` -- skip straight to the empty result rather than
+        # computing a bound over a now-empty `sel`)
+        for p in primes:
+            if isinstance(p, (int, np.integer)):
+                prime_list.append(p)
+            else:
+                prime_list = p
+                p = p[-1]
+
+            max_its = np.ceil(np.max(log_ints[sel]/np.log(p))).astype(int)
+            subints, subcounts = _sieve_core(ints[sel,], p, max_its)
+            counts = np.zeros(ints.shape[0], dtype=int)
+            counts[sel,] = subcounts
+            count_list.append(counts)
+            ints[sel,] = subints
+            max_prime[sel,] += 1
+
+            mask = np.where(subints > 1)
+            if len(mask) == 0 or len(mask[0]) == 0:
+                break
+            sel = sel[mask]
+
+            if generated:
+                # every prime <= p has now been divided out in order, so a
+                # residual that hasn't exceeded p**2 is already prime -- see
+                # docstring. Resolve those entries directly instead of paying
+                # to generate/test primes all the way up to their value.
+                resolved_mask = ints[sel] <= p * p
+                if np.any(resolved_mask):
+                    resolved = sel[resolved_mask]
+                    for uniq in np.unique(ints[resolved]):
+                        uniq_sel = resolved[ints[resolved] == uniq]
+                        c = np.zeros(ints.shape[0], dtype=int)
+                        c[uniq_sel] = 1
+                        extra_counts.append(c)
+                        extra_primes.append(int(uniq))
+                        ints[uniq_sel] = 1
+                    sel = sel[~resolved_mask]
+                    if len(sel) == 0:
+                        break
         else:
-            prime_list = p
-            p = p[-1]
+            if len(sel) > 0:
+                raise ValueError(
+                    "ran out of supplied primes before fully factorizing {}; "
+                    "supply more primes or leave `primes=None`".format(ints[sel])
+                )
 
-        max_its = np.ceil(np.max(log_ints/np.log(p))).astype(int)
-        subints, subcounts = _sieve_core(ints[sel,], p, max_its)
-        counts = np.zeros(ints.shape[0], dtype=int)
-        counts[sel,] = subcounts
-        count_list.append(counts)
-        ints[sel,] = subints
-        max_prime[sel,] += 1
-
-        mask = np.where(subints > 1)
-        if len(mask) == 0 or len(mask[0]) == 0:
-            break
-        sel = sel[mask]
+    prime_list = list(prime_list) + extra_primes
+    count_list = count_list + extra_counts
 
     count_list = [c.reshape(base_shape) for c in count_list]
     if smol:
