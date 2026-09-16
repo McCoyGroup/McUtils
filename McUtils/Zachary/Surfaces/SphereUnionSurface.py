@@ -2700,7 +2700,534 @@ class SphereUnionSurface:
         else:
             raise ValueError(f"unknown surface area method '{method}'")
 
-    def volume(self, method='monte-carlo', **opts):
+    @classmethod
+    def sphere_volume(cls, radii, axis=None):
+        """
+        **LLM Docstring**
+
+        The total volume of one or more spheres, `4/3 pi sum(r^3)`. Volume
+        analogue of `sphere_area`.
+
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param axis: the axis to sum over
+        :type axis: int | None
+        :return: the volume
+        :rtype: float | np.ndarray
+        """
+        return 4 / 3 * np.pi * np.sum(np.asanyarray(radii) ** 3, axis=axis)
+
+    @classmethod
+    def sphere_double_intersection_volume(cls, a, r1, r2):
+        """
+        **LLM Docstring**
+
+        Analytic volume contribution of the pairwise overlap of two
+        spheres, following Gibson & Scheraga eq (2), or a containment
+        fallback when one sphere swallows the other. Volume analogue of
+        `sphere_double_intersection_area`, with the same
+        `(overlap_indices_or_None, value)` return convention.
+
+        :param a: the inter-center distance
+        :type a: float
+        :param r1: the first radius
+        :type r1: float
+        :param r2: the second radius
+        :type r2: float
+        :return: `(overlap_indices_or_None, volume)`
+        :rtype: tuple
+        """
+        t1 = r1 + r2 - a
+        t2 = r1 - r2 + a
+        t3 = -r1 + r2 + a
+        if t1 > 0 and t2 > 0 and t3 > 0:
+            return None, (
+                (2 * np.pi / 3) * (r1 ** 3 + r2 ** 3 + 1 / 8 * a ** 3)
+                - (np.pi / 2) * (r1 ** 2 + r2 ** 2) * a
+                - (np.pi / (4 * a)) * (r1 ** 2 - r2 ** 2) ** 2
+            )
+        elif t1 < 0:
+            return (), 0
+        elif t2 < 0:
+            return (0,), cls.sphere_volume(r1)
+        else:
+            return (1,), cls.sphere_volume(r2)
+
+    @classmethod
+    def _corr0pi(cls, t):
+        """
+        **LLM Docstring**
+
+        Shift a raw `arctan` result into the `(0, pi)` branch used
+        throughout Gibson & Scheraga's formulas.
+
+        :param t: a raw `arctan(...)` value
+        :type t: float
+        :return: the branch-corrected value
+        :rtype: float
+        """
+        if t < 0:
+            t = t + np.pi
+        elif t > np.pi:
+            t = t - np.pi
+        return t
+
+    @classmethod
+    def sphere_triple_intersection_volume(cls, a, b, c, r1, r2, r3):
+        """
+        **LLM Docstring**
+
+        Analytic volume of the triple overlap of three spheres, following
+        Gibson & Scheraga eq (10). Returns either a pair/single-index
+        fallback (when the triple doesn't fully intersect -- classification
+        copied verbatim from `sphere_triple_intersection_area`, since it's
+        purely geometric and applies identically to volume) or the analytic
+        volume. Volume analogue of `sphere_triple_intersection_area`, same
+        return convention.
+
+        Note: `cls._trip_q(a, b, c, r1, r2, r3, e1)` returns `a * q1` in the
+        paper's own notation (eq 7), so terms like eq (10)'s `2/(a q1)`
+        become plain `2*w/q1` here (the `a` cancels), while terms like
+        `(1 - eps2)/(alpha q2)` pick up an explicit extra distance factor
+        to compensate. See the module docstring in the patch this was
+        drafted from for the full derivation/cross-check.
+
+        :param a: the distance between centers 2 and 3
+        :param b: the distance between centers 1 and 3
+        :param c: the distance between centers 1 and 2
+        :param r1: the first radius
+        :param r2: the second radius
+        :param r3: the third radius
+        :return: `(overlap_indices_or_None, volume_or_None)`
+        :rtype: tuple
+        """
+        # https://www.tandfonline.com/doi/pdf/10.1080/00268978700102951
+        w = cls._trip_w(a, b, c, r1, r2, r3)
+        if w < -1e-8:
+            t2 = cls._trip_t(a, b, c)
+            if t2 < 0:
+                return (), 0  # no intersection
+            t = np.sqrt(t2)
+            p1p, p1m = cls._trip_p(a, b, c, r1, r2, r3, t)
+            p2p, p2m = cls._trip_p(b, a, c, r2, r3, r1, t)
+            p3p, p3m = cls._trip_p(c, a, b, r3, r1, r2, t)
+
+            if p1p > 0 and p2p > 0 and p3p > 0:
+                p1, p2, p3 = p1m, p2m, p3m
+            else:
+                p1, p2, p3 = p1p, p2p, p3p
+
+            if p1 > 0 and p2 > 0 and p3 > 0:
+                return (), 0
+            if p1 <= 0 and p2 > 0 and p3 > 0:
+                return (1, 2), None
+            if p1 > 0 and p2 <= 0 and p3 > 0:
+                return (0, 2), None
+            if p1 > 0 and p2 > 0 and p3 <= 0:
+                return (0, 1), None
+            if p1 <= 0 and p2 <= 0 and p3 > 0:
+                return (2,), None
+            if p1 <= 0 and p2 > 0 and p3 <= 0:
+                return (1,), None
+            if p1 > 0 and p2 <= 0 and p3 <= 0:
+                return (0,), None
+            else:
+                raise ValueError((p1 > 0, p2 > 0, p3 > 0), p1, p2, p3)
+
+        e1 = cls._trip_e(a, r2, r3)
+        e2 = cls._trip_e(b, r3, r1)
+        e3 = cls._trip_e(c, r1, r2)
+
+        q1 = cls._trip_q(a, b, c, r1, r2, r3, e1)  # = a * q1_paper
+        q2 = cls._trip_q(b, c, a, r2, r3, r1, e2)  # = b * q2_paper
+        q3 = cls._trip_q(c, a, b, r3, r1, r2, e3)  # = c * q3_paper
+
+        T1 = cls._corr0pi(np.arctan(2 * w / q1))
+        T2 = cls._corr0pi(np.arctan(2 * w / q2))
+        T3 = cls._corr0pi(np.arctan(2 * w / q3))
+
+        lin = (
+            w / 6
+            - 0.5 * a * (r2 ** 2 + r3 ** 2 - a ** 2 * (1 / 6 - 0.5 * e1 ** 2)) * T1
+            - 0.5 * b * (r3 ** 2 + r1 ** 2 - b ** 2 * (1 / 6 - 0.5 * e2 ** 2)) * T2
+            - 0.5 * c * (r1 ** 2 + r2 ** 2 - c ** 2 * (1 / 6 - 0.5 * e3 ** 2)) * T3
+        )
+
+        # sum each pair *before* the (0, pi) branch correction (see module
+        # docstring -- this is the fix that made the formula match Monte
+        # Carlo; correcting each arctan individually first is wrong)
+        Sa = cls._corr0pi(
+            np.arctan((1 - e2) * b * w / (r1 * q2)) + np.arctan((1 + e3) * c * w / (r1 * q3))
+        )
+        Sb = cls._corr0pi(
+            np.arctan((1 - e3) * c * w / (r2 * q3)) + np.arctan((1 + e1) * a * w / (r2 * q1))
+        )
+        Sc = cls._corr0pi(
+            np.arctan((1 - e1) * a * w / (r3 * q1)) + np.arctan((1 + e2) * b * w / (r3 * q2))
+        )
+
+        cubes = (2 / 3) * r1 ** 3 * Sa + (2 / 3) * r2 ** 3 * Sb + (2 / 3) * r3 ** 3 * Sc
+
+        return None, lin + cubes
+
+    @classmethod
+    def _quad_vol_term(cls, dist, beta, gamma, W2, s):
+        """
+        **LLM Docstring**
+
+        Helper for the analytic quadruple-sphere intersection volume: one
+        branch-corrected arctangent volume term (the volume analogue of
+        `_quad_term`, which builds the area version of the same term).
+
+        :param dist: an inter-center distance
+        :param beta: a radius
+        :param gamma: a radius
+        :param W2: twice the quadruple `w` determinant term (`2*_quad_w(...)`)
+        :param s1: the corresponding `s` term
+        :return: the volume term
+        :rtype: float
+        """
+        t = cls._corr0pi(np.arctan(W2 / s))
+        bracket = (beta ** 2 + gamma ** 2) * dist + (beta ** 2 - gamma ** 2) ** 2 / (2 * dist) - dist ** 3 / 6
+        return 0.25 * t * bracket
+
+    @classmethod
+    def sphere_quadruple_intersection_volume(cls,
+                                             a, b, c, f, g, h,
+                                             r1, r2, r3, r4,
+                                             V123, V124, V134, V234,
+                                             I4, I3, I2, I1
+                                             ):
+        """
+        **LLM Docstring**
+
+        Analytic volume contribution of the quadruple overlap of four
+        spheres, following Gibson & Scheraga eq (20). The dispatch on
+        intersection-test bit patterns is copied verbatim from
+        `sphere_quadruple_intersection_area` (purely geometric
+        classification, measure-agnostic); only the final "clean"
+        (non-degenerate) case's numeric formula differs, using the volume
+        formula and the triple *volumes* (`V123` etc, rather than areas) as
+        inputs. Volume analogue of `sphere_quadruple_intersection_area`,
+        same return convention.
+
+        One case is not handled: the coplanar-centres limiting case (paper
+        case (vi)(b), non-convex quadrilateral) has no volume reduction
+        ported here (mirrors the existing area code, which also raises for
+        that case) -- see the module docstring in the patch this was
+        drafted from.
+
+        :param a: the distance between centers 2 and 3
+        :param b: the distance between centers 1 and 3
+        :param c: the distance between centers 1 and 2
+        :param f: the distance between centers 1 and 4
+        :param g: the distance between centers 2 and 4
+        :param h: the distance between centers 3 and 4
+        :param r1: the first radius
+        :param r2: the second radius
+        :param r3: the third radius
+        :param r4: the fourth radius
+        :param V123: the 1-2-3 triple volume
+        :param V124: the 1-2-4 triple volume
+        :param V134: the 1-3-4 triple volume
+        :param V234: the 2-3-4 triple volume
+        :param I4: the pair of tests for center 4 vs the 1-2-3 intersection points
+        :param I3: the pair of tests for center 3
+        :param I2: the pair of tests for center 2
+        :param I1: the pair of tests for center 1
+        :return: `(overlap_indices_or_None, volume_or_None)`
+        :rtype: tuple
+        :raises ValueError: for an unhandled intersection-test pattern
+        :raises NotImplementedError: for the non-convex coplanar-centres case
+        """
+        W2 = 2 * cls._quad_w(a, b, c, f, g, h)
+
+        ia4, ib4 = I4
+        ia3, ib3 = I3
+        ia2, ib2 = I2
+        ia1, ib1 = I1
+
+        test_bits = (int(ia4), int(ib4), int(ia3), int(ib3), int(ia2), int(ib2), int(ia1), int(ib1))
+
+        clean_tests = {
+            (1, 0, 1, 0, 1, 0, 1, 0),
+            (1, 0, 1, 0, 1, 0, 0, 1),
+            (1, 0, 1, 0, 0, 1, 1, 0),
+            (1, 0, 1, 0, 0, 1, 0, 1),
+            (1, 0, 0, 1, 1, 0, 1, 0),
+            (1, 0, 0, 1, 1, 0, 0, 1),
+            (1, 0, 0, 1, 0, 1, 1, 0),
+            (1, 0, 0, 1, 0, 1, 0, 1),
+            (0, 1, 1, 0, 1, 0, 1, 0),
+            (0, 1, 1, 0, 1, 0, 0, 1),
+            (0, 1, 1, 0, 0, 1, 1, 0),
+            (0, 1, 1, 0, 0, 1, 0, 1),
+            (0, 1, 0, 1, 1, 0, 1, 0),
+            (0, 1, 0, 1, 1, 0, 0, 1),
+            (0, 1, 0, 1, 0, 1, 1, 0),
+            (0, 1, 0, 1, 0, 1, 0, 1)
+        }
+
+        if test_bits == (0, 0, 0, 0, 0, 0, 0, 0):
+            return (), 0
+        elif test_bits == (1, 1, 0, 0, 0, 0, 0, 0):
+            return (0, 1, 2), None
+        elif test_bits == (0, 0, 1, 1, 0, 0, 0, 0):
+            return (0, 1, 3), None
+        elif test_bits == (0, 0, 0, 0, 1, 1, 0, 0):
+            return (0, 2, 3), None
+        elif test_bits == (0, 0, 0, 0, 0, 0, 1, 1):
+            return (1, 2, 3), None
+        elif test_bits == (1, 1, 1, 1, 0, 0, 0, 0):
+            return (0, 1), None
+        elif test_bits == (1, 1, 0, 0, 1, 1, 0, 0):
+            return (0, 2), None
+        elif test_bits == (0, 0, 1, 1, 1, 1, 0, 0):
+            return (0, 3), None
+        elif test_bits == (1, 1, 0, 0, 0, 0, 1, 1):
+            return (1, 2), None
+        elif test_bits == (0, 0, 1, 1, 0, 0, 1, 1):
+            return (1, 3), None
+        elif test_bits == (0, 0, 0, 0, 1, 1, 1, 1):
+            return (2, 3), None
+        elif test_bits == (1, 1, 1, 1, 1, 1, 0, 0):
+            return (0,), None
+        elif test_bits == (1, 1, 1, 1, 0, 0, 1, 1):
+            return (1,), None
+        elif test_bits == (1, 1, 0, 0, 1, 1, 1, 1):
+            return (2,), None
+        elif test_bits == (0, 0, 1, 1, 1, 1, 1, 1):
+            return (3,), None
+        elif test_bits == (1, 1, 1, 1, 1, 1, 1, 1):
+            T123 = cls.triangle_area(r1, r2, r3)
+            T124 = cls.triangle_area(r1, r2, r4)
+            T134 = cls.triangle_area(r1, r3, r4)
+            T234 = cls.triangle_area(r2, r3, r4)
+            test_vec = np.array([T123, T124, T134, T234])
+
+            if (
+                    abs(np.dot([1, 1, -1, -1], test_vec)) < 1e-6
+                    or abs(np.dot([1, -1, 1, -1], test_vec)) < 1e-6
+                    or abs(np.dot([1, -1, -1, 1], test_vec)) < 1e-6
+            ):
+                A, B, C, F, G, H = np.array([a, b, c, f, g, h]) ** 2
+                if (A - (B + C)) > 1e-6:
+                    return (1, 2), None
+                elif (B - (A + C)) > 1e-6:
+                    return (0, 2), None
+                elif (C - (A + B)) > 1e-6:
+                    return (0, 1), None
+                elif (F - (G + H)) > 1e-6:
+                    return (0, 3), None
+                else:
+                    raise ValueError("no set of diagonals works...")
+            elif abs(np.dot([1, 1, 1, -1], test_vec)) < 1e-6:
+                raise NotImplementedError(
+                    "coplanar, non-convex-quadrilateral quadruple volume (paper eq 22) not ported "
+                    "-- mirrors the existing area code's gap for this same case"
+                )
+            else:
+                raise ValueError("no set of areas works...")
+        elif test_bits not in clean_tests:
+            raise ValueError(test_bits)
+
+        if W2 <= 0:
+            raise ValueError("expected a real quadruple intersection", test_bits, W2)
+
+        s1 = cls._quad_s(a, b, c, f, g, h)
+        s2 = cls._quad_s(b, c, a, g, h, f)
+        s3 = cls._quad_s(c, a, b, h, f, g)
+        s4 = cls._quad_s(h, a, g, c, f, b)
+        s5 = cls._quad_s(g, h, a, b, c, f)
+        s6 = cls._quad_s(f, g, c, a, b, h)
+
+        V1 = cls._quad_vol_term(a, r2, r3, W2, s1)
+        V2 = cls._quad_vol_term(b, r1, r3, W2, s2)
+        V3 = cls._quad_vol_term(c, r1, r2, W2, s3)
+        V4 = cls._quad_vol_term(h, r3, r4, W2, s4)
+        V5 = cls._quad_vol_term(g, r2, r4, W2, s5)
+        V6 = cls._quad_vol_term(f, r1, r4, W2, s6)
+
+        V = (
+                -W2 / 24  # = -W/12, since W2 = 2*W
+                - np.pi / 3 * (r1 ** 3 + r2 ** 3 + r3 ** 3 + r4 ** 3)
+                + V1 + V2 + V3 + V4 + V5 + V6
+                + 0.5 * (V123 + V124 + V134 + V234)
+        )
+
+        return None, V
+
+    @classmethod
+    def sphere_union_volume(cls,
+                            centers, radii,
+                            include_doubles=True,
+                            include_triples=None,
+                            include_quadruples=None,
+                            return_terms=False,
+                            overlap_tolerance=0):
+        """
+        **LLM Docstring**
+
+        Compute the exact volume of a union of spheres via inclusion-exclusion
+        over the analytic double/triple/quadruple intersection-volume terms
+        (Gibson & Scheraga eqs 2, 10, 20), dropping redundant/contained
+        spheres and sub-intersections as they're detected. Volume analogue
+        of `sphere_union_surface_area`, mirroring its structure exactly
+        (same distance matrix, same combinatorial loops, same knobs, same
+        classification/dropping logic -- see this patch's module docstring
+        for why that logic carries over unchanged from area to volume).
+
+        :param centers: the sphere centers
+        :type centers: np.ndarray
+        :param radii: the sphere radii
+        :type radii: np.ndarray
+        :param include_doubles: include the pairwise intersection terms
+        :type include_doubles: bool
+        :param include_triples: include the triple terms
+        :type include_triples: bool | None
+        :param include_quadruples: include the quadruple terms
+        :type include_quadruples: bool | None
+        :param return_terms: return the per-combination term dict rather than the sum
+        :type return_terms: bool
+        :param overlap_tolerance: fractional tolerance for treating spheres as overlapping
+        :type overlap_tolerance: float
+        :return: the volume (or the terms dict)
+        :rtype: float | dict
+        """
+        if include_triples is None:
+            include_triples = include_doubles
+        if include_quadruples is None:
+            include_quadruples = include_triples is not False
+
+        dm = nput.distance_matrix(centers)
+        terms = {
+            (i,): v
+            for i, v in enumerate(cls.sphere_volume(np.asanyarray(radii)[:, np.newaxis], axis=-1))
+        }
+        nc = len(centers)
+
+        if include_doubles:
+            for i, j in itertools.combinations(range(nc), 2):
+                if not (
+                        (i,) in terms
+                        and (j,) in terms
+                ): continue
+                if (radii[i] + radii[j]) * (1 + overlap_tolerance) > dm[i, j]:
+                    overlaps, contrib = cls.sphere_double_intersection_volume(
+                        dm[i, j], radii[i], radii[j]
+                    )
+                    if overlaps is not None:
+                        if len(overlaps) > 0:
+                            k: int = [i, j][overlaps[0]]
+                            terms.pop((k,), None)
+                    else:
+                        terms[(i, j)] = -contrib
+
+        if include_quadruples:
+            intersection_points = np.full((nc, nc, nc, 2, 3), 0.0)
+        else:
+            intersection_points = None
+        if include_triples or include_quadruples:
+            for i, j, k in itertools.combinations(range(nc), 3):
+                if not all(p in terms for p in itertools.combinations((i, j, k), 1)): continue
+                if all(p in terms for p in itertools.combinations((i, j, k), 2)):
+                    overlaps, contrib = cls.sphere_triple_intersection_volume(
+                        dm[j, k], dm[i, k], dm[i, j],
+                        radii[i], radii[j], radii[k]
+                    )
+                    if overlaps is not None:
+                        overlaps = tuple([i, j, k][x] for x in overlaps)
+                        if len(overlaps) == 2:
+                            i2, j2 = overlaps
+                            term_keys = list(terms.keys())
+                            for p in term_keys:
+                                if i2 in p and j2 in p:
+                                    del terms[p]
+                        elif len(overlaps) == 1:
+                            l, = overlaps
+                            term_keys = list(terms.keys())
+                            for p in term_keys:
+                                if l in p:
+                                    del terms[p]
+                    else:
+                        if include_quadruples:
+                            intersection_points[i, j, k] = cls.sphere_triple_intersection_point(
+                                centers[(i, j, k),],
+                                radii[(i, j, k),],
+                                dists=(dm[i, j], dm[i, k])
+                            )
+                        terms[(i, j, k)] = contrib
+
+        if include_quadruples:
+            for i, j, k, l in itertools.combinations(range(nc), 4):
+                if not all(p in terms for p in itertools.combinations((i, j, k, l), 1)): continue
+                if not all(p in terms for p in itertools.combinations((i, j, k, l), 2)): continue
+                if all(p in terms for p in itertools.combinations((i, j, k, l), 3)):
+                    l_ints = (
+                            np.linalg.norm(centers[(l,)] - intersection_points[i, j, k], axis=-1)
+                            < radii[l] * (1 + overlap_tolerance)
+                    )
+                    k_ints = (
+                            np.linalg.norm(centers[(k,)] - intersection_points[i, j, l], axis=-1)
+                            < radii[k] * (1 + overlap_tolerance)
+                    )
+                    j_ints = (
+                            np.linalg.norm(centers[(j,)] - intersection_points[i, k, l], axis=-1)
+                            < radii[j] * (1 + overlap_tolerance)
+                    )
+                    i_ints = (
+                            np.linalg.norm(centers[(i,)] - intersection_points[j, k, l], axis=-1)
+                            < radii[i] * (1 + overlap_tolerance)
+                    )
+                    overlaps, contrib = cls.sphere_quadruple_intersection_volume(
+                        dm[j, k], dm[i, k], dm[i, j],
+                        dm[i, l], dm[j, l], dm[k, l],
+                        radii[i], radii[j], radii[k], radii[l],
+                        terms[(i, j, k)], terms[(i, j, l)],
+                        terms[(i, k, l)], terms[(j, k, l)],
+                        l_ints, k_ints, j_ints, i_ints
+                    )
+                    if overlaps is not None:
+                        overlaps = tuple([i, j, k, l][x] for x in overlaps)
+                        if len(overlaps) == 3:
+                            x, y, z = overlaps
+                            term_keys = list(terms.keys())
+                            for p in term_keys:
+                                if x in p and y in p and z in p:
+                                    del terms[p]
+                        elif len(overlaps) == 2:
+                            x, y, = overlaps
+                            term_keys = list(terms.keys())
+                            for p in term_keys:
+                                if x in p and y in p:
+                                    del terms[p]
+                        elif len(overlaps) == 1:
+                            term_keys = list(terms.keys())
+                            x, = overlaps
+                            for p in term_keys:
+                                if x in p:
+                                    del terms[p]
+                    else:
+                        terms[(i, j, k, l)] = -contrib
+
+        if return_terms:
+            return terms
+        else:
+            if include_doubles and include_triples and include_quadruples:
+                return sum(terms.values())
+            else:
+                return sum(
+                    v
+                    for k, v in terms.items()
+                    if (
+                        len(k) == 1
+                        or (include_doubles and len(k) == 2)
+                        or (include_triples and len(k) == 3)
+                        or (include_quadruples and len(k) == 4)
+                    )
+                )
+
+    def volume(self, method='union', **opts):
         """
         **LLM Docstring**
 
@@ -2715,7 +3242,7 @@ class SphereUnionSurface:
         :raises NotImplementedError: for the analytic `'union'` method
         """
         if method == 'union':
-            raise NotImplementedError("analytic sphere volume not yet implemented")
+            return self.sphere_union_volume(self.centers, self.radii, **opts)
         elif method == 'sampling':
             expansion = opts.pop('expansion', self.expansion)
             scaling = opts.pop('scaling', self.scaling)
