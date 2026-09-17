@@ -9,6 +9,7 @@ import uuid
 from .. import Numputils as nput
 from .. import Devutils as dev
 from ..Jupyter import JHTML
+from .Colors import ColorPalette
 import re
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -1516,6 +1517,92 @@ __MCUTILS_RENDERERS__
         return points.map(point => `${point[0]},${point[1]}`).join(" ");
       },
 
+      colorCode(rgb) {
+        const channel = value => Math.round(
+          Math.max(0, Math.min(255, value))
+        ).toString(16).padStart(2, "0");
+        return `#${channel(rgb[0])}${channel(rgb[1])}${channel(rgb[2])}`;
+      },
+
+      shadeColor(rgb, scale, whiteMix=0) {
+        return this.colorCode(rgb.map(
+          value => value * scale * (1 - whiteMix) + 255 * whiteMix
+        ));
+      },
+
+      lightingStops(kind, rgb, depthFactor) {
+        if (kind === "sphere") return [
+          this.shadeColor(rgb, 1.05 * depthFactor, .42),
+          this.shadeColor(rgb, 1.12 * depthFactor, .08),
+          this.shadeColor(rgb, .92 * depthFactor),
+          this.shadeColor(rgb, .52 * depthFactor)
+        ];
+        return [
+          this.shadeColor(rgb, .50 * depthFactor),
+          this.shadeColor(rgb, .88 * depthFactor),
+          this.shadeColor(rgb, 1.12 * depthFactor, .10),
+          this.shadeColor(rgb, .88 * depthFactor),
+          this.shadeColor(rgb, .50 * depthFactor)
+        ];
+      },
+
+      applyDepthLighting(results) {
+        if (!figure.depthLighting) return;
+        const lit = results.filter(
+          result => result && !result.hidden && result.primitive.lighting
+        );
+        if (lit.length === 0) return;
+        const means = lit.map(result => (result.depth[0] + result.depth[1]) / 2);
+        const near = Math.max(...means), far = Math.min(...means);
+        const span = Math.max(near - far, 1e-12);
+        lit.forEach((result, index) => {
+          const lighting = result.primitive.lighting;
+          const depthFactor = .78 + .22 * ((means[index] - far) / span);
+          if (!lighting.gradient) {
+            result.node.setAttribute(
+              "fill", this.shadeColor(lighting.baseColor, depthFactor)
+            );
+            return;
+          }
+          const gradient = document.getElementById(lighting.gradient);
+          if (!gradient) return;
+          const stops = this.lightingStops(
+            lighting.kind, lighting.baseColor, depthFactor
+          );
+          Array.from(gradient.getElementsByTagName("stop")).forEach(
+            (stop, stopIndex) => stop.setAttribute("stop-color", stops[stopIndex])
+          );
+          const points = result.points;
+          if (lighting.kind === "sphere") {
+            const center = points[0];
+            const radius = (
+              result.primitive.radius * this.columnNorm(1)
+              / Math.max(center.w, 1e-12)
+            );
+            gradient.setAttribute("cx", center.x);
+            gradient.setAttribute("cy", center.y);
+            gradient.setAttribute("r", radius);
+            gradient.setAttribute("fx", center.x - .35 * radius);
+            gradient.setAttribute("fy", center.y + .35 * radius);
+          } else if (lighting.kind === "cylinder") {
+            const start = points[0], end = points[1];
+            const dx = end.x - start.x, dy = end.y - start.y;
+            const length = Math.max(Math.hypot(dx, dy), 1e-12);
+            const ox = dy / length, oy = -dx / length;
+            const radius = result.primitive.radius * this.columnNorm(1) * .5 * (
+              1 / Math.max(start.w, 1e-12) + 1 / Math.max(end.w, 1e-12)
+            );
+            const mx = (start.x + end.x) / 2;
+            const my = (start.y + end.y) / 2;
+            gradient.setAttribute("x1", mx - radius * ox);
+            gradient.setAttribute("y1", my - radius * oy);
+            gradient.setAttribute("x2", mx + radius * ox);
+            gradient.setAttribute("y2", my + radius * oy);
+          }
+          result.node.setAttribute("fill", `url(#${lighting.gradient})`);
+        });
+      },
+
       scaleStroke(primitive, projected) {
         if (!primitive.strokeWidth || projected.length === 0) return;
         const inverseDepth = projected.reduce(
@@ -1544,6 +1631,7 @@ __MCUTILS_RENDERERS__
         return {
           node: this.node(primitive),
           primitive,
+          points,
           depth: [Math.min(...depths), Math.max(...depths)],
           hidden: false
         };
@@ -1583,6 +1671,7 @@ __MCUTILS_RENDERERS__
           }
           projected.push(renderer(primitive, this));
         }
+        this.applyDepthLighting(projected);
         projected
           .filter(item => item && !item.hidden)
           .sort((left, right) => this.compare(left, right))
@@ -1668,6 +1757,7 @@ __MCUTILS_RENDERERS__
                  view_distance=None,
                  view_scale=None,
                  clip_distances=None,
+                 depth_lighting=False,
                  **kwargs):
         self._projection_kwargs = dict(
             view_matrix=view_matrix,
@@ -1685,8 +1775,12 @@ __MCUTILS_RENDERERS__
         )
         self._render_matrix = None
         self.view_scale = view_scale
+        self.depth_lighting = depth_lighting
         self._temp_draw_cache = None
         self._interactive_context = None
+        self._lighting_context = None
+        self._lighting_def_ids = set()
+        self._lighting_prefix = f"mcutils-lighting-{uuid.uuid4().hex}"
         self.id = kwargs.get('id')
         super().__init__(elements=elements, defs=defs, **kwargs)
     def get_projection_matrix(self):
@@ -1709,6 +1803,141 @@ __MCUTILS_RENDERERS__
         if render_matrix is not None or len(kwargs) > 0:
             self._render_matrix = render_matrix
             self._projection_kwargs.update(kwargs)
+
+    @staticmethod
+    def _lighting_color(fill):
+        if fill is None or not isinstance(fill, (str, tuple, list, np.ndarray)):
+            return None
+        if isinstance(fill, str) and (
+            fill == 'none' or fill.startswith('url(')
+        ):
+            return None
+        try:
+            if isinstance(fill, str):
+                color = ColorPalette.parse_color_string(fill)
+            else:
+                color = np.asanyarray(fill, dtype=float)
+                if np.max(color) <= 1:
+                    color = color * 255
+            return np.asanyarray(color, dtype=float)[:3]
+        except (TypeError, ValueError, KeyError):
+            return None
+
+    @staticmethod
+    def _shade_color(rgb, scale, white_mix=0):
+        rgb = np.asanyarray(rgb, dtype=float)
+        shaded = rgb * scale * (1 - white_mix) + 255 * white_mix
+        return ColorPalette.rgb_code(shaded)
+
+    @classmethod
+    def _lighting_stops(cls, kind, rgb, depth_factor):
+        if kind == 'sphere':
+            values = [
+                (1.05, .42), (1.12, .08), (.92, 0), (.52, 0)
+            ]
+        else:
+            values = [
+                (.50, 0), (.88, 0), (1.12, .10), (.88, 0), (.50, 0)
+            ]
+        return [
+            cls._shade_color(rgb, scale * depth_factor, white_mix)
+            for scale, white_mix in values
+        ]
+
+    def _clear_lighting_defs(self):
+        for def_id in self._lighting_def_ids:
+            self.defs.pop(def_id, None)
+        self._lighting_def_ids = set()
+
+    def _prepare_depth_lighting(self):
+        self._clear_lighting_defs()
+        self._lighting_context = {}
+        if not self.depth_lighting:
+            return
+
+        projection = self.get_projection_matrix()
+        infos = []
+        for index, element in enumerate(self.elements):
+            if not isinstance(element, SVGPointsToShape3D):
+                continue
+            base_color = self._lighting_color(element.kwargs.get('fill'))
+            if base_color is None:
+                continue
+            kwargs, depth = element.prep_kwargs(projection)
+            if kwargs is None or depth is None or len(depth) == 0:
+                continue
+            if isinstance(element, SVGSphere):
+                kind = 'sphere'
+            elif isinstance(element, SVGCylinder):
+                kind = 'cylinder'
+            else:
+                kind = 'solid'
+            infos.append({
+                'element': element,
+                'index': index,
+                'kind': kind,
+                'base_color': base_color,
+                'kwargs': kwargs,
+                'depth': depth,
+                'mean_depth': (depth[0] + depth[1]) / 2
+            })
+
+        if len(infos) == 0:
+            return
+        depths = np.array([info['mean_depth'] for info in infos])
+        far, near = np.min(depths), np.max(depths)
+        span = max(near - far, 1e-12)
+        for info in infos:
+            depth_factor = .78 + .22 * (
+                (info['mean_depth'] - far) / span
+            )
+            lighting = {
+                'kind': info['kind'],
+                'baseColor': info['base_color'].tolist(),
+                'gradient': None
+            }
+            if info['kind'] == 'solid':
+                lighting['fill'] = self._shade_color(
+                    info['base_color'], depth_factor
+                )
+            else:
+                gradient_id = f"{self._lighting_prefix}-{info['index']}"
+                lighting['gradient'] = gradient_id
+                stop_colors = self._lighting_stops(
+                    info['kind'], info['base_color'], depth_factor
+                )
+                if info['kind'] == 'sphere':
+                    offsets = ['0%', '34%', '72%', '100%']
+                    x = info['kwargs']['cx']
+                    y = info['kwargs']['cy']
+                    radius = info['kwargs']['r']
+                    gradient_opts = {
+                        'tag': 'radialGradient',
+                        'cx': str(x), 'cy': str(y), 'r': str(radius),
+                        'fx': str(x - .35 * radius),
+                        'fy': str(y + .35 * radius)
+                    }
+                else:
+                    offsets = ['0%', '28%', '50%', '72%', '100%']
+                    points = np.asanyarray(info['kwargs']['points'])
+                    side_1 = (points[0] + points[1]) / 2
+                    side_2 = (points[2] + points[3]) / 2
+                    gradient_opts = {
+                        'tag': 'linearGradient',
+                        'x1': str(side_1[0]), 'y1': str(side_1[1]),
+                        'x2': str(side_2[0]), 'y2': str(side_2[1])
+                    }
+                gradient_opts['gradientUnits'] = 'userSpaceOnUse'
+                gradient_opts['body'] = [
+                    SVG.Stop(
+                        offset=offset,
+                        **{'stop-color': color}
+                    )
+                    for offset, color in zip(offsets, stop_colors)
+                ]
+                self.defs[gradient_id] = gradient_opts
+                self._lighting_def_ids.add(gradient_id)
+            self._lighting_context[id(info['element'])] = lighting
 
     @staticmethod
     def scale_view_box(view_box, view_scale):
@@ -1746,14 +1975,22 @@ __MCUTILS_RENDERERS__
 
     def prep_element(self, e):
         if isinstance(e, SVGPrimitive3D):
-            flat, z = e.to_2d(projection_matrix=self.get_projection_matrix())
+            primitive = e
+            flat, z = primitive.to_2d(projection_matrix=self.get_projection_matrix())
             if flat is None: return None, None
             if self._interactive_context is not None:
-                node_id = self._interactive_context.get(id(e))
+                node_id = self._interactive_context.get(id(primitive))
                 if node_id is not None:
                     flat.set_attr('id', node_id)
-                    flat.set_attr('data-mcutils-svg3d-primitive', e.js_type)
-            self._temp_draw_cache[flat] = (e, z)
+                    flat.set_attr('data-mcutils-svg3d-primitive', primitive.js_type)
+            if self._lighting_context is not None:
+                lighting = self._lighting_context.get(id(primitive))
+                if lighting is not None:
+                    if lighting['gradient'] is None:
+                        flat.styles['fill'] = lighting['fill']
+                    else:
+                        flat.styles['fill'] = f"url(#{lighting['gradient']})"
+            self._temp_draw_cache[flat] = (primitive, z)
             e = flat
         two_d, bbox = super().prep_element(e)
         self._temp_draw_cache[two_d] = (e, bbox)
@@ -1845,6 +2082,13 @@ __MCUTILS_RENDERERS__
             if not isinstance(element, SVGPrimitive3D):
                 continue
             shadow = element.to_js_shadow(primitive_ids[id(element)])
+            if self._lighting_context is not None:
+                lighting = self._lighting_context.get(id(element))
+                if lighting is not None:
+                    shadow['lighting'] = {
+                        key: value for key, value in lighting.items()
+                        if key != 'fill'
+                    }
             primitives.append(shadow)
             points.extend(shadow.get('points', ()))
             renderers[element.js_type] = element.to_2d_js
@@ -1858,6 +2102,7 @@ __MCUTILS_RENDERERS__
             'projection': np.asanyarray(self.get_projection_matrix()).tolist(),
             'center': center,
             'sensitivity': sensitivity,
+            'depthLighting': bool(self.depth_lighting),
             'rotation': {'yaw': 0, 'pitch': 0},
             'animationFrame': None,
             'primitives': primitives
@@ -1906,6 +2151,8 @@ __MCUTILS_RENDERERS__
             view_box = np.sort(view_box.T, axis=-1)
         if view_box is not None and self.view_scale is not None:
             view_box = self.scale_view_box(view_box, self.view_scale)
+
+        self._prepare_depth_lighting()
 
         primitive_ids = None
         if interactive:
