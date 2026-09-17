@@ -12,6 +12,7 @@ __all__ = [
 ]
 
 import enum, abc, contextlib, numpy as np
+import json
 import re
 import uuid
 import functools
@@ -8773,6 +8774,9 @@ class SVGFigure(GraphicsFigure):
     }
     def __init__(self, axes=None, layout=None, figsize=None,
                  flip_y=True,
+                 dynamic_loading=None,
+                 include_save_buttons=False,
+                 recording_options=None,
                  **kwargs):
         """
         **LLM Docstring**
@@ -8791,6 +8795,9 @@ class SVGFigure(GraphicsFigure):
         self.layout = layout
         self.kwargs = self.default_styles | kwargs
         self.flip_y = flip_y
+        self.dynamic_loading = dynamic_loading
+        self.include_save_buttons = include_save_buttons
+        self.recording_options = {} if recording_options is None else recording_options
         if figsize is not None:
             self.set_size_inches(*figsize)
     def create_axes(self, rows, cols, spans, **kw):
@@ -8942,16 +8949,185 @@ class SVGFigure(GraphicsFigure):
         """
         self.kwargs['background'] = fg
 
-    def savefig(self, file, format="html", **opts):
+    @staticmethod
+    def _parse_px(v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            v = float(v.rstrip('px').strip())
+        return int(round(v))
+
+    def _resolve_pixel_size(self, width=None, height=None):
         """
         **LLM Docstring**
 
-        Save the figure to a file (SVG backend).
+        Work out a pixel width/height for `rasterize`, preferring
+        explicit arguments, then this figure's own `width`/`height`
+        kwargs (as set by `set_size_inches`/`figsize=`), then
+        `get_size_inches()`. Unlike `X3DFigure` (which always has a
+        `width`/`height` default), a bare `SVGFigure3D` may have neither
+        set at all, so this can come back with `None`s rather than
+        guessing.
 
-        :param file: the destination file/path
-        :param opts: extra options
+        :param width: an explicit width, if any
+        :param height: an explicit height, if any
+        :return: `(width, height)`, either of which may be `None`
+        :rtype: tuple
         """
-        if format == "svg":
+        width = self._parse_px(width)
+        height = self._parse_px(height)
+        if width is None:
+            width = self._parse_px(self.kwargs.get('width'))
+        if height is None:
+            height = self._parse_px(self.kwargs.get('height'))
+        if width is None or height is None:
+            w_in, h_in = self.get_size_inches()
+            if width is None and w_in:
+                width = int(round(w_in * DPI_SCALING))
+            if height is None and h_in:
+                height = int(round(h_in * DPI_SCALING))
+        return width, height
+
+    def rasterize(self, file=None, image_format='png', width=None, height=None,
+                  device_scale_factor=1,
+                  background=None, transparent=None,
+                  timeout=15000, executable_path=None, channel=None,
+                  browser_args=None, keep_html=False,
+                  ready_timeout_action='warn'):
+        """
+        **LLM Docstring**
+
+        Render this figure to a raster image, the same idiom
+        `X3DInterface.X3D.rasterize`/`JSMol.Applet.rasterize` use: build
+        the standalone page the widget needs (a margin reset and an
+        optional background) and hand the actual headless-browser work
+        off to that page's own generic `HTML.XMLElement.rasterize`.
+
+        Unlike those two, plain SVG has no asynchronous engine to wait
+        on -- a browser paints it as part of ordinary page load, with
+        nothing comparable to X3DOM's `.runtime.isReady` or JSmol's
+        `readyFunction` to poll -- so no `ready_function` is supplied
+        here; `rasterize`'s own `delay_time` fallback (a short fixed
+        pause, overridable via `rasterize_options={'delay_time': ...}`
+        on `savefig`) is enough.
+
+        :param file: destination; a path, a writable/bytes-like buffer
+            (e.g. `io.BytesIO()`), or `None` to get a new `io.BytesIO`
+            back
+        :param image_format: `"png"` or `"jpg"`/`"jpeg"`
+        :type image_format: str
+        :param width: viewport width; defaults to this figure's own
+            configured width (see `_resolve_pixel_size`)
+        :param height: viewport height; defaults to this figure's own
+            configured height
+        :param device_scale_factor: forwarded to Playwright's
+            `new_page` (the same `dpi`-to-scale-factor trick
+            `X3DFigure.savefig` uses)
+        :param background: an HTML background color for the page before
+            the SVG is drawn; falls back to `self.get_facecolor()` when
+            not given (see `savefig`)
+        :param transparent: if truthy, take the screenshot with
+            `omit_background=True`
+        :param timeout: milliseconds to wait before capturing (mostly
+            irrelevant here, since there's no `ready_function` to time
+            out on)
+        :type timeout: int
+        :param executable_path: forwarded to `resolve_chromium_launch_kwargs`
+        :param channel: forwarded to `resolve_chromium_launch_kwargs`
+        :param browser_args: extra Chromium command-line flags; defaults
+            to `HTML.XMLElement.DEFAULT_RASTERIZE_ARGS`
+        :param keep_html: if truthy, don't delete the intermediate HTML
+            file/directory (useful for debugging what got rendered)
+        :type keep_html: bool
+        :param ready_timeout_action: accepted for interface parity with
+            `X3D.rasterize`/`Applet.rasterize`; irrelevant here since no
+            `ready_function` is ever supplied
+        :type ready_timeout_action: str
+        :return: `file` if given (the path or buffer passed in),
+            otherwise a new `io.BytesIO` holding the image
+        :raises ValueError: if `width`/`height` can't be determined from
+            either the arguments or this figure's own configured size
+        """
+        width, height = self._resolve_pixel_size(width, height)
+        if width is None or height is None:
+            raise ValueError(
+                "rasterize() couldn't determine this figure's width/height -- "
+                "call set_size_inches(...)/pass figsize= when constructing it, "
+                "or pass width=/height= explicitly"
+            )
+
+        from ..Jupyter import JHTML
+
+        wrap_id = f"svg3d-raster-{uuid.uuid4().hex[:8]}"
+        header_elems = [JHTML.Style("html, body { margin:0; padding:0; }")]
+        if background is not None:
+            header_elems.append(JHTML.Style(f"html, body {{ background:{background}; }}"))
+
+        widget = self.to_widget(id=wrap_id, width=f"{width}px", height=f"{height}px")
+        page = JHTML.Html(
+            JHTML.Head(*header_elems),
+            JHTML.Body(widget)
+        )
+
+        return page.rasterize(
+            file,
+            width=width, height=height, device_scale_factor=device_scale_factor,
+            screenshot_selector=f"#{wrap_id}",
+            image_format=image_format, transparent=transparent, timeout=timeout,
+            executable_path=executable_path, channel=channel, browser_args=browser_args,
+            keep_html=keep_html, ready_timeout_action=ready_timeout_action,
+        )
+
+    raster_formats = {'png', 'jpg', 'jpeg'}
+    def savefig(self, file, format=None,
+                dpi=144, facecolor=None, transparent=None,
+                rasterize_options=None,
+                **opts):
+        """
+        **LLM Docstring**
+
+        Save the figure to a file (SVG 3D backend). Extends
+        `SVGFigure.savefig`'s dispatch (`format="svg"` for the raw SVG
+        source, anything else via `to_widget().write(...)`) with a third
+        case: for raster formats (`png`, `jpg`/`jpeg`, inferred from
+        `file`'s extension when `format` is left as `None`, the same
+        convention `X3DFigure.savefig`/`JSMol.Applet.savefig` use), the
+        rasterizer is called instead of writing the SVG/HTML source text
+        into a file with a raster extension.
+
+        :param format: `"png"`/`"jpg"`/`"jpeg"` to rasterize, `"svg"` for
+            the raw SVG source, or anything else (the default) for the
+            widget's own HTML; inferred from `file`'s extension when
+            `format` is left as `None` and `file` is a path
+        :param dpi: only used when rasterizing; converted to
+            `rasterize`'s `device_scale_factor` as `dpi / 72`
+        :param facecolor: background color to use when rasterizing,
+            forwarded to `rasterize` as `background`; defaults to this
+            figure's own `get_facecolor()` when not given
+        :param transparent: if rasterizing, try to omit the page/browser
+            background so the export can come out with an alpha channel
+        :param rasterize_options: extra keyword options forwarded to
+            `rasterize` (`timeout`, `executable_path`, `channel`,
+            `browser_args`, `keep_html`, `ready_timeout_action`, ...)
+        :param opts: extra options forwarded to `to_widget().write(...)`
+            when not rasterizing or writing raw SVG (construction
+            options, not rasterization options)
+        """
+        fmt = format
+        if fmt is None and isinstance(file, str):
+            fmt = os.path.splitext(file)[1].lstrip('.')
+        if fmt is not None and fmt.lower() in self.raster_formats:
+            if facecolor is None:
+                facecolor = self.get_facecolor()
+            return self.rasterize(
+                file,
+                image_format=fmt.lower(),
+                background=facecolor,
+                transparent=transparent,
+                device_scale_factor=(dpi / 72 if dpi is not None else 1),
+                **(rasterize_options if rasterize_options is not None else {})
+            )
+        elif fmt == "svg":
             dev.write_file(
                 file,
                 self.to_svg()
@@ -8993,7 +9169,295 @@ class SVGFigure(GraphicsFigure):
         """
         kwargs = self.kwargs | opts
         ...
-    def to_svg_figure(self, wrap=True, **opts):
+    _transparent_loader_image = (
+        'data:image/gif;base64,'
+        'R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7'
+    )
+    @classmethod
+    def _wrap_dynamic_svg(cls, root):
+        """Bootstrap an inert SVG3D runtime after Jupyter inserts the output."""
+        from ..Jupyter import JHTML
+
+        root_id = root['id']
+        kill_id = f"tmp-svg3d-{uuid.uuid4()}"
+        root_js = json.dumps(root_id)
+        kill_js = json.dumps(kill_id)
+        loader = JHTML.Image(
+            src=cls._transparent_loader_image,
+            id=kill_id,
+            onload=f"""(function() {{
+                const kill = document.getElementById({kill_js});
+                if (kill === null) return;
+                kill.remove();
+                const root = document.getElementById({root_js});
+                if (root === null) return;
+                const payload = root.querySelector(
+                    'script[data-mcutils-svg3d-runtime]'
+                );
+                if (payload === null) return;
+                const ready = function() {{
+                    if (globalThis.McUtilsSVG3D) {{
+                        globalThis.McUtilsSVG3D.ready(root);
+                    }}
+                    payload.remove();
+                }};
+                const script = document.createElement('script');
+                const source = payload.getAttribute('src')
+                    || payload.getAttribute('href');
+                if (source) {{
+                    script.src = source;
+                    script.onload = ready;
+                    document.head.appendChild(script);
+                }} else {{
+                    script.textContent = payload.textContent;
+                    document.head.appendChild(script);
+                    ready();
+                }}
+            }})()"""
+        )
+        return JHTML.Figure(root, loader, can_be_dynamic=False)
+
+    @staticmethod
+    def _svg_snapshot_preamble(id, flip_y=False):
+        """Return shared JavaScript for cloning the currently displayed SVG."""
+        return r"""
+        const source = document.getElementById(__SVG_ID__);
+        if (source === null) return;
+        const snapshot = function() {
+            const clone = source.cloneNode(true);
+            clone.querySelectorAll('script').forEach((node) => node.remove());
+            clone.removeAttribute('onload');
+            clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg');
+            if (__FLIP_Y__) {
+                const rawViewBox = clone.getAttribute('viewBox');
+                if (rawViewBox) {
+                    const viewBox = rawViewBox.trim().split(/[\s,]+/).map(Number);
+                    if (viewBox.length === 4 && viewBox.every(Number.isFinite)) {
+                        const group = document.createElementNS(
+                            'http://www.w3.org/2000/svg', 'g'
+                        );
+                        const children = Array.from(clone.childNodes).filter((node) => {
+                            const name = (node.nodeName || '').toLowerCase();
+                            return name !== 'defs' && name !== 'style';
+                        });
+                        children.forEach((node) => group.appendChild(node));
+                        group.setAttribute(
+                            'transform',
+                            `translate(0 ${2 * viewBox[1] + viewBox[3]}) scale(1 -1)`
+                        );
+                        clone.appendChild(group);
+                    }
+                }
+            }
+            return new XMLSerializer().serializeToString(clone);
+        };
+        const dimensions = function() {
+            const bounds = source.getBoundingClientRect();
+            const viewBox = source.viewBox && source.viewBox.baseVal;
+            return {
+                width: Math.max(1, Math.round(
+                    bounds.width || (viewBox && viewBox.width) || 1
+                )),
+                height: Math.max(1, Math.round(
+                    bounds.height || (viewBox && viewBox.height) || 1
+                ))
+            };
+        };
+        const download = function(blob, name) {
+            const link = document.createElement('a');
+            const url = window.URL.createObjectURL(blob);
+            link.download = name;
+            link.href = url;
+            link.click();
+            setTimeout(() => window.URL.revokeObjectURL(url), 0);
+        };
+        const drawSnapshot = function(canvas) {
+            return new Promise((resolve, reject) => {
+                const svgURL = window.URL.createObjectURL(new Blob(
+                    [snapshot()], {type: 'image/svg+xml;charset=utf-8'}
+                ));
+                const image = new Image();
+                image.onload = function() {
+                    const context = canvas.getContext('2d');
+                    context.clearRect(0, 0, canvas.width, canvas.height);
+                    context.drawImage(image, 0, 0, canvas.width, canvas.height);
+                    window.URL.revokeObjectURL(svgURL);
+                    resolve();
+                };
+                image.onerror = function(error) {
+                    window.URL.revokeObjectURL(svgURL);
+                    reject(error);
+                };
+                image.src = svgURL;
+            });
+        };
+        """.replace('__SVG_ID__', json.dumps(id)).replace(
+            '__FLIP_Y__', 'true' if flip_y else 'false'
+        )
+
+    @classmethod
+    def get_png_export_script(cls, id, flip_y=False):
+        """Build JavaScript that rasterizes the active SVG and downloads a PNG."""
+        return "(async function(){" + cls._svg_snapshot_preamble(id, flip_y) + r"""
+            const size = dimensions();
+            const scale = globalThis.devicePixelRatio || 1;
+            const canvas = document.createElement('canvas');
+            canvas.width = Math.max(1, Math.round(size.width * scale));
+            canvas.height = Math.max(1, Math.round(size.height * scale));
+            await drawSnapshot(canvas);
+            canvas.toBlob((blob) => {
+                if (blob !== null) download(blob, __FILE_NAME__ + '.png');
+            }, 'image/png');
+        })()
+        """.replace('__FILE_NAME__', json.dumps(id))
+
+    @classmethod
+    def get_svg_export_script(cls, id, flip_y=False):
+        """Build JavaScript that downloads the active flattened SVG DOM."""
+        return "(function(){" + cls._svg_snapshot_preamble(id, flip_y) + r"""
+            download(
+                new Blob([snapshot()], {type: 'image/svg+xml;charset=utf-8'}),
+                __FILE_NAME__ + '.svg'
+            );
+        })()
+        """.replace('__FILE_NAME__', json.dumps(id))
+
+    @classmethod
+    def get_record_screen_script(cls, id, polling_rate=30,
+                                 recording_duration=2,
+                                 video_format='video/webm',
+                                 video_extension=None,
+                                 flip_y=False,
+                                 **ignored):
+        """Build JavaScript that records live SVG snapshots through a canvas."""
+        if video_extension is None:
+            video_extension = '.mp4' if video_format == 'video/mp4' else '.webm'
+        values = {
+            '__POLLING_RATE__': json.dumps(polling_rate),
+            '__DURATION__': json.dumps(recording_duration),
+            '__VIDEO_FORMAT__': json.dumps(video_format),
+            '__VIDEO_EXTENSION__': json.dumps(video_extension),
+            '__FILE_NAME__': json.dumps(id)
+        }
+        script = "(async function(){" + cls._svg_snapshot_preamble(id, flip_y) + r"""
+            if (!globalThis.MediaRecorder) {
+                throw new Error('MediaRecorder is not available in this browser');
+            }
+            const size = dimensions();
+            const canvas = document.createElement('canvas');
+            canvas.width = size.width;
+            canvas.height = size.height;
+            const pollingRate = Number(source.pollingRate || __POLLING_RATE__);
+            const duration = Number(source.recordingDuration || __DURATION__);
+            const requestedFormat = source.videoFormat || __VIDEO_FORMAT__;
+            const options = (
+                !MediaRecorder.isTypeSupported
+                || MediaRecorder.isTypeSupported(requestedFormat)
+            ) ? {mimeType: requestedFormat} : {};
+            const stream = canvas.captureStream(pollingRate);
+            const recorder = new MediaRecorder(stream, options);
+            const chunks = [];
+            recorder.ondataavailable = (event) => {
+                if (event.data && event.data.size > 0) chunks.push(event.data);
+            };
+            recorder.onstop = () => {
+                stream.getTracks().forEach((track) => track.stop());
+                download(
+                    new Blob(chunks, {type: recorder.mimeType || requestedFormat}),
+                    __FILE_NAME__ + __VIDEO_EXTENSION__
+                );
+            };
+            let recording = true;
+            const paint = async function() {
+                if (!recording) return;
+                try {
+                    await drawSnapshot(canvas);
+                } finally {
+                    if (recording) requestAnimationFrame(paint);
+                }
+            };
+            await drawSnapshot(canvas);
+            recorder.start();
+            requestAnimationFrame(paint);
+            setTimeout(() => {
+                recording = false;
+                if (recorder.state !== 'inactive') recorder.stop();
+            }, Math.max(0, duration) * 1000);
+        })()
+        """
+        for key, value in values.items():
+            script = script.replace(key, value)
+        return script
+
+    @staticmethod
+    def set_animation_duration_script(id):
+        """Build JavaScript that stores the duration input on the SVG element."""
+        return r"""
+        (function(){
+            const source = document.getElementById(__SVG_ID__);
+            const input = document.getElementById(__INPUT_ID__);
+            if (source !== null && input !== null) {
+                source.recordingDuration = Number(input.value);
+            }
+        })()
+        """.replace('__SVG_ID__', json.dumps(id)).replace(
+            '__INPUT_ID__', json.dumps(id + '-duration-input')
+        )
+
+    @staticmethod
+    def get_view_rotation_script(id):
+        """Build JavaScript that copies the live yaw/pitch into a text area."""
+        return r"""
+        (function(){
+            const figures = globalThis.McUtilsSVG3D
+                && globalThis.McUtilsSVG3D.figures;
+            const scene = figures && figures[__SVG_ID__];
+            const rotation = scene && scene.rotation
+                ? scene.rotation
+                : {yaw: 0, pitch: 0};
+            const output = document.getElementById(__OUTPUT_ID__);
+            if (output !== null) {
+                output.value = JSON.stringify(rotation, null, 2);
+            }
+        })()
+        """.replace('__SVG_ID__', json.dumps(id)).replace(
+            '__OUTPUT_ID__', json.dumps(id + '-view-rotation')
+        )
+
+    def _save_controls(self, JHTML, id, recording_options):
+        """Create PNG, animation, SVG, and view-rotation controls for one SVG."""
+        return JHTML.Div([
+            JHTML.Button(
+                "Save PNG",
+                onclick=self.get_png_export_script(id, flip_y=self.flip_y)
+            ),
+            JHTML.Button(
+                "Record Animation",
+                onclick=self.get_record_screen_script(
+                    id, flip_y=self.flip_y, **recording_options
+                )
+            ),
+            JHTML.Input(
+                value=str(recording_options.get('recording_duration', 2)),
+                id=id + '-duration-input', width="50px",
+                oninput=self.set_animation_duration_script(id)
+            ),
+            JHTML.Button(
+                "Save SVG",
+                onclick=self.get_svg_export_script(id, flip_y=self.flip_y)
+            ),
+            JHTML.Div([
+                JHTML.Button(
+                    "Show View Rotation",
+                    onclick=self.get_view_rotation_script(id)
+                ),
+                JHTML.Textarea(id=id + '-view-rotation')
+            ], display="block")
+        ])
+
+    def to_svg_figure(self, wrap=True, interactive=False,
+                      dynamic_loading=None, include_save_buttons=None,
+                      recording_options=None, **opts):
         """
         **LLM Docstring**
 
@@ -9004,15 +9468,49 @@ class SVGFigure(GraphicsFigure):
         :return: the assembled figure element
         """
         from ..Jupyter import JHTML
-        sub_svgs = [
-            s.figure.to_svg()
-            for s in self.axes
-        ]
+        if dynamic_loading is None:
+            dynamic_loading = self.dynamic_loading
+        if dynamic_loading is None and interactive:
+            from ..Jupyter.JHTML import JupyterAPIs
+            dynamic_loading = JupyterAPIs().in_jupyter_environment()
+        dynamic_loading = bool(dynamic_loading and interactive)
+        if include_save_buttons is None:
+            include_save_buttons = self.include_save_buttons
+        if recording_options is None:
+            recording_options = self.recording_options
+
+        sub_svgs = []
+        svg_ids = []
+        for axes in self.axes:
+            svg_opts = {}
+            if include_save_buttons:
+                svg_id = getattr(axes.figure, 'id', None)
+                if svg_id is None:
+                    svg_id = f"mcutils-svg-{uuid.uuid4().hex}"
+                    axes.figure.id = svg_id
+                svg_ids.append(svg_id)
+                svg_opts['id'] = svg_id
+            root = axes.figure.to_svg(
+                interactive=interactive,
+                dynamic_loading=dynamic_loading,
+                **svg_opts
+            )
+            if dynamic_loading:
+                root = self._wrap_dynamic_svg(root)
+            sub_svgs.append(root)
         #TODO: handle layout
-        fig = JHTML.Div(sub_svgs, **(self.kwargs | opts))
+        canvas = JHTML.Div(sub_svgs, **(self.kwargs | opts))
         if self.flip_y:
-            fig.style['transform'] = (fig.style.get('transform', '') + ' scaleY(-1)').strip()
-        return fig
+            canvas.style['transform'] = (
+                canvas.style.get('transform', '') + ' scaleY(-1)'
+            ).strip()
+        if include_save_buttons:
+            controls = [
+                self._save_controls(JHTML, svg_id, recording_options)
+                for svg_id in svg_ids
+            ]
+            return JHTML.Div([canvas] + controls)
+        return canvas
     def to_svg(self):
         """
         **LLM Docstring**
@@ -9031,7 +9529,7 @@ class SVGFigure(GraphicsFigure):
             s.write(buf)
         buf.seek(0)
         return buf.read()
-    def to_widget(self, **opts):
+    def to_widget(self, interactive=True, **opts):
         """
         **LLM Docstring**
 
@@ -9040,7 +9538,7 @@ class SVGFigure(GraphicsFigure):
         :param opts: extra options
         :return: the result
         """
-        return self.to_svg_figure(**opts)
+        return self.to_svg_figure(interactive=interactive, **opts)
 
     def _repr_html_(self):
         """
@@ -9118,7 +9616,7 @@ class SVGBackend(GraphicsBackend):
             """
             ...
 
-    def show_figure(self, graphics:SVGFigure, reshow=None):
+    def show_figure(self, graphics:SVGFigure, interactive=True, reshow=None):
         """
         **LLM Docstring**
 
@@ -9129,7 +9627,7 @@ class SVGBackend(GraphicsBackend):
         """
         if not graphics.shown:
             graphics.shown = True
-            graphics.to_svg_figure().display()
+            graphics.to_svg_figure(interactive=interactive).display()
 
     def get_interactive_status(self) -> 'bool':
         """

@@ -2,8 +2,12 @@
 from __future__ import annotations
 
 import functools
+import json
+import os
+import uuid
 
 from .. import Numputils as nput
+from .. import Devutils as dev
 from ..Jupyter import JHTML
 import re
 from abc import ABC, abstractmethod
@@ -886,6 +890,15 @@ class SVGFigure:
 
 class SVGPrimitive3D:
     wrapper: type[SVGPrimitive]
+    js_type = None
+    to_2d_js = None
+
+    def to_js_shadow(self, node_id):
+        if self.js_type is None or self.to_2d_js is None:
+            raise NotImplementedError(
+                f"{type(self).__name__} does not define an interactive SVG renderer"
+            )
+        return {'type': self.js_type, 'node': node_id}
     @abstractmethod
     def prep_kwargs(self, projection_matrix) -> tuple[dict, tuple[float, float]]:
         ...
@@ -920,11 +933,39 @@ class SVGPrimitive3D:
         return self.to_2d(projection_matrix).to_svg()
 
 class SVGPointsToShape3D(SVGPrimitive3D):
+    _projected_length_pattern = re.compile(
+        r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*(px)?\s*$"
+    )
     def __init__(self, **kwargs):
         self.kwargs = kwargs
     @abstractmethod
     def to_points(self):
         ...
+    @classmethod
+    def _parse_projected_length(cls, value):
+        if nput.is_numeric(value):
+            return float(value), ''
+        if isinstance(value, str):
+            match = cls._projected_length_pattern.match(value)
+            if match is not None:
+                return float(match.group(1)), match.group(2) or ''
+        return None
+    @classmethod
+    def _scale_projected_stroke(cls, kwargs, scale):
+        parsed = cls._parse_projected_length(kwargs.get('stroke-width'))
+        if parsed is None:
+            return kwargs
+        value, unit = parsed
+        return kwargs | {'stroke-width': f'{value * scale:.6g}{unit}'}
+    def to_js_shadow(self, node_id):
+        shadow = super().to_js_shadow(node_id) | {
+            'points': np.asanyarray(self.to_points()).tolist()
+        }
+        stroke_width = self._parse_projected_length(self.kwargs.get('stroke-width'))
+        if stroke_width is not None:
+            value, unit = stroke_width
+            shadow['strokeWidth'] = {'value': value, 'unit': unit}
+        return shadow
     def get_depth(self, points):
         return (np.min(points[:, 2]), np.max(points[:, 2]))
     def prep_kwargs(self, projection_matrix, return_w=False, **extra):
@@ -936,29 +977,47 @@ class SVGPointsToShape3D(SVGPrimitive3D):
             zvals = points[:, (2,)]
             points = np.concatenate([points[:, :2] @ np.asanyarray(projection_matrix), zvals], axis=-1)
         else:
-            # raise Exception(projection_matrix)
-            # print(">>>")
-            # print(points)
-            bits = nput.render_points(points, projection_matrix, return_w=return_w)
+            # A 3D stroke width is a world-space length, just like a sphere or
+            # cylinder radius. Keep the homogeneous depth even when the caller
+            # does not otherwise need it so the stroke can use the same local
+            # perspective scale as the geometry.
+
+            project_stroke = self._parse_projected_length(
+                self.kwargs.get('stroke-width')
+            ) is not None
+            want_w = return_w or project_stroke
+            bits = nput.render_points(points, projection_matrix, return_w=want_w)
             #TODO: split culled segments
-            if return_w:
+            if want_w:
                 (points, in_view), w = bits
-                extra['w'] = w
-                # print(w)
+                w = w[in_view]
+                if return_w:
+                    extra['w'] = w
             else:
                 points, in_view = bits
-            # print("  >")
-            # print(points)
-            # print(in_view)
             points = points[in_view]
+            if project_stroke and len(w) > 0:
+                y_scale = np.linalg.norm(pr[:3, 1])
+                stroke_scale = y_scale * np.mean(1 / w)
+                kwargs = self._scale_projected_stroke(
+                    self.kwargs, stroke_scale
+                )
+            else:
+                kwargs = self.kwargs
+        if pr.shape[-1] < 4:
+            kwargs = self.kwargs
         if len(points) > 0:
             depth = self.get_depth(points)
         else:
             depth = []
         extra['points'] = points[:, :2]
-        return self.kwargs | extra, depth
+        return kwargs | extra, depth
 
 class SVGPolygon3D(SVGPointsToShape3D):
+    js_type = 'polygon'
+    to_2d_js = """function(primitive, runtime) {
+  return runtime.flattenPoints(primitive);
+}"""
     wrapper = SVGPolygon
     def __init__(self, points, **kwargs):
         self.points = points
@@ -967,6 +1026,10 @@ class SVGPolygon3D(SVGPointsToShape3D):
         return self.points
 
 class SVGPolyline3D(SVGPointsToShape3D):
+    js_type = 'polyline'
+    to_2d_js = """function(primitive, runtime) {
+  return runtime.flattenPoints(primitive);
+}"""
     wrapper = SVGPolyline
     def __init__(self, points, **kwargs):
         self.points = points
@@ -975,6 +1038,10 @@ class SVGPolyline3D(SVGPointsToShape3D):
         return self.points
 
 class SVGLine3D(SVGPolyline3D):
+    js_type = 'line'
+    to_2d_js = """function(primitive, runtime) {
+  return runtime.flattenPoints(primitive);
+}"""
     def __init__(self, x1, y1, z1, x2, y2, z2, **kwargs):
         super().__init__(points=[[x1, y1, z1], [x2, y2, z2]], **kwargs)
 
@@ -1048,6 +1115,10 @@ class SVGPolylike3D(SVGFlatPointsToShape3D):
         self._wrapper = value
 
 class SVGRect3D(SVGPolylike3D):
+    js_type = 'rect'
+    to_2d_js = """function(primitive, runtime) {
+  return runtime.flattenPoints(primitive);
+}"""
     def __init__(self, x, y, z, width, height, **kwargs):
         self.x = x
         self.y = y
@@ -1064,6 +1135,10 @@ class SVGRect3D(SVGPolylike3D):
         ]), np.array([self.x, self.y, self.z])
 
 class SVGCircle3D(SVGPolylike3D):
+    js_type = 'circle'
+    to_2d_js = """function(primitive, runtime) {
+  return runtime.flattenPoints(primitive);
+}"""
     def __init__(self, x, y, z, r, minor_radius=None, npoints=48, offset_angle=0, span_angle=2*np.pi, **kwargs):
         self.x = x
         self.y = y
@@ -1082,6 +1157,10 @@ class SVGCircle3D(SVGPolylike3D):
                                  span_angle=self.span_angle)
         return points, np.array([self.x, self.y, self.z])
 class SVGEllipse3D(SVGCircle3D):
+    js_type = 'ellipse'
+    to_2d_js = """function(primitive, runtime) {
+  return runtime.flattenPoints(primitive);
+}"""
     def __init__(self, x, y, z, rx, ry, **kwargs):
         super().__init__(x, y, z, rx, minor_radius=ry, **kwargs)
 
@@ -1100,6 +1179,10 @@ class SVGEllipse3D(SVGCircle3D):
         self.minor_radius = value
 
 class SVGNonPlanarPolylike3D(SVGPointsToShape3D):
+    js_type = 'nonplanar-polylike'
+    to_2d_js = """function(primitive, runtime) {
+  return runtime.flattenPoints(primitive);
+}"""
     def __init__(self, points, wrapper=None, **kwargs):
         self.points = points
         self._wrapper = wrapper
@@ -1121,6 +1204,10 @@ class SVGNonPlanarPolylike3D(SVGPointsToShape3D):
         return self.points
 
 class SVGPath3D(SVGNonPlanarPolylike3D):
+    js_type = 'path'
+    to_2d_js = """function(primitive, runtime) {
+  return runtime.flattenPoints(primitive);
+}"""
     def __init__(self, d, rotation=None, normal=None, **kwargs):
         points = self.prep_points(d, rotation=rotation, normal=normal)
         super().__init__(points, **kwargs)
@@ -1135,6 +1222,35 @@ class SVGPath3D(SVGNonPlanarPolylike3D):
 
 
 class SVGCylinder(SVGPointsToShape3D):
+    js_type = 'cylinder'
+    to_2d_js = """function(primitive, runtime) {
+  const projected = primitive.points.map(point => runtime.project(point));
+  if (projected.some(point => point === null)) return runtime.hide(primitive);
+  const start = projected[0], end = projected[1];
+  const dx = end.x - start.x, dy = end.y - start.y;
+  const length = Math.hypot(dx, dy);
+  if (length <= 1e-12) return runtime.hide(primitive);
+  const ox = dy / length, oy = -dx / length;
+  const scale = runtime.columnNorm(1);
+  const r1 = primitive.radius * scale / Math.max(start.w, 1e-12);
+  const r2 = primitive.radius * scale / Math.max(end.w, 1e-12);
+  const points = [
+    [start.x - r1 * ox, start.y - r1 * oy],
+    [end.x - r2 * ox, end.y - r2 * oy],
+    [end.x + r2 * ox, end.y + r2 * oy],
+    [start.x + r1 * ox, start.y + r1 * oy]
+  ];
+  const edge = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  const node = runtime.node(primitive);
+  node.setAttribute('points', runtime.pointsAttribute(points));
+  node.setAttribute('stroke-dasharray', [
+    edge(points[0], points[1]), edge(points[3], points[0]),
+    edge(points[2], points[3]), edge(points[1], points[2])
+  ].join(', '));
+  runtime.scaleStroke(primitive, projected);
+  runtime.show(node);
+  return runtime.depthResult(primitive, projected);
+}"""
     def __init__(self, start, end, radius, wrapper=None, **kwargs):
         self.start = np.asanyarray(start)
         self.end = np.asanyarray(end)
@@ -1156,6 +1272,8 @@ class SVGCylinder(SVGPointsToShape3D):
         self._wrapper = value
     def to_points(self):
         return np.array([self.start, self.end])
+    def to_js_shadow(self, node_id):
+        return super().to_js_shadow(node_id) | {'radius': self.radius}
     def compare_primitive(self, prim, depth1, depth2) -> int:
         if isinstance(prim, SVGSphere):
             return -1 * prim.compare_primitive(self, depth2, depth1)
@@ -1165,7 +1283,7 @@ class SVGCylinder(SVGPointsToShape3D):
         kwargs, depth = super().prep_kwargs(projection_matrix, return_w=True)
         w = kwargs.pop('w')
         pts = kwargs.pop('points')
-        if len(pts) == 0:
+        if len(pts) < 2:
             return None, None
         w[w <= 0] = 1
         y_scale = np.linalg.norm(projection_matrix[:3, 1])
@@ -1185,6 +1303,19 @@ class SVGCylinder(SVGPointsToShape3D):
         return kwargs | dict(points=points), depth
 
 class SVGSphere(SVGPointsToShape3D):
+    js_type = 'sphere'
+    to_2d_js = """function(primitive, runtime) {
+  const point = runtime.project(primitive.points[0]);
+  if (point === null) return runtime.hide(primitive);
+  const node = runtime.node(primitive);
+  const radius = primitive.radius * runtime.columnNorm(1) / Math.max(point.w, 1e-12);
+  node.setAttribute('cx', point.x);
+  node.setAttribute('cy', point.y);
+  node.setAttribute('r', radius);
+  runtime.scaleStroke(primitive, [point]);
+  runtime.show(node);
+  return runtime.depthResult(primitive, [point]);
+}"""
     wrapper = SVGCircle
     def __init__(self, center, radius, **kwargs):
         self.center = np.asanyarray(center)
@@ -1192,6 +1323,8 @@ class SVGSphere(SVGPointsToShape3D):
         super().__init__(**kwargs)
     def to_points(self):
         return self.center[np.newaxis]
+    def to_js_shadow(self, node_id):
+        return super().to_js_shadow(node_id) | {'radius': self.radius}
     def compare_primitive(self, prim, depth1, depth2) -> int:
         if isinstance(prim, SVGSphere):
             r1 = self.radius
@@ -1232,6 +1365,20 @@ class SVGSphere(SVGPointsToShape3D):
         }, depth
 
 class SVGText3D(SVGPointsToShape3D):
+    js_type = 'text'
+    to_2d_js = """function(primitive, runtime) {
+  const point = runtime.project(primitive.points[0]);
+  if (point === null) return runtime.hide(primitive);
+  const node = runtime.node(primitive);
+  node.setAttribute('x', point.x);
+  node.setAttribute('y', point.y);
+  runtime.scaleStroke(primitive, [point]);
+  runtime.show(node);
+  if (primitive.overlay) return {
+    node: node, primitive: primitive, depth: [1000, 1000], hidden: false
+  };
+  return runtime.depthResult(primitive, [point]);
+}"""
     wrapper = SVGText
     def __init__(self, text, x, y, z, overlay=True, **kwargs):
         self.text = text
@@ -1241,6 +1388,8 @@ class SVGText3D(SVGPointsToShape3D):
 
     def to_points(self):
         return self.points
+    def to_js_shadow(self, node_id):
+        return super().to_js_shadow(node_id) | {'overlay': self.overlay}
     def prep_kwargs(self, projection_matrix) -> tuple[dict, tuple[float, float]]:
         kwargs, depth = super().prep_kwargs(projection_matrix)
         kwargs['text'] = self.text
@@ -1269,6 +1418,242 @@ class SVGText3D(SVGPointsToShape3D):
 
 class SVGFigure3D(SVGFigure):
 
+    interactive_runtime_template = r'''(function (global) {
+  "use strict";
+
+  const api = global.McUtilsSVG3D = global.McUtilsSVG3D || {};
+  api.figures = api.figures || Object.create(null);
+  api.renderers = Object.assign(api.renderers || Object.create(null), {
+__MCUTILS_RENDERERS__
+  });
+  api.figures[__MCUTILS_FIGURE_ID__] = __MCUTILS_SCENE__;
+
+  function makeRuntime(root, figure) {
+    return {
+      root,
+      figure,
+      matrix: figure.projection,
+      center: figure.center,
+
+      node(primitive) {
+        const node = document.getElementById(primitive.node);
+        if (!node) throw new Error(`Missing SVG node ${primitive.node}`);
+        return node;
+      },
+
+      rotate(point) {
+        const x = point[0] - this.center[0];
+        const y = point[1] - this.center[1];
+        const z = point[2] - this.center[2];
+        const cy = Math.cos(figure.rotation.yaw);
+        const sy = Math.sin(figure.rotation.yaw);
+        const cp = Math.cos(figure.rotation.pitch);
+        const sp = Math.sin(figure.rotation.pitch);
+        const yawX = cy * x + sy * z;
+        const yawZ = -sy * x + cy * z;
+        return [
+          yawX + this.center[0],
+          cp * y - sp * yawZ + this.center[1],
+          sp * y + cp * yawZ + this.center[2]
+        ];
+      },
+
+      project(point) {
+        const p = this.rotate(point);
+        const matrix = this.matrix;
+        const rows = matrix.length;
+        const cols = matrix[0].length;
+
+        if (cols === 4) {
+          const hp = [p[0], p[1], p[2], 1];
+          const q = [0, 0, 0, 0];
+          for (let j = 0; j < 4; ++j) {
+            for (let i = 0; i < Math.min(rows, 4); ++i) {
+              q[j] += hp[i] * matrix[i][j];
+            }
+          }
+          if (q[3] <= 1e-8) return null;
+          return {
+            x: q[0] / q[3],
+            y: q[1] / q[3],
+            z: q[2] / q[3],
+            w: q[3]
+          };
+        }
+
+        if (cols === 3) {
+          const q = [0, 0, 0];
+          for (let j = 0; j < 3; ++j) {
+            for (let i = 0; i < Math.min(rows, 3); ++i) {
+              q[j] += p[i] * matrix[i][j];
+            }
+          }
+          return {x: q[0], y: q[1], z: q[2], w: 1};
+        }
+
+        if (cols === 2) {
+          return {
+            x: p[0] * matrix[0][0] + p[1] * matrix[1][0],
+            y: p[0] * matrix[0][1] + p[1] * matrix[1][1],
+            z: p[2],
+            w: 1
+          };
+        }
+
+        throw new Error("Unsupported SVGFigure3D projection matrix shape");
+      },
+
+      columnNorm(column) {
+        let total = 0;
+        for (let row = 0; row < Math.min(3, this.matrix.length); ++row) {
+          const value = this.matrix[row][column];
+          total += value * value;
+        }
+        return Math.sqrt(total);
+      },
+
+      pointsAttribute(points) {
+        return points.map(point => `${point[0]},${point[1]}`).join(" ");
+      },
+
+      scaleStroke(primitive, projected) {
+        if (!primitive.strokeWidth || projected.length === 0) return;
+        const inverseDepth = projected.reduce(
+          (total, point) => total + 1 / point.w, 0
+        ) / projected.length;
+        const width = (
+          primitive.strokeWidth.value * this.columnNorm(1) * inverseDepth
+        );
+        this.node(primitive).setAttribute(
+          "stroke-width", `${width}${primitive.strokeWidth.unit}`
+        );
+      },
+
+      show(node) {
+        node.removeAttribute("display");
+      },
+
+      hide(primitive) {
+        const node = this.node(primitive);
+        node.setAttribute("display", "none");
+        return {node, primitive, depth: [-Infinity, -Infinity], hidden: true};
+      },
+
+      depthResult(primitive, points) {
+        const depths = points.map(point => point.z);
+        return {
+          node: this.node(primitive),
+          primitive,
+          depth: [Math.min(...depths), Math.max(...depths)],
+          hidden: false
+        };
+      },
+
+      flattenPoints(primitive) {
+        const projected = primitive.points
+          .map(point => this.project(point))
+          .filter(point => point !== null);
+        if (projected.length === 0) return this.hide(primitive);
+        const node = this.node(primitive);
+        node.setAttribute(
+          "points",
+          projected.map(point => `${point.x},${point.y}`).join(" ")
+        );
+        this.scaleStroke(primitive, projected);
+        this.show(node);
+        return this.depthResult(primitive, projected);
+      },
+
+      compare(left, right) {
+        const depth1 = left.depth;
+        const depth2 = right.depth;
+        if (depth1[1] < depth2[0]) return -1;
+        if (depth1[0] > depth2[1]) return 1;
+        if (depth1[1] > depth2[1]) return 1;
+        if (depth1[0] < depth2[0]) return -1;
+        return 0;
+      },
+
+      render() {
+        const projected = [];
+        for (const primitive of figure.primitives) {
+          const renderer = api.renderers[primitive.type];
+          if (!renderer) {
+            throw new Error(`No SVGFigure3D renderer for ${primitive.type}`);
+          }
+          projected.push(renderer(primitive, this));
+        }
+        projected
+          .filter(item => item && !item.hidden)
+          .sort((left, right) => this.compare(left, right))
+          .forEach(item => item.node.parentNode.appendChild(item.node));
+      }
+    };
+  }
+
+  api.ready = function (eventOrRoot) {
+    const root = eventOrRoot && (eventOrRoot.currentTarget || eventOrRoot.target)
+      ? (eventOrRoot.currentTarget || eventOrRoot.target)
+      : eventOrRoot;
+    if (!root || root.__mcutilsSVG3DReady) return;
+
+    const figure = api.figures[root.id];
+    if (!figure) {
+      throw new Error(`No SVGFigure3D shadow model registered for ${root.id}`);
+    }
+
+    root.__mcutilsSVG3DReady = true;
+    root.style.touchAction = "none";
+    root.style.cursor = "grab";
+    figure.rotation = figure.rotation || {yaw: 0, pitch: 0};
+    figure.animationFrame = null;
+    const runtime = makeRuntime(root, figure);
+    figure.runtime = runtime;
+
+    let drag = null;
+    root.addEventListener("pointerdown", event => {
+      root.setPointerCapture(event.pointerId);
+      drag = {
+        x: event.clientX,
+        y: event.clientY,
+        yaw: figure.rotation.yaw,
+        pitch: figure.rotation.pitch
+      };
+      root.style.cursor = "grabbing";
+      event.preventDefault();
+    });
+
+    root.addEventListener("pointermove", event => {
+      if (drag === null) return;
+      figure.rotation.yaw =
+        drag.yaw + (event.clientX - drag.x) * figure.sensitivity;
+      figure.rotation.pitch =
+        drag.pitch + (event.clientY - drag.y) * figure.sensitivity;
+      if (figure.animationFrame !== null) {
+        cancelAnimationFrame(figure.animationFrame);
+      }
+      figure.animationFrame = requestAnimationFrame(() => {
+        figure.animationFrame = null;
+        runtime.render();
+      });
+      event.preventDefault();
+    });
+
+    const finishDrag = event => {
+      if (drag === null) return;
+      drag = null;
+      root.style.cursor = "grab";
+      if (root.hasPointerCapture(event.pointerId)) {
+        root.releasePointerCapture(event.pointerId);
+      }
+    };
+    root.addEventListener("pointerup", finishDrag);
+    root.addEventListener("pointercancel", finishDrag);
+  };
+
+})(globalThis);
+'''
+
     def __init__(self, elements=None, defs=None,
                  view_matrix=None,
                  perspective_matrix=None,
@@ -1281,6 +1666,7 @@ class SVGFigure3D(SVGFigure):
                  view_angle=None,
                  aspect_ratio=None,
                  view_distance=None,
+                 view_scale=None,
                  clip_distances=None,
                  **kwargs):
         self._projection_kwargs = dict(
@@ -1298,7 +1684,10 @@ class SVGFigure3D(SVGFigure):
             clip_distances=clip_distances
         )
         self._render_matrix = None
+        self.view_scale = view_scale
         self._temp_draw_cache = None
+        self._interactive_context = None
+        self.id = kwargs.get('id')
         super().__init__(elements=elements, defs=defs, **kwargs)
     def get_projection_matrix(self):
         if self._render_matrix is None:
@@ -1306,11 +1695,35 @@ class SVGFigure3D(SVGFigure):
             self._render_matrix = nput.render_matrix(**self._projection_kwargs)
         return self._render_matrix
     def get_projection_kwargs(self):
-        return self._projection_kwargs
+        projection_kwargs = self._projection_kwargs.copy()
+        if self.view_scale is not None:
+            projection_kwargs['view_scale'] = self.view_scale
+        return projection_kwargs
     def set_projection_kwargs(self, render_matrix=None, **kwargs):
+        view_scale = kwargs.pop('view_scale', None)
+        if view_scale is not None:
+            view_scale = np.asanyarray(view_scale)
+            if np.any(view_scale <= 0):
+                raise ValueError("view_scale must be positive")
+            self.view_scale = view_scale
         if render_matrix is not None or len(kwargs) > 0:
             self._render_matrix = render_matrix
             self._projection_kwargs.update(kwargs)
+
+    @staticmethod
+    def scale_view_box(view_box, view_scale):
+        """Expand a 2D view box about its center without changing the canvas."""
+        view_box = np.asanyarray(view_box, dtype=float)
+        view_scale = np.asanyarray(view_scale, dtype=float)
+        if view_scale.ndim == 0:
+            view_scale = np.full(2, view_scale)
+        view_scale = np.broadcast_to(view_scale, (2,))
+        center = np.mean(view_box, axis=-1)
+        half_width = np.diff(view_box, axis=-1).flatten() / 2
+        return np.stack([
+            center - half_width * view_scale,
+            center + half_width * view_scale
+        ], axis=-1)
 
     element_mapping = {
         'circle': SVGCircle3D,
@@ -1335,6 +1748,11 @@ class SVGFigure3D(SVGFigure):
         if isinstance(e, SVGPrimitive3D):
             flat, z = e.to_2d(projection_matrix=self.get_projection_matrix())
             if flat is None: return None, None
+            if self._interactive_context is not None:
+                node_id = self._interactive_context.get(id(e))
+                if node_id is not None:
+                    flat.set_attr('id', node_id)
+                    flat.set_attr('data-mcutils-svg3d-primitive', e.js_type)
             self._temp_draw_cache[flat] = (e, z)
             e = flat
         two_d, bbox = super().prep_element(e)
@@ -1411,17 +1829,135 @@ class SVGFigure3D(SVGFigure):
                 )
         return bbox
 
-    def to_svg(self, compute_bbox=None, view_box=None, **opts):
-        vd = self._projection_kwargs.pop('view_distance', None)
+    @staticmethod
+    def _json_default(value):
+        if hasattr(value, 'tolist'):
+            return value.tolist()
+        if hasattr(value, 'item'):
+            return value.item()
+        raise TypeError(f"{type(value).__name__} is not JSON serializable")
+
+    def _interactive_scene(self, figure_id, primitive_ids, sensitivity):
+        primitives = []
+        points = []
+        renderers = {}
+        for element in self.elements:
+            if not isinstance(element, SVGPrimitive3D):
+                continue
+            shadow = element.to_js_shadow(primitive_ids[id(element)])
+            primitives.append(shadow)
+            points.extend(shadow.get('points', ()))
+            renderers[element.js_type] = element.to_2d_js
+        if len(points) == 0:
+            center = [0, 0, 0]
+        else:
+            points = np.asanyarray(points)
+            center = ((np.min(points, axis=0) + np.max(points, axis=0)) / 2).tolist()
+        return {
+            'id': figure_id,
+            'projection': np.asanyarray(self.get_projection_matrix()).tolist(),
+            'center': center,
+            'sensitivity': sensitivity,
+            'rotation': {'yaw': 0, 'pitch': 0},
+            'animationFrame': None,
+            'primitives': primitives
+        }, renderers
+
+    def get_interactive_runtime(self, scene, renderers):
+        renderer_source = ",\n".join(
+            f"    {json.dumps(name)}: {source}"
+            for name, source in renderers.items()
+        )
+        scene_source = json.dumps(
+            scene, separators=(',', ':'), default=self._json_default
+        )
+        return (
+            self.interactive_runtime_template
+            .replace('__MCUTILS_RENDERERS__', renderer_source)
+            .replace('__MCUTILS_FIGURE_ID__', json.dumps(scene['id']))
+            .replace('__MCUTILS_SCENE__', scene_source)
+        )
+
+    def write_interactive_runtime(self, file, scene, renderers):
+        dev.write_file(file, self.get_interactive_runtime(scene, renderers))
+        return file
+
+    def to_svg(self, compute_bbox=None, view_box=None, *, interactive=False,
+               dynamic_loading=False,
+               runtime_file=None, runtime_src=None, rotation_sensitivity=.01,
+               **opts):
+        vd = self._projection_kwargs.get('view_distance')
         if vd is not None and self.view_box is None:
             self.view_box = vd / 4 * np.array([[-1, 1], [-1, 1], [-1, 1]])
 
         if view_box is None:
             view_box = self.view_box
+        if view_box is None and self.view_scale is not None:
+            # The ordinary orthographic path obtains its range from the drawn
+            # elements. Materialize that range so view_scale can add breathing
+            # room without changing the projection itself.
+            view_box = self.compute_viewbox()
+            if view_box is not None:
+                view_box = view_box[:2]
+        if view_box is not None and len(view_box) == 3:
+            view_box, _ = nput.render_points(
+                np.asanyarray(view_box).T, self.get_projection_matrix()
+            )
+            view_box = np.sort(view_box.T, axis=-1)
+        if view_box is not None and self.view_scale is not None:
+            view_box = self.scale_view_box(view_box, self.view_scale)
 
-        if view_box is not None:
-            if len(view_box) == 3:
-                view_box, _ = nput.render_points(np.asanyarray(view_box).T, self.get_projection_matrix())
-                view_box = np.sort(view_box.T, axis=-1)
+        primitive_ids = None
+        if interactive:
+            requested_id = opts.get('id', self.kwargs.get('id', self.id))
+            if requested_id is not None:
+                self.id = requested_id
+            if self.id is None:
+                self.id = f"mcutils-svg3d-{uuid.uuid4().hex}"
+                self.kwargs['id'] = self.id
+            primitive_ids = {
+                id(element): f"{self.id}-primitive-{index}"
+                for index, element in enumerate(self.elements)
+                if isinstance(element, SVGPrimitive3D)
+            }
+            self._interactive_context = primitive_ids
+            opts = dict(opts)
+            opts['id'] = self.id
+            opts['data-mcutils-svg3d'] = self.id
+            opts.setdefault('tabindex', '0')
+            if not dynamic_loading:
+                ready = "globalThis.McUtilsSVG3D && McUtilsSVG3D.ready(event)"
+                opts['onload'] = f"{opts['onload']};{ready}" if opts.get('onload') else ready
 
-        return super().to_svg(compute_bbox=compute_bbox, view_box=view_box, **opts)
+        try:
+            root = super().to_svg(
+                compute_bbox=compute_bbox, view_box=view_box, **opts
+            )
+        finally:
+            self._interactive_context = None
+
+        if interactive:
+            scene, renderers = self._interactive_scene(
+                self.id, primitive_ids, rotation_sensitivity
+            )
+            runtime = self.get_interactive_runtime(scene, renderers)
+            runtime_type = (
+                'application/mcutils-svg3d-runtime'
+                    if dynamic_loading else
+                'application/ecmascript'
+            )
+            runtime_attrs = {
+                'type': runtime_type,
+                'data-mcutils-svg3d-runtime': self.id
+            }
+            if runtime_file is None:
+                root.append(SVG.Script(runtime, **runtime_attrs))
+            else:
+                self.write_interactive_runtime(runtime_file, scene, renderers)
+                if runtime_src is None:
+                    runtime_src = os.path.basename(os.fspath(runtime_file))
+                root.append(SVG.Script(
+                    '', href=runtime_src, src=runtime_src,
+                    **runtime_attrs
+                ))
+        return root
