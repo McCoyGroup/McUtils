@@ -18,7 +18,7 @@ class X3DHTML:
         return cls._x3d_map
 
     class X3DElement(HTML.TagElement):
-        ignored_styles = {"height", "width", "position", "color", "direction"}
+        ignored_styles = {"height", "width", "position", "color", "direction", "top", "bottom", "left", "right"}
         can_be_dynamic = False
         style_props = None
 

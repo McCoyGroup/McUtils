@@ -16,6 +16,7 @@ import re
 import uuid
 import functools
 import io
+import os
 import base64
 import dataclasses
 
@@ -921,9 +922,10 @@ class GraphicsFigure(metaclass=abc.ABCMeta):
         :return: the result
         """
         raise NotImplementedError("needs an overload")
-    supports_generic_args = False
+    supports_generic_args = False # this is handled at the `check` stage, not before
     def set_opts(self, opts):
-        raise NotImplementedError("generic Figure can't handle remaining Graphics args")
+        ...
+        # raise NotImplementedError("generic Figure can't handle remaining Graphics args")
     @classmethod
     def canonicalize_opts(cls, opts):
         """
@@ -3829,6 +3831,7 @@ class MPLAxes3D(MPLAxes):
                       color_cycle=False,
                       capstyle='butt',
                       plotter='plot',
+                      closed=None,
                       **opts):
         """
         **LLM Docstring**
@@ -3856,6 +3859,8 @@ class MPLAxes3D(MPLAxes):
         :param opts: extra options
         """
         import matplotlib.patheffects as pe
+
+        #TODO: try to get a closed impl
 
         if glow is not None:
             if color is None:
@@ -5041,7 +5046,7 @@ class MPLBackend3D(MPLBackend):
         """
         from mpl_toolkits.mplot3d import Axes3D
         subplot_kw = dict({"projection": '3d'}, **({} if subplot_kw is None else subplot_kw))
-        return super().create_figure(*args, subplot_kw=subplot_kw, **kwargs)
+        return super().create_raw_figure(*args, subplot_kw=subplot_kw, **kwargs)
 
 class PlotlyAxes(GraphicsAxes):
     base_axis_theme = {}
@@ -7378,6 +7383,7 @@ class PlotlyAxes3D(PlotlyAxes):
                       layer='above',
                       # capstyle='butt',
                       default_view_distance='auto',
+                      closed=None,
                       **opts):
         """
         **LLM Docstring**
@@ -9430,7 +9436,7 @@ class SVGAxes3D(SVGAxes):
         """
         styles = self.prep_styles(styles)
         return self.figure.add_sphere(center=points, radius=rads, **styles)
-    def draw_cylinder(self, start, end, rad, **styles):
+    def draw_cylinder(self, start, end, rad, closed=None, **styles):
         """
         **LLM Docstring**
 
@@ -13542,17 +13548,64 @@ class X3DFigure(GraphicsFigure):
         :param fg: the face color
         """
         self.background = fg
-    def savefig(self, file, format=None, **opts):
+
+    raster_formats = {'png', 'jpg', 'jpeg'}
+    def savefig(self, file, format=None,
+                dpi=144, facecolor=None, transparent=None,
+                rasterize_options=None,
+                **opts):
         """
         **LLM Docstring**
 
-        Save the figure to a file (X3D backend).
+        Save the figure to a file (X3D backend). Vector/markup formats (the
+        default, or an explicit `format="x3d"`/`"html"`) are written directly
+        via `to_x3d(...).dump(...)`, same as before. Raster formats (`png`,
+        `jpg`/`jpeg`, inferred from `file`'s extension when `format` is left
+        as `None`) instead render the scene in a headless browser and
+        screenshot it; see `X3DInterface.X3D.rasterize` for how the browser
+        is located and how it waits for the scene to actually be on screen
+        before capturing it.
 
-        :param file: the destination file/path
-        :param format: the `format`
-        :param opts: extra options
+        `dpi` and `facecolor` are accepted (and `facecolor` used as the
+        rasterized background when the scene doesn't already set one) so
+        that `X3DFigure` tolerates the generic kwargs `Graphics.savefig`
+        always forwards, but neither changes vector/markup output.
+
+        :param format: `"png"`/`"jpg"`/`"jpeg"` to rasterize, or a
+            markup format (`"x3d"`, `"html"`) to hand off to `dump`;
+            inferred from `file`'s extension when omitted
+        :param dpi: accepted for interface compatibility with the other
+            backends; unused (the scene is rendered at its own configured
+            pixel size)
+        :param facecolor: background color to use when rasterizing, if
+            the scene doesn't already specify one
+        :param transparent: if rasterizing, try to omit the page/browser
+            background so the export can come out with an alpha channel
+        :param rasterize_options: extra keyword options forwarded to
+            `X3DInterface.X3D.rasterize` (`timeout`, `executable_path`,
+            `channel`, `browser_args`, `keep_html`, `ready_timeout_action`, ...)
+        :param opts: extra options forwarded to `to_x3d(...)` (scene
+            construction options, not rasterization options)
         """
-        return self.to_x3d(**opts).dump(file)
+        fmt = format
+        if fmt is None and isinstance(file, str):
+            fmt = os.path.splitext(file)[1].lstrip('.')
+        if transparent is None:
+            transparent = dev.str_is(self.background, 'transparent')
+        if fmt is not None and fmt.lower() in self.raster_formats:
+            scene = self.to_x3d(**opts)
+            return scene.rasterize(
+                file,
+                image_format=fmt.lower(),
+                width=self.width,
+                height=self.height,
+                background=facecolor,
+                transparent=transparent,
+                device_scale_factor=(dpi / 72),
+                **(rasterize_options if rasterize_options is not None else {})
+            )
+        else:
+            return self.to_x3d(**opts).dump(file)
     def prep_opts(self):
         """
         **LLM Docstring**
