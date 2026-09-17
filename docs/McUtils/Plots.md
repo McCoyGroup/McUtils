@@ -630,9 +630,9 @@ figure.show()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-acd555" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-acd555"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-60cda0" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-60cda0"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-acd555" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-60cda0" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -656,15 +656,20 @@ figure.show()
 - [BaseSVG](#BaseSVG)
 - [SVGBackend2D](#SVGBackend2D)
 - [SVGBackend3D](#SVGBackend3D)
+- [SVGFigure3DProjectsStrokeWidths](#SVGFigure3DProjectsStrokeWidths)
+- [SVGFigure3DViewScale](#SVGFigure3DViewScale)
+- [SVGFigure3DInteractiveRuntime](#SVGFigure3DInteractiveRuntime)
+- [SVGFigure3DDynamicLoading](#SVGFigure3DDynamicLoading)
+- [SVGFigure3DSaveControls](#SVGFigure3DSaveControls)
 - [MPLPath](#MPLPath)
 - [MeshBackend](#MeshBackend)
 - [InvertAxes](#InvertAxes)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-665920" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-665920"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-f4bb3f" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-f4bb3f"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-665920" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-f4bb3f" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1166,6 +1171,157 @@ class PlotsTests(TestCase):
             ["l", [100, 0, 0, 100]],
         ], stroke='green', fill='none', rotation=np.pi/6, normal=[0, 1, 1]).plot(fig)
         fig.show()
+```
+
+#### <a name="SVGFigure3DProjectsStrokeWidths">SVGFigure3DProjectsStrokeWidths</a>
+```python
+    def test_SVGFigure3DProjectsStrokeWidths(self):
+        from McUtils.Plots.SVG import SVGCylinder, SVGSphere
+
+        projection = np.eye(4)
+        projection[0, 0] = projection[1, 1] = 2
+        projection[2, 3] = -1
+        projection[3, 3] = 10
+
+        sphere = SVGSphere(
+            center=[0, 0, 0], radius=.4, **{'stroke-width': '.01px'}
+        )
+        sphere_kwargs, _ = sphere.prep_kwargs(projection)
+        self.assertAlmostEqual(
+            float(sphere_kwargs['stroke-width'].removesuffix('px')),
+            .002
+        )
+
+        cylinder = SVGCylinder(
+            [0, 0, 0], [1, 0, 5], .1, **{'stroke-width': '.01px'}
+        )
+        cylinder_kwargs, _ = cylinder.prep_kwargs(projection)
+        # Mean endpoint scale: 2 * mean(1/10, 1/5) == .3.
+        self.assertAlmostEqual(
+            float(cylinder_kwargs['stroke-width'].removesuffix('px')),
+            .003
+        )
+```
+
+#### <a name="SVGFigure3DViewScale">SVGFigure3DViewScale</a>
+```python
+    def test_SVGFigure3DViewScale(self):
+        from McUtils.Plots.SVG import SVGFigure3D
+
+        fig = SVGFigure3D(view_scale=2)
+        fig.set_projection_kwargs(render_matrix=np.eye(4))
+        fig.add_sphere(center=[0, 0, 0], radius=1, fill='red')
+
+        root = fig.to_svg()
+        _, _, width, height = root['viewBox']
+        self.assertAlmostEqual(width, 4)
+        self.assertAlmostEqual(height, 4)
+        self.assertEqual(fig.get_projection_kwargs()['view_scale'], 2)
+```
+
+#### <a name="SVGFigure3DInteractiveRuntime">SVGFigure3DInteractiveRuntime</a>
+```python
+    def test_SVGFigure3DInteractiveRuntime(self):
+        import tempfile
+        from McUtils.Plots.SVG import SVGFigure3D
+
+        fig = SVGFigure3D(
+            id='interactive-svg-test',
+            view_box=np.array([[-2, 2], [-2, 2], [-2, 2]])
+        )
+        fig.set_projection_kwargs(render_matrix=np.eye(4))
+        fig.add_line(
+            x1=0, y1=0, z1=0, x2=1, y2=1, z2=1, stroke='black'
+        )
+        fig.add_sphere(
+            center=[0, 0, 0], radius=.2, fill='red',
+            **{'stroke-width': '.01px'}
+        )
+
+        static_source = fig.to_svg().tostring()
+        self.assertNotIn('McUtilsSVG3D.ready', static_source)
+
+        interactive_source = fig.to_svg(interactive=True).tostring()
+        self.assertIn('id="interactive-svg-test"', interactive_source)
+        self.assertIn('McUtilsSVG3D.ready(event)', interactive_source)
+        self.assertIn('api.figures["interactive-svg-test"]', interactive_source)
+        self.assertIn('interactive-svg-test-primitive-0', interactive_source)
+        self.assertIn('interactive-svg-test-primitive-1', interactive_source)
+        self.assertIn('scaleStroke(primitive, projected)', interactive_source)
+        self.assertIn('"strokeWidth"', interactive_source)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            runtime_file = os.path.join(tmpdir, 'runtime.js')
+            linked_source = fig.to_svg(
+                interactive=True,
+                runtime_file=runtime_file,
+                runtime_src='assets/runtime.js'
+            ).tostring()
+            self.assertTrue(os.path.isfile(runtime_file))
+            self.assertIn('assets/runtime.js', linked_source)
+            with open(runtime_file) as runtime_stream:
+                runtime_source = runtime_stream.read()
+            self.assertIn('api.figures["interactive-svg-test"]', runtime_source)
+```
+
+#### <a name="SVGFigure3DDynamicLoading">SVGFigure3DDynamicLoading</a>
+```python
+    def test_SVGFigure3DDynamicLoading(self):
+        from McUtils.Plots.Backends import SVGFigure3D
+
+        figure = SVGFigure3D(dynamic_loading=True)
+        axes = figure.create_axes(1, 1, 1)
+        axes.figure.add_sphere(
+            center=[0, 0, 0], radius=.2, fill='red'
+        )
+
+        dynamic_source = figure.to_svg_figure(
+            interactive=True, dynamic_loading=True
+        ).tostring()
+        self.assertIn('<figure', dynamic_source)
+        self.assertIn('application/mcutils-svg3d-runtime', dynamic_source)
+        self.assertIn('data-mcutils-svg3d-runtime', dynamic_source)
+        self.assertIn('globalThis.McUtilsSVG3D.ready(root)', dynamic_source)
+        self.assertNotRegex(dynamic_source, r'<svg[^>]+onload=')
+
+        direct_source = figure.to_svg_figure(
+            interactive=True, dynamic_loading=False
+        ).tostring()
+        self.assertIn('application/ecmascript', direct_source)
+        self.assertRegex(direct_source, r'<svg[^>]+onload=')
+```
+
+#### <a name="SVGFigure3DSaveControls">SVGFigure3DSaveControls</a>
+```python
+    def test_SVGFigure3DSaveControls(self):
+        from McUtils.Plots.Backends import SVGFigure3D
+
+        figure = SVGFigure3D(
+            include_save_buttons=True,
+            recording_options={'recording_duration': 3}
+        )
+        axes = figure.create_axes(1, 1, 1)
+        axes.figure.add_sphere(
+            center=[0, 0, 0], radius=.2, fill='red'
+        )
+
+        source = figure.to_svg_figure(interactive=False).tostring()
+        self.assertIn('Save PNG', source)
+        self.assertIn('Record Animation', source)
+        self.assertIn('Save SVG', source)
+        self.assertIn('Show View Rotation', source)
+        self.assertIn('-view-rotation', source)
+        self.assertIn('XMLSerializer', source)
+        self.assertIn('captureStream', source)
+        self.assertIn('toBlob', source)
+        self.assertNotIn('data-mcutils-svg3d-primitive', source)
+        self.assertNotIn('McUtilsSVG3D.ready(event)', source)
+
+        plain = figure.to_svg_figure(
+            interactive=False, include_save_buttons=False
+        ).tostring()
+        self.assertNotIn('Save PNG', plain)
+        self.assertNotIn('Show View Rotation', plain)
 ```
 
 #### <a name="MPLPath">MPLPath</a>

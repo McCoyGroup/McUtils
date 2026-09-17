@@ -1290,9 +1290,9 @@ print("first positions:", first)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-74e60b" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-74e60b"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-96793d" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-96793d"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-74e60b" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-96793d" markdown="1">
  - [VecOps](#VecOps)
 - [OptimizeClassic](#OptimizeClassic)
 - [BoysLocalize](#BoysLocalize)
@@ -1335,6 +1335,8 @@ print("first positions:", first)
 - [RotDerivs](#RotDerivs)
 - [AltCoords](#AltCoords)
 - [TransrotExpansion](#TransrotExpansion)
+- [RenderMatrixInfersCameraFromViewDistance](#RenderMatrixInfersCameraFromViewDistance)
+- [RenderMatrixViewDistanceHonorsExplicitCenter](#RenderMatrixViewDistanceHonorsExplicitCenter)
 - [RenderMatrix](#RenderMatrix)
 - [Bezier](#Bezier)
 - [Arc](#Arc)
@@ -1344,9 +1346,9 @@ print("first positions:", first)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-f8de17" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-f8de17"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-c7f11c" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c7f11c"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-f8de17" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c7f11c" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -4055,6 +4057,49 @@ class NumputilsTests(TestCase):
         concat_der = [np.concatenate(p, axis=-1) for p in zip(rot_der[1:], rot_der2[1:])]
         print(np.round(nput.tensor_reexpand(concat_exp, concat_der)[0], 8).shape)
         print(np.round(nput.tensor_reexpand(concat_exp, concat_der)[0], 8))
+```
+
+#### <a name="RenderMatrixInfersCameraFromViewDistance">RenderMatrixInfersCameraFromViewDistance</a>
+```python
+    def test_RenderMatrixInfersCameraFromViewDistance(self):
+        bbox = np.array([[-2., 2.], [-3., 3.], [-4., 4.]])
+        distance = 25.
+        center = np.mean(bbox, axis=-1)
+
+        inferred = nput.render_matrix(
+            bbox=bbox,
+            view_distance=distance
+        )
+        explicit = nput.render_matrix(
+            bbox=bbox,
+            view_distance=distance,
+            view_matrix=np.eye(3),
+            view_center=center
+        )
+        self.assertTrue(np.allclose(inferred, explicit))
+
+        corners = np.array([
+            [x, y, z]
+            for x in bbox[0]
+            for y in bbox[1]
+            for z in bbox[2]
+        ])
+        _, in_view = nput.render_points(corners, inferred)
+        self.assertTrue(np.all(in_view))
+```
+
+#### <a name="RenderMatrixViewDistanceHonorsExplicitCenter">RenderMatrixViewDistanceHonorsExplicitCenter</a>
+```python
+    def test_RenderMatrixViewDistanceHonorsExplicitCenter(self):
+        center = np.array([7., -2., 4.])
+        matrix = nput.render_matrix(
+            bbox=np.array([[5., 9.], [-5., 1.], [1., 7.]]),
+            view_distance=25.,
+            view_center=center
+        )
+        projected, in_view = nput.render_points(center[np.newaxis], matrix)
+        self.assertTrue(in_view[0])
+        self.assertTrue(np.allclose(projected[0, :2], [0., 0.]))
 ```
 
 #### <a name="RenderMatrix">RenderMatrix</a>
