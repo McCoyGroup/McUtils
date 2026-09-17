@@ -630,9 +630,9 @@ figure.show()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-60cda0" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-60cda0"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-3c4659" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-3c4659"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-60cda0" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-3c4659" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -661,15 +661,16 @@ figure.show()
 - [SVGFigure3DInteractiveRuntime](#SVGFigure3DInteractiveRuntime)
 - [SVGFigure3DDynamicLoading](#SVGFigure3DDynamicLoading)
 - [SVGFigure3DSaveControls](#SVGFigure3DSaveControls)
+- [SVGFigure3DDepthLighting](#SVGFigure3DDepthLighting)
 - [MPLPath](#MPLPath)
 - [MeshBackend](#MeshBackend)
 - [InvertAxes](#InvertAxes)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-f4bb3f" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-f4bb3f"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-79904f" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-79904f"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-f4bb3f" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-79904f" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1322,6 +1323,47 @@ class PlotsTests(TestCase):
         ).tostring()
         self.assertNotIn('Save PNG', plain)
         self.assertNotIn('Show View Rotation', plain)
+```
+
+#### <a name="SVGFigure3DDepthLighting">SVGFigure3DDepthLighting</a>
+```python
+    def test_SVGFigure3DDepthLighting(self):
+        from McUtils.Plots.Backends import SVGFigure3D
+
+        figure = SVGFigure3D(depth_lighting=True)
+        axes = figure.create_axes(1, 1, 1)
+        axes.figure.set_projection_kwargs(render_matrix=np.eye(4))
+        axes.figure.add_sphere(
+            center=[0, 0, 1], radius=.4, fill='#808080'
+        )
+        axes.figure.add_cylinder(
+            start=[-1, 0, -1], end=[1, 0, -1],
+            radius=.15, fill='#4080c0'
+        )
+
+        static_source = figure.to_svg_figure(interactive=False).tostring()
+        self.assertIn('<radialGradient', static_source)
+        self.assertIn('<linearGradient', static_source)
+        self.assertIn('gradientUnits="userSpaceOnUse"', static_source)
+        self.assertIn('stop-color=', static_source)
+        self.assertIn('fill:url(#mcutils-lighting-', static_source)
+
+        interactive_source = figure.to_svg_figure(
+            interactive=True, dynamic_loading=False
+        ).tostring()
+        self.assertIn('"depthLighting":true', interactive_source)
+        self.assertIn('applyDepthLighting(projected)', interactive_source)
+        self.assertIn('lightingStops(kind, rgb, depthFactor)', interactive_source)
+        self.assertIn('"kind":"sphere"', interactive_source)
+        self.assertIn('"kind":"cylinder"', interactive_source)
+
+        unlit = SVGFigure3D(depth_lighting=False)
+        unlit_axes = unlit.create_axes(1, 1, 1)
+        unlit_axes.figure.add_sphere(
+            center=[0, 0, 0], radius=.4, fill='#808080'
+        )
+        unlit_source = unlit.to_svg_figure(interactive=False).tostring()
+        self.assertNotIn('<radialGradient', unlit_source)
 ```
 
 #### <a name="MPLPath">MPLPath</a>
