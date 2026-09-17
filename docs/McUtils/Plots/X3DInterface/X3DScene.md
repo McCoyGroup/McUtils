@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DScene">X3DScene</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1529)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1529?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1648)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1648?message=Update%20Docs)]
 </div>
 
 
@@ -35,8 +35,8 @@ default_view_distance: int
 __init__(self, *children: 'X3DPrimitive', background=None, environment=True, lighting=None, navigation=None, viewpoint=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1541)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1541?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1660)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1660?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -61,8 +61,8 @@ Set up a scene primitive with an optional background and viewpoint.
 resolve_light(cls, light_spec) -> 'X3DLight': 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1618)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1618?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1737)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1737?message=Update%20Docs)]
 </div>
 Resolve a lighting spec (a dict keyed by light `type`, defaulting to `default_light_type`,
 or an already-built light object) into an `X3DLight` instance.
@@ -78,8 +78,8 @@ or an already-built light object) into an `X3DLight` instance.
 get_view_settings(cls, up_vector=None, view_vector=None, right_vector=None, view_distance=None, view_center=None, view_matrix=None, view_position=None, return_settings=False, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1638)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1638?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1757)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1757?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -144,7 +144,7 @@ specification.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DScene.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DScene.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1529?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1648?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

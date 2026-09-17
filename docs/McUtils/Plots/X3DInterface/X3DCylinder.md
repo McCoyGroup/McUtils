@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DCylinder">X3DCylinder</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L2144)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L2144?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L2263)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L2263?message=Update%20Docs)]
 </div>
 
 
@@ -23,11 +23,11 @@ tag_class: Cylinder
 ```
 <a id="McUtils.Plots.X3DInterface.X3DCylinder.prep_geometry_opts" class="docs-object-method">&nbsp;</a> 
 ```python
-prep_geometry_opts(self, starts, ends, radius=1, **opts): 
+prep_geometry_opts(self, starts, ends, radius=1, closed=True, top=None, bottom=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DCylinder.py#L2147)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DCylinder.py#L2147?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DCylinder.py#L2266)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DCylinder.py#L2266?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -95,7 +95,7 @@ Build the per-instance geometry options for cylinders between the given endpoint
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DCylinder.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DCylinder.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L2144?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L2263?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

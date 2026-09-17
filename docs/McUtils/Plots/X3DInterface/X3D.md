@@ -100,14 +100,48 @@ Build the JavaScript that exports the scene canvas to a PNG and triggers a downl
     > the export script
 
 
+<a id="McUtils.Plots.X3DInterface.X3D.get_ready_check_expression" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+get_ready_check_expression(cls, id): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L254)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L254?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Build the JavaScript predicate `rasterize` polls (via Playwright's
+`wait_for_function`) to find out whether X3DOM has actually
+started rendering the scene with the given wrapper `id`, instead
+of sleeping a fixed amount of time and hoping it was enough.
+
+Each `<x3d>` element gets its own `Runtime` object -- attached
+directly to that DOM element as `.runtime`, *not* reachable through
+`x3dom.canvases[...]` -- whose `.isReady` flips `true` on the
+first animation-frame tick once the WebGL backend is set up (right
+before that frame actually renders). Reading it back off the
+element like this, rather than installing our own hook such as a
+custom `x3dom.runtime.ready`, is also what makes this robust to
+`to_widget()`/`to_html()` sometimes emitting the x3dom `<script>`
+tag twice on the same page (harmless for X3DOM itself, but it
+re-runs that script's top-level `var x3dom = {...}` and so would
+silently wipe out any hook installed between the two runs).
+  - `id`: `str`
+    > the scene's wrapper element id (`X3D.id`)
+  - `:returns`: `str`
+    > the ready-check predicate, as the body of a Playwright
+    `wait_for_function` expression
+
+
 <a id="McUtils.Plots.X3DInterface.X3D.get_view_settings_script" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 get_view_settings_script(self, id): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L254)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L254?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L291)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L291?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -124,8 +158,8 @@ Build the JavaScript that reads the current view matrix and writes it into the v
 parse_view_matrix(cls, vs): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L282)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L282?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L319)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L319?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -143,8 +177,8 @@ options (inverting the matrix and extracting the rotation angle/axis).
 get_record_screen_script(self, id, polling_rate=30, recording_duration=2, video_format='video/webm'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L304)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L304?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L341)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L341?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -167,8 +201,8 @@ Build the JavaScript that records the scene canvas to a video and triggers a dow
 set_animation_duration_script(self, id): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L358)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L358?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L395)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L395?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -184,8 +218,8 @@ Build the JavaScript that reads the duration input and stores it on the canvas.
 to_widget(self, dynamic_loading=None, include_export_button=None, include_record_button=None, include_view_settings_button=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L432)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L432?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L469)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L469?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -208,8 +242,8 @@ scripts and any export/record/view-settings UI.
 to_html(self, *base_elems, header_elems=None, dynamic_loading=False, include_export_button=None, include_record_button=None, **header_info): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L581)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L581?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L618)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L618?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -235,8 +269,8 @@ Wrap the scene widget in a full HTML document (with the X3DOM CSS/JS in the head
 get_mime_bundle(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L637)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L637?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L674)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L674?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -250,8 +284,8 @@ Return the scene widget's MIME bundle for rich display.
 to_x3d(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L647)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L647?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L684)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L684?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -265,8 +299,8 @@ Render the scene to its `<x3d>` DOM element, formatting the size and rendering e
 display(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L673)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L673?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L710)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L710?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -278,8 +312,8 @@ Display the scene widget.
 show(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L681)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L681?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L718)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L718?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -291,8 +325,8 @@ Display the scene, enabling dynamic loading when in a Jupyter environment.
 dump(self, file, write_html=True, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L691)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L691?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L728)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L728?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -307,13 +341,76 @@ Write the scene to a file, as full HTML or as bare X3D.
     > the write result
 
 
+<a id="McUtils.Plots.X3DInterface.X3D.rasterize" class="docs-object-method">&nbsp;</a> 
+```python
+rasterize(self, file, image_format='png', width=None, height=None, device_scale_factor=1, background=None, transparent=None, timeout=15000, executable_path=None, channel=None, browser_args=None, keep_html=False, ready_timeout_action='warn'): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L746)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L746?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Render this scene to a raster image. This builds the page X3DOM
+needs (the margin reset, the optional background, `to_html`'s own
+CSS/JS embedding) and hands the actual headless-browser work off
+to that page's own `HTML.XMLElement.rasterize` -- the generic
+rasterizer any JHTML element now has -- passing it this scene's
+own X3DOM-specific "is it actually on screen yet" check
+(`get_ready_check_expression`) as its `ready_function`, and the
+rendered `<canvas>` (not the `<x3d>` tag itself, whose own CSS
+layout box is not what you'd expect, or the whole page/viewport)
+as what to screenshot.
+  - `file`: `Any`
+    > destination; a path, a writable/bytes-like buffer
+    (e.g. `io.BytesIO()`), or `None` to get a new `io.BytesIO` back
+  - `image_format`: `str`
+    > `"png"` or `"jpg"`/`"jpeg"`
+  - `width`: `Any`
+    > viewport width; defaults to the scene's own configured width
+  - `height`: `Any`
+    > viewport height; defaults to the scene's own configured height
+  - `background`: `Any`
+    > an HTML background color to give the page
+    before the scene loads (mostly invisible once the scene's own
+    canvas covers it; a convenience for callers that already have
+    a `facecolor`-style option lying around)
+  - `transparent`: `Any`
+    > if truthy, take the screenshot with
+    `omit_background=True` so a transparent page background can
+    come through as alpha (the WebGL canvas' own pixels are
+    unaffected unless the scene itself renders with a transparent
+    background)
+  - `timeout`: `int`
+    > milliseconds to wait for the scene-ready signal
+    before giving up and capturing whatever is currently rendered
+  - `executable_path`: `Any`
+    > forwarded to `resolve_chromium_launch_kwargs`
+  - `channel`: `Any`
+    > forwarded to `resolve_chromium_launch_kwargs`
+  - `browser_args`: `Any`
+    > extra Chromium command-line flags; defaults to
+    `DEFAULT_RASTERIZE_ARGS` (a software-WebGL config that works
+    headless without a GPU)
+  - `keep_html`: `bool`
+    > if truthy, don't delete the intermediate HTML
+    file/directory (useful for debugging what got rendered)
+  - `ready_timeout_action`: `str`
+    > `"warn"` (default, via the `warnings`
+    module), `"raise"`, or `"ignore"` -- what to do if the
+    scene-ready signal doesn't fire within `timeout`
+  - `:returns`: `_`
+    > `file` if given (the path or buffer passed in), otherwise
+    a new `io.BytesIO` holding the image
+
+
 <a id="McUtils.Plots.X3DInterface.X3D.get_children" class="docs-object-method">&nbsp;</a> 
 ```python
 get_children(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L709)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L709?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3D.py#L828)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3D.py#L828?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
