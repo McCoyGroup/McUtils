@@ -607,6 +607,44 @@ class PlotsTests(TestCase):
         self.assertNotIn('Save PNG', plain)
         self.assertNotIn('Show View Rotation', plain)
 
+    def test_SVGFigure3DDepthLighting(self):
+        from McUtils.Plots.Backends import SVGFigure3D
+
+        figure = SVGFigure3D(depth_lighting=True)
+        axes = figure.create_axes(1, 1, 1)
+        axes.figure.set_projection_kwargs(render_matrix=np.eye(4))
+        axes.figure.add_sphere(
+            center=[0, 0, 1], radius=.4, fill='#808080'
+        )
+        axes.figure.add_cylinder(
+            start=[-1, 0, -1], end=[1, 0, -1],
+            radius=.15, fill='#4080c0'
+        )
+
+        static_source = figure.to_svg_figure(interactive=False).tostring()
+        self.assertIn('<radialGradient', static_source)
+        self.assertIn('<linearGradient', static_source)
+        self.assertIn('gradientUnits="userSpaceOnUse"', static_source)
+        self.assertIn('stop-color=', static_source)
+        self.assertIn('fill:url(#mcutils-lighting-', static_source)
+
+        interactive_source = figure.to_svg_figure(
+            interactive=True, dynamic_loading=False
+        ).tostring()
+        self.assertIn('"depthLighting":true', interactive_source)
+        self.assertIn('applyDepthLighting(projected)', interactive_source)
+        self.assertIn('lightingStops(kind, rgb, depthFactor)', interactive_source)
+        self.assertIn('"kind":"sphere"', interactive_source)
+        self.assertIn('"kind":"cylinder"', interactive_source)
+
+        unlit = SVGFigure3D(depth_lighting=False)
+        unlit_axes = unlit.create_axes(1, 1, 1)
+        unlit_axes.figure.add_sphere(
+            center=[0, 0, 0], radius=.4, fill='#808080'
+        )
+        unlit_source = unlit.to_svg_figure(interactive=False).tostring()
+        self.assertNotIn('<radialGradient', unlit_source)
+
     @validationTest
     def test_MPLPath(self):
         fig = Graphics(backend='svg')

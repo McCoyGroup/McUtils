@@ -8777,6 +8777,7 @@ class SVGFigure(GraphicsFigure):
                  dynamic_loading=None,
                  include_save_buttons=False,
                  recording_options=None,
+                 depth_lighting=False,
                  **kwargs):
         """
         **LLM Docstring**
@@ -8798,6 +8799,7 @@ class SVGFigure(GraphicsFigure):
         self.dynamic_loading = dynamic_loading
         self.include_save_buttons = include_save_buttons
         self.recording_options = {} if recording_options is None else recording_options
+        self.depth_lighting = depth_lighting
         if figsize is not None:
             self.set_size_inches(*figsize)
     def create_axes(self, rows, cols, spans, **kw):
@@ -9482,6 +9484,7 @@ class SVGFigure(GraphicsFigure):
         sub_svgs = []
         svg_ids = []
         for axes in self.axes:
+            axes.figure.depth_lighting = self.depth_lighting
             svg_opts = {}
             if include_save_buttons:
                 svg_id = getattr(axes.figure, 'id', None)
@@ -9520,10 +9523,10 @@ class SVGFigure(GraphicsFigure):
         :return: the SVG markup
         :rtype: str
         """
-        sub_svgs = [
-            s.figure.to_svg()
-            for s in self.axes
-        ]
+        sub_svgs = []
+        for axes in self.axes:
+            axes.figure.depth_lighting = self.depth_lighting
+            sub_svgs.append(axes.figure.to_svg())
         buf = io.StringIO()
         for s in sub_svgs:
             s.write(buf)
