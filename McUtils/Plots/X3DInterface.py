@@ -20,6 +20,11 @@ __all__ = [
     "X3DScene",
     "X3DBackground",
     "X3DMaterial",
+    "X3DEnvironment",
+    "X3DLight",
+    "X3DDirectionalLight",
+    "X3DPointLight",
+    "X3DSpotLight",
     "X3DLine",
     "X3DSphere",
     "X3DCone",
@@ -129,6 +134,13 @@ class X3D(X3DObject):
         width=500,
         height=500
     )
+    xite_options = dict(
+        contentScale="auto",
+        antialiased = "true",
+        multisampling = "8",
+        primitiveQuality = "HIGH",
+        update = "auto",
+    )
     @classmethod
     def get_new_id(cls):
         """
@@ -141,6 +153,8 @@ class X3D(X3DObject):
         """
         return "x3d-" + str(uuid.uuid4())[:6]
     def __init__(self, *children, id=None, dynamic_loading=True,
+                 use_xite=False,
+                 xite_options=None,
                  x3dom_path=None,
                  x3dom_css_path=None,
                  include_mathjax=False,
@@ -201,11 +215,16 @@ class X3D(X3DObject):
             self.X3DOM_JS = x3dom_path
         if x3dom_css_path is not None:
             self.X3DOM_CSS = x3dom_css_path
+        if xite_options is None:
+            xite_options = self.xite_options
+        self.xite_options = xite_options
+        self.use_xite = use_xite
         self.include_mathjax = include_mathjax
         self.preload_scripts = preload_scripts
         self.onload_scripts = onload_scripts
         self._widg = None
 
+    X_ITE_JS = "https://cdn.jsdelivr.net/npm/x_ite@11.5.11/dist/x_ite.min.js"
     X3DOM_JS = 'https://www.x3dom.org/download/1.8.3/x3dom-full.js'
     X3DOM_CSS = 'https://www.x3dom.org/download/x3dom.css'
     MATHJAX_CDN = 'https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js'
@@ -451,6 +470,8 @@ document.head.append(frag{i});
             elems = [
                 JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
                 JHTML.Script(src=self.X3DOM_JS)
+            ] if not self.use_xite else [
+                JHTML.Script(src=self.X_ITE_JS)
             ]
             if self.include_mathjax:
                 elems.append(JHTML.Script(src=self.MATHJAX_CDN))
@@ -462,14 +483,16 @@ document.head.append(frag{i});
                 *elems,
                 x3d_embed,
                 id=id,
-                width=x3d_embed['width'],
-                height=x3d_embed['height'],
+                width=x3d_embed['width'] if not self.use_xite else x3d_embed.style['width'],
+                height=x3d_embed['height'] if not self.use_xite else x3d_embed.style['height'],
                 can_be_dynamic=False
             )
         else:
             JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
             load_scripts = [
                 JHTML.Script(src=self.X3DOM_JS)
+                    if not self.use_xite else
+                JHTML.Script(src=self.X_ITE_JS)
             ]
             if self.include_mathjax:
                 load_scripts.append(JHTML.Script(src=self.MATHJAX_CDN))
@@ -500,8 +523,8 @@ document.head.append(frag{i});
                     }})()"""
                     ),
                 id=id,
-                width=x3d_embed['width'],
-                height=x3d_embed['height'],
+                width=x3d_embed['width'] if not self.use_xite else x3d_embed.style['width'],
+                height=x3d_embed['height'] if not self.use_xite else x3d_embed.style['height'],
                 can_be_dynamic=False
             )
 
@@ -584,11 +607,17 @@ document.head.append(frag{i});
             include_record_button=include_record_button
         )  # .tostring()
 
+        src = [
+            JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
+            JHTML.Script(src=self.X3DOM_JS)
+        ] if not self.use_xite else [
+            JHTML.Script(src=self.X_ITE_JS)
+        ]
+
         return JHTML.Html(
             JHTML.Head(
                 *(header_elems if header_elems is not None else []),
-                JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
-                JHTML.Script(src=self.X3DOM_JS),
+                *src,
                 **header_info
             ),
             JHTML.Body(
@@ -629,11 +658,18 @@ document.head.append(frag{i});
                 v = base_opts[k]
                 if nput.is_numeric(v):
                     base_opts[k] = f'{v:.0f}px'
-        return X3DHTML.X3D(
+        elem = X3DHTML.X3D(
             JHTML.HTML.Head(),
             *[a.to_x3d() if hasattr(a, 'to_x3d') else a for a in self.children],
             **base_opts
         )
+        if self.use_xite:
+            elem = X3DHTML.X3DCanvas(elem,
+                                     width=base_opts['width'],
+                                     height=base_opts['height'],
+                                     **self.xite_options
+                                     )
+        return elem
     def display(self):
         """
         **LLM Docstring**
@@ -1015,6 +1051,8 @@ class X3DAppearance(X3DOptionsSet):
         if len(point_keys) > 0:
             base_attrs['pointProperties'] = {k:attrs[k] for k in point_keys}
 
+        if 'id' in base_attrs:
+            base_attrs['DEF'] = base_attrs['id']
         return base_attrs
     def to_x3d(self):
         """
@@ -1025,6 +1063,8 @@ class X3DAppearance(X3DOptionsSet):
         :return: the X3D element
         """
         base_attrs = self.prep_attrs(self.attrs)
+        if 'id' in base_attrs:
+            base_attrs['DEF'] = base_attrs['id']
 
         comps = []
         line_props = base_attrs.pop('lineProperties', None)
@@ -1130,6 +1170,8 @@ class X3DLineProperties(X3DOptionsSet):
         attrs = super().prep_attrs(attrs)
         attrs['linewidthScaleFactor'] = attrs.get('linewidthScaleFactor', '1')
         attrs['containerField'] = attrs.get('containerField', 'lineProperties')
+        if 'id' in attrs:
+            attrs['DEF'] = attrs['id']
         return attrs
     def to_x3d(self):
         """
@@ -1171,6 +1213,8 @@ class X3DPointProperties(X3DOptionsSet):
                 float(attrs.get('pointSizeScaleFactor', '0')),
             ])
         )
+        if 'id' in attrs:
+            attrs['DEF'] = attrs['id']
         return attrs
     def to_x3d(self):
         """
@@ -1277,6 +1321,8 @@ class X3DPrimitive(X3DObject):
         :return: the X3D element
         """
         obj_opts, appearance_opts = self.split_opts(self.opts)
+        if 'id' in obj_opts:
+            obj_opts['DEF'] = obj_opts['id']
         kids = [k.to_x3d() if hasattr(k, 'to_x3d') else k for k in self.children]
         appearance = self.get_appearance(appearance_opts)
         if self.tag_class is None:
@@ -1346,13 +1392,157 @@ class X3DPrimitive(X3DObject):
         """
         return self.children
 
+class X3DBackground(X3DOptionsSet):
+    wrapper_class = X3DHTML.Background
+    __props__ = {
+        'skyColor', 'skyAngle', 'groundColor', 'groundAngle',
+        'backUrl', 'bottomUrl', 'frontUrl', 'leftUrl', 'rightUrl', 'topUrl'
+    }
+    conversion_map = {"color": "skyColor", "ground_color": "groundColor"}
+    def prep_attrs(self, attrs: dict):
+        attrs = super().prep_attrs(attrs)
+        for key in ('skyColor', 'groundColor'):
+            color = attrs.get(key)
+            if color is None: continue
+            if isinstance(color, (list, tuple)) and color and not isinstance(color[0], (int, float, str)):
+                # multiple stops -> parse each and flatten to the MFColor string
+                attrs[key] = " ".join(" ".join(str(x) for x in self.parse_color(c)[0]) for c in color)
+            else:
+                color, transparency = self.parse_color(color)
+                attrs[key] = color
+                if key == 'skyColor' and transparency is not None:
+                    attrs['transparency'] = transparency
+        if 'id' in attrs:
+            attrs['DEF'] = attrs['id']
+        return attrs
+    def to_x3d(self):
+        return X3DHTML.Background(**self.prep_attrs(self.attrs))
+
+class X3DEnvironment(X3DOptionsSet):
+    wrapper_class = X3DHTML.Environment
+    __props__ = {
+        'ambientOcclusionRadius',
+        'ambientOcclusionType',
+        'frameBufferScale',
+        'gammaCorrectionDefault',
+        'reflectionIntensity',
+        'smallFeatureCulling',
+        'smallFeatureThreshold',
+        'sortObjects',
+        'sortTrans',
+        'tessellationDetail'
+    }
+    def to_x3d(self):
+        """
+        Render the environment to its X3D DOM element.
+
+        :return: the X3D element
+        """
+        return X3DHTML.Environment(**self.prep_attrs(self.attrs))
+
+class X3DLight(X3DOptionsSet):
+    """
+    Base for the `X3DLightNode` family (`DirectionalLight`/`PointLight`/`SpotLight`),
+    holding the fields they all share.
+    """
+    __props__ = {
+        'ambientIntensity',
+        'color',
+        'global',
+        'intensity',
+        'on'
+    }
+    conversion_map = {
+        'brightness': 'ambientIntensity',
+        'enabled': 'on',
+        'global_': 'global'
+    }
+    def prep_attrs(self, attrs: dict):
+        """
+        Canonicalize the light attributes (resolving `color`; lights have no transparency channel).
+
+        :param attrs: the attributes
+        :type attrs: dict
+        :return: the canonicalized attributes
+        :rtype: dict
+        """
+        attrs = super().prep_attrs(attrs)
+        color = attrs.get('color', None)
+        if color is not None:
+            attrs['color'] = self.parse_color(color)[0]
+        if 'id' in attrs:
+            attrs['DEF'] = attrs['id']
+        return attrs
+
+class X3DDirectionalLight(X3DLight):
+    wrapper_class = X3DHTML.DirectionalLight
+    __props__ = X3DLight.__props__ | {'direction'}
+    def to_x3d(self):
+        """
+        Render the light to its X3D DOM element.
+
+        :return: the X3D element
+        """
+        return X3DHTML.DirectionalLight(**self.prep_attrs(self.attrs))
+
+class X3DPointLight(X3DLight):
+    wrapper_class = X3DHTML.PointLight
+    __props__ = X3DLight.__props__ | {'attenuation', 'location', 'radius'}
+    def to_x3d(self):
+        """
+        Render the light to its X3D DOM element.
+
+        :return: the X3D element
+        """
+        return X3DHTML.PointLight(**self.prep_attrs(self.attrs))
+
+class X3DSpotLight(X3DPointLight):
+    wrapper_class = X3DHTML.SpotLight
+    __props__ = X3DPointLight.__props__ | {'beamWidth', 'cutOffAngle', 'direction'}
+    def to_x3d(self):
+        """
+        Render the light to its X3D DOM element.
+
+        :return: the X3D element
+        """
+        return X3DHTML.SpotLight(**self.prep_attrs(self.attrs))
+
+class X3DNavigationInfo(X3DOptionsSet):
+    wrapper_class = X3DHTML.NavigationInfo
+    __props__ = {
+        'avatarSize',
+        'headlight',
+        'speed',
+        'transitionTime',
+        'transitionType',
+        'type',
+        'visibilityLimit'
+    }
+    def to_x3d(self):
+        """
+        Render the navigation info to its X3D DOM element.
+
+        :return: the X3D element
+        """
+        return X3DHTML.NavigationInfo(**self.prep_attrs(self.attrs))
+
 class X3DScene(X3DPrimitive):
     wrapper_class = X3DHTML.Scene
+    default_light_type = 'directional'
+    light_types = {
+        'directional': X3DDirectionalLight,
+        'point': X3DPointLight,
+        'spot': X3DSpotLight
+    }
     default_viewpoint = {'viewAll':True}
+    camera_sensor_def = "CameraSensor"      # new
+    camera_rig_def = "CameraLightRig"       # new
     children: list
     def __init__(self, *children:X3DPrimitive,
                  background=None,
                  environment=True,
+                 lighting=None,
+                 navigation=None,
                  viewpoint=None, **opts):
         """
         **LLM Docstring**
@@ -1362,6 +1552,8 @@ class X3DScene(X3DPrimitive):
         :param children: the scene's child primitives
         :param background: the background specification
         :param viewpoint: the viewpoint specification
+        :param environment: `True`/`False`/`None`, a dict of `Environment` options, or an `X3DEnvironment`
+        :param lighting: a list of light specs (dicts with a `type` key resolving via `light_types`, or `X3DLight` instances)
         :param opts: extra scene options
         """
         if viewpoint is None:
@@ -1369,15 +1561,75 @@ class X3DScene(X3DPrimitive):
         elif viewpoint is False:
             viewpoint = {}
         super().__init__(*children, **opts)
+        if isinstance(background, dict):
+            background = X3DBackground(**background)
+        elif background is not None and not isinstance(background, (X3DObject, X3DHTML.X3DElement)):
+            background = X3DBackground(color=background)
         if background is not None:
-            self.children = [X3DBackground(color=background)] + list(self.children)
+            self.children = [background] + list(self.children)
         if environment is True:
-            environment = X3DHTML.Environment(reflectionIntensity=1.0)
+            environment = X3DEnvironment(reflectionIntensity=1.0)
+        elif isinstance(environment, dict):
+            environment = X3DEnvironment(**environment)
         if environment is not None:
             self.children = [environment] + list(self.children)
+        if lighting is not None:
+            static_specs, follow_specs = self._split_lighting(lighting)
+            new_children = [self.resolve_light(l) for l in static_specs]
+            if len(follow_specs) > 0:
+                rig_children = [self.resolve_light(l).to_x3d() for l in follow_specs]
+                sensor = X3DHTML.ProximitySensor(
+                    DEF=self.camera_sensor_def,
+                    center=(0, 0, 0),
+                    size=(100000, 100000, 100000),
+                )
+                rig = X3DHTML.Transform(*rig_children, DEF=self.camera_rig_def)
+                route = X3DHTML.Route(
+                    fromNode=self.camera_sensor_def, fromField="orientation_changed",
+                    toNode=self.camera_rig_def, toField="set_rotation",
+                )
+                new_children = [sensor, rig, route] + new_children
+            self.children = new_children + list(self.children)
+        if navigation is not None:
+            if isinstance(navigation, dict):
+                navigation = X3DNavigationInfo(**navigation)
+            self.children = [navigation] + list(self.children)
         if len(viewpoint) > 0:
             viewpoint = self.get_view_settings(**viewpoint)
             self.children = [X3DHTML.Viewpoint(**viewpoint)] + list(self.children)
+
+    @classmethod
+    def _split_lighting(cls, lighting):
+        """
+        Split a `lighting` list into (static_specs, follow_specs) by popping each
+        dict spec's `follow_view` flag. Already-built X3DObject light instances have
+        no flag to inspect and are always treated as static.
+        """
+        static_specs = []
+        follow_specs = []
+        for l in lighting:
+            if isinstance(l, X3DObject):
+                static_specs.append(l)
+                continue
+            l = dict(l)
+            follow_view = l.pop('follow_view', False)
+            (follow_specs if follow_view else static_specs).append(l)
+        return static_specs, follow_specs
+    @classmethod
+    def resolve_light(cls, light_spec) -> X3DLight:
+        """
+        Resolve a lighting spec (a dict keyed by light `type`, defaulting to `default_light_type`,
+        or an already-built light object) into an `X3DLight` instance.
+        :param light_spec: the lighting spec
+        :return: the light
+        :rtype: X3DLight
+        """
+        if isinstance(light_spec, X3DObject):
+            return light_spec
+        light_spec = dict(light_spec)
+        light_type = light_spec.pop('type', cls.default_light_type)
+        light_cls = cls.light_types[light_type]
+        return light_cls(**light_spec)
 
     default_up_vector = (0, 1, 0)
     default_right_vector = (1, 0, 0)
@@ -1482,45 +1734,6 @@ class X3DScene(X3DPrimitive):
                 },
                 **etc
             )
-
-class X3DBackground(X3DOptionsSet):
-    wrapper_class = X3DHTML.Background
-    __props__ = {
-        'skyColor',
-        'skyAngle'
-    }
-    conversion_map = {
-        "color": "skyColor"
-    }
-    def prep_attrs(self, attrs: dict):
-        """
-        **LLM Docstring**
-
-        Canonicalize the background attributes (resolving the color into components/transparency) before rendering.
-
-        :param attrs: the attributes
-        :type attrs: dict
-        :return: the canonicalized attributes
-        :rtype: dict
-        """
-        attrs = super().prep_attrs(attrs)
-        color = attrs.get('skyColor', None)
-        if color is not None:
-            color, transparency = self.parse_color(color)
-            attrs['skyColor'] = color
-            if transparency is not None:
-                attrs['transparency'] = transparency
-        return attrs
-
-    def to_x3d(self):
-        """
-        **LLM Docstring**
-
-        Render the background to its X3D DOM element.
-
-        :return: the X3D element
-        """
-        return X3DHTML.Background(**self.prep_attrs(self.attrs))
 
 class X3DCoordinate(X3DPrimitive):
     wrapper_class = X3DHTML.Coordinate
@@ -1643,6 +1856,8 @@ class X3DGeometryObject(X3DPrimitive):
         :param core_opts: the core geometry options
         :return: the geometry element
         """
+        if 'id' in core_opts:
+            core_opts['DEF'] = core_opts['id']
         return self.tag_class(**core_opts)
     def create_object(self,
                       translation=None,
@@ -1670,6 +1885,7 @@ class X3DGeometryObject(X3DPrimitive):
         :rtype: tuple
         """
         core_opts['id'] = core_opts.get('id', self.id)
+        core_opts['DEF'] = core_opts["id"]
         base_obj = self.create_tag_object(**core_opts)
         tf = {}
         if normal is not None:
@@ -1750,7 +1966,7 @@ class X3DGeometryObject(X3DPrimitive):
         if appearance is not None:
             core = self.wrapper_class(appearance, core)
         if tf is not None:
-            core = X3DHTML.Transform(core, id=core.id+"-transform", **tf)
+            core = X3DHTML.Transform(core, id=core.id+"-transform", DEF=core.id+"-transform", **tf)
         return core
 
 class X3DGeometryGroup(X3DGeometryObject):
@@ -1861,7 +2077,7 @@ class X3DGeometryGroup(X3DGeometryObject):
             if appearance is not None:
                 o = self.wrapper_class(appearance, o)
             if tf is not None:
-                o = X3DHTML.Transform(o, id=id+"-transform", **tf)
+                o = X3DHTML.Transform(o, id=id+"-transform", DEF=id+"-transform", **tf)
             objs.append(o)
         if len(objs) == 1:
             return objs[0]
@@ -2114,6 +2330,8 @@ class X3DText(X3DGeometryGroup):
         body = []
         if font_style is not None:
             body.append(font_style)
+        if 'id' in core_opts:
+            core_opts['DEF'] = core_opts['id']
         return self.tag_class(body, **core_opts)
     def prep_geometry_opts(self, centers, text, font_style=None, rotation=None, normal=None, **opts):
         """
@@ -2213,9 +2431,9 @@ class X3DCoordinatesWrapper(X3DGeometryGroup):
         :param etc: extra options
         :return: the geometry element
         """
-        body = [X3DCoordinate(point, id=self.id+"-coord").to_x3d()]
+        body = [X3DCoordinate(point, id=self.id+"-coord", DEF=self.id+"-coord").to_x3d()]
         if color is not None:
-            body.append(X3DColor(color, id=self.id+'-color').to_x3d())
+            body.append(X3DColor(color, id=self.id+'-color', DEF=self.id+"-coord").to_x3d())
         return self.tag_class(body, **etc)
     def prep_geometry_opts(self, point, **etc):
         """
@@ -2542,7 +2760,7 @@ class X3DGenericAnimator(X3DGroup):
                                       )
         )
 
-        super().__init__(elements, id=id, **opts)
+        super().__init__(elements, id=id, DEF=id, **opts)
 
     @classmethod
     @abc.abstractmethod
@@ -2580,9 +2798,10 @@ class X3DGenericAnimator(X3DGroup):
         """
         key_frames = np.linspace(0, 1, nframes+1)[:-1]
         base = [
-            X3DHTML.TimeSensor(id=f'animation-clock-{uuid}', cycleInterval=animation_duration, loop=True,
+            X3DHTML.TimeSensor(id=f'animation-clock-{uuid}', DEF=f'animation-clock-{uuid}',
+                               cycleInterval=animation_duration, loop=True,
                                enabled=running),
-            X3DHTML.IntegerSequencer(id=f'animation-indexer-{uuid}',
+            X3DHTML.IntegerSequencer(id=f'animation-indexer-{uuid}', DEF=f'animation-indexer-{uuid}',
                                      key=key_frames,
                                      keyValue=np.arange(nframes)),
             X3DHTML.Route(
@@ -2779,6 +2998,7 @@ class X3DGenericAnimator(X3DGroup):
                                      key,
                                      keyValue,
                                      id,
+                                     DEF,
                                      clockId,
                                      targetId):
         """
@@ -2793,6 +3013,7 @@ class X3DGenericAnimator(X3DGroup):
         color_driver_id = id
         driver = X3DHTML.CoordinateInterpolator(key=key, keyValue=keyValue,
                                                 id=color_driver_id,
+                                                DEF=color_driver_id,
                                                 clockId=clockId,
                                                 targetId=id+'-update')
         script = JHTML.Script(f"""(function() {{
@@ -2879,9 +3100,11 @@ requestAnimationFrame(tick)
             values = " ".join(np.round(values, 4).flatten().astype(str))
         key_frames = np.linspace(0, 1, nframes)
 
+        iid = id + "-interpolator-" + cls.get_new_id(),
         interp_obj = (
             interpolator_type(key=key_frames, keyValue=values,
-                              id=id + "-interpolator-" + cls.get_new_id(),
+                              id=iid,
+                              DEF=iid,
                               clockId=f'animation-clock-{clock_id}',
                               targetId=target_id)
                 if not hasattr(interpolator_type, 'id') else
@@ -2913,7 +3136,7 @@ requestAnimationFrame(tick)
                 X3DHTML.Route(
                     fromField='value_changed' if type == 'indexed' else 'fraction_changed',
                     fromNode=f'animation-indexer-{uuid}' if type == 'indexed' else f'animation-clock-{uuid}',
-                    toField=name, toNode=id
+                    toField="set_"+name, toNode=id
                 )
             ]
         else:
@@ -2961,6 +3184,7 @@ class X3DListAnimator(X3DGenericAnimator):
         anim_frames = X3DSwitch(
                 *frames,
                 id=id+"-switch",
+                DEF=id+"-switch",
                 whichChoice="0"
             )
         nframes = len(anim_frames.children)
@@ -3066,7 +3290,7 @@ class X3DInterpolatingAnimator(X3DGenericAnimator):
                 k
                 for a in [left_attrs] + right_attrs
                 for k in a.keys()
-            } - {'id'}
+            } - {'id', 'def', 'DEF'}
             for k in all_keys:
                 v = left_attrs.get(k)
                 vals = [v]

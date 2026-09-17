@@ -1,4 +1,5 @@
 from .JHTML import HTML
+from .. import Devutils as dev
 
 __all__ = [
     "X3DHTML"
@@ -17,7 +18,7 @@ class X3DHTML:
         return cls._x3d_map
 
     class X3DElement(HTML.TagElement):
-        ignored_styles = {"height", "width", "position", "color"}
+        ignored_styles = {"height", "width", "position", "color", "direction"}
         can_be_dynamic = False
         style_props = None
 
@@ -25,6 +26,24 @@ class X3DHTML:
         def get_class_map_updates(cls):
             return X3DHTML.get_x3d_map()
 
+        @classmethod
+        def convert_attr_value(cls, v):
+            if isinstance(v, str):
+                pass
+            elif v is True or v is False:
+                v = str(v).lower()
+            elif dev.is_number(v):
+                if abs(v - int(v)) > 1e-4:
+                    v = f"{v:.3f}"
+                else:
+                    v = f"{v:.0f}"
+            elif hasattr(v, "tolist"):
+                v = cls.convert_attr_value(v.tolist())
+            elif hasattr(v, "__getitem__") or hasattr(v, "__iter__"):
+                v = " ".join(cls.convert_attr_value(x) for x in v)
+            else:
+                v = str(v)
+            return v
         @classmethod
         def convert_attrs(cls, attrs:dict):
             copied = False
@@ -37,11 +56,7 @@ class X3DHTML:
                 if v is None:
                     del attrs[k]
                 else:
-                    if hasattr(v, "__getitem__") or hasattr(v, "__iter__"):
-                        v = " ".join(str(x) for x in v)
-                    else:
-                        v = str(v)
-                    attrs[k] = v
+                    attrs[k] = cls.convert_attr_value(v)
             return attrs
 
         attr_converter = convert_attrs
@@ -62,6 +77,7 @@ class X3DHTML:
         #
         #     return tag(children=children, **opts)
 
+    class X3DCanvas(HTML.TagElement): tag = "x3d-canvas"
     class X3D(X3DElement): tag = "X3D"
     class Anchor(X3DElement): tag = "Anchor"
     class Appearance(X3DElement): tag = "Appearance"
@@ -211,6 +227,7 @@ class X3DHTML:
     class PositionInterpolator(X3DElement): tag = "PositionInterpolator"
     class PositionInterpolator2D(X3DElement): tag = "PositionInterpolator2D"
     class ProjectionVolumeStyle(X3DElement): tag = "ProjectionVolumeStyle"
+    class ProximitySensor(X3DElement): tag = "ProximitySensor"
     class Pyramid(X3DElement): tag = "Pyramid"
     class QuadSet(X3DElement): tag = "QuadSet"
     class RadarVolumeStyle(X3DElement): tag = "RadarVolumeStyle"

@@ -338,7 +338,7 @@ class GraphicsBase(metaclass=ABCMeta):
                  theme_manager=ThemeManager,
                  managed=None,
                  # inset=False,
-                 strict=True,
+                 strict=None,
                  # annotations=None,
                  **opts
                  ):
@@ -668,7 +668,7 @@ class GraphicsBase(metaclass=ABCMeta):
                     animated=None,
                     prolog=None,
                     epilog=None,
-                    strict=True,
+                    strict=None,
                     theme=None,
                     **opts
                     ):
@@ -680,6 +680,8 @@ class GraphicsBase(metaclass=ABCMeta):
         :return:
         :rtype:
         """
+        if strict is None:
+            strict = not self.figure.supports_generic_args
         if strict:
             self._check_opts(opts)
 
@@ -696,6 +698,8 @@ class GraphicsBase(metaclass=ABCMeta):
             self._epilog = epilog
             if self._epilog is not None:
                 self.epilog = epilog
+
+        self.figure.set_opts(opts)
 
     @property
     def prolog(self):
@@ -2368,6 +2372,7 @@ class Graphics3D(Graphics):
                  projection_type=None,
                  aspect_ratio=None,
                  autoscale=None,
+                 prop_manager=None,
                  backend='matplotlib3D',
                  **kwargs
                  ):
@@ -2426,7 +2431,7 @@ class Graphics3D(Graphics):
             backend=backend,
             background=background,
             box_ratios=box_ratios,
-            prop_manager=GraphicsPropertyManager3D,
+            prop_manager=GraphicsPropertyManager3D if prop_manager is None else prop_manager,
             projection_type=projection_type,
             aspect_ratio=aspect_ratio,
             autoscale=autoscale,

@@ -921,6 +921,9 @@ class GraphicsFigure(metaclass=abc.ABCMeta):
         :return: the result
         """
         raise NotImplementedError("needs an overload")
+    supports_generic_args = False
+    def set_opts(self, opts):
+        raise NotImplementedError("generic Figure can't handle remaining Graphics args")
     @classmethod
     def canonicalize_opts(cls, opts):
         """
@@ -13342,7 +13345,7 @@ class X3DAxes(GraphicsAxes3D):
             background=self.background,
             title=self.title
         )
-    def to_x3d(self):
+    def to_x3d(self, **opts):
         """
         **LLM Docstring**
 
@@ -13352,7 +13355,7 @@ class X3DAxes(GraphicsAxes3D):
         """
         return x3d.X3DScene(
             self.children,
-            **self.prep_opts()
+            **(self.prep_opts() | opts)
         )
 
 class X3DFigure(GraphicsFigure):
@@ -13409,6 +13412,10 @@ class X3DFigure(GraphicsFigure):
         self.include_record_button = include_record_button
         self.include_view_settings_button = include_view_settings_button
         super().__init__()
+
+    supports_generic_args = True
+    def set_opts(self, opts):
+        self.opts.update(opts)
 
     def __setitem__(self, key, value):
         """
@@ -13570,6 +13577,15 @@ class X3DFigure(GraphicsFigure):
             include_record_button=self.include_record_button,
             include_view_settings_button=self.include_view_settings_button
         )
+    def prep_axes_opts(self, opts):
+        axes_opts = {}
+        if 'environment' in opts:
+            axes_opts['environment'] = opts.pop('environment')
+        if 'lighting' in opts:
+            axes_opts['lighting'] = opts.pop('lighting')
+        if 'navigation' in opts:
+            axes_opts['navigation'] = opts.pop('navigation')
+        return axes_opts, opts
     def to_x3d(self, **opts):
         """
         **LLM Docstring**
@@ -13581,6 +13597,7 @@ class X3DFigure(GraphicsFigure):
         :return: the X3D element
         """
         opts = dict(self.prep_opts(), **opts)
+        axes_opts, opts = self.prep_axes_opts(opts)
         if 'include_mathjax' not in opts:
             opts['include_mathjax'] = ([
                 a.include_mathjax
@@ -13590,7 +13607,7 @@ class X3DFigure(GraphicsFigure):
         if 'onload_scripts' not in opts:
             opts['onload_scripts'] = sum((a.onloads for a in self.axes), [])
         return x3d.X3D(
-            *[a.to_x3d() for a in self.axes],
+            *[a.to_x3d(**axes_opts) for a in self.axes],
             **opts
         )
     def to_widget(self, **opts):
@@ -13613,7 +13630,8 @@ class X3DFigure(GraphicsFigure):
         """
         return self.to_widget().tostring()
 
-    def animate_frames(self, frames: list['X3DAxes'], mode=None, **animation_opts):
+    allow_fallback = True
+    def animate_frames(self, frames: list['X3DAxes'], mode=None, allow_fallback=None, **animation_opts):
         """
         **LLM Docstring**
 
@@ -13627,6 +13645,8 @@ class X3DFigure(GraphicsFigure):
                     x3d.X3DGroup(f.children if hasattr(f, 'children') else f)
                     for f in frames
                 ]
+        if not allow_fallback and mode is None:
+            mode = 'interpolated'
         if mode is None:
             try:
                 animation = x3d.X3DInterpolatingAnimator.from_frames(
