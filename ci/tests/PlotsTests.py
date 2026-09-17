@@ -553,6 +553,60 @@ class PlotsTests(TestCase):
                 runtime_source = runtime_stream.read()
             self.assertIn('api.figures["interactive-svg-test"]', runtime_source)
 
+    def test_SVGFigure3DDynamicLoading(self):
+        from McUtils.Plots.Backends import SVGFigure3D
+
+        figure = SVGFigure3D(dynamic_loading=True)
+        axes = figure.create_axes(1, 1, 1)
+        axes.figure.add_sphere(
+            center=[0, 0, 0], radius=.2, fill='red'
+        )
+
+        dynamic_source = figure.to_svg_figure(
+            interactive=True, dynamic_loading=True
+        ).tostring()
+        self.assertIn('<figure', dynamic_source)
+        self.assertIn('application/mcutils-svg3d-runtime', dynamic_source)
+        self.assertIn('data-mcutils-svg3d-runtime', dynamic_source)
+        self.assertIn('globalThis.McUtilsSVG3D.ready(root)', dynamic_source)
+        self.assertNotRegex(dynamic_source, r'<svg[^>]+onload=')
+
+        direct_source = figure.to_svg_figure(
+            interactive=True, dynamic_loading=False
+        ).tostring()
+        self.assertIn('application/ecmascript', direct_source)
+        self.assertRegex(direct_source, r'<svg[^>]+onload=')
+
+    def test_SVGFigure3DSaveControls(self):
+        from McUtils.Plots.Backends import SVGFigure3D
+
+        figure = SVGFigure3D(
+            include_save_buttons=True,
+            recording_options={'recording_duration': 3}
+        )
+        axes = figure.create_axes(1, 1, 1)
+        axes.figure.add_sphere(
+            center=[0, 0, 0], radius=.2, fill='red'
+        )
+
+        source = figure.to_svg_figure(interactive=False).tostring()
+        self.assertIn('Save PNG', source)
+        self.assertIn('Record Animation', source)
+        self.assertIn('Save SVG', source)
+        self.assertIn('Show View Rotation', source)
+        self.assertIn('-view-rotation', source)
+        self.assertIn('XMLSerializer', source)
+        self.assertIn('captureStream', source)
+        self.assertIn('toBlob', source)
+        self.assertNotIn('data-mcutils-svg3d-primitive', source)
+        self.assertNotIn('McUtilsSVG3D.ready(event)', source)
+
+        plain = figure.to_svg_figure(
+            interactive=False, include_save_buttons=False
+        ).tostring()
+        self.assertNotIn('Save PNG', plain)
+        self.assertNotIn('Show View Rotation', plain)
+
     @validationTest
     def test_MPLPath(self):
         fig = Graphics(backend='svg')

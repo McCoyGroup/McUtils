@@ -1883,6 +1883,7 @@ __MCUTILS_RENDERERS__
         return file
 
     def to_svg(self, compute_bbox=None, view_box=None, *, interactive=False,
+               dynamic_loading=False,
                runtime_file=None, runtime_src=None, rotation_sensitivity=.01,
                **opts):
         vd = self._projection_kwargs.get('view_distance')
@@ -1924,8 +1925,9 @@ __MCUTILS_RENDERERS__
             opts['id'] = self.id
             opts['data-mcutils-svg3d'] = self.id
             opts.setdefault('tabindex', '0')
-            ready = "globalThis.McUtilsSVG3D && McUtilsSVG3D.ready(event)"
-            opts['onload'] = f"{opts['onload']};{ready}" if opts.get('onload') else ready
+            if not dynamic_loading:
+                ready = "globalThis.McUtilsSVG3D && McUtilsSVG3D.ready(event)"
+                opts['onload'] = f"{opts['onload']};{ready}" if opts.get('onload') else ready
 
         try:
             root = super().to_svg(
@@ -1939,14 +1941,23 @@ __MCUTILS_RENDERERS__
                 self.id, primitive_ids, rotation_sensitivity
             )
             runtime = self.get_interactive_runtime(scene, renderers)
+            runtime_type = (
+                'application/mcutils-svg3d-runtime'
+                    if dynamic_loading else
+                'application/ecmascript'
+            )
+            runtime_attrs = {
+                'type': runtime_type,
+                'data-mcutils-svg3d-runtime': self.id
+            }
             if runtime_file is None:
-                root.append(SVG.Script(runtime, type='application/ecmascript'))
+                root.append(SVG.Script(runtime, **runtime_attrs))
             else:
                 self.write_interactive_runtime(runtime_file, scene, renderers)
                 if runtime_src is None:
                     runtime_src = os.path.basename(os.fspath(runtime_file))
                 root.append(SVG.Script(
                     '', href=runtime_src, src=runtime_src,
-                    type='application/ecmascript'
+                    **runtime_attrs
                 ))
         return root
