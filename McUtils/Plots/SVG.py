@@ -1524,30 +1524,41 @@ __MCUTILS_RENDERERS__
         return `#${channel(rgb[0])}${channel(rgb[1])}${channel(rgb[2])}`;
       },
 
-      shadeColor(rgb, scale, whiteMix=0) {
+      shadeColor(rgb, scale, lightMix=0, lightColor=[255, 255, 255]) {
+        const mix = Math.max(0, Math.min(1, lightMix));
         return this.colorCode(rgb.map(
-          value => value * scale * (1 - whiteMix) + 255 * whiteMix
+          (value, index) => value * scale * (1 - mix) + lightColor[index] * mix
         ));
       },
 
-      lightingStops(kind, rgb, depthFactor) {
+      lightingScale(scale, strength) {
+        return Math.max(.05, 1 + strength * (scale - 1));
+      },
+
+      lightingStops(kind, rgb, depthFactor, options) {
+        const strength = Number(options.strength ?? 1);
+        const blend = Number(options.blend ?? 1);
+        const lightColor = options.color || [255, 255, 255];
+        const shade = (scale, mix=0) => this.shadeColor(
+          rgb,
+          this.lightingScale(scale, strength) * depthFactor,
+          mix * blend,
+          lightColor
+        );
         if (kind === "sphere") return [
-          this.shadeColor(rgb, 1.05 * depthFactor, .42),
-          this.shadeColor(rgb, 1.12 * depthFactor, .08),
-          this.shadeColor(rgb, .92 * depthFactor),
-          this.shadeColor(rgb, .52 * depthFactor)
+          shade(1.05, .42), shade(1.12, .08), shade(.92), shade(.52)
         ];
         return [
-          this.shadeColor(rgb, .50 * depthFactor),
-          this.shadeColor(rgb, .88 * depthFactor),
-          this.shadeColor(rgb, 1.12 * depthFactor, .10),
-          this.shadeColor(rgb, .88 * depthFactor),
-          this.shadeColor(rgb, .50 * depthFactor)
+          shade(.50), shade(.88), shade(1.12, .10), shade(.88), shade(.50)
         ];
       },
 
       applyDepthLighting(results) {
         if (!figure.depthLighting) return;
+        const options = figure.depthLighting === true
+          ? {strength: 1, color: [255, 255, 255], blend: 1}
+          : figure.depthLighting;
+        const strength = Number(options.strength ?? 1);
         const lit = results.filter(
           result => result && !result.hidden && result.primitive.lighting
         );
@@ -1557,7 +1568,8 @@ __MCUTILS_RENDERERS__
         const span = Math.max(near - far, 1e-12);
         lit.forEach((result, index) => {
           const lighting = result.primitive.lighting;
-          const depthFactor = .78 + .22 * ((means[index] - far) / span);
+          const baseDepth = .78 + .22 * ((means[index] - far) / span);
+          const depthFactor = this.lightingScale(baseDepth, strength);
           if (!lighting.gradient) {
             result.node.setAttribute(
               "fill", this.shadeColor(lighting.baseColor, depthFactor)
@@ -1567,7 +1579,7 @@ __MCUTILS_RENDERERS__
           const gradient = document.getElementById(lighting.gradient);
           if (!gradient) return;
           const stops = this.lightingStops(
-            lighting.kind, lighting.baseColor, depthFactor
+            lighting.kind, lighting.baseColor, depthFactor, options
           );
           Array.from(gradient.getElementsByTagName("stop")).forEach(
             (stop, stopIndex) => stop.setAttribute("stop-color", stops[stopIndex])
@@ -1779,6 +1791,7 @@ __MCUTILS_RENDERERS__
         self._temp_draw_cache = None
         self._interactive_context = None
         self._lighting_context = None
+        self._lighting_options = None
         self._lighting_def_ids = set()
         self._lighting_prefix = f"mcutils-lighting-{uuid.uuid4().hex}"
         self.id = kwargs.get('id')
@@ -1823,14 +1836,51 @@ __MCUTILS_RENDERERS__
         except (TypeError, ValueError, KeyError):
             return None
 
+    @classmethod
+    def _normalize_depth_lighting(cls, depth_lighting):
+        if depth_lighting is False or depth_lighting is None:
+            return None
+        if depth_lighting is True:
+            options = {}
+        elif isinstance(depth_lighting, dict):
+            options = depth_lighting
+        elif nput.is_numeric(depth_lighting):
+            options = {'strength': depth_lighting}
+        else:
+            raise TypeError(
+                "depth_lighting must be a bool, number, or option dictionary"
+            )
+        strength = float(options.get('strength', options.get('intensity', 1)))
+        if strength <= 0:
+            return None
+        blend = max(0, float(options.get('blend', 1)))
+        color = cls._lighting_color(options.get('color', 'white'))
+        if color is None:
+            raise ValueError(f"invalid depth-lighting color {options.get('color')!r}")
+        return {
+            'strength': strength,
+            'color': color.tolist(),
+            'blend': blend
+        }
+
     @staticmethod
-    def _shade_color(rgb, scale, white_mix=0):
+    def _shade_color(rgb, scale, light_mix=0, light_color=None):
         rgb = np.asanyarray(rgb, dtype=float)
-        shaded = rgb * scale * (1 - white_mix) + 255 * white_mix
+        if light_color is None:
+            light_color = np.full(3, 255.)
+        mix = np.clip(light_mix, 0, 1)
+        shaded = (
+            rgb * scale * (1 - mix)
+            + np.asanyarray(light_color, dtype=float) * mix
+        )
         return ColorPalette.rgb_code(shaded)
 
+    @staticmethod
+    def _lighting_scale(scale, strength):
+        return max(.05, 1 + strength * (scale - 1))
+
     @classmethod
-    def _lighting_stops(cls, kind, rgb, depth_factor):
+    def _lighting_stops(cls, kind, rgb, depth_factor, options):
         if kind == 'sphere':
             values = [
                 (1.05, .42), (1.12, .08), (.92, 0), (.52, 0)
@@ -1839,9 +1889,16 @@ __MCUTILS_RENDERERS__
             values = [
                 (.50, 0), (.88, 0), (1.12, .10), (.88, 0), (.50, 0)
             ]
+        strength = options['strength']
+        blend = options['blend']
         return [
-            cls._shade_color(rgb, scale * depth_factor, white_mix)
-            for scale, white_mix in values
+            cls._shade_color(
+                rgb,
+                cls._lighting_scale(scale, strength) * depth_factor,
+                light_mix * blend,
+                options['color']
+            )
+            for scale, light_mix in values
         ]
 
     def _clear_lighting_defs(self):
@@ -1852,7 +1909,10 @@ __MCUTILS_RENDERERS__
     def _prepare_depth_lighting(self):
         self._clear_lighting_defs()
         self._lighting_context = {}
-        if not self.depth_lighting:
+        self._lighting_options = self._normalize_depth_lighting(
+            self.depth_lighting
+        )
+        if self._lighting_options is None:
             return
 
         projection = self.get_projection_matrix()
@@ -1888,8 +1948,11 @@ __MCUTILS_RENDERERS__
         far, near = np.min(depths), np.max(depths)
         span = max(near - far, 1e-12)
         for info in infos:
-            depth_factor = .78 + .22 * (
+            base_depth = .78 + .22 * (
                 (info['mean_depth'] - far) / span
+            )
+            depth_factor = self._lighting_scale(
+                base_depth, self._lighting_options['strength']
             )
             lighting = {
                 'kind': info['kind'],
@@ -1904,7 +1967,8 @@ __MCUTILS_RENDERERS__
                 gradient_id = f"{self._lighting_prefix}-{info['index']}"
                 lighting['gradient'] = gradient_id
                 stop_colors = self._lighting_stops(
-                    info['kind'], info['base_color'], depth_factor
+                    info['kind'], info['base_color'], depth_factor,
+                    self._lighting_options
                 )
                 if info['kind'] == 'sphere':
                     offsets = ['0%', '34%', '72%', '100%']
@@ -2102,7 +2166,7 @@ __MCUTILS_RENDERERS__
             'projection': np.asanyarray(self.get_projection_matrix()).tolist(),
             'center': center,
             'sensitivity': sensitivity,
-            'depthLighting': bool(self.depth_lighting),
+            'depthLighting': self._lighting_options or False,
             'rotation': {'yaw': 0, 'pitch': 0},
             'animationFrame': None,
             'primitives': primitives

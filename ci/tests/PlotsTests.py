@@ -631,9 +631,9 @@ class PlotsTests(TestCase):
         interactive_source = figure.to_svg_figure(
             interactive=True, dynamic_loading=False
         ).tostring()
-        self.assertIn('"depthLighting":true', interactive_source)
+        self.assertIn('"depthLighting":{"strength":1.0', interactive_source)
         self.assertIn('applyDepthLighting(projected)', interactive_source)
-        self.assertIn('lightingStops(kind, rgb, depthFactor)', interactive_source)
+        self.assertIn('lightingStops(kind, rgb, depthFactor, options)', interactive_source)
         self.assertIn('"kind":"sphere"', interactive_source)
         self.assertIn('"kind":"cylinder"', interactive_source)
 
@@ -644,6 +644,32 @@ class PlotsTests(TestCase):
         )
         unlit_source = unlit.to_svg_figure(interactive=False).tostring()
         self.assertNotIn('<radialGradient', unlit_source)
+
+        exaggerated = SVGFigure3D(depth_lighting={
+            'strength': 2,
+            'color': '#ffd080',
+            'blend': .5
+        })
+        exaggerated_axes = exaggerated.create_axes(1, 1, 1)
+        exaggerated_axes.figure.set_projection_kwargs(render_matrix=np.eye(4))
+        exaggerated_axes.figure.add_sphere(
+            center=[0, 0, 0], radius=.4, fill='#808080'
+        )
+        exaggerated_source = exaggerated.to_svg_figure(
+            interactive=True, dynamic_loading=False
+        ).tostring()
+        self.assertIn('"strength":2.0', exaggerated_source)
+        self.assertIn('"color":[255.0,208.0,128.0]', exaggerated_source)
+        self.assertIn('"blend":0.5', exaggerated_source)
+
+        numeric = SVGFigure3D(depth_lighting=1.5)
+        numeric_axes = numeric.create_axes(1, 1, 1)
+        numeric_axes.figure.set_projection_kwargs(render_matrix=np.eye(4))
+        numeric_axes.figure.add_sphere(
+            center=[0, 0, 0], radius=.4, fill='#808080'
+        )
+        numeric_source = numeric.to_svg_figure(interactive=True).tostring()
+        self.assertIn('"strength":1.5', numeric_source)
 
     @validationTest
     def test_MPLPath(self):
