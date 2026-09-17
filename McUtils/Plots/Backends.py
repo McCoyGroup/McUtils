@@ -9162,7 +9162,7 @@ class SVGFigure(GraphicsFigure):
         """
         kwargs = self.kwargs | opts
         ...
-    def to_svg_figure(self, wrap=True, **opts):
+    def to_svg_figure(self, wrap=True, interactive=True, **opts):
         """
         **LLM Docstring**
 
@@ -9174,7 +9174,7 @@ class SVGFigure(GraphicsFigure):
         """
         from ..Jupyter import JHTML
         sub_svgs = [
-            s.figure.to_svg()
+            s.figure.to_svg(interactive=interactive)
             for s in self.axes
         ]
         #TODO: handle layout

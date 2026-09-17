@@ -1046,6 +1046,26 @@ def render_matrix(
     :return: the combined render matrix
     :rtype: np.ndarray
     """
+    if (
+            view_distance is not None
+            and view_position is None
+            and view_matrix is None
+            and view_vector is None
+            and up_vector is None
+            and right_vector is None
+    ):
+        # A distance is a camera setting, not just a perspective/frustum
+        # parameter. Without a view basis the old path left the camera at the
+        # origin, so the perspective w coordinate straddled zero for scenes
+        # centered there. Use the default, unrotated basis and let the existing
+        # view-position block below put the camera on +z.
+        view_matrix = np.eye(3)
+        if view_center is None:
+            if bbox is None:
+                view_center = np.zeros(3)
+            else:
+                view_center = np.mean(np.asanyarray(bbox), axis=-1)
+
     if view_position is not None:
         view_position = np.asanyarray(view_position)
         if view_center is None:
@@ -1070,6 +1090,7 @@ def render_matrix(
             or up_vector is not None
     ):
         if view_vector is not None:
+            view_vector = np.asanyarray(view_vector)
             if up_vector is not None:
                 view_matrix = _view_transform(
                     -view_vector,

@@ -471,6 +471,88 @@ class PlotsTests(TestCase):
         ], stroke='green', fill='none', rotation=np.pi/6, normal=[0, 1, 1]).plot(fig)
         fig.show()
 
+    def test_SVGFigure3DProjectsStrokeWidths(self):
+        from McUtils.Plots.SVG import SVGCylinder, SVGSphere
+
+        projection = np.eye(4)
+        projection[0, 0] = projection[1, 1] = 2
+        projection[2, 3] = -1
+        projection[3, 3] = 10
+
+        sphere = SVGSphere(
+            center=[0, 0, 0], radius=.4, **{'stroke-width': '.01px'}
+        )
+        sphere_kwargs, _ = sphere.prep_kwargs(projection)
+        self.assertAlmostEqual(
+            float(sphere_kwargs['stroke-width'].removesuffix('px')),
+            .002
+        )
+
+        cylinder = SVGCylinder(
+            [0, 0, 0], [1, 0, 5], .1, **{'stroke-width': '.01px'}
+        )
+        cylinder_kwargs, _ = cylinder.prep_kwargs(projection)
+        # Mean endpoint scale: 2 * mean(1/10, 1/5) == .3.
+        self.assertAlmostEqual(
+            float(cylinder_kwargs['stroke-width'].removesuffix('px')),
+            .003
+        )
+
+    def test_SVGFigure3DViewScale(self):
+        from McUtils.Plots.SVG import SVGFigure3D
+
+        fig = SVGFigure3D(view_scale=2)
+        fig.set_projection_kwargs(render_matrix=np.eye(4))
+        fig.add_sphere(center=[0, 0, 0], radius=1, fill='red')
+
+        root = fig.to_svg()
+        _, _, width, height = root['viewBox']
+        self.assertAlmostEqual(width, 4)
+        self.assertAlmostEqual(height, 4)
+        self.assertEqual(fig.get_projection_kwargs()['view_scale'], 2)
+
+    def test_SVGFigure3DInteractiveRuntime(self):
+        import tempfile
+        from McUtils.Plots.SVG import SVGFigure3D
+
+        fig = SVGFigure3D(
+            id='interactive-svg-test',
+            view_box=np.array([[-2, 2], [-2, 2], [-2, 2]])
+        )
+        fig.set_projection_kwargs(render_matrix=np.eye(4))
+        fig.add_line(
+            x1=0, y1=0, z1=0, x2=1, y2=1, z2=1, stroke='black'
+        )
+        fig.add_sphere(
+            center=[0, 0, 0], radius=.2, fill='red',
+            **{'stroke-width': '.01px'}
+        )
+
+        static_source = fig.to_svg().tostring()
+        self.assertNotIn('McUtilsSVG3D.ready', static_source)
+
+        interactive_source = fig.to_svg(interactive=True).tostring()
+        self.assertIn('id="interactive-svg-test"', interactive_source)
+        self.assertIn('McUtilsSVG3D.ready(event)', interactive_source)
+        self.assertIn('api.figures["interactive-svg-test"]', interactive_source)
+        self.assertIn('interactive-svg-test-primitive-0', interactive_source)
+        self.assertIn('interactive-svg-test-primitive-1', interactive_source)
+        self.assertIn('scaleStroke(primitive, projected)', interactive_source)
+        self.assertIn('"strokeWidth"', interactive_source)
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            runtime_file = os.path.join(tmpdir, 'runtime.js')
+            linked_source = fig.to_svg(
+                interactive=True,
+                runtime_file=runtime_file,
+                runtime_src='assets/runtime.js'
+            ).tostring()
+            self.assertTrue(os.path.isfile(runtime_file))
+            self.assertIn('assets/runtime.js', linked_source)
+            with open(runtime_file) as runtime_stream:
+                runtime_source = runtime_stream.read()
+            self.assertIn('api.figures["interactive-svg-test"]', runtime_source)
+
     @validationTest
     def test_MPLPath(self):
         fig = Graphics(backend='svg')
