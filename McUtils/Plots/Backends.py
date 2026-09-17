@@ -8942,16 +8942,185 @@ class SVGFigure(GraphicsFigure):
         """
         self.kwargs['background'] = fg
 
-    def savefig(self, file, format="html", **opts):
+    @staticmethod
+    def _parse_px(v):
+        if v is None:
+            return None
+        if isinstance(v, str):
+            v = float(v.rstrip('px').strip())
+        return int(round(v))
+
+    def _resolve_pixel_size(self, width=None, height=None):
         """
         **LLM Docstring**
 
-        Save the figure to a file (SVG backend).
+        Work out a pixel width/height for `rasterize`, preferring
+        explicit arguments, then this figure's own `width`/`height`
+        kwargs (as set by `set_size_inches`/`figsize=`), then
+        `get_size_inches()`. Unlike `X3DFigure` (which always has a
+        `width`/`height` default), a bare `SVGFigure3D` may have neither
+        set at all, so this can come back with `None`s rather than
+        guessing.
 
-        :param file: the destination file/path
-        :param opts: extra options
+        :param width: an explicit width, if any
+        :param height: an explicit height, if any
+        :return: `(width, height)`, either of which may be `None`
+        :rtype: tuple
         """
-        if format == "svg":
+        width = self._parse_px(width)
+        height = self._parse_px(height)
+        if width is None:
+            width = self._parse_px(self.kwargs.get('width'))
+        if height is None:
+            height = self._parse_px(self.kwargs.get('height'))
+        if width is None or height is None:
+            w_in, h_in = self.get_size_inches()
+            if width is None and w_in:
+                width = int(round(w_in * DPI_SCALING))
+            if height is None and h_in:
+                height = int(round(h_in * DPI_SCALING))
+        return width, height
+
+    def rasterize(self, file=None, image_format='png', width=None, height=None,
+                  device_scale_factor=1,
+                  background=None, transparent=None,
+                  timeout=15000, executable_path=None, channel=None,
+                  browser_args=None, keep_html=False,
+                  ready_timeout_action='warn'):
+        """
+        **LLM Docstring**
+
+        Render this figure to a raster image, the same idiom
+        `X3DInterface.X3D.rasterize`/`JSMol.Applet.rasterize` use: build
+        the standalone page the widget needs (a margin reset and an
+        optional background) and hand the actual headless-browser work
+        off to that page's own generic `HTML.XMLElement.rasterize`.
+
+        Unlike those two, plain SVG has no asynchronous engine to wait
+        on -- a browser paints it as part of ordinary page load, with
+        nothing comparable to X3DOM's `.runtime.isReady` or JSmol's
+        `readyFunction` to poll -- so no `ready_function` is supplied
+        here; `rasterize`'s own `delay_time` fallback (a short fixed
+        pause, overridable via `rasterize_options={'delay_time': ...}`
+        on `savefig`) is enough.
+
+        :param file: destination; a path, a writable/bytes-like buffer
+            (e.g. `io.BytesIO()`), or `None` to get a new `io.BytesIO`
+            back
+        :param image_format: `"png"` or `"jpg"`/`"jpeg"`
+        :type image_format: str
+        :param width: viewport width; defaults to this figure's own
+            configured width (see `_resolve_pixel_size`)
+        :param height: viewport height; defaults to this figure's own
+            configured height
+        :param device_scale_factor: forwarded to Playwright's
+            `new_page` (the same `dpi`-to-scale-factor trick
+            `X3DFigure.savefig` uses)
+        :param background: an HTML background color for the page before
+            the SVG is drawn; falls back to `self.get_facecolor()` when
+            not given (see `savefig`)
+        :param transparent: if truthy, take the screenshot with
+            `omit_background=True`
+        :param timeout: milliseconds to wait before capturing (mostly
+            irrelevant here, since there's no `ready_function` to time
+            out on)
+        :type timeout: int
+        :param executable_path: forwarded to `resolve_chromium_launch_kwargs`
+        :param channel: forwarded to `resolve_chromium_launch_kwargs`
+        :param browser_args: extra Chromium command-line flags; defaults
+            to `HTML.XMLElement.DEFAULT_RASTERIZE_ARGS`
+        :param keep_html: if truthy, don't delete the intermediate HTML
+            file/directory (useful for debugging what got rendered)
+        :type keep_html: bool
+        :param ready_timeout_action: accepted for interface parity with
+            `X3D.rasterize`/`Applet.rasterize`; irrelevant here since no
+            `ready_function` is ever supplied
+        :type ready_timeout_action: str
+        :return: `file` if given (the path or buffer passed in),
+            otherwise a new `io.BytesIO` holding the image
+        :raises ValueError: if `width`/`height` can't be determined from
+            either the arguments or this figure's own configured size
+        """
+        width, height = self._resolve_pixel_size(width, height)
+        if width is None or height is None:
+            raise ValueError(
+                "rasterize() couldn't determine this figure's width/height -- "
+                "call set_size_inches(...)/pass figsize= when constructing it, "
+                "or pass width=/height= explicitly"
+            )
+
+        from ..Jupyter import JHTML
+
+        wrap_id = f"svg3d-raster-{uuid.uuid4().hex[:8]}"
+        header_elems = [JHTML.Style("html, body { margin:0; padding:0; }")]
+        if background is not None:
+            header_elems.append(JHTML.Style(f"html, body {{ background:{background}; }}"))
+
+        widget = self.to_widget(id=wrap_id, width=f"{width}px", height=f"{height}px")
+        page = JHTML.Html(
+            JHTML.Head(*header_elems),
+            JHTML.Body(widget)
+        )
+
+        return page.rasterize(
+            file,
+            width=width, height=height, device_scale_factor=device_scale_factor,
+            screenshot_selector=f"#{wrap_id}",
+            image_format=image_format, transparent=transparent, timeout=timeout,
+            executable_path=executable_path, channel=channel, browser_args=browser_args,
+            keep_html=keep_html, ready_timeout_action=ready_timeout_action,
+        )
+
+    raster_formats = {'png', 'jpg', 'jpeg'}
+    def savefig(self, file, format=None,
+                dpi=144, facecolor=None, transparent=None,
+                rasterize_options=None,
+                **opts):
+        """
+        **LLM Docstring**
+
+        Save the figure to a file (SVG 3D backend). Extends
+        `SVGFigure.savefig`'s dispatch (`format="svg"` for the raw SVG
+        source, anything else via `to_widget().write(...)`) with a third
+        case: for raster formats (`png`, `jpg`/`jpeg`, inferred from
+        `file`'s extension when `format` is left as `None`, the same
+        convention `X3DFigure.savefig`/`JSMol.Applet.savefig` use), the
+        rasterizer is called instead of writing the SVG/HTML source text
+        into a file with a raster extension.
+
+        :param format: `"png"`/`"jpg"`/`"jpeg"` to rasterize, `"svg"` for
+            the raw SVG source, or anything else (the default) for the
+            widget's own HTML; inferred from `file`'s extension when
+            `format` is left as `None` and `file` is a path
+        :param dpi: only used when rasterizing; converted to
+            `rasterize`'s `device_scale_factor` as `dpi / 72`
+        :param facecolor: background color to use when rasterizing,
+            forwarded to `rasterize` as `background`; defaults to this
+            figure's own `get_facecolor()` when not given
+        :param transparent: if rasterizing, try to omit the page/browser
+            background so the export can come out with an alpha channel
+        :param rasterize_options: extra keyword options forwarded to
+            `rasterize` (`timeout`, `executable_path`, `channel`,
+            `browser_args`, `keep_html`, `ready_timeout_action`, ...)
+        :param opts: extra options forwarded to `to_widget().write(...)`
+            when not rasterizing or writing raw SVG (construction
+            options, not rasterization options)
+        """
+        fmt = format
+        if fmt is None and isinstance(file, str):
+            fmt = os.path.splitext(file)[1].lstrip('.')
+        if fmt is not None and fmt.lower() in self.raster_formats:
+            if facecolor is None:
+                facecolor = self.get_facecolor()
+            return self.rasterize(
+                file,
+                image_format=fmt.lower(),
+                background=facecolor,
+                transparent=transparent,
+                device_scale_factor=(dpi / 72 if dpi is not None else 1),
+                **(rasterize_options if rasterize_options is not None else {})
+            )
+        elif fmt == "svg":
             dev.write_file(
                 file,
                 self.to_svg()
