@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DBackground">X3DBackground</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1486)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1486?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1395)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1395?message=Update%20Docs)]
 </div>
 
 
@@ -27,16 +27,9 @@ conversion_map: dict
 prep_attrs(self, attrs: 'dict'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DBackground.py#L1495)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DBackground.py#L1495?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DBackground.py#L1402)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DBackground.py#L1402?message=Update%20Docs)]
 </div>
-**LLM Docstring**
-
-Canonicalize the background attributes (resolving the color into components/transparency) before rendering.
-  - `attrs`: `dict`
-    > the attributes
-  - `:returns`: `dict`
-    > the canonicalized attributes
 
 
 <a id="McUtils.Plots.X3DInterface.X3DBackground.to_x3d" class="docs-object-method">&nbsp;</a> 
@@ -44,14 +37,9 @@ Canonicalize the background attributes (resolving the color into components/tran
 to_x3d(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DBackground.py#L1515)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DBackground.py#L1515?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DBackground.py#L1418)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DBackground.py#L1418?message=Update%20Docs)]
 </div>
-**LLM Docstring**
-
-Render the background to its X3D DOM element.
-  - `:returns`: `_`
-    > the X3D element
  </div>
 </div>
 
@@ -105,7 +93,7 @@ Render the background to its X3D DOM element.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DBackground.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DBackground.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1486?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1395?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

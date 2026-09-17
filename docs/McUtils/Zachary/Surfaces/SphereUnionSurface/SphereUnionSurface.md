@@ -1,8 +1,8 @@
 ## <a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface">SphereUnionSurface</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface.py#L94)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface.py#L94?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface.py#L95)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface.py#L95?message=Update%20Docs)]
 </div>
 
 
@@ -32,8 +32,8 @@ IntersectionCircle: IntersectionCircle
 __init__(self, centers, radii, scaling=None, expansion=None, samples=None, density=None, tolerance=None, add_intersection_circles=False, **generator_options): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface.py#L100)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface.py#L100?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface.py#L101)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface.py#L101?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -65,8 +65,8 @@ spheres), deferring sample-point generation.
 from_xyz(cls, atoms, positions, scaling=None, expansion=None, samples=None, tolerance=None, radius_property='IconRadius', distance_units='BohrRadius'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L150)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L150?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L151)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L151?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -98,8 +98,8 @@ from an atomic radius property.
 sampling_points(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L192)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L192?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L193)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L193?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -115,8 +115,8 @@ Setting this overrides them.
 atom_sampling_points(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L220)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L220?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L221)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L221?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -131,8 +131,8 @@ The per-sphere lists of exterior sample points, generated lazily.
 nearest_centers(cls, pts, centers, return_normals=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L235)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L235?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L236)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L236?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -154,8 +154,8 @@ returning the distance and outward unit vector.
 sphere_project(cls, pts, centers, radii): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L261)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L261?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L262)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L262?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -176,8 +176,8 @@ Project each point radially onto the surface of its nearest sphere.
 sphere_boundary_pruning(cls, pts, centers, min_component=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L287)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L287?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L288)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L288?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -200,8 +200,8 @@ when one isn't supplied.
 point_cloud_repulsion(cls, pts, centers, radii, min_displacement_cutoff=0.001, stochastic_factor=0.0001, force_constant=0.001, power=-3, max_iterations=15): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L344)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L344?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L345)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L345?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -234,8 +234,8 @@ projected onto the local tangent plane, reprojecting onto the spheres each step
 adjust_point_cloud_density(self, pts, centers=None, radii=None, min_component=None, min_component_bins=30, min_component_scaling=0.7, same_point_cutoff=1e-06, max_iterations=15): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L411)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L411?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L412)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L412?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -269,8 +269,8 @@ nearest-neighbour distribution.
 get_exterior_points(cls, points, centers, radii, tolerance: float = 0, vertex_map=None, intersection_point_mask=None, intersection_point_tolerance=None, return_components=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L592)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L592?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L593)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L593?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -302,8 +302,8 @@ every sphere, i.e. on the exterior surface of the union, within a tolerance.
 get_interior_points(cls, points, centers, radii, tolerance: float = 0, return_components=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L647)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L647?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L648)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L648?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -329,8 +329,8 @@ at least one sphere, within a tolerance.
 get_surface_points(cls, centers, radii, samples=50, density=None, scaling=1, point_generator=None, expansion=0, preserve_origins=False, circle_samples=None, min_circle_samples=0.1, add_intersection_circles=False, intersection_radius_scaling=1, intersection_boundary_clipping_threshold=None, return_intersection_point_mask=False, extend_intersection_points=True, intersection_point_tolerance=None, clear_circle_neighbors=None, neighborhood_tolerance='auto', tolerance=0, prune=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L683)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L683?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L684)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L684?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -386,8 +386,8 @@ circles, and prune occluded (interior) points.
 generate_points(self, scaling=None, expansion=None, samples=None, density=None, preserve_origins=False, tolerance=None, prune=True, add_intersection_circles=None, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1004)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1004?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1005)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1005?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -420,8 +420,8 @@ from the instance defaults.
 generate_mesh(self, points=None, normals=None, scaling=None, expansion=None, samples=None, method='poisson', depth=5, **reconstruction_settings): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1058)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1058?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1059)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1059?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -454,8 +454,8 @@ when none are given.
 sphere_points(cls, centers, radii, samples, generator=None, shells=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1122)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1122?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1123)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1123?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -482,8 +482,8 @@ shells.
 fibonacci_sphere(cls, samples): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1217)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1217?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1218)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1218?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -500,8 +500,8 @@ Generate `samples` roughly-even points on the unit sphere via the Fibonacci
 get_bbox(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1240)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1240?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1241)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1241?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -516,8 +516,8 @@ Return the axis-aligned bounding box enclosing all of the spheres.
 signed_distance(cls, inside_mask, spacing=1.0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1254)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1254?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1255)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1255?message=Update%20Docs)]
 </div>
 Exact signed distance field from a binary mask.
 Positive outside, negative inside, zero at the boundary.
@@ -532,8 +532,8 @@ spacing     : float or tuple of floats, physical size of one voxel per axis
 morphological_close_sdf(cls, inside_mask, probe_radius, spacing=1.0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1275)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1275?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1276)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1276?message=Update%20Docs)]
 </div>
 Fill concave crevices smaller than probe_radius via
 SDF dilate -> redistance -> erode.
@@ -550,8 +550,8 @@ F_final : float ndarray
 solvent_surface_distance(cls, points, centers, radii, probe_radius=0, probe_type='sas', grid_spacing=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1304)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1304?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1305)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1305?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -579,8 +579,8 @@ solvent-excluded surface (SES), via a morphological close on a voxel grid.
 get_surface_function(self, probe_radius=None, distance_function=None, probe_type='sas'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1358)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1358?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1359)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1359?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -601,8 +601,8 @@ Return a callable mapping points to a scalar field whose zero level set is the
 get_triangulation(self, occlusion_type='auto', deduplicate_points=None, point_gen_options=None, add_intersection_circles=True, extend_intersection_points=False, method=None, bbox_scaling=1.2, grid_samples=20, probe_radius=None, probe_type='sas', bbox=None, **surface_opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1409)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1409?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1410)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L1410?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -641,8 +641,8 @@ scalar field.
 sampling_point_surface_area(cls, centers, radii, points=None, exterior_test=None, point_generator=None, generator_args=None, center_surface_areas=None, **test_args): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1527)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1527?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1528)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1528?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -674,8 +674,8 @@ the fraction of each sphere's sample points that are exterior times its area.
 sampling_point_volume(cls, centers, radii, points=None, interior_test=None, point_generator=None, generator_args=None, center_volumes=None, shells=50, **test_args): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1624)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1624?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1625)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1625?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -708,8 +708,8 @@ Estimate the union volume by Monte-Carlo sampling of interior shell points.
 random_sphere_sampling(cls, center, radius, samples=500, seed=None, rng=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1681)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1681?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1682)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1682?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -734,8 +734,8 @@ Draw uniformly-distributed random points inside a sphere.
 volume_union_mc(cls, centers, radii, n_samples=100000, integrand=None, seed=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1709)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1709?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1710)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1710?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -758,8 +758,8 @@ Estimate the union volume by Monte-Carlo sampling uniformly inside each sphere.
 volume_voxel(cls, centers, radii, resolution=200): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1740)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1740?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1741)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1741?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -775,44 +775,14 @@ inside any sphere.
     > the estimated volume
 
 
-<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_triple_intersection_area" class="docs-object-method">&nbsp;</a> 
-```python
-@classmethod
-sphere_triple_intersection_area(cls, a, b, c, r1, r2, r3): 
-```
-<div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1929)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1929?message=Update%20Docs)]
-</div>
-**LLM Docstring**
-
-Analytic surface area of the triple overlap of three spheres, following Gibson &
-Scheraga. Returns either a pair-index fallback (when the triple doesn't fully
-intersect) or the analytic area.
-  - `a`: `Any`
-    > the distance between centers 2 and 3
-  - `b`: `Any`
-    > the distance between centers 1 and 3
-  - `c`: `Any`
-    > the distance between centers 1 and 2
-  - `r1`: `Any`
-    > the first radius
-  - `r2`: `Any`
-    > the second radius
-  - `r3`: `Any`
-    > the third radius
-  - `:returns`: `tuple`
-    > `(overlap_indices_or_None, area_or_None)`
-
-
 <a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_double_intersection_circle" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 sphere_double_intersection_circle(cls, centers, radii, dist=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2005)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2005?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1973)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1973?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -834,8 +804,8 @@ radius).
 sphere_triple_intersection_point(cls, centers, radii, dists=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2030)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2030?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1998)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1998?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -857,8 +827,8 @@ by building a local axis system and solving for the coordinates.
 get_intersections(cls, centers, radii): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2077)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2077?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2045)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2045?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -872,37 +842,14 @@ a set of spheres.
     > `(intersection_points, intersection_disks)`
 
 
-<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_double_intersection_area" class="docs-object-method">&nbsp;</a> 
-```python
-@classmethod
-sphere_double_intersection_area(cls, a, r1, r2): 
-```
-<div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2124)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2124?message=Update%20Docs)]
-</div>
-**LLM Docstring**
-
-Analytic exposed surface-area contribution of the overlap of two spheres, or a
-containment fallback when one sphere swallows the other.
-  - `a`: `float`
-    > the inter-center distance
-  - `r1`: `float`
-    > the first radius
-  - `r2`: `float`
-    > the second radius
-  - `:returns`: `tuple`
-    > `(overlap_indices_or_None, area)`
-
-
 <a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.triangle_area" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 triangle_area(cls, a, b, c): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2233)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2233?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2169)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2169?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -917,20 +864,241 @@ Heron's-formula area of a triangle with the given side lengths.
     > the area
 
 
+<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_area" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+sphere_area(cls, radii, axis=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2186)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2186?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+The total surface area of one or more spheres, `4 pi sum(r^2)`.
+  - `radii`: `np.ndarray`
+    > the sphere radii
+  - `axis`: `int | None`
+    > the axis to sum over
+  - `:returns`: `float | np.ndarray`
+    > the surface area
+
+
+<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_volume" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+sphere_volume(cls, radii, axis=None): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2206)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2206?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+The total volume of one or more spheres, `4/3 pi sum(r^3)`. Volume
+analogue of `sphere_area`.
+  - `radii`: `np.ndarray`
+    > the sphere radii
+  - `axis`: `int | None`
+    > the axis to sum over
+  - `:returns`: `float | np.ndarray`
+    > the volume
+
+
+<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_double_intersection_volume" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+sphere_double_intersection_volume(cls, a, r1, r2): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2430)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2430?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Analytic volume contribution of the pairwise overlap of two
+spheres (Gibson & Scheraga eq 2), or a containment fallback.
+Volume analogue of `sphere_double_intersection_area`; both are thin
+wrappers around the shared `_classify_double`.
+  - `a`: `Any`
+    > the inter-center distance
+  - `r1`: `Any`
+    > the first radius
+  - `r2`: `Any`
+    > the second radius
+  - `:returns`: `tuple`
+    > `(overlap_indices_or_None, volume)`
+
+
+<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_double_intersection_area" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+sphere_double_intersection_area(cls, a, r1, r2): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2460)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2460?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Analytic exposed surface-area contribution of the overlap of two
+spheres, or a containment fallback. Unchanged in substance from the
+shipped version -- only refactored to share `_classify_double`
+rather than repeating the same `t1, t2, t3` test inline.
+  - `a`: `Any`
+    > the inter-center distance
+  - `r1`: `Any`
+    > the first radius
+  - `r2`: `Any`
+    > the second radius
+  - `:returns`: `tuple`
+    > `(overlap_indices_or_None, area)`
+
+
+<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_triple_intersection_volume" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+sphere_triple_intersection_volume(cls, a, b, c, r1, r2, r3): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2514)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2514?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Analytic volume of the triple overlap of three spheres (Gibson &
+Scheraga eq 10). Thin wrapper around `_classify_triple`; only the
+final "genuine intersection" arctan formula is volume-specific
+(`sphere_triple_intersection_area` computes the same thing via
+`_trip_s` instead, from the same `w, e*, q*` the classifier
+returns).
+
+Note: `cls._trip_q(a, b, c, r1, r2, r3, e1)` returns `a * q1` in
+the paper's own notation (eq 7), so terms like eq (10)'s `2/(a q1)`
+become plain `2*w/q1` here (the `a` cancels), while terms like
+`(1 - eps2)/(alpha q2)` pick up an explicit extra distance factor
+to compensate.
+  - `a`: `Any`
+    > the distance between centers 2 and 3
+  - `b`: `Any`
+    > the distance between centers 1 and 3
+  - `c`: `Any`
+    > the distance between centers 1 and 2
+  - `r1`: `Any`
+    > the first radius
+  - `r2`: `Any`
+    > the second radius
+  - `r3`: `Any`
+    > the third radius
+  - `:returns`: `tuple`
+    > `(overlap_indices_or_None, volume_or_None)`
+
+
+<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_triple_intersection_area" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+sphere_triple_intersection_area(cls, a, b, c, r1, r2, r3): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2576)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2576?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Analytic surface area of the triple overlap of three spheres.
+Thin wrapper around `_classify_triple`, using the pre-existing
+`_trip_s` helper for the final formula (unchanged from the shipped
+version other than sharing the classifier). This is what gets the
+`p2` argument-order fix for the first time (see module docstring).
+  - `a`: `Any`
+    > the distance between centers 2 and 3
+  - `b`: `Any`
+    > the distance between centers 1 and 3
+  - `c`: `Any`
+    > the distance between centers 1 and 2
+  - `r1`: `Any`
+    > the first radius
+  - `r2`: `Any`
+    > the second radius
+  - `r3`: `Any`
+    > the third radius
+  - `:returns`: `tuple`
+    > `(overlap_indices_or_None, area_or_None)`
+
+
+<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_quadruple_intersection_volume" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+sphere_quadruple_intersection_volume(cls, a, b, c, f, g, h, r1, r2, r3, r4, V123, V124, V134, V234, I4, I3, I2, I1): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2635)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2635?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Analytic volume contribution of the quadruple overlap of four
+spheres (Gibson & Scheraga eq 20). Thin wrapper around
+`_classify_quadruple`; only the final "genuine intersection"
+formula (using the triple *volumes* `V123` etc as inputs) is
+volume-specific.
+  - `a`: `Any`
+    > the distance between centers 2 and 3
+  - `b`: `Any`
+    > the distance between centers 1 and 3
+  - `c`: `Any`
+    > the distance between centers 1 and 2
+  - `f`: `Any`
+    > the distance between centers 1 and 4
+  - `g`: `Any`
+    > the distance between centers 2 and 4
+  - `h`: `Any`
+    > the distance between centers 3 and 4
+  - `r1`: `Any`
+    > the first radius
+  - `r2`: `Any`
+    > the second radius
+  - `r3`: `Any`
+    > the third radius
+  - `r4`: `Any`
+    > the fourth radius
+  - `V123`: `Any`
+    > the 1-2-3 triple volume
+  - `V124`: `Any`
+    > the 1-2-4 triple volume
+  - `V134`: `Any`
+    > the 1-3-4 triple volume
+  - `V234`: `Any`
+    > the 2-3-4 triple volume
+  - `I4`: `Any`
+    > the pair of tests for center 4 vs the 1-2-3 intersection points
+  - `I3`: `Any`
+    > the pair of tests for center 3
+  - `I2`: `Any`
+    > the pair of tests for center 2
+  - `I1`: `Any`
+    > the pair of tests for center 1
+  - `:returns`: `tuple`
+    > `(overlap_indices_or_None, volume_or_None)`
+
+
 <a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_quadruple_intersection_area" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
 sphere_quadruple_intersection_area(cls, a, b, c, f, g, h, r1, r2, r3, r4, A123, A124, A134, A234, I4, I3, I2, I1): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2249)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2249?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2695)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2695?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
-Analytic surface-area contribution of the quadruple overlap of four spheres,
-dispatching on a set of intersection-test bit patterns to the correct lower-order
-fallback or the full analytic expression.
+Analytic surface-area contribution of the quadruple overlap of
+four spheres. Thin wrapper around `_classify_quadruple`, using the
+pre-existing `_quad_term` helper for the final formula (unchanged
+from the shipped version other than sharing the classifier). This
+is what gets the `test_bits == (0,)*8` fix for the first time (see
+module docstring).
   - `a`: `Any`
     > the distance between centers 2 and 3
   - `b`: `Any`
@@ -971,65 +1139,220 @@ fallback or the full analytic expression.
     > `(overlap_indices_or_None, area_or_None)`
 
 
-<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_area" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.apply_quintuple_eliminations" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
-sphere_area(cls, radii, axis=None): 
+apply_quintuple_eliminations(cls, centers, radii, intersection_points, terms, overlap_tolerance=0): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2476)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2476?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2808)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2808?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
-The total surface area of one or more spheres, `4 pi sum(r^2)`.
-  - `radii`: `np.ndarray`
+Apply the Gibson & Scheraga section-5 "intersection of five
+spheres" existence tests/reductions to `terms` in place, for every
+(quadruple, 5th-sphere) view. Measure-agnostic: shared verbatim
+between `sphere_union_volume` and `sphere_union_surface_area` (the
+latter for the first time as of this patch -- previously the
+shipped area code had no quintuple pass at all).
+
+Four of the paper's five cases are implemented as simple term
+deletions (case (i), no intersection, is a no-op):
+
+  - case (ii) (1 of 4 vertices in the 5th sphere E): the *other*
+    quadruple {3 shared indices, E} is redundant -- drop it.
+  - case (iii) (2 vertices in E): eq (52) shows the quintuple
+    equals (other-quad-1) + (other-quad-2) - (shared triple + E);
+    drop all three of those already-existing terms.
+  - case (v) (all 4 vertices in E): the quadruple region is
+    entirely inside E, so the *original* quadruple's own term
+    cancels -- drop it.
+
+Case (iv) (exactly 3 of 4 vertices in E) is a **known, documented
+gap**: eq (53) requires singling out *which one* of the three
+non-special indices is replaced by the 5th sphere, and that choice
+is not determined by the vertex-containment pattern alone. This
+function detects case (iv) but applies no correction for it, and
+emits a single `UserWarning` (not one per occurrence).
+  - `centers`: `Any`
+    > the sphere centers
+  - `radii`: `Any`
     > the sphere radii
-  - `axis`: `int | None`
-    > the axis to sum over
-  - `:returns`: `float | np.ndarray`
-    > the surface area
+  - `intersection_points`: `Any`
+    > the `(nc, nc, nc, 2, 3)` triple-point-root array
+  - `terms`: `Any`
+    > the terms dict to mutate (from the doubles/triples/quadruples loops)
+  - `overlap_tolerance`: `Any`
+    > fractional tolerance, matching the rest of the module
+  - `:returns`: `int`
+    > the number of unresolved case-(iv) views encountered
+
+
+<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_union_volume" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+sphere_union_volume(cls, centers, radii, include_doubles=True, include_triples=None, include_quadruples=None, return_terms=False, overlap_tolerance=0, apply_quintuple_correction=True): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L3104)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L3104?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Compute the exact volume of a union of spheres via inclusion-
+exclusion over the analytic double/triple/quadruple intersection-
+volume terms (Gibson & Scheraga eqs 2, 10, 20) plus section-5
+quintuple elimination. Thin wrapper around
+`_sphere_union_inclusion_exclusion`; see that method and
+`sphere_union_surface_area` (its area-side sibling) for the shared
+implementation.
+  - `centers`: `Any`
+    > the sphere centers
+  - `radii`: `Any`
+    > the sphere radii
+  - `include_doubles`: `Any`
+    > include the pairwise intersection terms
+  - `include_triples`: `Any`
+    > include the triple terms
+  - `include_quadruples`: `Any`
+    > include the quadruple terms
+  - `return_terms`: `Any`
+    > return the per-combination term dict rather than the sum
+  - `overlap_tolerance`: `Any`
+    > fractional tolerance for treating spheres as overlapping
+  - `apply_quintuple_correction`: `Any`
+    > apply section-5 quintuple elimination (default True)
+  - `:returns`: `float | dict`
+    > the volume (or the terms dict)
 
 
 <a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_union_surface_area" class="docs-object-method">&nbsp;</a> 
 ```python
 @classmethod
-sphere_union_surface_area(cls, centers, radii, include_doubles=True, include_triples=None, include_quadruples=None, return_terms=False, overlap_tolerance=0): 
+sphere_union_surface_area(cls, centers, radii, include_doubles=True, include_triples=None, include_quadruples=None, return_terms=False, overlap_tolerance=0, apply_quintuple_correction=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2492)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2492?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L3149)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L3149?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
 Compute the exact exposed surface area of a union of spheres via
-inclusion-exclusion over the analytic single/double/triple/quadruple
-intersection-area terms, dropping fully-occluded spheres as they are detected.
-  - `centers`: `np.ndarray`
+inclusion-exclusion over the analytic single/double/triple/
+quadruple intersection-area terms, plus (new as of this patch)
+section-5 quintuple elimination. Thin wrapper around
+`_sphere_union_inclusion_exclusion`; see that method and
+`sphere_union_volume` (its volume-side sibling) for the shared
+implementation.
+  - `centers`: `Any`
     > the sphere centers
-  - `radii`: `np.ndarray`
+  - `radii`: `Any`
     > the sphere radii
-  - `include_doubles`: `bool`
+  - `include_doubles`: `Any`
     > include the pairwise intersection terms
-  - `include_triples`: `bool | None`
+  - `include_triples`: `Any`
     > include the triple terms
-  - `include_quadruples`: `bool | None`
+  - `include_quadruples`: `Any`
     > include the quadruple terms
-  - `return_terms`: `bool`
+  - `return_terms`: `Any`
     > return the per-combination term dict rather than the sum
-  - `overlap_tolerance`: `float`
+  - `overlap_tolerance`: `Any`
     > fractional tolerance for treating spheres as overlapping
+  - `apply_quintuple_correction`: `Any`
+    > apply section-5 quintuple elimination
+    (default True -- this is new; the shipped version never had a
+    quintuple pass at all, see module docstring)
   - `:returns`: `float | dict`
     > the surface area (or the terms dict)
 
 
-<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.surface_area" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_area_union_ball" class="docs-object-method">&nbsp;</a> 
 ```python
-surface_area(self, method='union', **opts): 
+@classmethod
+sphere_area_union_ball(cls, centers, radii, return_terms=False, overlap_tolerance=1e-10, joggle=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L2667)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L2667?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L3536)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L3536?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Compute the union surface area via the same weighted
+(regular-triangulation) alpha complex at alpha=0 used by
+`sphere_volume_union_ball` -- the area analogue, with an identical
+alpha-complex construction and identical containment pruning, just
+summing `_unionball_intersection_area` instead of
+`_unionball_intersection_volume` over the same simplices with the
+same inclusion-exclusion signs. See the "UnionBall" section comment
+above `_unionball_regular_candidates` for the benchmark numbers --
+this resolves the area-side residual error documented in this
+patch's "WHAT THIS PATCH DOES NOT FIX" section (which was *worse*,
+in relative terms, than the volume-side gap this was originally
+written to fix).
+  - `centers`: `np.ndarray`
+    > the sphere centers, shape `(n, 3)`
+  - `radii`: `np.ndarray`
+    > the sphere radii, shape `(n,)`
+  - `return_terms`: `bool`
+    > return the signed per-simplex term dict
+    (keyed by original sphere indices), rather than the sum
+  - `overlap_tolerance`: `float`
+    > relative tolerance for containment
+    pruning and the alpha-complex power test
+  - `joggle`: `bool`
+    > opt into Qhull's geometry-perturbing `QJ` option,
+    for degenerate (e.g. exactly-cospherical) configurations
+  - `:returns`: `float | dict`
+    > the union surface area (or the signed terms dict)
+    radii, or a Qhull failure on degenerate input)
+
+
+<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.sphere_volume_union_ball" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+sphere_volume_union_ball(cls, centers, radii, return_terms=False, overlap_tolerance=1e-10, joggle=False): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L3752)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L3752?message=Update%20Docs)]
+</div>
+**LLM Docstring**
+
+Compute the union volume via a weighted (regular-triangulation)
+alpha complex at alpha=0, rather than Gibson & Scheraga's
+combinatorial inclusion-exclusion. See the "UnionBall" section
+comment above `_unionball_regular_candidates` for why this sidesteps
+the quintuple-elimination gap `sphere_union_volume` still has, and
+for the benchmark numbers showing it does so in practice on the
+molecule where that gap was found (essentially exact at every
+scale tested, vs. up to 21.6% off for `sphere_union_volume` at the
+worst scale).
+  - `centers`: `np.ndarray`
+    > the sphere centers, shape `(n, 3)`
+  - `radii`: `np.ndarray`
+    > the sphere radii, shape `(n,)`
+  - `return_terms`: `bool`
+    > return the signed per-simplex term dict
+    (keyed by original sphere indices), rather than the sum
+  - `overlap_tolerance`: `float`
+    > relative tolerance for containment
+    pruning and the alpha-complex power test
+  - `joggle`: `bool`
+    > opt into Qhull's geometry-perturbing `QJ` option,
+    for degenerate (e.g. exactly-cospherical) configurations
+  - `:returns`: `float | dict`
+    > the union volume (or the signed terms dict)
+    negative radii, or negative `overlap_tolerance`)
+
+
+<a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.surface_area" class="docs-object-method">&nbsp;</a> 
+```python
+surface_area(self, method='union-ball', **opts): 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L3856)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L3856?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -1044,11 +1367,11 @@ Compute the surface area of the sphere union by the chosen method.
 
 <a id="McUtils.Zachary.Surfaces.SphereUnionSurface.SphereUnionSurface.volume" class="docs-object-method">&nbsp;</a> 
 ```python
-volume(self, method='monte-carlo', **opts): 
+volume(self, method='union-ball', **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L2703)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L2703?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L3894)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L3894?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -1066,8 +1389,8 @@ Compute the volume of the sphere union by the chosen method.
 integral(self, integrand, method='monte-carlo', **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L2744)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L2744?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L3937)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L3937?message=Update%20Docs)]
 </div>
 
 
@@ -1076,8 +1399,8 @@ integral(self, integrand, method='monte-carlo', **opts):
 plot(self, figure=None, *, points=None, function=None, sphere_color='white', sphere_style=None, point_style=None, point_values=None, distance_units='Angstroms', plot_intersections=False, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L2752)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L2752?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L3945)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.py#L3945?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -1113,8 +1436,8 @@ the spheres, and optionally the intersection circles/points.
 plot_sphere_points(cls, points, centers, radii, figure=None, *, color='black', backend='x3d', return_objects=False, sphere_color='white', sphere_style=None, point_colors=None, point_values=None, vertex_colormap='WarioColors', rescale_color_values=True, plot_intersections=False, intersection_point_style=None, intersection_circle_style=None, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L2816)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L2816?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L4009)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L4009?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -1209,7 +1532,7 @@ figure.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Zachary/Surfaces/SphereUnionSurface/SphereUnionSurface.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface.py#L94?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Zachary/Surfaces/SphereUnionSurface.py#L95?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

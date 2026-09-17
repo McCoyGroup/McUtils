@@ -1,11 +1,12 @@
-## <a id="McUtils.Plots.X3DInterface.X3DSphere">X3DSphere</a> 
+## <a id="McUtils.Plots.X3DInterface.X3DLight">X3DLight</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L2087)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L2087?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1443)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1443?message=Update%20Docs)]
 </div>
 
-
+Base for the `X3DLightNode` family (`DirectionalLight`/`PointLight`/`SpotLight`),
+holding the fields they all share.
 
 
 
@@ -19,27 +20,21 @@
  </div>
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  ```python
-tag_class: Sphere
+conversion_map: dict
 ```
-<a id="McUtils.Plots.X3DInterface.X3DSphere.prep_geometry_opts" class="docs-object-method">&nbsp;</a> 
+<a id="McUtils.Plots.X3DInterface.X3DLight.prep_attrs" class="docs-object-method">&nbsp;</a> 
 ```python
-prep_geometry_opts(self, centers, radius=1, **opts): 
+prep_attrs(self, attrs: 'dict'): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DSphere.py#L2090)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DSphere.py#L2090?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface/X3DLight.py#L1460)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface/X3DLight.py#L1460?message=Update%20Docs)]
 </div>
-**LLM Docstring**
-
-Build the per-instance geometry options for spheres at the given centers.
-  - `centers`: `Any`
-    > the sphere centers
-  - `radius`: `Any`
-    > the sphere radius/radii
-  - `opts`: `Any`
-    > extra options
-  - `:returns`: `list`
-    > the per-instance geometry options
+Canonicalize the light attributes (resolving `color`; lights have no transparency channel).
+  - `attrs`: `dict`
+    > the attributes
+  - `:returns`: `dict`
+    > the canonicalized attributes
  </div>
 </div>
 
@@ -87,13 +82,13 @@ Build the per-instance geometry options for spheres at the given centers.
 [Bug](https://github.com/McCoyGroup/McUtils/issues/new?title=Documentation%20Improvement%20Needed)/[Request](https://github.com/McCoyGroup/McUtils/issues/new?title=Example%20Request)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Plots/X3DInterface/X3DSphere.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Plots/X3DInterface/X3DSphere.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/examples/McUtils/Plots/X3DInterface/X3DLight.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/examples/McUtils/Plots/X3DInterface/X3DLight.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DSphere.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DSphere.md)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DLight.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DLight.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L2087?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1443?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

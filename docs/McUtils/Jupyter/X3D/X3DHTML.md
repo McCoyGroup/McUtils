@@ -1,8 +1,8 @@
 ## <a id="McUtils.Jupyter.X3D.X3DHTML">X3DHTML</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/X3D.py#L8)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/X3D.py#L8?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Jupyter/X3D.py#L9)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/X3D.py#L9?message=Update%20Docs)]
 </div>
 
 
@@ -20,6 +20,7 @@
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  ```python
 X3DElement: X3DElement
+X3DCanvas: X3DCanvas
 X3D: X3D
 Anchor: Anchor
 Appearance: Appearance
@@ -159,6 +160,7 @@ PositionDamper2D: PositionDamper2D
 PositionInterpolator: PositionInterpolator
 PositionInterpolator2D: PositionInterpolator2D
 ProjectionVolumeStyle: ProjectionVolumeStyle
+ProximitySensor: ProximitySensor
 Pyramid: Pyramid
 QuadSet: QuadSet
 RadarVolumeStyle: RadarVolumeStyle
@@ -277,8 +279,8 @@ X3DVolumeRenderStyleNode: X3DVolumeRenderStyleNode
 get_x3d_map(cls): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L10)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L10?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L11)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L11?message=Update%20Docs)]
 </div>
  </div>
 </div>
@@ -333,7 +335,7 @@ get_x3d_map(cls):
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Jupyter/X3D/X3DHTML.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Jupyter/X3D/X3DHTML.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/X3D.py#L8?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Jupyter/X3D.py#L9?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    

@@ -1,8 +1,8 @@
 ## <a id="McUtils.Plots.X3DInterface.X3DScene">X3DScene</a> 
 
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1349)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1349?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1529)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1529?message=Update%20Docs)]
 </div>
 
 
@@ -20,7 +20,11 @@
  <div class="collapsible-section collapsible-section-body collapse show" id="methods" markdown="1">
  ```python
 wrapper_class: Scene
+default_light_type: str
+light_types: dict
 default_viewpoint: dict
+camera_sensor_def: str
+camera_rig_def: str
 default_up_vector: tuple
 default_right_vector: tuple
 default_view_vector: tuple
@@ -28,11 +32,11 @@ default_view_distance: int
 ```
 <a id="McUtils.Plots.X3DInterface.X3DScene.__init__" class="docs-object-method">&nbsp;</a> 
 ```python
-__init__(self, *children: 'X3DPrimitive', background=None, environment=True, viewpoint=None, **opts): 
+__init__(self, *children: 'X3DPrimitive', background=None, environment=True, lighting=None, navigation=None, viewpoint=None, **opts): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1353)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1353?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Plots/X3DInterface.py#L1541)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1541?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -43,8 +47,29 @@ Set up a scene primitive with an optional background and viewpoint.
     > the background specification
   - `viewpoint`: `Any`
     > the viewpoint specification
+  - `environment`: `Any`
+    > `True`/`False`/`None`, a dict of `Environment` options, or an `X3DEnvironment`
+  - `lighting`: `Any`
+    > a list of light specs (dicts with a `type` key resolving via `light_types`, or `X3DLight` instances)
   - `opts`: `Any`
     > extra scene options
+
+
+<a id="McUtils.Plots.X3DInterface.X3DScene.resolve_light" class="docs-object-method">&nbsp;</a> 
+```python
+@classmethod
+resolve_light(cls, light_spec) -> 'X3DLight': 
+```
+<div class="docs-source-link" markdown="1">
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1618)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1618?message=Update%20Docs)]
+</div>
+Resolve a lighting spec (a dict keyed by light `type`, defaulting to `default_light_type`,
+or an already-built light object) into an `X3DLight` instance.
+  - `light_spec`: `Any`
+    > the lighting spec
+  - `:returns`: `X3DLight`
+    > the light
 
 
 <a id="McUtils.Plots.X3DInterface.X3DScene.get_view_settings" class="docs-object-method">&nbsp;</a> 
@@ -53,8 +78,8 @@ Set up a scene primitive with an optional background and viewpoint.
 get_view_settings(cls, up_vector=None, view_vector=None, right_vector=None, view_distance=None, view_center=None, view_matrix=None, view_position=None, return_settings=False, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1386)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1386?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L1638)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L1638?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -119,7 +144,7 @@ specification.
 [Edit](https://github.com/McCoyGroup/McUtils/edit/gh-pages/ci/docs/McUtils/Plots/X3DInterface/X3DScene.md)/[New](https://github.com/McCoyGroup/McUtils/new/gh-pages/?filename=ci/docs/templates/McUtils/Plots/X3DInterface/X3DScene.md)   
 </div>
    <div class="col" markdown="1">
-[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1349?message=Update%20Docs)   
+[Edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Plots/X3DInterface.py#L1529?message=Update%20Docs)   
 </div>
    <div class="col" markdown="1">
    
