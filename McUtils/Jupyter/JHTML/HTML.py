@@ -3276,6 +3276,348 @@ class HTML(XMLBase):
                 with open(file, 'w+') as dump:
                     dump.write(base_str)
 
+        DEFAULT_RASTERIZE_ARGS = [
+            "--use-gl=swiftshader",
+            "--enable-webgl",
+            "--ignore-gpu-blocklist",
+            "--enable-unsafe-swiftshader",
+        ]
+
+        @staticmethod
+        def resolve_chromium_launch_kwargs(playwright_chromium, executable_path=None, channel=None):
+            """
+            **LLM Docstring**
+
+            Find a Chromium/Chrome executable for `rasterize` to drive,
+            without hard-coding a path to one: an explicit
+            `executable_path`/`channel` override, then the
+            `MCUTILS_CHROME_EXECUTABLE` environment variable, then
+            Playwright's own managed Chromium install (so on a machine
+            where `playwright install chromium` has been run, or in an
+            environment that ships one -- e.g. under
+            `PLAYWRIGHT_BROWSERS_PATH` -- nothing further needs to be
+            configured), then a system Google Chrome via Playwright's
+            `channel` mechanism, and finally a `PATH`/common-install-location
+            search. Raises a `RuntimeError` explaining all of that if
+            nothing is found.
+
+            :param playwright_chromium: the `playwright.sync_api.Playwright.chromium`
+                (or async equivalent) browser-type object to try launching
+            :param executable_path: an explicit executable to use, skipping
+                auto-detection entirely
+            :type executable_path: str | None
+            :param channel: an explicit Playwright browser channel (e.g.
+                `"chrome"` or `"msedge"`) to use, skipping auto-detection
+            :type channel: str | None
+            :return: the keyword arguments to forward to `playwright_chromium.launch(...)`
+            :rtype: dict
+            """
+            import os
+            import shutil
+
+            if executable_path is not None:
+                return {"executable_path": executable_path}
+            if channel is not None:
+                return {"channel": channel}
+
+            env_path = os.environ.get("MCUTILS_CHROME_EXECUTABLE")
+            if env_path:
+                return {"executable_path": env_path}
+
+            errors = []
+
+            try:
+                browser = playwright_chromium.launch(headless=True)
+                browser.close()
+            except Exception as e:
+                errors.append(e)
+            else:
+                return {}
+
+            try:
+                browser = playwright_chromium.launch(headless=True, channel="chrome")
+                browser.close()
+            except Exception as e:
+                errors.append(e)
+            else:
+                return {"channel": "chrome"}
+
+            candidates = [
+                "chromium", "chromium-browser", "google-chrome", "google-chrome-stable", "chrome",
+                "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+                "/Applications/Chromium.app/Contents/MacOS/Chromium",
+            ]
+            for candidate in candidates:
+                if os.path.isabs(candidate):
+                    if os.path.isfile(candidate):
+                        return {"executable_path": candidate}
+                else:
+                    found = shutil.which(candidate)
+                    if found:
+                        return {"executable_path": found}
+
+            raise RuntimeError(
+                "couldn't find a Chromium/Chrome install to rasterize with; run "
+                "`playwright install chromium`, install Google Chrome, or point "
+                "`executable_path=`/`channel=` (on `rasterize(...)`) or the "
+                "MCUTILS_CHROME_EXECUTABLE environment variable at a "
+                f"Chromium/Chrome binary (tried: {errors})"
+            )
+
+        @staticmethod
+        def _parse_pixel_length(value):
+            """
+            **LLM Docstring**
+
+            Parse a CSS pixel-ish length -- a plain number, or a string
+            like `"400px"`/`"400"` -- into a plain `int`, or return `None`
+            if `value` is `None` or not parseable.
+
+            :param value: the raw attribute/style value
+            :return: the length in pixels, or `None`
+            :rtype: int | None
+            """
+            if value is None:
+                return None
+            if isinstance(value, (int, float)):
+                return int(round(value))
+            if isinstance(value, str):
+                v = value.strip()
+                if v.endswith('px'):
+                    v = v[:-2].strip()
+                try:
+                    return int(round(float(v)))
+                except ValueError:
+                    return None
+            return None
+
+        def get_pixel_size(self):
+            """
+            **LLM Docstring**
+
+            Try to work out this element's own rendered width/height, in
+            pixels, from its `width`/`height` attributes and/or its
+            inline `style` (checked in that order, matching how e.g.
+            `X3DInterface.X3D.to_widget` already reads a rendered
+            element's size back out).
+
+            :return: `(width, height)`; either may be `None` if it
+                couldn't be determined
+            :rtype: tuple
+            """
+            attrs = self.attrs
+            width = self._parse_pixel_length(attrs.get('width'))
+            height = self._parse_pixel_length(attrs.get('height'))
+            style = self.style
+            if style is not None:
+                if width is None:
+                    width = self._parse_pixel_length(style.get('width'))
+                if height is None:
+                    height = self._parse_pixel_length(style.get('height'))
+            return width, height
+
+        def rasterize(self, file=None, width=None, height=None, device_scale_factor=1,
+                      ready_function=None, delay_time=250, timeout=15000,
+                      image_format='png', transparent=None,
+                      screenshot_selector=None,
+                      executable_path=None, channel=None, browser_args=None,
+                      keep_html=False, ready_timeout_action='warn'):
+            """
+            **LLM Docstring**
+
+            Render this element as a standalone page in a headless
+            Chromium (via Playwright) and screenshot it. This works on
+            any `HTML.XMLElement` -- it isn't specific to X3D scenes,
+            which is what it was first written for; see
+            `X3DInterface.X3D.rasterize`, which now just builds the page
+            it wants (with a scene-specific `ready_function` and
+            `screenshot_selector`) and calls this.
+
+            There's no general way to know when an arbitrary page is
+            "done" the way there is for an X3DOM scene, so by default
+            this just waits `delay_time` milliseconds and then takes the
+            screenshot. Pass `ready_function` (a JS expression, as a
+            string, in the shape Playwright's `wait_for_function` expects)
+            for anything that can do better.
+
+            Playwright's *sync* API (used here) refuses to run on a
+            thread that already has an asyncio event loop running on it
+            -- which is exactly the situation inside a Jupyter kernel --
+            so the actual browser-driving work always runs on a
+            short-lived worker thread, whether or not the calling thread
+            has one.
+
+            :param file: destination; a path, a writable/bytes-like
+                buffer (anything with a `.write(bytes)` method, e.g.
+                `io.BytesIO()`), or `None` to just get a new `io.BytesIO`
+                back without writing it anywhere
+            :param width: viewport/image width in pixels; inferred from
+                this element's own `width` attribute/style (via
+                `get_pixel_size`) if not given
+            :param height: viewport/image height in pixels; inferred the
+                same way
+            :param ready_function: a JS predicate (the body Playwright's
+                `wait_for_function` expects) polled until it returns
+                truthy, or until `timeout` elapses
+            :param delay_time: milliseconds to sleep before capturing,
+                used only when `ready_function` is not given
+            :type delay_time: int
+            :param timeout: milliseconds to wait for `ready_function`
+                before giving up (irrelevant when `ready_function` is
+                `None`)
+            :type timeout: int
+            :param image_format: `"png"` or `"jpg"`/`"jpeg"`
+            :type image_format: str
+            :param transparent: if truthy, take the screenshot with
+                `omit_background=True` so a transparent page background
+                can come through as alpha
+            :param screenshot_selector: a CSS selector for the specific
+                element to screenshot (e.g. a `<canvas>` some script on
+                the page creates); defaults to the whole page/viewport
+            :param executable_path: forwarded to `resolve_chromium_launch_kwargs`
+            :param channel: forwarded to `resolve_chromium_launch_kwargs`
+            :param browser_args: extra Chromium command-line flags;
+                defaults to `DEFAULT_RASTERIZE_ARGS` (a software-WebGL
+                config that works headless without a GPU)
+            :param keep_html: if truthy, don't delete the intermediate
+                HTML file/directory (useful for debugging what got
+                rendered)
+            :type keep_html: bool
+            :param ready_timeout_action: `"warn"` (default, via the
+                `warnings` module), `"raise"`, or `"ignore"` -- what to
+                do if `ready_function` doesn't return truthy within
+                `timeout`
+            :type ready_timeout_action: str
+            :return: `file` if given (the path or buffer passed in),
+                otherwise a new `io.BytesIO` holding the image
+            """
+            if width is None or height is None:
+                own_width, own_height = self.get_pixel_size()
+                if width is None:
+                    width = own_width
+                if height is None:
+                    height = own_height
+            if width is None or height is None:
+                raise ValueError(
+                    "rasterize() couldn't infer this element's width/height "
+                    "(no width=/height= was given, and neither could be read "
+                    "off its own attributes/style) -- pass them explicitly"
+                )
+            width = int(round(width))
+            height = int(round(height))
+
+            import tempfile
+            import shutil
+            import os
+            import concurrent.futures
+
+            tmp_dir = tempfile.mkdtemp(prefix="mcutils_rasterize_")
+            tmp_html = os.path.join(tmp_dir, "page.html")
+            try:
+                self.write(tmp_html)
+
+                def _do_rasterize():
+                    return self._playwright_rasterize(
+                        tmp_html, width, height, device_scale_factor,
+                        image_format, transparent,
+                        browser_args, executable_path, channel,
+                        ready_function, delay_time, timeout, ready_timeout_action,
+                        screenshot_selector
+                    )
+
+                with concurrent.futures.ThreadPoolExecutor(max_workers=1) as pool:
+                    buf = pool.submit(_do_rasterize).result()
+            finally:
+                if not keep_html:
+                    shutil.rmtree(tmp_dir, ignore_errors=True)
+
+            if file is None:
+                return buf
+            elif hasattr(file, 'write'):
+                file.write(buf.getvalue())
+                return file
+            else:
+                with open(file, 'wb') as f:
+                    f.write(buf.getvalue())
+                return file
+
+        def _playwright_rasterize(self, tmp_html, width, height, device_scale_factor,
+                                  image_format, transparent,
+                                  browser_args, executable_path, channel,
+                                  ready_function, delay_time, timeout, ready_timeout_action,
+                                  screenshot_selector):
+            """
+            **LLM Docstring**
+
+            The actual Playwright work behind `rasterize` -- launch a
+            headless Chromium, load `tmp_html`, wait for it to be ready,
+            and return the screenshot as an `io.BytesIO`. Only ever called
+            from the worker thread `rasterize` spins up (see its
+            docstring for why), never directly.
+
+            :return: the screenshot bytes, wrapped in `io.BytesIO`
+            :rtype: io.BytesIO
+            """
+            try:
+                from playwright.sync_api import sync_playwright, TimeoutError as _PWTimeoutError
+            except ImportError:
+                raise ImportError(
+                    "rasterize() needs the `playwright` package "
+                    "(`pip install playwright` and then `playwright install chromium`)"
+                )
+            import io
+            import warnings
+
+            args = list(browser_args) if browser_args is not None else list(self.DEFAULT_RASTERIZE_ARGS)
+            with sync_playwright() as p:
+                launch_kwargs = self.resolve_chromium_launch_kwargs(
+                    p.chromium, executable_path=executable_path, channel=channel
+                )
+                browser = p.chromium.launch(headless=True, args=args, **launch_kwargs)
+                try:
+                    page = browser.new_page(viewport={"width": width + 40, "height": height + 40},
+                                            device_scale_factor=device_scale_factor)
+                    try:
+                        page.goto("file://" + tmp_html)
+                        if ready_function is not None:
+                            try:
+                                page.wait_for_function(ready_function, timeout=timeout)
+                            except _PWTimeoutError:
+                                msg = (
+                                    f"rasterize(): ready_function didn't return truthy within "
+                                    f"{timeout}ms; the exported image may be incomplete or blank"
+                                )
+                                if ready_timeout_action == 'raise':
+                                    raise TimeoutError(msg)
+                                elif ready_timeout_action == 'warn':
+                                    warnings.warn(msg)
+                        else:
+                            page.wait_for_timeout(delay_time)
+
+                        shot_kwargs = {}
+                        if image_format.lower() in ('jpg', 'jpeg'):
+                            shot_kwargs['type'] = 'jpeg'
+                        if transparent:
+                            shot_kwargs['omit_background'] = True
+
+                        try:
+                            if screenshot_selector is not None:
+                                png_bytes = page.locator(screenshot_selector).first.screenshot(
+                                    timeout=timeout, **shot_kwargs
+                                )
+                            else:
+                                png_bytes = page.screenshot(**shot_kwargs)
+                        except _PWTimeoutError:
+                            raise RuntimeError(
+                                f"rasterize(): couldn't find {screenshot_selector!r} to "
+                                "screenshot -- the page likely failed to render as expected"
+                            )
+                        return io.BytesIO(png_bytes)
+                    finally:
+                        page.close()
+                finally:
+                    browser.close()
+
         MAX_REPR_LENGTH = 1000
         def __repr__(self):
             """

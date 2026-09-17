@@ -252,6 +252,43 @@ class X3D(X3DObject):
        """
 
     @classmethod
+    def get_ready_check_expression(cls, id):
+        """
+        **LLM Docstring**
+
+        Build the JavaScript predicate `rasterize` polls (via Playwright's
+        `wait_for_function`) to find out whether X3DOM has actually
+        started rendering the scene with the given wrapper `id`, instead
+        of sleeping a fixed amount of time and hoping it was enough.
+
+        Each `<x3d>` element gets its own `Runtime` object -- attached
+        directly to that DOM element as `.runtime`, *not* reachable through
+        `x3dom.canvases[...]` -- whose `.isReady` flips `true` on the
+        first animation-frame tick once the WebGL backend is set up (right
+        before that frame actually renders). Reading it back off the
+        element like this, rather than installing our own hook such as a
+        custom `x3dom.runtime.ready`, is also what makes this robust to
+        `to_widget()`/`to_html()` sometimes emitting the x3dom `<script>`
+        tag twice on the same page (harmless for X3DOM itself, but it
+        re-runs that script's top-level `var x3dom = {...}` and so would
+        silently wipe out any hook installed between the two runs).
+
+        :param id: the scene's wrapper element id (`X3D.id`)
+        :type id: str
+        :return: the ready-check predicate, as the body of a Playwright
+            `wait_for_function` expression
+        :rtype: str
+        """
+        return f"""
+    () => {{
+      let wrap = document.getElementById('{id}');
+      if (!wrap) return false;
+      let el = wrap.getElementsByTagName('x3d')[0];
+      return !!el && !!el.runtime && el.runtime.isReady === true;
+    }}
+            """
+
+    @classmethod
     def get_view_settings_script(self, id):
         """
         **LLM Docstring**
@@ -705,6 +742,88 @@ document.head.append(frag{i});
         else:
             html = self.to_x3d()
         return html.write(file, **opts)
+
+    def rasterize(self, file, image_format='png', width=None, height=None,
+                  device_scale_factor=1,
+                  background=None, transparent=None,
+                  timeout=15000, executable_path=None, channel=None,
+                  browser_args=None, keep_html=False,
+                  ready_timeout_action='warn'):
+        """
+        **LLM Docstring**
+
+        Render this scene to a raster image. This builds the page X3DOM
+        needs (the margin reset, the optional background, `to_html`'s own
+        CSS/JS embedding) and hands the actual headless-browser work off
+        to that page's own `HTML.XMLElement.rasterize` -- the generic
+        rasterizer any JHTML element now has -- passing it this scene's
+        own X3DOM-specific "is it actually on screen yet" check
+        (`get_ready_check_expression`) as its `ready_function`, and the
+        rendered `<canvas>` (not the `<x3d>` tag itself, whose own CSS
+        layout box is not what you'd expect, or the whole page/viewport)
+        as what to screenshot.
+
+        :param file: destination; a path, a writable/bytes-like buffer
+            (e.g. `io.BytesIO()`), or `None` to get a new `io.BytesIO` back
+        :param image_format: `"png"` or `"jpg"`/`"jpeg"`
+        :type image_format: str
+        :param width: viewport width; defaults to the scene's own configured width
+        :param height: viewport height; defaults to the scene's own configured height
+        :param background: an HTML background color to give the page
+            before the scene loads (mostly invisible once the scene's own
+            canvas covers it; a convenience for callers that already have
+            a `facecolor`-style option lying around)
+        :param transparent: if truthy, take the screenshot with
+            `omit_background=True` so a transparent page background can
+            come through as alpha (the WebGL canvas' own pixels are
+            unaffected unless the scene itself renders with a transparent
+            background)
+        :param timeout: milliseconds to wait for the scene-ready signal
+            before giving up and capturing whatever is currently rendered
+        :type timeout: int
+        :param executable_path: forwarded to `resolve_chromium_launch_kwargs`
+        :param channel: forwarded to `resolve_chromium_launch_kwargs`
+        :param browser_args: extra Chromium command-line flags; defaults to
+            `DEFAULT_RASTERIZE_ARGS` (a software-WebGL config that works
+            headless without a GPU)
+        :param keep_html: if truthy, don't delete the intermediate HTML
+            file/directory (useful for debugging what got rendered)
+        :type keep_html: bool
+        :param ready_timeout_action: `"warn"` (default, via the `warnings`
+            module), `"raise"`, or `"ignore"` -- what to do if the
+            scene-ready signal doesn't fire within `timeout`
+        :type ready_timeout_action: str
+        :return: `file` if given (the path or buffer passed in), otherwise
+            a new `io.BytesIO` holding the image
+        """
+
+        def _px(v):
+            if isinstance(v, str):
+                v = float(v.rstrip('px').strip())
+            return int(round(v))
+
+        if width is None:
+            width = self.opts.get('width', self.defaults['width'])
+        if height is None:
+            height = self.opts.get('height', self.defaults['height'])
+        width = _px(width)
+        height = _px(height)
+
+        header_elems = [JHTML.Style("html, body { margin:0; padding:0; }")]
+        if background is not None:
+            header_elems.append(JHTML.Style(f"html, body {{ background:{background}; }}"))
+
+        html = self.to_html(header_elems=header_elems, dynamic_loading=False)
+
+        return html.rasterize(
+            file,
+            width=width, height=height, device_scale_factor=device_scale_factor,
+            ready_function=self.get_ready_check_expression(self.id),
+            screenshot_selector=f"#{self.id} canvas",
+            image_format=image_format, transparent=transparent, timeout=timeout,
+            executable_path=executable_path, channel=channel, browser_args=browser_args,
+            keep_html=keep_html, ready_timeout_action=ready_timeout_action,
+        )
 
     def get_children(self):
         """
@@ -2144,7 +2263,7 @@ class X3DBox(X3DGeometryGroup):
 class X3DCylinder(X3DGeometryGroup):
     tag_class = X3DHTML.Cylinder
 
-    def prep_geometry_opts(self, starts, ends, radius=1, **opts):
+    def prep_geometry_opts(self, starts, ends, radius=1, closed=True, top=None, bottom=None, **opts):
         """
         **LLM Docstring**
 
@@ -2160,13 +2279,26 @@ class X3DCylinder(X3DGeometryGroup):
         starts = self.prep_vecs(starts)
         ends = self.prep_vecs(ends)
         radius = self.prep_const(radius, starts.shape[0])
+        if closed is True:
+            closed = [True, True]
+        elif closed is False:
+            closed = [False, False]
+
+        closed = self.prep_vecs(closed, starts.shape[0])
+        if bottom is None:
+            bottom = [c[0] for c in closed]
+        bottom = self.prep_const(bottom, starts.shape[0])
+        if top is None:
+            top = [c[1] for c in closed]
+        top = self.prep_const(top, starts.shape[0])
+
 
         axes = ends - starts
         rots, norms = self.get_rotation(axes)
 
         return [
-            {"translation":s, "rotation":a, "height":n, "radius":r, **opts}
-            for s,a,n,r in zip((starts + ends) / 2, rots, norms, radius)
+            {"translation":s, "rotation":a, "height":n, "radius":r, 'bottom':b, 'top':t, **opts}
+            for s,a,n,r,b,t in zip((starts + ends) / 2, rots, norms, radius, bottom, top)
         ]
 
 class X3DCone(X3DGeometryGroup):
