@@ -35,13 +35,13 @@ __init__(self, internals, atoms=None, triangles_and_dihedrons=None):
 </div>
 **LLM Docstring**
 
-Initialize a mutable graph of internal coordinates, derive its triangulation and bond graph, and create caches for target conversions, expanded coordinates, and completed intermediates.
+Initialize a mutable graph of internal coordinates and create caches for target conversions, expanded coordinates, and completed intermediates. The triangulation/dihedron completion itself is built lazily -- the first time something actually needs it -- rather than eagerly here, since it is combinatorial in the number of internal coordinates and is never touched by callers that only want the raw bond/angle/dihedral structure (e.g. `get_multigraph`).
   - `internals`: `Any`
     > Available internal-coordinate specifications or their numerical values.
   - `atoms`: `Any`
     > Atoms to include or place.
   - `triangles_and_dihedrons`: `Any`
-    > Precomputed triangle and dihedron records used instead of rebuilding the triangulation.
+    > Precomputed triangle and dihedron records used instead of rebuilding the triangulation. Leave as `None` to defer building it until something (`enumerate_matching_dihedrons`, `add_internals`, ...) actually reads `self.triangulation`.
   - `:returns`: `None`
     > None.
 
@@ -51,8 +51,8 @@ Initialize a mutable graph of internal coordinates, derive its triangulation and
 get_target_triangulation(self, internals, target): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6433)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6433?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6439)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6439?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -70,8 +70,8 @@ Return the subset of the current triangulation needed to support a target coordi
 enumerate_matching_dihedrons(self, target_coord): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6447)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6447?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6453)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6453?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -87,8 +87,8 @@ Yield dihedron records and permutations that contain the target coordinate’s a
 find_conversions(self, target_internals, unconvertable_atoms=None, allow_recursive_completions=False, allow_ambiguous_completions=False, find_unreachable=True, verbose=False, create_single=False, missing_val=None, depth=0, max_depth=5, **etc): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6566)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6566?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6572)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6572?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -124,8 +124,8 @@ Find or construct conversions from the graph’s current coordinates to one or m
 get_bond_graph(self, dist_set=None, return_conversions=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6817)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6817?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6823)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6823?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -143,8 +143,8 @@ Return the bond graph implied by the graph’s current coordinates and triangula
 get_multigraph(self, labels=None, internals=None, weights=None, names=None, scales=None, combine=None, pool_layout=True, allow_self_loops=False): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6866)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6866?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6872)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6872?message=Update%20Docs)]
 </div>
 Build a union multigraph from a flat collection of index tuples that
 mix several coordinate types -- bonds `(i, j)`, angles `(i, j, k)`,
@@ -172,8 +172,8 @@ stay distinguishable -- `plot` draws every tuple's edge separately.
 checkpoint(self): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6980)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6980?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6992)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6992?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -187,8 +187,8 @@ Return a context manager for making temporary changes to the internal-coordinate
 add_internals(self, internals): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6991)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L6991?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L7003)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L7003?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 
@@ -204,8 +204,8 @@ Add coordinates to the graph, update triangulation and bond data, and refresh co
 remove_internals(self, internals): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L7075)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L7075?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L7087)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/McUtils/Coordinerds/Internals/InternalCoordinateGraph.py#L7087?message=Update%20Docs)]
 </div>
 **LLM Docstring**
 

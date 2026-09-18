@@ -630,9 +630,9 @@ figure.show()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-3c4659" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-3c4659"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-e4e842" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-e4e842"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-3c4659" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-e4e842" markdown="1">
  - [Plot](#Plot)
 - [Plot3D](#Plot3D)
 - [GraphicsGrid](#GraphicsGrid)
@@ -662,15 +662,16 @@ figure.show()
 - [SVGFigure3DDynamicLoading](#SVGFigure3DDynamicLoading)
 - [SVGFigure3DSaveControls](#SVGFigure3DSaveControls)
 - [SVGFigure3DDepthLighting](#SVGFigure3DDepthLighting)
+- [SVGFigureCairoSVGExport](#SVGFigureCairoSVGExport)
 - [MPLPath](#MPLPath)
 - [MeshBackend](#MeshBackend)
 - [InvertAxes](#InvertAxes)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-79904f" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-79904f"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-3422ad" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-3422ad"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-79904f" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-3422ad" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -1351,9 +1352,9 @@ class PlotsTests(TestCase):
         interactive_source = figure.to_svg_figure(
             interactive=True, dynamic_loading=False
         ).tostring()
-        self.assertIn('"depthLighting":true', interactive_source)
+        self.assertIn('"depthLighting":{"strength":1.0', interactive_source)
         self.assertIn('applyDepthLighting(projected)', interactive_source)
-        self.assertIn('lightingStops(kind, rgb, depthFactor)', interactive_source)
+        self.assertIn('lightingStops(kind, rgb, depthFactor, options)', interactive_source)
         self.assertIn('"kind":"sphere"', interactive_source)
         self.assertIn('"kind":"cylinder"', interactive_source)
 
@@ -1364,6 +1365,83 @@ class PlotsTests(TestCase):
         )
         unlit_source = unlit.to_svg_figure(interactive=False).tostring()
         self.assertNotIn('<radialGradient', unlit_source)
+
+        exaggerated = SVGFigure3D(depth_lighting={
+            'strength': 2,
+            'color': '#ffd080',
+            'blend': .5
+        })
+        exaggerated_axes = exaggerated.create_axes(1, 1, 1)
+        exaggerated_axes.figure.set_projection_kwargs(render_matrix=np.eye(4))
+        exaggerated_axes.figure.add_sphere(
+            center=[0, 0, 0], radius=.4, fill='#808080'
+        )
+        exaggerated_source = exaggerated.to_svg_figure(
+            interactive=True, dynamic_loading=False
+        ).tostring()
+        self.assertIn('"strength":2.0', exaggerated_source)
+        self.assertIn('"color":[255.0,208.0,128.0]', exaggerated_source)
+        self.assertIn('"blend":0.5', exaggerated_source)
+
+        numeric = SVGFigure3D(depth_lighting=1.5)
+        numeric_axes = numeric.create_axes(1, 1, 1)
+        numeric_axes.figure.set_projection_kwargs(render_matrix=np.eye(4))
+        numeric_axes.figure.add_sphere(
+            center=[0, 0, 0], radius=.4, fill='#808080'
+        )
+        numeric_source = numeric.to_svg_figure(interactive=True).tostring()
+        self.assertIn('"strength":1.5', numeric_source)
+```
+
+#### <a name="SVGFigureCairoSVGExport">SVGFigureCairoSVGExport</a>
+```python
+    def test_SVGFigureCairoSVGExport(self):
+        import io
+        import sys
+        import types
+        from unittest import mock
+        from McUtils.Plots.Backends import SVGFigure3D
+
+        calls = []
+        def convert(kind):
+            def converter(**opts):
+                calls.append((kind, opts))
+                payload = kind.encode('ascii')
+                if opts['write_to'] is None:
+                    return payload
+                opts['write_to'].write(payload)
+            return converter
+
+        fake_cairosvg = types.SimpleNamespace(
+            svg2png=convert('png'),
+            svg2pdf=convert('pdf')
+        )
+        figure = SVGFigure3D(figsize=(4, 3), depth_lighting=True)
+        axes = figure.create_axes(1, 1, 1)
+        axes.figure.set_projection_kwargs(render_matrix=np.eye(4))
+        axes.figure.add_sphere(
+            center=[0, 0, 0], radius=.4, fill='red'
+        )
+
+        with mock.patch.dict(sys.modules, {'cairosvg': fake_cairosvg}):
+            png = io.BytesIO()
+            self.assertIs(figure.savefig(png, format='png', dpi=144), png)
+            self.assertEqual(png.getvalue(), b'png')
+            pdf = io.BytesIO()
+            self.assertIs(figure.savefig(pdf, format='pdf'), pdf)
+            self.assertEqual(pdf.getvalue(), b'pdf')
+
+        png_call, pdf_call = calls
+        self.assertEqual(png_call[0], 'png')
+        self.assertEqual(png_call[1]['output_width'], 576)
+        self.assertEqual(png_call[1]['output_height'], 432)
+        self.assertEqual(pdf_call[0], 'pdf')
+        for _, call in calls:
+            source = call['bytestring'].decode('utf-8')
+            self.assertIn('width="288"', source)
+            self.assertIn('height="216"', source)
+            self.assertIn('scale(1 -1)', source)
+            self.assertIn('radialGradient', source)
 ```
 
 #### <a name="MPLPath">MPLPath</a>
