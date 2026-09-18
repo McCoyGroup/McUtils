@@ -8774,7 +8774,7 @@ class SVGFigure(GraphicsFigure):
     }
     def __init__(self, axes=None, layout=None, figsize=None,
                  flip_y=True,
-                 dynamic_loading=None,
+                 dynamic_loading=False,
                  include_save_buttons=False,
                  recording_options=None,
                  depth_lighting=False,
@@ -8990,20 +8990,84 @@ class SVGFigure(GraphicsFigure):
                 height = int(round(h_in * DPI_SCALING))
         return width, height
 
+    @staticmethod
+    def _load_cairosvg(required=False):
+        try:
+            import cairosvg
+        except ImportError as error:
+            if required:
+                raise ImportError(
+                    "CairoSVG is required for this SVG export format; "
+                    "install it with `pip install cairosvg`"
+                ) from error
+            return None
+        return cairosvg
+
+    def _cairosvg_source(self, width, height):
+        """Return a standalone, dimensioned SVG matching the displayed y-axis."""
+        import xml.etree.ElementTree as ET
+
+        root = ET.fromstring(self.to_svg())
+        root.set('width', str(width))
+        root.set('height', str(height))
+        if self.flip_y:
+            raw_view_box = root.get('viewBox')
+            if raw_view_box is None:
+                view_box = [0., 0., float(width), float(height)]
+                root.set('viewBox', ' '.join(str(v) for v in view_box))
+            else:
+                view_box = [
+                    float(value) for value in re.split(r"[\s,]+", raw_view_box.strip())
+                ]
+            if len(view_box) != 4:
+                raise ValueError(f"invalid SVG viewBox {raw_view_box!r}")
+            namespace = root.tag.partition('}')[0].removeprefix('{')
+            group_tag = f"{{{namespace}}}g" if namespace else 'g'
+            group = ET.Element(group_tag, {
+                'transform': (
+                    f"translate(0 {2 * view_box[1] + view_box[3]}) scale(1 -1)"
+                )
+            })
+            for child in list(root):
+                local_name = child.tag.rsplit('}', 1)[-1]
+                if local_name not in {'defs', 'style'}:
+                    root.remove(child)
+                    group.append(child)
+            root.append(group)
+        return ET.tostring(root, encoding='unicode')
+
+    def _cairosvg_export(self, file, output_format, width, height,
+                         background=None, cairosvg_module=None, **options):
+        if cairosvg_module is None:
+            cairosvg_module = self._load_cairosvg(required=True)
+        converter = getattr(cairosvg_module, f"svg2{output_format}")
+        target = os.fspath(file) if isinstance(file, os.PathLike) else file
+        kwargs = {
+            'bytestring': self._cairosvg_source(width, height).encode('utf-8'),
+            'write_to': target
+        }
+        if background is not None:
+            kwargs['background_color'] = background
+        kwargs.update(options)
+        result = converter(**kwargs)
+        if file is None:
+            return io.BytesIO(result)
+        return file
+
     def rasterize(self, file=None, image_format='png', width=None, height=None,
                   device_scale_factor=1,
                   background=None, transparent=None,
                   timeout=15000, executable_path=None, channel=None,
                   browser_args=None, keep_html=False,
-                  ready_timeout_action='warn'):
+                  ready_timeout_action='warn',
+                  use_cairosvg=None, cairosvg_options=None):
         """
         **LLM Docstring**
 
-        Render this figure to a raster image, the same idiom
-        `X3DInterface.X3D.rasterize`/`JSMol.Applet.rasterize` use: build
-        the standalone page the widget needs (a margin reset and an
-        optional background) and hand the actual headless-browser work
-        off to that page's own generic `HTML.XMLElement.rasterize`.
+        Render this figure to a raster image. PNG uses CairoSVG in-process
+        when that optional dependency is available; otherwise this uses the same
+        standalone-page/headless-browser path as `X3DInterface.X3D.rasterize`.
+        JPEG always uses the browser path because CairoSVG does not emit JPEG.
 
         Unlike those two, plain SVG has no asynchronous engine to wait
         on -- a browser paints it as part of ordinary page load, with
@@ -9058,6 +9122,24 @@ class SVGFigure(GraphicsFigure):
                 "or pass width=/height= explicitly"
             )
 
+        image_format = image_format.lower()
+        if image_format == 'png' and use_cairosvg is not False:
+            cairosvg_module = self._load_cairosvg(required=use_cairosvg is True)
+            if cairosvg_module is not None:
+                options = dict(cairosvg_options or {})
+                options.setdefault(
+                    'output_width', int(round(width * device_scale_factor))
+                )
+                options.setdefault(
+                    'output_height', int(round(height * device_scale_factor))
+                )
+                return self._cairosvg_export(
+                    file, 'png', width, height,
+                    background=None if transparent else background,
+                    cairosvg_module=cairosvg_module,
+                    **options
+                )
+
         from ..Jupyter import JHTML
 
         wrap_id = f"svg3d-raster-{uuid.uuid4().hex[:8]}"
@@ -9083,7 +9165,7 @@ class SVGFigure(GraphicsFigure):
     raster_formats = {'png', 'jpg', 'jpeg'}
     def savefig(self, file, format=None,
                 dpi=144, facecolor=None, transparent=None,
-                rasterize_options=None,
+                rasterize_options=None, cairosvg_options=None,
                 **opts):
         """
         **LLM Docstring**
@@ -9097,10 +9179,9 @@ class SVGFigure(GraphicsFigure):
         rasterizer is called instead of writing the SVG/HTML source text
         into a file with a raster extension.
 
-        :param format: `"png"`/`"jpg"`/`"jpeg"` to rasterize, `"svg"` for
-            the raw SVG source, or anything else (the default) for the
-            widget's own HTML; inferred from `file`'s extension when
-            `format` is left as `None` and `file` is a path
+        :param format: `"png"`/`"jpg"`/`"jpeg"` to rasterize, `"pdf"`
+            for CairoSVG vector export, `"svg"` for the raw SVG source, or
+            anything else for the widget's HTML; inferred from a path extension
         :param dpi: only used when rasterizing; converted to
             `rasterize`'s `device_scale_factor` as `dpi / 72`
         :param facecolor: background color to use when rasterizing,
@@ -9109,16 +9190,17 @@ class SVGFigure(GraphicsFigure):
         :param transparent: if rasterizing, try to omit the page/browser
             background so the export can come out with an alpha channel
         :param rasterize_options: extra keyword options forwarded to
-            `rasterize` (`timeout`, `executable_path`, `channel`,
-            `browser_args`, `keep_html`, `ready_timeout_action`, ...)
+            `rasterize`, including `use_cairosvg` to select or require its path
+        :param cairosvg_options: extra options forwarded to CairoSVG's converter
         :param opts: extra options forwarded to `to_widget().write(...)`
             when not rasterizing or writing raw SVG (construction
             options, not rasterization options)
         """
         fmt = format
-        if fmt is None and isinstance(file, str):
-            fmt = os.path.splitext(file)[1].lstrip('.')
-        if fmt is not None and fmt.lower() in self.raster_formats:
+        if fmt is None and isinstance(file, (str, os.PathLike)):
+            fmt = os.path.splitext(os.fspath(file))[1].lstrip('.')
+        fmt = fmt.lower() if fmt is not None else None
+        if fmt in self.raster_formats:
             if facecolor is None:
                 facecolor = self.get_facecolor()
             return self.rasterize(
@@ -9127,7 +9209,20 @@ class SVGFigure(GraphicsFigure):
                 background=facecolor,
                 transparent=transparent,
                 device_scale_factor=(dpi / 72 if dpi is not None else 1),
+                cairosvg_options=cairosvg_options,
                 **(rasterize_options if rasterize_options is not None else {})
+            )
+        elif fmt == 'pdf':
+            width, height = self._resolve_pixel_size()
+            if width is None or height is None:
+                raise ValueError(
+                    "PDF export couldn't determine this figure's width/height; "
+                    "construct it with figsize= or set_size_inches(...)"
+                )
+            return self._cairosvg_export(
+                file, 'pdf', width, height,
+                background=None if transparent else facecolor,
+                **(cairosvg_options if cairosvg_options is not None else {})
             )
         elif fmt == "svg":
             dev.write_file(
@@ -9532,7 +9627,7 @@ class SVGFigure(GraphicsFigure):
             s.write(buf)
         buf.seek(0)
         return buf.read()
-    def to_widget(self, interactive=True, **opts):
+    def to_widget(self, interactive=False, **opts):
         """
         **LLM Docstring**
 
@@ -9990,6 +10085,20 @@ class SVGAxes3D(SVGAxes):
 
 class SVGFigure3D(SVGFigure):
     Axes = SVGAxes3D
+
+    def __init__(self, axes=None, dynamic_loading=None, **opts):
+        super().__init__(axes=axes, dynamic_loading=dynamic_loading, **opts)
+
+    def to_widget(self, interactive=True, **opts):
+        """
+        **LLM Docstring**
+
+        Render the figure as an interactive widget (SVG backend).
+
+        :param opts: extra options
+        :return: the result
+        """
+        return super().to_widget(interactive=interactive, **opts)
 
 class SVGBackend3D(SVGBackend):
     Figure = SVGFigure3D

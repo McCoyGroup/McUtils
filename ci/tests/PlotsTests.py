@@ -671,6 +671,54 @@ class PlotsTests(TestCase):
         numeric_source = numeric.to_svg_figure(interactive=True).tostring()
         self.assertIn('"strength":1.5', numeric_source)
 
+    def test_SVGFigureCairoSVGExport(self):
+        import io
+        import sys
+        import types
+        from unittest import mock
+        from McUtils.Plots.Backends import SVGFigure3D
+
+        calls = []
+        def convert(kind):
+            def converter(**opts):
+                calls.append((kind, opts))
+                payload = kind.encode('ascii')
+                if opts['write_to'] is None:
+                    return payload
+                opts['write_to'].write(payload)
+            return converter
+
+        fake_cairosvg = types.SimpleNamespace(
+            svg2png=convert('png'),
+            svg2pdf=convert('pdf')
+        )
+        figure = SVGFigure3D(figsize=(4, 3), depth_lighting=True)
+        axes = figure.create_axes(1, 1, 1)
+        axes.figure.set_projection_kwargs(render_matrix=np.eye(4))
+        axes.figure.add_sphere(
+            center=[0, 0, 0], radius=.4, fill='red'
+        )
+
+        with mock.patch.dict(sys.modules, {'cairosvg': fake_cairosvg}):
+            png = io.BytesIO()
+            self.assertIs(figure.savefig(png, format='png', dpi=144), png)
+            self.assertEqual(png.getvalue(), b'png')
+            pdf = io.BytesIO()
+            self.assertIs(figure.savefig(pdf, format='pdf'), pdf)
+            self.assertEqual(pdf.getvalue(), b'pdf')
+
+        png_call, pdf_call = calls
+        self.assertEqual(png_call[0], 'png')
+        self.assertEqual(png_call[1]['output_width'], 576)
+        self.assertEqual(png_call[1]['output_height'], 432)
+        self.assertEqual(pdf_call[0], 'pdf')
+        for _, call in calls:
+            source = call['bytestring'].decode('utf-8')
+            self.assertIn('width="288"', source)
+            self.assertIn('height="216"', source)
+            self.assertIn('scale(1 -1)', source)
+            self.assertIn('radialGradient', source)
+
     @validationTest
     def test_MPLPath(self):
         fig = Graphics(backend='svg')
