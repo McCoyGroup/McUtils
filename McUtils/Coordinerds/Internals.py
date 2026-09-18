@@ -6403,13 +6403,13 @@ class InternalCoordinateGraph:
         """
         **LLM Docstring**
 
-        Initialize a mutable graph of internal coordinates, derive its triangulation and bond graph, and create caches for target conversions, expanded coordinates, and completed intermediates.
+        Initialize a mutable graph of internal coordinates and create caches for target conversions, expanded coordinates, and completed intermediates. The triangulation/dihedron completion itself is built lazily -- the first time something actually needs it -- rather than eagerly here, since it is combinatorial in the number of internal coordinates and is never touched by callers that only want the raw bond/angle/dihedral structure (e.g. `get_multigraph`).
 
         :param internals: Available internal-coordinate specifications or their numerical values.
         :type internals: Any
         :param atoms: Atoms to include or place.
         :type atoms: Any
-        :param triangles_and_dihedrons: Precomputed triangle and dihedron records used instead of rebuilding the triangulation.
+        :param triangles_and_dihedrons: Precomputed triangle and dihedron records used instead of rebuilding the triangulation. Leave as `None` to defer building it until something (`enumerate_matching_dihedrons`, `add_internals`, ...) actually reads `self.triangulation`.
         :type triangles_and_dihedrons: Any
         :return: None.
         :rtype: None
@@ -6418,8 +6418,14 @@ class InternalCoordinateGraph:
         if atoms is None:
             atoms = max(max(i) for i in internals) + 1
         self.atoms = atoms
-        if triangles_and_dihedrons is None:
-            triangles_and_dihedrons = get_internal_triangles_and_dihedrons(internals)
+        # deferred: stays `None` until something downstream actually needs it
+        # (see `enumerate_matching_dihedrons`, `add_internals`, which already
+        # handle a `None` triangulation by building one on demand). Building
+        # it unconditionally here made every `InternalCoordinateGraph(...)`
+        # pay for a full triangulation/dihedron completion even when it's
+        # only ever used for e.g. `get_multigraph`, which never reads it --
+        # combinatorial in len(internals), and the dominant cost (minutes,
+        # not milliseconds) for a real, ~40+-atom molecule's z-matrix.
         self.triangulation = triangles_and_dihedrons
         self._completion_cache = {}
         self._conversions = {}
@@ -6950,7 +6956,13 @@ class InternalCoordinateGraph:
             :rtype: InternalCoordinateGraph
             """
             self._internals = self.graph.internals.copy()
-            self._triangulation = tuple(t.copy() for t in self.graph.triangulation)
+            # triangulation may still be deferred (None) at checkpoint time --
+            # copying its dicts unconditionally would raise on a graph that's
+            # never actually needed one yet
+            self._triangulation = (
+                None if self.graph.triangulation is None
+                else tuple(t.copy() for t in self.graph.triangulation)
+            )
             self._conversions = self.graph._conversions.copy()
             self._unreachable = self.graph._unreachable.copy()
             self._exp_int = self.graph._expanded_internals
