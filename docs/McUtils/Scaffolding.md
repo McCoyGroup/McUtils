@@ -77,84 +77,95 @@ In order of usefulness, the design is:
 [NumpyTreeArchive](Scaffolding/Serializers/NumpyTreeArchive.md)   
 </div>
    <div class="col" markdown="1">
-[LogParser](Scaffolding/Logging/LogParser.md)   
+[LineIndexedSupplier](Scaffolding/Serializers/LineIndexedSupplier.md)   
 </div>
    <div class="col" markdown="1">
-[Checkpointer](Scaffolding/Checkpointing/Checkpointer.md)   
+[SerializedObjectSupplier](Scaffolding/Serializers/SerializedObjectSupplier.md)   
 </div>
 </div>
   <div class="row">
+   <div class="col" markdown="1">
+[JSONLSupplier](Scaffolding/Serializers/JSONLSupplier.md)   
+</div>
+   <div class="col" markdown="1">
+[NPZLSupplier](Scaffolding/Serializers/NPZLSupplier.md)   
+</div>
+   <div class="col" markdown="1">
+[LogParser](Scaffolding/Logging/LogParser.md)   
+</div>
+</div>
+  <div class="row">
+   <div class="col" markdown="1">
+[Checkpointer](Scaffolding/Checkpointing/Checkpointer.md)   
+</div>
    <div class="col" markdown="1">
 [CheckpointerKeyError](Scaffolding/Checkpointing/CheckpointerKeyError.md)   
 </div>
    <div class="col" markdown="1">
 [DumpCheckpointer](Scaffolding/Checkpointing/DumpCheckpointer.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [JSONCheckpointer](Scaffolding/Checkpointing/JSONCheckpointer.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [NumPyCheckpointer](Scaffolding/Checkpointing/NumPyCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
 [HDF5Checkpointer](Scaffolding/Checkpointing/HDF5Checkpointer.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [DictCheckpointer](Scaffolding/Checkpointing/DictCheckpointer.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [NullCheckpointer](Scaffolding/Checkpointing/NullCheckpointer.md)   
 </div>
    <div class="col" markdown="1">
 [PersistenceLocation](Scaffolding/Persistence/PersistenceLocation.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [PersistenceManager](Scaffolding/Persistence/PersistenceManager.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [ResourceManager](Scaffolding/Persistence/ResourceManager.md)   
 </div>
    <div class="col" markdown="1">
 [BaseObjectManager](Scaffolding/ObjectBackers/BaseObjectManager.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [FileBackedObjectManager](Scaffolding/ObjectBackers/FileBackedObjectManager.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [Config](Scaffolding/Configurations/Config.md)   
 </div>
    <div class="col" markdown="1">
 [ParameterManager](Scaffolding/Configurations/ParameterManager.md)   
 </div>
+</div>
+  <div class="row">
    <div class="col" markdown="1">
 [Job](Scaffolding/Jobs/Job.md)   
 </div>
-</div>
-  <div class="row">
    <div class="col" markdown="1">
 [JobManager](Scaffolding/Jobs/JobManager.md)   
 </div>
    <div class="col" markdown="1">
 [CLI](Scaffolding/CLIs/CLI.md)   
 </div>
-   <div class="col" markdown="1">
-[CommandGroup](Scaffolding/CLIs/CommandGroup.md)   
-</div>
 </div>
   <div class="row">
    <div class="col" markdown="1">
-[Command](Scaffolding/CLIs/Command.md)   
+[CommandGroup](Scaffolding/CLIs/CommandGroup.md)   
 </div>
    <div class="col" markdown="1">
-   
+[Command](Scaffolding/CLIs/Command.md)   
 </div>
    <div class="col" markdown="1">
    
@@ -293,9 +304,9 @@ print("saved energy span:", energies[order[-1]] - energies[order[0]])
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-cf00fc" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-cf00fc"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-75ca9a" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-75ca9a"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-cf00fc" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-75ca9a" markdown="1">
  - [Schema](#Schema)
 - [TreeFlattening](#TreeFlattening)
 - [TreeArchiveJumps](#TreeArchiveJumps)
@@ -305,6 +316,11 @@ print("saved energy span:", energies[order[-1]] - energies[order[0]])
 - [JSONPseudoPickleSerialization](#JSONPseudoPickleSerialization)
 - [HDF5PseudoPickleSerialization](#HDF5PseudoPickleSerialization)
 - [NumPySerialization](#NumPySerialization)
+- [LineIndexedSupplier](#LineIndexedSupplier)
+- [JSONLSupplier](#JSONLSupplier)
+- [JSONLSupplierCreateDatabaseFolder](#JSONLSupplierCreateDatabaseFolder)
+- [NPZLSupplier](#NPZLSupplier)
+- [IterativeJSONL](#IterativeJSONL)
 - [JSONCheckpointing](#JSONCheckpointing)
 - [JSONCheckpointingKeyed](#JSONCheckpointingKeyed)
 - [JSONCheckpointingCanonicalKeyed](#JSONCheckpointingCanonicalKeyed)
@@ -323,9 +339,9 @@ print("saved energy span:", energies[order[-1]] - energies[order[0]])
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-c3fa91" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c3fa91"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-bec2da" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-bec2da"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c3fa91" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-bec2da" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -649,6 +665,250 @@ class ScaffoldingTests(TestCase):
             loaded[1].tolist(),
             {k: v.tolist() for k, v in loaded[2].items()}
         ])
+```
+
+#### <a name="LineIndexedSupplier">LineIndexedSupplier</a>
+```python
+    def test_LineIndexedSupplier(self):
+        def deserialize(line):
+            index, value = line.decode("utf-8").strip().split("|", 1)
+            return {"index": int(index), "value": value}
+
+        rows = [
+            {"index": 0, "value": "alpha"},
+            {"index": 1, "value": "beta"},
+            {"index": 2, "value": "gamma"}
+        ]
+        with tmpf.TemporaryDirectory() as temp_dir:
+            data_file = os.path.join(temp_dir, "rows.dat")
+            index_file = os.path.join(temp_dir, "rows.idx.npy")
+            archive_file = os.path.join(temp_dir, "rows.tar")
+            expanded_dir = os.path.join(temp_dir, "expanded")
+            with open(data_file, "wb") as stream:
+                for row in rows:
+                    stream.write(f"{row['index']}|{row['value']}\n".encode("utf-8"))
+
+            supplier = LineIndexedSupplier(
+                data_file,
+                deserialization_function=deserialize
+            )
+            self.assertEqual(supplier.find_object(2), rows[2])
+            self.assertEqual(list(supplier.consume_iter()), rows)
+
+            line_indices = supplier.create_line_index()
+            supplier.save_line_index(index_file, line_indices)
+            indexed = LineIndexedSupplier(
+                data_file,
+                line_indices=index_file,
+                deserialization_function=deserialize
+            )
+            self.assertEqual(len(indexed), len(rows))
+            self.assertEqual(indexed.find_object(0), rows[0])
+
+            LineIndexedSupplier.build_jump_database(
+                data_file,
+                archive_file,
+                line_indices=line_indices,
+                stored_file_name="custom.rows",
+                metadata_arrays={"source_id": np.arange(len(rows))}
+            )
+            archived = LineIndexedSupplier.from_jump_database(
+                archive_file,
+                deserialization_function=deserialize
+            )
+            obj, metadata = archived.find_object(1)
+            self.assertEqual(obj, rows[1])
+            self.assertEqual(metadata["source_id"], 1)
+
+            with tarfile.open(archive_file, "r:") as archive:
+                self.assertIn("custom.rows", archive.getnames())
+                archive.extractall(expanded_dir)
+            expanded = LineIndexedSupplier.from_jump_database(
+                expanded_dir,
+                deserialization_function=deserialize
+            )
+            self.assertEqual(expanded.find_object(2)[0], rows[2])
+```
+
+#### <a name="JSONLSupplier">JSONLSupplier</a>
+```python
+    def test_JSONLSupplier(self):
+        records = [
+            {"id": 0, "text": "first"},
+            {"id": 1, "text": "a value with\na newline"},
+            {"id": 2, "text": "third"}
+        ]
+        with tmpf.TemporaryDirectory() as temp_dir:
+            data_file = os.path.join(temp_dir, "records.jsonl")
+            index_file = data_file + ".line_indices.npy"
+            supplier = JSONLSupplier.write_objects(records[:1], data_file)
+            supplier.append(records[1]).extend(records[2:])
+
+            self.assertEqual(len(supplier), len(records))
+            self.assertEqual(list(supplier.consume_iter()), records)
+            self.assertEqual(supplier.find_object(1), records[1])
+            self.assertEqual(len(np.load(index_file)), len(records))
+
+            original_size = os.path.getsize(data_file)
+            original_indices = np.load(index_file).copy()
+            with self.assertRaises(TypeError):
+                supplier.append({"not_json": object()})
+            self.assertEqual(os.path.getsize(data_file), original_size)
+            np.testing.assert_array_equal(np.load(index_file), original_indices)
+
+            archive_file = os.path.join(temp_dir, "records.tar")
+            JSONLSupplier.create_jump_database(
+                records,
+                archive_file,
+                stored_file_name="objects.jsonl",
+                metadata_arrays={"quality": np.array([.1, .2, .3])}
+            )
+            # create=True remains a no-op for an existing packaged database.
+            archived = JSONLSupplier.from_jump_database(archive_file, create=True)
+            obj, metadata = archived.find_object(2)
+            self.assertEqual(obj, records[2])
+            self.assertAlmostEqual(metadata["quality"], .3)
+            with self.assertRaises(ValueError):
+                archived.append({"id": 3})
+
+            with tarfile.open(archive_file, "r:") as archive:
+                self.assertIn("objects.jsonl", archive.getnames())
+```
+
+#### <a name="JSONLSupplierCreateDatabaseFolder">JSONLSupplierCreateDatabaseFolder</a>
+```python
+    def test_JSONLSupplierCreateDatabaseFolder(self):
+        class CustomJSONLSupplier(JSONLSupplier):
+            STORED_FILE_NAME = "dataset.jsonl"
+
+        with tmpf.TemporaryDirectory() as temp_dir:
+            database_dir = os.path.join(temp_dir, "dataset")
+            supplier = CustomJSONLSupplier.from_jump_database(
+                database_dir,
+                create=True,
+                name="example"
+            )
+            self.assertEqual(len(supplier), 0)
+            self.assertEqual(
+                set(os.listdir(database_dir)),
+                {"dataset.jsonl", "line_indices.npy", "meta.json"}
+            )
+            with open(os.path.join(database_dir, "meta.json"), encoding="utf-8") as stream:
+                self.assertEqual(json.load(stream), {
+                    "name": "example",
+                    "stored_file_name": "dataset.jsonl"
+                })
+
+            supplier.append({"row": 0}).extend(
+                {"row": i} for i in range(1, 4)
+            )
+            reopened = CustomJSONLSupplier.from_jump_database(
+                database_dir,
+                create=True
+            )
+            self.assertEqual(len(reopened), 4)
+            self.assertEqual(reopened.find_object(3), {"row": 3})
+
+            broken_dir = os.path.join(temp_dir, "broken")
+            os.mkdir(broken_dir)
+            with open(
+                os.path.join(broken_dir, CustomJSONLSupplier.STORED_FILE_NAME),
+                "w",
+                encoding="utf-8"
+            ) as stream:
+                stream.write('{"unindexed":true}\n')
+            with self.assertRaises(ValueError):
+                CustomJSONLSupplier.from_jump_database(broken_dir, create=True)
+```
+
+#### <a name="NPZLSupplier">NPZLSupplier</a>
+```python
+    def test_NPZLSupplier(self):
+        records = [
+            {
+                "coords": np.arange(12).reshape(4, 3),
+                "label": np.array("first")
+            },
+            {
+                "coords": np.eye(3),
+                "bytes": np.frombuffer(b"embedded\nnewlines\n", dtype=np.uint8)
+            }
+        ]
+        with tmpf.TemporaryDirectory() as temp_dir:
+            data_file = os.path.join(temp_dir, "records.npzl")
+            supplier = NPZLSupplier.write_objects(records[:1], data_file)
+            supplier.append(records[1]).extend([
+                {"coords": np.full((2, 2), 4)},
+                {"coords": np.full((1, 3), 5)}
+            ])
+            self.assertEqual(len(supplier), 4)
+            np.testing.assert_array_equal(
+                supplier.find_object(1)["bytes"],
+                records[1]["bytes"]
+            )
+            np.testing.assert_array_equal(
+                supplier.find_object(3)["coords"],
+                np.full((1, 3), 5)
+            )
+
+            rescanned = NPZLSupplier(data_file)
+            rebuilt_indices = rescanned.create_line_index()
+            self.assertEqual(len(rebuilt_indices), 4)
+            np.testing.assert_array_equal(
+                rescanned.find_object(0)["coords"],
+                records[0]["coords"]
+            )
+
+            archive_file = os.path.join(temp_dir, "records.tar")
+            NPZLSupplier.create_jump_database(
+                records,
+                archive_file,
+                stored_file_name="arrays.npzl"
+            )
+            archived = NPZLSupplier.from_jump_database(archive_file)
+            np.testing.assert_array_equal(
+                archived.find_object(1)["coords"],
+                records[1]["coords"]
+            )
+            with tarfile.open(archive_file, "r:") as archive:
+                self.assertIn("arrays.npzl", archive.getnames())
+```
+
+#### <a name="IterativeJSONL">IterativeJSONL</a>
+```python
+    def test_IterativeJSONL(self):
+        from Psience.Molecools import Molecule
+        from McUtils.Scaffolding import JSONLSupplier, JSONSerializer
+
+        smis = [
+            'COC(=O)c1ccc(C(=O)OC)c(NC(=S)NC(=O)c2ccc(OC)c(c2)[N+]([O-])=O)c1',
+            'CCn1nccc1C(=O)Nc1cccc(N)c1',
+            'CC(C(=O)c1ccc(C)cc1)n1c(CC#N)nc2cc3CCCCc3cc12',
+            'Cc1ccc(C(=O)Nc2nc3c(C)cccn3n2)c(Cl)n1',
+            'CSc1cccc(c1)C(=O)Nc1c(C)cc(cc1C(C)=C)C#N',
+            'CCc1ccccc1OCC(=O)N(Cc1ccccc1)Cc1ccc2ccccc2c1',
+            'CC(C)(C)C(=O)N(Cc1ccccc1F)Cc1ccccc1Br',
+            'Cc1ccnc(SCC(=O)Nc2cc(Cl)c(Cl)cc2Cl)n1',
+        ]
+
+        database_dir = os.path.expanduser("~/Desktop/smiles_npz_data")
+        database = NPZLSupplier.from_jump_database(database_dir, create=True)
+        serializer = NumPySerializer()
+        for _ in range(20):
+            for smi in smis:
+                mol = Molecule.from_string(smi, 'smi', num_confs=5)
+                data_dict = {
+                    'smi':mol[0].to_string('smi', remove_hydrogens=True),
+                    'inchi':mol[0].to_string('inchi', remove_hydrogens=True),
+                    'atoms':mol[0].atoms,
+                    'coords':[m.coords for m in mol]
+                }
+                clean_dict = serializer.convert(data_dict).data # wrapped by default
+                database.append(clean_dict)
+
+        print(
+            database.find_object(100)
+        )
 ```
 
 #### <a name="JSONCheckpointing">JSONCheckpointing</a>
