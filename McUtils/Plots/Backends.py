@@ -10045,6 +10045,50 @@ class SVGAxes3D(SVGAxes):
         """
         styles = self.prep_styles(styles)
         return self.figure.add_cylinder(start=start, end=end, radius=rad, **styles)
+    def draw_cone(self, start, end, rad, top_rad=0, **styles):
+        """Draw a cone or conical frustum between two 3D endpoints."""
+        styles = self.prep_styles(styles)
+        return self.figure.add_cone(
+            start=start, end=end, radius=rad, top_radius=top_rad, **styles
+        )
+
+    def draw_arrow(self, points, radius=.05, head_length=.25,
+                   head_width=2., **styles):
+        """Draw a rotatable 3D arrow as a cylinder shaft and cone head.
+
+        ``head_length`` is the fraction of the full arrow length occupied by
+        the head; ``head_width`` is the cone-base radius relative to ``radius``.
+        """
+        points = np.asanyarray(points, dtype=float).reshape(-1, 3)
+        if len(points) != 2:
+            raise ValueError("SVG 3D arrows require exactly two endpoints")
+        if radius <= 0:
+            raise ValueError("arrow radius must be positive")
+        if not 0 < head_length <= 1:
+            raise ValueError("head_length must be in the interval (0, 1]")
+        if head_width <= 0:
+            raise ValueError("head_width must be positive")
+
+        start, end = points
+        axis = end - start
+        length = np.linalg.norm(axis)
+        if length <= 1e-12:
+            raise ValueError("arrow endpoints must be distinct")
+        neck = end - axis * head_length
+
+        if 'color' not in styles and 'fill' not in styles:
+            body_color = next((
+                styles.get(key)
+                for key in ('line_color', 'stroke', 'edgecolor', 'edgecolors')
+                if styles.get(key) not in (None, 'none')
+            ), 'black')
+            styles['color'] = body_color
+        shaft = self.draw_cylinder(start, neck, radius, **styles)
+        head = self.draw_cone(
+            neck, end, radius * head_width, top_rad=0, **styles
+        )
+        return [shaft, head]
+
     def draw_box(self, start, end, **styles):
         """
         **LLM Docstring**
