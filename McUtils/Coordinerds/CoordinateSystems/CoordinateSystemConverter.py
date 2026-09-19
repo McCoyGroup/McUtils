@@ -362,6 +362,16 @@ class CoordinateSystemConverters:
         global _CONVERTER_GRAPH
         if _CONVERTER_GRAPH is None:
             _CONVERTER_GRAPH = ConversionGraph()
+        elif not isinstance(_CONVERTER_GRAPH, ConversionGraph):
+            # The backing graph intentionally survives module reloads, but its class
+            # object does not.  Migrate an older-generation instance so newly added
+            # graph operations (notably edge removal) are available immediately.
+            old_graph = _CONVERTER_GRAPH
+            _CONVERTER_GRAPH = ConversionGraph(
+                (node, connection)
+                for node, connections in old_graph._graph.items()
+                for connection in connections
+            )
         # `converter_graph` is reset to `_CONVERTER_GRAPH`'s value from *class body definition
         # time* on every reload; re-bind it here so this (possibly new) generation of the class
         # always points at the one persistent graph object.
@@ -414,6 +424,17 @@ class CoordinateSystemConverters:
         if (k1, k2) in cls.converters:
             key_path = [(k1, k2)]
         else:
+            key_path = cls.converter_graph.find_path_bfs(k1, k2)
+
+        # A graph created by an older version of the registry may contain edges whose
+        # converters have since been deregistered.  Do not let those stale edges turn
+        # into an opaque ``KeyError`` below, and clean them up as they are encountered.
+        while key_path is not None:
+            stale_edges = [edge for edge in key_path if edge not in cls.converters]
+            if not stale_edges:
+                break
+            for edge in stale_edges:
+                cls.converter_graph.remove(*edge)
             key_path = cls.converter_graph.find_path_bfs(k1, k2)
 
         if key_path is None:
@@ -485,6 +506,7 @@ class CoordinateSystemConverters:
         k1, k2 = cls._resolve_key(system1), cls._resolve_key(system2)
         if cls.converters.get((k1, k2)) is converter:
             del cls.converters[(k1, k2)]
+            cls.converter_graph.remove(k1, k2)
             _CONVERTER_CHAINED_KEYS.discard((k1, k2))
             # only scan the (typically tiny) set of explicitly-registered composite converters,
             # rather than the whole registry, to find any that routed through this edge
@@ -499,6 +521,7 @@ class CoordinateSystemConverters:
                         dead.append(k)
                 for k in dead:
                     del cls.converters[k]
+                    cls.converter_graph.remove(*k)
                     _CONVERTER_CHAINED_KEYS.discard(k)
 
     @classmethod
@@ -560,14 +583,42 @@ class ConversionGraph:
 
     def __init__(self, stuff_to_update=()):
         self._graph = {}
+        self._reverse_graph = {}
         self.update(stuff_to_update)
+
+    def _ensure_reverse_graph(self):
+        # ConversionGraph instances survive a module reload along with the converter
+        # registry.  Populate this lazily for graphs created before reverse adjacency
+        # tracking was introduced.
+        if not hasattr(self, '_reverse_graph'):
+            self._reverse_graph = {node: set() for node in self._graph}
+            for node, connections in self._graph.items():
+                for connection in connections:
+                    self._reverse_graph.setdefault(connection, set()).add(node)
 
     def __contains__(self, item):
         return item in self._graph
 
     def add(self, node, connection):
+        self._ensure_reverse_graph()
         self._graph.setdefault(node, set()).add(connection)
         self._graph.setdefault(connection, set())
+        self._reverse_graph.setdefault(node, set())
+        self._reverse_graph.setdefault(connection, set()).add(node)
+
+    def remove(self, node, connection):
+        """Remove an edge and discard either endpoint when it becomes isolated."""
+        self._ensure_reverse_graph()
+        connections = self._graph.get(node)
+        if connections is None or connection not in connections:
+            return
+
+        connections.discard(connection)
+        self._reverse_graph.get(connection, set()).discard(node)
+        for endpoint in (node, connection):
+            if not self._graph.get(endpoint) and not self._reverse_graph.get(endpoint):
+                self._graph.pop(endpoint, None)
+                self._reverse_graph.pop(endpoint, None)
 
     def keys(self):
         return self._graph.keys()

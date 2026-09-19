@@ -76,6 +76,37 @@ class ConverterTest(TestCase):
     def test_Loader(self):
         loaded = CoordinateSystemConverters.get_converter(CartesianCoordinates3D, ZMatrixCoordinates)
         self.assertIsInstance(loaded, CoordinateSystemConverter)
+
+    @validationTest
+    def test_DeregisterConverterRemovesGraphEdge(self):
+        source = CoordinateSystem("TemporarySource")
+        target = CoordinateSystem("TemporaryTarget")
+        converter = SimpleCoordinateSystemConverter(
+            (source, target),
+            lambda coords, **opts: (coords, opts)
+        )
+
+        converter.register()
+        try:
+            self.assertEqual(
+                CoordinateSystemConverters.converter_graph.find_path_bfs(source, target),
+                [(source, target)]
+            )
+        finally:
+            converter.deregister()
+
+        self.assertIsNone(
+            CoordinateSystemConverters.converter_graph.find_path_bfs(source, target)
+        )
+
+        # Lookup also repairs stale edges left in a reload-persistent graph by an
+        # older implementation that did not remove them during deregistration.
+        CoordinateSystemConverters.converter_graph.add(source, target)
+        with self.assertRaisesRegex(KeyError, "no rules for converting"):
+            CoordinateSystemConverters.get_converter(source, target)
+        self.assertIsNone(
+            CoordinateSystemConverters.converter_graph.find_path_bfs(source, target)
+        )
     @validationTest
     def test_CartesianToZMatrix(self):
         coord_set = CoordinateSet(DataGenerator.coords(10))
