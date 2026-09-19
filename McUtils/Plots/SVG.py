@@ -938,6 +938,10 @@ class SVGPointsToShape3D(SVGPrimitive3D):
         r"^\s*([+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?)\s*(px)?\s*$"
     )
     def __init__(self, **kwargs):
+        # Lighting is renderer metadata, not an SVG presentation attribute.
+        # Pull it out here so per-object overrides do not leak into the final
+        # element as an invalid ``lighting=...`` attribute.
+        self.lighting = kwargs.pop('lighting', None)
         self.kwargs = kwargs
     @abstractmethod
     def to_points(self):
@@ -1303,6 +1307,79 @@ class SVGCylinder(SVGPointsToShape3D):
         kwargs['stroke-dasharray']=f"{r:.3g}, {b:.3g}, {l:.3g}, {t:.3g}"
         return kwargs | dict(points=points), depth
 
+class SVGCone(SVGCylinder):
+    """A conical frustum projected as its view-facing SVG silhouette."""
+
+    js_type = 'cone'
+    to_2d_js = """function(primitive, runtime) {
+  const projected = primitive.points.map(point => runtime.project(point));
+  if (projected.some(point => point === null)) return runtime.hide(primitive);
+  const start = projected[0], end = projected[1];
+  const dx = end.x - start.x, dy = end.y - start.y;
+  const length = Math.hypot(dx, dy);
+  if (length <= 1e-12) return runtime.hide(primitive);
+  const ox = dy / length, oy = -dx / length;
+  const scale = runtime.columnNorm(1);
+  const r1 = primitive.radius * scale / Math.max(start.w, 1e-12);
+  const r2 = primitive.topRadius * scale / Math.max(end.w, 1e-12);
+  const points = [
+    [start.x - r1 * ox, start.y - r1 * oy],
+    [end.x - r2 * ox, end.y - r2 * oy],
+    [end.x + r2 * ox, end.y + r2 * oy],
+    [start.x + r1 * ox, start.y + r1 * oy]
+  ];
+  const edge = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1]);
+  const node = runtime.node(primitive);
+  node.setAttribute('points', runtime.pointsAttribute(points));
+  node.setAttribute('stroke-dasharray', [
+    edge(points[0], points[1]), edge(points[3], points[0]),
+    edge(points[2], points[3]), edge(points[1], points[2])
+  ].join(', '));
+  runtime.scaleStroke(primitive, projected);
+  runtime.show(node);
+  return runtime.depthResult(primitive, projected);
+}"""
+
+    def __init__(self, start, end, radius, top_radius=0, wrapper=None, **kwargs):
+        self.top_radius = top_radius
+        super().__init__(start, end, radius, wrapper=wrapper, **kwargs)
+
+    def to_js_shadow(self, node_id):
+        return super().to_js_shadow(node_id) | {
+            'topRadius': self.top_radius
+        }
+
+    def prep_kwargs(self, projection_matrix) -> tuple[dict, tuple[float, float]]:
+        kwargs, depth = SVGPointsToShape3D.prep_kwargs(
+            self, projection_matrix, return_w=True
+        )
+        w = kwargs.pop('w')
+        pts = kwargs.pop('points')
+        if len(pts) < 2:
+            return None, None
+        w[w <= 0] = 1
+        y_scale = np.linalg.norm(projection_matrix[:3, 1])
+        rad1 = self.radius * y_scale / w[0]
+        rad2 = self.top_radius * y_scale / w[1]
+        start, end = pts
+        vec = end - start
+        length = np.linalg.norm(vec)
+        if length <= 1e-12:
+            return None, None
+        orth = np.array([vec[1], -vec[0]]) / length
+        points = np.array([
+            start - rad1 * orth,
+            end - rad2 * orth,
+            end + rad2 * orth,
+            start + rad1 * orth
+        ])
+        b, r, t, l = np.linalg.norm(
+            np.roll(points, 1, axis=0) - points, axis=-1
+        )
+        kwargs['stroke-dasharray'] = f"{r:.3g}, {b:.3g}, {l:.3g}, {t:.3g}"
+        return kwargs | dict(points=points), depth
+
+
 class SVGSphere(SVGPointsToShape3D):
     js_type = 'sphere'
     to_2d_js = """function(primitive, runtime) {
@@ -1535,16 +1612,26 @@ __MCUTILS_RENDERERS__
         return Math.max(.05, 1 + strength * (scale - 1));
       },
 
-      lightingStops(kind, rgb, depthFactor, options) {
+      lightingStops(kind, rgb, depthFactor, options, baseColorMix=0) {
         const strength = Number(options.strength ?? 1);
         const blend = Number(options.blend ?? 1);
         const lightColor = options.color || [255, 255, 255];
-        const shade = (scale, mix=0) => this.shadeColor(
-          rgb,
-          this.lightingScale(scale, strength) * depthFactor,
-          mix * blend,
-          lightColor
-        );
+        const fogMix = Math.max(0, Math.min(1, baseColorMix));
+        const shadowTarget = lightColor.map(value => value * fogMix);
+        const shade = (scale, highlightMix=0) => {
+          const effectiveScale = (
+            this.lightingScale(scale, strength) * depthFactor
+          );
+          const shaded = effectiveScale < 1
+            ? rgb.map((value, channel) => (
+                value * effectiveScale
+                + shadowTarget[channel] * (1 - effectiveScale)
+              ))
+            : rgb.map(value => value * effectiveScale);
+          return this.shadeColor(
+            shaded, 1, highlightMix * blend, lightColor
+          );
+        };
         if (kind === "sphere") return [
           shade(1.05, .42), shade(1.12, .08), shade(.92), shade(.52)
         ];
@@ -1554,32 +1641,77 @@ __MCUTILS_RENDERERS__
       },
 
       applyDepthLighting(results) {
-        if (!figure.depthLighting) return;
-        const options = figure.depthLighting === true
-          ? {strength: 1, color: [255, 255, 255], blend: 1}
-          : figure.depthLighting;
-        const strength = Number(options.strength ?? 1);
         const lit = results.filter(
           result => result && !result.hidden && result.primitive.lighting
         );
         if (lit.length === 0) return;
         const means = lit.map(result => (result.depth[0] + result.depth[1]) / 2);
         const near = Math.max(...means), far = Math.min(...means);
-        const span = Math.max(near - far, 1e-12);
+        const rawSpan = near - far;
+        const span = Math.max(rawSpan, 1e-12);
         lit.forEach((result, index) => {
           const lighting = result.primitive.lighting;
-          const baseDepth = .78 + .22 * ((means[index] - far) / span);
+          const options = lighting.options || figure.depthLighting || {
+            strength: 1, color: [255, 255, 255], blend: 1,
+            useGradients: true, distanceScaling: .12,
+            baseColorBlending: null
+          };
+          const strength = Number(options.strength ?? 1);
+          const depthPosition = rawSpan <= 1e-12
+            ? 1 : (means[index] - far) / span;
+          const baseDepth = .78 + .22 * depthPosition;
           const depthFactor = this.lightingScale(baseDepth, strength);
-          if (!lighting.gradient) {
-            result.node.setAttribute(
-              "fill", this.shadeColor(lighting.baseColor, depthFactor)
+          const configuredBaseBlending = options.baseColorBlending;
+          const baseColorBlending = configuredBaseBlending == null
+            ? (options.useGradients === false ? strength : 0)
+            : Number(configuredBaseBlending);
+          const baseColorMix = Math.max(
+            0, Math.min(1, (1 - baseDepth) * baseColorBlending)
+          );
+          const targetColor = options.color || [0, 0, 0];
+          const renderedBaseColor = lighting.baseColor.map(
+            (value, channel) => (
+              value * (1 - baseColorMix)
+              + targetColor[channel] * baseColorMix
+            )
+          );
+          if (lighting.outlineColor) {
+            const renderedOutlineColor = lighting.outlineColor.map(
+              (value, channel) => (
+                value * (1 - baseColorMix)
+                + targetColor[channel] * baseColorMix
+              )
             );
+            result.node.setAttribute(
+              "stroke", this.colorCode(renderedOutlineColor)
+            );
+          }
+
+          if (lighting.kind === "sphere") {
+            const point = result.points[0];
+            const distanceScaling = Number(options.distanceScaling ?? 0);
+            const sizeScale = Math.max(
+              .05, 1 - distanceScaling * (1 - depthPosition)
+            );
+            const radius = (
+              result.primitive.radius * this.columnNorm(1) * sizeScale
+              / Math.max(point.w, 1e-12)
+            );
+            result.node.setAttribute("r", radius);
+          }
+
+          if (!lighting.gradient) {
+            result.node.setAttribute("fill", this.colorCode(renderedBaseColor));
             return;
           }
           const gradient = document.getElementById(lighting.gradient);
           if (!gradient) return;
           const stops = this.lightingStops(
-            lighting.kind, lighting.baseColor, depthFactor, options
+            lighting.kind,
+            renderedBaseColor,
+            depthFactor,
+            options,
+            baseColorMix
           );
           Array.from(gradient.getElementsByTagName("stop")).forEach(
             (stop, stopIndex) => stop.setAttribute("stop-color", stops[stopIndex])
@@ -1587,10 +1719,7 @@ __MCUTILS_RENDERERS__
           const points = result.points;
           if (lighting.kind === "sphere") {
             const center = points[0];
-            const radius = (
-              result.primitive.radius * this.columnNorm(1)
-              / Math.max(center.w, 1e-12)
-            );
+            const radius = Number(result.node.getAttribute("r"));
             gradient.setAttribute("cx", center.x);
             gradient.setAttribute("cy", center.y);
             gradient.setAttribute("r", radius);
@@ -1601,8 +1730,10 @@ __MCUTILS_RENDERERS__
             const dx = end.x - start.x, dy = end.y - start.y;
             const length = Math.max(Math.hypot(dx, dy), 1e-12);
             const ox = dy / length, oy = -dx / length;
-            const radius = result.primitive.radius * this.columnNorm(1) * .5 * (
-              1 / Math.max(start.w, 1e-12) + 1 / Math.max(end.w, 1e-12)
+            const endRadius = result.primitive.topRadius ?? result.primitive.radius;
+            const radius = this.columnNorm(1) * .5 * (
+              result.primitive.radius / Math.max(start.w, 1e-12)
+              + endRadius / Math.max(end.w, 1e-12)
             );
             const mx = (start.x + end.x) / 2;
             const my = (start.y + end.y) / 2;
@@ -1857,11 +1988,68 @@ __MCUTILS_RENDERERS__
         color = cls._lighting_color(options.get('color', 'white'))
         if color is None:
             raise ValueError(f"invalid depth-lighting color {options.get('color')!r}")
+
+        distance_scaling = options.get(
+            'distance_scaling', options.get(
+                'depth_scaling', options.get('distanceScaling', .12)
+            )
+        )
+        if distance_scaling is True:
+            distance_scaling = .12
+        elif distance_scaling is False or distance_scaling is None:
+            distance_scaling = 0
+        else:
+            distance_scaling = float(distance_scaling)
+            if distance_scaling < 0:
+                raise ValueError("distance_scaling must be non-negative")
+        base_color_blending = options.get(
+            'base_color_blending', options.get('baseColorBlending')
+        )
+        if base_color_blending is True:
+            base_color_blending = strength
+        elif base_color_blending is False:
+            base_color_blending = 0
+        elif base_color_blending is not None:
+            base_color_blending = float(base_color_blending)
+            if base_color_blending < 0:
+                raise ValueError("base_color_blending must be non-negative")
         return {
             'strength': strength,
             'color': color.tolist(),
-            'blend': blend
+            'blend': blend,
+            'useGradients': bool(options.get(
+                'use_gradients', options.get('useGradients', True)
+            )),
+            'distanceScaling': distance_scaling,
+            # None retains the aliasing rule through per-object option merges:
+            # strength for flat shading, zero for gradient shading.
+            'baseColorBlending': base_color_blending
         }
+
+    def _resolve_depth_lighting(self, lighting):
+        defaults = self._lighting_options
+        if lighting is False:
+            return None
+        if lighting is None:
+            return None if defaults is None else defaults.copy()
+        if lighting is True:
+            return (
+                defaults.copy() if defaults is not None
+                else self._normalize_depth_lighting(True)
+            )
+        if nput.is_numeric(lighting):
+            override = {'strength': lighting}
+        elif isinstance(lighting, dict):
+            override = lighting
+        else:
+            raise TypeError(
+                "object lighting must be a bool, number, or option dictionary"
+            )
+        base = (
+            self._normalize_depth_lighting(True)
+            if defaults is None else defaults
+        )
+        return self._normalize_depth_lighting(base | override)
 
     @staticmethod
     def _shade_color(rgb, scale, light_mix=0, light_color=None):
@@ -1880,7 +2068,8 @@ __MCUTILS_RENDERERS__
         return max(.05, 1 + strength * (scale - 1))
 
     @classmethod
-    def _lighting_stops(cls, kind, rgb, depth_factor, options):
+    def _lighting_stops(cls, kind, rgb, depth_factor, options,
+                        base_color_mix=0):
         if kind == 'sphere':
             values = [
                 (1.05, .42), (1.12, .08), (.92, 0), (.52, 0)
@@ -1891,15 +2080,28 @@ __MCUTILS_RENDERERS__
             ]
         strength = options['strength']
         blend = options['blend']
-        return [
-            cls._shade_color(
-                rgb,
-                cls._lighting_scale(scale, strength) * depth_factor,
-                light_mix * blend,
-                options['color']
+        light_color = np.asanyarray(options['color'])
+        fog_mix = np.clip(base_color_mix, 0, 1)
+        shadow_target = light_color * fog_mix
+        colors = []
+        for scale, highlight_mix in values:
+            effective_scale = (
+                cls._lighting_scale(scale, strength) * depth_factor
             )
-            for scale, light_mix in values
-        ]
+            if effective_scale < 1:
+                shaded = (
+                    rgb * effective_scale
+                    + shadow_target * (1 - effective_scale)
+                )
+            else:
+                shaded = rgb * effective_scale
+            colors.append(cls._shade_color(
+                shaded,
+                1,
+                highlight_mix * blend,
+                light_color
+            ))
+        return colors
 
     def _clear_lighting_defs(self):
         for def_id in self._lighting_def_ids:
@@ -1912,13 +2114,14 @@ __MCUTILS_RENDERERS__
         self._lighting_options = self._normalize_depth_lighting(
             self.depth_lighting
         )
-        if self._lighting_options is None:
-            return
 
         projection = self.get_projection_matrix()
         infos = []
         for index, element in enumerate(self.elements):
             if not isinstance(element, SVGPointsToShape3D):
+                continue
+            options = self._resolve_depth_lighting(element.lighting)
+            if options is None:
                 continue
             base_color = self._lighting_color(element.kwargs.get('fill'))
             if base_color is None:
@@ -1937,44 +2140,89 @@ __MCUTILS_RENDERERS__
                 'index': index,
                 'kind': kind,
                 'base_color': base_color,
+                'outline_color': self._lighting_color(
+                    element.kwargs.get('stroke')
+                ),
                 'kwargs': kwargs,
                 'depth': depth,
-                'mean_depth': (depth[0] + depth[1]) / 2
+                'mean_depth': (depth[0] + depth[1]) / 2,
+                'options': options
             })
 
         if len(infos) == 0:
             return
         depths = np.array([info['mean_depth'] for info in infos])
         far, near = np.min(depths), np.max(depths)
-        span = max(near - far, 1e-12)
+        raw_span = near - far
+        span = max(raw_span, 1e-12)
         for info in infos:
-            base_depth = .78 + .22 * (
-                (info['mean_depth'] - far) / span
+            options = info['options']
+            depth_position = (
+                1 if raw_span <= 1e-12
+                else (info['mean_depth'] - far) / span
             )
+            base_depth = .78 + .22 * depth_position
             depth_factor = self._lighting_scale(
-                base_depth, self._lighting_options['strength']
+                base_depth, options['strength']
             )
+            size_scale = 1
+            if info['kind'] == 'sphere':
+                size_scale = max(
+                    .05,
+                    1 - options['distanceScaling'] * (1 - depth_position)
+                )
             lighting = {
                 'kind': info['kind'],
                 'baseColor': info['base_color'].tolist(),
-                'gradient': None
+                'outlineColor': (
+                    None if info['outline_color'] is None
+                    else info['outline_color'].tolist()
+                ),
+                'gradient': None,
+                'options': options,
+                'scale': size_scale
             }
-            if info['kind'] == 'solid':
-                lighting['fill'] = self._shade_color(
-                    info['base_color'], depth_factor
+            use_gradient = (
+                options['useGradients']
+                and info['kind'] in ('sphere', 'cylinder')
+            )
+            base_color_blending = options['baseColorBlending']
+            if base_color_blending is None:
+                base_color_blending = (
+                    options['strength'] if not options['useGradients'] else 0
                 )
+            base_color_mix = np.clip(
+                (1 - base_depth) * base_color_blending, 0, 1
+            )
+            rendered_base_color = (
+                info['base_color'] * (1 - base_color_mix)
+                + np.asanyarray(options['color']) * base_color_mix
+            )
+            if info['outline_color'] is not None:
+                rendered_outline_color = (
+                    info['outline_color'] * (1 - base_color_mix)
+                    + np.asanyarray(options['color']) * base_color_mix
+                )
+                lighting['stroke'] = ColorPalette.rgb_code(
+                    rendered_outline_color
+                )
+            if not use_gradient:
+                lighting['fill'] = ColorPalette.rgb_code(rendered_base_color)
             else:
                 gradient_id = f"{self._lighting_prefix}-{info['index']}"
                 lighting['gradient'] = gradient_id
                 stop_colors = self._lighting_stops(
-                    info['kind'], info['base_color'], depth_factor,
-                    self._lighting_options
+                    info['kind'],
+                    rendered_base_color,
+                    depth_factor,
+                    options,
+                    base_color_mix=base_color_mix
                 )
                 if info['kind'] == 'sphere':
                     offsets = ['0%', '34%', '72%', '100%']
                     x = info['kwargs']['cx']
                     y = info['kwargs']['cy']
-                    radius = info['kwargs']['r']
+                    radius = info['kwargs']['r'] * size_scale
                     gradient_opts = {
                         'tag': 'radialGradient',
                         'cx': str(x), 'cy': str(y), 'r': str(radius),
@@ -1993,10 +2241,7 @@ __MCUTILS_RENDERERS__
                     }
                 gradient_opts['gradientUnits'] = 'userSpaceOnUse'
                 gradient_opts['body'] = [
-                    SVG.Stop(
-                        offset=offset,
-                        **{'stop-color': color}
-                    )
+                    SVG.Stop(offset=offset, **{'stop-color': color})
                     for offset, color in zip(offsets, stop_colors)
                 ]
                 self.defs[gradient_id] = gradient_opts
@@ -2027,6 +2272,7 @@ __MCUTILS_RENDERERS__
         'polygon': SVGPolygon3D,
         'path': SVGPath3D,
         'cylinder': SVGCylinder,
+        'cone': SVGCone,
         'sphere': SVGSphere,
         'text': SVGText3D
     }
@@ -2034,6 +2280,8 @@ __MCUTILS_RENDERERS__
         return self.element_mapping[element_type](**kwargs)
     def add_cylinder(self, **kwargs):
         return self.add_element('cylinder', **kwargs)
+    def add_cone(self, **kwargs):
+        return self.add_element('cone', **kwargs)
     def add_sphere(self, **kwargs):
         return self.add_element('sphere', **kwargs)
 
@@ -2050,6 +2298,10 @@ __MCUTILS_RENDERERS__
             if self._lighting_context is not None:
                 lighting = self._lighting_context.get(id(primitive))
                 if lighting is not None:
+                    if isinstance(primitive, SVGSphere):
+                        flat.r = flat.r * lighting['scale']
+                    if 'stroke' in lighting:
+                        flat.styles['stroke'] = lighting['stroke']
                     if lighting['gradient'] is None:
                         flat.styles['fill'] = lighting['fill']
                     else:
