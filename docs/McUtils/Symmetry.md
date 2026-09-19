@@ -265,9 +265,9 @@ figure.show()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-e64fa1" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-e64fa1"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-03b169" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-03b169"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-e64fa1" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-03b169" markdown="1">
  - [Characters](#Characters)
 - [CharacterDecomposition](#CharacterDecomposition)
 - [CharacterSymmetries](#CharacterSymmetries)
@@ -282,9 +282,9 @@ figure.show()
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-69c301" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-69c301"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-8e0f6b" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-8e0f6b"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-69c301" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-8e0f6b" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
