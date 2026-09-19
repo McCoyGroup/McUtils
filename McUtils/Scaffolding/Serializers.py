@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 """
 Provides scaffolding for creating serializers that dump data to a reloadable format.
 Light-weight and unsophisticated, but that's what makes this useful..
 """
 
 import abc, numpy as np, json, io, pickle, os, base64, types, warnings
+import re
+import tarfile
 import tempfile
 import collections
 import uuid
@@ -24,7 +28,11 @@ __all__= [
     "unflatten_tree",
     "write_flat_tree",
     "read_flat_tree",
-    "NumpyTreeArchive"
+    "NumpyTreeArchive",
+    "LineIndexedSupplier",
+    "SerializedObjectSupplier",
+    "JSONLSupplier",
+    "NPZLSupplier"
 ]
 
 
@@ -3077,3 +3085,876 @@ class NumpyTreeArchive:
 
     def __repr__(self):
         return f"{type(self).__name__}(<{len(self)}>)"
+
+class _FileWrapper:
+    """Give a tar member the small file interface expected by StreamInterface."""
+
+    def __init__(self, stream, mode="rb", encoding="utf-8"):
+        self.stream = stream
+        self.mode = mode
+        self.encoding = encoding
+
+    def read(self, n=None):
+        return self.stream.read() if n is None else self.stream.read(n)
+
+    def readline(self, n=None):
+        return self.stream.readline() if n is None else self.stream.readline(n)
+
+    def seek(self, n, *args):
+        return self.stream.seek(n, *args)
+
+    def tell(self):
+        return self.stream.tell()
+
+    def peek(self, n=1):
+        return self.stream.peek(n) if hasattr(self.stream, "peek") else b""
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        pass
+
+
+def _memmap_npy_member(tar_path, member):
+    """Memory-map an ndarray stored in an uncompressed tar member."""
+    with open(tar_path, "rb") as stream:
+        stream.seek(member.offset_data)
+        version = np.lib.format.read_magic(stream)
+        if version[0] == 1:
+            shape, fortran_order, dtype = np.lib.format.read_array_header_1_0(stream)
+        elif version[0] == 2:
+            shape, fortran_order, dtype = np.lib.format.read_array_header_2_0(stream)
+        else:
+            shape, fortran_order, dtype = np.lib.format._read_array_header(stream, version)
+        data_offset = stream.tell()
+    return np.memmap(
+        tar_path,
+        dtype=dtype,
+        mode="r",
+        offset=data_offset,
+        shape=shape,
+        order="F" if fortran_order else "C",
+    )
+
+
+def _load_npy_member_bytes(tar, member):
+    stream = tar.extractfile(member)
+    try:
+        return np.load(io.BytesIO(stream.read()), allow_pickle=True)
+    finally:
+        stream.close()
+
+
+class LineIndexedSupplier:
+    """Stream and randomly access objects serialized one per line.
+
+    ``deserialization_function`` receives one raw line (normally ``bytes``)
+    and returns the corresponding object.  A line-index is an ndarray of
+    byte offsets.  A jump database is an uncompressed tar containing the
+    source lines, that ndarray, metadata, and optional index-aligned arrays.
+
+    Subclasses configure the default name of the source member with
+    ``STORED_FILE_NAME``.  ``stored_file_name=`` on
+    :meth:`build_jump_database` overrides it for one database; the selected
+    name is recorded in the database metadata and honored when it is loaded.
+    """
+
+    STORED_FILE_NAME = "lines.dat"
+    INDEX_FILE_NAME = "line_indices.npy"
+    META_FILE_NAME = "meta.json"
+
+    _EOF = object()
+
+    def __init__(
+        self,
+        data_file,
+        line_indices=None,
+        name=None,
+        size=int(1e3),
+        managed_streams=None,
+        deserialization_function=None,
+        metadata_arrays=None,
+        stored_file_name=None,
+    ):
+        self.name = name
+        self.data = dev.StreamInterface(data_file, mode="rb")
+        self.line_indices = line_indices
+        self._size = size
+        self._call_depth = 0
+        self._stream = None
+        self._cur = None
+        self._max_offset = None
+        self._offsets = None
+        self._flexible_offsets = None
+        self._assignable_offsets = None
+        self._encoding = self.data.get_encoding()
+        self._binary = self.data.is_binary()
+        self._deserialization_function = deserialization_function
+        self.deserialization_function = deserialization_function
+        self.managed_streams = managed_streams
+        self._exit_codes = (None, None, None)
+        self.metadata_arrays = metadata_arrays
+        self.stored_file_name = stored_file_name or self.STORED_FILE_NAME
+
+    def _default_deserialization_function(self, line):
+        if isinstance(line, bytes):
+            line = line.decode(self._encoding)
+        return line.rstrip("\r\n")
+
+    @classmethod
+    def from_jump_database(
+        cls,
+        database_file,
+        name=None,
+        deserialization_function=None,
+        metadata_arrays=None,
+        create=False,
+        **extra,
+    ):
+        """Open a packaged or expanded jump database.
+
+        When ``create=True``, ``database_file`` is treated as an expanded
+        database directory. The directory and any missing empty database
+        files are created before opening it. Existing database files are
+        never truncated or replaced.
+        """
+        if create:
+            cls._create_database_directory(database_file, name=name)
+        data_file, line_indices, meta, streams, archive_arrays = cls._load_database_archive(
+            database_file
+        )
+        if meta is not None and name is None:
+            name = meta.get("name")
+        stored_file_name = (
+            meta.get("stored_file_name", cls.STORED_FILE_NAME)
+            if meta is not None
+            else cls.STORED_FILE_NAME
+        )
+
+        if metadata_arrays is None:
+            metadata_arrays = archive_arrays
+        elif archive_arrays:
+            merged = dict(archive_arrays)
+            merged.update(metadata_arrays)
+            metadata_arrays = merged
+
+        return cls(
+            data_file,
+            line_indices=line_indices,
+            name=name,
+            managed_streams=streams,
+            deserialization_function=deserialization_function,
+            metadata_arrays=metadata_arrays,
+            stored_file_name=stored_file_name,
+            **extra,
+        )
+
+    @classmethod
+    def _create_database_directory(cls, directory, name=None):
+        if not isinstance(directory, (str, os.PathLike)):
+            raise TypeError("a created jump database must be a filesystem directory")
+        directory = os.fspath(directory)
+        if os.path.exists(directory) and not os.path.isdir(directory):
+            if tarfile.is_tarfile(directory):
+                return directory
+            raise NotADirectoryError(
+                f"cannot create a jump database directory at {directory!r}: "
+                "a non-directory entry already exists"
+            )
+        os.makedirs(directory, exist_ok=True)
+
+        meta_path = os.path.join(directory, cls.META_FILE_NAME)
+        if os.path.isfile(meta_path):
+            with open(meta_path, "r", encoding="utf-8") as stream:
+                meta = json.load(stream)
+        else:
+            meta = None
+        stored_file_name = (
+            meta.get("stored_file_name", cls.STORED_FILE_NAME)
+            if meta is not None
+            else cls.STORED_FILE_NAME
+        )
+        data_path = os.path.join(directory, stored_file_name)
+        index_path = os.path.join(directory, cls.INDEX_FILE_NAME)
+
+        data_exists = os.path.isfile(data_path)
+        index_exists = os.path.isfile(index_path)
+        if not data_exists and index_exists:
+            line_indices = np.load(index_path, mmap_mode="r")
+            if len(line_indices) > 0:
+                raise ValueError(
+                    f"cannot create missing data file {data_path!r}: "
+                    f"{index_path!r} contains {len(line_indices)} record offsets"
+                )
+        if data_exists and not index_exists and os.path.getsize(data_path) > 0:
+            raise ValueError(
+                f"cannot create an empty index for non-empty data file {data_path!r}"
+            )
+
+        if not data_exists:
+            with open(data_path, "xb"):
+                pass
+        if not index_exists:
+            np.save(index_path, np.empty(0, dtype=np.uint16))
+        if meta is None:
+            with open(meta_path, "x", encoding="utf-8") as stream:
+                json.dump(
+                    {"name": name, "stored_file_name": stored_file_name},
+                    stream,
+                )
+
+        return directory
+
+    @classmethod
+    def _read_archive_meta(cls, tar, names):
+        if cls.META_FILE_NAME not in names:
+            return None
+        stream = tar.extractfile(cls.META_FILE_NAME)
+        try:
+            return json.loads(stream.read().decode("utf-8"))
+        finally:
+            stream.close()
+
+    @classmethod
+    def _load_database_archive(cls, path):
+        if not isinstance(path, (str, os.PathLike)):
+            return path, None, None, None, None
+        if not os.path.exists(path):
+            return path, None, None, None, None
+        if os.path.isdir(path):
+            return cls._load_database_directory(path)
+        if not tarfile.is_tarfile(path):
+            return path, None, None, None, None
+
+        tar_path = os.fspath(path)
+        tar = tarfile.open(tar_path, mode="r:").__enter__()
+        names = set(tar.getnames())
+        meta = cls._read_archive_meta(tar, names)
+        stored_file_name = (
+            meta.get("stored_file_name", cls.STORED_FILE_NAME)
+            if meta is not None
+            else cls.STORED_FILE_NAME
+        )
+        if stored_file_name not in names or cls.INDEX_FILE_NAME not in names:
+            tar.__exit__(None, None, None)
+            return path, None, None, None, None
+
+        data_file = _FileWrapper(tar.extractfile(stored_file_name))
+        line_indices = _memmap_npy_member(
+            tar_path, tar.getmember(cls.INDEX_FILE_NAME)
+        )
+        metadata_arrays = cls._load_metadata_arrays(tar, meta)
+        return data_file, line_indices, meta, [tar], metadata_arrays
+
+    @classmethod
+    def _load_metadata_arrays(cls, tar, meta):
+        members = meta.get("metadata_arrays") if meta is not None else None
+        if not members:
+            return None
+        return {
+            key: _load_npy_member_bytes(tar, tar.getmember(member_name))
+            for key, member_name in members.items()
+        }
+
+    @classmethod
+    def _load_database_directory(cls, directory):
+        directory = os.fspath(directory)
+        meta_path = os.path.join(directory, cls.META_FILE_NAME)
+        meta = None
+        if os.path.isfile(meta_path):
+            with open(meta_path, "r", encoding="utf-8") as stream:
+                meta = json.load(stream)
+        stored_file_name = (
+            meta.get("stored_file_name", cls.STORED_FILE_NAME)
+            if meta is not None
+            else cls.STORED_FILE_NAME
+        )
+        data_path = os.path.join(directory, stored_file_name)
+        index_path = os.path.join(directory, cls.INDEX_FILE_NAME)
+        if not (os.path.isfile(data_path) and os.path.isfile(index_path)):
+            return directory, None, None, None, None
+
+        line_indices = np.load(index_path, mmap_mode="r")
+        members = meta.get("metadata_arrays") if meta is not None else None
+        metadata_arrays = None
+        if members:
+            metadata_arrays = {
+                key: np.load(os.path.join(directory, member_name), allow_pickle=True)
+                for key, member_name in members.items()
+            }
+        return data_path, line_indices, meta, None, metadata_arrays
+
+    def to_mp_state(self):
+        return (
+            self.data._input,
+            self.name,
+            self._deserialization_function,
+            self.stored_file_name,
+        )
+
+    @classmethod
+    def from_mp_state(cls, state, line_indices=None, **extra):
+        data_file, name, deserialization_function, stored_file_name = state
+        return cls(
+            data_file,
+            line_indices=line_indices,
+            name=name,
+            deserialization_function=deserialization_function,
+            stored_file_name=stored_file_name,
+            **extra,
+        )
+
+    def __enter__(self):
+        self._call_depth += 1
+        if self._call_depth == 1:
+            if self.deserialization_function is None:
+                self.deserialization_function = self._default_deserialization_function
+            self._stream = self.data.__enter__()
+            self._cur = 0
+            if self.line_indices is None:
+                self._max_offset = 0
+                self.line_indices = np.zeros(self._size, dtype="uint64")
+            if isinstance(self.line_indices, np.ndarray) and not isinstance(
+                self.line_indices, np.memmap
+            ):
+                self._offsets = self.line_indices
+                self._flexible_offsets = True
+                self._assignable_offsets = True
+            else:
+                self._offsets = (
+                    self.line_indices
+                    if isinstance(self.line_indices, np.memmap)
+                    else np.load(self.line_indices, mmap_mode="r")
+                )
+                self._flexible_offsets = False
+                self._assignable_offsets = False
+            if self._max_offset is None:
+                self._max_offset = len(self._offsets)
+        self._exit_codes = (None, None, None)
+        return self, self._stream
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._call_depth -= 1
+        if self._call_depth == 0:
+            self.deserialization_function = self._deserialization_function
+            self._cur = None
+            self._stream.__exit__(exc_type, exc_val, exc_tb)
+            self._stream = None
+            if self._flexible_offsets:
+                self.line_indices = self._offsets
+            self._offsets = None
+            self._exit_codes = (exc_type, exc_val, exc_tb)
+
+    def __del__(self):
+        if hasattr(self, "managed_streams") and self.managed_streams is not None:
+            for stream in self.managed_streams:
+                stream.__exit__(*self._exit_codes)
+
+    def __len__(self):
+        with self:
+            if self._flexible_offsets:
+                self.create_line_index(return_index=False)
+            return self._max_offset
+
+    @classmethod
+    def _consume_next(cls, db, deserialization_function):
+        line = db.readline()
+        if len(line) == 0:
+            return cls._EOF
+        return deserialization_function(line)
+
+    def _metadata_at(self, n):
+        return {key: array[n] for key, array in self.metadata_arrays.items()}
+
+    def _metadata_slice(self, start, stop):
+        return {
+            key: array[start:stop] for key, array in self.metadata_arrays.items()
+        }
+
+    def find_object(self, n, block_size=None, include_metadata=None):
+        if include_metadata is None:
+            include_metadata = self.metadata_arrays is not None
+        elif include_metadata and self.metadata_arrays is None:
+            raise ValueError(
+                f"{type(self).__name__} has no `metadata_arrays`; "
+                "pass `metadata_arrays=...` to use `include_metadata`"
+            )
+        with self as (_, db):
+            if n >= self._max_offset:
+                self.create_line_index(n, return_index=False)
+            db.seek(self._offsets[n])
+            if block_size is None:
+                self._cur = n
+                obj = self._consume_next(db, self.deserialization_function)
+                if obj is self._EOF:
+                    obj = b""
+                return (obj, self._metadata_at(n)) if include_metadata else obj
+
+            self._cur = n + block_size
+            objects = []
+            for offset in range(block_size):
+                if self._assignable_offsets:
+                    self._expand_offset_if_needed(n + offset)
+                    self._offsets[n + offset] = db.tell()
+                obj = self._consume_next(db, self.deserialization_function)
+                if obj is self._EOF:
+                    obj = b""
+                objects.append(obj)
+            if include_metadata:
+                return objects, self._metadata_slice(n, n + block_size)
+            return objects
+
+    def consume_iter(self, start_at=None, upto=None, include_metadata=None):
+        if include_metadata is None:
+            include_metadata = self.metadata_arrays is not None
+        elif include_metadata and self.metadata_arrays is None:
+            raise ValueError(
+                f"{type(self).__name__} has no `metadata_arrays`; "
+                "pass `metadata_arrays=...` to use `include_metadata`"
+            )
+        with self as (_, db):
+            if start_at is None:
+                start_at = self._cur
+            else:
+                self.create_line_index(upto=start_at, return_index=False)
+            ninds = start_at
+            try:
+                db.seek(self._offsets[ninds])
+                if upto is not None and ninds >= upto:
+                    return
+                obj = self._consume_next(db, self.deserialization_function)
+                while obj is not self._EOF and (upto is None or ninds < upto):
+                    row = ninds
+                    ninds += 1
+                    if self._assignable_offsets:
+                        self._expand_offset_if_needed(ninds)
+                        self._offsets[ninds] = db.tell()
+                    yield (obj, self._metadata_at(row)) if include_metadata else obj
+                    obj = self._consume_next(db, self.deserialization_function)
+            finally:
+                self._cur = ninds
+                self._max_offset = max(self._max_offset, ninds)
+
+    def __next__(self):
+        if self._stream is None:
+            raise ValueError(
+                f"{type(self).__name__} must be opened via `with` before iteration"
+            )
+        with self as (_, db):
+            db.seek(self._offsets[self._cur])
+            obj = self._consume_next(db, self.deserialization_function)
+            if obj is self._EOF:
+                raise StopIteration
+            self._cur += 1
+            return obj
+
+    def __iter__(self):
+        return self.consume_iter()
+
+    def _expand_offset_if_needed(self, n):
+        if n < len(self._offsets):
+            return
+        if not self._flexible_offsets:
+            raise ValueError(
+                f"{self._max_offset} `line_indices` were passed, but the database extends beyond that"
+            )
+        new_offsets = np.zeros(max(1, 2 * len(self._offsets)), dtype="uint64")
+        new_offsets[: len(self._offsets)] = self._offsets
+        self._offsets = new_offsets
+
+    def create_line_index(self, upto=None, return_index=True):
+        with self as (_, db):
+            if not self._assignable_offsets:
+                return self._offsets[: self._max_offset] if return_index else None
+            ninds = self._max_offset
+            db.seek(self._offsets[ninds])
+            try:
+                line_length = len(db.readline())
+                while line_length > 0 and (upto is None or ninds < upto):
+                    ninds += 1
+                    self._expand_offset_if_needed(ninds)
+                    self._offsets[ninds] = self._offsets[ninds - 1] + line_length
+                    if not self._binary and db.peek(1) == "\r":
+                        self._offsets[ninds] += 1
+                    line_length = len(db.readline())
+            finally:
+                self._max_offset = ninds
+            return self._offsets[: self._max_offset] if return_index else None
+
+    @classmethod
+    def save_line_index(cls, file, line_index):
+        max_offset = line_index[-1]
+        for dtype in (np.uint16, np.uint32, np.uint64):
+            if max_offset < np.iinfo(dtype).max:
+                line_index = line_index.astype(dtype)
+                break
+        return np.save(file, line_index)
+
+    def write_jump_database(self, target, **options):
+        with self:
+            self.create_line_index(return_index=False)
+            return self.build_jump_database(
+                self,
+                target,
+                line_indices=self._offsets[: self._max_offset],
+                **options,
+            )
+
+    @staticmethod
+    def _metadata_member_name(key, disambiguator=None):
+        slug = re.sub(r"[^A-Za-z0-9_.-]+", "_", str(key)).strip("_") or "field"
+        name = f"metadata_{slug}"
+        if disambiguator is not None:
+            name = f"{name}_{disambiguator}"
+        return f"{name}.npy"
+
+    @classmethod
+    def build_jump_database(
+        cls,
+        supplier_or_data_file,
+        out_file,
+        line_indices=None,
+        name=None,
+        metadata_arrays=None,
+        stored_file_name=None,
+        overwrite=False,
+        extra_metadata=None,
+    ):
+        if not overwrite and os.path.exists(out_file):
+            raise FileExistsError(
+                f"{out_file} already exists; pass overwrite=True to replace it"
+            )
+
+        if isinstance(supplier_or_data_file, LineIndexedSupplier):
+            supplier = supplier_or_data_file
+            data_path = supplier.data._input
+            if not isinstance(data_path, (str, os.PathLike)):
+                raise ValueError("can only package a supplier backed by a real file path")
+            if line_indices is None:
+                line_indices = supplier.line_indices
+            if name is None:
+                name = supplier.name
+            if metadata_arrays is None:
+                metadata_arrays = supplier.metadata_arrays
+            if stored_file_name is None:
+                stored_file_name = supplier.stored_file_name
+        else:
+            data_path = supplier_or_data_file
+        if stored_file_name is None:
+            stored_file_name = cls.STORED_FILE_NAME
+
+        if line_indices is None:
+            scanner = cls(data_path)
+            with scanner:
+                line_indices = scanner.create_line_index(return_index=True)
+        if isinstance(line_indices, (str, os.PathLike)):
+            with open(line_indices, "rb") as stream:
+                index_bytes = stream.read()
+        else:
+            buffer = io.BytesIO()
+            cls.save_line_index(buffer, np.asarray(line_indices))
+            index_bytes = buffer.getvalue()
+
+        meta = {"name": name, "stored_file_name": stored_file_name}
+        if extra_metadata:
+            meta.update(extra_metadata)
+            meta["stored_file_name"] = stored_file_name
+
+        metadata_payloads = {}
+        if metadata_arrays:
+            member_names = {}
+            used_names = set()
+            for i, (key, array) in enumerate(metadata_arrays.items()):
+                member_name = cls._metadata_member_name(key)
+                if member_name in used_names:
+                    member_name = cls._metadata_member_name(key, disambiguator=i)
+                used_names.add(member_name)
+                buffer = io.BytesIO()
+                np.save(buffer, np.asarray(array))
+                metadata_payloads[member_name] = buffer.getvalue()
+                member_names[key] = member_name
+            meta["metadata_arrays"] = member_names
+
+        meta_bytes = json.dumps(meta).encode("utf-8")
+        with tarfile.open(out_file, mode="w") as tar:
+            tar.add(data_path, arcname=stored_file_name)
+            for member_name, payload in (
+                [(cls.INDEX_FILE_NAME, index_bytes)]
+                + list(metadata_payloads.items())
+                + [(cls.META_FILE_NAME, meta_bytes)]
+            ):
+                info = tarfile.TarInfo(name=member_name)
+                info.size = len(payload)
+                tar.addfile(info, io.BytesIO(payload))
+        return out_file
+
+class SerializedObjectSupplier(LineIndexedSupplier):
+    """Shared writing and packaging support for concrete object formats."""
+
+    @classmethod
+    def serialize_object(cls, obj):
+        raise NotImplementedError
+
+    @classmethod
+    def write_object(cls, stream, obj):
+        payload = cls.serialize_object(obj)
+        stream.write(payload)
+        stream.write(b"\n")
+
+    @classmethod
+    def write_objects(cls, objects, data_file, line_indices_file=None, overwrite=False):
+        """Serialize objects and return a supplier with a complete jump index."""
+        data_file = os.fspath(data_file)
+        if line_indices_file is None:
+            line_indices_file = data_file + ".line_indices.npy"
+        if not overwrite and os.path.exists(data_file):
+            raise FileExistsError(
+                f"{data_file} already exists; pass overwrite=True to replace it"
+            )
+        line_indices_file = os.fspath(line_indices_file)
+        if not overwrite and os.path.exists(line_indices_file):
+            raise FileExistsError(
+                f"{line_indices_file} already exists; pass overwrite=True to replace it"
+            )
+
+        offsets = []
+        with open(data_file, "wb") as stream:
+            for obj in objects:
+                offsets.append(stream.tell())
+                cls.write_object(stream, obj)
+        offsets = np.asarray(offsets, dtype=np.uint64)
+        if len(offsets) == 0:
+            # LineIndexedSupplier.save_line_index chooses a dtype from the
+            # final offset, which an empty database does not have.
+            np.save(line_indices_file, offsets.astype(np.uint16))
+        else:
+            cls.save_line_index(line_indices_file, offsets)
+        return cls(data_file, line_indices=line_indices_file)
+
+    def append(self, obj):
+        """Append one object and its byte offset to the sidecar jump index."""
+        return self.extend((obj,))
+
+    def extend(self, objects):
+        """Append an iterable of objects and atomically update the jump index.
+
+        Only suppliers backed by ordinary files are mutable. Packaged jump
+        databases are intentionally read-only because changing a tar member
+        would require rebuilding the archive. If serialization or index
+        persistence fails, the data file is truncated to its original size.
+        """
+        if self._call_depth != 0:
+            raise RuntimeError("cannot extend a supplier while it is open")
+        if self.metadata_arrays is not None:
+            raise ValueError(
+                "cannot extend a supplier with index-aligned metadata_arrays"
+            )
+
+        data_file = self.data._input
+        if not isinstance(data_file, (str, os.PathLike)):
+            raise ValueError("packaged jump databases are read-only")
+        data_file = os.fspath(data_file)
+        if not os.path.isfile(data_file):
+            raise FileNotFoundError(data_file)
+
+        current_offsets, index_file = self._append_index_state(data_file)
+        original_size = os.path.getsize(data_file)
+        appended_offsets = []
+        try:
+            with open(data_file, "r+b") as stream:
+                stream.seek(0, os.SEEK_END)
+                for obj in objects:
+                    appended_offsets.append(stream.tell())
+                    self.write_object(stream, obj)
+                stream.flush()
+
+            if len(appended_offsets) == 0:
+                return self
+
+            new_offsets = np.concatenate(
+                [current_offsets, np.asarray(appended_offsets, dtype=np.uint64)]
+            )
+            self._replace_line_index(index_file, new_offsets)
+        except BaseException:
+            with open(data_file, "r+b") as stream:
+                stream.truncate(original_size)
+            raise
+
+        # Reopen the new index lazily on the next supplier operation.
+        self.line_indices = index_file
+        self._offsets = None
+        self._max_offset = None
+        self._flexible_offsets = None
+        self._assignable_offsets = None
+        return self
+
+    def _append_index_state(self, data_file):
+        line_indices = self.line_indices
+        if isinstance(line_indices, (str, os.PathLike)):
+            index_file = os.fspath(line_indices)
+            current_offsets = np.asarray(np.load(index_file, mmap_mode="r")).copy()
+        elif isinstance(line_indices, np.memmap):
+            index_file = os.fspath(line_indices.filename)
+            current_offsets = np.asarray(line_indices).copy()
+        elif isinstance(line_indices, np.ndarray):
+            count = self._max_offset
+            current_offsets = np.asarray(
+                line_indices if count is None else line_indices[:count]
+            ).copy()
+            index_file = data_file + ".line_indices.npy"
+        else:
+            # A supplier without a fixed index may only have scanned part of
+            # its input. Complete the scan before adding new offsets.
+            with self:
+                current_offsets = np.asarray(self.create_line_index()).copy()
+            index_file = data_file + ".line_indices.npy"
+        return current_offsets, index_file
+
+    @classmethod
+    def _replace_line_index(cls, index_file, line_indices):
+        index_dir = os.path.dirname(os.path.abspath(index_file))
+        temp_name = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                mode="wb", dir=index_dir, prefix=".line_indices-", delete=False
+            ) as temp:
+                temp_name = temp.name
+                cls.save_line_index(temp, line_indices)
+                temp.flush()
+            os.replace(temp_name, index_file)
+            temp_name = None
+        finally:
+            if temp_name is not None and os.path.exists(temp_name):
+                os.unlink(temp_name)
+
+    @classmethod
+    def create_jump_database(
+        cls,
+        objects,
+        out_file,
+        name=None,
+        metadata_arrays=None,
+        stored_file_name=None,
+        overwrite=False,
+    ):
+        """Serialize an iterable directly into a packaged jump database."""
+        stored_file_name = stored_file_name or cls.STORED_FILE_NAME
+        suffix = os.path.splitext(stored_file_name)[1]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            data_file = os.path.join(temp_dir, "records" + suffix)
+            supplier = cls.write_objects(objects, data_file)
+            return cls.build_jump_database(
+                supplier,
+                out_file,
+                line_indices=supplier.line_indices,
+                name=name,
+                metadata_arrays=metadata_arrays,
+                stored_file_name=stored_file_name,
+                overwrite=overwrite,
+            )
+
+class JSONLSupplier(SerializedObjectSupplier):
+    """Serialize JSON-compatible objects one compact JSON value per line."""
+
+    STORED_FILE_NAME = "records.jsonl"
+
+    def __init__(self, *args, json_load_options=None, **kwargs):
+        self.json_load_options = {} if json_load_options is None else json_load_options
+        super().__init__(*args, **kwargs)
+
+    @classmethod
+    def serialize_object(cls, obj):
+        return json.dumps(
+            obj,
+            ensure_ascii=False,
+            separators=(",", ":"),
+        ).encode("utf-8")
+
+    def _default_deserialization_function(self, line):
+        return json.loads(line, **self.json_load_options)
+
+class NPZLSupplier(SerializedObjectSupplier):
+    """Serialize mappings/arrays as binary, length-framed NPZ records.
+
+    Each record has the form ``<decimal byte length>\n<raw npz bytes>\n``.
+    The explicit byte length is required because an NPZ file is a ZIP stream
+    and may contain arbitrary newline bytes internally. Jump indices point to
+    the start of each decimal length header.
+    """
+
+    STORED_FILE_NAME = "records.npzl"
+
+    def __init__(self, *args, allow_pickle=False, **kwargs):
+        self.allow_pickle = allow_pickle
+        super().__init__(*args, **kwargs)
+
+    @classmethod
+    def serialize_object(cls, obj):
+        buffer = io.BytesIO()
+        if hasattr(obj, "items"):
+            np.savez(buffer, **obj)
+        elif isinstance(obj, (tuple, list)):
+            np.savez(buffer, *obj)
+        else:
+            np.savez(buffer, obj)
+        return buffer.getvalue()
+
+    @classmethod
+    def write_object(cls, stream, obj):
+        payload = cls.serialize_object(obj)
+        stream.write(str(len(payload)).encode("ascii"))
+        stream.write(b"\n")
+        stream.write(payload)
+        stream.write(b"\n")
+
+    def _default_deserialization_function(self, payload):
+        with np.load(io.BytesIO(payload), allow_pickle=self.allow_pickle) as archive:
+            return {key: archive[key] for key in archive.files}
+
+    @classmethod
+    def _consume_next(cls, db, deserialization_function):
+        length_line = db.readline()
+        if len(length_line) == 0:
+            return cls._EOF
+        try:
+            payload_length = int(length_line)
+        except ValueError as exc:
+            raise ValueError(f"invalid NPZL record length {length_line!r}") from exc
+        payload = db.read(payload_length)
+        if len(payload) != payload_length:
+            raise EOFError(
+                f"truncated NPZL record: expected {payload_length} bytes, "
+                f"found {len(payload)}"
+            )
+        if db.read(1) != b"\n":
+            raise ValueError("NPZL record is not followed by a newline separator")
+        return deserialization_function(payload)
+
+    def create_line_index(self, upto=None, return_index=True):
+        with self as (_, db):
+            if not self._assignable_offsets:
+                return self._offsets[: self._max_offset] if return_index else None
+            ninds = self._max_offset
+            db.seek(self._offsets[ninds])
+            try:
+                length_line = db.readline()
+                while len(length_line) > 0 and (upto is None or ninds < upto):
+                    try:
+                        payload_length = int(length_line)
+                    except ValueError as exc:
+                        raise ValueError(
+                            f"invalid NPZL record length {length_line!r}"
+                        ) from exc
+                    payload_start = db.tell()
+                    db.seek(payload_length, os.SEEK_CUR)
+                    if db.tell() - payload_start != payload_length:
+                        raise EOFError("truncated NPZL record")
+                    if db.read(1) != b"\n":
+                        raise ValueError(
+                            "NPZL record is not followed by a newline separator"
+                        )
+                    ninds += 1
+                    self._expand_offset_if_needed(ninds)
+                    self._offsets[ninds] = db.tell()
+                    length_line = db.readline()
+            finally:
+                self._max_offset = ninds
+            return self._offsets[: self._max_offset] if return_index else None

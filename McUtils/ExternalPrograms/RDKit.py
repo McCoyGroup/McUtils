@@ -919,6 +919,83 @@ class RDMolecule(ExternalMolecule):
 
         return rdkit_mol
     @classmethod
+    def _from_string(cls,
+                     string,
+                     parser,
+                     add_implicit_hydrogens=False,
+                     call_add_hydrogens=True,
+                     conf_id=None,
+                     num_confs=None,
+                     optimize=False,
+                     take_min=True,
+                     force_field_type='mmff',
+                     reorder_from_atom_map=False,
+                     confgen_opts=None,
+                     check_tag=True,
+                     coords=None,
+                     conf_tag=None,
+                     conformer_encoder=None):
+        """Build an `RDMolecule` from a tagged molecular string and parser."""
+        if os.path.isfile(string):
+            string = dev.read_file(string)
+
+        if check_tag and conf_tag is None:
+            string, _, conf_tag = string.partition("_")
+            if len(conf_tag) == 0:
+                conf_tag = None
+
+        rdkit_mol = parser(string, conf_tag is not None)
+
+        if coords is None and conf_tag is not None:
+            if reorder_from_atom_map:
+                reordering = [
+                    atom.GetIntProp('og_idx')
+                    for atom in rdkit_mol.GetAtoms()
+                ]
+            else:
+                reordering = None
+            graph = cls.get_mol_edge_graph(rdkit_mol, reordering=reordering)
+            coords = cls.conformer_from_smiles_tag(
+                conf_tag,
+                graph,
+                conformer_encoder=conformer_encoder
+            )
+            if reordering is not None:
+                coords = coords[reordering,]
+
+        if coords is None:
+            if call_add_hydrogens:
+                Chem = cls.chem_api()
+                rdkit_mol = Chem.AddHs(
+                    rdkit_mol,
+                    explicitOnly=not add_implicit_hydrogens
+                )
+            return cls.from_base_mol(
+                rdkit_mol,
+                conf_id=conf_id,
+                num_confs=num_confs,
+                optimize=optimize,
+                take_min=take_min,
+                force_field_type=force_field_type,
+                confgen_opts=confgen_opts
+            )
+        else:
+            return cls.from_coords(
+                [atom.GetSymbol() for atom in rdkit_mol.GetAtoms()],
+                coords,
+                bonds=[
+                    [bond.GetBeginAtomIdx(), bond.GetEndAtomIdx(), bond.GetBondTypeAsDouble()]
+                    for bond in rdkit_mol.GetBonds()
+                ],
+                add_implicit_hydrogens=add_implicit_hydrogens,
+                num_confs=num_confs,
+                optimize=optimize,
+                take_min=take_min,
+                force_field_type=force_field_type,
+                confgen_opts=confgen_opts
+            )
+
+    @classmethod
     def from_smiles(cls, smiles,
                     sanitize=False,
                     parse_name=True,
@@ -988,72 +1065,39 @@ class RDMolecule(ExternalMolecule):
         :rtype: RDMolecule | list
         """
 
-        if os.path.isfile(smiles):
-            with open(smiles) as f:
-                smiles = f.read()
-        Chem = cls.chem_api()
-
-        if check_tag and conf_tag is None:
-            smiles, _, conf_tag = smiles.partition("_")
-            if len(conf_tag) == 0: conf_tag = None
-
-        rdkit_mol = cls.parse_smiles(
-            smiles,
-            sanitize=sanitize,
-            parse_name=parse_name,
-            allow_cxsmiles=allow_cxsmiles,
-            strict_cxsmiles=strict_cxsmiles,
-            remove_hydrogens=remove_hydrogens,
-            replacements=replacements,
-            add_implicit_hydrogens=(
-                'strip'
-                    if conf_tag is not None else
-                add_implicit_hydrogens
-            ),
-            reorder_from_atom_map=reorder_from_atom_map,
-            **opts
-        )
-
-        if coords is None and conf_tag is not None:
-            #TODO: add precision support
-            if reorder_from_atom_map:
-                reordering = [a.GetIntProp('og_idx') for a in rdkit_mol.GetAtoms()]
-            else:
-                reordering = None
-            graph = cls.get_mol_edge_graph(rdkit_mol, reordering=reordering)
-            coords = cls.conformer_from_smiles_tag(conf_tag, graph, conformer_encoder=conformer_encoder)
-            if reordering is not None:
-                new_ord = np.argsort(reordering)
-                coords = coords[reordering,]
-
-        if coords is None:
-            if call_add_hydrogens: # RDKit is super borked for most molecules
-                mol = Chem.AddHs(rdkit_mol, explicitOnly=not add_implicit_hydrogens)
-            else:
-                mol = rdkit_mol
-
-            return cls.from_base_mol(mol,
-                                     conf_id=conf_id,
-                                     num_confs=num_confs, optimize=optimize, take_min=take_min,
-                                     force_field_type=force_field_type,
-                                     confgen_opts=confgen_opts
-                                     )
-        else:
-            return cls.from_coords(
-                [a.GetSymbol() for a in rdkit_mol.GetAtoms()],
-                coords,
-                bonds=[
-                    [b.GetBeginAtomIdx(), b.GetEndAtomIdx(), b.GetBondTypeAsDouble()]
-                    for b in rdkit_mol.GetBonds()
-                ],
-                add_implicit_hydrogens=add_implicit_hydrogens,
-                num_confs=num_confs, optimize=optimize, take_min=take_min,
-                force_field_type=force_field_type,
-                confgen_opts=confgen_opts
+        def parser(smiles_string, has_tag):
+            return cls.parse_smiles(
+                smiles_string,
+                sanitize=sanitize,
+                parse_name=parse_name,
+                allow_cxsmiles=allow_cxsmiles,
+                strict_cxsmiles=strict_cxsmiles,
+                remove_hydrogens=remove_hydrogens,
+                replacements=replacements,
+                add_implicit_hydrogens=(
+                    'strip' if has_tag else add_implicit_hydrogens
+                ),
+                reorder_from_atom_map=reorder_from_atom_map,
+                **opts
             )
 
-        # rdDistGeom = RDKitInterface.submodule("Chem.rdDistGeom")
-        # rdDistGeom.EmbedMolecule(mol, num_confs, **cls.get_confgen_opts())
+        return cls._from_string(
+            smiles,
+            parser,
+            add_implicit_hydrogens=add_implicit_hydrogens,
+            call_add_hydrogens=call_add_hydrogens,
+            conf_id=conf_id,
+            num_confs=num_confs,
+            optimize=optimize,
+            take_min=take_min,
+            force_field_type=force_field_type,
+            reorder_from_atom_map=reorder_from_atom_map,
+            confgen_opts=confgen_opts,
+            check_tag=check_tag,
+            coords=coords,
+            conf_tag=conf_tag,
+            conformer_encoder=conformer_encoder
+        )
 
     @classmethod
     def from_base_mol(cls,
@@ -1642,6 +1686,116 @@ class RDMolecule(ExternalMolecule):
             return "".join(b.capitalize() for b in o.split("_"))
         else:
             return "".join(b.capitalize() if i > 0 else b for i,b in enumerate(o.split("_")))
+    def _prepare_string_serialization(self,
+                                      remove_hydrogens=None,
+                                      remove_implicit_hydrogens=None,
+                                      compute_stereo=False,
+                                      remove_stereo=False,
+                                      preserve_atom_order=False,
+                                      include_tag=False,
+                                      coords=None,
+                                      mol=None):
+        """Prepare a molecule and its coordinates for a string serializer."""
+        Chem = self.allchem_api()
+        if mol is None:
+            mol = self.rdmol
+        if coords is None and (compute_stereo or include_tag):
+            coords = self.coords
+        if remove_hydrogens is None:
+            remove_hydrogens = remove_implicit_hydrogens
+
+        if compute_stereo or remove_stereo or preserve_atom_order or remove_hydrogens:
+            mol = Chem.Mol(mol)
+        if compute_stereo:
+            conf = Chem.Conformer(len(coords))
+            conf.SetPositions(np.asanyarray(coords))
+            conf.SetId(0)
+            mol.AddConformer(conf)
+            Chem.AssignStereochemistryFrom3D(mol, confId=0)
+        elif remove_stereo:
+            Chem.RemoveStereochemistry(mol)
+
+        if preserve_atom_order:
+            for atom in mol.GetAtoms():
+                atom.SetAtomMapNum(atom.GetIdx() + 1)
+
+        if remove_hydrogens:
+            if remove_implicit_hydrogens is None:
+                remove_implicit_hydrogens = False
+            for atom in mol.GetAtoms():
+                atom.SetIntProp('preremoval_idx', atom.GetIdx())
+            mol = Chem.RemoveHs(
+                mol,
+                implicitOnly=remove_implicit_hydrogens,
+                sanitize=False,
+                updateExplicitCount=True
+            )
+            if include_tag:
+                coords = coords[[
+                    atom.GetIntProp('preremoval_idx')
+                    for atom in mol.GetAtoms()
+                ],]
+
+        return mol, coords, remove_hydrogens
+
+    def _finalize_string_serialization(self,
+                                       string,
+                                       mol,
+                                       coords,
+                                       reordering=None,
+                                       include_tag=False,
+                                       return_reordering=False,
+                                       binary=False,
+                                       conformer_encoder=None,
+                                       removed_hydrogens=False):
+        """Apply atom ordering, conformer tagging, and return-index mapping."""
+        if reordering is None:
+            reordering = list(range(mol.GetNumAtoms()))
+
+        if include_tag:
+            coords = coords[reordering,]
+            output_positions = {old: new for new, old in enumerate(reordering)}
+            bonds = [
+                (output_positions[i], output_positions[j])
+                for i, j, *_ in self.get_bonds(mol)
+                if i in output_positions and j in output_positions
+            ]
+            from .. import Graphs
+            graph = Graphs.EdgeGraph(np.arange(len(reordering)), bonds)
+            tag = self.conformer_smiles_tag(
+                coords=coords,
+                graph=graph,
+                binary=binary,
+                conformer_encoder=conformer_encoder
+            )
+            if binary:
+                string = string.encode() + b"_" + tag
+            else:
+                string = string + "_" + tag
+
+        if return_reordering:
+            if removed_hydrogens:
+                original_indices = [
+                    atom.GetIntProp('preremoval_idx')
+                    for atom in mol.GetAtoms()
+                ]
+                reordering = [original_indices[i] for i in reordering]
+            return string, reordering
+        else:
+            return string
+
+    @staticmethod
+    def _parse_inchi_reordering(aux_info):
+        """Extract the canonical-to-input atom ordering from InChI AuxInfo."""
+        numbering = aux_info.partition('/N:')[2].partition('/')[0]
+        if len(numbering) == 0:
+            raise ValueError("InChI AuxInfo did not contain an atom-numbering layer")
+        return [
+            int(index) - 1
+            for component in numbering.split(';')
+            for index in component.split(',')
+        ]
+
     def to_smiles(self,
                   remove_hydrogens=None,
                   remove_implicit_hydrogens=None,
@@ -1686,117 +1840,101 @@ class RDMolecule(ExternalMolecule):
         :rtype: str | bytes
         """
         Chem = self.allchem_api()
+        mol, coords, removed_hydrogens = self._prepare_string_serialization(
+            remove_hydrogens=remove_hydrogens,
+            remove_implicit_hydrogens=remove_implicit_hydrogens,
+            compute_stereo=compute_stereo,
+            remove_stereo=remove_stereo,
+            preserve_atom_order=preserve_atom_order,
+            include_tag=include_tag,
+            coords=coords,
+            mol=mol
+        )
+        opts = {self._camel_case(k): v for k, v in opts.items()}
+        smiles = Chem.MolToSmiles(mol, canonical=canonical, **opts)
+        if include_tag or return_reordering:
+            reordering = json.loads(mol.GetProp('_smilesAtomOutputOrder'))
+        else:
+            reordering = None
+        return self._finalize_string_serialization(
+            smiles,
+            mol,
+            coords,
+            reordering=reordering,
+            include_tag=include_tag,
+            return_reordering=return_reordering,
+            binary=binary,
+            conformer_encoder=conformer_encoder,
+            removed_hydrogens=removed_hydrogens
+        )
+
+    def to_inchi(self,
+                 remove_hydrogens=None,
+                 remove_implicit_hydrogens=None,
+                 include_tag=False, canonical=False,
+                 compute_stereo=False,
+                 remove_stereo=False,
+                 preserve_atom_order=False,
+                 return_reordering=False,
+                 binary=False,
+                 conformer_encoder=None,
+                 coords=None,
+                 mol=None,
+                 options='',
+                 log_level=None,
+                 treat_warning_as_error=False,
+                 **opts):
+        """Serialize the molecule to a standard InChI string."""
+        inchi_api = RDKitInterface.submodule("Chem.inchi")
+        mol, coords, removed_hydrogens = self._prepare_string_serialization(
+            remove_hydrogens=remove_hydrogens,
+            remove_implicit_hydrogens=remove_implicit_hydrogens,
+            compute_stereo=compute_stereo,
+            remove_stereo=remove_stereo,
+            preserve_atom_order=preserve_atom_order,
+            include_tag=include_tag,
+            coords=coords,
+            mol=mol
+        )
+        inchi_opts = {self._camel_case(k): v for k, v in opts.items()}
+        inchi_opts.update(
+            options=options,
+            logLevel=log_level,
+            treatWarningAsError=treat_warning_as_error
+        )
+        if include_tag or return_reordering:
+            inchi, aux_info = inchi_api.MolToInchiAndAuxInfo(mol, **inchi_opts)
+            reordering = self._parse_inchi_reordering(aux_info)
+        else:
+            inchi = inchi_api.MolToInchi(mol, **inchi_opts)
+            reordering = None
+        return self._finalize_string_serialization(
+            inchi,
+            mol,
+            coords,
+            reordering=reordering,
+            include_tag=include_tag,
+            return_reordering=return_reordering,
+            binary=binary,
+            conformer_encoder=conformer_encoder,
+            removed_hydrogens=removed_hydrogens
+        )
+
+    def to_inchi_key(self, options='', mol=None):
+        """
+        Serialize the molecule as a standard InChIKey.
+
+        :param options: command-line options forwarded to the InChI library
+        :type options: str
+        :param mol: an explicit mol to serialize (defaults to this one)
+        :type mol: Chem.Mol | None
+        :return: the standard InChIKey
+        :rtype: str
+        """
+        inchi = RDKitInterface.submodule("Chem.inchi")
         if mol is None:
             mol = self.rdmol
-        if compute_stereo:
-            mol = Chem.Mol(mol)
-            if coords is None:
-                coords = self.coords
-            conf = Chem.Conformer(len(coords))
-            conf.SetPositions(np.asanyarray(coords))
-            conf.SetId(0)
-            mol.AddConformer(conf)
-            Chem.AssignStereochemistryFrom3D(mol, confId=0)
-        elif remove_stereo:
-            mol = Chem.Mol(mol)
-            Chem.RemoveStereochemistry(mol)
-        if preserve_atom_order:
-            og_atom_map = list(range(mol.GetNumAtoms()))
-            for atom in mol.GetAtoms():
-                atom.SetAtomMapNum(atom.GetIdx() + 1)
-        else:
-            og_atom_map = [
-                atom.GetAtomMapNum()
-                for atom in mol.GetAtoms()
-            ]
-        if remove_hydrogens is None:
-            remove_hydrogens = remove_implicit_hydrogens
-        if remove_hydrogens:
-            if remove_implicit_hydrogens is None: remove_implicit_hydrogens = False
-            mol = Chem.Mol(mol)
-            for atom in mol.GetAtoms():
-                atom.SetIntProp('preremoval_idx', atom.GetIdx())
-            # if include_tag and not preserve_atom_order:
-            #     for atom in mol.GetAtoms():
-            #         atom.SetAtomMapNum(atom.GetIdx()+1)
-            mol = Chem.RemoveHs(mol, implicitOnly=remove_implicit_hydrogens, sanitize=False, updateExplicitCount=False)
-        new_opts = {
-            self._camel_case(k):v for k,v in opts.items()
-        }
-        if include_tag:
-            if coords is None:
-                coords = self.coords
-            if remove_hydrogens:
-                subord = [
-                    atom.GetIntProp('preremoval_idx')
-                    for atom in mol.GetAtoms()
-                ]
-                coords = coords[subord,]
-            #     if not preserve_atom_order:
-            #         coords = [
-            #             coords[atom.GetAtomMapNum() - 1] for atom in mol.GetAtoms()
-            #         ]
-            #         for atom in mol.GetAtoms():
-            #             atom.SetAtomMapNum(og_atom_map[atom.GetAtomMapNum() - 1])
-            #     else:
-            #         remapping = np.array([
-            #             atom.GetAtomMapNum() - 1
-            #             for atom in mol.GetAtoms()
-            #         ])
-            #         suborder = np.argsort(remapping, kind='merge')
-            #         coords = [
-            #             coords[o]
-            #             for o in remapping[suborder]
-            #         ]
-            #         for atom,o in zip(mol.GetAtoms(), suborder):
-            #             atom.SetAtomMapNum(int(o+1))
-
-            ## we have to infer how the atom ordering will change
-            smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
-            order_str = mol.GetProp('_smilesAtomOutputOrder')
-            reordering = json.loads(order_str)
-            coords = coords[reordering,]
-            # track coordinates into new Mol
-            # if not preserve_atom_order:
-            #     mol = Chem.Mol(mol)
-            #     for atom in mol.GetAtoms():
-            #         atom.SetAtomMapNum(atom.GetIdx()+1)
-            #     ord_smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
-            #     ord_mol = self.parse_smiles(ord_smi, remove_hydrogens=False, reorder_from_atom_map=False)
-            #     coords = [
-            #         coords[atom.GetAtomMapNum()-1]
-            #         for atom in ord_mol.GetAtoms()
-            #     ]
-            # else:
-            #     ord_mol = self.parse_smiles(smi, remove_hydrogens=remove_hydrogens, reorder_from_atom_map=False)
-            #     base_map = [a.GetAtomMapNum() for a in ord_mol.GetAtoms()]
-            #     base_map = [len(base_map) + 1 if a == 0 else a for a in base_map]
-            #     # need to use a stable sort
-            #     ord_mol = Chem.RenumberAtoms(ord_mol, np.argsort(base_map, kind='merge').tolist())
-            # mol = Chem.RenumberAtoms(mol, reordering)
-            graph = self.get_edge_graph(mol, reordering=np.argsort(reordering))
-            tag = self.conformer_smiles_tag(coords=coords, graph=graph, binary=binary,
-                                            conformer_encoder=conformer_encoder)
-            if binary:
-                smi = smi.encode()
-                smi = smi + b"_" + tag
-            else:
-                smi = smi+"_"+tag
-        else:
-            smi = Chem.MolToSmiles(mol, canonical=canonical, **new_opts)
-            if return_reordering:
-                order_str = mol.GetProp('_smilesAtomOutputOrder')
-                reordering = json.loads(order_str)
-        if return_reordering:
-            if remove_hydrogens:
-                og_idx = [
-                    atom.GetIntProp('preremoval_idx')
-                    for atom in mol.GetAtoms()
-                ]
-                reordering = [og_idx[i] for i in reordering]
-            return smi, reordering
-        else:
-            return smi
+        return inchi.MolToInchiKey(mol, options=options)
 
     draw_options_mapping = {
 
@@ -4519,35 +4657,55 @@ class RDMolecule(ExternalMolecule):
         )
 
     @classmethod
-    def from_inchi(cls,
-                   molblock,
+    def from_inchi(cls, inchi,
+                   sanitize=True,
+                   remove_hydrogens=True,
                    add_implicit_hydrogens=True,
-                   allow_generate_conformers=True,
-                   **mol_opts
-                   ):
+                   call_add_hydrogens=True,
+                   conf_id=None,
+                   num_confs=None,
+                   optimize=False,
+                   take_min=True,
+                   force_field_type='mmff',
+                   confgen_opts=None,
+                   check_tag=True,
+                   coords=None,
+                   conf_tag=None,
+                   conformer_encoder=None,
+                   log_level=None,
+                   treat_warning_as_error=False,
+                   **opts):
         """
-        **LLM Docstring**
-
-        Build an `RDMolecule` from an InChI string (generating a conformer by default).
-
-        :param molblock: the InChI string
-        :type molblock: str
-        :param add_implicit_hydrogens: add implicit hydrogens
-        :type add_implicit_hydrogens: bool
-        :param allow_generate_conformers: generate a conformer
-        :type allow_generate_conformers: bool
-        :param mol_opts: extra options forwarded to the reader
-        :return: the wrapped molecule
-        :rtype: RDMolecule
+        Build an `RDMolecule` from an InChI string, optional conformer tag,
+        or explicit coordinates.
         """
-        Chem = cls.chem_api()
-        return cls._from_file_reader(
-            None,
-            Chem.MolFromInChi,
-            molblock,
+        inchi_api = RDKitInterface.submodule("Chem.inchi")
+
+        def parser(inchi_string, has_tag):
+            return inchi_api.MolFromInchi(
+                inchi_string,
+                sanitize=sanitize,
+                removeHs=remove_hydrogens or has_tag,
+                logLevel=log_level,
+                treatWarningAsError=treat_warning_as_error,
+                **{cls._camel_case(k): v for k, v in opts.items()}
+            )
+
+        return cls._from_string(
+            inchi,
+            parser,
             add_implicit_hydrogens=add_implicit_hydrogens,
-            allow_generate_conformers=allow_generate_conformers,
-            **mol_opts
+            call_add_hydrogens=call_add_hydrogens,
+            conf_id=conf_id,
+            num_confs=num_confs,
+            optimize=optimize,
+            take_min=take_min,
+            force_field_type=force_field_type,
+            confgen_opts=confgen_opts,
+            check_tag=check_tag,
+            coords=coords,
+            conf_tag=conf_tag,
+            conformer_encoder=conformer_encoder
         )
 
     @classmethod
