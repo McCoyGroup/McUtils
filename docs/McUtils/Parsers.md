@@ -466,9 +466,9 @@ print("matched block length:", len(block))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-2e0cf9" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-2e0cf9"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-93fea7" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-93fea7"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-2e0cf9" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-93fea7" markdown="1">
  - [RegexGroups](#RegexGroups)
 - [OptScan](#OptScan)
 - [XYZ](#XYZ)
@@ -513,9 +513,9 @@ print("matched block length:", len(block))
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-c1eb1d" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-c1eb1d"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-876328" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-876328"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-c1eb1d" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-876328" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces

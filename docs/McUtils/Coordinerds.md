@@ -478,12 +478,13 @@ print(reindexed)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-## <a class="collapse-link" data-toggle="collapse" href="#Tests-59cec6" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-59cec6"><i class="fa fa-chevron-down"></i></a>
+## <a class="collapse-link" data-toggle="collapse" href="#Tests-6fef54" markdown="1"> Tests</a> <a class="float-right" data-toggle="collapse" href="#Tests-6fef54"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Tests-59cec6" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Tests-6fef54" markdown="1">
  - [GetDihedrals](#GetDihedrals)
 - [CoordinateSet](#CoordinateSet)
 - [Loader](#Loader)
+- [DeregisterConverterRemovesGraphEdge](#DeregisterConverterRemovesGraphEdge)
 - [CartesianToZMatrix](#CartesianToZMatrix)
 - [CartesianToZMatrixMulti](#CartesianToZMatrixMulti)
 - [CartesianToZMatrixAndBack](#CartesianToZMatrixAndBack)
@@ -524,9 +525,9 @@ print(reindexed)
 
 <div class="collapsible-section">
  <div class="collapsible-section collapsible-section-header" markdown="1">
-### <a class="collapse-link" data-toggle="collapse" href="#Setup-ca268f" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-ca268f"><i class="fa fa-chevron-down"></i></a>
+### <a class="collapse-link" data-toggle="collapse" href="#Setup-4d7f82" markdown="1"> Setup</a> <a class="float-right" data-toggle="collapse" href="#Setup-4d7f82"><i class="fa fa-chevron-down"></i></a>
  </div>
- <div class="collapsible-section collapsible-section-body collapse show" id="Setup-ca268f" markdown="1">
+ <div class="collapsible-section collapsible-section-body collapse show" id="Setup-4d7f82" markdown="1">
  
 Before we can run our examples we should get a bit of setup out of the way.
 Since these examples were harvested from the unit tests not all pieces
@@ -605,6 +606,39 @@ class ConverterTest(TestCase):
     def test_Loader(self):
         loaded = CoordinateSystemConverters.get_converter(CartesianCoordinates3D, ZMatrixCoordinates)
         self.assertIsInstance(loaded, CoordinateSystemConverter)
+```
+
+#### <a name="DeregisterConverterRemovesGraphEdge">DeregisterConverterRemovesGraphEdge</a>
+```python
+    def test_DeregisterConverterRemovesGraphEdge(self):
+        source = CoordinateSystem("TemporarySource")
+        target = CoordinateSystem("TemporaryTarget")
+        converter = SimpleCoordinateSystemConverter(
+            (source, target),
+            lambda coords, **opts: (coords, opts)
+        )
+
+        converter.register()
+        try:
+            self.assertEqual(
+                CoordinateSystemConverters.converter_graph.find_path_bfs(source, target),
+                [(source, target)]
+            )
+        finally:
+            converter.deregister()
+
+        self.assertIsNone(
+            CoordinateSystemConverters.converter_graph.find_path_bfs(source, target)
+        )
+
+        # Lookup also repairs stale edges left in a reload-persistent graph by an
+        # older implementation that did not remove them during deregistration.
+        CoordinateSystemConverters.converter_graph.add(source, target)
+        with self.assertRaisesRegex(KeyError, "no rules for converting"):
+            CoordinateSystemConverters.get_converter(source, target)
+        self.assertIsNone(
+            CoordinateSystemConverters.converter_graph.find_path_bfs(source, target)
+        )
 ```
 
 #### <a name="CartesianToZMatrix">CartesianToZMatrix</a>

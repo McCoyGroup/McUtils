@@ -82,8 +82,8 @@ load_converter(cls, converter):
 get_converter(cls, system1, system2): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L385)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L385?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L395)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L395?message=Update%20Docs)]
 </div>
 Gets the appropriate converter for two CoordinateSystem objects
   - `system1`: `CoordinateSystem`
@@ -100,8 +100,8 @@ Gets the appropriate converter for two CoordinateSystem objects
 register_converter(cls, system1, system2, converter, check=True, name_format=None, final=None): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L448)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L448?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L469)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L469?message=Update%20Docs)]
 </div>
 Registers a converter between two coordinate systems
   - `system1`: `CoordinateSystem`
@@ -122,8 +122,8 @@ Registers a converter between two coordinate systems
 deregister_converter(cls, system1, system2, converter, check=True): 
 ```
 <div class="docs-source-link" markdown="1">
-[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L473)/
-[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L473?message=Update%20Docs)]
+[[source](https://github.com/McCoyGroup/McUtils/blob/master/classmethod.py#L494)/
+[edit](https://github.com/McCoyGroup/McUtils/edit/master/classmethod.py#L494?message=Update%20Docs)]
 </div>
 Registers a converter between two coordinate systems
   - `system1`: `CoordinateSystem`
