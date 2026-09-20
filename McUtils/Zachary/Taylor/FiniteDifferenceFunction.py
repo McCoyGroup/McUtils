@@ -1073,13 +1073,13 @@ class FiniteDifferenceMatrix:
             c_left, c_center, c_right = [np.array(x, dtype=dtype) / (h**o) for x in self.weights]
         else:
             c_left, c_center, c_right = [np.array(x, dtype=dtype) for x in self.weights]
-        if c_left.shape[0] + c_center.shape[0] + c_right.shape[0] != npts:
-            raise ValueError("weights don't match points")
         mode = self.mode
 
         if nput.is_numeric(c_center[0]):
             fdm = self._fdm_regular(c_left, c_center, c_right, npts, only_core, only_center, mode, dtype)
         else:
+            if c_left.shape[0] + c_center.shape[0] + c_right.shape[0] != npts:
+                raise ValueError("weights don't match points")
             fdm = self._fdm_irregular(c_left, c_center, c_right, npts, only_core, only_center, mode, dtype)
 
         return fdm

@@ -899,7 +899,14 @@ def _eckart_embedding(ref, coords,
                 for g in permutable_groups
             ]
             permutable_groups = [g for g in permutable_groups if len(g) > 1]
-        rem_atoms = np.delete(np.arange(len(masses)), np.concatenate(permutable_groups))
+        # `permutable_groups` can be fully emptied by the `len(g) > 1` filter above
+        # (e.g. when `_eckart_embedding` is invoked, as `eckart_permutation` does
+        # internally, on a single-atom `sel`/group) -- `np.concatenate` can't take an
+        # empty sequence, and in that case every remaining atom is unassigned anyway.
+        if len(permutable_groups) > 0:
+            rem_atoms = np.delete(np.arange(len(masses)), np.concatenate(permutable_groups))
+        else:
+            rem_atoms = np.arange(len(masses))
         permutable_groups = list(permutable_groups) + rem_atoms[:, np.newaxis].tolist()
     if not planar_ref:
         # generate pair-wise product matrix
@@ -915,8 +922,7 @@ def _eckart_embedding(ref, coords,
             mw_coords = coords * mw_scaling
             A = sum(
                 np.sum(
-                    mw_ref[..., g, :, np.newaxis],
-                    mw_coords[..., g, np.newaxis, :],
+                    mw_ref[..., g, :, np.newaxis] * mw_coords[..., g, np.newaxis, :],
                     axis=-3
                 ) for g in permutable_groups
             )
@@ -940,8 +946,7 @@ def _eckart_embedding(ref, coords,
             mw_coords = coords * mw_scaling
             A = sum(
                 np.sum(
-                    mw_ref[:, g, :2, np.newaxis],
-                    mw_coords[:, g, np.newaxis, :2],
+                    mw_ref[:, g, :2, np.newaxis] * mw_coords[:, g, np.newaxis, :2],
                     axis=1
                 ) for g in permutable_groups
             )
@@ -1052,6 +1057,158 @@ def eckart_embedding(ref, coords,
     )
 rmsd_minimizing_transformation = eckart_embedding
 
+def _validate_permutation_candidates(candidates, n_atoms):
+    """
+    **LLM Docstring**
+
+    Sanity-check a stack of permutation candidates: integer, in range, and each row
+    an actual bijection of `range(n_atoms)`. This exists because a silently-wrong
+    candidate (e.g. from a mis-composed atom map) doesn't error downstream -- it just
+    quietly returns a bad alignment, which is much worse than failing loudly here.
+
+    :param candidates: candidate permutations, shape `(n_candidates, n_atoms)`
+    :type candidates: np.ndarray
+    :param n_atoms: the expected number of atoms
+    :type n_atoms: int
+    :return: the validated candidates, as an int array
+    :rtype: np.ndarray
+    """
+    candidates = np.asanyarray(candidates)
+    if candidates.ndim == 1:
+        candidates = candidates[np.newaxis]
+    if candidates.ndim != 2:
+        raise ValueError(
+            f"permutation_candidates should be 2D (n_candidates, n_atoms), got shape {candidates.shape}"
+        )
+    if candidates.shape[-1] != n_atoms:
+        raise ValueError(
+            f"permutation_candidates has {candidates.shape[-1]} columns but coords has {n_atoms} atoms; "
+            "candidates must be full-length permutations over every atom (sel only restricts what is "
+            "used to score the match, not what can be permuted)"
+        )
+    if not np.issubdtype(candidates.dtype, np.integer):
+        candidates = candidates.astype(int)
+    if not np.all(np.sort(candidates, axis=-1) == np.arange(n_atoms)):
+        bad = np.where(np.any(np.sort(candidates, axis=-1) != np.arange(n_atoms), axis=-1))[0]
+        raise ValueError(
+            f"permutation_candidates rows {bad.tolist()[:5]}{'...' if len(bad) > 5 else ''} "
+            f"are not valid permutations of range({n_atoms})"
+        )
+    return candidates
+
+def _eckart_permutation_from_candidates(
+        ref, coords, candidates,
+        masses=None,
+        sel=None,
+        in_paf=False,
+        planar_ref_tolerance=1e-6,
+        proper_rotation=False,
+        candidate_chunk_size=512,
+        return_rmsd=False,
+        validate_candidates=True
+):
+    """
+    **LLM Docstring**
+
+    Find the best-matching permutation for each structure by exhaustive search over
+    an explicit set of candidate permutations, rather than the independent per-group
+    Hungarian matching `eckart_permutation` otherwise uses.
+
+    This is the "graph-automorphism-restricted brute force" strategy: every
+    candidate is assumed to already be a structurally valid relabeling (e.g. one
+    element of a molecular graph's automorphism group, so bonds/elements/chirality
+    are guaranteed to line up); this function's only job is to figure out which of
+    those valid relabelings actually minimizes the Eckart RMSD to `ref`, since that's
+    not something graph automorphism search itself can tell you. Unlike the
+    per-group Hungarian matching, this can't accidentally produce a mapping that
+    isn't a real automorphism, at the cost of the caller having to supply (or
+    generate, e.g. via RDKit) the candidate set up front.
+
+    Every candidate is scored with a single (batched) call into `eckart_rmsd` per
+    chunk, so this is cheap for anything up to several thousand candidates; the
+    chunking just bounds peak memory; it does not change the result.
+
+    :param ref: the reference geometry, `(n_atoms, 3)`
+    :type ref: np.ndarray
+    :param coords: the coordinates to permute, `(n_atoms, 3)` or `(n_structures, n_atoms, 3)`
+    :type coords: np.ndarray
+    :param candidates: candidate permutations, `(n_candidates, n_atoms)`; every atom must
+        appear (atoms outside `sel` should simply map to themselves)
+    :type candidates: np.ndarray
+    :param masses: per-atom masses (defaults to unit masses)
+    :type masses: np.ndarray | None
+    :param sel: optional subset of atoms used to define/score the embedding (does not
+        restrict which atoms `candidates` may permute)
+    :type sel: Iterable[int] | None
+    :param in_paf: whether the inputs are already in the principal-axis frame
+    :type in_paf: bool
+    :param planar_ref_tolerance: tolerance for detecting a planar reference
+    :type planar_ref_tolerance: float
+    :param proper_rotation: restrict embeddings to proper rotations
+    :type proper_rotation: bool
+    :param candidate_chunk_size: number of candidates scored per batched `eckart_rmsd` call
+    :type candidate_chunk_size: int
+    :param return_rmsd: also return the winning RMSD for each structure
+    :type return_rmsd: bool
+    :param validate_candidates: check that every candidate is a genuine permutation
+    :type validate_candidates: bool
+    :return: the optimal per-structure permutation(s) (and, if requested, the matching
+        RMSD(s)); see `eckart_permutation` for the exact index convention (it's the
+        same "new atom ordering" convention `candidates` themselves must already use)
+    :rtype: np.ndarray | tuple
+    """
+    ref = np.asanyarray(ref)
+    coords = np.asanyarray(coords)
+    n_atoms = coords.shape[-2]
+
+    if validate_candidates:
+        candidates = _validate_permutation_candidates(candidates, n_atoms)
+    else:
+        candidates = np.asanyarray(candidates)
+        if candidates.ndim == 1:
+            candidates = candidates[np.newaxis]
+    n_cand = candidates.shape[0]
+    if n_cand == 0:
+        raise ValueError("permutation_candidates must contain at least one candidate (e.g. the identity)")
+
+    smol = coords.ndim == 2
+    if smol:
+        coords = coords[np.newaxis]
+    n_structs = coords.shape[0]
+
+    best_perm = np.broadcast_to(candidates[0], (n_structs, n_atoms)).copy()
+    best_rmsd = np.full(n_structs, np.inf)
+
+    for start in range(0, n_cand, candidate_chunk_size):
+        chunk = candidates[start:start + candidate_chunk_size]
+        c = chunk.shape[0]
+        # coords: (n_structs, n_atoms, 3), chunk: (c, n_atoms) -> (n_structs, c, n_atoms, 3)
+        permuted = coords[:, chunk, :]
+        rmsd = eckart_rmsd(
+            permuted.reshape(n_structs * c, n_atoms, 3),
+            ref,
+            masses=masses,
+            embedding_sel=sel,
+            comparison_sel=sel,
+            in_paf=in_paf,
+            planar_ref_tolerance=planar_ref_tolerance,
+            proper_rotation=proper_rotation
+        ).reshape(n_structs, c)
+
+        chunk_best = np.argmin(rmsd, axis=1)
+        chunk_best_rmsd = rmsd[np.arange(n_structs), chunk_best]
+        improved = chunk_best_rmsd < best_rmsd
+        best_rmsd = np.where(improved, chunk_best_rmsd, best_rmsd)
+        best_perm[improved] = chunk[chunk_best[improved]]
+
+    if smol:
+        best_perm = best_perm[0]
+        best_rmsd = best_rmsd[0]
+
+    if return_rmsd:
+        return best_perm, best_rmsd
+    return best_perm
+
 def eckart_permutation(
         ref, coords,
         masses=None,
@@ -1060,7 +1217,11 @@ def eckart_permutation(
         prealign=False,
         planar_ref_tolerance=1e-6,
         proper_rotation=False,
-        permutable_groups=None
+        permutable_groups=None,
+        permutation_candidates=None,
+        candidate_chunk_size=512,
+        return_rmsd=False,
+        validate_candidates=True
 ):
     """
     **LLM Docstring**
@@ -1068,11 +1229,27 @@ def eckart_permutation(
     Find, for each structure, the atom permutation that best matches a reference
     under the Eckart embedding.
 
-    Optionally pre-aligns the coordinates, then works group by group over the
-    `permutable_groups`: for each group it Eckart-embeds, builds the mass-weighted
-    distance matrix between embedded coordinates and reference atoms, and solves the
-    assignment problem (`scipy.optimize.linear_sum_assignment`) to get the optimal
-    relabeling.
+    Two independent strategies are available. By default (`permutation_candidates`
+    left as `None`), this works group by group over `permutable_groups`: for each
+    group it Eckart-embeds, builds the mass-weighted distance matrix between
+    embedded coordinates and reference atoms, and solves the assignment problem
+    (`scipy.optimize.linear_sum_assignment`) to get the optimal relabeling. This is
+    fast, but only exact when every group is "freely" permutable on its own (e.g. the
+    three hydrogens of an isolated, freely-rotating methyl) -- when the atoms judged
+    equivalent actually span more than one branch of the molecule (e.g. two whole
+    equivalent methyl groups), independently reassigning each atom within the
+    combined group is not guaranteed to land on a permutation that respects the
+    molecular graph (it can e.g. mix hydrogens from two different methyls).
+
+    If `permutation_candidates` is given instead (an explicit `(n_candidates,
+    n_atoms)` set of full-molecule permutations -- typically the automorphism group
+    of the reference's molecular graph, composed with an atom map to `coords`'
+    labeling, e.g. from `McUtils.ExternalPrograms.RDMolecule.get_automorphisms`/
+    `match_atoms`), this instead exhaustively scores every candidate with
+    `eckart_rmsd` and returns whichever is best. This is exact -- every candidate is
+    assumed to already be graph-consistent, so the only question is which one best
+    matches the actual geometry -- at the cost of needing that candidate set up
+    front. See `_eckart_permutation_from_candidates` for the implementation.
 
     :param ref: the reference geometry
     :type ref: np.ndarray
@@ -1084,17 +1261,54 @@ def eckart_permutation(
     :type sel: Iterable[int] | None
     :param in_paf: whether the inputs are already in the principal-axis frame
     :type in_paf: bool
-    :param prealign: Eckart-align the coordinates before matching
+    :param prealign: Eckart-align the coordinates before matching (ignored when
+        `permutation_candidates` is given -- every candidate is independently
+        re-embedded, so any starting orientation scores identically)
     :type prealign: bool
     :param planar_ref_tolerance: tolerance for detecting a planar reference
     :type planar_ref_tolerance: float
     :param proper_rotation: restrict embeddings to proper rotations
     :type proper_rotation: bool
-    :param permutable_groups: groups of atoms allowed to permute (defaults to all)
+    :param permutable_groups: groups of atoms allowed to permute (defaults to all);
+        ignored when `permutation_candidates` is given
     :type permutable_groups: Iterable | None
-    :return: the optimal per-structure atom permutations
-    :rtype: np.ndarray
+    :param permutation_candidates: an explicit set of full-molecule candidate
+        permutations to search exhaustively instead of the per-group Hungarian
+        matching (see above)
+    :type permutation_candidates: np.ndarray | None
+    :param candidate_chunk_size: batch size used when scoring `permutation_candidates`
+    :type candidate_chunk_size: int
+    :param return_rmsd: also return the winning RMSD(s); only supported together
+        with `permutation_candidates`
+    :type return_rmsd: bool
+    :param validate_candidates: check that every entry of `permutation_candidates`
+        is a genuine permutation before using it
+    :type validate_candidates: bool
+    :return: the optimal per-structure atom permutations (and, if `return_rmsd` and
+        `permutation_candidates` were both given, the matching RMSD(s)). Each
+        permutation is a "new atom ordering": `perm[j]` is the index, in the
+        *original* `coords` numbering, of the atom that belongs at position `j` to
+        match `ref`'s atom `j` -- so `coords[perm]` is the reordered structure, and
+        this is the same convention `Psience.Molecools.Molecule.permute_atoms` and
+        RDKit's `RenumberAtoms` use (apply it directly, no inversion needed).
+    :rtype: np.ndarray | tuple
     """
+    if permutation_candidates is not None:
+        return _eckart_permutation_from_candidates(
+            ref, coords, permutation_candidates,
+            masses=masses,
+            sel=sel,
+            in_paf=in_paf,
+            planar_ref_tolerance=planar_ref_tolerance,
+            proper_rotation=proper_rotation,
+            candidate_chunk_size=candidate_chunk_size,
+            return_rmsd=return_rmsd,
+            validate_candidates=validate_candidates
+        )
+    elif return_rmsd:
+        raise NotImplementedError(
+            "return_rmsd is currently only supported together with permutation_candidates"
+        )
 
     ref = np.asanyarray(ref)
     og_og_ref = ref
@@ -1128,7 +1342,14 @@ def eckart_permutation(
                 for g in permutable_groups
             ]
             permutable_groups = [g for g in permutable_groups if len(g) > 1]
-        rem_atoms = np.delete(np.arange(len(masses)), np.concatenate(permutable_groups))
+        # `permutable_groups` can be fully emptied by the `len(g) > 1` filter above
+        # (e.g. when `_eckart_embedding` is invoked, as `eckart_permutation` does
+        # internally, on a single-atom `sel`/group) -- `np.concatenate` can't take an
+        # empty sequence, and in that case every remaining atom is unassigned anyway.
+        if len(permutable_groups) > 0:
+            rem_atoms = np.delete(np.arange(len(masses)), np.concatenate(permutable_groups))
+        else:
+            rem_atoms = np.arange(len(masses))
         permutable_groups = list(permutable_groups) + rem_atoms[:, np.newaxis].tolist()
     else:
         permutable_groups = [np.arange(mw_ref.shape[-2])]
