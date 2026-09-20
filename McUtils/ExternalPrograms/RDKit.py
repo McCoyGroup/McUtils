@@ -2793,6 +2793,273 @@ class RDMolecule(ExternalMolecule):
         query = Chem.MolFromSmarts(query)
         return self.rdmol.GetSubstructMatches(query)
 
+    def get_automorphisms(self, use_chirality=True, max_automorphisms=100_000, include_identity=True):
+        """
+        **LLM Docstring**
+
+        Enumerate this molecule's graph automorphisms: every atom-index permutation
+        under which the molecule maps onto itself (same elements, same bonds, and --
+        when `use_chirality` -- the same stereocenters/bond stereo). Obtained via
+        RDKit's self-substructure-match trick (`mol.GetSubstructMatches(mol,
+        uniquify=False)`); `uniquify=False` is essential here, since the whole point
+        is to get every internally-symmetric relabeling, not just one representative
+        per atom set.
+
+        `use_chirality=True` (the default) is what keeps this from pairing an atom
+        with its mirror-image position at a stereocenter -- an achiral match would
+        happily call a molecule "automorphic" onto its own enantiomer/diastereomer at
+        a stereocenter, which then silently produces the wrong labeling. This only
+        does anything useful if stereochemistry has actually been perceived on the
+        mol (e.g. via `Chem.AssignStereochemistryFrom3D` for a 3D-derived structure,
+        or already set from a stereo SMILES) -- if it hasn't, this filters nothing.
+
+        Molecules with many independent local symmetries (several free-rotor methyls,
+        several equivalent branches, ...) can have very large automorphism groups
+        (the factors multiply: three equivalent methyls alone contribute a factor of
+        3! x (3!)**3 = 1296 if graph symmetry alone is considered). `max_automorphisms`
+        is a hard cap so that case fails loudly instead of silently truncating the
+        search (RDKit's own `maxMatches` truncates *silently* by default, which would
+        otherwise bias the result towards whatever RDKit happened to enumerate first).
+
+        :param use_chirality: respect stereocenters/bond stereo when matching
+        :type use_chirality: bool
+        :param max_automorphisms: raise rather than silently truncate if the
+            automorphism group is larger than this
+        :type max_automorphisms: int
+        :param include_identity: make sure the identity permutation is included
+            (it always should be mathematically; this just guards against RDKit
+            corner cases so callers can rely on "no permutation" always being tried)
+        :type include_identity: bool
+        :return: the automorphisms, shape `(n_automorphisms, n_atoms)`
+        :rtype: np.ndarray
+        """
+        mol = self.rdmol
+        n = mol.GetNumAtoms()
+        matches = mol.GetSubstructMatches(
+            mol,
+            uniquify=False,
+            useChirality=use_chirality,
+            maxMatches=max_automorphisms + 1
+        )
+        if len(matches) > max_automorphisms:
+            raise ValueError(
+                f"{self} has more than max_automorphisms={max_automorphisms} graph "
+                "automorphisms (hit the cap while enumerating). This molecule is too "
+                "symmetric to search exhaustively as-is -- raise max_automorphisms if "
+                "you can afford the cost, or fall back to McUtils.Numputils.eckart_permutation's "
+                "permutable_groups= (per-group Hungarian matching) for the free-rotor "
+                "parts of the molecule instead of an exhaustive automorphism search."
+            )
+        auts = np.array(matches, dtype=int)
+        if include_identity:
+            ident = np.arange(n)
+            if not np.any(np.all(auts == ident[np.newaxis], axis=1)):
+                auts = np.concatenate([ident[np.newaxis], auts], axis=0)
+        return auts
+
+    def match_atoms(self, other, use_chirality=True):
+        """
+        **LLM Docstring**
+
+        Find one atom map from `other` onto this molecule via substructure matching
+        (`self.rdmol.GetSubstructMatch(other.rdmol)`), i.e. the RDKit index that this
+        molecule's graph assigns to each atom of `other`.
+
+        This is only *one* valid map when the two molecules have any internal graph
+        symmetry -- e.g. it might match `other`'s first methyl hydrogen against any
+        of the three symmetric hydrogens in a corresponding methyl on `self`. That's
+        fine: composing this single map with the *automorphism group* of `self` (see
+        `get_automorphisms`/`get_alignment_permutation_candidates`) recovers every
+        other equally-valid map, so there's no need to search for "the right" base
+        match here.
+
+        :param other: the molecule to map onto this one
+        :type other: RDMolecule
+        :param use_chirality: respect stereocenters/bond stereo when matching
+        :type use_chirality: bool
+        :return: the atom map, `map[i]` = this molecule's atom index for `other`'s atom `i`
+        :rtype: np.ndarray
+        """
+        if not isinstance(other, RDMolecule):
+            raise TypeError(f"expected an RDMolecule, got {type(other)}")
+        match = self.rdmol.GetSubstructMatch(other.rdmol, useChirality=use_chirality)
+        if len(match) == 0:
+            raise ValueError(
+                "found no atom map between these two molecules -- GetSubstructMatch "
+                "returned nothing. If these really are meant to be the same molecule, "
+                "check that they have the same connectivity (bond perception can "
+                "differ between structures built different ways) and that chirality "
+                "perception agrees between them, or try use_chirality=False to rule "
+                "stereochemistry in/out as the cause."
+            )
+        if len(match) != other.rdmol.GetNumAtoms():
+            raise ValueError(
+                f"matched only {len(match)} of {other.rdmol.GetNumAtoms()} atoms in `other`; "
+                "these molecules don't share the same connectivity/atom count"
+            )
+        return np.array(match, dtype=int)
+
+    def get_alignment_permutation_candidates(self, other, use_chirality=True, max_automorphisms=100_000):
+        """
+        **LLM Docstring**
+
+        Build the full set of graph-consistent atom maps from `other` onto this
+        molecule, suitable for `McUtils.Numputils.eckart_permutation`'s
+        `permutation_candidates=`.
+
+        One base map is found with `match_atoms`, then composed with every
+        automorphism of this molecule (`get_automorphisms`): if `base[i]` is a valid
+        label in this molecule's numbering for `other`'s atom `i`, and `aut` is any
+        automorphism of this molecule, then `aut[base[i]]` is *also* a valid label
+        for `other`'s atom `i` -- composing an isomorphism with an automorphism of
+        its codomain gives another isomorphism. This is exactly the full set of valid
+        atom maps between the two molecules (it's the coset `Aut(self) . base`), so
+        nothing is missed and nothing invalid is included.
+
+        :param other: the molecule to map onto this one
+        :type other: RDMolecule
+        :param use_chirality: respect stereocenters/bond stereo when matching
+        :type use_chirality: bool
+        :param max_automorphisms: forwarded to `get_automorphisms`
+        :type max_automorphisms: int
+        :return: candidate atom maps, shape `(n_candidates, n_atoms)`
+        :rtype: np.ndarray
+        """
+        # `base[i]` is a ref-*position* for other-atom `i` (RDKit's GetSubstructMatch
+        # convention); what `eckart_permutation` wants back is the inverse of that --
+        # for each ref-position j, which atom of `other` belongs there (matching
+        # `Psience.Molecools.Molecule.permute_atoms`'s "sequence of old indices in
+        # their new order" convention, so `other.coords[candidate]` lines up with
+        # `self.coords`). `binv = argsort(base)` inverts it; composing with every
+        # automorphism of `self` (ref-position -> ref-position) on the *inside* then
+        # explores every other, equally valid choice of which symmetry-equivalent
+        # ref-position each `other` atom is assigned to.
+        base = self.match_atoms(other, use_chirality=use_chirality)
+        binv = np.argsort(base)
+        auts = self.get_automorphisms(use_chirality=use_chirality, max_automorphisms=max_automorphisms)
+        return binv[auts]
+
+    def find_alignment_permutation(self, other, masses=None, use_chirality=True,
+                                   max_automorphisms=100_000, return_rmsd=False, **eckart_opts):
+        """
+        **LLM Docstring**
+
+        Find the atom permutation of `other` that best superimposes it onto this
+        molecule under an Eckart embedding, searching every graph-automorphism-
+        consistent atom map rather than trusting whichever one RDKit's substructure
+        matcher happens to return first.
+
+        This is `McUtils.Numputils.eckart_permutation` driven with
+        `permutation_candidates` from `get_alignment_permutation_candidates`, so the
+        search is exact for whatever automorphisms RDKit finds (bounded by
+        `max_automorphisms`), rather than the approximate per-group Hungarian
+        matching `eckart_permutation` falls back to without an explicit candidate set.
+
+        :param other: the molecule to permute/align
+        :type other: RDMolecule
+        :param masses: per-atom masses (defaults to this molecule's own)
+        :type masses: np.ndarray | None
+        :param use_chirality: respect stereocenters/bond stereo when matching
+        :type use_chirality: bool
+        :param max_automorphisms: forwarded to `get_automorphisms`
+        :type max_automorphisms: int
+        :param return_rmsd: also return the winning Eckart RMSD
+        :type return_rmsd: bool
+        :param eckart_opts: extra options forwarded to `eckart_permutation`
+            (e.g. `proper_rotation`)
+        :return: the optimal permutation of `other`'s atoms (and, if requested, the
+            RMSD); `perm[j]` is the index, in `other`'s *current* numbering, of the
+            atom that belongs at position `j` to match this molecule's atom `j` --
+            i.e. `other.coords[perm]` is the reordered structure -- matching
+            `Psience.Molecools.Molecule.permute_atoms`'s convention directly
+        :rtype: np.ndarray | tuple
+        """
+        candidates = self.get_alignment_permutation_candidates(
+            other, use_chirality=use_chirality, max_automorphisms=max_automorphisms
+        )
+        if masses is None:
+            masses = self.masses
+        return nput.eckart_permutation(
+            self.coords, other.coords,
+            masses=masses,
+            permutation_candidates=candidates,
+            return_rmsd=return_rmsd,
+            **eckart_opts
+        )
+
+    def align_to(self, ref, masses=None, use_chirality=True, max_automorphisms=100_000,
+                proper_rotation=False, return_rmsd=False):
+        """
+        **LLM Docstring**
+
+        Return a copy of this molecule renumbered into `ref`'s atom order and
+        rigid-body aligned onto it, using whichever graph-automorphism-consistent
+        atom map gives the best Eckart RMSD (see `find_alignment_permutation`).
+
+        Both the atom/bond bookkeeping (via RDKit's `RenumberAtoms`) and the
+        coordinates are updated, so the result is a fully self-consistent
+        `RDMolecule` in `ref`'s numbering -- not just reordered coordinates next to
+        a stale, unrenumbered graph.
+
+        :param ref: the reference molecule to align onto
+        :type ref: RDMolecule
+        :param masses: per-atom masses (defaults to `ref`'s own)
+        :type masses: np.ndarray | None
+        :param use_chirality: respect stereocenters/bond stereo when matching
+        :type use_chirality: bool
+        :param max_automorphisms: forwarded to `get_automorphisms`
+        :type max_automorphisms: int
+        :param proper_rotation: restrict the final rigid-body fit to proper rotations
+        :type proper_rotation: bool
+        :param return_rmsd: also return the achieved Eckart RMSD
+        :type return_rmsd: bool
+        :return: the aligned, renumbered copy (and, if requested, the RMSD)
+        :rtype: RDMolecule | tuple
+        """
+        if not isinstance(ref, RDMolecule):
+            raise TypeError(f"expected an RDMolecule, got {type(ref)}")
+        if masses is None:
+            masses = ref.masses
+
+        result = ref.find_alignment_permutation(
+            self,
+            masses=masses,
+            use_chirality=use_chirality,
+            max_automorphisms=max_automorphisms,
+            proper_rotation=proper_rotation,
+            return_rmsd=return_rmsd
+        )
+        perm, rmsd = result if return_rmsd else (result, None)
+
+        # `perm` is already in "new atom ordering" form (perm[j] = the index, in
+        # this molecule's *current* numbering, of the atom that belongs at position
+        # j to match ref) -- the same convention RDKit's `RenumberAtoms` and
+        # `Psience.Molecools.Molecule.permute_atoms` both use, so it can be handed
+        # straight through with no inversion.
+        new_order = perm
+
+        Chem = self.chem_api()
+        renumbered = Chem.RenumberAtoms(self.rdmol, [int(i) for i in new_order])
+        new_mol = type(self).from_rdmol(
+            renumbered,
+            conf_id=self.mol.GetId(),
+            charge=self.charge,
+            sanitize=False,
+            guess_bonds=False,
+            add_implicit_hydrogens=False
+        )
+        aligned_coords = nput.eckart_embedding(
+            ref.coords, new_mol.coords,
+            masses=masses,
+            proper_rotation=proper_rotation
+        ).coordinates
+        new_mol.coords = aligned_coords
+
+        if return_rmsd:
+            return new_mol, rmsd
+        return new_mol
+
+
     @classmethod
     def apply_smarts_to_mol(cls, mol, pattern,
                             remove_hydrogens=True,
