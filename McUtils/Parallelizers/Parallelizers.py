@@ -1332,6 +1332,7 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
             )
 
     _is_worker=False # global flag to be overridden
+    _worker_initializer_generations = {}
     def __init__(self,
                  worker=False,
                  pool:mp.Pool=None,
@@ -1396,6 +1397,15 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                          initialization_kwargs=initialization_kwargs,
                          )
         self.comm_preinitializer = comm_preinitializer
+        self._requested_nprocs = kwargs.pop('processes', None)
+        if (
+                self._requested_nprocs is not None
+                and self._requested_nprocs < 2
+        ):
+            raise ValueError(
+                "MultiprocessingParallelizer requires at least two "
+                "participants; use SerialNonParallelizer for one process"
+            )
         self.opts = kwargs
         self.pool:mp_pool.Pool = pool
         self.worker = worker
@@ -1403,8 +1413,11 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         self.manager:mp.Manager = manager
         self._comm = comm
         self._id = rank
-        self.nproc = None
+        self.nproc = (
+            None if pool is None else self.get_pool_nprocs(pool) + 1
+        )
         self.allow_restart = allow_restart
+        self._initializer_generation = 0
 
     def get_nprocs(self):
         """
@@ -1582,9 +1595,11 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
             if main_kwargs is None:
                 main_kwargs = {}
             if self.on_main:
+                self._ensure_worker_initialized()
                 return runner(*args, **main_kwargs, **kwargs)
             else:
                 try:
+                    self._ensure_worker_initialized()
                     return runner(*args, **main_kwargs, **kwargs)
                 except Exception as e:
                     import traceback as tb
@@ -1676,7 +1691,13 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         """
         **LLM Docstring**
 
-        Create a process pool from the supplied multiprocessing context, adding default size and worker initializer options.
+        Create the child-process portion of the participant group.
+
+        ``nprocs`` and the public ``processes`` option count the main
+        process, since the main process executes rank zero. The owned pool
+        therefore needs only ``nprocs - 1`` children. Previously the pool
+        contained ``nprocs`` children while only ranks 1 through
+        ``nprocs - 1`` were dispatched, leaving one imported child idle.
 
         :param manager: Value supplied for `manager`.
         :type manager: mp.Manager
@@ -1685,13 +1706,16 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         :return: The value produced by the implementation; see the summary for its exact semantics.
         :rtype: mp.pool.Pool
         """
-        if 'processes' not in kwargs:
-            kwargs['processes'] = mp.cpu_count() - 1
+        if self._requested_nprocs is None:
+            nprocs = max(2, mp.cpu_count() - 1)
+        else:
+            nprocs = self._requested_nprocs
+        self.nproc = nprocs
+        kwargs['processes'] = nprocs - 1
         if 'initializer' not in kwargs:
-            kwargs['initializer'] = functools.partial(
-                self._initialize_worker,
-                self.initialization_function
-            )
+            # Evaluation-specific initialization is installed lazily by
+            # _run, after set_initializer has selected its generation.
+            kwargs['initializer'] = self._initialize_worker
         return manager.Pool(**kwargs)
     @staticmethod
     def get_pool_context(pool):
@@ -1731,20 +1755,37 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         self.pool = None
         self.queues = None
         self.comm = None
+        self.nproc = None
     @classmethod
-    def _initialize_worker(cls, initializer=None, *etc):
+    def _initialize_worker(cls):
         """
         Sets a flag so that worker processes
         can know immediately that they are workers
         """
-        if initializer is not None:
-            initializer()
         cls._is_worker = True
+    def _ensure_worker_initialized(self):
+        """Run the current initializer once per process and generation.
+
+        Pool.map does not guarantee that one initialization task is routed
+        to each OS worker. Checking at the _run boundary instead guarantees
+        that every process initializes before it executes evaluation work,
+        while processes which never receive work incur no initialization
+        or cache-allocation cost.
+        """
+        generations = type(self)._worker_initializer_generations
+        if generations.get(self.uid) != self._initializer_generation:
+            if self.initialization_function is not None:
+                self.initialization_function()
+            generations[self.uid] = self._initializer_generation
     def set_initializer(self, func, *args, **kwargs):
         """
         **LLM Docstring**
 
-        Install and run an initializer locally, map worker initialization across the pool, and update the pool initializer.
+        Install a new initializer generation and run it in the main process.
+
+        Each child acknowledges this generation lazily at its next _run
+        boundary. This replaces the previous pool.map broadcast, which
+        could execute more than once in one child and not at all in another.
 
         :param func: Value supplied for `func`.
         :type func: Any
@@ -1756,15 +1797,8 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
         :rtype: None
         """
         self.initialization_function = functools.partial(func, *args, **kwargs)
-        self.initialization_function()
-        self.pool.map(
-            self._initialize_worker,
-            [self.initialization_function] * (self.nproc)
-        )
-        self.pool.initializer = functools.partial(
-            self._initialize_worker,
-            self.initialization_function
-        )
+        self._initializer_generation += 1
+        self._ensure_worker_initialized()
 
     def initialize(self, allow_restart=None):
         """
@@ -1797,16 +1831,14 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                     return self.initialize(allow_restart=False)
             else:
                 self.pool.__enter__()
-            self.nproc = self.get_pool_nprocs(self.pool)
-            self.pool.map(
-                self._initialize_worker,
-                [self.initialization_function] * (self.nproc+1)
-            )
-            if self.initialization_function is not None:
-                self.initialization_function()
+            if self.nproc is None:
+                # An externally supplied pool contributes all of its child
+                # processes in addition to the main-process rank.
+                self.nproc = self.get_pool_nprocs(self.pool) + 1
             # just to be safe
             self._is_worker = False
             self.worker = False
+            self._ensure_worker_initialized()
             self.queues = [
                 self.SendRecvQueuePair(i, self.manager)
                 for i in range(0, self.nproc)
@@ -1832,6 +1864,10 @@ class MultiprocessingParallelizer(SendRecieveParallelizer):
                 self.pool.__exit__(exc_type, exc_val, exc_tb)
             self.queues = None
             self._comm = None
+            # A later re-entry creates a fresh pool. Force the main process
+            # to acknowledge the current generation along with those new
+            # workers rather than retaining stale initializer state.
+            type(self)._worker_initializer_generations.pop(self.uid, None)
     @property
     def on_main(self):
         """

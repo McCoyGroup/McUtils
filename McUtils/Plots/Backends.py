@@ -355,6 +355,41 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
     def adjustable_limits_enabled(self, adjust_limits):
         return self._limit_adjuster_context(self, adjust_limits)
 
+    @staticmethod
+    def thread_styles(styles, n):
+        """
+        Split a style dict into `n` per-item dicts, so batched geometry can be
+        styled per item -- the same broadcasting `draw_disk` does over its
+        centers, made shared so every backend threads the same way.
+
+        A value counts as per-item when it is a `list` or an array of exactly
+        `n` entries.  Everything else -- a string, a number, `None`, or a tuple
+        such as an RGB(A) triple or a dash spec like `(0, (5, 4))` -- is shared
+        by every item.  The tuple/list split is what disambiguates the awkward
+        cases: pass a color as `(1, 0, 0)` to mean one color for all, or as
+        `['r', 'b']` to mean one per item.
+
+        :param styles: the styling options to spread over the batch
+        :type styles: dict
+        :param n: the number of items in the batch
+        :type n: int
+        :return: one style dict per item
+        :rtype: list[dict]
+        """
+        per_item = {}
+        shared = {}
+        for key, val in styles.items():
+            if isinstance(val, (list, np.ndarray)):
+                arr = np.asanyarray(val, dtype=object)
+                if arr.ndim >= 1 and len(val) == n:
+                    per_item[key] = list(val)
+                    continue
+            shared[key] = val
+        return [
+            dict(shared, **{k: v[i] for k, v in per_item.items()})
+            for i in range(n)
+        ]
+
 
     @abc.abstractmethod
     def get_xlabel(self):
@@ -2483,7 +2518,9 @@ class MPLAxes(GraphicsAxes):
 
         return setp(obj, **props)
 
-    def draw_line(self, points, adjust_limits=None, color=None, linewidth=None, s=None, edgecolors=None, **styles):
+    def draw_line(self, points, adjust_limits=None, color=None, linewidth=None, s=None, edgecolors=None,
+                  riffle=True,
+                  **styles):
         """
         **LLM Docstring**
 
@@ -2499,16 +2536,29 @@ class MPLAxes(GraphicsAxes):
             color = edgecolors
         if color is not None:
             styles['color'] = color
+        if linewidth is None:
+            # accept matplotlib's other spelling rather than colliding with it
+            linewidth = styles.pop('lw', None)
+        else:
+            styles.pop('lw', None)
         if s is not None and linewidth is None:
-            linewidth = s[0]
+            linewidth = np.ravel(s)[0]
         if linewidth is not None:
             styles['linewidth'] = linewidth
+        plotter = self.get_plotter('plot')
         with self.adjustable_limits_enabled(adjust_limits):
-            return self.get_plotter('plot')(
-                points[:, 0],
-                points[:, 1],
-                **styles
-            )
+            # `points` are `(N, 2)` vertices, or a batch of them, `(B, N, 2)`.
+            # The old `reshape(-1, 2)` was right for one polyline but silently
+            # concatenated a batch into a single line, joining the end of each
+            # to the start of the next.
+            if points.ndim <= 2:
+                points = points.reshape(-1, 2)
+                return plotter(points[:, 0], points[:, 1], **styles)
+            lines = [
+                plotter(p[:, 0], p[:, 1], **line_styles)
+                for p, line_styles in zip(points, self.thread_styles(styles, len(points)))
+            ]
+            return lines[0] if len(lines) == 1 else lines
 
     def draw_disk(self, points, radius=None, s=None, adjust_limits=None, **styles):
         """
@@ -2521,17 +2571,35 @@ class MPLAxes(GraphicsAxes):
         :param s: the `s`
         :param styles: the styling options
         """
-        points = np.asanyarray(points)
+        # With a `radius` these are real circles of that radius in data units,
+        # as in 3D.  The old code computed `s = radius * 100` and then never
+        # passed it to `scatter`, so `radius` was silently ignored -- and a
+        # scatter marker is sized in points anyway, so it could never be a disk
+        # of a given size in data space.
+        points = np.asanyarray(points, dtype=float)
         if points.ndim == 1:
             points = points[np.newaxis]
-        if radius is not None and s is None:
-            s = radius * 100
+
+        if radius is None:
+            if s is not None:
+                styles['s'] = s
+            with self.adjustable_limits_enabled(adjust_limits):
+                return self.get_plotter('scatter')(
+                    points[:, 0],
+                    points[:, 1],
+                    **styles
+                )
+
+        patches = MPLManager.patch_api()
+        radii = np.broadcast_to(np.asanyarray(radius, dtype=float), (len(points),))
+        disks = []
         with self.adjustable_limits_enabled(adjust_limits):
-            return self.get_plotter('scatter')(
-                points[:, 0],
-                points[:, 1],
-                **styles
-            )
+            for (x, y), r in zip(points[:, :2], radii):
+                disk = patches.Circle((x, y), r, **styles)
+                self.obj.add_patch(disk)
+                self.obj.update_datalim([(x - r, y - r), (x + r, y + r)])
+                disks.append(disk)
+        return disks[0] if len(disks) == 1 else disks
 
     def draw_rect(self, points, adjust_limits=None, **styles):
         """
@@ -2591,15 +2659,19 @@ class MPLAxes(GraphicsAxes):
         :param points: the points to draw
         :param styles: the styling options
         """
-        points = np.asanyarray(points)
+        # A single arrow used to raise `IndexError`: the input was promoted to
+        # `(1, 2, ndim)` and then indexed as `points[1]`, i.e. along the batch
+        # axis rather than the point axis.
+        points = np.asanyarray(points, dtype=float)
         if points.ndim == 2:
             points = points[np.newaxis]
+        plotter = self.get_plotter('arrow')
         with self.adjustable_limits_enabled(adjust_limits):
-            return self.get_plotter('arrow')(
-                *points[0],
-                *(points[1] - points[0]),
-                **styles
-            )
+            arrows = [
+                plotter(*p[0], *(p[1] - p[0]), **styles)
+                for p in points
+            ]
+        return arrows[0] if len(arrows) == 1 else arrows
 
     def draw_text(self, points, vals, adjust_limits=None, **styles):
         """
@@ -3090,12 +3162,16 @@ class MPLAxes3D(MPLAxes):
             patch.set_3d_properties = functools.partial(self._set_pathpatch_3d_properties, patch)
             patch.translate = functools.partial(self._pathpatch_translate, patch)
             art3d.pathpatch_2d_to_3d(patch, z=0, zdir=zdir)
-            patch.do_3d_projection =  functools.partial(self._patch_do_3d_projection, patch)
+            # a PathPatch carries `_code3d`, so it needs the codes-aware variant
+            patch.do_3d_projection =  functools.partial(self._pathpatch_do_3d_projection, patch)
         else:
             patch.set_3d_properties = functools.partial(self._set_patch_3d_properties, patch)
             patch.translate = functools.partial(self._pathpatch_translate, patch)
             art3d.patch_2d_to_3d(patch, z=0, zdir=zdir)
-            patch.do_3d_projection =  functools.partial(self._pathpatch_do_3d_projection, patch)
+            # a plain patch (a Wedge, a Circle) has no `_code3d`; asking for it
+            # raised `AttributeError: 'Patch3D' object has no attribute '_code3d'`
+            # the moment a filled disk was added to a 3D axes
+            patch.do_3d_projection =  functools.partial(self._patch_do_3d_projection, patch)
         patch.translate(pos)
 
         if zorder_mode is None:
@@ -4140,6 +4216,39 @@ class MPLAxes3D(MPLAxes):
                   glow=None,
                   lw=None,
                   **styles):
+        # Accept matplotlib's own style names, so the same `Disk(...)` call
+        # works against the 2D and the 3D axes.  Without this, `edgecolor`
+        # collides with the hard-coded `edgecolor=line_color` below
+        # ("got multiple values for keyword argument 'edgecolor'") and
+        # `facecolor` / `fill` go unrecognised.
+        edge = styles.pop('edgecolor', None)
+        if edge is None:
+            edge = styles.pop('ec', None)
+        else:
+            styles.pop('ec', None)
+        if edge is not None and line_color is None:
+            line_color = edge
+        face = styles.pop('facecolor', None)
+        if face is None:
+            face = styles.pop('fc', None)
+        else:
+            styles.pop('fc', None)
+        fill = styles.pop('fill', None)
+        if fill is False or (isinstance(face, str) and face == 'none'):
+            color = None
+        elif face is not None and color is None:
+            color = face
+        width = styles.pop('linewidth', None)
+        if width is not None and lw is None:
+            lw = width
+        # an unoriented disk lies in the xy plane; `zdir=None` used to reach
+        # `vec_normalize(None)`
+        if zdir is None and normal is None and uv_axes is None:
+            zdir = 'z'
+        # and with no arc angles a disk is the whole circle; these used to stay
+        # None and reach `patches.Wedge(theta1=None, theta2=None)`
+        if angle is None and theta1 is None and theta2 is None:
+            theta1, theta2 = 0., 360.
         """
         **LLM Docstring**
 
@@ -4222,9 +4331,14 @@ class MPLAxes3D(MPLAxes):
         if box_scalings is not None:
             box_scalings = np.array(box_scalings) * self._view_scaling
         if lw is None:
-            if line_thickness is None or nput.is_numeric(line_thickness):
-                line_thickness = [line_thickness] * len(centers)
-            lw = np.asanyarray(line_thickness) * 72 * max(box_scalings)
+            if line_thickness is None:
+                # `None * 72` is a TypeError; a disk with no explicit edge width
+                # just takes matplotlib's default
+                lw = [None] * len(centers)
+            else:
+                if nput.is_numeric(line_thickness):
+                    line_thickness = [line_thickness] * len(centers)
+                lw = np.asanyarray(line_thickness) * 72 * max(box_scalings)
         if lw is None or nput.is_numeric(lw):
             lw = [lw] * len(centers)
         if isinstance(color, str) or color is None:
@@ -4284,21 +4398,46 @@ class MPLAxes3D(MPLAxes):
         """
         points = np.asanyarray(points)
         if points.ndim > 2:
-            points = points.reshape(-1, 3)
+            # a batch of polylines draws as separate lines, with the styles
+            # threaded over it -- the old `reshape(-1, 3)` concatenated them
+            # into one line, joining the end of each to the start of the next
+            if lw is not None:
+                styles['lw'] = lw
+            if s is not None:
+                styles['s'] = s
+            if edgecolors is not None:
+                styles['edgecolors'] = edgecolors
+            if line_thickness is not None:
+                styles['line_thickness'] = line_thickness
+            lines = []
+            for sub_points, line_styles in zip(points, self.thread_styles(styles, len(points))):
+                thickness = line_styles.pop('line_thickness', None)
+                lines.append(
+                    self.draw_line(sub_points, rendering=rendering,
+                                   box_scalings=box_scalings,
+                                   line_thickness=thickness, **line_styles)
+                )
+            return lines[0] if len(lines) == 1 else lines
         if box_scalings is None:
             box_scalings = [1, 1, 1]
         if box_scalings is not None:
             box_scalings = np.array(box_scalings) * self._view_scaling
+        if lw is None:
+            # accept matplotlib's other spelling rather than colliding with it
+            lw = styles.pop('linewidth', None)
+        else:
+            styles.pop('linewidth', None)
         if lw is None and line_thickness is not None:
             rad = np.asanyarray(line_thickness)
             if rad.ndim == 0:
                 rad = np.array([rad])
             lw = rad * 72 * max(box_scalings)
+        if lw is not None:
+            styles['lw'] = lw
         return self.get_plotter('plot')(
             points[:, 0],
             points[:, 1],
             zs=points[:, 2],
-            lw=lw,
             **styles
         )
 
@@ -4385,6 +4524,13 @@ class MPLAxes3D(MPLAxes):
     def draw_arrow(self, points, radius=None, rendering=None, segments=8, box_scalings=None,
                    lw=None,
                    **styles):
+        # 'flat' is the only mode implemented, and the default of None fell
+        # straight through to `NotImplementedError`; and with neither `lw` nor
+        # `radius` the width calculation below is `None * 72`
+        if rendering is None:
+            rendering = 'flat'
+        if lw is None and radius is None:
+            radius = .02
         """
         **LLM Docstring**
 
@@ -8471,18 +8617,28 @@ class SVGAxes(GraphicsAxes):
         :return: the prepared styles
         :rtype: dict
         """
+        styles = dict(styles)
         glow = styles.pop('glow', None)
         if glow is not None:
-            color = styles.pop('color')
+            color = styles.pop('color', None)
             if color is None or dev.str_is(color, 'none'):
                 color = glow
             else:
                 color = ColorPalette.prep_color(palette=[glow, color], blending=.5)
             styles['color'] = color
-        return {
-            self.style_mapping.get(k, k):v
-            for k,v in styles.items()
-        }
+        # several source keys can map onto one SVG property (`line_thickness`,
+        # `line_width` and `lw` all mean `stroke-width`; `edgecolor`,
+        # `edgecolors` and `line_color` all mean `stroke`).  The last *set*
+        # value wins: an alias sitting at `None` because it is an unfilled
+        # keyword argument must not erase a property the caller spelled out
+        # directly, which is what a plain dict comprehension did.
+        prepped = {}
+        for k, v in styles.items():
+            key = self.style_mapping.get(k, k)
+            if v is None and key in prepped:
+                continue
+            prepped[key] = v
+        return prepped
     def draw_line(self, points, stroke=None, line_color=None, color=None,
                   edgecolors=None, line_thickness=None,
                   line_style=None, dashing=None,
@@ -8502,6 +8658,9 @@ class SVGAxes(GraphicsAxes):
             drawn line's length, as accepted by the other backends
         :param dashing: an explicit `stroke-dasharray` spec (`True`, a dasharray
             string, or a sequence of on/off lengths), takes precedence over `line_style`
+        :param points: `(N, 2)` vertices, or a `(B, N, 2)` batch of polylines, in
+            which case the styles are threaded over the batch by `thread_styles`
+            the way the matplotlib backends do
         :param styles: the styling options
         """
         if line_color is None:
@@ -8511,14 +8670,33 @@ class SVGAxes(GraphicsAxes):
             line_color = edgecolors
         if dashing is None and dev.str_in(line_style, self.named_dashing):
             dashing = line_style
-        styles = self.prep_styles(styles | {
-            'line_color':line_color, 'color':color, 'line_thickness':line_thickness
-        })
+
+        points = np.asanyarray(points)
+        if points.ndim > 2:
+            batch = points.reshape((-1,) + points.shape[-2:])
+            threaded = self.thread_styles(
+                dict(styles,
+                     stroke=stroke, line_color=line_color, color=color,
+                     line_thickness=line_thickness,
+                     line_style=line_style, dashing=dashing),
+                len(batch)
+            )
+            return [
+                self.draw_line(sub, **sty)
+                for sub, sty in zip(batch, threaded)
+            ]
+
+        # only the aliases that were actually given: passing them unconditionally
+        # meant `line_thickness=None` mapped onto `stroke-width` and wiped out a
+        # `stroke-width` the caller had set directly
+        aliases = {'line_color': line_color, 'line_thickness': line_thickness}
+        if color is not None:
+            aliases['color'] = color
+        styles = self.prep_styles(dict(styles, **aliases))
         if stroke is not None:
             styles['stroke'] = stroke
         if dashing is not None:
             styles['stroke-dasharray'] = self.prep_dasharray(dashing, length=self.path_length(points))
-        points = np.asanyarray(points)
         if len(points) > 2:
             return self.figure.add_polyline(points=points, **styles)
         else:
@@ -8650,7 +8828,7 @@ class SVGAxes(GraphicsAxes):
     @classmethod
     def _text_to_path(cls, origin, text, invert=False, size=None, plot_range=None,
                       anchor=None,
-                      font_size_scaling=13, **font_opts):
+                      font_size_scaling=13, font_size_reference='Mg', **font_opts):
         """
         **LLM Docstring**
 
@@ -8666,6 +8844,10 @@ class SVGAxes(GraphicsAxes):
         :param plot_range: a range to scale the text into
         :param anchor: the text anchor alignment
         :param font_size_scaling: the reference font size for scaling
+        :param font_size_reference: the string whose extent `size` is measured
+            against when `plot_range` is given, so one `size` means one glyph
+            size across labels of different lengths; `None` falls back to
+            normalizing each label by its own extent
         :param font_opts: font properties
         :return: the text path (and its bounds/placement)
         """
@@ -8692,11 +8874,19 @@ class SVGAxes(GraphicsAxes):
         if scaling is not None:
             tf = Affine2D()
             if plot_range is not None:
-                min_x = np.min(path.vertices[:, 0])
-                max_x = np.max(path.vertices[:, 0])
-                min_y = np.min(path.vertices[:, 1])
-                max_y = np.max(path.vertices[:, 1])
-                scaling = scaling / np.max([(max_y - min_y), (max_x - min_x)])
+                # normalize by a fixed reference string, not by the drawn text's
+                # own extent: dividing by the drawn extent fits *every* label
+                # into the same box, so `"g"` and `"m5+v20+v19"` come out at
+                # wildly different glyph sizes and `size` stops meaning font
+                # size at all.  `font_size_reference=None` restores that.
+                reference = path if font_size_reference is None else TextPath(
+                    (0, 0), font_size_reference, prop=fp
+                )
+                min_x = np.min(reference.vertices[:, 0])
+                max_x = np.max(reference.vertices[:, 0])
+                min_y = np.min(reference.vertices[:, 1])
+                max_y = np.max(reference.vertices[:, 1])
+                scaling = scaling / (np.max([(max_y - min_y), (max_x - min_x)]) or 1.)
                 tf = (
                     tf
                     # .translate(tx=-origin[0], ty=-origin[1])
@@ -8720,7 +8910,8 @@ class SVGAxes(GraphicsAxes):
                   use_path=False,
                   invert=False,
                   anchor=None,
-                  plot_range=None, font_size_scaling=13, **styles):
+                  plot_range=None, font_size_scaling=13,
+                  font_size_reference='Mg', **styles):
         """
         **LLM Docstring**
 
@@ -8741,6 +8932,7 @@ class SVGAxes(GraphicsAxes):
             mpl_path = self._text_to_path(points, vals,
                                           plot_range=plot_range,
                                           font_size_scaling=font_size_scaling,
+                                          font_size_reference=font_size_reference,
                                           invert=invert,
                                           anchor=anchor,
                                           **font_opts)
@@ -8778,6 +8970,7 @@ class SVGFigure(GraphicsFigure):
                  include_save_buttons=False,
                  recording_options=None,
                  depth_lighting=False,
+                 fixed_image_size=None,
                  **kwargs):
         """
         **LLM Docstring**
@@ -8790,6 +8983,18 @@ class SVGFigure(GraphicsFigure):
         :param figsize: the figure size in inches
         :param flip_y: flip the y-axis (SVG's y grows downward)
         :type flip_y: bool
+        :param fixed_image_size: this figure's default for whether/what
+            `savefig` bakes into the root `<svg>` element's `width`/
+            `height`/`viewBox` when saving to a `.svg` file, instead of
+            leaving the file to scale to whatever container displays it.
+            `None` (the default) defers the decision to `savefig`'s own
+            `fixed_image_size=` argument (and, if that's also left `None`,
+            baking still happens, sized from this figure's own
+            `image_size`/configured width-height -- see `savefig`);
+            `False` always leaves the SVG unsized; `True` bakes this
+            figure's own resolved size; an explicit `(width, height)` (or
+            a single number for a square) bakes that size instead
+        :type fixed_image_size: bool | tuple | int | float | None
         :param kwargs: extra default styling options
         """
         super().__init__(axes=axes)
@@ -8800,6 +9005,7 @@ class SVGFigure(GraphicsFigure):
         self.include_save_buttons = include_save_buttons
         self.recording_options = {} if recording_options is None else recording_options
         self.depth_lighting = depth_lighting
+        self.fixed_image_size = fixed_image_size
         if figsize is not None:
             self.set_size_inches(*figsize)
     def create_axes(self, rows, cols, spans, **kw):
@@ -8990,6 +9196,104 @@ class SVGFigure(GraphicsFigure):
                 height = int(round(h_in * DPI_SCALING))
         return width, height
 
+    def _bake_svg_size(self, fixed_image_size=None):
+        """
+        Return this figure's raw `self.to_svg()` source with an explicit
+        `width`/`height` baked into the root `<svg>` element (and a
+        `viewBox`, if one isn't already present, so the aspect ratio is
+        preserved), instead of leaving the file to scale to whatever
+        container displays it. Like `_cairosvg_source`, it applies the
+        y-flip `<g>` wrapper when `flip_y` is set: the backend draws in
+        math orientation and hands the flip to whatever displays the
+        result (the widget puts `scaleY(-1)` on its container), so a
+        `.svg` written without the wrapper comes out mirrored
+        top-to-bottom relative to the same figure's `.png` -- and with
+        every text label mirrored on top of that, since `draw_text`
+        pre-applies its own `scale(1 -1)` to cancel a flip that then
+        never arrives.
+
+        :param fixed_image_size: `True`/`None` to bake in this figure's
+            own resolved size (see `_resolve_pixel_size`), or an explicit
+            `(width, height)` pair -- or a single number for a square --
+            to bake in that size instead
+        :type fixed_image_size: bool | tuple | int | float | None
+        :return: the resized SVG source
+        :rtype: str
+        """
+        import xml.etree.ElementTree as ET
+
+        width = height = None
+        if fixed_image_size is not None and not isinstance(fixed_image_size, bool):
+            if nput.is_numeric(fixed_image_size):
+                width = height = fixed_image_size
+            else:
+                width, height = fixed_image_size
+        width, height = self._resolve_pixel_size(width, height)
+        if width is None or height is None:
+            raise ValueError(
+                "couldn't determine this figure's width/height to bake into "
+                "the SVG -- construct it with figsize=/set_size_inches(...), "
+                "or pass fixed_image_size=(width, height) explicitly"
+            )
+        # NB: without this, `ET.tostring` serializes the (unprefixed-by-
+        # default) SVG namespace as `<ns0:svg xmlns:ns0="...">` instead of
+        # plain `<svg xmlns="...">` -- harmless to `_cairosvg_export`
+        # (CairoSVG's own parser doesn't care), but this method's output
+        # is meant to be written directly to a standalone `.svg` file, and
+        # a namespace-prefixed root doesn't render as an image in a lot of
+        # tooling (a bare `<img src=...>`, Preview, etc. all expect the
+        # default/unprefixed form)
+        ET.register_namespace('', 'http://www.w3.org/2000/svg')
+        root = ET.fromstring(self.to_svg())
+        root.set('width', str(width))
+        root.set('height', str(height))
+        if root.get('viewBox') is None:
+            root.set('viewBox', f"0 0 {width} {height}")
+        self._apply_flip_y(root, width, height)
+        return ET.tostring(root, encoding='unicode')
+
+    def _apply_flip_y(self, root, width, height):
+        """
+        **LLM Docstring**
+
+        Wrap an SVG root's drawable children in the y-flipping `<g>` this
+        backend's display-time flip needs, in place. A no-op when `flip_y`
+        is unset.
+
+        :param root: the parsed root `<svg>` element
+        :param width: the element's width, used only if it carries no `viewBox`
+        :param height: the element's height, used only if it carries no `viewBox`
+        :return: the same root element
+        """
+        import xml.etree.ElementTree as ET
+
+        if not self.flip_y:
+            return root
+        raw_view_box = root.get('viewBox')
+        if raw_view_box is None:
+            view_box = [0., 0., float(width), float(height)]
+            root.set('viewBox', ' '.join(str(v) for v in view_box))
+        else:
+            view_box = [
+                float(value) for value in re.split(r"[\s,]+", raw_view_box.strip())
+            ]
+        if len(view_box) != 4:
+            raise ValueError(f"invalid SVG viewBox {raw_view_box!r}")
+        namespace = root.tag.partition('}')[0].removeprefix('{')
+        group_tag = f"{{{namespace}}}g" if namespace else 'g'
+        group = ET.Element(group_tag, {
+            'transform': (
+                f"translate(0 {2 * view_box[1] + view_box[3]}) scale(1 -1)"
+            )
+        })
+        for child in list(root):
+            local_name = child.tag.rsplit('}', 1)[-1]
+            if local_name not in {'defs', 'style'}:
+                root.remove(child)
+                group.append(child)
+        root.append(group)
+        return root
+
     @staticmethod
     def _load_cairosvg(required=False):
         try:
@@ -9010,30 +9314,7 @@ class SVGFigure(GraphicsFigure):
         root = ET.fromstring(self.to_svg())
         root.set('width', str(width))
         root.set('height', str(height))
-        if self.flip_y:
-            raw_view_box = root.get('viewBox')
-            if raw_view_box is None:
-                view_box = [0., 0., float(width), float(height)]
-                root.set('viewBox', ' '.join(str(v) for v in view_box))
-            else:
-                view_box = [
-                    float(value) for value in re.split(r"[\s,]+", raw_view_box.strip())
-                ]
-            if len(view_box) != 4:
-                raise ValueError(f"invalid SVG viewBox {raw_view_box!r}")
-            namespace = root.tag.partition('}')[0].removeprefix('{')
-            group_tag = f"{{{namespace}}}g" if namespace else 'g'
-            group = ET.Element(group_tag, {
-                'transform': (
-                    f"translate(0 {2 * view_box[1] + view_box[3]}) scale(1 -1)"
-                )
-            })
-            for child in list(root):
-                local_name = child.tag.rsplit('}', 1)[-1]
-                if local_name not in {'defs', 'style'}:
-                    root.remove(child)
-                    group.append(child)
-            root.append(group)
+        self._apply_flip_y(root, width, height)
         return ET.tostring(root, encoding='unicode')
 
     def _cairosvg_export(self, file, output_format, width, height,
@@ -9166,6 +9447,7 @@ class SVGFigure(GraphicsFigure):
     def savefig(self, file, format=None,
                 dpi=144, facecolor=None, transparent=None,
                 rasterize_options=None, cairosvg_options=None,
+                fixed_image_size=None,
                 **opts):
         """
         **LLM Docstring**
@@ -9192,6 +9474,20 @@ class SVGFigure(GraphicsFigure):
         :param rasterize_options: extra keyword options forwarded to
             `rasterize`, including `use_cairosvg` to select or require its path
         :param cairosvg_options: extra options forwarded to CairoSVG's converter
+        :param fixed_image_size: only used when writing a raw `.svg` file
+            (`format="svg"`, or inferred from a `.svg` path): whether/what
+            to bake into the root `<svg>` element's `width`/`height`/
+            `viewBox` (see `SVGFigure.__init__`/`_bake_svg_size`) instead
+            of leaving the file to scale to its container. A per-call
+            override of this same-named option set at figure construction
+            time (`self.fixed_image_size`); when *this* argument is left
+            `None`, that figure-level default is used instead, and if
+            *that* is also `None` (neither was ever specified), the size
+            is still baked in, sized from this figure's own resolved
+            `image_size`/configured width-height. Pass `False` (at either
+            level) to skip baking and write the plain, unsized SVG source
+            as before.
+        :type fixed_image_size: bool | tuple | int | float | None
         :param opts: extra options forwarded to `to_widget().write(...)`
             when not rasterizing or writing raw SVG (construction
             options, not rasterization options)
@@ -9225,9 +9521,19 @@ class SVGFigure(GraphicsFigure):
                 **(cairosvg_options if cairosvg_options is not None else {})
             )
         elif fmt == "svg":
+            bake = fixed_image_size if fixed_image_size is not None else self.fixed_image_size
+            if bake is False:
+                svg_source = self.to_svg()
+            else:
+                # `bake is None` here means neither `savefig`'s own
+                # `fixed_image_size` nor the figure's own default was ever
+                # set -- baked in anyway, sized from this figure's own
+                # resolved size (`_bake_svg_size` treats `None` the same
+                # as `True`: bake, using `_resolve_pixel_size`'s default)
+                svg_source = self._bake_svg_size(bake)
             dev.write_file(
                 file,
-                self.to_svg()
+                svg_source
             )
         else:
             return self.to_widget().write(file, **opts)

@@ -23,6 +23,33 @@ __all__ = [
 import abc, numpy as np
 from .VTKInterface import *
 
+def _primitive_bbox(points):
+    """
+    Bounding box of a point set of any dimensionality, so primitives report
+    3D boxes for 3D data instead of silently truncating to (x, y).
+    """
+    pts = np.asanyarray(points, dtype=float)
+    pts = pts.reshape(-1, pts.shape[-1])
+    return [tuple(np.min(pts, axis=0)), tuple(np.max(pts, axis=0))]
+
+def _is_padding_spec(bbox):
+    """
+    True if `bbox` is the legacy `((left, right), (bottom, top))` padding spec
+    rather than a matplotlib-style text-box styling dict.
+    """
+    if bbox is None or isinstance(bbox, dict):
+        return False
+    try:
+        arr = np.asanyarray(bbox, dtype=float)
+    except (TypeError, ValueError):
+        return False
+    return arr.ndim == 2 and arr.shape[-1] == 2
+
+def _unwrap_axes(axes):
+    if hasattr(axes, 'axes') and not hasattr(axes, 'draw_line'):
+        axes = axes.axes
+    return axes
+
 class GraphicsPrimitive(metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def plot(self, axes, *args, graphics=None, **kwargs):
@@ -75,7 +102,9 @@ class Disk(GraphicsPrimitive):
         :return: the `[(min_x, min_y), (max_x, max_y)]` bounding box
         :rtype: list
         """
-        return [(self.pos[0]-self.rad, self.pos[1]-self.rad), (self.pos[0]+self.rad, self.pos[1]+self.rad)]
+        pos = np.asanyarray(self.pos, dtype=float)
+        rad = np.asanyarray(self.rad, dtype=float)
+        return [tuple(pos - rad), tuple(pos + rad)]
 
     def plot(self, axes, *args, graphics=None, zdir=None, **kwargs):
         """
@@ -89,25 +118,29 @@ class Disk(GraphicsPrimitive):
         :param kwargs: extra styling options
         :return: the drawn backend object
         """
-        if hasattr(axes, 'axes'):
-            axes = axes.axes
-
-        return axes.draw_disk(self.pos, radius=self.rad, **dict(self.opts, **kwargs))
+        axes = _unwrap_axes(axes)
+        opts = dict(self.opts, **kwargs)
+        if zdir is not None and 'zdir' not in opts:
+            opts['zdir'] = zdir  # was accepted and then dropped, so 3D disks couldn't be oriented
+        return axes.draw_disk(self.pos, radius=self.rad, **opts)
 class Line(GraphicsPrimitive):
-    def __init__(self, points, radius=.1, **opts):
+    def __init__(self, points, thickness=None, radius=None, **opts):
         """
         **LLM Docstring**
 
         Set up a `Line` primitive.
 
-        :param points: the line points
-        :param radius: the line radius
+        :param points: the line vertices, `(N, ndim)`, or a batch of them, `(B, N, ndim)`
+        :param thickness: the line width, in points
+        :param radius: deprecated spelling of `thickness`
         :param opts: extra styling options
         """
-        self.pos = points
-        # self.pos2 = pos2
-        # self.rest = rest
-        self.rad = 72*radius # this can't be configured nearly as cleanly as the circle stuff...
+        self.pos = np.asanyarray(points, dtype=float)
+        # `radius` used to be rescaled into a scatter size and then turned back
+        # into a linewidth by the backend, which made the default `radius=.1`
+        # come out as `linewidth=5184`; it now simply means a width in points
+        self.thickness = thickness if thickness is not None else radius
+        self.rad = self.thickness
         self.opts = opts
     @property
     def points(self):
@@ -129,8 +162,7 @@ class Line(GraphicsPrimitive):
         :return: the `[(min_x, min_y), (max_x, max_y)]` bounding box
         :rtype: list
         """
-        pos = np.array(self.points).T
-        return [(np.min(pos[0]), np.min(pos[1])), (np.max(pos[0]), np.max(pos[1]))]
+        return _primitive_bbox(self.points)
     def plot(self, axes, *args, graphics=None, **kwargs):
         """
         **LLM Docstring**
@@ -143,16 +175,19 @@ class Line(GraphicsPrimitive):
         :param kwargs: extra styling options
         :return: the drawn backend object
         """
-        if hasattr(axes, 'axes'):
-            axes = axes.axes
-
-        kw = dict(edgecolors=[[0.]*3+[.3]])
-        kw = dict(kw, **self.opts)
-        kw = dict(kw, s=[(10*self.rad)**2], **kwargs)
-        return axes.draw_line(self.pos, **kw)
+        axes = _unwrap_axes(axes)
+        opts = dict(self.opts, **kwargs)
+        if (
+                self.thickness is not None
+                and not any(k in opts for k in ('linewidth', 'lw', 'line_thickness'))
+        ):
+            # `lw`, not `linewidth`: in 3D this binds to `draw_line`'s own `lw`
+            # parameter rather than colliding with it from inside `**styles`
+            opts['lw'] = self.thickness
+        return axes.draw_line(self.pos, **opts)
 
 class Text(GraphicsPrimitive):
-    def __init__(self, txt, pos, bbox=((1, 1), (1, 1)), **opts):
+    def __init__(self, txt, pos, padding=None, **opts):
         """
         **LLM Docstring**
 
@@ -160,12 +195,16 @@ class Text(GraphicsPrimitive):
 
         :param txt: the text string
         :param pos: the text position
-        :param bbox: the per-side padding box around the text
-        :param opts: extra styling options
+        :param padding: the per-side padding box around the text, `((l, r), (b, t))`
+        :param opts: extra styling options, passed to the backend -- including
+            matplotlib's own `bbox`, which used to be swallowed by this signature
         """
+        if padding is None and _is_padding_spec(opts.get('bbox')):
+            padding = opts.pop('bbox')  # legacy spelling
         self.txt = txt
-        self.pos = pos
-        self.bbox = bbox
+        self.pos = np.asanyarray(pos, dtype=float)
+        self.padding = padding
+        self.bbox = padding
         self.opts = opts
     def get_bbox(self):
         """
@@ -176,10 +215,13 @@ class Text(GraphicsPrimitive):
         :return: the `[(min_x, min_y), (max_x, max_y)]` bounding box
         :rtype: list
         """
-        return [
-            (self.pos[0]-self.bbox[0][0], self.pos[1]-self.bbox[1][0]),
-            (self.pos[0]+self.bbox[0][1], self.pos[1]+self.bbox[1][1])
-        ]
+        pos = np.asanyarray(self.pos, dtype=float)
+        if self.padding is None:
+            return [tuple(pos), tuple(pos)]
+        pad = np.asanyarray(self.padding, dtype=float)
+        if pad.shape[0] < len(pos):  # 2D padding given for a 3D position
+            pad = np.concatenate([pad, np.zeros((len(pos) - pad.shape[0], 2))])
+        return [tuple(pos - pad[:, 0]), tuple(pos + pad[:, 1])]
     def plot(self, axes, *args, graphics=None, **kwargs):
         """
         **LLM Docstring**
@@ -192,9 +234,8 @@ class Text(GraphicsPrimitive):
         :param kwargs: extra styling options
         :return: the drawn backend object
         """
-        if hasattr(axes, 'axes'):
-            axes = axes.axes
-        return axes.draw_text(self.pos, self.txt, **self.opts)
+        axes = _unwrap_axes(axes)
+        return axes.draw_text(self.pos, self.txt, **dict(self.opts, **kwargs))
 
 class Arrow(GraphicsPrimitive):
     def __init__(self, pos1, pos2, **opts):
@@ -219,8 +260,7 @@ class Arrow(GraphicsPrimitive):
         :return: the `[(min_x, min_y), (max_x, max_y)]` bounding box
         :rtype: list
         """
-        pos = np.array([self.pos1, self.pos2]).T
-        return [(np.min(pos[0]), np.min(pos[1])), (np.max(pos[0]), np.max(pos[1]))]
+        return _primitive_bbox([self.pos1, self.pos2])
     def plot(self, axes, *args, graphics=None, **kwargs):
         """
         **LLM Docstring**
@@ -233,9 +273,8 @@ class Arrow(GraphicsPrimitive):
         :param kwargs: extra styling options
         :return: the drawn backend object
         """
-        if hasattr(axes, 'axes'):
-            axes = axes.axes
-        return axes.draw_arrow([self.pos1, self.pos2], **self.opts)
+        axes = _unwrap_axes(axes)
+        return axes.draw_arrow([self.pos1, self.pos2], **dict(self.opts, **kwargs))
 
 class Path(GraphicsPrimitive):
     def __init__(self, commands, **opts):
