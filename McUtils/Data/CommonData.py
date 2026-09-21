@@ -3,6 +3,8 @@ Defines a common data handler
 """
 from .. import Devutils as dev
 import os, sys
+import importlib.util
+import importlib.machinery
 
 __all__ = [ "DataHandler", "DataError", "DataRecord" ]
 
@@ -71,6 +73,8 @@ class DataHandler:
         self.getter = getter
     @property
     def data_file(self): # in case other people want to load it...
+        if self._pkg is None:
+            return os.path.join(self._dir, self._name+self.extension)
         return os.path.join(self._dir, self._pkg, self._name+self.extension)
     def _load_alts(self):
         # assumes we have dict data, but this entire structure does that anyway
@@ -81,30 +85,93 @@ class DataHandler:
             for k in self._alts:
                 extras.update({a[k]:a for a in self._data.values()}) #shouldn't increase memory bc mutable
             self._data.update(extras)
+    def _load_package(self, pkg_name, pkg_dir):
+        """
+        Registers `pkg_name` in `sys.modules` as a package rooted at `pkg_dir`,
+        without ever touching `sys.path`. This is what lets a submodule inside
+        `pkg_dir` (e.g. `TheRealMcCoy/AtomData.py`) use ordinary relative
+        imports (`from . import whatever`) the way it could if `pkg_dir`'s
+        *parent* had been added to `sys.path`, the way `load()` used to do it.
+
+        A no-op if `pkg_name` is already imported (e.g. from a previous call).
+        """
+        existing = sys.modules.get(pkg_name)
+        if existing is not None:
+            return existing
+        pkg_init = os.path.join(pkg_dir, "__init__.py")
+        if os.path.isfile(pkg_init):
+            spec = importlib.util.spec_from_file_location(
+                pkg_name, pkg_init, submodule_search_locations=[pkg_dir]
+            )
+            if spec is None or spec.loader is None:
+                raise ImportError(f"can't load package {pkg_name!r} from {pkg_init!r}")
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[pkg_name] = module
+            try:
+                spec.loader.exec_module(module)
+            except Exception:
+                sys.modules.pop(pkg_name, None)
+                raise
+        else:
+            # no __init__.py -- treat it as a PEP 420 namespace package
+            spec = importlib.machinery.ModuleSpec(pkg_name, loader=None, is_package=True)
+            spec.submodule_search_locations = [pkg_dir]
+            module = importlib.util.module_from_spec(spec)
+            sys.modules[pkg_name] = module
+        return module
+    def _import_data_module(self):
+        """
+        Imports the python file backing this handler's data using `importlib`,
+        resolving straight from the known file path instead of stashing
+        `self._dir` on `sys.path` and hoping the normal import machinery finds
+        it (and then leaving it there for the life of the process, which is
+        what this replaces).
+
+        If the data lives inside a package (the usual case -- e.g. `TheRealMcCoy`
+        or `PsiDatasets`), that package is registered under its own name first
+        (see `_load_package`) so relative imports inside it keep working.
+        Either way, nothing is ever added to `sys.path`.
+
+        Modules are cached in `sys.modules` under their normal dotted name, so
+        loading the same dataset twice doesn't re-parse a (potentially large,
+        e.g. `AtomData.py`) data file.
+        """
+        full_name = self._name if self._pkg is None else f"{self._pkg}.{self._name}"
+        cached = sys.modules.get(full_name)
+        if cached is not None:
+            return cached
+        if self._pkg is not None:
+            self._load_package(self._pkg, os.path.join(self._dir, self._pkg))
+        mod_file = self.data_file
+        spec = importlib.util.spec_from_file_location(full_name, mod_file)
+        if spec is None or spec.loader is None:
+            raise ImportError(f"can't load {full_name!r} from {mod_file!r}")
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[full_name] = module
+        try:
+            spec.loader.exec_module(module)
+        except Exception:
+            sys.modules.pop(full_name, None)
+            raise
+        return module
     def load(self, env=None):
         """
         Actually loads the data from `data_file`.
-        Currently set up to just use an `import` statement but should
-        be reimplemented to use a `Deserializer` from `Scaffolding.Serializers`
 
         :return:
         :rtype:
         """
-        # currently we only load python data
-        # TODO: I should rewrite this to use a Deserializer object...
         if self.extension == '.py':
-            env = {} if env is None else env
-            sys.path.insert(0, self._dir) #name needs to be unique enough...
-            if self._pkg is None:
-                exec_stmt = "from {0} import {1} as {1}".format(self._name, self._key)
-            else:
-                exec_stmt = "from {0}.{1} import {2} as {2}".format(self._pkg, self._name, self._key)
-            exec(exec_stmt, env, env)
-            self._data = env[self._key]
+            module = self._import_data_module()
             try:
-                self._src = env[self._src_key]
-            except:
-                pass
+                self._data = getattr(module, self._key)
+            except AttributeError:
+                raise DataError(
+                    "{}: data source {} has no key {}".format(
+                        type(self).__name__, self._name, self._key
+                    )
+                )
+            self._src = getattr(module, self._src_key, None)
         elif self.extension == '.json':
             env = dev.read_json(self.data_file)
             self._data = env[self._key]

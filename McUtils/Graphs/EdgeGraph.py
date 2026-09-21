@@ -22,17 +22,18 @@ __all__ = [
 
 class EdgeGraph:
     map: dict[int, set[int]]
-    __slots__ = ["labels", "edges", "graph", "map", "weights", "_rings", "_sp_data"]
-    def __init__(self, labels, edges, graph=None, edge_map=None, weights=None, allow_self_loops=False):
+    __slots__ = ["labels", "edges", "graph", "map", "weights", "directed", "_rings", "_sp_data", "meta"]
+    def __init__(self, labels, edges, graph=None, edge_map=None, weights=None,
+                 allow_self_loops=False, meta=None, directed=None):
         """
         **LLM Docstring**
 
-        Construct an undirected labeled graph from edges, an optional adjacency matrix, and an optional edge map.
+        Construct a labeled graph from edges, an optional adjacency matrix, and an optional edge map.
 
         :param labels: Node labels indexed consistently with the graph.
         :type labels: object
 
-        :param edges: Undirected edges as endpoint pairs, optionally carrying weights.
+        :param edges: Edges as endpoint pairs, optionally carrying weights.
         :type edges: object
 
         :param graph: Graph object, adjacency matrix, or adjacency mapping used by the operation.
@@ -47,23 +48,56 @@ class EdgeGraph:
         :param allow_self_loops: Whether neighbor maps may contain a node as its own neighbor.
         :type allow_self_loops: object
 
+        :param meta: Optional free-form dict for algorithm-specific information a
+            graph wants to make available to layout (or other) code without that
+            code needing bespoke plumbing to find it -- e.g. `stacked_graph`
+            stashes `{'layer_sizes': [...]}` here, which the `"stacked_layer"`
+            `GraphLayout` reads as a default for its own `layer_sizes` argument.
+            Not interpreted by `EdgeGraph` itself; defaults to `{}` (never `None`,
+            so callers can always do `graph.meta.get(...)` without a null check).
+        :type meta: dict
+
+        :param directed: Whether stored edges are directed. If omitted and
+            `graph` is an adjacency matrix, directedness is inferred from
+            whether it is asymmetric; otherwise defaults to `False`.
+        :type directed: bool | None
+
         :return: No value is returned.
         :rtype: None
         """
         self.labels = labels
         self.edges = np.asanyarray(edges)
         self.weights = weights
+        if directed is None:
+            directed = graph is not None and self._adjacency_is_directed(graph)
+        self.directed = bool(directed)
         if graph is None:
-            graph = self.adj_mat(len(labels), self.edges, weights)
+            graph = self.adj_mat(
+                len(labels), self.edges, weights, directed=self.directed
+            )
         self.graph = graph
         if edge_map is None:
-            edge_map = self.build_edge_map(self.edges)
+            edge_map = self.build_edge_map(self.edges, directed=self.directed)
         self.map = edge_map
         if not allow_self_loops:
             for i,m in self.map.items():
                 if i in m: raise ValueError(f"edge map contains self-loops between item {i} and itself")
         self._rings = None
         self._sp_data = None
+        self.meta = {} if meta is None else dict(meta)
+
+    @staticmethod
+    def _adjacency_is_directed(graph):
+        """Infer directedness from asymmetry in a supplied adjacency matrix."""
+        if sparse.issparse(graph):
+            if len(graph.shape) != 2 or graph.shape[0] != graph.shape[1]:
+                raise ValueError(f"adjacency matrix must be square; got {graph.shape}")
+            difference = graph - graph.T
+            return difference.nnz > 0 and not np.allclose(difference.data, 0)
+        graph = np.asanyarray(graph)
+        if graph.ndim != 2 or graph.shape[0] != graph.shape[1]:
+            raise ValueError(f"adjacency matrix must be square; got {graph.shape}")
+        return not np.allclose(graph, graph.T)
 
     @classmethod
     def from_map(cls, edge_map):
@@ -185,12 +219,22 @@ class EdgeGraph:
         else:
             method_opts = {}
         coords = self.layout(method, **method_opts)
-        c = np.array(list(coords.values()))
-        if all(isinstance(c, tuple) and nput.is_int(c[1]) for c in coords.keys()):
-            i = np.argsort([c[1] for c in coords.keys()])
-            xy = c[i]
-        else:
-            xy = c
+        # `coords` is a `{label: (x, y)}` mapping; a layout function is free
+        # to return it in any iteration order (grouped by shell, sorted by
+        # angle, whatever the algorithm finds natural) as long as every
+        # label maps to its own position. `GraphPlotter` then treats row `i`
+        # of the coordinate array as `self.labels[i]`'s position, so building
+        # that array from `coords.values()` silently assumes the dict
+        # iterates in `self.labels` order -- true for `circular`/
+        # `kamada_kawai` (which build the dict by walking `layout.nodes` in
+        # order) but not guaranteed by the `GraphLayout.register` contract,
+        # and false for any layout that groups/sorts nodes internally before
+        # writing them out. When it's false, positions are individually
+        # correct but end up attached to the wrong node, which renders as a
+        # structurally scrambled graph with no exception raised anywhere.
+        # Indexing `coords` by `self.labels` explicitly removes the
+        # assumption instead of relying on layout authors to know about it.
+        xy = np.array([coords[label] for label in self.labels], dtype=float)
 
         return GraphPlotter(self, xy).plot(**opts)
 
@@ -240,43 +284,65 @@ class EdgeGraph:
             return cls.build_edge_map(spec)
 
     @classmethod
-    def adj_mat(cls, num_nodes, edges, weights=None):
+    def adj_mat(cls, num_nodes, edges, weights=None, directed=False):
         """
         **LLM Docstring**
 
-        Build a symmetric CSR adjacency matrix from unweighted, explicitly weighted, or weight-mapped edges.
+        Build a CSR adjacency matrix from unweighted, explicitly
+        weighted, or weight-mapped edges. Missing entries in a weight mapping
+        have unit weight.
 
         :param num_nodes: Optional total node count, including isolated vertices.
         :type num_nodes: object
 
-        :param edges: Undirected edges as endpoint pairs, optionally carrying weights.
+        :param edges: Edges as endpoint pairs, optionally carrying weights.
         :type edges: object
 
-        :param weights: Optional mapping or values used as edge weights.
+        :param weights: Optional mapping from endpoint pairs to weights, or one
+            weight per edge. A partial mapping leaves unspecified edges at 1.
         :type weights: object
 
-        :return: A symmetric CSR adjacency matrix.
+        :param directed: Whether to omit the reverse adjacency entry for each edge.
+        :type directed: bool
+
+        :return: A CSR adjacency matrix.
         :rtype: object
         """
+        edges = [tuple(e) for e in edges]
         if weights is not None:
-            edges = [
-                (e[0], e[1], weights.get((e[0], e[1]), weights.get((e[1], e[0]))))
-                    if len(e) == 2 else
-                e
-                for e in edges
-            ]
+            if hasattr(weights, 'get'):
+                edges = [
+                    (
+                        e[0], e[1],
+                        weights.get((e[0], e[1]), weights.get((e[1], e[0]), 1.0))
+                    ) if len(e) == 2 else e
+                    for e in edges
+                ]
+            else:
+                weights = list(weights)
+                if len(weights) != len(edges):
+                    raise ValueError(
+                        f"got {len(weights)} weights for {len(edges)} edges"
+                    )
+                edges = [
+                    (e[0], e[1], w) if len(e) == 2 else e
+                    for e, w in zip(edges, weights)
+                ]
         edges = [
             (e[0], e[1], 1)
                 if len(e) == 2 else
             e
             for e in edges
         ]
-        adj = np.zeros((num_nodes, num_nodes), dtype=int)
-        edges = np.array(edges)
+        weighted = weights is not None or any(e[2] != 1 for e in edges)
+        adj = np.zeros((num_nodes, num_nodes), dtype=float if weighted else int)
         if len(edges) > 0:
-            rows, cols, ws = edges.T
+            rows = np.array([e[0] for e in edges], dtype=int)
+            cols = np.array([e[1] for e in edges], dtype=int)
+            ws = np.array([e[2] for e in edges], dtype=adj.dtype)
             adj[rows, cols] = ws
-            adj[cols, rows] = ws
+            if not directed:
+                adj[cols, rows] = ws
 
         return sparse.csr_matrix(adj)
 
@@ -294,13 +360,13 @@ class EdgeGraph:
         """
         return sparse.csgraph.shortest_path(
             self.graph,
-            directed=False,
+            directed=self.directed,
             unweighted=self.weights is None,
             indices=indices
         )
 
     @classmethod
-    def build_edge_map(cls, edge_list, num_nodes=None):
+    def build_edge_map(cls, edge_list, num_nodes=None, directed=False):
         """
         **LLM Docstring**
 
@@ -312,7 +378,10 @@ class EdgeGraph:
         :param num_nodes: Optional total node count, including isolated vertices.
         :type num_nodes: object
 
-        :return: A dictionary mapping each node to a set of neighbors.
+        :param directed: Whether to record only outgoing neighbors.
+        :type directed: bool
+
+        :return: A dictionary mapping each node to its neighbor set.
         :rtype: object
         """
         map = {}
@@ -320,11 +389,311 @@ class EdgeGraph:
             if e1 not in map: map[e1] = set()
             map[e1].add(e2)
             if e2 not in map: map[e2] = set()
-            map[e2].add(e1)
+            if not directed:
+                map[e2].add(e1)
         if num_nodes is not None:
             for i in range(num_nodes):
                 if i not in map: map[i] = set()
         return map
+
+    # -- stacked / layered graph generation --------------------------------
+
+    @staticmethod
+    def _layer_positions(n):
+        """
+        Normalized within-layer node positions in `[0, 1]`, used only to
+        rank nodes by horizontal proximity across adjacent layers when
+        building a stacked graph (`stacked_graph`/`build_stacked_edges`).
+        Node `i` of `n` sits at `(i + 1/2) / n`, so layers of different
+        sizes still line up sensibly (e.g. the middle node of a 5-node
+        layer lines up with the gap between the middle two nodes of a
+        6-node layer, not with either edge).
+        """
+        return (np.arange(n) + 0.5) / n
+
+    @classmethod
+    def build_stacked_edges(cls, layer_sizes, neighbors=3, random_thresholds=None, seed=None):
+        """
+        Build the forward edge list for a stacked/layered graph -- the kind
+        of diagram used to draw a feed-forward network -- connecting each
+        node in one layer only to nodes in the *next* layer (never within a
+        layer or across a skipped layer).
+
+        By default each node in layer `l` connects to its `neighbors`
+        nearest nodes in layer `l + 1`, "nearest" meaning closest normalized
+        horizontal position (`_layer_positions`); with equal-sized layers
+        and `neighbors=1` this reduces to a 1-to-1 alignment, and with
+        `neighbors >= max(layer_sizes)` it reduces to a fully-connected
+        (dense) stack.
+
+        `random_thresholds=(random_include, random_prune)` turns that clean
+        k-nearest-neighbor structure into a Monte-Carlo-perturbed one, each
+        side controlled by its own "temperature" (`None` or `<= 0` disables
+        that side):
+
+        - `random_include`: every candidate edge *outside* the `neighbors`
+          nearest (i.e. a longer-range connection that wouldn't normally be
+          drawn) is added with probability `exp(-d / random_include)`, where
+          `d` is that pair's normalized distance -- the same Boltzmann-style
+          weighting used throughout statistical mechanics, with
+          `random_include` playing the role of `kT`. As `random_include ->
+          0` effectively no long-range edges are added (the structure stays
+          a clean k-NN stack); as `random_include -> inf`, distance stops
+          mattering and long-range edges are added almost as readily as
+          near ones.
+        - `random_prune`: every one of the `neighbors` nearest edges is
+          instead *removed* with probability `1 - exp(-d * random_prune)`,
+          so at `random_prune -> 0` nothing is pruned (same clean k-NN
+          stack) and as `random_prune -> inf` even the nearest edges become
+          likely to be cut, with the farther ones among the `neighbors`
+          going first.
+
+        Both probabilities are compared against an independent uniform
+        draw per candidate edge (`numpy.random.default_rng(seed)`), so the
+        two mechanisms can be combined -- or used one at a time by leaving
+        the other threshold `None` -- to dial a stack anywhere between a
+        rigid k-NN lattice and a fully randomized bipartite graph between
+        each pair of layers.
+
+        :param layer_sizes: Number of nodes in each layer, in stacking order.
+        :type layer_sizes: Iterable[int]
+
+        :param neighbors: Number of nearest nodes in the next layer each node
+            connects to (clipped to that layer's size), either as one value
+            used for every transition or one value per adjacent layer pair.
+        :type neighbors: int | Iterable[int]
+
+        :param random_thresholds: `(random_include, random_prune)` temperatures,
+            either as one pair used for every transition or one pair/`None`
+            per adjacent layer pair. Either temperature may be `None` or
+            non-positive to disable that side of the randomization.
+        :type random_thresholds: tuple[float, float] | Iterable[tuple[float, float] | None]
+
+        :param seed: Seed (or `numpy` `Generator`/`SeedSequence`) for the
+            Monte Carlo draws, forwarded to `numpy.random.default_rng`.
+        :type seed: object
+
+        :return: A list of `(global_node_index, global_node_index)` edge pairs.
+        :rtype: list
+        """
+        layer_sizes = [int(s) for s in layer_sizes]
+        if any(s < 0 for s in layer_sizes):
+            raise ValueError(f"layer sizes must be non-negative, got {layer_sizes}")
+        if len(layer_sizes) < 2:
+            return []
+
+        n_transitions = len(layer_sizes) - 1
+        if np.ndim(neighbors) == 0:
+            neighbor_counts = [int(neighbors)] * n_transitions
+        else:
+            neighbor_counts = [int(n) for n in neighbors]
+            if len(neighbor_counts) != n_transitions:
+                raise ValueError(
+                    f"got {len(neighbor_counts)} neighbor counts for "
+                    f"{n_transitions} layer transitions"
+                )
+        if any(n < 0 for n in neighbor_counts):
+            raise ValueError(f"neighbor counts must be non-negative, got {neighbor_counts}")
+
+        if random_thresholds is None:
+            threshold_pairs = [(None, None)] * n_transitions
+        else:
+            threshold_specs = list(random_thresholds)
+            is_single_pair = (
+                len(threshold_specs) == 2
+                and all(v is None or np.ndim(v) == 0 for v in threshold_specs)
+            )
+            if is_single_pair:
+                threshold_pairs = [tuple(threshold_specs)] * n_transitions
+            else:
+                if len(threshold_specs) != n_transitions:
+                    raise ValueError(
+                        f"got {len(threshold_specs)} random-threshold entries for "
+                        f"{n_transitions} layer transitions"
+                    )
+                threshold_pairs = []
+                for l, spec in enumerate(threshold_specs):
+                    if spec is None:
+                        threshold_pairs.append((None, None))
+                    elif len(spec) == 2:
+                        threshold_pairs.append(tuple(spec))
+                    else:
+                        raise ValueError(
+                            f"random-threshold entry {l} must be a pair or None; got {spec!r}"
+                        )
+
+        rng = np.random.default_rng(seed)
+        offsets = np.concatenate([[0], np.cumsum(layer_sizes)])
+        positions = [cls._layer_positions(s) if s > 0 else np.zeros(0) for s in layer_sizes]
+
+        edges = []
+        for l in range(len(layer_sizes) - 1):
+            n_here, n_next = layer_sizes[l], layer_sizes[l + 1]
+            if n_here == 0 or n_next == 0:
+                continue
+            here_off, next_off = int(offsets[l]), int(offsets[l + 1])
+            pos_here, pos_next = positions[l], positions[l + 1]
+            k = min(neighbor_counts[l], n_next)
+            include_temp, prune_temp = threshold_pairs[l]
+            for i in range(n_here):
+                dists = np.abs(pos_next - pos_here[i])
+                order = np.argsort(dists, kind='stable')
+                nearest, rest = order[:k], order[k:]
+
+                for j in nearest:
+                    j = int(j)
+                    if prune_temp is not None and prune_temp > 0:
+                        prune_prob = 1 - math.exp(-dists[j] * prune_temp)
+                        if rng.random() < prune_prob:
+                            continue
+                    edges.append((here_off + i, next_off + j))
+
+                if include_temp is not None and include_temp > 0:
+                    for j in rest:
+                        j = int(j)
+                        threshold = 1 - math.exp(-dists[j] / include_temp)
+                        if rng.random() > threshold:
+                            edges.append((here_off + i, next_off + j))
+
+        return edges
+
+    @classmethod
+    def stacked_graph(cls, layer_sizes, neighbors=3, random_thresholds=None,
+                      seed=None, labels=None, edge_weights=None):
+        """
+        Build a stacked/layered `EdgeGraph` -- the kind of node-and-edge
+        diagram used to draw a (feed-forward) neural network -- with an
+        arbitrary number of layers, an arbitrary node count per layer, and
+        a tunable, optionally Monte-Carlo-randomized connection pattern
+        between consecutive layers. See `build_stacked_edges` for exactly
+        how `neighbors`/`random_thresholds` shape the edges.
+
+        Nodes are labeled/ordered layer by layer (all of layer 0, then all
+        of layer 1, ...), which is the ordering the `"stacked_layer"`
+        `GraphLayout` (see `Layout.py`) expects; the returned graph also
+        stashes `layer_sizes` in `graph.meta` (`graph.meta['layer_sizes']`),
+        so layout can be requested with `graph.layout("stacked_layer")` and
+        no further bookkeeping.
+
+        Unless `labels` is given explicitly, each node's label is its
+        `(layer, column)` position, which is unique across the
+        whole graph (two nodes can share a column, or share a layer, but never
+        both) and so works fine as `EdgeGraph.labels`, the same as any other
+        graph's labels. `edge_weights` may specify weights for any subset of
+        generated edges, keyed by pairs of node labels; unspecified edges keep
+        unit weight. Alternately, it may be a callable that receives each
+        generated integer index pair and its corresponding pair of
+        `(layer, column)` coordinates after edge selection, and returns its
+        weight (or `None` for unit weight). For the default labels, for example,
+        `edge_weights={((0, 0), (1, 0)): 4}` weights the first edge between
+        layers 0 and 1. Pass `label_function=True` to a `plot()` call to
+        show these (labels are off by default, as for any `EdgeGraph`).
+
+        :param layer_sizes: Number of nodes in each layer, in stacking order.
+        :type layer_sizes: Iterable[int]
+
+        :param neighbors: Number of nearest nodes in the next layer each node
+            connects to, either as one value used for every transition or one
+            value per adjacent layer pair.
+        :type neighbors: int | Iterable[int]
+
+        :param random_thresholds: One `(random_include, random_prune)` pair for
+            every transition, or one pair/`None` per adjacent layer pair; see
+            `build_stacked_edges`.
+        :type random_thresholds: tuple[float, float] | Iterable[tuple[float, float] | None]
+
+        :param seed: Seed for the Monte Carlo draws.
+        :type seed: object
+
+        :param labels: Optional explicit node labels, in the same layer-by-layer
+            order; defaults to each node's `(layer, column)` position.
+        :type labels: object
+
+        :param edge_weights: Optional partial mapping from pairs of node labels
+            to numeric edge weights, or a callable invoked as
+            `f((i, j), ((layer_i, column_i), (layer_j, column_j)))` for each
+            generated edge after edge selection. A callable may return `None`
+            to leave an edge at unit weight. Mapping pairs may be written in
+            either direction; every unspecified edge has weight 1.
+        :type edge_weights: Mapping[tuple[Node, Node], float] | Callable[[tuple[int, int], tuple[tuple[int, int], tuple[int, int]]], float | None]
+
+        :return: The stacked graph.
+        :rtype: EdgeGraph
+        """
+        layer_sizes = [int(s) for s in layer_sizes]
+        n_total = sum(layer_sizes)
+        node_positions = [
+            (layer, column)
+            for layer, size in enumerate(layer_sizes)
+            for column in range(size)
+        ]
+        if labels is None:
+            labels = [
+                (row, column)
+                for row, size in enumerate(layer_sizes)
+                for column in range(size)
+            ]
+        elif len(labels) != n_total:
+            raise ValueError(f"got {len(labels)} labels for {n_total} nodes across {len(layer_sizes)} layers")
+        else:
+            labels = list(labels)
+
+        edges = cls.build_stacked_edges(
+            layer_sizes, neighbors=neighbors, random_thresholds=random_thresholds, seed=seed
+        )
+
+        weights = None
+        if edge_weights is not None:
+            weights = {}
+            if callable(edge_weights):
+                # Deliberately invoke the callback only now, after the graph's
+                # connectivity (including random inclusion/pruning) is final.
+                weighted_edges = (
+                    (
+                        tuple(edge),
+                        edge_weights(
+                            tuple(edge),
+                            tuple(node_positions[i] for i in edge)
+                        )
+                    )
+                    for edge in edges
+                )
+            else:
+                label_indices = {label: i for i, label in enumerate(labels)}
+                edge_lookup = {
+                    pair: edge
+                    for edge in edges
+                    for pair in (tuple(edge), tuple(reversed(edge)))
+                }
+                weighted_edges = []
+                for pair, weight in edge_weights.items():
+                    if len(pair) != 2:
+                        raise ValueError(f"edge-weight key must have two node labels; got {pair!r}")
+                    try:
+                        index_pair = (label_indices[pair[0]], label_indices[pair[1]])
+                    except KeyError as exc:
+                        raise ValueError(
+                            f"edge-weight key {pair!r} contains an unknown node label"
+                        ) from exc
+                    if index_pair not in edge_lookup:
+                        raise ValueError(
+                            f"edge-weight key {pair!r} is not an edge generated by stacked_graph"
+                        )
+                    weighted_edges.append((edge_lookup[index_pair], weight))
+
+            for pair, weight in weighted_edges:
+                if weight is None:
+                    continue
+                weight = float(weight)
+                if not np.isfinite(weight):
+                    raise ValueError(f"edge weight for {pair!r} must be finite; got {weight!r}")
+                weights[pair] = weight
+            weights = weights or None
+
+        return cls(
+            labels, edges, weights=weights, directed=True,
+            meta={'layer_sizes': layer_sizes}
+        )
 
     @classmethod
     def _remap(cls, labels, pos, rows, cols):
@@ -359,7 +728,7 @@ class EdgeGraph:
 
         return [labels[p] for p in pos], edge_list
     @classmethod
-    def _take(cls, pos, labels, adj_mat:sparse.compressed) -> 'typing.Self':
+    def _take(cls, pos, labels, adj_mat:sparse.compressed, directed=False) -> 'typing.Self':
         """
         **LLM Docstring**
 
@@ -378,15 +747,16 @@ class EdgeGraph:
         :rtype: object
         """
         rows, cols, _ = sparse.find(adj_mat)
-        utri = cols >= rows
-        rows = rows[utri]
-        cols = cols[utri]
+        if not directed:
+            utri = cols >= rows
+            rows = rows[utri]
+            cols = cols[utri]
         row_cont, _, _ = nput.contained(rows, pos)
         col_cont, _, _ = nput.contained(cols, pos)
         cont = np.logical_and(row_cont, col_cont)
 
         labels, edge_list = cls._remap(labels, pos, rows[cont], cols[cont])
-        return cls(labels, edge_list)
+        return cls(labels, edge_list, directed=directed)
 
     def take(self, pos):
         """
@@ -400,7 +770,7 @@ class EdgeGraph:
         :return: The induced subgraph.
         :rtype: object
         """
-        return self._take(pos, self.labels, self.graph)
+        return self._take(pos, self.labels, self.graph, directed=self.directed)
 
     def split(self, backbone_pos, return_subgraphs=True):
         """
@@ -427,7 +797,7 @@ class EdgeGraph:
         _, groups = nput.group_by(np.arange(len(labels)), labels)[0]
         if return_subgraphs:
             return [
-                self._take(pos, self.labels, new_adj)
+                self._take(pos, self.labels, new_adj, directed=self.directed)
                 for pos in groups
             ]
         else:
@@ -456,7 +826,8 @@ class EdgeGraph:
             return type(self)(self.labels,
                               [b for b in self.edges
                                if tuple(sorted(b)) not in bonds
-                               ])
+                               ],
+                              directed=self.directed)
         else:
             new_adj = self.graph.copy()
             for i,j in bonds:
@@ -466,7 +837,7 @@ class EdgeGraph:
             _, groups = nput.group_by(np.arange(len(labels)), labels)[0]
             if return_subgraphs:
                 return [
-                    self._take(pos, self.labels, new_adj)
+                    self._take(pos, self.labels, new_adj, directed=self.directed)
                     for pos in groups
                 ]
             else:
@@ -637,7 +1008,7 @@ class EdgeGraph:
             queue = new_queue
 
     @classmethod
-    def build_neighborhood_graph(cls, node, labels, edge_map, ignored=None, num=1):
+    def build_neighborhood_graph(cls, node, labels, edge_map, ignored=None, num=1, directed=False):
         """
         **LLM Docstring**
 
@@ -667,7 +1038,7 @@ class EdgeGraph:
         if len(edges) == 0:
             edges = np.reshape(edges, (-1, 2))
         labels, edges = cls._remap(labels, np.unique(edges), edges[:, 0], edges[:, 1])
-        return cls(labels, edges)
+        return cls(labels, edges, directed=directed)
 
     def neighbor_graph(self, root, ignored=None, num=1):
         """
@@ -687,7 +1058,10 @@ class EdgeGraph:
         :return: A remapped neighborhood graph.
         :rtype: object
         """
-        return self.build_neighborhood_graph(root, self.labels, self.map, ignored=ignored, num=num)
+        return self.build_neighborhood_graph(
+            root, self.labels, self.map, ignored=ignored, num=num,
+            directed=self.directed
+        )
 
     def neighbor_iterator(self, root, ignored=None, num=1, return_labels=False):
         """

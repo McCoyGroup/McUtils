@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 
 from .. import Devutils as dev
+from .. import Numputils as nput
 from .EdgeGraph import EdgeGraph
 
 __all__ = [
@@ -45,7 +46,8 @@ class UnionMultiGraph(EdgeGraph):
     _reducers = {"sum": sum, "max": max, "mean": lambda v: sum(v) / len(v)}
 
     def __init__(self, labels, edges=None, graph=None, edge_map=None, weights=None,
-                 allow_self_loops=False, *, components=None, scales=None, combine=None,
+                 allow_self_loops=False, directed=None, *,
+                 components=None, scales=None, combine=None,
                  pool_layout=True):
         """
         Base-`EdgeGraph`-compatible constructor: with `components=None` this
@@ -75,7 +77,7 @@ class UnionMultiGraph(EdgeGraph):
             )
             weights = self.pooled_weights if pool_layout else None
         super().__init__(labels, edges, graph=graph, edge_map=edge_map, weights=weights,
-                         allow_self_loops=allow_self_loops)
+                         allow_self_loops=allow_self_loops, directed=directed)
 
     # ------------------------------------------------------------------ #
     #  Construction
@@ -160,7 +162,7 @@ class UnionMultiGraph(EdgeGraph):
     #  identical, just widen the dtype.
     # ------------------------------------------------------------------ #
     @classmethod
-    def adj_mat(cls, num_nodes, edges, weights=None):
+    def adj_mat(cls, num_nodes, edges, weights=None, directed=False):
         import scipy.sparse as sparse
         if weights is not None:
             edges = [
@@ -174,8 +176,90 @@ class UnionMultiGraph(EdgeGraph):
             rows, cols, ws = np.array(edges, dtype=float).T
             rows, cols = rows.astype(int), cols.astype(int)
             adj[rows, cols] = ws
-            adj[cols, rows] = ws
+            if not directed:
+                adj[cols, rows] = ws
         return sparse.csr_matrix(adj)
+
+    # ------------------------------------------------------------------ #
+    #  Provenance-aware induced subgraphs
+    # ------------------------------------------------------------------ #
+    @classmethod
+    def _take_component(cls, component, pos, new_mapping):
+        """
+        Filter one component's own edges/weights down to `pos` and remap
+        the surviving edges into the new, dense node-index space -- the
+        per-component analogue of `EdgeGraph._remap`, except the weight
+        riding along with each edge is kept rather than dropped.
+
+        :param component: a `self.components` entry, `{'name', 'edges', 'weights'}`
+        :param pos: selected node positions in the original (pre-`take`) graph
+        :param new_mapping: `original index -> new index` lookup, `len(self.labels)` long
+        :return: a new `{'name', 'edges', 'weights'}` entry over just the kept edges
+        :rtype: dict
+        """
+        edges = np.asanyarray(component['edges'], dtype=int).reshape(-1, 2)
+        weights = np.asanyarray(component['weights'], dtype=float)
+        if len(edges) == 0:
+            return {'name': component['name'], 'edges': edges, 'weights': weights}
+        keep = np.isin(edges[:, 0], pos) & np.isin(edges[:, 1], pos)
+        kept = edges[keep]
+        new_edges = (
+            np.stack([new_mapping[kept[:, 0]], new_mapping[kept[:, 1]]], axis=-1)
+            if len(kept) else np.zeros((0, 2), dtype=int)
+        )
+        return {'name': component['name'], 'edges': new_edges, 'weights': weights[keep]}
+
+    def take(self, pos):
+        """
+        Induced sub-union on selected node positions.
+
+        The inherited `EdgeGraph.take` (see its docstring) rebuilds
+        `type(self)(labels, edge_list)` with no `components` -- which, per
+        this class's own constructor contract, degrades to a plain,
+        component-less graph: every component's provenance and weights are
+        thrown away, not merely re-pooled. Here, instead, `pos` is applied
+        to *each stored component* independently (`_take_component`) --
+        exactly like taking a subgraph of each contributing graph on its
+        own -- and the survivors are re-merged through `from_graphs`
+        (`_merge_components`), so `self.components`, `self.pooled_weights`,
+        and `self.edge_components` all come back correctly re-derived from
+        the actual subgraph weights instead of missing entirely.
+
+        `self.scales` is passed through as-is (already-resolved absolute
+        factors) rather than left to be re-derived from scratch, so a
+        component doesn't get rescaled onto a different footing just
+        because its own weight range shrank along with the node subset.
+
+        Falls back to `EdgeGraph.take` when this instance carries no
+        component data (`self.components is None`), matching the
+        constructor's "no components -> plain `EdgeGraph`" contract.
+
+        :param pos: selected node positions in the original graph
+        :return: the induced sub-union, with per-component weights intact
+        :rtype: UnionMultiGraph
+        """
+        if self.components is None:
+            return super().take(pos)
+
+        pos = np.asanyarray(pos)
+        new_mapping = np.zeros(len(self.labels), dtype=int)
+        new_mapping[pos] = np.arange(len(pos))
+
+        new_components = [self._take_component(c, pos, new_mapping) for c in self.components]
+        new_labels = [self.labels[p] for p in pos]
+        # `pool_layout` isn't stored directly; it's recoverable from whether the base
+        # `EdgeGraph.weights` this instance was built with *is* `self.pooled_weights`
+        # (pool_layout=True) or was left `None` (pool_layout=False) -- see `__init__`
+        pool_layout = self.pooled_weights is not None and self.weights is self.pooled_weights
+
+        return type(self).from_graphs(
+            new_labels,
+            [{'edges': c['edges'], 'weights': c['weights']} for c in new_components],
+            names=[c['name'] for c in new_components],
+            scales=self.scales,
+            combine=self.combine,
+            pool_layout=pool_layout,
+        )
 
     # ------------------------------------------------------------------ #
     #  Provenance-aware plotting
@@ -195,7 +279,7 @@ class UnionMultiGraph(EdgeGraph):
         ]
 
     def plot(self, method='default', *, graph_styles=None, component_colors=None, weight_linewidth=(.01, .1),
-             edge_offset=None, **opts):
+             edge_offset=None, edge_style=None, **opts):
         """
         Like `EdgeGraph.plot`, but when this union carries component
         provenance, every contributing edge is drawn on its own -- styled
@@ -224,7 +308,7 @@ class UnionMultiGraph(EdgeGraph):
             a short list, or an omitted `'stroke'`) fall back to `component_colors`/the
             default palette.
         """
-        if not self.components or 'edge_style' in opts or 'edges' in opts:
+        if not self.components or 'edges' in opts:
             return super().plot(method, **opts)
 
         from .Layout import GraphPlotter
@@ -265,13 +349,33 @@ class UnionMultiGraph(EdgeGraph):
             edge_list.append((i, j, (slot - (counts[key] - 1) / 2) * edge_offset))
             meta.append((k, w))
 
+        # `edge_style` here is a *base* style merged under each edge's
+        # component style below -- normally a plain dict (or `None`). But
+        # `GraphPlotter.plot()` itself also accepts a callable `edge_style`
+        # (called per drawn-edge index), and that's a reasonable thing to
+        # pass here too (e.g. to vary the base style by edge). Resolve both
+        # shapes to a per-index base dict up front, rather than assuming
+        # dict-like and later doing `base_edge_style | {...}`, which raises
+        # `TypeError: unsupported operand type(s) for |: 'function' and
+        # 'dict'` for a callable.
+        if edge_style is None:
+            base_edge_style = lambda idx: {}
+        elif callable(edge_style):
+            _edge_style_fn = edge_style
+            base_edge_style = lambda idx: dict(_edge_style_fn(idx) or {})
+        else:
+            _base_edge_style = dict(edge_style)
+            base_edge_style = lambda idx: _base_edge_style
         def edge_style(idx):
             k, w = meta[idx]
-            sty = dict(graph_styles[k]) if (graph_styles and k < len(graph_styles) and graph_styles[k]) else {}
-            sty.setdefault('stroke', colors[k % len(colors)])
-            if 'stroke-width' not in sty:
+            sty = base_edge_style(idx) | (
+                dict(graph_styles[k])
+                    if (graph_styles and k < len(graph_styles) and graph_styles[k]) else
+                {} )
+            sty.setdefault('line_color', colors[k % len(colors)])
+            if 'line_thickness' not in sty:
                 width = lo + (hi - lo) * (w - wmin) / span
-                sty['stroke-width'] = f'{width:.3f}px'
+                sty['line_thickness'] = f'{width:.3f}px'
             return sty
 
         if 'plot_range' not in opts and 'figure' not in opts:
@@ -295,6 +399,24 @@ class UnionMultiGraph(EdgeGraph):
         regardless of the layout's, matching a plain square preview."""
         lo, hi = xy.min(axis=0), xy.max(axis=0)
         center = (lo + hi) / 2
-        pad = float(np.max(node_radius)) * 1.5 if plot_range_padding == 'auto' else float(plot_range_padding)
-        side = max(float(np.max(hi - lo)) / 2, 1e-9) + pad
-        return [[center[0] - side, center[0] + side], [center[1] - side, center[1] + side]]
+        pad = (
+            float(np.max(node_radius)) * 1.5
+                if plot_range_padding == 'auto'
+            else plot_range_padding
+        )
+
+        if nput.is_numeric(pad):
+            pad = [pad, pad]
+        xpad, ypad = pad
+        if nput.is_numeric(xpad):
+            xpad = [xpad, xpad]
+        if nput.is_numeric(ypad):
+            ypad = [ypad, ypad]
+        lpad, rpad = xpad
+        bpad, hpad = ypad
+        side = max(float(np.max(hi - lo)) / 2, 1e-9)
+        lpad += side
+        rpad += side
+        bpad += side
+        hpad += side
+        return [[center[0] - lpad, center[0] + rpad], [center[1] - bpad, center[1] + hpad]]

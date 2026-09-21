@@ -3,10 +3,11 @@ Provides classes for working with `multiprocessing.SharedMemory`
 in a slightly more convenient way
 """
 
-import abc, os, numpy as np, typing, weakref, mmap
+import abc, gc, os, numpy as np, typing, weakref, mmap
 from dataclasses import dataclass
 
-from multiprocessing import Manager
+from multiprocessing import Manager, shared_memory
+from multiprocessing.managers import DictProxy, ListProxy
 
 from ..Scaffolding import BaseObjectManager, NDarrayMarshaller
 
@@ -14,7 +15,9 @@ __all__ = [
     "SharedObjectManager",
     "SharedMemoryDict",
     "SharedMemoryList",
-    "SharedMemoryNDarray"
+    "SharedMemoryNDarray",
+    "SharedMemoryArrayTree",
+    "SharedArrayTreeDescriptor"
 ]
 
 class SharedMemoryInterface(typing.Protocol):
@@ -71,7 +74,8 @@ class SharedMemoryNDarray:
         weakref.WeakKeyDictionary(),
         {}
     ]
-    def __init__(self, shape, dtype, buf, autoclose=True, parallelizer=None):
+    def __init__(self, shape, dtype, buf, autoclose=True, parallelizer=None,
+                 readonly=False):
         """
         :param shape:
         :type shape: tuple[int]
@@ -82,11 +86,16 @@ class SharedMemoryNDarray:
         :param parallelizer:
         :type parallelizer: Parallelizer
         """
-        self.dtype = dtype
-        self.shape = shape
+        self.dtype = np.dtype(dtype)
+        self.shape = tuple(shape)
         self.buf = buf
         self.autoclose = autoclose
+        self.readonly = readonly
+        self._closed = False
+        self._unlinked = False
         self.array = np.ndarray(self.shape, dtype=self.dtype, buffer=self.buf.buf)
+        if readonly:
+            self.array.flags.writeable = False
         self._incref()
         self.parallelizer = parallelizer
         # self.parallelizer.print("initializing {} ({})".format(
@@ -186,7 +195,8 @@ class SharedMemoryNDarray:
             'shape': self.shape,
             'buf': self.buf,
             'autoclose': self.autoclose,
-            'parallelizer': self.parallelizer
+            'parallelizer': self.parallelizer,
+            'readonly': self.readonly
         }
 
     def __setstate__(self, state):
@@ -205,7 +215,12 @@ class SharedMemoryNDarray:
         self.buf = state['buf']
         self.autoclose = state['autoclose']
         self.parallelizer = state['parallelizer']
+        self.readonly = state.get('readonly', False)
+        self._closed = False
+        self._unlinked = False
         self.array = np.ndarray(self.shape, dtype=self.dtype, buffer=self.buf.buf)
+        if self.readonly:
+            self.array.flags.writeable = False
         self._incref()
         # self.parallelizer.print("cloned {} ({})".format(
         #     self._bufid_ref()[0],
@@ -215,7 +230,8 @@ class SharedMemoryNDarray:
     @classmethod
     def from_array(cls, arr, buf,
                    autoclose=None,
-                   parallelizer=None
+                   parallelizer=None,
+                   readonly=False
                    ):
         """
         Initializes by pulling metainfo from an array
@@ -232,9 +248,40 @@ class SharedMemoryNDarray:
             opts['autoclose'] = autoclose
         if parallelizer is not None:
             opts['parallelizer'] = parallelizer
-        new = cls(arr.shape, arr.dtype, buf, **opts)
+        new = cls(arr.shape, arr.dtype, buf, readonly=False, **opts)
         new[:] = arr
+        new.readonly = readonly
+        if readonly:
+            new.array.flags.writeable = False
         return new
+
+    def __array__(self, dtype=None, copy=None):
+        """Return the NumPy view rather than an object array wrapper."""
+        array = self.array
+        if dtype is not None:
+            array = array.astype(dtype, copy=False)
+        if copy is True:
+            array = array.copy()
+        return array
+
+    @property
+    def ndim(self):
+        return self.array.ndim
+
+    @property
+    def size(self):
+        return self.array.size
+
+    @property
+    def nbytes(self):
+        return self.array.nbytes
+
+    @property
+    def flags(self):
+        return self.array.flags
+
+    def __len__(self):
+        return len(self.array)
 
     def __setitem__(self, key, value):
         """
@@ -272,11 +319,14 @@ class SharedMemoryNDarray:
         :return: None.
         :rtype: None
         """
+        if self._closed:
+            return
         self._decref()
         if self._ref() <= 0:
             # self.parallelizer.print("???? {}".format(self._bufid_ref()[0]))
             self._rmref()
             self.buf.close()
+        self._closed = True
 
     def unlink(self):
         """
@@ -286,8 +336,13 @@ class SharedMemoryNDarray:
         :return: None.
         :rtype: None
         """
-        if self._ref() <= 0:
+        if self._unlinked:
+            return
+        try:
             self.buf.unlink()
+        except FileNotFoundError:
+            pass
+        self._unlinked = True
 
     def __del__(self):
         """
@@ -303,13 +358,15 @@ class SharedMemoryNDarray:
             pass
         else:
             if ac:
-                if self.parallelizer is not None and self.parallelizer.on_main:
+                if self.parallelizer is None or self.parallelizer.on_main:
                     # self.parallelizer.print("closing {} ({})".format(
                     #     self._bufid_ref()[0],
                     #     os.getpid()
                     # ))
-                    self.close()
-                    self.unlink()
+                    try:
+                        self.unlink()
+                    finally:
+                        self.close()
 
     def __repr__(self):
         """
@@ -422,7 +479,7 @@ class SharedArrayAllocator:
     #             )
 
 
-    def create_shared_array(self, data, name=None):
+    def create_shared_array(self, data, name=None, readonly=False):
         """
         Makes a SharedNDarray object for an existing data chunk
 
@@ -432,12 +489,26 @@ class SharedArrayAllocator:
         :rtype: SharedMemoryNDarray
         """
 
+        data = np.asanyarray(data)
+        if data.dtype.hasobject:
+            raise TypeError("object arrays cannot be stored in shared memory")
+        if not data.flags.c_contiguous:
+            data = np.array(data, order='C', copy=True)
+
         if self.mem_manager is not None:
-            shm = self.mem_manager.SharedMemory
+            if name is not None:
+                raise ValueError("SharedMemoryManager does not support named allocation")
+            buf = self.mem_manager.SharedMemory(size=max(data.nbytes, 1))
         else:
-            shm = self.api.SharedMemory
-        buf = shm(name, create=True, size=data.nbytes)
-        arr = SharedMemoryNDarray.from_array(data, buf, parallelizer=self.parallelizer, autoclose=self.autoclose)
+            buf = self.api.SharedMemory(
+                name, create=True, size=max(data.nbytes, 1)
+            )
+        arr = SharedMemoryNDarray.from_array(
+            data, buf,
+            parallelizer=self.parallelizer,
+            autoclose=self.autoclose,
+            readonly=readonly
+        )
         # self._refbuf.append(arr) # kludge to keep stuff from going out of scope
         return arr
 
@@ -450,7 +521,10 @@ class SharedArrayAllocator:
         :return:
         :rtype:
         """
-        shared_array.close()
+        try:
+            shared_array.unlink()
+        finally:
+            shared_array.close()
         # try:
         #     self._refbuf.remove(shared_array)
         # except IndexError:
@@ -465,12 +539,239 @@ class SharedArrayAllocator:
         :return:
         :rtype:
         """
-        try:
-            shared_array.array[:] = data
-        except ValueError:
+        data = np.asanyarray(data)
+        if (
+            shared_array.shape != data.shape
+            or shared_array.dtype != data.dtype
+        ):
             self.delete_shared_array(shared_array)
             shared_array = self.create_shared_array(data)
+        else:
+            shared_array.array[...] = data
         return shared_array
+
+
+@dataclass(frozen=True)
+class _SharedArrayReference:
+    index: int
+
+
+@dataclass(frozen=True)
+class _SharedArrayDescriptor:
+    offset: int
+    shape: tuple
+    dtype: str
+
+
+@dataclass(frozen=True)
+class SharedArrayTreeDescriptor:
+    """Picklable metadata needed to attach to a shared array tree."""
+    name: str
+    size: int
+    arrays: tuple
+    tree: object
+    readonly: bool = True
+
+
+class SharedMemoryArrayTree:
+    """An immutable nested container backed by one shared-memory arena.
+
+    Unlike :class:`SharedMemoryList` and :class:`SharedMemoryDict`, this class
+    has no manager process and provides no synchronized mutation.  It is meant
+    for large, read-mostly initializer payloads: the parent copies array leaves
+    into one arena, while spawned workers pickle only the descriptor and attach
+    ordinary NumPy views.
+    """
+
+    def __init__(self, descriptor, handle, tree, arrays, owner=False):
+        self.descriptor = descriptor
+        self._handle = handle
+        self._tree = tree
+        self._arrays = arrays
+        self._owner = owner
+        self._closed = False
+        self._unlinked = False
+
+    @staticmethod
+    def _align(offset, alignment):
+        return (offset + alignment - 1) // alignment * alignment
+
+    @classmethod
+    def _map_tree(cls, value, array_handler):
+        if isinstance(value, np.ndarray):
+            return array_handler(value)
+        if isinstance(value, list):
+            return [cls._map_tree(item, array_handler) for item in value]
+        if isinstance(value, tuple):
+            return tuple(cls._map_tree(item, array_handler) for item in value)
+        if isinstance(value, dict):
+            return {
+                key: cls._map_tree(item, array_handler)
+                for key, item in value.items()
+            }
+        return value
+
+    @classmethod
+    def _restore_tree(cls, value, arrays):
+        if isinstance(value, _SharedArrayReference):
+            return arrays[value.index]
+        if isinstance(value, list):
+            return [cls._restore_tree(item, arrays) for item in value]
+        if isinstance(value, tuple):
+            return tuple(cls._restore_tree(item, arrays) for item in value)
+        if isinstance(value, dict):
+            return {
+                key: cls._restore_tree(item, arrays)
+                for key, item in value.items()
+            }
+        return value
+
+    @classmethod
+    def create(cls, tree, alignment=64, readonly=True):
+        source_arrays = []
+        references = {}
+
+        def record(array):
+            identity = id(array)
+            if identity in references:
+                return references[identity]
+            array = np.asanyarray(array)
+            if array.dtype.hasobject:
+                raise TypeError("object arrays cannot be stored in shared memory")
+            # ascontiguousarray promotes a scalar array to shape (1,).
+            if not array.flags.c_contiguous:
+                array = np.array(array, order='C', copy=True)
+            reference = _SharedArrayReference(len(source_arrays))
+            references[identity] = reference
+            source_arrays.append(array)
+            return reference
+
+        tree_descriptor = cls._map_tree(tree, record)
+        array_descriptors = []
+        offset = 0
+        for array in source_arrays:
+            offset = cls._align(offset, max(alignment, array.dtype.alignment))
+            array_descriptors.append(_SharedArrayDescriptor(
+                offset=offset,
+                shape=array.shape,
+                dtype=array.dtype.str
+            ))
+            offset += array.nbytes
+
+        size = max(offset, 1)
+        handle = shared_memory.SharedMemory(create=True, size=size)
+        descriptor = SharedArrayTreeDescriptor(
+            name=handle.name,
+            size=size,
+            arrays=tuple(array_descriptors),
+            tree=tree_descriptor,
+            readonly=readonly
+        )
+        arrays = cls._make_arrays(handle, descriptor)
+        for source, target in zip(source_arrays, arrays):
+            # Temporarily make parent views writable while populating them.
+            target.flags.writeable = True
+            target[...] = source
+            if readonly:
+                target.flags.writeable = False
+        return cls(
+            descriptor,
+            handle,
+            cls._restore_tree(descriptor.tree, arrays),
+            arrays,
+            owner=True
+        )
+
+    @classmethod
+    def _make_arrays(cls, handle, descriptor):
+        arrays = []
+        for spec in descriptor.arrays:
+            array = np.ndarray(
+                spec.shape,
+                dtype=np.dtype(spec.dtype),
+                buffer=handle.buf,
+                offset=spec.offset
+            )
+            if descriptor.readonly:
+                array.flags.writeable = False
+            arrays.append(array)
+        return arrays
+
+    @classmethod
+    def attach(cls, descriptor):
+        handle = shared_memory.SharedMemory(
+            name=descriptor.name,
+            create=False,
+            size=descriptor.size
+        )
+        arrays = cls._make_arrays(handle, descriptor)
+        return cls(
+            descriptor,
+            handle,
+            cls._restore_tree(descriptor.tree, arrays),
+            arrays,
+            owner=False
+        )
+
+    @property
+    def tree(self):
+        return self._tree
+
+    @property
+    def owner(self):
+        return self._owner
+
+    def __len__(self):
+        return len(self._tree)
+
+    def __iter__(self):
+        return iter(self._tree)
+
+    def __getitem__(self, item):
+        return self._tree[item]
+
+    def __reduce__(self):
+        return type(self).attach, (self.descriptor,)
+
+    def unshare(self):
+        return self._map_tree(self._tree, lambda array: array.copy())
+
+    def close(self):
+        if self._closed:
+            return
+        self._tree = None
+        self._arrays = None
+        gc.collect()
+        self._handle.close()
+        self._closed = True
+
+    def unlink(self):
+        if not self._owner:
+            raise RuntimeError("only the creating process may unlink the arena")
+        if self._unlinked:
+            return
+        try:
+            self._handle.unlink()
+        except FileNotFoundError:
+            pass
+        self._unlinked = True
+
+    def dispose(self):
+        if self._owner:
+            self.unlink()
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.dispose() if self._owner else self.close()
+
+    def __del__(self):
+        try:
+            self.dispose() if self._owner else self.close()
+        except (AttributeError, BufferError, FileNotFoundError):
+            pass
 
 class SharedMemoryPrimitive:
     """
@@ -503,14 +804,49 @@ class SharedMemoryPrimitive:
         self.marshaller = marshaller
         # self.buffers = {} if buffers is None else buffers
         self.parallelizer = parallelizer
+        self._owner_pid = os.getpid()
+        self._closed = False
+
+    @staticmethod
+    def _tree_get(tree, name, default=None):
+        if hasattr(tree, 'get'):
+            return tree.get(name, default)
+        if isinstance(name, (int, np.integer)) and 0 <= name < len(tree):
+            return tree[name]
+        return default
+
+    @staticmethod
+    def _is_mapping(value):
+        return isinstance(value, (dict, DictProxy))
+
+    @staticmethod
+    def _is_sequence(value):
+        return isinstance(value, (list, tuple, ListProxy))
+
+    def _new_mapping(self):
+        manager = getattr(self, 'manager', None)
+        return {} if manager is None else manager.dict()
+
+    def _new_sequence(self):
+        manager = getattr(self, 'manager', None)
+        return [] if manager is None else manager.list()
+
+    @staticmethod
+    def _ensure_list_slot(tree, name):
+        if name < 0:
+            raise IndexError("negative shared-list insertion is not supported")
+        if name >= len(tree):
+            tree.extend([None] * (name + 1 - len(tree)))
 
     def _set_tree_array_entry(self, tree, name, arr, cur):
         if arr.ndim == 0:
+            self._handle_delete(cur)
             tree[name] = arr.tolist()
         else:
             if isinstance(cur, SharedMemoryNDarray):
-                tree[name] = self.allocator.update_shared_array(tree[name], arr)
+                tree[name] = self.allocator.update_shared_array(cur, arr)
             else:
+                self._handle_delete(cur)
                 tree[name] = self.allocator.create_shared_array(arr)
 
     def _save_to_buffer(self, tree, name, data):
@@ -533,34 +869,47 @@ class SharedMemoryPrimitive:
         if isinstance(arr, np.ndarray):
             if hasattr(tree, 'keys'):
                 # add the array as an attr
-                self._set_tree_array_entry(tree, name, arr, tree[name])
+                self._set_tree_array_entry(
+                    tree, name, arr, self._tree_get(tree, name)
+                )
             elif isinstance(name, (int, np.integer)):
                 # add the array as a list element
-                if len(tree) < name:
-                    self._set_tree_array_entry(tree, name, arr, tree[name])
-                else:
-                    # expand the tree to just the necessary space
-                    padding = len(tree) - name - 1
-                    tree = tree + [None] * padding
-                    self._set_tree_array_entry(tree, name, arr, None)
+                self._ensure_list_slot(tree, name)
+                self._set_tree_array_entry(
+                    tree, name, arr, self._tree_get(tree, name)
+                )
             else:
                 raise ValueError("cannot save {} into {}".format(arr, tree))
         else:
             # walk an expression tree, updating buffers as needed
-            if hasattr(arr, 'items'):
-                subtree = {} if name not in tree or not hasattr(tree[name], 'items') else tree[name]
+            if self._is_mapping(arr):
+                current = self._tree_get(tree, name)
+                if not self._is_mapping(current):
+                    self._handle_delete(current)
+                    subtree = self._new_mapping()
+                else:
+                    subtree = current
+                    for old_key in set(subtree.keys()).difference(arr):
+                        self._handle_delete(subtree.pop(old_key))
                 for k,v in arr.items():
                     self._save_to_buffer(subtree, k, v)
-            else:
-                try:
-                    iter(tree[name])
-                except (AttributeError, TypeError):
-                    subtree = []
+            elif self._is_sequence(arr):
+                current = self._tree_get(tree, name)
+                if self._is_sequence(current):
+                    subtree = current
                 else:
-                    subtree = tree[name]
+                    self._handle_delete(current)
+                    subtree = self._new_sequence()
                 for i,v in enumerate(arr):
                     self._save_to_buffer(subtree, i, v)
+                while len(subtree) > len(arr):
+                    self._handle_delete(subtree.pop())
+            else:
+                self._handle_delete(self._tree_get(tree, name))
+                subtree = arr
 
+            if not hasattr(tree, 'keys'):
+                self._ensure_list_slot(tree, name)
             tree[name] = subtree
 
     def __setitem__(self, key, value):
@@ -592,10 +941,10 @@ class SharedMemoryPrimitive:
             pass
         elif isinstance(arr, SharedMemoryNDarray):
             self.allocator.delete_shared_array(arr)
-        elif isinstance(arr, dict):
+        elif self._is_mapping(arr):
             for v in arr.values():
                 self._handle_delete(v)
-        else:  # build a list of loaded values
+        elif self._is_sequence(arr):
             for v in arr:
                 self._handle_delete(v)
 
@@ -641,15 +990,16 @@ class SharedMemoryPrimitive:
             data = None
         elif isinstance(arr, SharedMemoryNDarray):
             data = arr.array.copy()
-            self.allocator.delete_shared_array(arr)
         elif isinstance(arr, np.ndarray): # protection but not sure how we'd get here...
-            data = arr
-        elif isinstance(arr, dict):
+            data = arr.copy()
+        elif self._is_mapping(arr):
             data = {
                 k:self._handle_load(v) for k,v in arr.items()
             }
-        else: # build a list of loaded values
+        elif self._is_sequence(arr):
             data = [self._handle_load(v) for v in arr]
+        else:
+            data = arr
 
         return data
 
@@ -793,8 +1143,11 @@ class SharedMemoryList(SharedMemoryPrimitive):
         :return: None.
         :rtype: None
         """
-        for i in range(len(self)):
-            del self[i]
+        try:
+            if os.getpid() == self._owner_pid:
+                self.close()
+        except (AttributeError, FileNotFoundError, BrokenPipeError):
+            pass
 
     def unshare(self):
         """
@@ -818,7 +1171,9 @@ class SharedMemoryList(SharedMemoryPrimitive):
         :rtype: Any
         """
         val = self.buffers.pop(k)
-        return self._handle_load(val)
+        data = self._handle_load(val)
+        self._handle_delete(val)
+        return data
     def insert(self, k, v):
         """
         **LLM Docstring**
@@ -846,7 +1201,7 @@ class SharedMemoryList(SharedMemoryPrimitive):
         :rtype: None
         """
         self.buffers.append(None)
-        self.buffers[len(self.buffers)] = v
+        self[len(self.buffers) - 1] = v
     def extend(self, v):
         """
         **LLM Docstring**
@@ -861,11 +1216,14 @@ class SharedMemoryList(SharedMemoryPrimitive):
         base_len = len(self.buffers)
         self.buffers.extend([None]*len(v))
         for i,a in enumerate(v):
-            self.buffers[base_len+i] = v
+            self[base_len+i] = a
 
     def close(self):
-        for b in self.buffers:
-            b.close()
+        if self._closed or os.getpid() != self._owner_pid:
+            return
+        while len(self.buffers) > 0:
+            del self[len(self.buffers) - 1]
+        self._closed = True
 
 class SharedMemoryDict(SharedMemoryPrimitive):
     """
@@ -949,12 +1307,11 @@ class SharedMemoryDict(SharedMemoryPrimitive):
         :return: None.
         :rtype: None
         """
-        if self.parallelizer is not None and self.parallelizer.on_main:
-            try:
-                for k in self.keys():
-                    del self[k]
-            except FileNotFoundError:
-                pass
+        try:
+            if os.getpid() == self._owner_pid:
+                self.close()
+        except (AttributeError, FileNotFoundError, BrokenPipeError):
+            pass
 
     def keys(self):
         """
@@ -1010,9 +1367,11 @@ class SharedMemoryDict(SharedMemoryPrimitive):
             self[k] = a
 
     def close(self):
-        for b in self.values():
-            if hasattr(b, 'close'):
-                b.close()
+        if self._closed or os.getpid() != self._owner_pid:
+            return
+        for key in list(self.keys()):
+            del self[key]
+        self._closed = True
 
 class SharedAttribute:
     def __init__(self, name, manager):
@@ -1095,7 +1454,7 @@ class SharedObjectManager(BaseObjectManager):
         val = getattr(self.obj, attr)
         if not isinstance(val, SharedAttribute):
             self.base_dict[attr] = val
-            setattr(self.obj, attr, SharedAttribute(self, attr))
+            setattr(self.obj, attr, SharedAttribute(attr, self))
             val = getattr(self.obj, attr)
         return val
 
@@ -1128,7 +1487,7 @@ class SharedObjectManager(BaseObjectManager):
         """
         val = getattr(self.obj, attr)
         if isinstance(val, SharedAttribute):
-            val = self.base_dict[attr]
+            val = self.base_dict.load_item(attr)
             setattr(self.obj, attr, val)
         return val
 
@@ -1157,7 +1516,7 @@ class SharedObjectManager(BaseObjectManager):
         :rtype: None
         """
         if keys is None:
-            keys = self.get_saved_keys(self.obj)
+            keys = list(self.get_saved_keys(self.obj))
         for k in keys:
             self.save_attr(k)
 
@@ -1195,7 +1554,7 @@ class SharedObjectManager(BaseObjectManager):
         :rtype: None
         """
         if keys is None:
-            keys = self.get_saved_keys(self.obj)
+            keys = list(self.get_saved_keys(self.obj))
         for k in keys:
             self.load_attr(k)
 
@@ -1218,11 +1577,11 @@ class SharedObjectManager(BaseObjectManager):
 
         if res is None:
             if isinstance(self.obj, PrimitiveTypeHolder):
-                return self.obj.val
+                res = self.obj.val
             else:
-                return self.obj
-        else:
-            return res
+                res = self.obj
+        self._cleanup()
+        return res
 
     def _cleanup(self):
         """
@@ -1233,12 +1592,15 @@ class SharedObjectManager(BaseObjectManager):
         :rtype: None
         """
         try:
-            saved_keys = self.base_dict.keys()
+            saved_keys = list(self.base_dict.keys())
         except:
             pass
         else:
             for k in saved_keys:
-                self.del_attr(k)
+                try:
+                    del self.base_dict[k]
+                except (KeyError, FileNotFoundError):
+                    pass
 
     def __del__(self):
         """
