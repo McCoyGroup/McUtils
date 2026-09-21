@@ -178,6 +178,87 @@ class UnionMultiGraph(EdgeGraph):
         return sparse.csr_matrix(adj)
 
     # ------------------------------------------------------------------ #
+    #  Provenance-aware induced subgraphs
+    # ------------------------------------------------------------------ #
+    @classmethod
+    def _take_component(cls, component, pos, new_mapping):
+        """
+        Filter one component's own edges/weights down to `pos` and remap
+        the surviving edges into the new, dense node-index space -- the
+        per-component analogue of `EdgeGraph._remap`, except the weight
+        riding along with each edge is kept rather than dropped.
+
+        :param component: a `self.components` entry, `{'name', 'edges', 'weights'}`
+        :param pos: selected node positions in the original (pre-`take`) graph
+        :param new_mapping: `original index -> new index` lookup, `len(self.labels)` long
+        :return: a new `{'name', 'edges', 'weights'}` entry over just the kept edges
+        :rtype: dict
+        """
+        edges = np.asanyarray(component['edges'], dtype=int).reshape(-1, 2)
+        weights = np.asanyarray(component['weights'], dtype=float)
+        if len(edges) == 0:
+            return {'name': component['name'], 'edges': edges, 'weights': weights}
+        keep = np.isin(edges[:, 0], pos) & np.isin(edges[:, 1], pos)
+        kept = edges[keep]
+        new_edges = (
+            np.stack([new_mapping[kept[:, 0]], new_mapping[kept[:, 1]]], axis=-1)
+            if len(kept) else np.zeros((0, 2), dtype=int)
+        )
+        return {'name': component['name'], 'edges': new_edges, 'weights': weights[keep]}
+
+    def take(self, pos):
+        """
+        Induced sub-union on selected node positions.
+
+        The inherited `EdgeGraph.take` (see its docstring) rebuilds
+        `type(self)(labels, edge_list)` with no `components` -- which, per
+        this class's own constructor contract, degrades to a plain,
+        component-less graph: every component's provenance and weights are
+        thrown away, not merely re-pooled. Here, instead, `pos` is applied
+        to *each stored component* independently (`_take_component`) --
+        exactly like taking a subgraph of each contributing graph on its
+        own -- and the survivors are re-merged through `from_graphs`
+        (`_merge_components`), so `self.components`, `self.pooled_weights`,
+        and `self.edge_components` all come back correctly re-derived from
+        the actual subgraph weights instead of missing entirely.
+
+        `self.scales` is passed through as-is (already-resolved absolute
+        factors) rather than left to be re-derived from scratch, so a
+        component doesn't get rescaled onto a different footing just
+        because its own weight range shrank along with the node subset.
+
+        Falls back to `EdgeGraph.take` when this instance carries no
+        component data (`self.components is None`), matching the
+        constructor's "no components -> plain `EdgeGraph`" contract.
+
+        :param pos: selected node positions in the original graph
+        :return: the induced sub-union, with per-component weights intact
+        :rtype: UnionMultiGraph
+        """
+        if self.components is None:
+            return super().take(pos)
+
+        pos = np.asanyarray(pos)
+        new_mapping = np.zeros(len(self.labels), dtype=int)
+        new_mapping[pos] = np.arange(len(pos))
+
+        new_components = [self._take_component(c, pos, new_mapping) for c in self.components]
+        new_labels = [self.labels[p] for p in pos]
+        # `pool_layout` isn't stored directly; it's recoverable from whether the base
+        # `EdgeGraph.weights` this instance was built with *is* `self.pooled_weights`
+        # (pool_layout=True) or was left `None` (pool_layout=False) -- see `__init__`
+        pool_layout = self.pooled_weights is not None and self.weights is self.pooled_weights
+
+        return type(self).from_graphs(
+            new_labels,
+            [{'edges': c['edges'], 'weights': c['weights']} for c in new_components],
+            names=[c['name'] for c in new_components],
+            scales=self.scales,
+            combine=self.combine,
+            pool_layout=pool_layout,
+        )
+
+    # ------------------------------------------------------------------ #
     #  Provenance-aware plotting
     # ------------------------------------------------------------------ #
     def dominant_component(self, i, j):

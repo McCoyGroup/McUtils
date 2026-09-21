@@ -27,6 +27,7 @@ from .. import Numputils as nput
 from .EdgeGraph import EdgeGraph
 
 import numpy as np
+import scipy.sparse as sparse
 
 # Node = Hashable
 # Edge = Tuple[Node, Node]
@@ -157,7 +158,29 @@ class GraphLayout:
                 f"Unknown layout method '{method}'. "
                 f"Available: {self.available_layouts()}"
             )
-        self.positions = self._registry[method](self, **kwargs)
+
+        n = len(self.nodes)
+        if n == 0:
+            self.positions = {}
+            return self.positions
+
+        component_ids = self._connected_component_ids()
+        n_components = int(component_ids.max()) + 1 if n > 0 else 0
+        if n_components <= 1:
+            self.positions = self._registry[method](self, **kwargs)
+            return self.positions
+
+        # Most layout algorithms (Kamada-Kawai in particular) place nodes by
+        # minimizing an error against graph-theoretic shortest-path distances;
+        # those distances are infinite between disconnected components, which
+        # gives every cross-component pair zero weight and leaves nothing to
+        # keep the components apart (or even finite) -- fragments end up
+        # NaN'd out or piled on top of one another. Instead, lay out each
+        # connected component on its own (recursing with the same method and
+        # options, where cross-component distances are never an issue), then
+        # tile the independent sub-layouts on a grid so their bounding boxes
+        # can never intersect.
+        self.positions = self._compute_disconnected(method, component_ids, n_components, **kwargs)
         return self.positions
 
     # -- shared utilities -------------------------------------------------
@@ -174,6 +197,137 @@ class GraphLayout:
         dits = self.graph.get_distances()
         dits = dits.copy()
         return dits
+
+    # -- disconnected-fragment handling ------------------------------------
+
+    def _connected_component_ids(self) -> np.ndarray:
+        """
+        **LLM Docstring**
+
+        Label every node with the index of the connected component it belongs to.
+
+        :return: An integer array of length `N` giving each node's component id.
+        :rtype: np.ndarray
+        """
+        _, comp_ids = sparse.csgraph.connected_components(
+            self.graph.graph, directed=False, return_labels=True
+        )
+        return comp_ids
+
+    def _sub_layout(self, node_indices: List[int]) -> "GraphLayout":
+        """
+        **LLM Docstring**
+
+        Build a `GraphLayout` over the induced subgraph on the given node indices, preserving original labels and remapped weights.
+
+        :param node_indices: Indices (into `self.nodes`) of the nodes to keep.
+        :type node_indices: list
+
+        :return: A `GraphLayout` for just those nodes and the edges between them.
+        :rtype: GraphLayout
+        """
+        idx_set = set(node_indices)
+        idx_map = {old: new for new, old in enumerate(node_indices)}
+        sub_labels = [self.nodes[i] for i in node_indices]
+        sub_edges = [
+            (idx_map[i], idx_map[j])
+            for i, j in ((int(e[0]), int(e[1])) for e in self.edges)
+            if i in idx_set and j in idx_set
+        ]
+        sub_weights = None
+        if self.weights is not None:
+            sub_weights = {
+                (idx_map[i], idx_map[j]): w
+                for (i, j), w in self.weights.items()
+                if i in idx_set and j in idx_set
+            }
+        sub_graph = EdgeGraph(sub_labels, sub_edges)
+        return GraphLayout(sub_graph, weights=sub_weights)
+
+    def _compute_disconnected(self, method: str, component_ids: np.ndarray, n_components: int, **kwargs):
+        """
+        **LLM Docstring**
+
+        Lay out each connected component independently with `method`, then tile the sub-layouts on a non-overlapping grid.
+
+        :param method: Layout method name already validated against the registry.
+        :type method: str
+
+        :param component_ids: Per-node connected-component index, as from `_connected_component_ids`.
+        :type component_ids: np.ndarray
+
+        :param n_components: Total number of connected components.
+        :type n_components: int
+
+        :param kwargs: Layout-algorithm keyword options, forwarded unchanged to each component.
+        :type kwargs: object
+
+        :return: A mapping from node labels to 2D coordinate pairs.
+        :rtype: dict
+        """
+        component_indices = [
+            [i for i, c in enumerate(component_ids) if c == comp_id]
+            for comp_id in range(n_components)
+        ]
+        sub_positions = [
+            self._sub_layout(idxs).compute(method, **kwargs)
+            for idxs in component_indices
+        ]
+        merged = self._tile_components(sub_positions)
+        # dict insertion order matters downstream (it's read positionally by
+        # callers like `EdgeGraph.plot`), so return the merged positions back
+        # in the same node order `compute` would otherwise have produced
+        return {node: merged[node] for node in self.nodes}
+
+    @staticmethod
+    def _tile_components(sub_positions: List[Dict], padding: float = 0.5) -> Dict:
+        """
+        **LLM Docstring**
+
+        Translate each component's layout onto a shared grid so that no two bounding boxes can intersect.
+
+        :param sub_positions: One `{node: (x, y)}` mapping per connected component.
+        :type sub_positions: list
+
+        :param padding: Extra gap between adjacent grid cells, as a fraction of the largest component's extent.
+        :type padding: float
+
+        :return: A single merged `{node: (x, y)}` mapping, re-centered at the origin.
+        :rtype: dict
+        """
+        boxes = []
+        for pos in sub_positions:
+            pts = np.array(list(pos.values()), dtype=float) if pos else np.zeros((0, 2))
+            if len(pts) == 0:
+                boxes.append((np.zeros(2), np.zeros(2)))
+                continue
+            lo = pts.min(axis=0)
+            hi = pts.max(axis=0)
+            boxes.append(((lo + hi) / 2.0, hi - lo))
+
+        # every grid cell is sized to the single largest component so that,
+        # wherever it lands, its bounding box fits inside its cell -- this is
+        # what makes the non-overlap guarantee independent of cell contents
+        max_extent = max((float(np.max(size)) for _, size in boxes), default=0.0)
+        if max_extent <= 0:
+            max_extent = 1.0
+        cell = max_extent * (1.0 + padding)
+
+        n_components = len(sub_positions)
+        cols = max(1, int(math.ceil(math.sqrt(n_components))))
+
+        merged = {}
+        for k, (pos, (center, _size)) in enumerate(zip(sub_positions, boxes)):
+            row, col = divmod(k, cols)
+            offset = np.array([col * cell, -row * cell])
+            for node, xy in pos.items():
+                merged[node] = tuple(np.asarray(xy, dtype=float) - center + offset)
+
+        if merged:
+            pts = np.array(list(merged.values()))
+            shift = pts.mean(axis=0)
+            merged = {node: tuple(np.asarray(xy) - shift) for node, xy in merged.items()}
+        return merged
 
 # ---------------------------------------------------------------------------
 # Plugin: circular layout (trivial baseline, shows the dispatch mechanism)
@@ -789,6 +943,7 @@ class GraphPlotter:
         :rtype: object
         """
         prims = []
+        global_style = {k:v for k,v in label_style.items() if isinstance(k, str)}
         for j, (coord, color, lab) in enumerate(zip(xy, colors, labels)):
             if lab is None:
                 continue
@@ -812,13 +967,15 @@ class GraphPlotter:
             # a label-only style shouldn't drag the node's disk keys onto the text
             n_sty.pop('radius', None)
 
-            sty = (label_style | {
+            ls = global_style | label_style.get(j, {})
+
+            sty = ({
                 'color': col,
                 'use_path': True,
                 'invert': True,
                 'anchor': (-.5, 1.25),
                 'plot_range': plot_range,
-            } | extra)
+            } | extra | ls)
             pos = coord + np.asanyarray(sty.pop('offset', [0.0, 0.0]), dtype=float)
             prims.append(text_class(text, pos, **sty))
         return prims
