@@ -4787,7 +4787,7 @@ class SVG(HTML):
         optional: dict
         display_opts: dict
 
-        ignored_styles = {"height", "width", "position", "color"}
+        ignored_styles = {"height", "width", "position", "color", "overflow"}
         can_be_dynamic = False
 
         @classmethod
@@ -5382,7 +5382,12 @@ class SVG(HTML):
        '''Arrowhead / endpoint decoration. orient='auto-start-reverse' flips for start markers automatically.'''
        tag = 'marker'
        required = {'id': None, 'viewBox': str, 'refX': numbers.Number, 'refY': numbers.Number, 'markerWidth': numbers.Number, 'markerHeight': numbers.Number}
-       optional = {'orient': str, 'markerUnits': str, 'preserveAspectRatio': str}
+       optional = {
+           'orient': str,
+           'markerUnits': str,
+           'preserveAspectRatio': str,
+           'overflow': str
+       }
        styles = COMMON_PRESENTATION
        def __init__(self, *elems, id=None, viewBox='0 0 10 10', refX=5, refY=5, markerWidth=6, markerHeight=6, **kwargs):
            """

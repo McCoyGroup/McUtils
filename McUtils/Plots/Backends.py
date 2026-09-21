@@ -8763,8 +8763,10 @@ class SVGAxes(GraphicsAxes):
         viewBox="0 0 10 10",
         refX="5",
         refY="5",
-        markerWidth="6",
-        markerHeight="6",
+        markerWidth="2",
+        markerHeight="5",
+        markerUnits="strokeWidth",
+        overflow="visible",
         orient="auto-start-reverse"
     )
     def draw_arrow(self, points, arrowhead=None, marker=None, **styles):
@@ -8782,13 +8784,19 @@ class SVGAxes(GraphicsAxes):
         if marker is None:
             if arrowhead is None:
                 arrowhead = self.default_arrowhead
+            else:
+                # Treat caller-supplied arrowhead options as overrides so a
+                # graph can adjust size or placement without having to repeat
+                # the default path/viewBox definition.
+                arrowhead = {**self.default_arrowhead, **arrowhead}
             self.figure.add_def(
                 "arrowhead",
                 tag="marker",
                 **arrowhead
             )
             marker = 'url(#arrowhead)'
-        self.draw_line(points, marker=marker, **styles)
+        styles.setdefault("marker-end", marker)
+        self.draw_line(points, **styles)
 
     mpl_font_map = dict(
         font_family='family',
