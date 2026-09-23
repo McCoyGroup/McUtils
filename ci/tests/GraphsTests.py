@@ -4,8 +4,9 @@ import numpy as np
 import scipy.sparse as sparse
 
 from McUtils.Graphs import EdgeGraph
-from McUtils.Plots import Arrow, Line
+from McUtils.Plots import Arrow, Disk, Line, Text
 from McUtils.Plots.Backends import SVGAxes
+from McUtils.Plots.SVG import SVGCircle
 
 
 class GraphsTests(unittest.TestCase):
@@ -106,6 +107,47 @@ class GraphsTests(unittest.TestCase):
         self.assertEqual(SVGAxes.default_arrowhead['markerHeight'], '5')
         self.assertEqual(SVGAxes.default_arrowhead['markerUnits'], 'strokeWidth')
         self.assertEqual(SVGAxes.default_arrowhead['overflow'], 'visible')
+
+    def test_callable_graph_labels_build_graphics_and_svg_primitives(self):
+        graph = EdgeGraph.stacked_graph([2, 1], neighbors=1)
+
+        def graphic_labels(_node, i, **_):
+            if i == 0:
+                return lambda pos: [
+                    Disk(pos + [-.025, 0], .01, color='red'),
+                    Disk(pos + [.025, 0], .01, color='red')
+                ]
+            if i == 1:
+                return {'text': 'text label', 'color': 'blue'}
+
+        objects = graph.plot(
+            method='stacked_layer', label_function=graphic_labels, objects=True
+        )
+        self.assertEqual(len(objects['labels']), 3)
+        self.assertTrue(all(isinstance(label, Disk) for label in objects['labels'][:2]))
+        self.assertIsInstance(objects['labels'][2], Text)
+        expected = objects['nodes'][0].pos
+        self.assertTrue(np.allclose(objects['labels'][0].pos, expected + [-.025, 0]))
+        self.assertTrue(np.allclose(objects['labels'][1].pos, expected + [.025, 0]))
+
+        raw = []
+
+        def svg_label(_node, i, **_):
+            if i != 0:
+                return None
+
+            def make_circle(pos):
+                circle = SVGCircle(pos[0], pos[1], .01, fill='purple')
+                raw.append(circle)
+                return circle
+
+            return make_circle
+
+        figure, _nodes, _edges, labels = graph.plot(
+            method='stacked_layer', label_function=svg_label, return_objects=True
+        )
+        self.assertEqual(labels, raw)
+        self.assertIn(raw[0], figure.axes.figure.elements)
 
     def test_stacked_graph_layer_specific_connectivity(self):
         graph = EdgeGraph.stacked_graph([2, 3, 2], neighbors=[1, 2])

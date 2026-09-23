@@ -773,8 +773,10 @@ class GraphPlotter:
     Labels are **off** by default (the graph analogue of leaving carbons/hydrogens
     implicit). Pass ``label_function`` to turn them on: it is called once per node,
     and every node for which it returns a non-``None`` value gets that value drawn
-    as `Text` next to the node. Returning ``None`` skips the label for that node, so
-    a single function can label some nodes and not others.
+    as `Text` next to the node. A callable return value is instead invoked with the
+    resolved label position and may return one graphics primitive, an SVG primitive,
+    or a list/tuple of primitives. Returning ``None`` skips the label for that node,
+    so a single function can label some nodes and not others.
 
     Mirrors the primitive/style handling of the molecule plotter: `_clean_style`
     (folds ``glow`` into a stroke), `_plot_range_2d`, half-colored edges, edge
@@ -1484,7 +1486,7 @@ class GraphPlotter:
         """
         **LLM Docstring**
 
-        Build text primitives for non-`None` labels with per-label overrides and node-derived colors.
+        Build text or factory-provided primitives for non-`None` labels.
 
         :param xy: Planar node coordinates with shape `(N, 2)`.
         :type xy: object
@@ -1514,7 +1516,7 @@ class GraphPlotter:
             its style doesn't override it with its own `'z_index'`.
         :type default_z: object
 
-        :return: A list of text primitives, each carrying a resolved `.z_index`.
+        :return: A flat list of text, graphics, or SVG primitives, each carrying a resolved `.z_index`.
         :rtype: object
         """
         prims = []
@@ -1522,6 +1524,26 @@ class GraphPlotter:
         for j, (coord, color, lab) in enumerate(zip(xy, colors, labels)):
             if lab is None:
                 continue
+            ls = global_style | label_style.get(j, {})
+
+            if callable(lab):
+                # Primitive factories get the resolved label position. They own
+                # their primitive-specific styling, while label_style can still
+                # supply the common offset and z-index used by the text path.
+                pos = coord + np.asanyarray(ls.get('offset', [0.0, 0.0]), dtype=float)
+                made = lab(pos)
+                if made is None:
+                    continue
+                made = made if isinstance(made, (list, tuple)) else [made]
+                zi = ls.get('z_index', default_z)
+                for prim in made:
+                    if prim is None:
+                        continue
+                    if not hasattr(prim, 'z_index'):
+                        prim.z_index = zi
+                    prims.append(prim)
+                continue
+
             # a label may be raw text, or a dict of text + per-label style overrides
             extra = {}
             if isinstance(lab, dict):
@@ -1541,8 +1563,6 @@ class GraphPlotter:
             n_sty = self._clean_style(n_sty)
             # a label-only style shouldn't drag the node's disk keys onto the text
             n_sty.pop('radius', None)
-
-            ls = global_style | label_style.get(j, {})
 
             sty = ({
                 'color': col,
@@ -1567,7 +1587,9 @@ class GraphPlotter:
             * None  -> no labels at all (the default),
             * True  -> label every node with str(node),
             * callable(node, i, *, plotter, coords, position, **node_style) -> label|None
-        Returns a list of per-node labels (each str/number/dict, or None to skip).
+        A returned label may be text/a text-style dict, or a callable accepting the
+        resolved position and returning one primitive or a list/tuple of primitives.
+        Returns a list of per-node labels (or None to skip).
         """
         n = len(self.coords)
         if label_function is None:
@@ -1816,7 +1838,23 @@ class GraphPlotter:
             """Render a single primitive into the figure, or pass it through in `objects` mode."""
             if objects:
                 return p
-            art = p.plot(figure)
+            if hasattr(p, 'plot'):
+                art = p.plot(figure)
+            elif hasattr(p, 'to_svg') and hasattr(p, 'get_bbox'):
+                # Low-level SVG primitives are already backend objects. Insert
+                # them directly instead of requiring a GraphicsPrimitive wrapper.
+                svg_figure = getattr(getattr(figure, 'axes', None), 'figure', None)
+                if svg_figure is None or not hasattr(svg_figure, 'elements'):
+                    raise TypeError(
+                        "raw SVG label primitives require the SVG plotting backend"
+                    )
+                svg_figure.elements.append(p)
+                art = p
+            else:
+                raise TypeError(
+                    "label factories must return Graphics primitives, SVG primitives, "
+                    "or lists/tuples containing them"
+                )
             if isinstance(art, (list, tuple)):
                 art = art[0]
             return art
