@@ -1837,11 +1837,14 @@ def vec_parallel_cross_norm_deriv(axb_expansion, bxc_expansion, order, *,
 
     A_expansion, B_expansion, C_expansion = component_vectors
     if unit_expansions is None:
-        axb_unit_expansion, _ = vec_norm_unit_deriv(axb_expansion, order)
-        bxc_unit_expansion, _ = vec_norm_unit_deriv(bxc_expansion, order)
-        B_unit_expansion, _ = vec_norm_unit_deriv(B_expansion, order)
+        axb_norms, _ = vec_norm_unit_deriv(axb_expansion, order)
+        bxc_norms, _ = vec_norm_unit_deriv(bxc_expansion, order)
     else:
-        B_unit_expansion, axb_unit_expansion, bxc_unit_expansion = unit_expansions
+        _, axb_norms, bxc_norms = unit_expansions
+    # Normalize the B vector actually used in the scalar triple product. In
+    # vec_dihed_deriv it is already unit length, whereas the supplied first
+    # norm expansion describes the original (unnormalized) bond.
+    B_norms, _ = vec_norm_unit_deriv(B_expansion, order)
     axc_expansion = vec_cross_deriv(A_expansion, C_expansion, order)
 
     # print([b.shape for b in B_expansion])
@@ -1854,13 +1857,13 @@ def vec_parallel_cross_norm_deriv(axb_expansion, bxc_expansion, order, *,
         axes=[-1, -1],
         shared=shared
     )
-    axb_inv_expansion = scalarinv_deriv(axb_unit_expansion, order)
-    bxc_inv_expansion = scalarinv_deriv(bxc_unit_expansion, order)
+    axb_inv_expansion = scalarinv_deriv(axb_norms, order)
+    bxc_inv_expansion = scalarinv_deriv(bxc_norms, order)
     # print("B", [b.shape for b in B_unit_expansion])
     # print("axb", [b.shape for b in axb_inv_expansion])
     # print("bxc", [b.shape for b in bxc_inv_expansion])
     scalar_term = scalarprod_deriv(
-        B_unit_expansion,
+        scalarinv_deriv(B_norms, order),
         axb_inv_expansion,
         order
     )
@@ -1871,7 +1874,7 @@ def vec_parallel_cross_norm_deriv(axb_expansion, bxc_expansion, order, *,
     )
     woof = scalarprod_deriv(scalar_term, base_expansion, order)
     # print("woof", [w.shape for w in woof])
-    return [-w for w in woof]
+    return woof
 
     # i3 = np.broadcast_to(np.eye(3)[np.newaxis], (3, 3, 3)).copy()
     # for i in range(3):
@@ -2401,8 +2404,9 @@ def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order,
                                   planar=planar,
                                   planar_threshold=planar_threshold
                                   )
-    # add in the np.pi shift to account for imposed sign flip in standard imp. to match Gaussian
-    base_derivs[0] = np.pi - base_derivs[0]
+    # Match pts_dihedrals' signed phase in [-pi, pi). Higher derivatives
+    # already have the orientation of that signed Cartesian value.
+    base_derivs[0] = np.mod(base_derivs[0], 2 * np.pi) - np.pi
     return base_derivs
     # return [-x for x in base_derivs]
 
