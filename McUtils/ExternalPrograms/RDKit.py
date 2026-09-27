@@ -5,6 +5,7 @@ __all__ = [
 import base64
 import itertools
 import functools
+import re
 import tempfile as tf
 import json
 import numpy as np, io, os
@@ -17,6 +18,17 @@ from .ExternalMolecule import ExternalMolecule
 from .Conformers import ConformerEncoder
 from .. import Coordinerds as coordops
 from ..Jupyter import DisplayImage
+
+class _AtomNoteImage(DisplayImage):
+    """Retain RDKit's native note positions while styling individual notes."""
+
+    def __init__(self, *args, atom_note_styles, **kwargs):
+        self.atom_note_styles = atom_note_styles
+        super().__init__(*args, **kwargs)
+
+    def postprocess(self, text):
+        text = super().postprocess(text)
+        return RDMolecule._style_atom_note_svg(text, self.atom_note_styles)
 
 class RDMolecule(ExternalMolecule):
     """
@@ -2352,6 +2364,87 @@ class RDMolecule(ExternalMolecule):
 
         return draw_coords
 
+    @classmethod
+    def _style_atom_note_svg(cls, svg, notes):
+        """Color or move RDKit note glyphs, preserving their native placement."""
+        note_path = re.compile(
+            r"<path class='note' d='(?P<d>.*?)' fill='(?P<fill>#[0-9A-Fa-f]{6})'/>",
+            re.S
+        )
+        paths = list(note_path.finditer(svg))
+        expected = sum(sum(not char.isspace() for char in label) for label, _ in notes)
+        if len(paths) != expected:
+            raise ValueError(
+                f"RDKit produced {len(paths)} note glyphs, expected {expected}; "
+                "cannot safely match atom labels to SVG paths"
+            )
+
+        numbers = re.compile(r"[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?")
+        replacements = []
+        next_path = 0
+        for label, style in notes:
+            count = sum(not char.isspace() for char in label)
+            group = paths[next_path:next_path + count]
+            next_path += count
+            if not style:
+                continue
+            if not group:
+                raise ValueError("cannot style an empty atom note")
+
+            color = style.get('color')
+            if color is not None:
+                rgb = cls._handle_color(color)[:3]
+                color = '#{:02X}{:02X}{:02X}'.format(
+                    *(round(255 * np.clip(component, 0, 1)) for component in rgb)
+                )
+
+            scale = float(style.get('scale', 1))
+            if not np.isfinite(scale) or scale <= 0:
+                raise ValueError("atom label scale must be finite and positive")
+            shift = np.asarray(style.get('offset_px', (0, 0)), dtype=float)
+            target = style.get('position_px')
+            center = None
+            if target is not None or scale != 1:
+                points = []
+                for path in group:
+                    values = [float(value) for value in numbers.findall(path.group('d'))]
+                    if len(values) % 2:
+                        raise ValueError("cannot determine the center of an RDKit note path")
+                    points.extend(np.asarray(values, dtype=float).reshape(-1, 2))
+                points = np.asarray(points)
+                center = (points.min(axis=0) + points.max(axis=0)) / 2
+            if target is not None:
+                shift = shift + np.asarray(target, dtype=float) - center
+
+            transform = None
+            if scale != 1:
+                transform = (
+                    f"translate({shift[0]:.4f} {shift[1]:.4f}) "
+                    f"translate({center[0]:.4f} {center[1]:.4f}) "
+                    f"scale({scale:.6f}) "
+                    f"translate({-center[0]:.4f} {-center[1]:.4f})"
+                )
+            elif np.any(shift):
+                transform = f"translate({shift[0]:.4f} {shift[1]:.4f})"
+
+            for path in group:
+                replacement = path.group()
+                if color is not None:
+                    replacement = replacement.replace(
+                        f"fill='{path.group('fill')}'", f"fill='{color}'"
+                    )
+                if transform is not None:
+                    replacement = replacement.replace(
+                        "<path class='note'",
+                        f"<path class='note' transform='{transform}'",
+                        1
+                    )
+                replacements.append((path.start(), path.end(), replacement))
+
+        for start, end, replacement in reversed(replacements):
+            svg = svg[:start] + replacement + svg[end:]
+        return svg
+
     default_draw_options = {
         'annotation_font_scale':1
     }
@@ -3613,6 +3706,7 @@ class RDMolecule(ExternalMolecule):
              view_settings=None,
              plot_range=None,
              atom_labels=None,
+             atom_label_placement='auto',
              bond_labels=None,
              blend_mixed_bonds=True,
              highlight_atoms=None,
@@ -3663,6 +3757,9 @@ class RDMolecule(ExternalMolecule):
         :param plot_range: a fixed drawing range
         :type plot_range: tuple | None
         :param atom_labels: per-atom label overrides
+        :param atom_label_placement: ``'auto'`` places dictionary labels with
+            no ``key`` at RDKit's native atom-note positions. ``'rdkit'``
+            forces that placement; ``'coords'`` keeps coordinate annotations.
         :param bond_labels: per-bond label overrides
         :param blend_mixed_bonds: blend colors on bonds between differently colored atoms
         :type blend_mixed_bonds: bool
@@ -3886,7 +3983,10 @@ class RDMolecule(ExternalMolecule):
                 modified = True
             for atom in mol.GetAtoms():
                 atom.SetAtomMapNum(0)
+        native_atom_labels = {}
         if atom_labels is not None:
+            if atom_label_placement not in ('auto', 'rdkit', 'coords'):
+                raise ValueError("atom_label_placement must be 'auto', 'rdkit', or 'coords'")
             if not modified:
                 if coords is None:
                     conf = mol.GetConformer(conf_id)
@@ -3901,6 +4001,21 @@ class RDMolecule(ExternalMolecule):
                     if isinstance(label, str):
                         atom.SetProp("atomNote", label)
                     else:
+                        use_native = (
+                            atom_label_placement == 'rdkit'
+                            or (atom_label_placement == 'auto' and 'key' not in label)
+                        )
+                        if use_native:
+                            label = label.copy()
+                            if 'key' in label:
+                                raise ValueError("native atom labels use position/offset, not key")
+                            text = str(label.pop('text', atom.GetIdx()))
+                            unsupported = set(label) - {'color', 'offset', 'position', 'scale'}
+                            if unsupported:
+                                raise ValueError(f"unsupported native atom-label options: {sorted(unsupported)}")
+                            atom.SetProp('atomNote', text)
+                            native_atom_labels[atom.GetIdx()] = label
+                            continue
                         draw_coords = self._prep_draw_coords(draw_coords)
                         label = label.copy()
                         key = label.pop('key', None)
@@ -3932,6 +4047,12 @@ class RDMolecule(ExternalMolecule):
                         if refs is not None:
                             spec['refs'] = refs
                         draw_coords.append(spec)
+
+        if native_atom_labels and draw_opts.get('add_atom_indices'):
+            raise ValueError(
+                "native atom labels already use the atom-index positions; "
+                "do not combine them with display_atom_numbers=True"
+            )
 
         if bond_labels is not None:
             if not modified:
@@ -4168,6 +4289,38 @@ class RDMolecule(ExternalMolecule):
             draw_fig, splits = draw_fig
         else:
             splits = None
+        note_styles = None
+        if native_atom_labels:
+            if format != 'svg':
+                raise ValueError("styled native atom labels require SVG output")
+            from rdkit.Geometry import Point2D
+            note_styles = []
+            draw_positions = np.asarray(coords)
+            for atom in mol.GetAtoms():
+                if not atom.HasProp('atomNote'):
+                    continue
+                i = atom.GetIdx()
+                style = native_atom_labels.get(i, {}).copy()
+                position = style.pop('position', None)
+                if position is not None:
+                    position = np.asarray(position, dtype=float)
+                    if position.shape != (2,):
+                        raise ValueError("atom-label position must have two components")
+                    point = draw_fig.GetDrawCoords(Point2D(*position))
+                    style['position_px'] = (point.x, point.y)
+                offset = style.pop('offset', None)
+                if offset is not None:
+                    offset = np.asarray(offset, dtype=float)
+                    if offset.shape != (2,):
+                        raise ValueError("atom-label offset must have two components")
+                    start = draw_positions[i, :2]
+                    first = draw_fig.GetDrawCoords(Point2D(*start))
+                    second = draw_fig.GetDrawCoords(Point2D(*(start + offset)))
+                    style['offset_px'] = (second.x - first.x, second.y - first.y)
+                note_styles.append((atom.GetProp('atomNote'), style))
+            for bond in mol.GetBonds():
+                if bond.HasProp('bondNote'):
+                    note_styles.append((bond.GetProp('bondNote'), {}))
         try:
             base_splits = figure.splits
         except AttributeError:
@@ -4192,12 +4345,15 @@ class RDMolecule(ExternalMolecule):
                         base_postdraw = [base_postdraw]
                     postdraw = postdraw + base_postdraw
 
-        return DisplayImage(draw_fig, format,
+        image_type = DisplayImage if note_styles is None else _AtomNoteImage
+        image_opts = {} if note_styles is None else {'atom_note_styles': note_styles}
+        return image_type(draw_fig, format,
                             plot_range=plot_range,
                             postdraw=postdraw,
                             scaling_factor=radius_to_range_scaling,
                             splits=splits,
-                            include_save_buttons=include_save_buttons)
+                            include_save_buttons=include_save_buttons,
+                            **image_opts)
 
     def plot(self,
              conf_id=None,
