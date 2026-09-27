@@ -664,6 +664,78 @@ class GEOMLoader:
         else:
             yield from self._iter_from_directory(max_mols, max_confs_per_mol, create_mols=create_mols)
 
+    def export_smi(
+            self,
+            output_path: Union[str, Path],
+            max_mols: Optional[int] = None,
+            max_confs_per_mol: Optional[int] = None,
+            remove_hydrogens: bool = False
+    ) -> Path:
+        """
+        Stream GEOM conformers into a two-column .smi file.
+
+        Each headerless, tab-separated row contains a conformer-tagged SMILES
+        string and that conformer's totalenergy value from GEOM. Energies are
+        written without unit conversion. By default explicit hydrogen
+        coordinates are retained in the tag; set remove_hydrogens=True for a
+        smaller file. The completed file replaces output_path atomically.
+
+        Requires Psience to be importable. A missing or non-finite energy
+        aborts the export and leaves any existing output file intact.
+        """
+        import math
+        import tempfile
+        from Psience.Molecools import Molecule
+
+        output_path = Path(output_path)
+        if output_path.suffix.lower() != ".smi":
+            raise ValueError("output_path must have a .smi extension")
+
+        temp_path = None
+        try:
+            with tempfile.NamedTemporaryFile(
+                    mode="w",
+                    encoding="utf-8",
+                    newline="\n",
+                    dir=output_path.parent,
+                    prefix=f".{output_path.name}.",
+                    suffix=".tmp",
+                    delete=False
+            ) as stream:
+                temp_path = Path(stream.name)
+                for rdmol, meta in self.iter_geom_records(
+                        max_mols=max_mols,
+                        max_confs_per_mol=max_confs_per_mol
+                ):
+                    energy = meta["total_energy"]
+                    try:
+                        energy = float(energy)
+                    except (TypeError, ValueError) as exc:
+                        raise ValueError(
+                            f"Missing or invalid totalenergy for "
+                            f"{meta['pickle_path']} conformer "
+                            f"{meta['conformer_index']}"
+                        ) from exc
+                    if not math.isfinite(energy):
+                        raise ValueError(
+                            f"Non-finite totalenergy for "
+                            f"{meta['pickle_path']} conformer "
+                            f"{meta['conformer_index']}"
+                        )
+                    smiles = Molecule.from_rdmol(rdmol).to_string(
+                        "smi",
+                        include_tag=True,
+                        remove_hydrogens=remove_hydrogens
+                    )
+                    stream.write(f"{smiles}\t{energy:.17g}\n")
+
+            temp_path.replace(output_path)
+            temp_path = None
+            return output_path
+        finally:
+            if temp_path is not None:
+                temp_path.unlink(missing_ok=True)
+
     # ------------------------------------------------------------------
     def close(self) -> None:
         if self._tar_handle is not None:

@@ -720,10 +720,12 @@ class EdgeGraph:
         if len(rows) == 0:
             edge_list = np.array([], dtype=int).reshape(-1, 2)
         else:
-            new_mapping = np.zeros(len(labels), dtype=int)
+            new_mapping = np.full(len(labels), -1, dtype=int)
             new_mapping[pos,] = np.arange(len(pos))
             new_row = new_mapping[rows,]
             new_col = new_mapping[cols,]
+            if np.any(new_row < 0) or np.any(new_col < 0):
+                raise ValueError("cannot remap an edge outside the selected nodes")
             edge_list = np.array([new_row, new_col]).T
 
         return [labels[p] for p in pos], edge_list
@@ -1029,15 +1031,27 @@ class EdgeGraph:
         :param num: Number of breadth layers to expand from the root.
         :type num: object
 
-        :return: A remapped neighborhood graph.
+        :return: An induced, remapped neighborhood graph.
         :rtype: object
         """
-        edges = list(cls.get_neighborhood_iterator(node, edge_map, ignored=ignored, num=num))
-
-        edges = np.array(edges, dtype=int)
-        if len(edges) == 0:
-            edges = np.reshape(edges, (-1, 2))
-        labels, edges = cls._remap(labels, np.unique(edges), edges[:, 0], edges[:, 1])
+        discovery_edges = list(cls.get_neighborhood_iterator(
+            node, edge_map, ignored=ignored, num=num
+        ))
+        if discovery_edges:
+            positions = np.unique(np.asarray(discovery_edges, dtype=int))
+        else:
+            positions = np.array([], dtype=int)
+        selected = set(positions)
+        edge_pairs = {
+            (i, j) if directed else tuple(sorted((i, j)))
+            for i in positions
+            for j in edge_map.get(i, ())
+            if j in selected
+        }
+        original_edges = np.asarray(sorted(edge_pairs), dtype=int).reshape(-1, 2)
+        labels, edges = cls._remap(
+            labels, positions, original_edges[:, 0], original_edges[:, 1]
+        )
         return cls(labels, edges, directed=directed)
 
     def neighbor_graph(self, root, ignored=None, num=1):
