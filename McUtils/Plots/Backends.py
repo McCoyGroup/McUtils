@@ -9907,8 +9907,20 @@ class SVGFigure(GraphicsFigure):
                 dynamic_loading=dynamic_loading,
                 **svg_opts
             )
+            canvas_height = (self.kwargs | opts).get('height')
+            fill_canvas = (
+                isinstance(axes.figure, svg.SVGFigure3D)
+                and canvas_height not in (None, 'auto')
+            )
+            if fill_canvas:
+                # Auto height uses the rotated viewBox ratio and can extend
+                # beyond the fixed canvas height, clipping the 3D drawing.
+                root['height'] = '100%'
+                root['preserveAspectRatio'] = 'xMidYMid meet'
             if dynamic_loading:
                 root = self._wrap_dynamic_svg(root)
+                if fill_canvas:
+                    root.style = {'width': '100%', 'height': '100%', 'margin': 0}
             sub_svgs.append(root)
         #TODO: handle layout
         canvas = JHTML.Div(sub_svgs, **(self.kwargs | opts))

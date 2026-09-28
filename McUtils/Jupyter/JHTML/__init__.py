@@ -15,3 +15,5 @@ from .HTMLWidgets import *; from .HTMLWidgets import __all__ as exposed
 __all__ += exposed
 from .BootstrapWidgets import *; from .BootstrapWidgets import __all__ as exposed
 __all__ += exposed
+from .JupyterMarkdownElements import *; from .JupyterMarkdownElements import __all__ as exposed
+__all__ += exposed

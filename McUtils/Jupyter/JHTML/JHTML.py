@@ -5,11 +5,13 @@ from .Bootstrap import Bootstrap
 from .HTMLWidgets import ActiveHTMLWrapper, HTMLWidgets
 from .BootstrapWidgets import BootstrapWidgets
 from .WidgetTools import JupyterAPIs, DefaultOutputWidget
+from .JupyterMarkdownElements import JupyterMarkdownElement
 
+import json
 import functools
 
 __all__ = [ "JHTML" ]
-__reload_hook__ = [".HTML", ".HTMLWidgets", ".Bootstrap", ".BootstrapWidgets", ".WidgetTools"]
+__reload_hook__ = [".HTML", ".HTMLWidgets", ".Bootstrap", ".BootstrapWidgets", ".WidgetTools", '.JupyterMarkdownElement']
 
 
 class JHTML:
@@ -19,6 +21,7 @@ class JHTML:
     CSS = CSS
     XML = ContentXML
     HTMLWidgets = HTMLWidgets
+    JupyterMarkdownElements = JupyterMarkdownElement
 
 
     APIs = JupyterAPIs
@@ -859,3 +862,52 @@ class JHTML:
                 objs=",\n    ".join(repr(x) for x in self.classes+(self.base,)),
                 spacing="\n    " if len(self.classes) > 0 else ""
             )
+
+    @classmethod
+    def JRow(cls, *children, gap="12px", **attrs):
+        """A wrapping horizontal layout."""
+        return JupyterMarkdownElement.lookup("row")(*children, gap=gap, **attrs)
+
+    @classmethod
+    def JColum(cls, *children, min_width="180px", **attrs):
+        """A wrapping horizontal layout."""
+        return JupyterMarkdownElement.lookup("column")(*children, min_width=min_width, **attrs)
+
+    @classmethod
+    def JCard(cls, *children, title=None, **attrs):
+        """A bordered surface with an optional heading."""
+        return JupyterMarkdownElement.lookup("card")(*children, title=title, **attrs)
+
+    @classmethod
+    def JAlert(cls, children, kind="info", **attrs):
+        """A themed notice; kind is primary, info, success, warning, or error."""
+        return JupyterMarkdownElement.lookup("alert")(*children, kind=kind, **attrs)
+
+    @classmethod
+    def JBadge(cls, text, kind="info", **attrs):
+        """A compact status label."""
+        return JupyterMarkdownElement.lookup("badge")(text, kind=kind, **attrs)
+
+    @classmethod
+    def JButton(cls, label, *, kind="primary", **attrs):
+        """A styled static HTML button."""
+        return JupyterMarkdownElement.lookup("button")(label, kind=kind, **attrs)
+
+    @classmethod
+    def JTable(cls, rows, *, headers=None, **attrs):
+        """A simple table with optional column headings."""
+        return JupyterMarkdownElement.lookup("table")(rows, headers=headers, **attrs)
+
+    @classmethod
+    def ClickToCopy(cls, text, *, label="Copy", button_type=None, **attrs):
+        """Build a plain button with a browser-side clipboard action."""
+        # if not isinstance(text, str):
+        #     raise TypeError("text must be a string")
+        if any(key in attrs for key in ("onclick", "on_click", "event_handlers")):
+            raise ValueError("ClickToCopy manages its own click handler")
+        # JSON quotes the JavaScript string; McUtils HTML-escapes the attribute.
+        attrs["onclick"] = f"navigator.clipboard.writeText({json.dumps(text, ensure_ascii=True)});"
+        attrs.setdefault("title", "Copy to clipboard")
+        if button_type is None:
+            button_type = HTML.Button
+        return button_type(label, **attrs)
