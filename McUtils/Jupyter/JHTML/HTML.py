@@ -2992,55 +2992,40 @@ class HTML(XMLBase):
             return self.context.xml_to_json(tree, root)
         @classmethod
         def _prettyify(cls, current, *, indent, riffle, parent=None, index=-1, depth=0):
-            """
-            **LLM Docstring**
-
-            Recursively inject indentation and line breaks into an `ElementTree` node in place.
-
-            :param current: Current `ElementTree` node being indented.
-            :type current: object
-            :param indent: Indentation string.
-            :type indent: object
-            :param riffle: Text inserted between serialized fragments or lines.
-            :type riffle: object
-            :param parent: Parent element used for cache invalidation or selector traversal.
-            :type parent: object
-            :param index: Position of the current node within its parent.
-            :type index: object
-            :param depth: Current recursion depth.
-            :type depth: object
-
-            :return: The value produced by the implemented operation.
-            :rtype: object
-            """
-            # lightly adapted from https://stackoverflow.com/a/65808327/5720002
+            """Indent structural children without changing meaningful text nodes."""
+            tag = str(current.tag)
+            # Every descendant of a whitespace-sensitive element is literal.
+            if tag.lower() in {"pre", "code", "script", "style", "textarea"}:
+                return
             for i, node in enumerate(current):
-                cls._prettyify(node, indent=indent, riffle=riffle, parent=current, index=i, depth=depth + 1)
-            if current.text is not None and len(current.text.strip()) > 0:
-                current.text = (
-                        riffle + textwrap.indent(current.text, prefix=indent * (depth+1))
-                        + riffle + (indent * depth)
-                )
-            if parent is not None:
-                if index == 0:
-                    txt = parent.text
-                    if txt is None:
-                        txt = ""
-                    parent.text = txt + riffle + (indent * depth)
-                else:
-                    txt = parent[index - 1].tail
-                    if txt is not None:
-                        txt = riffle + (indent * (depth)) + txt
-                    else:
-                        txt = ""
-                    parent[index - 1].tail = txt + riffle + (indent * depth)
-                if index == len(parent) - 1:
-                    txt = current.tail
-                    if txt is not None:
-                        txt = riffle + (indent * (depth)) + txt
-                    else:
-                        txt = ""
-                    current.tail = txt + riffle + (indent * (depth - 1))
+                cls._prettyify(node, indent=indent, riffle=riffle,
+                               parent=current, index=i, depth=depth + 1)
+            if not len(current):
+                return
+
+            # Whitespace is content between inline elements. Preserve mixed
+            # content such as <span>A<b>B</b>C</span> as well.
+            if current.text is not None and current.text.strip():
+                return
+            if any(node.tail is not None and node.tail.strip() for node in current):
+                return
+
+            structural = {
+                "div", "section", "article", "header", "footer", "main",
+                "nav", "aside", "ul", "ol", "li", "table", "thead",
+                "tbody", "tfoot", "tr", "th", "td", "blockquote",
+            }
+            x3d_children = tag[:1].isupper() and all(
+                str(node.tag)[:1].isupper() for node in current
+            )
+            if not x3d_children and not all(
+                str(node.tag).lower() in structural for node in current
+            ):
+                return
+
+            current.text = riffle + indent * (depth + 1)
+            for i, node in enumerate(current):
+                node.tail = riffle + indent * (depth + 1 if i < len(current) - 1 else depth)
 
         default_indent = "  "
         default_newline = "\n"
@@ -3086,7 +3071,7 @@ class HTML(XMLBase):
                 self._prettyify(tree, indent=indent, riffle=riffle)
                 if write_string is None:
                     write_string = ElementTree.tostring
-                base_str = write_string(tree, **base_etree_opts)
+                base_str = write_string(tree, method=method, **base_etree_opts)
             else:
                 if indent is not None and indent is not False:
                     if indent is True:
@@ -3122,6 +3107,13 @@ class HTML(XMLBase):
                 for key,elem in replacements.items():
                     base_str = base_str.replace(key, elem.tostring())
             return base_str
+
+        def to_copy_button(self, label='Copy', prettify=False, **etc):
+            return HTML.ClickToCopy(
+                self.tostring(prettify=prettify),
+                label=label,
+                **etc
+            )
 
         def sanitize_key(self, key):
             """
@@ -3765,6 +3757,8 @@ class HTML(XMLBase):
 
             display = JupyterAPIs.get_display_api()
             return display.display(display.HTML(wrapper.tostring()))
+
+        wrap_display_element = True
         def display_ipython(self):
             """
             **LLM Docstring**
@@ -3774,7 +3768,11 @@ class HTML(XMLBase):
             :return: The value produced by the implemented operation.
             :rtype: object
             """
-            return self.display_ipython_from_wrapper(self.get_display_element())
+            if self.wrap_display_element:
+                elem = self.get_display_element()
+            else:
+                elem = self
+            return self.display_ipython_from_wrapper(elem)
 
         def display(self):
             """
@@ -4319,6 +4317,21 @@ class HTML(XMLBase):
             :type id: object
             """
             super().__init__(f"<![CDATA[{text}]]>", id)
+
+    @classmethod
+    def ClickToCopy(cls, text, *, label="Copy", button_type=None, **attrs):
+        """Build a plain button with a browser-side clipboard action."""
+        import json
+        # if not isinstance(text, str):
+        #     raise TypeError("text must be a string")
+        if any(key in attrs for key in ("onclick", "on_click", "event_handlers")):
+            raise ValueError("ClickToCopy manages its own click handler")
+        # JSON quotes the JavaScript string; McUtils HTML-escapes the attribute.
+        attrs["onclick"] = f"navigator.clipboard.writeText({json.dumps(text, ensure_ascii=True)});"
+        attrs.setdefault("title", "Copy to clipboard")
+        if button_type is None:
+            button_type = cls.Button
+        return button_type(label, **attrs)
 
     class Comment(XMLElement):
         def __init__(self, *elems, **attrs):
