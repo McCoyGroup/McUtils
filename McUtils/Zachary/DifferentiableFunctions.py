@@ -12,6 +12,7 @@ from .Taylor import FunctionExpansion
 __all__ = [
     "DifferentiableFunction",
     "PolynomialFunction",
+    "GaussianFunction",
     "MorseFunction",
     "CoordinateFunction"
 ]
@@ -676,6 +677,46 @@ class PolynomialFunction(DifferentiableFunction):
         :rtype: list[DifferentiableFunction]
         """
         return []
+
+class GaussianFunction(DifferentiableFunction):
+    """A multidimensional exponential of a quadratic form.
+
+    ``amplitude * exp((x - center) @ quadratic_form @ (x - center))``.
+    The quadratic form need not be negative definite; this also represents
+    the positive Gaussian term in the Müller–Brown potential.
+    """
+
+    def __init__(self, amplitude, center, quadratic_form, inds=None):
+        super().__init__(inds=inds)
+        self.amplitude = amplitude
+        self.center = np.asarray(center, dtype=float)
+        matrix = np.asarray(quadratic_form, dtype=float)
+        if self.center.ndim != 1 or matrix.shape != (len(self.center), len(self.center)):
+            raise ValueError("quadratic_form must be square and match center")
+        self.quadratic_form = (matrix + matrix.T) / 2
+
+    def evaluate(self, coords, order=0):
+        if order > 2:
+            raise NotImplementedError("GaussianFunction supports derivatives through order 2")
+        displacement = np.asarray(coords) - self.center
+        exponent = np.einsum(
+            '...i,ij,...j->...', displacement, self.quadratic_form, displacement
+        )
+        value = self.amplitude * np.exp(exponent)
+        expansion = [value]
+        if order > 0:
+            exponent_gradient = 2 * displacement @ self.quadratic_form
+            expansion.append(value[..., np.newaxis] * exponent_gradient)
+        if order > 1:
+            expansion.append(value[..., np.newaxis, np.newaxis] * (
+                np.einsum('...i,...j->...ij', exponent_gradient, exponent_gradient)
+                + 2 * self.quadratic_form
+            ))
+        return expansion
+
+    def get_children(self):
+        return []
+
 
 class UnivariateFunction(DifferentiableFunction):
 

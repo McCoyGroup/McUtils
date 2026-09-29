@@ -349,18 +349,20 @@ class CoordinateSystem:
         else:
             # print("> okkkay", kw['return_derivs'] if 'return_derivs' in kw else 'nooooooo')
             no_conv = converter is None
-            no_preg = self._preregistered is None
-            no_other_preg = system._preregistered is None
-            if no_conv:
-                converter = self.converter(system)
-                if converter is None: raise ValueError("no converter found")
-            fun = self._convert_caller(converter, kw.copy(), is_multiconfig(coords))
-            new_coords = mc_safe_apply(fun, coords=coords)
-            if no_conv:
-                if no_preg:
-                    self.deregister_converters()
-                if no_other_preg:
-                    system.deregister_converters()
+            no_preg = not self._preregistered
+            no_other_preg = not system._preregistered
+            try:
+                if no_conv:
+                    converter = self.converter(system)
+                    if converter is None: raise ValueError("no converter found")
+                fun = self._convert_caller(converter, kw.copy(), is_multiconfig(coords))
+                new_coords = mc_safe_apply(fun, coords=coords)
+            finally:
+                if no_conv:
+                    if no_preg:
+                        self.deregister_converters()
+                    if no_other_preg:
+                        system.deregister_converters()
             # new_coords = fun(coords)
             # print("...wtf", kw['return_derivs'] if 'return_derivs' in kw else 'nooooooo')
             return new_coords

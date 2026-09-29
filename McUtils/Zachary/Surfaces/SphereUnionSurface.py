@@ -12,6 +12,8 @@ from ... import Numputils as nput
 from ... import Combinatorics as comb
 from ...Data import AtomData, UnitsData
 from ...ExternalPrograms import Open3DInterface as o3d
+from .AlphaMol import AlphaMol
+from .SkinSurface import SkinSurface
 
 __all__ = [
     "sphere_points",
@@ -1437,7 +1439,8 @@ class SphereUnionSurface:
         :type add_intersection_circles: bool
         :param extend_intersection_points: add fresh intersection-circle points
         :type extend_intersection_points: bool
-        :param method: `'hull-union'` or `'isosurface'`
+        :param method: `'hull-union'`, `'isosurface'`, or `'skin'` (triangulated skin
+            surface; options `shrink`, `radii_type`, `spacing`, forwarded to `SkinSurface`)
         :type method: str | None
         :param bbox_scaling: bounding-box padding for the isosurface grid
         :type bbox_scaling: float
@@ -1522,6 +1525,10 @@ class SphereUnionSurface:
                                   1,
                                   transformation=unembed_points,
                                   **surface_opts)
+        elif method == 'skin':
+            skin_opts = {k: surface_opts.pop(k) for k in ('shrink', 'radii_type') if k in surface_opts}
+            spacing = surface_opts.pop('spacing', 0.25)
+            return self.get_skin_surface(**skin_opts).triangulate(spacing=spacing, **surface_opts).to_surface_mesh()
         else:
             raise ValueError(f"unknown method {method}")
 
@@ -3853,13 +3860,177 @@ class SphereUnionSurface:
         return terms if return_terms else sum(terms.values())
 
 
+
+    # ------------------------------------------------------------------
+    # AlphaMol (Koehl, Akopyan & Edelsbrunner, JCIM 63, 973 (2023)):
+    # same weighted-alpha-complex idea as the UnionBall methods above, but
+    # the dual complex comes from closed-form orthosphere/attachment tests
+    # (no per-simplex SLSQP), and the measures use the angle-weighted short
+    # inclusion-exclusion formula, so no four-ball intersection is ever
+    # evaluated; also provides gradients w.r.t. the centers. See
+    # `AlphaMol.py` for the implementation.
+    # ------------------------------------------------------------------
+    @classmethod
+    def sphere_alpha_mol(cls, centers, radii, **opts):
+        """
+        **LLM Docstring**
+
+        Build the `AlphaMol` dual complex for a union of spheres.
+
+        :param centers: the sphere centers, shape `(n, 3)`
+        :param radii: the sphere radii, shape `(n,)`
+        :param opts: forwarded to `AlphaMol` (`perturbation`, `prune_contained`, `joggle`, ...)
+        :return: the (lazily evaluated) complex
+        :rtype: AlphaMol
+        """
+        return AlphaMol(centers, radii, **opts)
+
+    @classmethod
+    def sphere_area_alpha_mol(cls, centers, radii, return_components=False, **opts):
+        """
+        **LLM Docstring**
+
+        Union surface area via AlphaMol.
+
+        :param return_components: return the per-sphere exposed areas instead of the total
+        :return: the area (or per-sphere areas)
+        """
+        am = cls.sphere_alpha_mol(centers, radii, **opts)
+        return am.ball_surface_areas if return_components else am.surface_area
+
+    @classmethod
+    def sphere_volume_alpha_mol(cls, centers, radii, return_components=False, **opts):
+        """
+        **LLM Docstring**
+
+        Union volume via AlphaMol.
+
+        :param return_components: return the per-sphere (power-cell) volumes instead of the total
+        :return: the volume (or per-sphere volumes)
+        """
+        am = cls.sphere_alpha_mol(centers, radii, **opts)
+        return am.ball_volumes if return_components else am.volume
+
+    def get_alpha_mol(self, **opts):
+        """
+        **LLM Docstring**
+
+        The `AlphaMol` complex for this surface's spheres, cached when called
+        without options.
+        """
+        if opts:
+            return self.sphere_alpha_mol(self.centers, self.radii, **opts)
+        am = getattr(self, '_alpha_mol', None)
+        if am is None:
+            am = self.sphere_alpha_mol(self.centers, self.radii)
+            self._alpha_mol = am
+        return am
+
+    def intrinsic_measures(self, return_components=False, **opts):
+        """
+        **LLM Docstring**
+
+        Surface area, volume, integrated mean curvature and integrated
+        Gaussian curvature of the sphere union (AlphaMol).
+
+        :param return_components: return per-sphere arrays instead of totals
+        :return: dict keyed by `'surface_area'`, `'volume'`, `'mean_curvature'`, `'gaussian_curvature'`
+        :rtype: dict
+        """
+        am = self.get_alpha_mol(**opts)
+        return dict(am.ball_measures) if return_components else am.measures()
+
+    def intrinsic_measure_gradients(self, weights=None, method='cartesian', **opts):
+        """
+        **LLM Docstring**
+
+        Gradients of the four measures with respect to the sphere centers
+        (AlphaMol; see `AlphaMol.gradients`).
+
+        :param weights: optional per-sphere weights applied to every measure
+        :param method: `'cartesian'` (default) or `'intrinsic'` for the volume/area parts
+        :return: dict of `(n, 3)` arrays keyed like `intrinsic_measures`
+        :rtype: dict
+        """
+        return self.get_alpha_mol(**opts).gradients(weights=weights, method=method)
+
+    def weighted_measure_gradient(self, volume=None, surface_area=None,
+                                  mean_curvature=None, gaussian_curvature=None,
+                                  method='cartesian', **opts):
+        """
+        **LLM Docstring**
+
+        Gradient of `sum_i a_i V_i + b_i A_i + c_i M_i + d_i G_i` with respect
+        to the sphere centers (paper eq. 19; e.g. the morphometric nonpolar
+        solvation force is minus this with `-p, sigma, k1, k2`).
+
+        :return: `(n, 3)` gradient
+        :rtype: np.ndarray
+        """
+        return self.get_alpha_mol(**opts).weighted_gradient(
+            volume=volume, surface_area=surface_area,
+            mean_curvature=mean_curvature, gaussian_curvature=gaussian_curvature,
+            method=method
+        )
+
+    def mean_curvature(self, return_components=False, **opts):
+        """
+        **LLM Docstring**
+
+        Integrated mean curvature `int (k1 + k2)/2 dA` of the sphere union (AlphaMol).
+        """
+        am = self.get_alpha_mol(**opts)
+        return am.ball_mean_curvatures if return_components else am.mean_curvature
+
+    def gaussian_curvature(self, return_components=False, **opts):
+        """
+        **LLM Docstring**
+
+        Integrated Gaussian curvature of the sphere union (AlphaMol); equals
+        `2 pi chi` of the boundary surface.
+        """
+        am = self.get_alpha_mol(**opts)
+        return am.ball_gaussian_curvatures if return_components else am.gaussian_curvature
+
+    # ------------------------------------------------------------------
+    # skin surface (Edelsbrunner, Discrete Comput. Geom. 21, 87 (1999)):
+    # a C^1, self-intersection-free blend of the spheres built from the same
+    # regular triangulation; see `SkinSurface.py`
+    # ------------------------------------------------------------------
+    def get_skin_surface(self, shrink=None, radii_type='convex', **opts):
+        """
+        **LLM Docstring**
+
+        The skin surface of this surface's spheres. With the default
+        `radii_type='convex'` the skin's convex caps lie on the spheres
+        themselves (radii `self.radii`) and `shrink` sets how wide the concave
+        blends are. Cached per `(shrink, radii_type)` when no other options
+        are given.
+
+        :param shrink: the shrink factor `0 < s < 1` (default `SkinSurface.default_shrink`)
+        :param radii_type: `'convex'` or `'balls'`, see `SkinSurface`
+        :param opts: forwarded to `SkinSurface`
+        :rtype: SkinSurface
+        """
+        if opts:
+            return SkinSurface(self.centers, self.radii, shrink, radii_type=radii_type, **opts)
+        cache = getattr(self, '_skin_surfaces', None)
+        if cache is None:
+            cache = {}
+            self._skin_surfaces = cache
+        key = (shrink, radii_type)
+        if key not in cache:
+            cache[key] = SkinSurface(self.centers, self.radii, shrink, radii_type=radii_type)
+        return cache[key]
+
     def surface_area(self, method='union-ball', **opts):
         """
         **LLM Docstring**
 
         Compute the surface area of the sphere union by the chosen method.
 
-        :param method: `'union'` (analytic), `'sampling'`, `'mesh'`, or `'pcmesh'`
+        :param method: `'union-ball'`, `'alpha-mol'`, `'skin'` (skin-surface area,
+            options `shrink`, `radii_type`, `spacing`), `'union'` (analytic), `'sampling'`, `'mesh'`, or `'pcmesh'`
         :type method: str
         :param opts: method-specific options
         :return: the surface area
@@ -3870,6 +4041,13 @@ class SphereUnionSurface:
             return self.sphere_union_surface_area(self.centers, self.radii, **opts)
         elif method == 'union-ball':
             return self.sphere_area_union_ball(self.centers, self.radii, **opts)
+        elif method == 'alpha-mol':
+            if opts:
+                return self.sphere_area_alpha_mol(self.centers, self.radii, **opts)
+            return self.get_alpha_mol().surface_area
+        elif method == 'skin':
+            spacing = opts.pop('spacing', 0.25)
+            return self.get_skin_surface(**opts).surface_area(spacing=spacing)
         elif method == 'sampling':
             expansion = opts.pop('expansion', self.expansion)
             scaling = opts.pop('scaling', self.scaling)
@@ -3897,18 +4075,26 @@ class SphereUnionSurface:
 
         Compute the volume of the sphere union by the chosen method.
 
-        :param method: `'monte-carlo'`, `'sampling'`, `'voxel'`, `'mesh'`, or `'pcmesh'` (`'union'` not implemented)
+        :param method: `'union-ball'`, `'alpha-mol'`, `'skin'` (volume inside the skin
+            surface, options `shrink`, `radii_type`, `spacing`), `'union'`, `'monte-carlo'`, `'sampling'`,
+            `'voxel'`, `'mesh'`, or `'pcmesh'`
         :type method: str
         :param opts: method-specific options
         :return: the volume
         :rtype: float
         :raises ValueError: for an unknown method
-        :raises NotImplementedError: for the analytic `'union'` method
         """
         if method == 'union':
             return self.sphere_union_volume(self.centers, self.radii, **opts)
         elif method == 'union-ball':
             return self.sphere_volume_union_ball(self.centers, self.radii, **opts)
+        elif method == 'alpha-mol':
+            if opts:
+                return self.sphere_volume_alpha_mol(self.centers, self.radii, **opts)
+            return self.get_alpha_mol().volume
+        elif method == 'skin':
+            spacing = opts.pop('spacing', 0.25)
+            return self.get_skin_surface(**opts).volume(spacing=spacing)
         elif method == 'sampling':
             expansion = opts.pop('expansion', self.expansion)
             scaling = opts.pop('scaling', self.scaling)
@@ -4568,7 +4754,7 @@ class MeshCleaner:
 
 class SphereUnionSurfaceMesh:
     def __init__(self, verts, inds, surf=None, densities=None, tri_map=None, vert_map=None, normals=None,
-                 vertex_normals=None, centers=None, radii=None, styles=None):
+                 vertex_normals=None, centers=None, radii=None, styles=None, curvatures=None):
         """
         **LLM Docstring**
 
@@ -4595,6 +4781,11 @@ class SphereUnionSurfaceMesh:
         :type centers: np.ndarray | None
         :param radii: the sphere radii
         :type radii: np.ndarray | None
+        :param curvatures: stored per-vertex curvatures, a dict with `'mean'`
+            and/or `'gaussian'` arrays (e.g. exact values from the surface the
+            mesh was built from); anything missing is estimated from the mesh
+            on demand, see `vertex_curvatures`
+        :type curvatures: dict | None
         """
         self.surf = surf
         self.verts = verts
@@ -4610,25 +4801,229 @@ class SphereUnionSurfaceMesh:
         self.radii = radii
         self._derivative_term_cache = {}
         self.styles = styles
+        self._curvatures = {} if curvatures is None else {
+            k: np.asanyarray(v) for k, v in dict(curvatures).items() if v is not None
+        }
+
+    curvature_types = ('mean', 'gaussian')
+    default_curvature_method = 'quadric'
+    def vertex_curvatures(self, curvature_type=None, recompute=False, method=None):
+        """
+        **LLM Docstring**
+
+        Per-vertex mean (`(k1 + k2)/2`, positive on outward-convex regions)
+        and Gaussian curvatures. Stored values (from `curvatures=` in the
+        constructor) are returned as-is; otherwise they are estimated from the
+        mesh (see `estimate_vertex_curvatures`) and cached.
+
+        :param curvature_type: `'mean'`, `'gaussian'`, or `None` for a dict of both
+        :type curvature_type: str | None
+        :param recompute: ignore stored / cached values and estimate from the mesh
+        :type recompute: bool
+        :param method: estimator, `'quadric'` (default) or `'cotangent'`
+        :type method: str | None
+        :return: the per-vertex curvatures
+        :rtype: np.ndarray | dict
+        """
+        types = self.curvature_types if curvature_type is None else (curvature_type,)
+        for t in types:
+            if t not in self.curvature_types:
+                raise ValueError(f"unknown curvature type '{t}'")
+        if recompute or any(t not in self._curvatures for t in types):
+            mean, gauss = self.estimate_vertex_curvatures(self.verts, self.inds, vertex_normals=self.vertex_normals,
+                                                          method=method)
+            estimated = {'mean': mean, 'gaussian': gauss}
+            if recompute:
+                return estimated[curvature_type] if curvature_type is not None else estimated
+            for t in types:
+                self._curvatures.setdefault(t, estimated[t])
+        if curvature_type is not None:
+            return self._curvatures[curvature_type]
+        return {t: self._curvatures[t] for t in self.curvature_types}
+
+    @classmethod
+    def estimate_vertex_curvatures(cls, verts, inds, vertex_normals=None, method=None, rings=2):
+        """
+        **LLM Docstring**
+
+        Per-vertex mean and Gaussian curvature estimated from a triangle mesh.
+
+        `'quadric'` (default): at each vertex, least-squares fit of the height
+        `w = a u^2 + b u v + c v^2 + d u + e v` of its `rings`-ring neighbours
+        over the tangent plane of the vertex normal, and the curvatures of that
+        graph at the vertex. Insensitive to triangle shape, so it stays
+        accurate on isosurface meshes (irregular, with occasional slivers);
+        converges as `O(h^2)` on smooth surfaces. Vertices with fewer than
+        five neighbours fall back to `'cotangent'`.
+
+        `'cotangent'`: the discrete operators of Meyer, Desbrun, Schroeder &
+        Barr (2003), see `cotangent_vertex_curvatures`; exact Gauss-Bonnet in
+        aggregate, but individual vertices are noisy on irregular meshes.
+
+        The sign of the mean curvature follows the vertex normals (given, or
+        area-weighted face normals from the triangle winding), so it is
+        positive on convex parts of an outward-oriented mesh.
+
+        :param verts: the vertices, shape `(n, 3)`
+        :param inds: the triangles, shape `(t, 3)`
+        :param vertex_normals: optional per-vertex normals
+        :param method: `'quadric'` or `'cotangent'`
+        :param rings: neighbourhood size for the quadric fit
+        :return: `(mean, gaussian)`
+        :rtype: tuple
+        """
+        if method is None:
+            method = cls.default_curvature_method
+        if method == 'cotangent':
+            return cls.cotangent_vertex_curvatures(verts, inds, vertex_normals=vertex_normals)
+        elif method != 'quadric':
+            raise ValueError(f"unknown curvature estimator '{method}'")
+        verts = np.asanyarray(verts, dtype=float)
+        inds = np.asanyarray(inds, dtype=int)
+        n = len(verts)
+        e = np.concatenate([inds[:, [0, 1]], inds[:, [1, 2]], inds[:, [2, 0]]])
+        A = scipy.sparse.coo_matrix((np.ones(len(e)), (e[:, 0], e[:, 1])), shape=(n, n)).tocsr()
+        A = ((A + A.T) > 0).astype(np.int8)
+        N = A.copy()
+        for _ in range(rings - 1):
+            N = ((N + N @ A) > 0).astype(np.int8)
+        N = N.tolil()
+        N.setdiag(0)
+        N = N.tocsr()
+        N.eliminate_zeros()
+        vn = cls._vertex_normals_for(verts, inds, vertex_normals)
+        ax = np.eye(3)[np.argmin(np.abs(vn), axis=1)]
+        t1 = np.cross(vn, ax)
+        t1 /= np.linalg.norm(t1, axis=1)[:, None]
+        t2 = np.cross(vn, t1)
+        mean = np.full(n, np.nan)
+        gauss = np.full(n, np.nan)
+        counts = np.diff(N.indptr)
+        for c in np.unique(counts):
+            if c < 5:
+                continue
+            rows = np.flatnonzero(counts == c)
+            for start in range(0, len(rows), 20000):
+                r = rows[start:start + 20000]
+                nb = N.indices[N.indptr[r][:, None] + np.arange(c)[None, :]]
+                d = verts[nb] - verts[r][:, None, :]
+                u = np.einsum('mkx,mx->mk', d, t1[r])
+                v = np.einsum('mkx,mx->mk', d, t2[r])
+                w = np.einsum('mkx,mx->mk', d, vn[r])
+                M = np.stack([u * u, u * v, v * v, u, v], -1)
+                MtM = np.einsum('mki,mkj->mij', M, M)
+                Mtw = np.einsum('mki,mk->mi', M, w)
+                reg = 1e-14 * np.trace(MtM, axis1=1, axis2=2)[:, None, None] * np.eye(5)
+                a, b, cc, dd, ee = np.linalg.solve(MtM + reg, Mtw[..., None])[..., 0].T
+                g2 = 1 + dd * dd + ee * ee
+                # the surface bends away from an outward normal on convex parts, hence the sign
+                mean[r] = -((1 + ee * ee) * 2 * a - 2 * dd * ee * b + (1 + dd * dd) * 2 * cc) / (2 * g2 ** 1.5)
+                gauss[r] = (4 * a * cc - b * b) / g2 ** 2
+        bad = ~np.isfinite(mean) | ~np.isfinite(gauss)
+        if bad.any():
+            cm, cg = cls.cotangent_vertex_curvatures(verts, inds, vertex_normals=vertex_normals)
+            mean[bad], gauss[bad] = cm[bad], cg[bad]
+        return mean, gauss
+
+    @staticmethod
+    def _vertex_normals_for(verts, inds, vertex_normals):
+        if vertex_normals is None:
+            cr = np.cross(verts[inds[:, 1]] - verts[inds[:, 0]], verts[inds[:, 2]] - verts[inds[:, 0]])
+            vn = np.zeros((len(verts), 3))
+            for k in range(3):
+                np.add.at(vn, inds[:, k], cr)
+        else:
+            vn = np.asanyarray(vertex_normals, dtype=float)
+        return vn / np.maximum(np.linalg.norm(vn, axis=1), 1e-300)[:, None]
+
+    @classmethod
+    def cotangent_vertex_curvatures(cls, verts, inds, vertex_normals=None):
+        """
+        **LLM Docstring**
+
+        Discrete per-vertex mean and Gaussian curvature of a triangle mesh
+        (Meyer et al. 2003): mixed Voronoi areas `A_i`,
+        `K_i = (2 pi - sum of angles at i) / A_i` (`pi` instead of `2 pi` on
+        boundary vertices), and `H_i = -(Delta x)_i . n_i / 2` with the
+        cotangent Laplacian `Delta x`. The sign of `H` follows the vertex
+        normals (given, or area-weighted face normals from the triangle
+        winding), so it is positive on convex parts of an outward-oriented mesh.
+
+        :param verts: the vertices, shape `(n, 3)`
+        :param inds: the triangles, shape `(t, 3)`
+        :param vertex_normals: optional per-vertex normals used for the sign of `H`
+        :return: `(mean, gaussian)`
+        :rtype: tuple
+        """
+        verts = np.asanyarray(verts, dtype=float)
+        inds = np.asanyarray(inds, dtype=int)
+        n = len(verts)
+        P = verts[inds]                                        # (t, 3 corners, 3)
+        # edge opposite corner k runs between the other two corners
+        e = np.stack([P[:, 2] - P[:, 1], P[:, 0] - P[:, 2], P[:, 1] - P[:, 0]], axis=1)
+        l2 = np.einsum('tkx,tkx->tk', e, e)
+        cr = np.cross(P[:, 1] - P[:, 0], P[:, 2] - P[:, 0])
+        dbl = np.linalg.norm(cr, axis=-1)                      # twice the triangle area
+        # interior angle and cotangent at each corner
+        a_vec = [(P[:, (k + 1) % 3] - P[:, k], P[:, (k + 2) % 3] - P[:, k]) for k in range(3)]
+        dots = np.stack([np.einsum('tx,tx->t', u, v) for u, v in a_vec], axis=1)
+        with np.errstate(invalid='ignore', divide='ignore'):
+            cot = dots / dbl[:, None]
+            ang = np.arctan2(dbl[:, None], dots)
+        cot = np.nan_to_num(cot)
+        # mixed Voronoi areas
+        area = dbl / 2
+        vor = np.stack([
+            (l2[:, (k + 1) % 3] * cot[:, (k + 1) % 3] + l2[:, (k + 2) % 3] * cot[:, (k + 2) % 3]) / 8
+            for k in range(3)
+        ], axis=1)
+        obtuse = ang > np.pi / 2
+        any_obtuse = obtuse.any(axis=1)
+        mixed = np.where(any_obtuse[:, None], np.where(obtuse, area[:, None] / 2, area[:, None] / 4), vor)
+        A = np.zeros(n)
+        np.add.at(A, inds.ravel(), mixed.ravel())
+        # angle deficit (boundary vertices: pi)
+        angsum = np.zeros(n)
+        np.add.at(angsum, inds.ravel(), np.nan_to_num(ang).ravel())
+        edges = np.sort(np.concatenate([inds[:, [0, 1]], inds[:, [1, 2]], inds[:, [2, 0]]]), axis=1)
+        ue, cnt = np.unique(edges, axis=0, return_counts=True)
+        boundary = np.zeros(n, dtype=bool)
+        boundary[ue[cnt == 1].ravel()] = True
+        full = np.where(boundary, np.pi, 2 * np.pi)
+        # cotangent Laplacian: sum over the edges (i, j) of (cot a + cot b)(x_j - x_i) / (2 A_i)
+        lap = np.zeros((n, 3))
+        for k in range(3):
+            i, j = inds[:, (k + 1) % 3], inds[:, (k + 2) % 3]   # the edge opposite corner k
+            w = cot[:, k][:, None] * (verts[j] - verts[i])
+            np.add.at(lap, i, w)
+            np.add.at(lap, j, -w)
+        vn = cls._vertex_normals_for(verts, inds, vertex_normals)
+        with np.errstate(invalid='ignore', divide='ignore'):
+            lap = lap / (2 * A)[:, None]
+            mean = -0.5 * np.einsum('ij,ij->i', lap, vn)
+            gauss = (full - angsum) / A
+        return mean, gauss
 
     def surface_area(self, return_components=False):
         """
         **LLM Docstring**
 
-        Compute the mesh surface area as the sum of its triangle areas (Heron's
-        formula).
+        Compute the mesh surface area as the sum of its triangle areas,
+        `|(b - a) x (c - a)| / 2` per triangle. This is linear in the number of
+        triangles (the previous Heron's-formula version built a dense
+        vertex-vertex distance matrix, quadratic in the number of vertices) and
+        stays accurate for needle-shaped triangles, where Heron's formula
+        cancels catastrophically.
 
         :param return_components: return the per-triangle areas rather than the sum
         :type return_components: bool
         :return: the surface area (or per-triangle areas)
         :rtype: float | np.ndarray
         """
-        dm = nput.distance_matrix(self.verts)
-        a = dm[self.inds[:, 0], self.inds[:, 1]]
-        b = dm[self.inds[:, 1], self.inds[:, 2]]
-        c = dm[self.inds[:, 0], self.inds[:, 2]]
-        s = (a + b + c) /2
-        tris = np.sqrt(s*(s-a)*(s-b)*(s-c))
+        verts = np.asanyarray(self.verts)
+        inds = np.asanyarray(self.inds)
+        a = verts[inds[:, 0]]
+        tris = 0.5 * np.linalg.norm(np.cross(verts[inds[:, 1]] - a, verts[inds[:, 2]] - a), axis=-1)
         if return_components:
             return tris
         else:
@@ -4636,15 +5031,26 @@ class SphereUnionSurfaceMesh:
 
     def volume(self, return_components=False):
         """
-        Exact volume of a closed mesh via the divergence theorem.
-        Assumes outward-pointing face normals and watertight mesh.
+        Exact volume of a closed mesh via the divergence theorem: the sum of
+        the signed volumes `a . (b x c) / 6` of the tetrahedra joining the
+        origin to each triangle. Assumes a watertight, consistently oriented
+        mesh; the sign of the total is dropped, so inward- and
+        outward-oriented meshes give the same volume. (Summing the absolute
+        values of the per-triangle terms instead, as before, is only correct
+        when all of them share a sign, i.e. for star-shaped meshes seen from
+        the origin, and overestimates the volume of concave surfaces.)
+
+        :param return_components: return the signed per-triangle terms
+        :type return_components: bool
+        :return: the volume (or per-triangle signed volumes)
+        :rtype: float | np.ndarray
         """
         v1 = self.verts[self.inds[:, 0], :]
         comps = np.sum((v1 * self.signed_volumes[:, np.newaxis] * self.normals), axis=-1) / 6
         if return_components:
             return comps
         else:
-            return np.sum(np.abs(comps))
+            return abs(np.sum(comps))
 
     def normal_derivatives(self, order=1):
         """
@@ -5158,6 +5564,7 @@ class SphereUnionSurfaceMesh:
              normals=None,
              invert_mesh=False,
              distance_units=None,
+             curvature=None,
              **etc
              ):
         """
@@ -5176,6 +5583,10 @@ class SphereUnionSurfaceMesh:
         :type invert_mesh: bool
         :param distance_units: the display distance units
         :type distance_units: str
+        :param curvature: color the vertices by `'mean'` or `'gaussian'`
+            curvature (see `vertex_curvatures`; stored values are used when
+            present); ignored if `vertex_values` or `function` is given
+        :type curvature: str | None
         :param etc: extra plotting options
         :return: the figure
         """
@@ -5189,6 +5600,9 @@ class SphereUnionSurfaceMesh:
         vv = styles.pop('vertex_values', None)
         if vertex_values is None:
             vertex_values = vv
+        cv = styles.pop('curvature', None)
+        if curvature is None:
+            curvature = cv
 
         du = styles.pop('distance_units', None)
         if distance_units is None:
@@ -5204,6 +5618,8 @@ class SphereUnionSurfaceMesh:
             vertex_values = vv
         if vertex_values is None and function is not None:
             vertex_values = function(self.verts)
+        if vertex_values is None and curvature is not None:
+            vertex_values = self.vertex_curvatures(curvature)
 
         if vertex_values is not None:
             etc['color'] = etc.get('color', None)
