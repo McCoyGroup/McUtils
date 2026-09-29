@@ -14,6 +14,7 @@ from . import SetOps as set_ops
 __all__ = [
     "iterative_step_minimize",
     "iterative_chain_minimize",
+    "string_method_minimize",
     "scipy_minimize",
     "GradientDescentStepFinder",
     "NewtonStepFinder",
@@ -21,6 +22,8 @@ __all__ = [
     "ConjugateGradientStepFinder",
     "EigenvalueFollowingStepFinder",
     "NudgedElasticBandStepFinder",
+    "StringMethodStepFinder",
+    "InterpolatingReparametrizer",
     "jacobi_maximize",
     "LineSearchRotationGenerator",
     "GradientDescentRotationGenerator",
@@ -49,6 +52,9 @@ def lookup_method_name(method):
         'newton':NewtonStepFinder,
         'quasi-newton':QuasiNewtonStepFinder,
         'gradient-descent':GradientDescentStepFinder,
+        'eigenvalue-following':EigenvalueFollowingStepFinder,
+        'eigenvector-following':EigenvalueFollowingStepFinder,
+        'string':StringMethodStepFinder,
         'neb':NudgedElasticBandStepFinder
     }.get(method)
 def get_step_finder(spec,
@@ -189,10 +195,14 @@ def iterative_step_minimize_step(step_predictor,
 
     if max_displacement is not None:
         step_sizes = np.max(np.abs(step), axis=1)
-        step *= max_displacement / np.clip(step_sizes, max_displacement, None)
+        step *= (max_displacement / np.clip(
+            step_sizes, max_displacement, None
+        ))[:, np.newaxis]
     if max_displacement_norm is not None:
         step_sizes = np.linalg.norm(step, axis=1)
-        step *= max_displacement / np.clip(step_sizes, max_displacement, None)
+        step *= (max_displacement_norm / np.clip(
+            step_sizes, max_displacement_norm, None
+        ))[:, np.newaxis]
     if region_constraints is not None:
         #TODO: introduce this as a scaling
         max_step = region_constraints[np.newaxis, :, 1] - guess
@@ -262,10 +272,6 @@ def iterative_step_minimize_step(step_predictor,
             ang = np.arctan2(norms / r, v / r)
             rot = tfs.rotation_matrix(axis, ang)
             rotations = rot @ rotations
-    else:
-        step = step[rem,]
-
-
     return step, errs, mask, done
 
 def iterative_step_minimize(
@@ -1094,9 +1100,9 @@ def iterative_chain_minimize(
                     if j-1 not in fixed_images:
                         submasks[new_mask, j-1] = True
 
-                errs[mask,] += step_errs
-                guesses[submask, j] += step
-                if reembed: # implies Cartesian
+                errs[submask,] += step_errs
+                guesses[new_mask, j] += step
+                if reembed and len(new_mask) > 0: # implies Cartesian
                     from .CoordinateFrames import eckart_embedding
 
                     if j == 0:
@@ -1106,32 +1112,25 @@ def iterative_chain_minimize(
                             ref = 1
                     else:
                         ref = j-1
-                    ref = guesses[submask, ref]
-                    coords = guesses[submask, j]
+                    ref = guesses[new_mask, ref]
+                    coords = guesses[new_mask, j]
                     emb = eckart_embedding(
                         ref.reshape(ref.shape[0], -1, 3),
                         coords.reshape(coords.shape[0], -1, 3),
                         **embedding_options
                     )
-                    guesses[submask, j] = emb.coordinates.reshape(coords.shape[0], -1)
+                    guesses[new_mask, j] = emb.coordinates.reshape(coords.shape[0], -1)
 
             climbing_nodes = climbing_nodes_og
             if reparametrizer is not None:
-                # for methods that want to satisfy some density function on
-                # the number of images
-                new_chains, is_static, fixed_images = reparametrizer(guesses[mask,], fixed_images)
+                new_chains, moved_images, fixed_images = reparametrizer(guesses[mask,], fixed_images)
                 nimg_new = new_chains.shape[1]
                 if nimg_new != nimg:
-                    guesses = np.pad(guesses,  [[0, 0], [0, nimg_new-nimg], [0, 0]])
-                    submasks = np.pad(submasks, [[0, 0], [0, nimg_new-nimg]])
-                    submasks[mask, :] = True
-                    guesses[mask,] = new_chains
-                    image_numbers[mask,] = nimg_new
-                else:
-                    submasks[mask, :] = np.logical_and(
-                        submasks[mask, :],
-                        is_static
-                    )
+                    raise ValueError("reparametrization must preserve the number of images")
+                guesses[mask,] = new_chains
+                submasks[mask,] |= np.any(moved_images, axis=1)[:, np.newaxis]
+                if len(fixed_images) > 0:
+                    submasks[mask[:, np.newaxis], fixed_images] = False
 
                 if prev_step is not None:
                     prev_step = np.zeros_like(guesses)
@@ -1147,9 +1146,9 @@ def iterative_chain_minimize(
 
             if return_trajectory:
                 traj.append(guesses.copy())
-            else:
-                converged = False
-                its[mask,] = max_iterations
+    else:
+        converged = False
+        its[mask,] = max_iterations
 
     guesses = guesses.reshape(base_shape + guesses.shape[-2:])
     errs = errs.reshape(base_shape)
@@ -2169,6 +2168,7 @@ class QuasiNetwonHessianApproximator:
         self.base_hess = None
         self.prev_jac = None
         self.prev_step = None
+        self.prev_guess = None
         self.prev_hess_inv = None
         self.eye_tensors = None
         self.damper = Damper(
@@ -2298,19 +2298,23 @@ class QuasiNetwonHessianApproximator:
             jac_diffs = new_jacs - prev_jacs
         return new_jacs, jac_diffs
 
-    def restart_hessian_approximation(self):
+    def restart_hessian_approximation(self, displacement=None):
         """
         **LLM Docstring**
 
         Decide whether to reset the Hessian approximation (on a near-zero previous step
         or a numerical blow-up).
 
+        :param displacement: actual previous step, if available
+        :type displacement: np.ndarray | None
         :return: whether to restart
         :rtype: bool
         """
-        if np.any(self.prev_step > 1e80): # a divide by zero in a previous Hessian update
+        if displacement is None:
+            displacement = self.prev_step
+        if np.any(displacement > 1e80): # a divide by zero in a previous Hessian update
             return True
-        prev_norm = np.linalg.norm(self.prev_step, axis=-1)
+        prev_norm = np.linalg.norm(displacement, axis=-1)
         restart = np.any(prev_norm < self.restart_hessian_norm)
         return restart
 
@@ -2336,13 +2340,20 @@ class QuasiNetwonHessianApproximator:
         :rtype: tuple
         """
         new_jacs, jacobian_diffs = self.get_jacobian_updates(guess, mask, gradient_modifer=gradient_modifer)
-        if self.prev_step is None or self.restart_hessian_approximation():
+        if self.prev_guess is None:
             new_hess = self.initialize_hessians(guess, mask)
         else:
-            prev_steps = self.prev_step[mask,]
-            prev_hess = self.prev_hess_inv[mask,]
-            #TODO: check the update to make sure the Hessian approx. isn't crashing
-            new_hess = self.get_hessian_update(self.identities(guess, mask), jacobian_diffs, prev_steps, prev_hess)
+            # The outer minimizer can cap or project the proposed step. Use the
+            # displacement it actually took for the secant equation.
+            prev_steps = guess - self.prev_guess[mask,]
+            if self.restart_hessian_approximation(prev_steps):
+                new_hess = self.initialize_hessians(guess, mask)
+            else:
+                prev_hess = self.prev_hess_inv[mask,]
+                new_hess = self.get_hessian_update(
+                    self.identities(guess, mask), jacobian_diffs,
+                    prev_steps, prev_hess
+                )
 
         if self.approximation_mode == 'direct':
             B = np.linalg.inv(new_hess)
@@ -2371,6 +2382,11 @@ class QuasiNetwonHessianApproximator:
             self.prev_step = new_step
         else:
             self.prev_step[mask,] = new_step
+
+        if self.prev_guess is None:
+            self.prev_guess = guess.copy()
+        else:
+            self.prev_guess[mask,] = guess
 
         if self.prev_hess_inv is None:
             self.prev_hess_inv = new_hess
@@ -2702,19 +2718,41 @@ class CompactQuasiNewtonApproximator(QuasiNetwonHessianApproximator):
         return B
 
 class PSBQuasiNewtonApproximator(CompactQuasiNewtonApproximator):
+    def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
+        """Apply the symmetric PSB secant update in direct or inverse form."""
+        updated = prev_hess.copy()
+        if self.approximation_mode == 'direct':
+            displacement, difference = prev_steps, jacobian_diffs
+        else:
+            displacement, difference = jacobian_diffs, prev_steps
+
+        residual = difference - np.einsum('bij,bj->bi', updated, displacement)
+        step_norm = np.einsum('bi,bi->b', displacement, displacement)
+        valid = step_norm > self.orthogonal_dirs_cutoff
+        safe_norm = np.where(valid, step_norm, 1)
+        residual_step = np.einsum('bi,bi->b', residual, displacement)
+        correction = (
+            (np.einsum('bi,bj->bij', residual, displacement)
+             + np.einsum('bi,bj->bij', displacement, residual)) / safe_norm[:, None, None]
+            - (residual_step / safe_norm**2)[:, None, None]
+            * np.einsum('bi,bj->bij', displacement, displacement)
+        )
+        updated[valid] += correction[valid]
+        return updated
+
     @classmethod
     def get_direct_hessian_update_vector(cls, H, dx, y):
         """
         **LLM Docstring**
 
-        Not supported: PSB only implements the inverse update.
+        The PSB compact update vector is the displacement.
 
         :param H: the current Hessian
         :param dx: the step
         :param y: the gradient difference
-        :raises NotImplementedError: always
+        :return: the displacement
         """
-        raise NotImplementedError("PSB only does inverse mode")
+        return dx
     @classmethod
     def get_inverse_hessian_update_vector(cls, H, dx, y):
         """
@@ -2883,9 +2921,10 @@ class WeightedQuasiNewtonApproximator(QuasiNetwonHessianApproximator):
             for app in self.approximators
         ])
 
-        # weights is kxb array and base_updates is bxkxnxn
-        avg = weights[:, np.newaxis, :] @ np.moveaxis(base_updates, 1, 0)[:, :, np.newaxis, :, :]
-        return avg.reshape(base_updates.shape[1:])
+        # Each approximator supplies one (batch, n, n) update and one weight
+        # per batch member. Blend the complete updates, not their increments.
+        weights = np.asarray(weights)
+        return np.einsum('kb,kbij->bij', weights, base_updates)
 
 class BofillApproximator(WeightedQuasiNewtonApproximator):
     base_approximators = [
@@ -2896,16 +2935,17 @@ class BofillApproximator(WeightedQuasiNewtonApproximator):
         """
         **LLM Docstring**
 
-        Not supported: the Bofill blend is only defined for the inverse form here.
+        Return the direct-Hessian SR1 and PSB weights for each batch member.
 
         :param jacobian_diffs: gradient differences
         :param prev_steps: previous steps
         :param prev_hess: previous Hessian
-        :raises NotImplementedError: always
+        :return: `[psi, 1 - psi]`, where psi weights SR1
+        :rtype: list[np.ndarray]
         """
-        raise NotImplementedError("only inverse supported")
+        psi = self.get_psi(jacobian_diffs, prev_steps, prev_hess)
+        return [psi, 1 - psi]
 
-    @classmethod
     def get_psi(self, jacobian_diffs, prev_steps, prev_hess):
         """
         **LLM Docstring**
@@ -2922,28 +2962,22 @@ class BofillApproximator(WeightedQuasiNewtonApproximator):
         :return: the psi weights
         :rtype: np.ndarray
         """
-        psi = np.ones_like(prev_steps)
-
-        dx = prev_steps[:, :, np.newaxis]
-        dx_T = prev_steps[:, np.newaxis, :]
-        y = jacobian_diffs[:, :, np.newaxis]
-        y_T = jacobian_diffs[:, np.newaxis, :]
-        H = prev_hess
-        h_step = y + H @ dx
-        h_step_T = np.moveaxis(h_step, -2, -1)
-        h_norm = h_step_T @ h_step
-        s_norm = dx_T @ dx
-        good_pos, (
-            H, dx, dx_T, y, y_T,
-            s_norm, h_norm
-        ) = self.take_nonzero_norm_regions([s_norm, h_norm],
-                                           [H, dx, dx_T, y, y_T,
-                                            s_norm, h_norm])
-        step_disp = h_step_T @ dx
-
-        psi[good_pos] = np.reshape( (step_disp**2)/(s_norm * h_norm), -1)
-
-        return psi
+        if self.approximation_mode == 'direct':
+            displacement, difference = prev_steps, jacobian_diffs
+        else:
+            displacement, difference = jacobian_diffs, prev_steps
+        residual = difference - np.einsum('bij,bj->bi', prev_hess, displacement)
+        residual_norm = np.einsum('bi,bi->b', residual, residual)
+        step_norm = np.einsum('bi,bi->b', displacement, displacement)
+        residual_step = np.einsum('bi,bi->b', residual, displacement)
+        denominator = residual_norm * step_norm
+        psi = np.zeros(len(prev_steps), dtype=np.result_type(prev_hess, float))
+        valid = np.logical_and(
+            denominator > self.orthogonal_dirs_cutoff,
+            np.abs(residual_step) > SR1Approximator.orthogonal_dirs_cutoff
+        )
+        psi[valid] = residual_step[valid]**2 / denominator[valid]
+        return np.clip(psi, 0, 1)
 
     def get_inverse_weights(self, jacobian_diffs, prev_steps, prev_hess):
             """
@@ -3275,6 +3309,7 @@ class PolakRibiereApproximator(ConjugateGradientStepApproximator):
 
 class EigenvalueFollowingStepFinder:
 
+    supports_hessian = True
     line_search = ArmijoSearch
     def __init__(self, func, jacobian, hessian, initial_beta=1,
                  damping_parameter=None, damping_exponent=None,
@@ -3289,8 +3324,8 @@ class EigenvalueFollowingStepFinder:
         """
         **LLM Docstring**
 
-        Initialize an eigenvalue-following (P-RFO style) step finder, which shifts the
-        Hessian eigenvalues to walk toward a chosen stationary point.
+        Initialize an eigenvector-following step finder. The selected Hessian mode
+        is ascended while the remaining modes are descended.
 
         :param func: the objective function
         :type func: Callable
@@ -3304,7 +3339,7 @@ class EigenvalueFollowingStepFinder:
         :type damping_parameter: float | None
         :param damping_exponent: damping decay exponent
         :type damping_exponent: float | None
-        :param line_search: line-search setting
+        :param line_search: energy Armijo search; normally leave disabled for saddles
         :type line_search: bool | Callable
         :param restart_interval: damping restart interval
         :type restart_interval: int
@@ -3312,15 +3347,20 @@ class EigenvalueFollowingStepFinder:
         :type restart_hessian_norm: float
         :param hessian_approximator: quasi-Newton scheme for Hessian updates
         :type hessian_approximator: str
-        :param approximation_mode: `'direct'` or `'inverse'`
+        :param approximation_mode: use direct or inverse secant updates
         :type approximation_mode: str
         :param target_mode: index/vector of the eigenmode to follow
         :type target_mode: int | np.ndarray | None
         :param logger: optional logger
         :type logger: object | None
         """
-        self.base_approximator = QuasiNewtonStepFinder.get_hessian_approximations()[hessian_approximator.lower()](
-            func, jacobian
+        self.hessian_approximator = hessian_approximator.lower()
+        self.approximation_mode = approximation_mode
+        if approximation_mode not in ('direct', 'inverse'):
+            raise ValueError("approximation_mode must be 'direct' or 'inverse'")
+        approximator = QuasiNewtonStepFinder.get_hessian_approximations()[self.hessian_approximator]
+        self.base_approximator = approximator(
+            func, jacobian, approximation_mode=approximation_mode
         )
         self.logger = logger
 
@@ -3331,6 +3371,7 @@ class EigenvalueFollowingStepFinder:
         self.base_hess = None
         self.prev_jac = None
         self.prev_step = None
+        self.prev_guess = None
         self.prev_evec = None
         self.prev_hess = None
         self.eye_tensors = None
@@ -3345,14 +3386,13 @@ class EigenvalueFollowingStepFinder:
             line_search = None
         self.searcher = line_search
         self.restart_hessian_norm = restart_hessian_norm
-        self.approximation_mode = approximation_mode
         self.target_mode = target_mode
 
     def identities(self, guess, mask):
         """
         **LLM Docstring**
 
-        Return (cached) identity matrices matching the active members' shape.
+        Return identity matrices matching the active members' shape.
 
         :param guess: the current parameters
         :type guess: np.ndarray
@@ -3361,11 +3401,7 @@ class EigenvalueFollowingStepFinder:
         :return: the identity tensors
         :rtype: np.ndarray
         """
-        if self.eye_tensors is None:
-            self.eye_tensors = vec_ops.identity_tensors(guess.shape[:-1], guess.shape[-1])
-            return self.eye_tensors
-        else:
-            return self.eye_tensors[mask,]
+        return vec_ops.identity_tensors(guess.shape[:-1], guess.shape[-1])
 
     def initialize_hessians(self, guess, mask):
         """
@@ -3380,7 +3416,7 @@ class EigenvalueFollowingStepFinder:
         :return: the Hessian
         :rtype: np.ndarray
         """
-        return self.hess(guess)
+        return self.hess(guess, mask)
 
     def get_hessian_update(self, identities, jacobian_diffs, prev_steps, prev_hess):
         """
@@ -3399,7 +3435,14 @@ class EigenvalueFollowingStepFinder:
         :return: the updated Hessian
         :rtype: np.ndarray
         """
-        return self.base_approximator.get_hessian_update(identities, jacobian_diffs, prev_steps, prev_hess)
+        if self.approximation_mode == 'inverse':
+            updated = self.base_approximator.get_hessian_update(
+                identities, jacobian_diffs, prev_steps, np.linalg.pinv(prev_hess)
+            )
+            return np.linalg.pinv(updated)
+        return self.base_approximator.get_hessian_update(
+            identities, jacobian_diffs, prev_steps, prev_hess
+        )
 
     negative_eigenvalue_offset = 0.015
     positive_eigenvalue_offset = 0.005
@@ -3408,9 +3451,9 @@ class EigenvalueFollowingStepFinder:
         """
         **LLM Docstring**
 
-        Choose the eigenvalue shift used to control the step, following the target mode
-        (or the lowest eigenvalue) and offsetting to keep the shifted eigenvalue the
-        right sign.
+        Return per-mode shifts and the selected eigenvectors. The followed mode has
+        negative effective curvature (ascent); all others have positive effective
+        curvature (descent). Small curvatures are bounded away from zero.
 
         :param evals: the Hessian eigenvalues
         :type evals: np.ndarray
@@ -3418,27 +3461,37 @@ class EigenvalueFollowingStepFinder:
         :type tf_new: np.ndarray
         :param target_mode: the mode being followed (or `None`)
         :type target_mode: np.ndarray | None
-        :return: the eigenvalue shift
-        :rtype: np.ndarray
+        :return: `(shifts, followed_eigenvectors)`
+        :rtype: tuple[np.ndarray, np.ndarray]
         """
+        batch_size, dimensions = evals.shape
         if target_mode is None:
-            target_ev = evals[0] # could do np.min(ev) if we had some other (or complex) eigensolver
+            mode_indices = np.zeros(batch_size, dtype=int)
+        elif np.ndim(target_mode) == 0:
+            mode_index = int(target_mode)
+            if mode_index < 0 or mode_index >= dimensions:
+                raise ValueError('target_mode index is outside the Hessian spectrum')
+            mode_indices = np.full(batch_size, mode_index, dtype=int)
         else:
-            overlaps = np.abs(tf_new @ target_mode) # TODO: check if this makes sense, in principle under a
-                                                    # quadratic appx. the "direction" of the step doesn't matter
-            abs_ov = np.abs(overlaps)
-            ev_pos = np.argmax(abs_ov)
-            if abs_ov[ev_pos] < self.mode_tracking_overlap_cutoff:
-                target_ev = evals[0]
-            else:
-                target_ev = evals[ev_pos]
+            target_mode = np.asarray(target_mode)
+            if target_mode.shape == (dimensions,):
+                target_mode = np.broadcast_to(target_mode, (batch_size, dimensions))
+            if target_mode.shape != (batch_size, dimensions):
+                raise ValueError('target_mode must be a vector or one vector per batch member')
+            norms = np.linalg.norm(target_mode, axis=1)
+            if np.any(norms == 0):
+                raise ValueError('target_mode vectors must be nonzero')
+            overlaps = np.abs(np.einsum('bij,bi->bj', tf_new, target_mode / norms[:, None]))
+            mode_indices = np.argmax(overlaps, axis=1)
+            mode_indices[overlaps[np.arange(batch_size), mode_indices] < self.mode_tracking_overlap_cutoff] = 0
 
-        if target_ev < 0:
-            shift = -target_ev + self.negative_eigenvalue_offset # make this very slightly positive
-        else:
-            shift = self.positive_eigenvalue_offset
-
-        return shift
+        rows = np.arange(batch_size)
+        effective_curvatures = np.maximum(np.abs(evals), self.positive_eigenvalue_offset)
+        effective_curvatures[rows, mode_indices] = -np.maximum(
+            np.abs(evals[rows, mode_indices]), self.negative_eigenvalue_offset
+        )
+        followed_eigenvectors = tf_new[rows, :, mode_indices]
+        return effective_curvatures - evals, followed_eigenvectors
 
     def get_jacobian_updates(self, guess, mask, gradient_modifer=None):
         """
@@ -3465,19 +3518,19 @@ class EigenvalueFollowingStepFinder:
             jac_diffs = new_jacs - prev_jacs
         return new_jacs, jac_diffs
 
-    def restart_hessian_approximation(self):
+    def restart_hessian_approximation(self, displacement):
         """
         **LLM Docstring**
 
-        Decide whether to reset the Hessian approximation (on a near-zero previous
-        step).
+        Decide whether to reset the Hessian approximation after a near-zero actual
+        displacement.
 
+        :param displacement: actual displacement since the last call
+        :type displacement: np.ndarray
         :return: whether to restart
         :rtype: bool
         """
-        restart = np.any(
-            np.linalg.norm(self.prev_step, axis=-1) < self.restart_hessian_norm
-        )
+        restart = np.any(np.linalg.norm(displacement, axis=-1) < self.restart_hessian_norm)
         return restart
 
     def __call__(self, guess, mask, return_vals=False, gradient_modifer=None, projector=None):
@@ -3507,28 +3560,33 @@ class EigenvalueFollowingStepFinder:
             guess = guess[:, j]
 
         new_jacs, jacobian_diffs = self.get_jacobian_updates(guess, mask, gradient_modifer=gradient_modifer)
-        if self.prev_step is None or self.restart_hessian_approximation():
+        if self.prev_guess is None:
             new_hess = self.initialize_hessians(guess, mask)
         else:
-            prev_steps = self.prev_step[mask,]
-            prev_hess = self.prev_hess[mask,]
-            new_hess = self.get_hessian_update(guess, self.identities(guess, mask), jacobian_diffs, prev_steps, prev_hess)
-
-        if self.prev_evec is None:
-            prev_evec = None
-        else:
-            prev_evec = self.prev_evec[mask,]
+            # The outer optimizer may cap or project the proposed step. Use the
+            # displacement that was actually taken in the secant update.
+            displacement = guess - self.prev_guess[mask,]
+            if self.restart_hessian_approximation(displacement):
+                new_hess = self.initialize_hessians(guess, mask)
+            else:
+                new_hess = self.get_hessian_update(
+                    self.identities(guess, mask), jacobian_diffs,
+                    displacement, self.prev_hess[mask,]
+                )
+        new_hess = (new_hess + np.swapaxes(new_hess, -1, -2)) / 2
 
         evals, tf = np.linalg.eigh(new_hess)
-        if misc.is_numeric(self.target_mode):
-            self.target_mode = tf[:, self.target_mode]
+        if self.prev_evec is not None and self.target_mode is not None:
+            target_mode = self.prev_evec[mask,]
+        else:
+            target_mode = self.target_mode
+            if isinstance(target_mode, np.ndarray) and target_mode.ndim == 2 and target_mode.shape[0] != len(mask):
+                target_mode = target_mode[mask,]
+        shift, followed_eigenvectors = self.get_shift(evals, tf, target_mode)
 
-        shift = self.get_shift(evals, tf, self.target_mode)
-
-        tf_grad = -np.diag(
-                np.moveaxis(tf, -1, -2) @ new_jacs[:, :, np.newaxis]
-        ) / (evals[:, :, np.newaxis] + shift[:, np.newaxis, np.newaxis])
-        new_step_dir = (tf_grad @ tf).reshape(new_jacs.shape)
+        mode_gradient = np.einsum('bij,bi->bj', tf, new_jacs)
+        mode_step = -mode_gradient / (evals + shift)
+        new_step_dir = np.einsum('bij,bj->bi', tf, mode_step)
 
         # print(new_hess)
         if projector is not None:
@@ -3553,6 +3611,16 @@ class EigenvalueFollowingStepFinder:
             self.prev_step = new_step
         else:
             self.prev_step[mask,] = new_step
+
+        if self.prev_guess is None:
+            self.prev_guess = guess.copy()
+        else:
+            self.prev_guess[mask,] = guess
+
+        if self.prev_evec is None:
+            self.prev_evec = followed_eigenvectors
+        else:
+            self.prev_evec[mask,] = followed_eigenvectors
 
         if self.prev_hess is None:
             self.prev_hess = new_hess
@@ -4055,6 +4123,33 @@ class NudgedElasticBandStepFinder(ChainMinimizingStepFinder):
             contribution = const * vec_ops.identity_tensors(guess.shape[0], guess.shape[1])
         return contribution
 
+class StringMethodStepFinder(NudgedElasticBandStepFinder):
+    """Relax a string normal to its path; reparameterization controls spacing."""
+
+    def __init__(self, func, jacobian, hessian=None, *, step_size=.001,
+                 step_finder='gradient-descent', logger=None, **opts):
+        super().__init__(
+            func, jacobian, hessian=hessian, spring_constants=0,
+            step_finder=step_finder, logger=logger,
+            line_search=False, damping_parameter=step_size,
+            damping_exponent=0, **opts
+        )
+
+    def get_tangent(self, guess, mask, cur, prev, next):
+        tangent = guess[:, next] - guess[:, prev]
+        norm = np.linalg.norm(tangent, axis=-1, keepdims=True)
+        return tangent / np.maximum(norm, 1e-12)
+
+    def adjust_jacobian(self, jac, guess, mask, cur, prev, next):
+        if prev is None or next is None:
+            return jac
+        tangent = self.get_tangent(guess, mask, cur, prev, next)
+        return jac - np.sum(jac * tangent, axis=-1, keepdims=True) * tangent
+
+    def image_pairwise_contribution(self, guess, mask, cur, prev, next, order=0):
+        return 0
+
+
 class AdjustedChainStepFinder(ChainMinimizingStepFinder):
     def __init__(self,
                  pairwise_image_function,
@@ -4130,36 +4225,102 @@ class ChainReparametrizer:
         ...
 
 class InterpolatingReparametrizer(ChainReparametrizer):
-    #TODO: add in some kind of density function
-    def __init__(self, interpolator_type):
+    def __init__(self, interpolator_type=None, movement_tolerance=1e-8):
         """
         **LLM Docstring**
 
         Initialize a reparametrizer that redistributes images by interpolation.
 
-        :param interpolator_type: the interpolator class to build from the images
+        :param interpolator_type: optional callable built from arc positions and images
         :type interpolator_type: type
+        :param movement_tolerance: displacement below which an image need not relax again
+        :type movement_tolerance: float
         """
         self.interpolator_type = interpolator_type
+        self.movement_tolerance = movement_tolerance
 
     def __call__(self, images, fixed_positions):
         """
         **LLM Docstring**
 
-        Redistribute the images evenly along an interpolation of the current chain,
-        holding the fixed positions in place.
+        Redistribute each chain by arc length, holding fixed images in place.
 
         :param images: the current chain images
         :type images: np.ndarray
         :param fixed_positions: image indices to keep unchanged
         :type fixed_positions: Iterable[int]
-        :return: the reparametrized images
-        :rtype: np.ndarray
+        :return: `(images, moved_images, fixed_positions)`
+        :rtype: tuple
         """
-        interp = self.interpolator_type(images)
-        new = interp(np.linspace(len(images)))
-        interp[fixed_positions] = images[fixed_positions]
-        return new
+        images = np.asarray(images)
+        if images.ndim != 3:
+            raise ValueError("images must have shape (batch, n_images, n_coordinates)")
+        fixed_positions = [] if fixed_positions is None else list(fixed_positions)
+        boundaries = sorted(set([0, images.shape[1] - 1] + fixed_positions))
+        new_images = images.copy()
+        for batch in range(images.shape[0]):
+            for first, last in zip(boundaries[:-1], boundaries[1:]):
+                segment = images[batch, first:last + 1]
+                distances = np.linalg.norm(np.diff(segment, axis=0), axis=-1)
+                arc = np.concatenate(([0.], np.cumsum(distances)))
+                if arc[-1] == 0:
+                    continue
+                # np.interp requires strictly increasing abscissae.
+                unique_arc, unique_indices = np.unique(arc, return_index=True)
+                nodes = segment[unique_indices]
+                targets = np.linspace(0, arc[-1], len(segment))
+                if self.interpolator_type is None:
+                    new_images[batch, first:last + 1] = np.stack([
+                        np.interp(targets, unique_arc, nodes[:, coord])
+                        for coord in range(images.shape[-1])
+                    ], axis=-1)
+                else:
+                    interpolator = self.interpolator_type(unique_arc, nodes)
+                    new_images[batch, first:last + 1] = interpolator(targets)
+                new_images[batch, first] = segment[0]
+                new_images[batch, last] = segment[-1]
+        moved = np.linalg.norm(new_images - images, axis=-1) > self.movement_tolerance
+        moved[:, boundaries] = False
+        return new_images, moved, fixed_positions
+
+
+def string_method_minimize(start, end, function, jacobian, *, n_images=12,
+                           initial_images=None, step_size=.001,
+                           reparametrizer=None, **optimizer_options):
+    """Interpolate endpoints, relax normal to the path, and redistribute nodes.
+
+    Returns the same ``((images, image_counts), converged, (errors, iterations))``
+    structure as ``iterative_chain_minimize``. Endpoints remain fixed.
+    """
+    if initial_images is None:
+        start = np.asarray(start, dtype=float)
+        end = np.asarray(end, dtype=float)
+        if start.shape != end.shape or start.ndim < 1:
+            raise ValueError("start and end must have matching coordinate shapes")
+        if n_images < 3:
+            raise ValueError("string methods require at least three images")
+        positions = np.linspace(0, 1, n_images)
+        initial_images = (
+            start[..., np.newaxis, :] * (1 - positions)[..., np.newaxis]
+            + end[..., np.newaxis, :] * positions[..., np.newaxis]
+        )
+    else:
+        initial_images = np.asarray(initial_images, dtype=float)
+        if initial_images.ndim < 2:
+            raise ValueError("initial_images must contain image and coordinate axes")
+        n_images = initial_images.shape[-2]
+        if n_images < 3:
+            raise ValueError("string methods require at least three images")
+        if not (np.allclose(initial_images[..., 0, :], start)
+                and np.allclose(initial_images[..., -1, :], end)):
+            raise ValueError("initial_images must start and end at the supplied endpoints")
+    if reparametrizer is None:
+        reparametrizer = InterpolatingReparametrizer()
+    finder = StringMethodStepFinder(function, jacobian, step_size=step_size)
+    return iterative_chain_minimize(
+        initial_images, finder, reparametrizer=reparametrizer,
+        fixed_images=[0, n_images - 1], **optimizer_options
+    )
 
 
 def jacobi_maximize(initial_matrix, rotation_generator, max_iterations=100, contrib_tol=1e-16, tol=1e-8):

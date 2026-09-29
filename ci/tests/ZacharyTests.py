@@ -2595,3 +2595,554 @@ class ZacharyTests(TestCase):
             x_test = laplace_dist.ppf(q_test)
             print(f"ppf({q_test}) = {x_test}")
             print(f"cdf(ppf(q)) = {laplace_dist.cdf(x_test)}  (should match q_test)")
+
+    #region AlphaMol
+
+    # Shared fixtures for the AlphaMol (Koehl, Akopyan & Edelsbrunner,
+    # JCIM 63, 973 (2023)) sphere-union measures and their gradients.
+    alphamol_measures = ('surface_area', 'volume', 'mean_curvature', 'gaussian_curvature')
+
+    @staticmethod
+    def alphamol_benzene():
+        # perfectly regular benzene: co-planar, co-circular -> sliver tetrahedra
+        th = np.linspace(0, 2 * np.pi, 6, endpoint=False)
+        ring = np.c_[1.39 * np.cos(th), 1.39 * np.sin(th), 0 * th]
+        return np.r_[ring, ring * (1 + 1.08 / 1.39)], np.r_[np.full(6, 1.7), np.full(6, 1.2)]
+
+    @staticmethod
+    def alphamol_cluster(n, seed, spread=1.5):
+        rng = np.random.default_rng(seed)
+        return rng.normal(size=(n, 3)) * spread, rng.uniform(0.8, 1.6, n)
+
+    @staticmethod
+    def alphamol_fd_gradient(centers, radii, measure, weights, h=1e-6):
+        grad = np.zeros_like(centers)
+        for i in range(len(radii)):
+            for x in range(3):
+                cp = centers.copy(); cp[i, x] += h
+                cm = centers.copy(); cm[i, x] -= h
+                grad[i, x] = (
+                    weights @ AlphaMol(cp, radii).ball_measures[measure]
+                    - weights @ AlphaMol(cm, radii).ball_measures[measure]
+                ) / (2 * h)
+        return grad
+
+    @validationTest
+    def test_AlphaMolClosedForms(self):
+        # exact input (perturbation=0): the default 1e-9 relative perturbation
+        # would shift these by ~1e-9
+        r = 1.3
+        m = AlphaMol(np.zeros((1, 3)), [r], perturbation=0).measures()
+        self.assertAlmostEqual(m['volume'], 4 / 3 * np.pi * r ** 3, places=10)
+        self.assertAlmostEqual(m['surface_area'], 4 * np.pi * r ** 2, places=10)
+        self.assertAlmostEqual(m['mean_curvature'], 4 * np.pi * r, places=10)
+        self.assertAlmostEqual(m['gaussian_curvature'], 4 * np.pi, places=10)
+
+        ra, rb, d = 1.0, 1.4, 1.7
+        lens = np.pi * (ra + rb - d) ** 2 * (d ** 2 + 2 * d * rb - 3 * rb ** 2 + 2 * d * ra + 6 * ra * rb - 3 * ra ** 2) / (12 * d)
+        ha = (rb - ra + d) * (rb + ra - d) / (2 * d)
+        hb = (ra - rb + d) * (ra + rb - d) / (2 * d)
+        m = AlphaMol([[0, 0, 0], [d, 0, 0]], [ra, rb], perturbation=0).measures()
+        self.assertAlmostEqual(m['volume'], 4 / 3 * np.pi * (ra ** 3 + rb ** 3) - lens, places=10)
+        self.assertAlmostEqual(m['surface_area'], 4 * np.pi * (ra ** 2 + rb ** 2) - 2 * np.pi * (ra * ha + rb * hb), places=10)
+
+        # per-ball terms are the exposed sphere areas / power-cell volumes and sum to the totals
+        am = AlphaMol(*self.alphamol_cluster(20, 0))
+        self.assertAlmostEqual(np.sum(am.ball_volumes), am.volume, places=10)
+        self.assertAlmostEqual(np.sum(am.ball_surface_areas), am.surface_area, places=10)
+
+    @validationTest
+    def test_AlphaMolAgreesWithUnionBall(self):
+        centers, radii = self.alphamol_cluster(60, 1)
+        am = AlphaMol(centers, radii)
+        vu = SphereUnionSurface.sphere_volume_union_ball(centers, radii)
+        au = SphereUnionSurface.sphere_area_union_ball(centers, radii)
+        self.assertLess(abs(am.volume - vu), 1e-7 * vu)
+        self.assertLess(abs(am.surface_area - au), 1e-7 * au)
+
+        surf = SphereUnionSurface(centers, radii)
+        self.assertAlmostEqual(surf.volume(method='alpha-mol'), am.volume, places=8)
+        self.assertAlmostEqual(surf.surface_area(method='alpha-mol'), am.surface_area, places=8)
+        meas = surf.intrinsic_measures()
+        self.assertEqual(set(meas.keys()), set(self.alphamol_measures))
+        self.assertAlmostEqual(meas['mean_curvature'], surf.mean_curvature(), places=10)
+        self.assertAlmostEqual(meas['gaussian_curvature'], surf.gaussian_curvature(), places=10)
+
+    @validationTest
+    def test_AlphaMolGrowthIdentity(self):
+        # dV/dr = A under uniform growth of every radius (exact for unions of balls)
+        centers, radii = self.alphamol_cluster(40, 2, spread=1.6)
+        eps = 1e-5
+        dV = (AlphaMol(centers, radii + eps).volume - AlphaMol(centers, radii - eps).volume) / (2 * eps)
+        self.assertLess(abs(dV - AlphaMol(centers, radii).surface_area), 1e-5)
+
+    @validationTest
+    def test_AlphaMolMeanCurvature(self):
+        # M = sum_i A_i / r_i - sum_ij (1/2) phi_ij L_ij, with the exposed crease
+        # lengths L_ij sampled directly on each intersection circle
+        centers, radii = self.alphamol_cluster(15, 3)
+        am = AlphaMol(centers, radii)
+        ref = np.sum(am.ball_surface_areas / radii)
+        t = np.linspace(0, 2 * np.pi, 20000, endpoint=False)
+        for i, j in itertools.combinations(range(len(radii)), 2):
+            d = np.linalg.norm(centers[j] - centers[i])
+            if d >= radii[i] + radii[j] or d <= abs(radii[i] - radii[j]):
+                continue
+            u = (centers[j] - centers[i]) / d
+            x = (d * d + radii[i] ** 2 - radii[j] ** 2) / (2 * d)
+            rho = np.sqrt(radii[i] ** 2 - x * x)
+            v = np.cross(u, [1, 0, 0]) if abs(u[0]) < .9 else np.cross(u, [0, 1, 0])
+            v /= np.linalg.norm(v)
+            w = np.cross(u, v)
+            pts = centers[i] + x * u + rho * (np.cos(t)[:, None] * v + np.sin(t)[:, None] * w)
+            exposed = np.all([
+                np.sum((pts - centers[k]) ** 2, axis=1) > radii[k] ** 2
+                for k in range(len(radii)) if k not in (i, j)
+            ], axis=0)
+            phi = np.arccos((radii[i] ** 2 + radii[j] ** 2 - d * d) / (2 * radii[i] * radii[j]))
+            ref -= np.pi * rho * exposed.mean() * phi
+        self.assertLess(abs(ref - am.mean_curvature), 1e-3 * abs(ref))
+
+    @validationTest
+    def test_AlphaMolGaussBonnet(self):
+        # G = 2 pi chi(boundary): a torus of balls, and a lattice with 27 cavities
+        th = np.linspace(0, 2 * np.pi, 16, endpoint=False)
+        torus = AlphaMol(np.c_[4 * np.cos(th), 4 * np.sin(th), 0 * th], np.full(16, 1.2))
+        self.assertLess(abs(torus.gaussian_curvature), 1e-8)
+        lattice = np.array(np.meshgrid(*[np.arange(4)] * 3)).reshape(3, -1).T * 1.0
+        cav = AlphaMol(lattice, np.full(len(lattice), 0.8))
+        self.assertLess(abs(cav.gaussian_curvature / (4 * np.pi) - 28), 1e-9)
+        # 27 cavities: the complex must also have the right volume
+        rng = np.random.default_rng(4)
+        pts = rng.uniform(-0.8, 3.8, (400000, 3))
+        inside = np.zeros(len(pts), dtype=bool)
+        for c in lattice:
+            inside |= np.sum((pts - c) ** 2, axis=1) < 0.64
+        mc = inside.mean() * 4.6 ** 3
+        self.assertLess(abs(cav.volume - mc), 5e-3 * mc)
+
+    @validationTest
+    def test_AlphaMolDegenerateInputs(self):
+        benz, rb = self.alphamol_benzene()
+        ref = AlphaMol(benz, rb, perturbation=0).measures()
+        rng = np.random.default_rng(5)
+        for noise in [0, 1e-13, 1e-11, 1e-9, 1e-7]:
+            for _ in range(20):
+                m = AlphaMol(benz + noise * rng.normal(size=benz.shape), rb).measures()
+                for k in self.alphamol_measures:
+                    self.assertLess(abs(m[k] - ref[k]), 1e-4, msg=f"{k} at noise {noise}")
+        self.assertLess(abs(ref['gaussian_curvature'] - 4 * np.pi), 1e-12)
+
+        # co-linear chain; exact duplicates and a contained ball change nothing
+        chain = np.c_[np.arange(5.), np.zeros(5), np.zeros(5)]
+        a = AlphaMol(chain, np.full(5, .8)).measures()
+        b = AlphaMol(np.r_[chain, chain[:2], [[.1, 0, 0]]], np.r_[np.full(7, .8), .3]).measures()
+        for k in self.alphamol_measures:
+            self.assertAlmostEqual(a[k], b[k], places=9)
+        # 1-4 balls (no Delaunay tetrahedra among the real balls)
+        for n in range(1, 5):
+            m = AlphaMol(chain[:n], np.full(n, .8)).measures()
+            self.assertAlmostEqual(m['gaussian_curvature'], 4 * np.pi, places=10)
+        # empty input
+        self.assertEqual(AlphaMol(np.zeros((0, 3)), np.zeros(0)).volume, 0.0)
+
+    @validationTest
+    def test_AlphaMolGradients(self):
+        centers, radii = self.alphamol_cluster(12, 6)
+        weights = np.random.default_rng(6).uniform(-1, 2, len(radii))
+        am = AlphaMol(centers, radii)
+        for k in self.alphamol_measures:
+            for w in (np.ones(len(radii)), weights):
+                grad = am.weighted_gradient(**{k: w})
+                fd = self.alphamol_fd_gradient(centers, radii, k, w)
+                scale = max(np.abs(fd).max(), 1.0)
+                self.assertLess(np.abs(grad - fd).max() / scale, 1e-6, msg=k)
+        grads = am.gradients()
+        self.assertEqual(set(grads.keys()), set(self.alphamol_measures))
+        np.testing.assert_allclose(grads['volume'], am.volume_gradient)
+
+    @validationTest
+    def test_AlphaMolGradientMethods(self):
+        centers, radii = self.alphamol_cluster(30, 7)
+        w = np.random.default_rng(7).uniform(-1, 2, len(radii))
+        am = AlphaMol(centers, radii)
+        # the Cartesian (default) and intrinsic volume/area gradients agree off degeneracy
+        for k in ('volume', 'surface_area'):
+            np.testing.assert_allclose(
+                am.weighted_gradient(**{k: w}),
+                am.weighted_gradient(method='intrinsic', **{k: w}),
+                atol=1e-9
+            )
+        # eq. 19 is linear in the four measures
+        coefs = dict(volume=-0.1, surface_area=0.02, mean_curvature=0.3, gaussian_curvature=-0.1)
+        combined = am.weighted_gradient(**coefs)
+        parts = sum(c * am.weighted_gradient(**{k: 1}) for k, c in coefs.items())
+        np.testing.assert_allclose(combined, parts, atol=1e-10)
+        # translation invariance and a vanishing unweighted Gaussian-curvature gradient
+        for k in self.alphamol_measures:
+            self.assertLess(np.abs(am.weighted_gradient(**{k: 1}).sum(axis=0)).max(), 1e-9)
+        self.assertLess(np.abs(am.gaussian_curvature_gradient).max(), 1e-8)
+        # pruned (contained) balls get zero gradient rows
+        am2 = AlphaMol(np.r_[centers, centers[:1] + 0.01], np.r_[radii, 0.1])
+        self.assertTrue(np.all(am2.volume_gradient[-1] == 0))
+        np.testing.assert_allclose(am2.volume_gradient[:-1], am.volume_gradient, atol=1e-9)
+        # SphereUnionSurface wrappers
+        surf = SphereUnionSurface(centers, radii)
+        np.testing.assert_allclose(surf.weighted_measure_gradient(**coefs), combined, atol=1e-12)
+        self.assertEqual(surf.intrinsic_measure_gradients()['volume'].shape, centers.shape)
+
+    @validationTest
+    def test_AlphaMolDegenerateGradients(self):
+        # on a perfectly regular benzene the volume gradient of each atom must equal
+        # the vector area of its exposed sphere patch (sampled independently),
+        # and the unweighted Gaussian-curvature gradient must vanish
+        benz, rb = self.alphamol_benzene()
+        n = 100000
+        i = np.arange(n) + 0.5
+        ph = np.arccos(1 - 2 * i / n)
+        t = np.pi * (1 + 5 ** 0.5) * i
+        U = np.c_[np.cos(t) * np.sin(ph), np.sin(t) * np.sin(ph), np.cos(ph)]
+        vec_area = np.zeros_like(benz)
+        for a in range(len(rb)):
+            pts = benz[a] + rb[a] * U
+            exposed = np.all([
+                np.sum((pts - benz[b]) ** 2, axis=1) > rb[b] ** 2
+                for b in range(len(rb)) if b != a
+            ], axis=0)
+            vec_area[a] = rb[a] ** 2 * 4 * np.pi * np.mean(U * exposed[:, None], axis=0)
+        for p in (0, 1e-9):
+            am = AlphaMol(benz, rb, perturbation=p)
+            self.assertLess(np.abs(am.volume_gradient - vec_area).max(), 1e-2)
+            self.assertLess(np.abs(am.gaussian_curvature_gradient).max(), 1e-5)
+            # the intrinsic volume derivative is ill-conditioned here by design;
+            # the area/curvature gradients stay finite
+            for k in self.alphamol_measures:
+                self.assertTrue(np.all(np.isfinite(am.weighted_gradient(**{k: 1}))))
+
+    @validationTest
+    def test_AlphaMolTiming(self):
+        rng = np.random.default_rng(8)
+        N = 400
+        L = (N * 20) ** (1 / 3)
+        centers, radii = rng.uniform(0, L, (N, 3)), rng.uniform(1.2, 1.9, N)
+        with Timer("AlphaMol measures + gradients (N=400)"):
+            am = AlphaMol(centers, radii)
+            am.measures()
+            am.gradients()
+        with Timer("UnionBall volume (N=400)"):
+            vu = SphereUnionSurface.sphere_volume_union_ball(centers, radii)
+        self.assertLess(abs(am.volume - vu), 1e-7 * vu)
+
+    #endregion AlphaMol
+
+    #region SkinSurface
+
+    # Edelsbrunner skin surfaces: exact skin function, gradients, curvatures
+    # and meshes, checked against the direct definition (maximum over convex
+    # combinations of the shrunk balls) and closed forms.
+
+    @staticmethod
+    def skin_bruteforce(centers, ball_radii, s, points, n):
+        # F(x) = max over sampled convex combinations of s w(b) - |x - z(b)|^2;
+        # a lower bound on the exact skin function that converges as n grows
+        best = np.full(len(points), -np.inf)
+        m = len(ball_radii)
+        c2 = np.sum(centers ** 2, axis=1)
+        for comb in itertools.product(range(n + 1), repeat=m - 1):
+            if sum(comb) > n:
+                continue
+            lam = np.array(list(comb) + [n - sum(comb)]) / n
+            z = lam @ centers
+            w = lam @ (ball_radii ** 2 - c2) + z @ z
+            best = np.maximum(best, s * w - np.sum((points - z) ** 2, axis=1))
+        return best
+
+    @staticmethod
+    def skin_benzene():
+        th = np.linspace(0, 2 * np.pi, 6, endpoint=False)
+        ring = np.c_[1.39 * np.cos(th), 1.39 * np.sin(th), 0 * th]
+        return np.r_[ring, ring * (1 + 1.08 / 1.39)], np.r_[np.full(6, 1.7), np.full(6, 1.2)]
+
+    @validationTest
+    def test_SkinSurfaceSphere(self):
+        r, s = 1.5, 0.5
+        skin = SkinSurface(np.zeros((1, 3)), [r], s)
+        np.testing.assert_allclose(skin.ball_radii, [r / np.sqrt(s)])
+        pts = np.random.default_rng(0).normal(size=(200, 3))
+        F, G = skin.skin_function(pts, return_gradient=True, band=5)
+        np.testing.assert_allclose(F, r ** 2 - np.sum(pts ** 2, axis=1), atol=1e-12)
+        np.testing.assert_allclose(G, -2 * pts, atol=1e-12)
+        on, nrm = skin.project(pts)
+        np.testing.assert_allclose(np.linalg.norm(on, axis=1), r, atol=1e-12)
+        np.testing.assert_allclose(nrm, on / r, atol=1e-12)
+        H, K = skin.curvatures(on)
+        np.testing.assert_allclose(H, 1 / r, atol=1e-12)
+        np.testing.assert_allclose(K, 1 / r ** 2, atol=1e-12)
+        mesh = skin.triangulate(0.05)
+        self.assertEqual(mesh.euler_characteristic(), 2)
+        self.assertLess(abs(mesh.surface_area() / (4 * np.pi * r ** 2) - 1), 1e-3)
+        self.assertLess(abs(mesh.volume() / (4 / 3 * np.pi * r ** 3) - 1), 1e-3)
+        # radii_type='balls': the given radii are the generating balls
+        self.assertAlmostEqual(SkinSurface(np.zeros((1, 3)), [r], s, radii_type='balls').project([[3., 0, 0]])[0][0, 0],
+                               np.sqrt(s) * r, places=12)
+
+    @validationTest
+    def test_SkinSurfaceMatchesDefinition(self):
+        rng = np.random.default_rng(1)
+        for s in (0.25, 0.5, 0.8):
+            centers = rng.normal(size=(4, 3)) * 1.2
+            skin = SkinSurface(centers, rng.uniform(1.0, 1.6, 4), s)
+            pts = rng.normal(size=(1500, 3)) * 1.8
+            F = skin.skin_function(pts, band=6)
+            Fb = self.skin_bruteforce(centers, skin.ball_radii, s, pts, 24)
+            near = Fb > -5
+            self.assertLess(np.max(Fb[near] - F[near]), 1e-7)       # exact >= every sampled combination
+            self.assertLess(np.max(F[near] - Fb[near]), 1e-2)       # ... and the sampling closes the gap
+            self.assertTrue(np.all(F[~near] < 0))
+            self.assertEqual(skin.simplices['affine_dimension'], 3)
+
+    @validationTest
+    def test_SkinSurfaceDerivatives(self):
+        rng = np.random.default_rng(2)
+        benz, rb = self.skin_benzene()
+        for centers, radii in [(rng.normal(size=(6, 3)) * 1.3, rng.uniform(1.0, 1.6, 6)), (benz, rb)]:
+            skin = SkinSurface(centers, radii, 0.4)
+            x = centers.mean(0) + rng.normal(size=(800, 3)) * 1.8
+            F, G = skin.skin_function(x, return_gradient=True, band=5)
+            ok = np.isfinite(F)
+            h = 1e-6
+            num = np.stack([(skin.skin_function(x + h * e, band=5) - skin.skin_function(x - h * e, band=5)) / (2 * h)
+                            for e in np.eye(3)], -1)
+            # F is C^1: the patchwise gradient matches finite differences everywhere, including across patches
+            self.assertLess(np.abs(num - G)[ok].max(), 1e-6)
+            # curvatures of the level sets vs finite differences of the gradient
+            on = skin.project(x[ok][::10])[0]
+            H, K = skin.curvatures(on)
+            _, G0 = skin.skin_function(on, return_gradient=True)
+            Hs = np.stack([(skin.skin_function(on + h * e, return_gradient=True)[1]
+                            - skin.skin_function(on - h * e, return_gradient=True)[1]) / (2 * h) for e in np.eye(3)], -1)
+            g, Hf = -G0, -Hs
+            gn = np.linalg.norm(g, axis=1)
+            Hn = (gn ** 2 * np.trace(Hf, axis1=1, axis2=2) - np.einsum('mi,mij,mj->m', g, Hf, g)) / (2 * gn ** 3)
+            self.assertLess(np.abs(H - Hn).max(), 1e-5)
+            self.assertTrue(np.all(np.isfinite(K)))
+
+    @validationTest
+    def test_SkinSurfaceDegenerateInputs(self):
+        benz, rb = self.skin_benzene()
+        rng = np.random.default_rng(3)
+        ring = benz[:6]
+        cases = {
+            'planar benzene': (benz, rb, 2),
+            'noisy benzene': (benz + 1e-9 * rng.normal(size=benz.shape), rb, 2),
+            'co-circular ring': (ring, np.full(6, 1.7), 2),
+            'chain': (np.c_[np.arange(4.) * 1.5, np.zeros(4), np.zeros(4)], np.full(4, 1.0), 1),
+            'pair': (ring[:2], np.array([1.7, 1.3]), 1),
+            'duplicates': (np.r_[ring[:3], ring[:1]], np.full(4, 1.7), 2),
+        }
+        areas = {}
+        for name, (c, r, dim) in cases.items():
+            skin = SkinSurface(c, r, 0.5)
+            self.assertEqual(skin.simplices['affine_dimension'], dim, msg=name)
+            mesh = skin.triangulate(0.15)
+            self.assertEqual(mesh.euler_characteristic(), 2, msg=name)
+            self.assertLess(np.abs(skin.skin_function(mesh.verts, band=0.3)).max(), 1e-10, msg=name)
+            areas[name] = mesh.surface_area()
+            if len(r) <= 4:
+                pts = c.mean(0) + rng.normal(size=(800, 3)) * 2
+                F = skin.skin_function(pts, band=6)
+                Fb = self.skin_bruteforce(c, skin.ball_radii, 0.5, pts, {2: 200, 3: 30, 4: 14}[len(r)])
+                near = Fb > -5
+                self.assertLess(np.max(Fb[near] - F[near]), 1e-7, msg=name)
+        self.assertAlmostEqual(areas['planar benzene'], areas['noisy benzene'], places=5)
+        dup = SkinSurface(ring[:3], np.full(3, 1.7), 0.5).triangulate(0.15).surface_area()
+        self.assertAlmostEqual(areas['duplicates'], dup, places=8)
+
+    @validationTest
+    def test_SkinSurfaceMesh(self):
+        rng = np.random.default_rng(4)
+        centers, radii = rng.normal(size=(4, 3)) * 1.2, rng.uniform(1.0, 1.6, 4)
+        skin = SkinSurface(centers, radii, 0.4)
+        A, V = [], []
+        for h in (0.2, 0.1, 0.05):
+            mesh = skin.triangulate(h)
+            self.assertEqual(mesh.euler_characteristic(), 2)
+            self.assertLess(np.abs(skin.skin_function(mesh.verts, band=h)).max(), 1e-10)
+            # outward-oriented, unit normals
+            a, b, c = (mesh.verts[mesh.tris[:, k]] for k in range(3))
+            fn = np.cross(b - a, c - a)
+            self.assertGreater(np.mean(np.einsum('ij,ij->i', fn, mesh.normals[mesh.tris].mean(1)) > 0), 0.999)
+            A.append(mesh.surface_area()); V.append(mesh.volume())
+        # second-order convergence of area and volume
+        for q in (A, V):
+            self.assertGreater(abs(q[1] - q[0]) / max(abs(q[2] - q[1]), 1e-12), 3.0)
+        # the coarse-cell skipping changes nothing
+        skin._mesh_cache.clear()
+        np.testing.assert_allclose(skin.triangulate(0.1, coarsening=1).verts, skin.triangulate(0.1).verts)
+        # volume vs Monte Carlo on the exact skin function; skin body inside the union of balls
+        lo, hi = skin.bounding_box()
+        x = np.random.default_rng(5).uniform(lo, hi, (400000, 3))
+        inside = skin.contains(x, band=0.3)
+        mc = inside.mean() * np.prod(hi - lo)
+        self.assertLess(abs(V[-1] - mc), 4 * np.prod(hi - lo) * np.sqrt(inside.mean() * (1 - inside.mean()) / len(x)))
+        in_balls = np.any(np.sum((x[:, None] - centers) ** 2, -1) <= skin.ball_radii ** 2, axis=1)
+        self.assertTrue(np.all(in_balls[inside]))
+
+    @validationTest
+    def test_SkinSurfaceConvexCapsAndGaussBonnet(self):
+        benz, rb = self.skin_benzene()
+        for s in (0.3, 0.6):
+            skin = SkinSurface(benz, rb, s)
+            mesh = skin.triangulate(0.1)
+            # far from the other atoms, the skin is the atom's own (van der Waals) sphere
+            k = 8   # an H atom
+            out = benz[k] - benz[:6].mean(0)
+            p = benz[k] + rb[k] * out / np.linalg.norm(out)
+            self.assertLess(abs(skin.skin_function(p[None])[0]), 1e-7)   # up to the 1e-9 perturbation
+            H, K = skin.curvatures(mesh.verts)
+            # on the sphere patches (vertex cells) the curvatures are those of the atom
+            sx = skin.simplices
+            cap = sx['dim'][mesh.patches] == 0
+            atom = sx['verts'][mesh.patches[cap], 0]
+            np.testing.assert_allclose(H[cap], 1 / rb[atom], rtol=1e-6)
+            np.testing.assert_allclose(K[cap], 1 / rb[atom] ** 2, rtol=1e-6)
+            # integral of the Gaussian curvature over the (genus-0) skin ~ 4 pi
+            a, b, c = (mesh.verts[mesh.tris[:, i]] for i in range(3))
+            ta = 0.5 * np.linalg.norm(np.cross(b - a, c - a), axis=1)
+            va = np.zeros(len(mesh.verts)); np.add.at(va, mesh.tris.ravel(), np.repeat(ta, 3) / 3)
+            self.assertLess(abs(np.sum(va * K) / (4 * np.pi) - 1), 0.06)
+        counts = SkinSurface(benz, rb, 0.5).patch_counts()
+        self.assertEqual(counts['sphere'], 12)
+        self.assertEqual(counts['tetrahedron'], 0)     # planar: triangulated in its plane
+
+    @validationTest
+    def test_SkinSurfaceSphereUnionSurface(self):
+        benz, rb = self.skin_benzene()
+        surf = SphereUnionSurface(benz, rb)
+        skin = surf.get_skin_surface(shrink=0.5)
+        self.assertIs(skin, surf.get_skin_surface(shrink=0.5))
+        self.assertAlmostEqual(surf.surface_area(method='skin', shrink=0.5, spacing=0.2),
+                               skin.triangulate(0.2).surface_area(), places=10)
+        self.assertAlmostEqual(surf.volume(method='skin', shrink=0.5, spacing=0.2),
+                               skin.triangulate(0.2).volume(), places=10)
+        mesh = surf.get_triangulation(method='skin', shrink=0.5, spacing=0.2)
+        self.assertIsInstance(mesh, SphereUnionSurfaceMesh)
+        np.testing.assert_array_equal(mesh.verts, skin.triangulate(0.2).verts)
+        np.testing.assert_array_equal(mesh.inds, skin.triangulate(0.2).tris)
+        self.assertAlmostEqual(mesh.surface_area(), skin.triangulate(0.2).surface_area(), places=8)
+        # the skin encloses at least the van der Waals union (its caps are the vdW spheres)
+        self.assertGreater(skin.triangulate(0.2).volume(), surf.volume(method='alpha-mol'))
+
+    @validationTest
+    def test_SphereUnionSurfaceMeshArea(self):
+        # cross-product triangle areas: agree with Heron's formula on ordinary
+        # triangles, stay accurate on needles, and scale to large meshes
+        rng = np.random.default_rng(7)
+        verts = rng.normal(size=(50, 3))
+        inds = np.array([rng.choice(50, 3, replace=False) for _ in range(200)])
+        mesh = SphereUnionSurfaceMesh(verts, inds)
+        a = np.linalg.norm(verts[inds[:, 0]] - verts[inds[:, 1]], axis=1)
+        b = np.linalg.norm(verts[inds[:, 1]] - verts[inds[:, 2]], axis=1)
+        c = np.linalg.norm(verts[inds[:, 0]] - verts[inds[:, 2]], axis=1)
+        p = (a + b + c) / 2
+        heron = np.sqrt(p * (p - a) * (p - b) * (p - c))
+        np.testing.assert_allclose(mesh.surface_area(return_components=True), heron, rtol=1e-9, atol=1e-12)
+        self.assertAlmostEqual(mesh.surface_area(), heron.sum(), places=9)
+        # a needle: base 1, height 1e-9 -> area 5e-10
+        needle = SphereUnionSurfaceMesh(np.array([[0., 0, 0], [1, 0, 0], [0.5, 1e-9, 0]]), np.array([[0, 1, 2]]))
+        self.assertAlmostEqual(needle.surface_area() / 5e-10, 1, places=6)
+        # a skin mesh with tens of thousands of vertices (a dense distance matrix would be ~10 GB)
+        skin_mesh = SkinSurface(*self.skin_benzene(), 0.5).triangulate(0.05)
+        big = skin_mesh.to_surface_mesh()
+        self.assertGreater(len(big.verts), 30000)
+        self.assertAlmostEqual(big.surface_area(), skin_mesh.surface_area(), places=8)
+
+    @validationTest
+    def test_SphereUnionSurfaceMeshVolume(self):
+        # signed divergence-theorem volume: exact for closed polyhedra, concave
+        # or not, and independent of the origin and of the global orientation
+        cube = np.array(list(itertools.product([0., 1.], repeat=3)))
+        faces = np.array([[0, 1, 3], [0, 3, 2], [4, 6, 7], [4, 7, 5], [0, 4, 5], [0, 5, 1],
+                          [2, 3, 7], [2, 7, 6], [0, 2, 6], [0, 6, 4], [1, 5, 7], [1, 7, 3]])
+        for shift in ([0, 0, 0], [5, -3, 2]):
+            m = SphereUnionSurfaceMesh(cube + shift, faces)
+            self.assertAlmostEqual(m.volume(), 1.0, places=12)
+            self.assertAlmostEqual(SphereUnionSurfaceMesh(cube + shift, faces[:, ::-1]).volume(), 1.0, places=12)
+        # a concave closed surface (the benzene skin), off-center: matches the
+        # skin mesh's own volume, where summing |per-triangle terms| overshoots
+        skin_mesh = SkinSurface(*self.skin_benzene(), 0.3).triangulate(0.15)
+        for shift in ([0, 0, 0], [3.0, 1.0, 0.5], [20.0, 0, 0]):
+            m = SphereUnionSurfaceMesh(skin_mesh.verts + shift, skin_mesh.tris)
+            self.assertLess(abs(m.volume() - skin_mesh.volume()), 1e-8 * skin_mesh.volume())
+        # with the origin outside the molecule the per-triangle terms have both
+        # signs, so the old sum of their absolute values is far too large
+        self.assertGreater(np.sum(np.abs(m.volume(return_components=True))), 2 * skin_mesh.volume())
+
+    @validationTest
+    def test_SphereUnionSurfaceMeshCurvatures(self):
+        # mesh estimates on a sphere (H = 1/r, K = 1/r^2): the quadric fit is
+        # accurate at every vertex of an (irregular) isosurface mesh and
+        # converges as h^2; the cotangent operators are right only on average
+        r = 1.5
+        errs = []
+        for h in (0.1, 0.05):
+            sphere = SkinSurface(np.zeros((1, 3)), [r], 0.5).triangulate(h)
+            m = SphereUnionSurfaceMesh(sphere.verts, sphere.tris)       # nothing stored: estimated
+            curv = m.vertex_curvatures()
+            errs.append(max(np.abs(curv['mean'] * r - 1).max(), np.abs(curv['gaussian'] * r ** 2 - 1).max()))
+        self.assertLess(errs[1], 5e-3)
+        self.assertGreater(errs[0] / errs[1], 3)
+        self.assertGreater(np.min(curv['mean']), 0)                 # outward winding -> convex is positive
+        cot = m.vertex_curvatures(recompute=True, method='cotangent')
+        self.assertLess(abs(np.median(cot['mean']) * r - 1), 5e-3)
+        self.assertLess(abs(np.median(cot['gaussian']) * r ** 2 - 1), 1e-2)
+        # the sign follows given vertex normals rather than the winding
+        flipped = SphereUnionSurfaceMesh(sphere.verts, sphere.tris[:, ::-1], vertex_normals=sphere.normals)
+        same = SphereUnionSurfaceMesh(sphere.verts, sphere.tris, vertex_normals=sphere.normals)
+        np.testing.assert_allclose(flipped.vertex_curvatures('mean'), same.vertex_curvatures('mean'), rtol=1e-10)
+        self.assertGreater(np.min(flipped.vertex_curvatures('mean')), 0)
+        # the skin conversion stores the exact curvatures
+        skin = SkinSurface(*self.skin_benzene(), 0.4)
+        smesh = skin.triangulate(0.1)
+        stored = smesh.to_surface_mesh()
+        exact = skin.curvatures(smesh.verts)
+        np.testing.assert_allclose(stored.vertex_curvatures('mean'), exact[0])
+        np.testing.assert_allclose(stored.vertex_curvatures('gaussian'), exact[1])
+        # ... and the mesh estimate agrees with them away from the patch seams
+        # (the skin is only C^1: its curvature jumps across patch boundaries)
+        est = stored.vertex_curvatures(recompute=True)
+        self.assertLess(np.median(np.abs(est['mean'] - exact[0])), 0.01 * np.max(np.abs(exact[0])))
+        self.assertLess(np.median(np.abs(est['gaussian'] - exact[1])), 0.01 * np.max(np.abs(exact[1])))
+        self.assertIsNone(smesh.to_surface_mesh(store_curvatures=False)._curvatures.get('mean'))
+        with self.assertRaises(ValueError):
+            stored.vertex_curvatures('principal')
+        # plot(curvature=...) colors by exactly those values and otherwise plots as before
+        calls = []
+        original = SphereUnionSurfaceMesh.__dict__['plot_triangle_mesh']
+        try:
+            SphereUnionSurfaceMesh.plot_triangle_mesh = classmethod(lambda cls, v, i, **kw: calls.append(kw))
+            stored.plot(curvature='mean')
+            stored.plot(curvature='gaussian', vertex_values=np.ones(len(stored.verts)))
+            stored.styles = {'curvature': 'gaussian'}
+            stored.plot()
+            stored.styles = None
+            stored.plot()
+        finally:
+            SphereUnionSurfaceMesh.plot_triangle_mesh = original
+        np.testing.assert_allclose(calls[0]['vertex_values'], exact[0])
+        np.testing.assert_allclose(calls[1]['vertex_values'], 1.0)      # explicit values win
+        np.testing.assert_allclose(calls[2]['vertex_values'], exact[1])
+        self.assertIsNone(calls[3]['vertex_values'])
+        self.assertTrue(all('curvature' not in c for c in calls))
+
+    @validationTest
+    def test_SkinSurfaceTiming(self):
+        rng = np.random.default_rng(6)
+        N = 100
+        L = (N * 20) ** (1 / 3)
+        with Timer("SkinSurface (N=100, spacing 0.3)"):
+            skin = SkinSurface(rng.uniform(0, L, (N, 3)), rng.uniform(1.2, 1.9, N), 0.5)
+            mesh = skin.triangulate(0.3)
+        self.assertLess(np.abs(skin.skin_function(mesh.verts, band=0.3)).max(), 1e-9)
+
+    #endregion SkinSurface

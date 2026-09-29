@@ -881,7 +881,7 @@ class JHTML:
     @classmethod
     def JAlert(cls, children, kind="info", **attrs):
         """A themed notice; kind is primary, info, success, warning, or error."""
-        return JupyterMarkdownElement.lookup("alert")(*children, kind=kind, **attrs)
+        return JupyterMarkdownElement.lookup("alert")(children, kind=kind, **attrs)
 
     @classmethod
     def JBadge(cls, text, kind="info", **attrs):

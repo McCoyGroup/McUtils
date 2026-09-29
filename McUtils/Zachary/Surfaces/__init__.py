@@ -11,6 +11,10 @@ from .BaseSurface import *; from .BaseSurface import __all__ as exposed
 __all__ += exposed
 from .Surface import *; from .Surface import __all__ as exposed
 __all__ += exposed
+from .AlphaMol import *; from .AlphaMol import __all__ as exposed
+__all__ += exposed
+from .SkinSurface import *; from .SkinSurface import __all__ as exposed
+__all__ += exposed
 from .SphereUnionSurface import *; from .SphereUnionSurface import __all__ as exposed
 __all__ += exposed
 from .MarchingCubesSurface import *; from .MarchingCubesSurface import __all__ as exposed
