@@ -16851,8 +16851,20 @@ class Mesh3DFigure(GraphicsFigure):
         file.write(scene.export(file_type=fmt))
         return file
 
-    def animate_frames(self, frames, **animation_opts):
-        raise NotImplementedError(...)
+    def animate_frames(self, frames, mode=None, animation_duration=2, **animation_opts):
+        """
+        Build a keyframed animation from per-frame lists of `MeshInformation`
+        (mirrors `X3DFigure.animate_frames`). The result exports to an animated
+        glTF via `.savefig('anim.glb')` and previews through X3D via `.show()`.
+
+        :param mode: None (rigid node TRS where exact, else morph targets),
+            'rigid', 'morph', or 'list' (frame switching, like `X3DListAnimator`)
+        :param animation_duration: the loop duration in seconds
+        """
+        from .Mesh3DAnimation import Mesh3DAnimation
+        return Mesh3DAnimation(frames, figure=self, mode=mode,
+                               animation_duration=animation_duration,
+                               **animation_opts)
 
 # ----------------------------------------------------------------------------- #
 #  backend
