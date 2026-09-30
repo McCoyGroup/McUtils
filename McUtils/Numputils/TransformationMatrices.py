@@ -180,7 +180,10 @@ def rotation_matrix_align_vectors(vec1, vec2):
 
     Uses the closed-form reflection-free construction from the normalized vectors;
     the near-antiparallel case (where the formula is singular) is detected and
-    replaced with `-I`.
+    handled by composing a proper pi-rotation (about an axis perpendicular to
+    `vec1`) with the well-conditioned alignment of `-vec1` onto `vec2`.
+    (Previously this returned `-I`, which is a reflection: it has determinant -1,
+    turns tessellated meshes inside out, and only approximately maps `vec1` to `vec2`.)
 
     :param vec1: the source vector
     :type vec1: np.ndarray
@@ -200,7 +203,14 @@ def rotation_matrix_align_vectors(vec1, vec2):
     base_shape = mats.shape[:-2]
     mats = np.reshape(mats, (-1, 3, 3))
     flip_masks = flip_masks.reshape(-1)
-    mats[flip_masks] = -1*np.eye(3)[np.newaxis]
+    if flip_masks.any():
+        v1 = np.broadcast_to(vec1, s.shape).reshape(-1, 3)[flip_masks]
+        v2 = np.broadcast_to(vec2, s.shape).reshape(-1, 3)[flip_masks]
+        seed = np.where(np.abs(v1[:, :1]) < .9, np.array([[1., 0, 0]]), np.array([[0., 1, 0]]))
+        p = vec_ops.vec_normalize(np.cross(v1, seed))
+        # 2 p p^T - I is a proper rotation by pi about p, with v1 @ F = -v1
+        F = 2 * p[:, :, np.newaxis] * p[:, np.newaxis, :] - np.eye(3)[np.newaxis]
+        mats[flip_masks] = F @ rotation_matrix_align_vectors(-v1, v2)
     return mats.reshape(base_shape + (3, 3))
 
 def rotation_matrix(axis, theta=None):
