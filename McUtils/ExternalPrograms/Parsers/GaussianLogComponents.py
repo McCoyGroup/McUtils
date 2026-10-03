@@ -1354,3 +1354,11 @@ GaussianLogOrdering.update(list_type)
 del glk
 del list_type
 # endregion
+
+# Structured components extend the same public registry used by custom readers.
+from .GaussianLogTools import register_gaussian_components
+register_gaussian_components(GaussianLogComponents)
+GaussianLogDefaults = tuple(k for k, v in GaussianLogComponents.items()
+                            if v.get("default", True) and not v.get("large", False))
+GaussianLogOrdering.update({k: -1 if v["mode"] == "List" else len(GaussianLogOrdering)
+                            for k, v in GaussianLogComponents.items() if k not in GaussianLogOrdering})
