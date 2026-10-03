@@ -6,7 +6,7 @@ import numpy as np, re, math, io
 from .GaussianLogComponents import GaussianLogComponents, GaussianLogDefaults, GaussianLogOrdering
 from . import GaussianLogComponents as GaussianLogParsers
 from .GaussianFChkComponents import FormattedCheckpointComponents, FormattedCheckpointCommonNames
-from ...Parsers import FileStreamReader, FileStreamCheckPoint, FileStreamReaderException
+from ...Parsers import FileStreamReader, FileStreamCheckPoint, FileStreamReaderException, StringStreamReader
 
 __all__ = ["GaussianFChkReader", "GaussianLogReader", "GaussianLogReaderException", "GaussianFChkReaderException"]
 __reload_hook__ = [ '.GaussianFChkComponents', ".GaussianLogComponents" ]
@@ -29,26 +29,12 @@ class GaussianLogReader(FileStreamReader):
     Next, a function (usually based on a `StringParser`) is applied to this data to convert it into a usable data format.
     The goal is to move toward wrapping all returned data in a `QuantityArray` so as to include data type information, too.
 
-    You can see the full list of available keys in the `GaussianLogComponents` module, but currently they are:
-    * `"Header"`: the header for the Gaussian job
-    * `"InputZMatrix"`: the string of the input Z-matrix
-    * `"CartesianCoordinates"`: all the Cartesian coordinates in the file
-    * `"ZMatCartesianCoordinates"`: all of the Cartesian coordinate in Z-matrix orientation
-    * `"StandardCartesianCoordinates"`: all of the Cartesian coordinates in 'standard' orientation
-    * `"InputCartesianCoordinates"`: all of the Cartesian coordinates in 'input' orientation
-    * `"ZMatrices"`: all of the Z-matrices
-    * `"OptimizationParameters"`: all of the optimization parameters
-    * `"MullikenCharges"`: all of the Mulliken charges
-    * `"MultipoleMoments"`: all of the multipole moments
-    * `"DipoleMoments"`: all of the dipole moments
-    * `"OptimizedDipoleMoments"`: all of the dipole moments from an optimized scan
-    * `"ScanEnergies"`: the potential surface information from a scan
-    * `"OptimizedScanEnergies"`: the PES from an optimized scan
-    * `"XMatrix"`: the anharmonic X-matrix from Gaussian's style of perturbation theory
-    * `"Footer"`: the footer from a calculation
-
-    You can add your own types, too.
-    If you need something we don't have, give `GaussianLogComponents` a look to see how to add it in.
+    parse() discovers the available components and job types automatically.
+    parse_jobs() separates linked jobs. Large blocks are opt-in through
+    include_all_fields=True or explicit keys. available_fields(True) lists the
+    complete inventory without converting numerical data. Field definitions
+    and parsers are registered in GaussianLogComponents, including custom
+    literal-tag and multiline-regex components.
 
     """
 
@@ -57,104 +43,231 @@ class GaussianLogReader(FileStreamReader):
     default_ordering = GaussianLogOrdering
     parsers = GaussianLogParsers
 
-    def parse(self, keys=None, num=None, reset=False):
-        """The main function we'll actually use. Parses bits out of a .log file.
+    def _read_source(self, from_start=False):
+        with FileStreamCheckPoint(self):
+            if from_start:
+                self.seek(0)
+            return self.read(-1)
 
-        :param keys: the keys we'd like to read from the log file
-        :type keys: str or list(str)
-        :param num: for keys with multiple entries, the number of entries to pull
-        :type num: int or None
-        :return: the data pulled from the log file, strung together as a `dict` and keyed by the _keys_
-        :rtype: dict
+    @staticmethod
+    def _has_component(component, source):
+        pattern = component.get("block_pattern")
+        if pattern is not None:
+            return pattern.search(source) is not None
+        tag = component.get("tag_start")
+        if tag is None:
+            return True
+        tags = getattr(tag, "tags", (tag,))
+        return any(t in source for t in tags)
+
+    def available_fields(self, include_all_fields=False):
+        """Discover fields without converting numeric blocks.
+
+        ``include_all_fields=True`` also lists large and alternative legacy
+        representations. The reader position is preserved.
         """
-        if keys is None:
-            keys = self.get_default_keys()
-        # important for ensuring correctness of what we pull
-        if isinstance(keys, str):
+        return self._default_keys(self._read_source(from_start=True), include_all_fields)
+
+    def _default_keys(self, source, include_all_fields=False):
+        return tuple(k for k, c in self.registered_components.items()
+                     if (include_all_fields or c.get("default", True))
+                     and (include_all_fields or not c.get("large", False))
+                     and self._has_component(c, source))
+
+    def get_default_keys(self, include_all_fields=False):
+        """Select every available default field, for any Gaussian job type."""
+        return self.available_fields(include_all_fields=include_all_fields)
+
+    def detect_job_types(self):
+        """Return all detected job types across the printed route sections."""
+        from .GaussianLogTools import parse_job_types
+        return parse_job_types(self._read_source(from_start=True))
+
+    def _parse_component(self, key, source, num=None):
+        component = self.registered_components[key]
+        pattern = component.get("block_pattern")
+        if pattern is not None:
+            matches = pattern.finditer(source)
+            if component["mode"] == "Single":
+                match = next(matches, None)
+                return None if match is None else component["parser"](match.group())
+            from itertools import islice
+            if num is not None:
+                matches = islice(matches, num)
+            blocks = [m.group() for m in matches]
+            if not blocks:
+                return []
+            if component.get("parse_mode", "List") == "List":
+                return component["parser"](blocks)
+            return [component["parser"](b) for b in blocks]
+        # Isolating each component fixes ordering dependencies between Single
+        # blocks and ensures absent fields never reach a parser as None.
+        with StringStreamReader(source) as reader:
+            if component["mode"] == "Single":
+                block = reader._parse_block(component.get("tag_start"), component.get("tag_end"),
+                                            component.get("validator"), component.get("tag_validator"),
+                                            component.get("allow_terminal", False), component.get("expand_until_valid", False),
+                                            component.get("preserve_tag", False), False,
+                                            component.get("direction", "forward"))
+                if block is None:
+                    return None
+                parser = component.get("parser")
+                return block if parser is None else parser(block)
+            # Avoid FileStreamReader's fixed-count path, which passes a trailing
+            # None to parsers when num exceeds the number of available blocks.
+            blocks = []
+            while num is None or len(blocks) < num:
+                block = reader._parse_block(component.get("tag_start"), component.get("tag_end"),
+                                            component.get("validator"), component.get("tag_validator"),
+                                            component.get("allow_terminal", False), component.get("expand_until_valid", False),
+                                            component.get("preserve_tag", False), False,
+                                            component.get("direction", "forward"))
+                if block is None:
+                    break
+                blocks.append(block)
+            if not blocks:
+                return []
+            parser = component.get("parser")
+            if parser is None:
+                return blocks
+            if component.get("parse_mode", "List") == "List":
+                return parser(blocks, reader=reader) if component.get("pass_context") else parser(blocks)
+            return [parser(b, reader=reader) if component.get("pass_context") else parser(b) for b in blocks]
+
+    def parse_key_block(self, *args, block_pattern=None, **kwargs):
+        """Also accept regex-based registrations from GaussianLogComponents."""
+        if block_pattern is None:
+            return super().parse_key_block(*args, **kwargs)
+        source = self._read_source()
+        # Use the same dispatch as parse without modifying the shared registry.
+        pattern = block_pattern if hasattr(block_pattern, "finditer") else re.compile(block_pattern, re.MULTILINE)
+        matches = pattern.finditer(source)
+        parser = kwargs.get("parser", lambda b: b)
+        if kwargs.get("mode", "Single") == "Single":
+            match = next(matches, None)
+            if match is None:
+                return None
+            result = parser(match.group())
+            encoding = getattr(self.stream, "_encoding", "utf-8")
+            self.seek(self.tell() + len(source[:match.end()].encode(encoding)))
+            return result
+        from itertools import islice
+        if kwargs.get("num") is not None:
+            matches = islice(matches, kwargs["num"])
+        blocks = [m.group() for m in matches]
+        return parser(blocks) if kwargs.get("parse_mode", "List") == "List" else [parser(b) for b in blocks]
+
+    def parse(self, keys=None, num=None, reset=False, include_all_fields=False):
+        """Read structured results with automatic field selection.
+
+        With no keys, read all recognized useful fields in the complete file.
+        Large AO/MO, density, basis, archive and derivative blocks are omitted
+        unless include_all_fields is True. Explicit keys always override this
+        policy, including custom registrations. Missing explicit fields return
+        None (Single) or [] (List). Malformed present fields raise with the key
+        and original exception. num limits repeated blocks independently.
+
+        Automatic reads preserve the current stream position. Explicit reads
+        start at the current position; reset=True preserves that position, while
+        reset=False advances past the last requested Single component.
+        """
+        if num is not None and (not isinstance(num, int) or isinstance(num, bool) or num < 0):
+            raise ValueError("num must be a nonnegative integer or None")
+        automatic = keys is None
+        source = self._read_source(from_start=automatic)
+        if automatic:
+            keys = self._default_keys(source, include_all_fields)
+        elif isinstance(keys, str):
             keys = (keys,)
-        keys = sorted(keys,
-                      key = lambda k: (
-                          -1 if (self.registered_components[k]["mode"] == "List") else (
-                              self.default_ordering[k] if k in self.default_ordering else 0
-                          )
-                      )
-                      )
-
-        res = {}
-        if reset:
-            with FileStreamCheckPoint(self):
-                for k in keys:
-                    comp = self.registered_components[k]
-                    res[k] = self.parse_key_block(**comp, num=num)
         else:
-            for k in keys:
-                comp = self.registered_components[k]
-                try:
-                    res[k] = self.parse_key_block(**comp, num=num)
-                except:
-                    raise GaussianLogReaderException("failed to parse block for key '{}'".format(k))
-        return res
-
-    job_default_keys = {
-        "opt":{
-            "p": ("StandardCartesianCoordinates", "OptimizedScanEnergies", "OptimizedDipoleMoments"),
-            "_": ("StandardCartesianCoordinates", "OptimizedScanEnergies")
-        },
-        "popt": {
-            "p": ("StandardCartesianCoordinates", "OptimizedScanEnergies", "OptimizedDipoleMoments"),
-            "_": ("StandardCartesianCoordinates", "OptimizedScanEnergies")
-        },
-        "scan": ("StandardCartesianCoordinates", "ScanEnergies")
-    }
-    def get_default_keys(self):
-        """
-        Tries to get the default keys one might be expected to want depending on the type of job as determined from the Header
-        Currently only supports 'opt', 'scan', and 'popt' as job types.
-
-        :return: key listing
-        :rtype: tuple(str)
-        """
-        header = self.parse("Header", reset=True)["Header"]
-
-        header_low = {k.lower() for k in header.job}
-        for k in self.job_default_keys:
-            if k in header_low:
-                sub = self.job_default_keys[k]
-                if isinstance(sub, dict):
-                    for k in sub:
-                        if k in header_low:
-                            defs = sub[k]
-                            break
+            keys = tuple(keys)
+        results = {}
+        position = self.tell()
+        advance = 0
+        for key in keys:
+            component = self.registered_components[key]
+            try:
+                results[key] = self._parse_component(key, source, num=num)
+                if not automatic and not reset and component["mode"] == "Single" and results[key] is not None:
+                    pattern = component.get("block_pattern")
+                    if pattern is not None:
+                        match = pattern.search(source)
+                        if match is not None:
+                            advance = max(advance, match.end())
                     else:
-                        defs = sub["_"]
-                else:
-                    defs = sub
-                break
-        else:
-            raise GaussianLogReaderException("unclear what default keys should be used if not a scan and not a popt")
+                        with StringStreamReader(source) as reader:
+                            reader.get_tagged_block(component.get("tag_start"), component.get("tag_end"))
+                            advance = max(advance, reader.tell())
+            except Exception as exc:
+                raise GaussianLogReaderException("failed to parse block for key '{}'".format(key)) from exc
+        if advance:
+            encoding = getattr(self.stream, "_encoding", "utf-8")
+            self.seek(position + len(source[:advance].encode(encoding)))
+        return results
 
-        return ("Header", ) + tuple(defs) + ("Footer",)
+    def parse_jobs(self, keys=None, num=None, include_all_fields=False):
+        """Read each linked job separately, preserving the stream position.
+
+        Each item contains route/config/job_types/status, a data dictionary,
+        available_fields, and omitted_fields. Offsets are decoded text offsets.
+        """
+        if num is not None and (not isinstance(num, int) or isinstance(num, bool) or num < 0):
+            raise ValueError("num must be a nonnegative integer or None")
+        from .GaussianLogTools import gaussian_job_metadata
+        source = self._read_source(from_start=True)
+        jobs = gaussian_job_metadata(source)
+        explicit = None if keys is None else ((keys,) if isinstance(keys, str) else tuple(keys))
+        for job in jobs:
+            section = source[job["start"]:job["end"]]
+            available = self._default_keys(section, True)
+            selected = self._default_keys(section, include_all_fields) if explicit is None else explicit
+            # Avoid recursively duplicating file-wide job metadata per job.
+            selected = tuple(k for k in selected if k != "Jobs")
+            job["available_fields"] = available
+            job["omitted_fields"] = tuple(k for k in available if k not in selected and k != "Jobs")
+            job["data"] = {}
+            for key in selected:
+                try:
+                    job["data"][key] = self._parse_component(key, section, num=num)
+                except Exception as exc:
+                    raise GaussianLogReaderException("failed to parse block for key '{}' in job {}".format(key, job["index"])) from exc
+        return jobs
+
+    def to_archive(self, keys=None, num=None, include_all_fields=False, source=None):
+        """Build a Scaffolding NumpyTreeArchive of all linked jobs.
+
+        Job records use zero-based string keys: archive["jobs/0/data"]. Large
+        fields remain opt-in. The reader position is preserved.
+        """
+        from .GaussianLogNPZ import _reader_archive
+        return _reader_archive(self, keys=keys, num=num,
+                               include_all_fields=include_all_fields, source=source)
+
+    def to_npz(self, output_file, keys=None, num=None, include_all_fields=False,
+               compress=True, overwrite=False, source=None):
+        """Save linked jobs to one nested .npz and return its path."""
+        from .GaussianLogNPZ import _save_archive
+        archive = self.to_archive(keys=keys, num=num,
+                                  include_all_fields=include_all_fields, source=source)
+        return _save_archive(archive, output_file, compress=compress, overwrite=overwrite)
 
     @classmethod
-    def read_props(cls, file, keys):
-        """
-        **LLM Docstring**
+    def export_npz(cls, file, output_file=None, **options):
+        """Convert a log to .npz using read-only input access.
 
-        Convenience classmethod: open `file`, parse the requested keys, and return the
-        result (unwrapped to the single value when one key is given).
-
-        :param file: the Gaussian `.log` file
-        :type file: str
-        :param keys: the component key(s) to read
-        :type keys: str | list[str]
-        :return: the parsed data
-        :rtype: dict | Any
+        Default output replaces the input suffix with .npz. Options are keys,
+        num, include_all_fields, compress, overwrite and encoding. The output
+        uses Scaffolding.NumpyTreeArchive and never requires pickle.
         """
+        from .GaussianLogNPZ import export_gaussian_log
+        return export_gaussian_log(file, output_file, reader_type=cls, **options)
+
+    @classmethod
+    def read_props(cls, file, keys=None, **kwargs):
+        """Open a log and read automatic or explicitly selected fields."""
         with cls(file) as reader:
-            parse = reader.parse(keys)
-        if isinstance(keys, str):
-            parse = parse[keys]
-        return parse
+            result = reader.parse(keys, **kwargs)
+        return result[keys] if isinstance(keys, str) else result
 
 ########################################################################################################################
 #
