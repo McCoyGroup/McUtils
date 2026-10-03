@@ -15915,7 +15915,7 @@ class MeshInformation:
             glow = styles.pop('emissive', None)
             if glow is not None:
                 styles['glow'] = glow
-            double_sided = styles.pop('double_sided')
+            double_sided = styles.pop('double_sided', False)  # materials built by hand may omit it
             if double_sided:
                 styles['solid'] = False
         return SphereUnionSurfaceMesh(
@@ -16693,6 +16693,9 @@ class Mesh3DFigure(GraphicsFigure):
             _ = m.to_zachary().plot(
                 background=self.background,
                 figure=figure,
+                # the mesh is already in its final units; without this the surface-mesh
+                # plotter treats the vertices as Bohr and shrinks the scene by 0.529
+                distance_units="BohrRadius",
                 **plops
             )
             if figure is None:

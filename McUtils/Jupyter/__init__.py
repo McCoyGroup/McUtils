@@ -19,11 +19,15 @@ from .MoleculeGraphics import *; from .MoleculeGraphics import __all__ as expose
 __all__ += exposed
 from .X3D import *; from .X3D import __all__ as exposed
 __all__ += exposed
+from .OpenXML import *; from .OpenXML import __all__ as exposed
+__all__ += exposed
 from .JSMol import *; from .JSMol import __all__ as exposed
 __all__ += exposed
 from .NotebookTools import *; from .NotebookTools import __all__ as exposed
 __all__ += exposed
 from .ImageTools import *; from .ImageTools import __all__ as exposed
+__all__ += exposed
+from .Readouts import *; from .Readouts import __all__ as exposed
 __all__ += exposed
 del exposed
 

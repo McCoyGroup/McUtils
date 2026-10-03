@@ -42,3 +42,6 @@ from .Colors import *; from .Colors import __all__ as exposed
 __all__ += exposed
 from .SVG import *; from .SVG import __all__ as exposed
 __all__ += exposed
+
+from .PowerPoint import *; from .PowerPoint import __all__ as exposed
+__all__ += exposed

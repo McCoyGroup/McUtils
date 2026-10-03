@@ -7,6 +7,8 @@ import uuid
 from xml.etree import ElementTree
 import weakref, numpy as np, copy, textwrap, inspect
 import contextlib
+import io
+import keyword
 
 __all__ = [
     "HTML",
@@ -1911,7 +1913,11 @@ class XMLBase:
 
     base_element = None
     @classmethod
-    def convert(cls, etree:ElementTree.Element, strip=True, converter=None, **extra_attrs):
+    def get_element_type(cls, tag, namespace=None, attrs=None):
+        return cls.get_class_map().get(tag, cls.base_element)
+
+    @classmethod
+    def convert(cls, etree:ElementTree.Element, strip=True, converter=None, namespace_data=None, **extra_attrs):
         """
         **LLM Docstring**
 
@@ -1923,6 +1929,8 @@ class XMLBase:
         :type strip: object
         :param converter: Recursive element conversion callable.
         :type converter: object
+        :param namespace_data: Per-node lexical names and declarations captured while parsing.
+        :type namespace_data: dict | None
         :param extra_attrs: Additional attributes merged onto the converted element.
         :type extra_attrs: dict
 
@@ -1932,11 +1940,14 @@ class XMLBase:
         import copy
 
         if converter is None:
-            converter = cls.convert
+            converter = lambda node, **opts: cls.convert(node, namespace_data=namespace_data, **opts)
         children = []
         for x in etree:
             if x.tail is not None:
+                original = x
                 x = copy.copy(x)
+                if namespace_data is not None:
+                    namespace_data[x] = namespace_data[original]
                 t = x.tail
                 x.tail = None
                 children.append(converter(x, strip=strip))
@@ -1965,18 +1976,60 @@ class XMLBase:
         if strip:
             elems = [e for e in elems if not isinstance(e, str) or len(e) > 0]
 
-        map = cls.get_class_map()
-        try:
-            tag_class = map[tag]
-        except KeyError:
-            tag_class = lambda *es,**ats:cls.base_element(tag, *es, **ats)
-
         attrs = {} if etree.attrib is None else etree.attrib
-
-        return tag_class(*elems, **dict(extra_attrs, **attrs))
+        if namespace_data is not None:
+            lexical_tag, attrs = namespace_data[etree]
+        else:
+            lexical_tag = tag
+        attrs = dict(extra_attrs, **attrs)
+        tag_class = cls.get_element_type(tag, attrs=attrs)
+        constructor_attrs = attrs if namespace_data is None else {}
+        node = tag_class(lexical_tag, *elems, **constructor_attrs) if tag_class is cls.base_element \
+            else tag_class(*elems, **constructor_attrs)
+        if namespace_data is not None:
+            # Parsed names are literal XML, not Python keyword aliases.
+            node.tag = lexical_tag
+            node._attrs = attrs
+            node._attr_view = None
+        return node
 
     @classmethod
-    def parse(cls, str, strict=True, strip=True, fallback=None, converter=None, namespace=None):
+    def _parse_etree(cls, source, preserve_namespaces=False):
+        if not preserve_namespaces:
+            return ElementTree.fromstring(source), None
+        stream = io.StringIO(source) if isinstance(source, str) else io.BytesIO(source)
+        stack, pending, namespace_data = [], [], {}
+
+        def lexical(name, scope, attribute=False):
+            if not name.startswith('{'):
+                return name
+            uri, local = name[1:].split('}', 1)
+            for prefix, value in scope.items():
+                if value == uri and (prefix or not attribute):
+                    return (prefix + ':' if prefix else '') + local
+            raise ValueError('undeclared namespace: ' + uri)
+
+        parser = ElementTree.iterparse(stream, events=('start-ns', 'start', 'end'))
+        for event, value in parser:
+            if event == 'start-ns':
+                pending.append(value)
+            elif event == 'start':
+                scope = dict(stack[-1]) if stack else {'xml': 'http://www.w3.org/XML/1998/namespace'}
+                declarations = dict(pending)
+                scope.update(declarations)
+                pending.clear()
+                attrs = {lexical(key, scope, attribute=True): val for key, val in value.attrib.items()}
+                attrs.update({'xmlns' + (':' + prefix if prefix else ''): uri
+                              for prefix, uri in declarations.items()})
+                namespace_data[value] = lexical(value.tag, scope), attrs
+                stack.append(scope)
+            else:
+                stack.pop()
+        return parser.root, namespace_data
+
+    @classmethod
+    def parse(cls, str, strict=True, strip=True, fallback=None, converter=None, namespace=None,
+              preserve_namespaces=False):
         """
         **LLM Docstring**
 
@@ -1994,22 +2047,29 @@ class XMLBase:
         :type converter: object
         :param namespace: Optional default XML namespace to register before parsing.
         :type namespace: object
+        :param preserve_namespaces: Retain lexical prefixes and scoped namespace declarations during conversion.
+        :type preserve_namespaces: bool
 
         :return: The value produced by the implemented operation.
         :rtype: object
         """
         if namespace is not None:
             ElementTree.register_namespace("", namespace)
+        if hasattr(str, 'read'):
+            str = str.read()
         if strict:
-            etree = ElementTree.fromstring(str)
+            etree, namespace_data = cls._parse_etree(str, preserve_namespaces=preserve_namespaces)
         else:
             try:
-                etree = ElementTree.fromstring(str)
+                etree, namespace_data = cls._parse_etree(str, preserve_namespaces=preserve_namespaces)
             except ElementTree.ParseError as e:
                 # print('no element found' in e.args[0])
                 if 'junk after document element' in e.args[0]:
                     try:
-                        return cls.parse('<div>\n\n'+str+'\n\n</div>', strict=True, strip=strip, fallback=fallback, converter=converter)
+                        wrapped = b'<div>\n\n' + str + b'\n\n</div>' if isinstance(str, bytes) \
+                            else '<div>\n\n' + str + '\n\n</div>'
+                        return cls.parse(wrapped, strict=True, strip=strip, fallback=fallback,
+                                         converter=converter, preserve_namespaces=preserve_namespaces)
                     except ElementTree.ParseError:
                         if fallback is None:
                             fallback = HTML.Span
@@ -2019,7 +2079,7 @@ class XMLBase:
                 return fallback(str)
 
         if converter is None:
-            converter = cls.convert
+            return cls.convert(etree, strip=strip, namespace_data=namespace_data)
 
         return converter(etree, strip=strip)
     # @classmethod
@@ -2064,6 +2124,9 @@ class HTML(XMLBase):
         can_be_dynamic = True
         style_props = None
         context = HTMLManager
+        use_css_styles = True
+        text_separator = "\n"
+        cache_tree = True
 
         @classmethod
         def get_class_map_updates(cls):
@@ -2122,15 +2185,18 @@ class HTML(XMLBase):
             self._elem_view = None
             attrs = self.context.manage_attrs(attrs)
             extra_styles, attrs = self.context.extract_styles(attrs, style_props=self.style_props, ignored_styles=self.ignored_styles)
-            if style is not None:
+            if not self.use_css_styles:
+                if style is not None:
+                    attrs['style'] = style
+            elif style is not None:
                 style = self.context.manage_styles(style).props
                 for k,v in extra_styles.items():
                     if k in style:
                         raise ValueError("got style {} specified in two different locations".format(k))
                     style[k] = v
-            else:
+            elif self.use_css_styles:
                 style = extra_styles
-            if len(style) > 0:
+            if self.use_css_styles and len(style) > 0:
                 attrs['style'] = style
             self._attrs = attrs
             self._attr_view = None
@@ -2662,7 +2728,7 @@ class HTML(XMLBase):
             :rtype: object
             """
             if isinstance(item, str):
-                item = item.replace("_", "-")
+                item = item if item in self._attrs else self.context.clean_key(item)
                 return self._attrs[item]
             else:
                 return self._elems[item]
@@ -2681,7 +2747,7 @@ class HTML(XMLBase):
             :rtype: object
             """
             if isinstance(item, str):
-                item = item.replace("_", "-")
+                item = item if item in self._attrs else self.context.clean_key(item)
                 old_value = self._attrs.get(item, None)
                 self._attrs[item] = self.context.sanitize_value(value)
                 self._attr_view = None
@@ -2737,7 +2803,7 @@ class HTML(XMLBase):
             :rtype: object
             """
             if isinstance(item, str):
-                item = item.replace("_", "-")
+                item = item if item in self._attrs else self.context.clean_key(item)
                 old_value = self._attrs.get(item, None)
                 try:
                     del self._attrs[item]
@@ -2793,9 +2859,9 @@ class HTML(XMLBase):
                     if kids[-1].tail is None:
                         kids[-1].tail = elem
                     else:
-                        kids[-1].tail += "\n" + elem
+                        kids[-1].tail += cls.text_separator + elem
                 else:
-                    root.text = elem
+                    root.text = (root.text + cls.text_separator if root.text is not None else "") + elem
             elif hasattr(elem, 'to_widget'):
                 elem = elem.to_widget()
                 if not isinstance(elem, HTML.XMLElement):
@@ -2808,7 +2874,28 @@ class HTML(XMLBase):
             else:
                 raise ValueError(f"don't know what to do with {elem} in converting {parent}")
 
-        attr_converter = None
+        boolean_values = (None, 'true')  # (False, True); `None` drops the attribute
+        @classmethod
+        def convert_attrs(cls, attrs):
+            """
+            **LLM Docstring**
+
+            Default attribute conversion, needed since `ElementTree` only serializes strings: booleans
+            map through `boolean_values` (`open=True` -> `open="true"`, `False` drops the attribute)
+            and `None`-valued attributes are dropped. XML subclasses (`ContentXML.Element`, ...)
+            install their own converters.
+
+            :param attrs: Attribute values to normalize.
+            :type attrs: dict
+            :return: The converted attributes.
+            :rtype: dict
+            """
+            if not any(v is None or isinstance(v, (bool, np.bool_)) for v in attrs.values()):
+                return attrs
+            attrs = {k: (cls.boolean_values[bool(v)] if isinstance(v, (bool, np.bool_)) else v)
+                     for k, v in attrs.items()}
+            return {k: v for k, v in attrs.items() if v is not None}
+        attr_converter = convert_attrs
         @classmethod
         def construct_etree_attrs(cls, attrs, attr_converter=None):
             """
@@ -2825,7 +2912,7 @@ class HTML(XMLBase):
             :rtype: object
             """
             _copied = False
-            if 'style' in attrs:
+            if cls.use_css_styles and 'style' in attrs:
                 styles = attrs['style']
                 if hasattr(styles, 'items'):
                     styles = CSS(**styles)
@@ -2834,7 +2921,10 @@ class HTML(XMLBase):
                         attrs = attrs.copy()
                         _copied = True
                     attrs['style'] = styles.tostring()
-            if 'class' in attrs:
+            if cls.use_css_styles and 'class' in attrs and (attrs['class'] is None or attrs['class'] is False):
+                # no class (rather than `class="None"`)
+                attrs = {k: v for k, v in attrs.items() if k != 'class'}
+            if cls.use_css_styles and 'class' in attrs:
                 if not isinstance(attrs['class'], str):
                     if not _copied:
                         attrs = attrs.copy()
@@ -2872,6 +2962,7 @@ class HTML(XMLBase):
                 """
                 super().__init__('root')
                 self._raw_html_cache = {}
+                self._namespace_scopes = {}
             def __repr__(self):
                 """
                 **LLM Docstring**
@@ -2882,6 +2973,10 @@ class HTML(XMLBase):
                 :rtype: str
                 """
                 return f'{type(self).__name__}()'
+        def construct_etree_node(self, root, top, attrs):
+            """Create a node; XML adapters can supply namespace declarations here."""
+            return ElementTree.SubElement(root, self.tag, attrs)
+
         def to_tree(self, root=None, top=None, parent=None, attr_converter=None):
             """
             **LLM Docstring**
@@ -2904,8 +2999,8 @@ class HTML(XMLBase):
                 self._parents.add(parent)
             if attr_converter is None:
                 attr_converter = self.__dict__.get('attr_converter') # don't want to resolve to class-level converter
-            if self._tree_cache is None:
-                if top is None:
+            if self._tree_cache is None or not self.cache_tree:
+                if top is None and self.cache_tree:
                     top = self._tree_root
                 if top is None and parent is not None:
                     top = parent._tree_root
@@ -2914,9 +3009,9 @@ class HTML(XMLBase):
                 if root is None:
                     root = top
                 attrs = self.construct_etree_attrs(self.attrs, attr_converter=attr_converter)
-                my_el = ElementTree.SubElement(root, self.tag, attrs)
+                my_el = self.construct_etree_node(root, top, attrs)
                 if all(isinstance(e, str) for e in self.elems):
-                    my_el.text = "\n".join(self.elems)
+                    my_el.text = self.text_separator.join(self.elems)
                 else:
                     for elem in self.elems:
                         self.construct_etree_element(elem, my_el, top, parent=self, attr_converter=attr_converter)
@@ -3036,6 +3131,7 @@ class HTML(XMLBase):
             **LLM Docstring**
 
             Serialize the element, optionally pretty-printing or riffle-joining fragments, then restore raw HTML sentinels.
+            An explicit byte encoding returns bytes; the default returns a string.
 
             :param attr_converter: Optional callable that converts the serialized attribute mapping.
             :type attr_converter: object
@@ -3056,6 +3152,8 @@ class HTML(XMLBase):
             :rtype: str
             """
             tree, root = self.to_tree(attr_converter=attr_converter)
+            encoding = base_etree_opts.get('encoding')
+            return_bytes = encoding is not None and encoding != 'unicode'
             if prettify:
                 if indent is not False:
                     if indent is None or indent is True:
@@ -3082,22 +3180,19 @@ class HTML(XMLBase):
                 if riffle is not None and indent is not False:
                     if riffle is True:
                         riffle = self.default_newline
-                    strs = [
-                        s.decode() for s in ElementTree.tostringlist(
-                            tree,
-                            method=method,
-                            **base_etree_opts
-                        )
-                    ]
-                    base_str = riffle.join(strs)
+                    strs = ElementTree.tostringlist(tree, method=method, **base_etree_opts)
+                    if return_bytes:
+                        base_str = riffle.encode(encoding).join(strs)
+                    else:
+                        base_str = riffle.join(s.decode() if isinstance(s, bytes) else s for s in strs)
                     if write_string is not None:
                         base_str = write_string(base_str)
                 else:
                     if write_string is None:
                         write_string = ElementTree.tostring
-                    base_str = write_string(tree)
+                    base_str = write_string(tree, method=method, **base_etree_opts)
 
-            if hasattr(base_str, 'decode'):
+            if hasattr(base_str, 'decode') and not return_bytes:
                 base_str = base_str.decode()
             try:
                 replacements = root._raw_html_cache
@@ -3105,7 +3200,10 @@ class HTML(XMLBase):
                 replacements = {}
             if len(replacements) > 0:
                 for key,elem in replacements.items():
-                    base_str = base_str.replace(key, elem.tostring())
+                    value = elem.tostring()
+                    if isinstance(base_str, bytes):
+                        key, value = key.encode(encoding), value.encode(encoding)
+                    base_str = base_str.replace(key, value)
             return base_str
 
         def to_copy_button(self, label='Copy', prettify=False, **etc):
@@ -4468,10 +4566,15 @@ class HTML(XMLBase):
             """
             if len(rows) == 1 and isinstance(rows[0], (list, tuple)):
                 rows = rows[0]
+            # table sections/captions and existing rows/cells are used as given (wrapping a <thead>
+            # or <tbody> in <tr><td> produced invalid, mis-styled tables)
+            passthrough = (HTML.TableRow, HTML.TableHeader, HTML.TableBody, HTML.TableFooter,
+                           HTML.Caption, HTML.Colgroup)
+            cells = (HTML.TableItem, HTML.TableHeading)
             rows = [
                 HTML.TableRow(
-                    [HTML.TableItem(y) if not isinstance(y, HTML.TableItem) else y for y in x]
-                ) if not isinstance(x, HTML.TableRow) else x for x in rows
+                    [HTML.TableItem(y) if not isinstance(y, cells) else y for y in x]
+                ) if not isinstance(x, passthrough) else x for x in rows
             ]
             if headers is not None:
                 rows = [
@@ -4601,10 +4704,93 @@ class HTML(XMLBase):
     #     if strip:
     #         elems = [e for e in elems if not isinstance(e, str) or len(e) > 0]
 
-class ContentXML(XMLBase):
+class ContentXML(XMLBase, HTMLManager):
+
+    namespace_uris = {'xml': 'http://www.w3.org/XML/1998/namespace'}
+    namespace_attributes = ()
+    boolean_values = ('false', 'true')
+    keyword_replacements = {}
+
+    @classmethod
+    def manage_attrs(cls, attrs, sanitize=True):
+        # XML attributes are case-sensitive and must not become HTML/CSS styles.
+        return {(k[:-1] if k.endswith("_") and keyword.iskeyword(k[:-1]) else k)
+                .replace("__", ":"): v for k, v in attrs.items()}
+
+    @classmethod
+    def clean_key(cls, key):
+        return next(iter(cls.manage_attrs({key: None}, sanitize=False)))
+
+    @classmethod
+    def sanitize_value(cls, value):
+        return value.item() if isinstance(value, np.generic) else value
+
+    @classmethod
+    def extract_styles(cls, attrs, **opts):
+        return {}, attrs
+
+    @classmethod
+    def attr_value(cls, value):
+        if hasattr(value, 'item'):
+            value = value.item()
+        if isinstance(value, bool):
+            return cls.boolean_values[value]
+        if isinstance(value, (list, tuple)):
+            return ' '.join(cls.attr_value(v) for v in value)
+        return str(value)
+
+    @classmethod
+    def add_namespace_declarations(cls, tag, attrs, scope):
+        attrs = dict(attrs)
+        for key, value in attrs.items():
+            if key == 'xmlns' or key.startswith('xmlns:'):
+                scope[key.partition(':')[2]] = value
+        prefixes = {name.split(':', 1)[0] for name in (tag, *attrs)
+                    if ':' in name and not name.startswith(('xmlns:', '{'))}
+        for key in cls.namespace_attributes:
+            prefixes.update(attrs.get(key, '').split())
+        for prefix in sorted(prefixes - scope.keys()):
+            if prefix not in cls.namespace_uris:
+                raise ValueError('undeclared namespace prefix: ' + prefix)
+            scope[prefix] = attrs['xmlns:' + prefix] = cls.namespace_uris[prefix]
+        return attrs
+
+    @classmethod
+    def parse(cls, xml, strip=False, preserve_namespaces=True, **opts):
+        """Use the shared parser while retaining XML whitespace and namespace scopes."""
+        return super().parse(xml, strip=strip, preserve_namespaces=preserve_namespaces, **opts)
 
     class Element(HTML.XMLElement):
         ignored_styles = CSS.known_properties
+        use_css_styles = False
+        text_separator = ''
+        # Namespace bindings depend on the parent scope, so XML trees are rebuilt.
+        cache_tree = False
+        default_prettify = True
+
+        @classmethod
+        def convert_attrs(cls, attrs):
+            return {key: cls.context.attr_value(value) for key, value in attrs.items() if value is not None}
+
+        attr_converter = convert_attrs
+
+        def construct_etree_node(self, root, top, attrs):
+            scopes = getattr(top, '_namespace_scopes', {})
+            scope = dict(scopes.get(root, {'xml': self.context.namespace_uris['xml']}))
+            attrs = self.context.add_namespace_declarations(self.tag, attrs, scope)
+            node = super().construct_etree_node(root, top, attrs)
+            scopes[node] = scope
+            return node
+
+        @classmethod
+        def construct_etree_element(cls, elem, root, top, **opts):
+            if elem is not None:
+                return super().construct_etree_element(elem, root, top, **opts)
+
+        def to_etree(self, **opts):
+            """Return the element produced by the shared tree builder."""
+            return self.to_tree(**opts)[0]
+
         def get_display_element(self):
             """
             **LLM Docstring**
@@ -4615,11 +4801,11 @@ class ContentXML(XMLBase):
             :rtype: object
             """
             return HTML.Pre(self.tostring()).get_display_element()
-        def tostring(self, method='xml', prettify=True, **opts):
+        def tostring(self, method='xml', prettify=None, riffle=None, **opts):
             """
             **LLM Docstring**
 
-            Serialize content as prettified XML by default.
+            Serialize content as prettified XML by default using the shared serializer.
 
             :param method: Serialization method passed to `ElementTree`.
             :type method: object
@@ -4631,7 +4817,14 @@ class ContentXML(XMLBase):
             :return: The generated string representation.
             :rtype: str
             """
-            return super().tostring(method=method, prettify=prettify, **opts)
+            if prettify is None:
+                prettify = self.default_prettify
+            return super().tostring(method=method, prettify=prettify, riffle=riffle, **opts)
+
+        def to_bytes(self, **opts):
+            opts.setdefault('encoding', 'utf-8')
+            opts.setdefault('xml_declaration', True)
+            return self.tostring(**opts)
 
     base_element = Element
     class TagElement(Element):
@@ -4726,6 +4919,9 @@ class ContentXML(XMLBase):
                 on_update=self.on_update,
                 **dict(self.attrs, **kwargs)
             )
+
+
+ContentXML.Element.context = ContentXML
 
 
 COMMON_PRESENTATION = {

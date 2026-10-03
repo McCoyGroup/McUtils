@@ -2554,7 +2554,9 @@ def build_jump_table(serial_tree, max_depth=None, path_sep='/'):
     return jump_table
 
 def _downcast_uint(array):
-    return array.astype(nput.infer_inds_dtype(np.max(array)))
+    # `initial=0` so that empty arrays (e.g. no nonzero block pointers in a small tree) don't
+    # fail with "zero-size array to reduction operation maximum which has no identity"
+    return array.astype(nput.infer_inds_dtype(np.max(array, initial=0)))
 
 def _encode_jump_table(jump_table, index_remapping):
     """
