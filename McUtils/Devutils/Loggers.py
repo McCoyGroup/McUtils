@@ -338,6 +338,19 @@ class Logger:
 
     _loggers = weakref.WeakValueDictionary()
     default_verbosity = LogLevel.Normal
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the log file (`McUtils.Scaffolding.Readouts.LogReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from ..Scaffolding.Readouts import LogReadout
+        return LogReadout(self).to_readout(**opts)
+
     def __init__(self,
                  log_file=None,
                  log_level=None,

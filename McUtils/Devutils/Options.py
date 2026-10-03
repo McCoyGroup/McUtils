@@ -18,6 +18,19 @@ class OptionsSet:
     them across subclasses and things
     """
 
+    def to_readout(self, targets=(), **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the options (`OptionsSetReadout`), routed over ``targets`` if given.
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts import OptionsSetReadout
+        return OptionsSetReadout(self, targets=targets).to_readout(**opts)
+
     def __init__(self, *d, **ops):
         """
         **LLM Docstring**

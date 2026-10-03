@@ -531,6 +531,19 @@ class ExternalProgramJob(metaclass=abc.ABCMeta):
     extension: str
 
     registry = {}
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the job specification (`ExternalProgramJobReadout`); nothing is submitted.
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from ..Readouts.Jobs import ExternalProgramJobReadout
+        return ExternalProgramJobReadout(self).to_readout(**opts)
+
     @classmethod
     def register(cls, name, method=None):
         if method is None and hasattr(name, 'name'):

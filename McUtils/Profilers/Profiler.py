@@ -7,6 +7,19 @@ __all__ = [
 ]
 
 class BlockProfiler(metaclass=abc.ABCMeta):
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the finished profile (`ProfileReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts import ProfileReadout
+        return ProfileReadout(self).to_readout(**opts)
+
     def __init__(self, name="Profiled Block", inactive=False, print_res=True, logger=None, print_options=None):
         """
         **LLM Docstring**

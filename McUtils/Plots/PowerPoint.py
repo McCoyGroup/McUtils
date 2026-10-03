@@ -763,6 +763,19 @@ class PresentationMLPrimitive:
     Layout = PresentationMLElementLayout
     Appearance = PresentationMLAppearance
 
+    def to_readout(self, caption=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of this primitive (`ViewReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts import ViewReadout
+        return ViewReadout(self, caption=caption).to_readout(**opts)
+
     def __init__(self, *children, element=None, tag=None, parts=(), relationships=(),
                  content_options=None, layout=None, appearance=None, position=None,
                  width=None, height=None, bounds=None, units=None, name=None, id=None, **options):

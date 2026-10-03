@@ -253,6 +253,19 @@ class DataRecord:
     Implements _most_ of the `dict` interface, but, to make things a bit easier when
     pickling, is not implemented as a proper subclass of `dict`.
     """
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the record (`DataRecordReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts import DataRecordReadout
+        return DataRecordReadout(self).to_readout(**opts)
+
     def __init__(self, data_handler, key, records):
         self.data = records
         self.handler = data_handler

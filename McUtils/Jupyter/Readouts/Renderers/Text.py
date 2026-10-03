@@ -4,6 +4,7 @@ import textwrap
 
 from ..Nodes import (ReadoutNode, ReadoutSection, ReadoutText, ReadoutFields, ReadoutTable,
                      ReadoutArray, ReadoutImage, ReadoutScene, ReadoutGallery, Readout)
+from ..Views import ReadoutPlot, ReadoutEquation, ReadoutCode, ReadoutHTML, ReadoutPresML
 from .Base import ReadoutRenderer, RenderContext, handles
 
 __all__ = ["TextReadoutRenderer"]
@@ -77,3 +78,27 @@ class TextReadoutRenderer(ReadoutRenderer):
         for c in node.get_children():
             lines.extend("  " + l for l in self.render(c, ctx.child(c)))
         return lines + [""]
+
+    @handles(ReadoutPlot)
+    def render_plot(self, node, ctx):
+        return [f"[plot{': ' + node.caption if node.caption else ''}]", ""]
+
+    @handles(ReadoutEquation)
+    def render_equation(self, node, ctx):
+        return ["  " + node.latex(), ""]
+
+    @handles(ReadoutCode)
+    def render_code(self, node, ctx):
+        lines = [node.title + ":"] if node.title else []
+        return lines + ["    " + l for l in node.display_text(40).splitlines()] + [""]
+
+    @handles(ReadoutHTML)
+    def render_html(self, node, ctx):
+        if node.fallback is not None:
+            return self.render(node.fallback, ctx)
+        text = node.text_content()
+        return (text.splitlines() if text else ["[HTML view]"]) + [""]
+
+    @handles(ReadoutPresML)
+    def render_presml(self, node, ctx):
+        return self.render(node.get_fallback(), ctx)

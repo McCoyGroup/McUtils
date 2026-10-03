@@ -183,6 +183,19 @@ class GraphicsBase(metaclass=ABCMeta):
         'annotations'
     }
 
+    def to_readout(self, caption=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of this figure (`ViewReadout`); use ``include=['view', 'details']`` for the figure description.
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts import ViewReadout
+        return ViewReadout(self, caption=caption).to_readout(**opts)
+
     @staticmethod
     def _split_props_list(props, filter_set):
         """

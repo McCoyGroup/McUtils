@@ -15,6 +15,7 @@ import os
 
 from ..Nodes import (ReadoutNode, ReadoutSection, ReadoutText, ReadoutFields, ReadoutTable,
                      ReadoutArray, ReadoutImage, ReadoutScene, ReadoutGallery, Readout)
+from ..Views import ReadoutPlot, ReadoutEquation, ReadoutCode, ReadoutHTML, ReadoutPresML
 from ..Scenes import SceneView
 from .Base import ReadoutRenderer, RenderContext, handles, is_visible
 
@@ -100,6 +101,15 @@ figure.mcr-scene figcaption{{text-align:center;padding:4px 8px 6px;font-size:{sc
 .mcr-note{{color:var(--mcr-muted);font-style:italic}}
 .mcr-error{{color:#B42318}}
 .mcr-image{{max-width:100%}}
+figure.mcr-plot{{margin:6px 0;display:inline-block;max-width:100%;vertical-align:top}}
+figure.mcr-plot svg,figure.mcr-plot img{{max-width:100%;height:auto;display:block}}
+figure.mcr-plot figcaption{{text-align:center;color:var(--mcr-muted);font-size:{caption}px;padding-top:2px}}
+.mcr-eq{{margin:8px 0;overflow-x:auto}} .mcr-eq svg{{max-width:100%;height:auto}}
+pre.mcr-code{{background:var(--mcr-stripe);border:1px solid var(--mcr-rule);border-radius:6px;padding:8px 10px;
+ font-family:{mono};font-size:{caption}px;line-height:1.35;max-height:{table_max_height}px;overflow:auto;margin:4px 0 8px;
+ white-space:pre}}
+.mcr-cell{{display:inline-block;vertical-align:top;max-width:100%}}
+.mcr-html{{margin:4px 0 8px}}
 """
 
 
@@ -134,6 +144,7 @@ class HTMLReadoutRenderer(ReadoutRenderer):
 
     def render_readout(self, readout):
         self._has_scenes = False
+        self._head = []
         return self.render(readout, RenderContext())
 
     def runtime_elements(self):
@@ -159,6 +170,12 @@ class HTMLReadoutRenderer(ReadoutRenderer):
                 H.Style("html,body{margin:0;background:#F6F8FA} body{padding:16px 0}")]
         if self._has_scenes and self.mode == "static":
             head.extend(self.runtime_elements())
+        seen = set()
+        for el in self._head:
+            key = el if isinstance(el, str) else el.tostring()
+            if key not in seen:
+                seen.add(key)
+                head.append(H.RawHTML(el) if isinstance(el, str) else el)
         return "<!DOCTYPE html>\n" + H.Html(H.Head(*head), H.Body(body), lang="en").tostring()
 
     # ---- nodes ------------------------------------------------------------------------- #
@@ -229,8 +246,12 @@ class HTMLReadoutRenderer(ReadoutRenderer):
     def render_array(self, node, ctx):
         if not node.display:
             return None
-        a = node.data
-        return self.H.P(f"{a.label}: array of shape {a.array.shape}", cls="mcr-text mcr-note")
+        from .Base import array_preview
+        table, summary = array_preview(node.data, self.theme)
+        out = self._block_title(node) + [self.H.P(summary, cls="mcr-text mcr-note")]
+        if table is not None:
+            out.append(self.render_table(ReadoutTable(table), ctx)[-1])
+        return out
 
     @handles(ReadoutImage)
     def render_image(self, node, ctx):
@@ -271,6 +292,42 @@ class HTMLReadoutRenderer(ReadoutRenderer):
     def render_scene(self, node, ctx):
         return self._scene_element(node, ctx, self.scene_size)
 
+    @handles(ReadoutPlot)
+    def render_plot(self, node, ctx):
+        H = self.H
+        try:
+            body = H.RawHTML(node.to_svg())
+        except Exception:
+            body = H.Img(src="data:image/png;base64," + base64.b64encode(node.to_png()).decode())
+        kids = [body]
+        if node.caption:
+            kids.append(H.Figcaption(node.caption))
+        return self._block_title(node) + [H.Figure(*kids, cls="mcr-plot")]
+
+    @handles(ReadoutEquation)
+    def render_equation(self, node, ctx):
+        H = self.H
+        color = "#" + self.theme.color("text").lstrip("#")
+        return H.Div(H.RawHTML(node.to_svg(color=color)), cls="mcr-eq", title=node.latex(),
+                     data_latex=node.latex())
+
+    @handles(ReadoutCode)
+    def render_code(self, node, ctx):
+        return self._block_title(node) + [self.H.Pre(node.display_text(), cls="mcr-code")]
+
+    @handles(ReadoutHTML)
+    def render_html(self, node, ctx):
+        self._head.extend(node.head)
+        el = node.get_element()
+        if isinstance(el, str):
+            el = self.H.RawHTML(el)
+        return self._block_title(node) + [self.H.Div(el, cls="mcr-html")]
+
+    @handles(ReadoutPresML)
+    def render_presml(self, node, ctx):
+        fb = node.get_fallback()
+        return self.render(fb, ctx)
+
     @handles(ReadoutGallery)
     def render_gallery(self, node, ctx):
         H = self.H
@@ -283,5 +340,6 @@ class HTMLReadoutRenderer(ReadoutRenderer):
             else:
                 res = self.render(c, ctx.child(c))
                 if res is not None:
-                    items.extend(res if isinstance(res, list) else [res])
+                    res = res if isinstance(res, list) else [res]
+                    items.append(H.Div(*res, cls="mcr-cell", style=f"width:{w + 2}px"))
         return self._block_title(node) + [H.Div(*items, cls="mcr-gallery")]

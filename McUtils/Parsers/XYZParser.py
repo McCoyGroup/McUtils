@@ -9,6 +9,19 @@ __all__ = [
 ]
 
 class XYZParser(FileLineByLineReader):
+    def to_readout(self, max_blocks=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the XYZ frames (`XYZReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from ..ExternalPrograms.Readouts.Structures import XYZReadout
+        return XYZReadout.from_file(self.stream._file, max_blocks=max_blocks).to_readout(**opts)
+
     def __init__(self, *args, **kwds):
         super().__init__(*args, max_nesting_depth=0, **kwds)
     def check_tag(self, line:str, depth:int=0, active_tag=None, label:str=None, history:list[str]=None):
@@ -28,7 +41,8 @@ class XYZParser(FileLineByLineReader):
                     return None
                 else:
                     return self.LineReaderTags.BLOCK_END
-        elif check_block_end and reps.PositiveInteger.match(line):
+        elif check_block_end and reps.PositiveInteger.match(line.strip()):
+            # atom-count lines may be indented (e.g. CREST writes "  93")
             return self.LineReaderTags.BLOCK_START, int(line.strip()), None
         else:
             return None

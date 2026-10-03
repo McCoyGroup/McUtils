@@ -20,6 +20,14 @@ from .Scenes import *; from .Scenes import __all__ as exposed
 __all__ += exposed
 from .Interface import *; from .Interface import __all__ as exposed
 __all__ += exposed
+from .Views import *; from .Views import __all__ as exposed
+__all__ += exposed
+from .Registry import *; from .Registry import __all__ as exposed
+__all__ += exposed
+from .Structures import *; from .Structures import __all__ as exposed
+__all__ += exposed
+from .Charts import *; from .Charts import __all__ as exposed
+__all__ += exposed
 from .Renderers import *; from .Renderers import __all__ as exposed
 __all__ += exposed
 del exposed

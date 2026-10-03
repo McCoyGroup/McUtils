@@ -5,6 +5,7 @@ from ..Nodes import ReadoutArray
 
 __all__ = [
     "is_visible",
+    "array_preview",
     "ReadoutRenderer",
     "RenderContext",
     "handles",
@@ -26,6 +27,32 @@ def is_visible(node):
     if node.kind in ("section", "gallery", "readout"):
         return any(is_visible(c) for c in node.get_children())
     return True
+
+
+def array_preview(data, theme=None, max_rows=12, max_cols=10):
+    """``(TabularData | None, summary text)`` for showing an `ArrayData`."""
+    import numpy as np
+    from ..Data import Column, TabularData
+    a = np.asarray(data.array)
+    unit = theme.get_unit_label(data.unit) if (theme is not None and data.unit) else data.unit
+    summary = f"shape {a.shape}, {a.dtype}" + (f", {unit}" if unit else "")
+    if a.size and np.issubdtype(a.dtype, np.number) and not np.iscomplexobj(a):
+        summary += f"; min {np.nanmin(a):.6g}, max {np.nanmax(a):.6g}"
+    if a.ndim == 1 and a.size <= max_rows * max_cols:
+        if a.size > max_rows:
+            return None, summary + f": [{', '.join(f'{v:.6g}' if np.issubdtype(a.dtype, np.number) else str(v) for v in a[:max_rows])}, …]"
+        cols = [Column("index", np.arange(len(a)), label="i", quantity="index"),
+                Column("value", a, label=data.label, unit=data.unit, quantity=data.quantity, fmt=data.fmt)]
+        return TabularData(cols), summary
+    if a.ndim == 2 and a.shape[1] <= max_cols:
+        rows = a[:max_rows]
+        cols = [Column("row", np.arange(len(rows)), label="i", quantity="index")]
+        cols += [Column(f"c{j}", rows[:, j], label=str(j), unit=data.unit, quantity=data.quantity, fmt=data.fmt)
+                 for j in range(a.shape[1])]
+        if len(a) > max_rows:
+            summary += f" (first {max_rows} of {len(a)} rows)"
+        return TabularData(cols), summary
+    return None, summary
 
 
 class RenderContext:

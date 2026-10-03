@@ -10,6 +10,19 @@ __all__ = ["Timer"]
 class Timer:
 
     tag_printing_times = {}
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of recorded timings (`TimerReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts import TimerReadout
+        return TimerReadout(self).to_readout(**opts)
+
     def __init__(self, tag=None, file=sys.stderr, rounding=6, message=None, format=None, print_times=-1, number=None, globals=None, **kw):
         """
         **LLM Docstring**

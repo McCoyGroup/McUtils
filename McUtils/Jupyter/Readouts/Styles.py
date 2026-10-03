@@ -129,6 +129,7 @@ class ReadoutTheme:
             "family": "-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif",
             "mono": "Menlo, Consolas, 'DejaVu Sans Mono', monospace",
             "pptx_family": "Arial",
+            "pptx_mono": "Courier New",
         },
         # point sizes, used for PowerPoint; HTML scales them by `html.font_scale`
         "sizes": {
@@ -160,6 +161,7 @@ class ReadoutTheme:
             "max_table_rows": 16, "min_table_rows": 3,
             "scene_size": (490, 370), "scene_caption_height": 40, "gallery_per_slide": 1,
             "field_label_fraction": .28, "title_slide": True, "pack_sections": True,
+            "plot_size": (520, 340), "code_lines": 22,
         },
         "scene": {
             "fov": 45, "padding": 1.15, "metres_per_unit": 0.03, "background": "white",

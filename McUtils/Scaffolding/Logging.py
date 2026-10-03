@@ -16,6 +16,19 @@ class LogParser(FileStreamReader):
     """
     A parser that will take a log file and stream it as a series of blocks
     """
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the log (`LogReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts import LogReadout
+        return LogReadout(self).to_readout(**opts)
+
     def __init__(self, file, block_settings=None, binary=False, block_level_padding=None, **kwargs):
         """
         **LLM Docstring**
