@@ -141,6 +141,19 @@ class X3D(X3DObject):
         primitiveQuality = "HIGH",
         update = "auto",
     )
+    def to_readout(self, caption=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of this scene (`ViewReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts import ViewReadout
+        return ViewReadout(self, caption=caption).to_readout(**opts)
+
     @classmethod
     def get_new_id(cls):
         """

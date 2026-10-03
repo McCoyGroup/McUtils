@@ -74,6 +74,19 @@ class SharedMemoryNDarray:
         weakref.WeakKeyDictionary(),
         {}
     ]
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the shared array (`McUtils.Scaffolding.Readouts.ArchiveReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from ..Scaffolding.Readouts import ArchiveReadout
+        return ArchiveReadout(self).to_readout(**opts)
+
     def __init__(self, shape, dtype, buf, autoclose=True, parallelizer=None,
                  readonly=False):
         """

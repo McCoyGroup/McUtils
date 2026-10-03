@@ -24,6 +24,19 @@ class Job:
     """
     default_job_file = "job_data.json"
     default_log_file = "log.txt"
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the run directory (`JobRunReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts import JobRunReadout
+        return JobRunReadout(self).to_readout(**opts)
+
     def __init__(self,
                  job_dir,
                  job_file=None,

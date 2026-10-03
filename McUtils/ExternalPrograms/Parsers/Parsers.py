@@ -17,6 +17,19 @@ class ElectronicStructureLogReader(FileStreamReader):
     components_name = None
     components_package = ".LogComponents"
     _comps = None
+    def to_readout(self, keys=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build a generic `Readout` of parsed results (`ElectronicStructureLogReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from ..Readouts.ElectronicStructure import ElectronicStructureLogReadout
+        return ElectronicStructureLogReadout.from_reader(self, keys=keys).to_readout(**opts)
+
     @classmethod
     def load_components(cls):
         """

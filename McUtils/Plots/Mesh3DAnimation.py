@@ -71,6 +71,19 @@ class Mesh3DAnimation:
     skinned_export = False          # default for `to_gltf`/`savefig` when `skinned` isn't passed
     max_morph_joints = 20000        # guard for the per-vertex fallback in skinned export
 
+    def to_readout(self, caption=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of this animation (`ViewReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts import ViewReadout
+        return ViewReadout(self, caption=caption).to_readout(**opts)
+
     def __init__(self, frames, figure=None, mode=None, animation_duration=2.0,
                  background=None, name="animation", **ignored_opts):
         """

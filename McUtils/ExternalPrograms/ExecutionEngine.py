@@ -26,6 +26,21 @@ class ExecutionStatus(enum.Enum):
 
 class ExecutionFuture(metaclass=abc.ABCMeta):
     poll_time = 1
+    def to_readout(self, refresh=False, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of a status snapshot (`ExecutionReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts.Jobs import ExecutionReadout
+        if refresh:
+            opts["status"] = dict(opts.get("status") or {}, refresh=True)
+        return ExecutionReadout(self).to_readout(**opts)
+
     def __init__(self, poll_time=None):
         """
         **LLM Docstring**
@@ -116,6 +131,21 @@ class JoinableExecutionFuture(ExecutionFuture):
         self.await_result(timeout=timeout)
 
 class ExecutionQueue:
+    def to_readout(self, refresh=False, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of a status snapshot (`ExecutionReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts.Jobs import ExecutionReadout
+        if refresh:
+            opts["status"] = dict(opts.get("status") or {}, refresh=True)
+        return ExecutionReadout(self).to_readout(**opts)
+
     def __init__(self, futures:list[ExecutionFuture]):
         """
         **LLM Docstring**

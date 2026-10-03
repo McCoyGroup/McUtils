@@ -127,6 +127,19 @@ class CIFParser(FileLineByLineReader):
     # }
     # exceptions = {'_chemical_formula_moiety', '_atom_site_fract_z', 'atom_type_radius_bond'}
 
+    def to_readout(self, block=0, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the CIF data block ``block`` (`CIFReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from ..Readouts.Crystals import CIFReadout
+        return CIFReadout.from_file(self.stream._file, block=block).to_readout(**opts)
+
     def __init__(self, file, fields=None, **kw):
         """
         **LLM Docstring**
@@ -411,6 +424,19 @@ class CIFParser(FileLineByLineReader):
             self.fields = tmp_fields
 
 class CIFConverter:
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the converted CIF data (`CIFReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from ..Readouts.Crystals import CIFReadout
+        return CIFReadout(self).to_readout(**opts)
+
     def __init__(self, parsed_cif):
         """
         **LLM Docstring**

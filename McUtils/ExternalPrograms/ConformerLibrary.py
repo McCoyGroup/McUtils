@@ -281,6 +281,19 @@ class ConformerLibrary:
 
     LibraryBackend = ConformerLibraryBackend # to make it easier to subclass without exposing more surface
 
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the library contents (`ConformerLibraryReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts.Conformers import ConformerLibraryReadout
+        return ConformerLibraryReadout(self).to_readout(**opts)
+
     def __init__(self, backend=None, loader=None):
         if backend is None:
             backend = NumpyTreeArchiveBackend.from_tree({})

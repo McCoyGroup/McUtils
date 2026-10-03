@@ -11,6 +11,8 @@ import numpy as np
 
 from ..Nodes import (ReadoutNode, ReadoutSection, ReadoutText, ReadoutFields, ReadoutTable,
                      ReadoutArray, ReadoutImage, ReadoutScene, ReadoutGallery, Readout)
+from ..Views import ReadoutPlot, ReadoutEquation, ReadoutCode, ReadoutHTML, ReadoutPresML
+from ..Data import TabularData, FieldSet, ArrayData
 from .Base import ReadoutRenderer, RenderContext, handles
 
 __all__ = ["DataReadoutRenderer"]
@@ -114,8 +116,27 @@ class DataReadoutRenderer(ReadoutRenderer):
         self._meta(ctx, None, node.data.get_meta())
         return node.data.array
 
-    @handles(ReadoutText, ReadoutImage, ReadoutScene)
+    @handles(ReadoutText, ReadoutImage, ReadoutScene, ReadoutEquation, ReadoutCode, ReadoutHTML, ReadoutPresML)
     def render_skip(self, node, ctx):
+        return None
+
+    @handles(ReadoutPlot)
+    def render_plot(self, node, ctx):
+        """Plots export the semantic data they were given (``data=``), never pixels."""
+        d = node.data
+        if d is None:
+            return None
+        if isinstance(d, TabularData):
+            for name, m in d.get_meta().items():
+                self._meta(ctx, name, m)
+            return d.to_arrays()
+        if isinstance(d, FieldSet):
+            for f in d:
+                self._meta(ctx, f.name, f.get_meta())
+            return d.to_arrays()
+        if isinstance(d, ArrayData):
+            self._meta(ctx, None, d.get_meta())
+            return d.array
         return None
 
     # ---- outputs ---------------------------------------------------------------------- #

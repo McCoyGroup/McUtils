@@ -118,6 +118,19 @@ class CRESTParser:
     conformers_best_file = 'crest_best.xyz'
     conformers_file = 'crest_conformers.xyz'
     rotamers_file = 'crest_rotamers.xyz'
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the CREST run (`CRESTReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from ..Readouts.Conformers import CRESTReadout
+        return CRESTReadout(self).to_readout(**opts)
+
     def __init__(self, parse_dir,
                  opt_log_file=None,
                  confgen_log_file=None,

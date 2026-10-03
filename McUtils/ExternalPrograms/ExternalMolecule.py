@@ -15,6 +15,19 @@ class ExternalMolecule(metaclass=abc.ABCMeta):
     that _must_ be implemented
     """
 
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the wrapped molecule (`ExternalMoleculeReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts.Molecules import ExternalMoleculeReadout
+        return ExternalMoleculeReadout(self).to_readout(**opts)
+
     def __init__(self, external_mol):
         self.mol = external_mol
 

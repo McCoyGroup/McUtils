@@ -24,6 +24,19 @@ class Checkpointer(metaclass=abc.ABCMeta):
     """
 
     default_extension=""
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the checkpoint contents (`ArchiveReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts import ArchiveReadout
+        return ArchiveReadout(self).to_readout(**opts)
+
     def __init__(self, checkpoint_file,
                  allowed_keys=None,
                  omitted_keys=None

@@ -43,6 +43,19 @@ class GaussianLogReader(FileStreamReader):
     default_ordering = GaussianLogOrdering
     parsers = GaussianLogParsers
 
+    def to_readout(self, keys=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of parsed results (`GaussianLogReadout`); ``keys`` limits what is parsed.
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from ..Readouts.ElectronicStructure import GaussianLogReadout
+        return GaussianLogReadout.from_reader(self, keys=keys).to_readout(**opts)
+
     def _read_source(self, from_start=False):
         with FileStreamCheckPoint(self):
             if from_start:
@@ -286,6 +299,19 @@ class GaussianFChkReader(FileStreamReader):
     registered_components = FormattedCheckpointComponents
     common_names = {to_:from_ for from_, to_ in FormattedCheckpointCommonNames.items()}
     to_common_name = FormattedCheckpointCommonNames
+
+    def to_readout(self, keys=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of parsed results (`GaussianFChkReadout`); ``keys`` limits what is parsed.
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from ..Readouts.ElectronicStructure import GaussianFChkReadout
+        return GaussianFChkReadout.from_reader(self, keys=keys).to_readout(**opts)
 
     def __init__(self, file, **kwargs):
         """

@@ -9,6 +9,19 @@ __all__ = [
 ]
 
 class CubePropEvaluator:
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the volume (`CubeReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from .Readouts.Volumes import CubeReadout
+        return CubeReadout(self).to_readout(**opts)
+
     def __init__(self, origin, axes, steps, values, base_data=None, **opts):
         """
         **LLM Docstring**

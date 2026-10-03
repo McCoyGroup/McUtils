@@ -26,3 +26,16 @@ class QChemLogReader(ElectronicStructureLogReader):
         )
     """
     components_name = "QChemLogComponents"
+
+    def to_readout(self, keys=None, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of parsed results (`QChemLogReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from ..Readouts.ElectronicStructure import QChemLogReadout
+        return QChemLogReadout.from_reader(self, keys=keys).to_readout(**opts)

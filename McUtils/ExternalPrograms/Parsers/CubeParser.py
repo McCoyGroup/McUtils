@@ -44,6 +44,19 @@ CubeFileData = namedtuple(
 )
 
 class CubeFileParser(FileLineByLineReader):
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the cube file (`CubeReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from ..Readouts.Volumes import CubeReadout
+        return CubeReadout.from_file(self.stream._file).to_readout(**opts)
+
     def __init__(self, file, **kw):
         """
         **LLM Docstring**

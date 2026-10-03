@@ -1288,96 +1288,51 @@ class LineSearcher(metaclass=abc.ABCMeta):
                       max_iterations=15,
                       history_length=1,
                       **opts):
-        """
-        **LLM Docstring**
+        """Search each batch member independently, returning zero on failure.
 
-        Run the 1-D line search: iteratively update step lengths until each member's
-        objective along the search direction meets the convergence test (or the
-        iteration cap is hit).
-
-        :param scalar_func: the directional objective `phi(alphas, mask)`
-        :type scalar_func: Callable
-        :param guess_alpha: initial step length(s)
-        :type guess_alpha: np.ndarray
-        :param min_alpha: minimum allowed step length
-        :type min_alpha: float | None
-        :param max_iterations: maximum line-search iterations
-        :type max_iterations: int
-        :param history_length: how many past iterations to retain
-        :type history_length: int
-        :param opts: extra options forwarded to the convergence/update hooks
-        :return: `(alphas, (phi_vals, is_converged))`
-        :rtype: tuple
+        The returned objective values always correspond to the returned alphas.
+        Failed searches retain a false convergence flag and leave the point intact.
         """
         if min_alpha is None:
             min_alpha = self.min_alpha
+        if min_alpha is None:
+            min_alpha = 0
 
-        alphas = np.asanyarray(guess_alpha)
+        alphas = np.array(guess_alpha, dtype=float, copy=True)
         mask = np.arange(len(alphas))
-
-        phi_vals = scalar_func(alphas, mask)
-        if history_length > 0:
-            history = collections.deque(maxlen=history_length)
-        else:
-            history = None
-
+        phi_vals = np.array(scalar_func(alphas, mask), dtype=float, copy=True)
+        history = collections.deque(maxlen=history_length) if history_length > 0 else None
         is_converged = np.full(len(mask), False)
-        converged = np.where(self.check_scalar_converged(phi_vals, alphas, **opts))[0]
-        if len(converged) > 0:
-            is_converged[converged,] = True
+
+        for i in range(max_iterations + 1):
+            converged = np.where(self.check_scalar_converged(
+                phi_vals[mask], alphas[mask], mask=mask, **opts
+            ))[0]
+            is_converged[mask[converged]] = True
             mask = np.delete(mask, converged)
+            if len(mask) == 0 or i == max_iterations:
+                break
+
+            # A failed trial at the lower bound cannot be reduced further.
+            mask = mask[alphas[mask] > min_alpha]
             if len(mask) == 0:
-                return alphas,  (phi_vals, is_converged)
+                break
 
-        for i in range(max_iterations):
+            phi_vals_old = [p[mask] for p, a in history] if history is not None else None
+            alpha_vals_old = [a[mask] for p, a in history] if history is not None else None
+            new_alphas = self.update_alphas(
+                phi_vals, alphas, i, phi_vals_old, alpha_vals_old, mask, **opts
+            )
             if history is not None:
-                phi_vals_old = [p[mask,] for p,a in history]
-                alpha_vals_old = [a[mask,] for p,a in history]
-            else:
-                phi_vals_old = None
-                alpha_vals_old = None
+                history.append([phi_vals.copy(), alphas.copy()])
+            new_alphas = np.maximum(new_alphas, min_alpha)
+            phi_vals[mask] = scalar_func(new_alphas, mask)
+            alphas[mask] = new_alphas
 
-            new_alphas = self.update_alphas(phi_vals, alphas, i,
-                                            phi_vals_old, alpha_vals_old,
-                                            mask,
-                                            **opts
-                                            )
-                # mask = np.delete(mask, problem_alphas)
-                # if len(mask) == 0:
-                #     break  # alphas, (phi_vals, is_converged)
-
-            history.append([phi_vals.copy(), alphas.copy()])
-
-            new_phi = scalar_func(new_alphas, mask)
-            phi_vals[mask,] = new_phi
-            # prev_alphas = alphas[mask,].copy()
-            alphas[mask,] = new_alphas
-
-            problem_alphas = np.where(new_alphas < min_alpha)[0]
-            if len(problem_alphas) > 0:
-                alphas[mask[problem_alphas,],] = min_alpha
-                new_alphas = np.delete(new_alphas, problem_alphas)
-                new_phi = np.delete(new_phi, problem_alphas)
-                mask = np.delete(mask, problem_alphas)
-                if len(mask) == 0:
-                    break
-
-            converged = np.where(self.check_scalar_converged(new_phi, new_alphas, **opts))[0]
-            if len(converged) > 0:
-                is_converged[mask[converged,],] = True
-                mask = np.delete(mask, converged)
-                if len(mask) == 0:
-                    break
-
-            # problem_alphas = np.where(np.abs(prev_alphas - alphas[mask,]) < 1e-8)[0]
-            # if len(problem_alphas) > 0:
-            #     mask = np.delete(mask, problem_alphas)
-            #     if len(mask) == 0:
-            #         break# alphas, (phi_vals, is_converged)
-        else:
-            am = alphas[mask,]
-            default_alpha = self.get_default_alpha(am, **opts)
-            alphas[mask,] = np.min(np.array([am, default_alpha]), axis=0)
+        failed = np.where(~is_converged)[0]
+        if len(failed) > 0:
+            alphas[failed] = 0
+            phi_vals[failed] = scalar_func(alphas[failed], failed)
         return alphas, (phi_vals, is_converged)
 
     def prep_search(self, initial_geom, search_dir, guess_alpha=1, **opts):
@@ -1472,10 +1427,10 @@ class ArmijoSearch(LineSearcher):
         :type c1: float
         :param min_alpha: minimum allowed step length
         :type min_alpha: float | None
-        :param fixed_step_cutoff: gradient magnitude below which a unit step is used
+        :param fixed_step_cutoff: lower bound on the directional derivative magnitude used to scale the initial trial
         :type fixed_step_cutoff: float | None
-        :param der_max: cap on the magnitude of the directional derivative
-        :type der_max: float
+        :param der_max: cap on the initial predicted objective change (`None` disables)
+        :type der_max: float | None
         :param guess_alpha: initial step length
         :type guess_alpha: float
         """
@@ -1486,76 +1441,40 @@ class ArmijoSearch(LineSearcher):
         self.guess_alpha = guess_alpha
 
     def prep_search(self, initial_geom, search_dir, *, initial_grad, min_alpha=None, **rest):
-        """
-        **LLM Docstring**
+        """Use the actual directional derivative and bound the initial trial.
 
-        Prepare the Armijo search: compute (and clip) the initial directional
-        derivative and the baseline objective value, and pick the starting step length.
-
-        :param initial_geom: the base points
-        :type initial_geom: np.ndarray
-        :param search_dir: the search directions
-        :type search_dir: np.ndarray
-        :param initial_grad: the gradient at the base points
-        :type initial_grad: np.ndarray
-        :param min_alpha: minimum allowed step length
-        :type min_alpha: float | None
-        :param rest: extra options forwarded to the base preparation
-        :return: `(guess_alpha, opts, phi)`
-        :rtype: tuple
+        ``der_max`` bounds the initial predicted objective change, rather than
+        changing the derivative used by the Armijo test and interpolation.
         """
         mask = np.arange(len(initial_geom))
-        derphi0 = np.reshape(initial_grad[:, np.newaxis, :] @ search_dir[:, :, np.newaxis], (-1,))
-        derphi0 = np.clip(derphi0, -self.der_max, self.der_max)
+        derphi0 = np.einsum('ij,ij->i', initial_grad, search_dir)
         if min_alpha is None:
             min_alpha = self.min_alpha
+        if min_alpha is None:
+            min_alpha = 1e-8
 
+        rest.setdefault('guess_alpha', self.guess_alpha)
         a0, opts, phi = super().prep_search(initial_geom, search_dir, **rest)
-        if self.fixed_step_cutoff is None:
-           if min_alpha is None:
-               min_alpha = 1e-8
-        else:
-           if min_alpha is None:
-               min_alpha = 1e-8 #if np.max(np.abs(derphi0)) > self.fixed_step_cutoff else 1
-           a0 = (
-                   (np.abs(derphi0) > self.fixed_step_cutoff) + (np.abs(derphi0) <= self.fixed_step_cutoff)
-           ).astype(float)
-
+        if self.der_max is not None:
+            cutoff = self.fixed_step_cutoff
+            if cutoff is None:
+                cutoff = np.finfo(float).tiny
+            cutoff = max(cutoff, np.finfo(float).tiny)
+            a0 = np.minimum(a0, self.der_max / np.maximum(np.abs(derphi0), cutoff))
+        a0 = np.maximum(a0, min_alpha)
         phi0 = phi(np.zeros_like(a0), mask)
         return a0, dict(opts, phi0=phi0, derphi0=derphi0, min_alpha=min_alpha), phi
 
-    converged_tolerance = 1e-8
-    def check_scalar_converged(self, phi_vals, alphas, *, phi0, c1, derphi0, tol=None):
-        """
-        **LLM Docstring**
-
-        Apply the Armijo sufficient-decrease test `phi(a) <= phi0 + c1 * a * derphi0`.
-
-        :param phi_vals: objective values along the search direction
-        :type phi_vals: np.ndarray
-        :param alphas: current step lengths
-        :type alphas: np.ndarray
-        :param phi0: baseline objective value
-        :type phi0: np.ndarray
-        :param c1: sufficient-decrease parameter
-        :type c1: float
-        :param derphi0: baseline directional derivative
-        :type derphi0: np.ndarray
-        :param tol: comparison tolerance
-        :type tol: float | None
-        :return: the convergence mask
-        :rtype: np.ndarray
-        """
+    converged_tolerance = 0
+    def check_scalar_converged(self, phi_vals, alphas, *, phi0, c1, derphi0, tol=None, mask=None):
+        """Apply the sufficient-decrease test separately to each active member."""
         if tol is None:
             tol = self.converged_tolerance
+        if mask is not None:
+            phi0 = phi0[mask]
+            derphi0 = derphi0[mask]
         test = phi0 + c1 * alphas * derphi0
-        return np.logical_and(
-            np.logical_not(np.isnan(phi_vals)),
-            np.logical_or(
-                phi_vals < test,
-                np.allclose(phi_vals, test, rtol=0, atol=tol)
-            )
-        )
+        return np.isfinite(phi_vals) & (phi_vals <= test + tol)
 
     def get_default_alpha(self, am, *, phi0, **etc):
         """
@@ -1575,102 +1494,33 @@ class ArmijoSearch(LineSearcher):
 
     def update_alphas(self,
                       phi_vals, alphas, iteration,
-                      old_phi_vals, old_alphas_vals,
-                      mask,
-                      *,
-                      phi0, c1, derphi0,
-                      zero_cutoff=1e-16
-                      ):
-        """
-        **LLM Docstring**
+                      old_phi_vals, old_alphas_vals, mask,
+                      *, phi0, c1, derphi0, zero_cutoff=1e-16):
+        """Safeguard interpolation; halve trials with nonfinite objective values."""
+        phi0 = phi0[mask]
+        derphi0 = derphi0[mask]
+        phi_a1 = phi_vals[mask]
+        alpha1 = alphas[mask]
 
-        Propose the next Armijo step length by quadratic (first iteration) then cubic
-        (subsequent) interpolation of the objective along the search direction, with
-        safeguards that halve the step when the interpolation misbehaves.
+        with np.errstate(over='ignore', divide='ignore', invalid='ignore'):
+            if iteration == 0 or not old_phi_vals:
+                factor = phi_a1 - phi0 - derphi0 * alpha1
+                candidate = -derphi0 * alpha1 ** 2 / (2 * factor)
+            else:
+                phi_a0 = old_phi_vals[-1]
+                alpha0 = old_alphas_vals[-1]
+                delta = alpha1 - alpha0
+                f0 = (phi_a0 - phi0 - derphi0 * alpha0) / (alpha0 ** 2 * delta)
+                f1 = (phi_a1 - phi0 - derphi0 * alpha1) / (alpha1 ** 2 * delta)
+                a = f1 - f0
+                b = alpha1 * f0 - alpha0 * f1
+                discriminant = b ** 2 - 3 * a * derphi0
+                # Rationalized root avoids subtracting nearly equal quantities.
+                candidate = -derphi0 / (b + np.sqrt(discriminant))
 
-        :param phi_vals: current objective values
-        :type phi_vals: np.ndarray
-        :param alphas: current step lengths
-        :type alphas: np.ndarray
-        :param iteration: the line-search iteration index
-        :type iteration: int
-        :param old_phi_vals: recent historical objective values
-        :type old_phi_vals: list
-        :param old_alphas_vals: recent historical step lengths
-        :type old_alphas_vals: list
-        :param mask: indices of the active members
-        :type mask: np.ndarray
-        :param phi0: baseline objective value
-        :type phi0: np.ndarray
-        :param c1: sufficient-decrease parameter
-        :type c1: float
-        :param derphi0: baseline directional derivative
-        :type derphi0: np.ndarray
-        :param zero_cutoff: small-denominator guard
-        :type zero_cutoff: float
-        :return: the updated step lengths
-        :rtype: np.ndarray
-        """
-        phi0 = phi0[mask,]
-        derphi0 = derphi0[mask,]
-
-        if iteration == 0:
-            factor = (phi_vals - phi0 - derphi0 * alphas)
-            # alpha1 = alphas.copy()
-            # safe_pos = np.where(np.abs(factor) > zero_cutoff)
-            # alpha1[safe_pos,] = -(derphi0[safe_pos,]) * alphas[safe_pos] ** 2 / 2.0 / factor[safe_pos]
-            # TODO: ensure stays numerically stable
-            # print(".>>", phi0)
-            alpha1 = -(derphi0) * alphas ** 2 / 2.0 / factor
-            alpha_new = alpha1
-        else:
-            phi_a0 = old_phi_vals[0]
-            phi_a1 = phi_vals
-            alpha0 = old_alphas_vals[0]
-            alpha1 = alphas
-
-            # da = (alpha1 - alpha0)
-
-            # safe_pos = np.where(np.abs(factor) < zero_cutoff)
-            # factor = alpha0 ** 2 * alpha1 ** 2 * (alpha1 - alpha0)
-            # a = alpha0 ** 2 * (phi_a1 - phi0 - derphi0 * alpha1) - \
-            #     alpha1 ** 2 * (phi_a0 - phi0 - derphi0 * alpha0)
-            # a = a / factor
-            # b = -alpha0 ** 3 * (phi_a1 - phi0 - derphi0 * alpha1) + \
-            #     alpha1 ** 3 * (phi_a0 - phi0 - derphi0 * alpha0)
-            # b = b / factor
-
-            # scaling = 1
-            n0 = (phi_a0 - phi0 - derphi0 * alpha0)
-            n1 = (phi_a1 - phi0 - derphi0 * alpha1)
-            d0 = alpha0 ** 2 * (alpha1 - alpha0)
-            d1 = alpha1 ** 2 * (alpha1 - alpha0)
-            # if d0 < 1e-8 or d1 < 1e-8:
-            #     scaling = 1e6
-            #     d0 = d0 * scaling
-            #     d1 = d1 * scaling
-            f1 = n1 / d1
-            f0 = n0 / d0
-
-            a = f1 - f0
-            b = alpha1 * f0 - alpha0 * f1
-
-            alpha2 = (-b + np.sqrt(abs(b ** 2 - 3 * a * derphi0))) / (3.0 * a)
-            # alpha2 = alpha2 / scaling
-
-            halved_alphas = np.where(
-                np.logical_or(
-                    (alpha1 - alpha2) > alpha1 / 2.0,
-                    (1 - alpha2 / alpha1) < 0.96
-                )
-            )
-            alpha2[halved_alphas] = alpha1[halved_alphas] / 2.0
-
-            alpha_new = alpha2
-
-        bad_pos = np.where(np.isnan(alpha_new))
-        alpha_new[bad_pos] = alphas[bad_pos] / 2
-        return alpha_new
+        valid = np.isfinite(phi_a1) & np.isfinite(candidate) & (candidate > 0)
+        candidate = np.where(valid, candidate, alpha1 / 2)
+        return np.clip(candidate, .1 * alpha1, .5 * alpha1)
 
 class _WolfeLineSearch(LineSearcher):
     """

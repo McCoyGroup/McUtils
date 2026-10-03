@@ -252,6 +252,19 @@ class PubChemAPI(WebAPIConnection):
         return self.get_subapi('compound/name')
 
     class Compound:
+        def to_readout(self, **opts):
+            """
+            **LLM Docstring**
+
+            Build a `Readout` of the fetched record (`CompoundRecordReadout`); nothing is requested.
+
+            :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+            :return: the readout
+            :rtype: McUtils.Jupyter.Readouts.Readout
+            """
+            from .Readouts.Records import CompoundRecordReadout
+            return CompoundRecordReadout(self).to_readout(**opts)
+
         def __init__(self, cid, **opts):
             """
             **LLM Docstring**

@@ -86,6 +86,15 @@ class ReadoutNode:
 class ReadoutSection(ReadoutNode):
     kind = "section"
 
+    @classmethod
+    def compose(cls, *items, **opts):
+        """
+        Build a section (or a `Readout`) from arbitrary objects: plots, scenes, X3D objects, TeX,
+        JHTML elements, PowerPoint primitives, tables, other readouts, ... (see `as_readout_node`).
+        """
+        from .Views import as_readout_node
+        return cls(*[as_readout_node(i) for i in items if i is not None], **opts)
+
 
 class ReadoutText(ReadoutNode):
     kind = "text"
@@ -138,11 +147,12 @@ class ReadoutImage(ReadoutNode):
     """A static image (PNG/SVG bytes, a file path, or a factory returning either)."""
     kind = "image"
 
-    def __init__(self, image, content_type=None, caption=None, **opts):
+    def __init__(self, image, content_type=None, caption=None, fallback=None, **opts):
         super().__init__(**opts)
         self._image = image
         self.content_type = content_type
         self.caption = caption
+        self.fallback = fallback  # PNG bytes used where the image format isn't supported (SVG in PowerPoint)
 
     def get_image(self):
         img = self._image() if callable(self._image) else self._image

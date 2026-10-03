@@ -126,6 +126,19 @@ class MemmappedNPZFile:
     array is memmapped the first time it's accessed and then cached.
     """
 
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the archive contents (`McUtils.Scaffolding.Readouts.ArchiveReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from ..Scaffolding.Readouts import ArchiveReadout
+        return ArchiveReadout(self).to_readout(**opts)
+
     def __init__(self, path, mode: str = "r"):
         self.path = path
         self.mode = mode
@@ -222,6 +235,19 @@ class MemmappedNPTarFile:
 
     Same access pattern as `MemmappedNPZFile` / `NpzFile`.
     """
+
+    def to_readout(self, **opts):
+        """
+        **LLM Docstring**
+
+        Build a `Readout` of the archive contents (`McUtils.Scaffolding.Readouts.ArchiveReadout`).
+
+        :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
+        :return: the readout
+        :rtype: McUtils.Jupyter.Readouts.Readout
+        """
+        from ..Scaffolding.Readouts import ArchiveReadout
+        return ArchiveReadout(self).to_readout(**opts)
 
     def __init__(self, path, mode: str = "r"):
         self.path = path

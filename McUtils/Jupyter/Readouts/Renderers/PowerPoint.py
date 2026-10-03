@@ -22,6 +22,7 @@ from ..Nodes import (ReadoutNode, ReadoutSection, ReadoutText, ReadoutFields, Re
 from ..Scenes import ReadoutRasterizer, PosterRequest
 from .Base import ReadoutRenderer, RenderContext, handles, is_visible
 from .HTML import resolve_scene_view, resolve_gallery_views
+from ..Views import ReadoutPlot, ReadoutEquation, ReadoutCode, ReadoutHTML, ReadoutPresML, _png_size
 
 __all__ = ["PowerPointReadoutRenderer"]
 
@@ -87,6 +88,7 @@ class _Flow:
         self.title = title
         self.slide_titles = [title + (" (cont.)" if continued else "")] if title else []
         self.y = self.content_top
+        self.fresh = True
         return self.slide
 
     def finish(self):
@@ -102,6 +104,15 @@ class _Flow:
 
     def advance(self, height):
         self.y += height + self.gap
+        self.fresh = False
+
+    def page(self, title):
+        """Start a page for full-slide content, reusing the current slide if nothing is on it yet."""
+        if self.slide is not None and getattr(self, "fresh", False):
+            self.slide_titles = [title] if title else []
+            self.title = title
+            return self.slide
+        return self.new_slide(title)
 
 
 class PowerPointReadoutRenderer(ReadoutRenderer):
@@ -119,10 +130,10 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
         self.assets = {}
 
     # ---- primitives ------------------------------------------------------------------- #
-    def font(self, size_key, color="text", bold=False, size=None):
+    def font(self, size_key, color="text", bold=False, size=None, family=None):
         t = self.theme
         return {"size": size if size is not None else t.get("sizes." + size_key),
-                "color": t.color(color), "family": t.get("font.pptx_family"), "bold": bold}
+                "color": t.color(color), "family": family or t.get("font.pptx_family"), "bold": bold}
 
     def text_height(self, text, size, width, line_height=None):
         line_height = line_height or self.theme.get("slide.line_height")
@@ -131,10 +142,13 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
         return lines * size * line_height + 4
 
     def draw_text(self, slide, text, x, y, w, h, size_key="body", color="text", bold=False, align="left",
-                  valign="top", size=None, name=None):
+                  valign="top", size=None, name=None, family=None, fill=None):
+        appearance = {"font": self.font(size_key, color, bold, size, family)}
+        if fill is not None:
+            appearance["fill"] = fill
         return slide.draw_text(
             text, layout={"position": (x, y), "size": (w, h), "alignment": align, "vertical_alignment": valign},
-            appearance={"font": self.font(size_key, color, bold, size)}, name=name)
+            appearance=appearance, name=name)
 
     def draw_slide_title(self, slide, title):
         t = self.theme
@@ -176,7 +190,13 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
             if node.data.nrows > t.get("slide.max_table_rows"):
                 return None
             return (node.data.nrows + 1) * rh + gap + (title_h if node.title else 0)
-        if isinstance(node, (ReadoutScene, ReadoutGallery, ReadoutImage)):
+        if isinstance(node, (ReadoutPlot, ReadoutEquation, ReadoutCode)):
+            return self.block_size(node, width)[1] + gap
+        if isinstance(node, ReadoutArray):
+            from .Base import array_preview
+            table, _ = array_preview(node.data, t)
+            return rh * (1.5 + (table.nrows + 1 if table is not None else 0)) + gap
+        if isinstance(node, (ReadoutScene, ReadoutGallery, ReadoutImage, ReadoutHTML, ReadoutPresML)):
             return None
         if isinstance(node, ReadoutSection):
             total = t.get("sizes.subsection") * 1.6
@@ -357,21 +377,213 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
     def render_array(self, node, ctx):
         if not node.display:
             return
-        a = node.data
-        self.render_text(ReadoutText(f"{a.label}: array of shape {a.array.shape}", role="note"), ctx)
+        from .Base import array_preview
+        table, summary = array_preview(node.data, self.theme)
+        label = node.title or node.data.label
+        self.render_text(ReadoutText(f"{label}: {summary}", role="note"), ctx)
+        if table is not None:
+            self.render_table(ReadoutTable(table), ctx)
+
+    # ---- view leaves -------------------------------------------------------------------- #
+    def block_size(self, node, width, max_height=None):
+        """Natural (w, h) of a view leaf in the flow, scaled to fit ``width``/``max_height``."""
+        t = self.theme
+        if isinstance(node, ReadoutPlot):
+            pw, ph = t.get("slide.plot_size")
+            w = min(width, pw)
+            h = w / node.aspect()
+            if node.caption:
+                h += t.get("sizes.caption") * 1.6
+        elif isinstance(node, ReadoutEquation):
+            px = _png_size(node.to_png())
+            w, h = px[0] * 72 / 200, px[1] * 72 / 200
+            if w > width:
+                w, h = width, h * width / w
+        elif isinstance(node, ReadoutCode):
+            size = t.get("sizes.caption")
+            n = min(len(node.text.splitlines()) or 1, t.get("slide.code_lines"))
+            w, h = width, n * size * 1.22 + 12
+        else:
+            w, h = width, t.get("slide.row_height") * 2
+        if max_height is not None and h > max_height:
+            w, h = w * max_height / h, max_height
+        return w, h
+
+    def _image_asset(self, data, content_type):
+        from ....Plots.PowerPoint import PresentationMLAsset
+        ext = {"image/png": "png", "image/svg+xml": "svg", "image/jpeg": "jpg", "image/gif": "gif"}.get(content_type, "png")
+        return PresentationMLAsset(data if isinstance(data, bytes) else data.encode(), content_type, ext)
+
+    def _fit_image(self, slide, png, x, y, w, h, name=None):
+        size = _png_size(png)
+        aspect = size[0] / size[1] if size else w / h
+        iw, ih = self._fit(w, h, aspect)
+        slide.draw_image(self._image_asset(png, "image/png"),
+                         layout={"position": (x + (w - iw) / 2, y + (h - ih) / 2), "size": (iw, ih)}, name=name)
+        return iw, ih
+
+    def draw_in_box(self, slide, node, x, y, w, h, ctx, view=None):
+        """Draw any leaf into a fixed box (gallery cells, user layouts)."""
+        t = self.theme
+        if isinstance(node, ReadoutScene):
+            if node.get_source() is None:
+                self.draw_text(slide, "Interactive 3D view (see the HTML readout)", x, y + h / 2 - 12, w, 24,
+                               "caption", "muted", align="center")
+                return
+            if view is None:
+                view = resolve_scene_view(node, w / h, t, ctx.cache)
+            self.draw_scene(slide, node, x, y, w, h, view, ctx.path_string)
+        elif isinstance(node, ReadoutPlot):
+            cap_h = t.get("sizes.caption") * 1.6 if node.caption else 0
+            iw, ih = self._fit_image(slide, node.to_png(), x, y, w, h - cap_h, name=node.title or node.id)
+            if node.caption:
+                self.draw_text(slide, node.caption, x, y + (h - cap_h + ih) / 2, w, cap_h, "caption", "muted",
+                               align="center")
+        elif isinstance(node, ReadoutEquation):
+            png = node.to_png(color="#" + t.color("text").lstrip("#"))
+            ew, eh = self.block_size(node, w, h)
+            self._fit_image(slide, png, x, y, ew if ew < w else w, eh, name="Equation")
+        elif isinstance(node, ReadoutImage):
+            data, ctype = node.get_image()
+            if ctype == "image/png":
+                self._fit_image(slide, data, x, y, w, h)
+            elif node.fallback is not None:
+                size = _png_size(node.fallback)
+                iw, ih = self._fit(w, h, size[0] / size[1] if size else w / h)
+                slide.draw_image(self._image_asset(data, ctype),
+                                 fallback=self._image_asset(node.fallback, "image/png"),
+                                 layout={"position": (x + (w - iw) / 2, y + (h - ih) / 2), "size": (iw, ih)})
+            else:
+                slide.draw_image(self._image_asset(data, ctype), layout={"position": (x, y), "size": (w, h)})
+            if node.caption:
+                self.draw_text(slide, node.caption, x, y + h, w, 18, "caption", "muted", align="center")
+        elif isinstance(node, ReadoutCode):
+            size = t.get("sizes.caption")
+            n = max(1, int((h - 12) / (size * 1.22)))
+            self.draw_text(slide, node.display_text(n - 1 if len(node.text.splitlines()) > n else None),
+                           x, y, w, h, "caption", family=t.get("font.pptx_mono"), fill=t.color("stripe"),
+                           name=node.title or "Code")
+        elif isinstance(node, ReadoutPresML):
+            from ....Plots.PowerPoint import PresentationMLElementLayout
+            p = node.primitive
+            if not hasattr(p, "layout"):
+                from ....Plots.PowerPoint import PresentationMLPrimitive
+                p = PresentationMLPrimitive(p)
+            pw, ph = node.size or (w, h)
+            p.layout = PresentationMLElementLayout.from_options(p.layout, bounds=(x, y, min(pw, w), min(ph, h)),
+                                                                units=t.get("slide.units"))
+            slide.draw_primitive(p)
+        elif isinstance(node, ReadoutHTML):
+            if node.fallback is not None:
+                self.draw_in_box(slide, node.fallback, x, y, w, h, ctx)
+            else:
+                self.draw_text(slide, node.title or "HTML view (see the HTML readout)", x, y + h / 2 - 12, w, 24,
+                               "caption", "muted", align="center")
+        elif isinstance(node, ReadoutText):
+            self.draw_text(slide, str(node.text), x, y, w, h, "body")
+        elif isinstance(node, (ReadoutTable, ReadoutFields)):
+            rh = t.get("slide.row_height")
+            if isinstance(node, ReadoutTable):
+                data = node.data
+                headers, rows = data.headers(t), data.format_rows(t)
+                aligns = [c.align for c in data.columns]
+            else:
+                headers, rows, aligns = None, [[f.label, f.format(t)] for f in node.data], ["left", "left"]
+            n = max(1, int(h / rh) - (1 if headers else 0))
+            rows = rows[:n]
+            ncol = len(rows[0]) if rows else len(headers or [])
+            slide.draw_table(([headers] if headers else []) + rows,
+                             layout={"position": (x, y), "size": (w, rh * (len(rows) + (1 if headers else 0)))},
+                             column_widths=[w / ncol] * ncol, header_rows=1 if headers else 0, alignments=aligns,
+                             **self._table_style())
+        else:
+            self.draw_text(slide, f"[{type(node).__name__}]", x, y, w, 24, "caption", "muted")
+
+    def _flow_block(self, node, ctx):
+        flow = ctx.extra["flow"]
+        self._block_title(node, flow)
+        w, h = self.block_size(node, flow.width, flow.content_height)
+        flow.ensure(h)
+        if h > flow.remaining:
+            w, h = self.block_size(node, flow.width, flow.remaining)
+        x = flow.x0 + (flow.width - w) / 2 if not isinstance(node, (ReadoutCode, ReadoutEquation)) else flow.x0
+        self.draw_in_box(flow.slide, node, x, flow.y, w, h, ctx)
+        flow.advance(h)
+
+    @handles(ReadoutPlot, ReadoutEquation)
+    def render_view(self, node, ctx):
+        self._flow_block(node, ctx)
+
+    @handles(ReadoutCode)
+    def render_code(self, node, ctx):
+        flow = ctx.extra["flow"]
+        t = self.theme
+        size = t.get("sizes.caption")
+        line_h = size * 1.22
+        lines = node.display_text().splitlines() or [""]
+        self._block_title(node, flow)
+        i = 0
+        while i < len(lines):
+            flow.ensure(min(len(lines) - i, 4) * line_h + 12)
+            n = max(1, min(int((flow.remaining - 12) / line_h), t.get("slide.code_lines"), len(lines) - i))
+            h = n * line_h + 12
+            self.draw_text(flow.slide, "\n".join(lines[i:i + n]), flow.x0, flow.y, flow.width, h, "caption",
+                           family=t.get("font.pptx_mono"), fill=t.color("stripe"), name=node.title or "Code")
+            flow.advance(h)
+            i += n
+
+    @handles(ReadoutHTML)
+    def render_html(self, node, ctx):
+        if node.fallback is not None:
+            return self.render(node.fallback, ctx)
+        text = node.text_content()
+        if text:
+            return self.render_text(ReadoutText(text), ctx)
+        self.render_text(ReadoutText(f"{node.title or 'Interactive HTML view'}: see the HTML readout", role="note"), ctx)
+
+    @handles(ReadoutPresML)
+    def render_presml(self, node, ctx):
+        flow = ctx.extra["flow"]
+        lay = getattr(node.primitive, "layout", None)
+        opts = lay.get_options() if hasattr(lay, "get_options") else {}
+        w = node.size[0] if node.size else (opts.get("width") or flow.width)
+        if node.size:
+            h = node.size[1]
+        elif opts.get("height"):
+            h = opts["height"]
+        elif hasattr(node.primitive, "text"):
+            fs = getattr(getattr(node.primitive, "appearance", None), "opts", {}).get("font")
+            size = getattr(fs, "opts", {}).get("size", 18) if fs is not None else 18
+            h = self.text_height(node.primitive.text, size, w)
+        else:
+            h = self.theme.get("slide.plot_size")[1]
+        w, h = min(w, flow.width), min(h, flow.content_height)
+        flow.ensure(h)
+        self.draw_in_box(flow.slide, node, flow.x0 + (flow.width - w) / 2, flow.y, w, h, ctx)
+        flow.advance(h)
 
     @handles(ReadoutImage)
     def render_image(self, node, ctx):
         flow = ctx.extra["flow"]
         data, ctype = node.get_image()
-        from ....Plots.PowerPoint import PresentationMLAsset
-        w = flow.width * .6
-        h = min(flow.content_height * .8, w * .75)
-        flow.ensure(h)
-        ext = "svg" if "svg" in ctype else "png"
-        flow.slide.draw_image(PresentationMLAsset(data if isinstance(data, bytes) else data.encode(), ctype, ext),
-                              layout={"position": (flow.x0 + (flow.width - w) / 2, flow.y), "size": (w, h)})
-        flow.advance(h)
+        png = data if ctype == "image/png" else node.fallback
+        size = _png_size(png) if png is not None else None
+        pw, ph = self.theme.get("slide.plot_size")
+        if size:
+            w = min(flow.width, pw, size[0] * .75)
+            h = w * size[1] / size[0]
+        else:
+            w, h = min(flow.width, pw), ph
+        cap = self.theme.get("sizes.caption") * 1.6 if node.caption else 0
+        flow.ensure(h + cap)
+        if h + cap > flow.remaining:
+            h = flow.remaining - cap
+        self.draw_in_box(flow.slide, ReadoutImage(data, content_type=ctype, fallback=node.fallback),
+                         flow.x0 + (flow.width - w) / 2, flow.y, w, h, ctx)
+        if node.caption:
+            self.draw_text(flow.slide, node.caption, flow.x0, flow.y + h, flow.width, cap, "caption", "muted",
+                           align="center")
+        flow.advance(h + cap)
 
     # ---- scenes ------------------------------------------------------------------------- #
     def _lighting(self):
@@ -438,6 +650,9 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
     @handles(ReadoutScene)
     def render_scene(self, node, ctx):
         flow = ctx.extra["flow"]
+        if node.get_source() is None:
+            return self.render_text(ReadoutText(
+                f"{node.format_caption(self.theme) or 'Interactive 3D view'}: see the HTML readout", role="note"), ctx)
         sw, sh = self.theme.get("slide.scene_size")
         cap_h = self.theme.get("slide.scene_caption_height") if node.caption else 0
         if flow.slide is None or flow.remaining < .6 * sh + cap_h:
@@ -473,8 +688,9 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
         npages = math.ceil(len(items) / k)
         for p in range(npages):
             page = items[p * k:(p + 1) * k]
-            flow.new_slide(title + (f"  ({p + 1}/{npages})" if npages > 1 else ""))
+            flow.page(title + (f"  ({p + 1}/{npages})" if npages > 1 else ""))
             flow.title = title
+            flow.fresh = False
             for j, item in enumerate(page):
                 r, c = divmod(j, cols)
                 cx = flow.x0 + c * (cell_w + gap)
@@ -489,6 +705,5 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
                         self.draw_text(flow.slide, cap, cx, y + h + 4, cell_w, cap_h - 4, "scene_caption",
                                        align="center", name="Caption")
                 else:
-                    # non-scene items get their own flow on the slide
-                    self.render(item, ictx)
+                    self.draw_in_box(flow.slide, item, cx, cy, cell_w, cell_h, ictx)
             flow.y = flow.bottom
