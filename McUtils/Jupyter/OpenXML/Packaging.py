@@ -229,7 +229,16 @@ class OpenXMLPackage:
                 element.tag = element.local_tag
             write_part("[Content_Types].xml", manifest.to_bytes())
             for name, part in self.parts.items():
-                write_part(name, part.to_bytes())
+                if name.endswith(".rels") and isinstance(part.data, OpenXML.Element):
+                    # Relationship parts likewise use the default namespace: LibreOffice (and
+                    # other non-Microsoft consumers) reject prefixed `rel:Relationships`.
+                    rels = part.data.clone()
+                    rels.attrs = dict(rels.attrs, xmlns=OpenXML.namespace_uris["rel"])
+                    for element in rels.walk():
+                        element.tag = element.local_tag
+                    write_part(name, rels.to_bytes())
+                else:
+                    write_part(name, part.to_bytes())
         return file
 
     def to_bytes(self, validate=True):

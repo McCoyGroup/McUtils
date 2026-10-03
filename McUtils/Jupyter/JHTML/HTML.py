@@ -2874,7 +2874,28 @@ class HTML(XMLBase):
             else:
                 raise ValueError(f"don't know what to do with {elem} in converting {parent}")
 
-        attr_converter = None
+        boolean_values = (None, 'true')  # (False, True); `None` drops the attribute
+        @classmethod
+        def convert_attrs(cls, attrs):
+            """
+            **LLM Docstring**
+
+            Default attribute conversion, needed since `ElementTree` only serializes strings: booleans
+            map through `boolean_values` (`open=True` -> `open="true"`, `False` drops the attribute)
+            and `None`-valued attributes are dropped. XML subclasses (`ContentXML.Element`, ...)
+            install their own converters.
+
+            :param attrs: Attribute values to normalize.
+            :type attrs: dict
+            :return: The converted attributes.
+            :rtype: dict
+            """
+            if not any(v is None or isinstance(v, (bool, np.bool_)) for v in attrs.values()):
+                return attrs
+            attrs = {k: (cls.boolean_values[bool(v)] if isinstance(v, (bool, np.bool_)) else v)
+                     for k, v in attrs.items()}
+            return {k: v for k, v in attrs.items() if v is not None}
+        attr_converter = convert_attrs
         @classmethod
         def construct_etree_attrs(cls, attrs, attr_converter=None):
             """
@@ -2900,6 +2921,9 @@ class HTML(XMLBase):
                         attrs = attrs.copy()
                         _copied = True
                     attrs['style'] = styles.tostring()
+            if cls.use_css_styles and 'class' in attrs and (attrs['class'] is None or attrs['class'] is False):
+                # no class (rather than `class="None"`)
+                attrs = {k: v for k, v in attrs.items() if k != 'class'}
             if cls.use_css_styles and 'class' in attrs:
                 if not isinstance(attrs['class'], str):
                     if not _copied:
@@ -4542,10 +4566,15 @@ class HTML(XMLBase):
             """
             if len(rows) == 1 and isinstance(rows[0], (list, tuple)):
                 rows = rows[0]
+            # table sections/captions and existing rows/cells are used as given (wrapping a <thead>
+            # or <tbody> in <tr><td> produced invalid, mis-styled tables)
+            passthrough = (HTML.TableRow, HTML.TableHeader, HTML.TableBody, HTML.TableFooter,
+                           HTML.Caption, HTML.Colgroup)
+            cells = (HTML.TableItem, HTML.TableHeading)
             rows = [
                 HTML.TableRow(
-                    [HTML.TableItem(y) if not isinstance(y, HTML.TableItem) else y for y in x]
-                ) if not isinstance(x, HTML.TableRow) else x for x in rows
+                    [HTML.TableItem(y) if not isinstance(y, cells) else y for y in x]
+                ) if not isinstance(x, passthrough) else x for x in rows
             ]
             if headers is not None:
                 rows = [

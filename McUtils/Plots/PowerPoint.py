@@ -24,6 +24,7 @@ __all__ = [
     'PresentationMLImage',
     'PresentationMLModel3D',
     'PresentationMLShape',
+    'PresentationMLTable',
     'PresentationMLAsset',
     'PresentationMLContext',
     'PresentationMLSlideContext',
@@ -963,6 +964,131 @@ class PresentationMLShape(PresentationMLPrimitive):
         )
 
 
+TABLE_URI = "http://schemas.openxmlformats.org/drawingml/2006/table"
+
+
+class PresentationMLTable(PresentationMLPrimitive):
+    """A DrawingML table of text cells.
+
+    ``rows`` holds the cell text row by row; a cell may also be a dictionary with ``text`` and
+    any of ``font``, ``fill``, ``align`` and ``bold`` to override the table defaults. Column
+    widths and the row height use the layout units; by default the frame width is split
+    evenly and the frame height is split between the rows. The first ``header_rows`` rows use
+    ``header_font`` and ``header_fill``, body rows alternate ``fill`` and ``stripe_fill``, and
+    ``rule`` (a line or line options) is drawn under every row. Cells carry explicit borders,
+    so the result does not depend on a table style part.
+    """
+    def __init__(self, rows=(), bounds=None, column_widths=None, row_height=None, header_rows=1,
+                 font=None, header_font=None, fill=None, header_fill=None, stripe_fill=None,
+                 rule=None, alignments=None, padding=(2, 5, 2, 5), vertical_alignment="center", **options):
+        super().__init__(bounds=bounds, **options)
+        self.rows = tuple(tuple(_copy_options(cell) for cell in row) for row in rows)
+        self.column_widths = None if column_widths is None else tuple(column_widths)
+        self.row_height = row_height
+        self.header_rows = header_rows
+        self.font = PresentationMLFont.from_options(font)
+        self.header_font = PresentationMLFont.from_options(
+            header_font if header_font is not None else dict(self.font.get_options(), bold=True))
+        self.fill, self.header_fill, self.stripe_fill = fill, header_fill, stripe_fill
+        self.rule = None if rule is None else PresentationMLLine.from_options(rule)
+        self.alignments = None if alignments is None else tuple(alignments)
+        if isinstance(padding, (int, float)):
+            padding = (padding,) * 4
+        self.padding = tuple(padding)
+        if vertical_alignment not in PresentationMLElementLayout.vertical_alignments:
+            raise ValueError("invalid vertical alignment")
+        self.vertical_alignment = vertical_alignment
+
+    @staticmethod
+    def _element(tag, *children, **attrs):
+        return OpenXML.Element(tag, *children, **attrs)
+
+    def _border(self, side, line):
+        if line is None:
+            return self._element("a:" + side, A.NoFill(), w=0)
+        outline = line.to_presml()
+        return self._element("a:" + side, *(e.clone() for e in outline.elems), **dict(outline.attrs))
+
+    def _fill(self, color):
+        return A.NoFill() if color is None else A.SolidFill(_color(color))
+
+    def _cell(self, cell, row_index, column_index, units):
+        spec = dict(cell) if isinstance(cell, dict) else dict(text=cell)
+        header = row_index < self.header_rows
+        font = self.header_font if header else self.font
+        if "font" in spec or "bold" in spec:
+            font = PresentationMLFont.from_options(font, **dict(spec.get("font") or {},
+                                                               **({"bold": spec["bold"]} if "bold" in spec else {})))
+        if "fill" in spec:
+            fill = spec["fill"]
+        elif header:
+            fill = self.header_fill
+        elif self.stripe_fill is not None and (row_index - self.header_rows) % 2 == 1:
+            fill = self.stripe_fill
+        else:
+            fill = self.fill
+        align = spec.get("align")
+        if align is None and self.alignments is not None and column_index < len(self.alignments):
+            align = self.alignments[column_index]
+        align = PresentationMLElementLayout.alignments[align or "left"]
+        text = "" if spec.get("text") is None else str(spec["text"])
+        paragraphs = []
+        for line in text.split("\n"):
+            if line:
+                paragraphs.append(A.Paragraph(A.ParagraphProperties(algn=align),
+                                              A.Run(font.to_presml(), A.Text(line))))
+            else:
+                paragraphs.append(A.Paragraph(A.ParagraphProperties(algn=align),
+                                              A.EndParagraphRunProperties(lang="en-US", sz=round(font.opts["size"] * 100))))
+        top, right, bottom, left = (_emu(v, units) for v in self.padding)
+        rule = self.rule
+        properties = self._element(
+            "a:tcPr",
+            self._border("lnL", None), self._border("lnR", None),
+            self._border("lnT", rule if (rule is not None and row_index == 0) else None),
+            self._border("lnB", rule),
+            self._fill(fill),
+            marL=left, marR=right, marT=top, marB=bottom,
+            anchor=PresentationMLElementLayout.vertical_alignments[self.vertical_alignment]
+        )
+        body = self._element("a:txBody", A.BodyProperties(), A.ListStyle(), *paragraphs)
+        return self._element("a:tc", body, properties)
+
+    def to_presml(self, context=None):
+        if self.element is not None:
+            return super().to_presml(context)
+        identifier = self._context(context)
+        layout = self.prepare_layout()
+        units = layout.opts["units"]
+        _, _, width, height = layout.bounds
+        if not self.rows:
+            raise ValueError("a table needs at least one row")
+        ncols = max(len(row) for row in self.rows)
+        if self.column_widths is not None:
+            if len(self.column_widths) != ncols:
+                raise ValueError(f"{len(self.column_widths)} column widths for {ncols} columns")
+            widths = [_emu(v, units) for v in self.column_widths]
+        else:
+            widths = [width // ncols] * ncols
+            widths[-1] += width - sum(widths)
+        row_height = _emu(self.row_height, units) if self.row_height is not None else height // len(self.rows)
+        grid = self._element("a:tblGrid", *(self._element("a:gridCol", w=w) for w in widths))
+        table_properties = self._element("a:tblPr", firstRow=self.header_rows > 0,
+                                         bandRow=self.stripe_fill is not None)
+        rows = [
+            self._element("a:tr", *(self._cell(row[j] if j < len(row) else "", i, j, units) for j in range(ncols)),
+                          h=row_height)
+            for i, row in enumerate(self.rows)
+        ]
+        table = self._element("a:tbl", table_properties, grid, *rows)
+        return P.graphicFrame(
+            P.nvGraphicFramePr(P.cNvPr(id=identifier, name=self.name or "Table " + str(identifier)),
+                               P.cNvGraphicFramePr(A.graphicFrameLocks(noGrp=True)), P.nvPr()),
+            layout.to_presml(P.xfrm),
+            A.graphic(A.graphicData(table, uri=TABLE_URI))
+        )
+
+
 class PresentationMLModel3D(PresentationMLPrimitive):
     """GLB content; view belongs to Layout, lighting to Appearance, playback to Animation."""
     def __init__(self, model=None, bounds=None, fallback=None, animation=None, **options):
@@ -1309,6 +1435,10 @@ class PowerPointSlide:
     def draw_shape(self, geometry, bounds=None, **opts):
         self._drawing_options(opts)
         return self.draw_primitive(PresentationMLShape(geometry, bounds, **opts))
+
+    def draw_table(self, rows, bounds=None, **opts):
+        self._drawing_options(opts)
+        return self.draw_primitive(PresentationMLTable(rows, bounds, **opts))
 
     def to_presentationml(self, presentation=None):
         return PresentationMLSlide(*self.children, presentation=presentation, **self.opts)
