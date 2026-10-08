@@ -7,6 +7,8 @@ same numbers. They know nothing about HTML or PowerPoint; renderers only ask the
 formatted strings (using a theme) or for raw arrays.
 """
 
+from __future__ import annotations
+
 import numbers
 import numpy as np
 

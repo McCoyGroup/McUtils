@@ -8,6 +8,8 @@ the browser-based ``'x3d'`` rasterizer (Playwright + Chromium) is opt-in and imp
 Playwright only when it actually renders.
 """
 
+from __future__ import annotations
+
 import abc
 import dataclasses
 import importlib.util
