@@ -674,9 +674,9 @@ class ColorPalette:
             lab_color = cls.color_convert(color, color_space, modification_space)
         else:
             lab_color = color
-        lab_color = modification_function(*lab_color)
+        color = np.asanyarray(modification_function(*lab_color))
         if color_space != modification_space:
-            color = cls.color_convert(lab_color, modification_space, color_space)
+            color = cls.color_convert(color, modification_space, color_space)
         if clip:
             color = cls.color_normalize(color, color_space)
 
@@ -999,10 +999,11 @@ class ColorPalette:
             self.xyz_to_rbg_array = np.array(self.xyz_to_rbg_array)
 
         xyz = np.array([x, y, z]) / 100
-        rgb = np.tensordot(self.xyz_to_rbg_array, xyz, axes=[0, 0])
+        rgb = np.tensordot(self.xyz_to_rbg_array, xyz, axes=[1, 0])
         return self.linear_to_rgb(*rgb)
 
-    rgb_to_xyz_array = [ # just the inverse
+    # Linear sRGB -> XYZ under D65 (2-degree observer), after rgb_to_linear.
+    rgb_to_xyz_array = [
         [0.412453, 0.357580, 0.180423],
         [0.212671, 0.715160, 0.072169],
         [0.019334, 0.119193, 0.950227],
@@ -1067,7 +1068,7 @@ class ColorPalette:
             cls.rgb_to_xyz_array = np.array(cls.rgb_to_xyz_array)
 
         rgb = cls.rgb_to_linear(r, g, b)
-        xyz = np.tensordot(cls.rgb_to_xyz_array, rgb, axes=[0, 0])
+        xyz = np.tensordot(cls.rgb_to_xyz_array, rgb, axes=[1, 0])
         return xyz * 100
 
     CVD_MATRICES = {
@@ -1110,12 +1111,13 @@ class ColorPalette:
         m = np.eye(3) * (1 - severity) + m_full * severity
 
         sim_linear = m @ linear
-        return cls.linear_to_rgb(sim_linear)
+        return cls.linear_to_rgb(*sim_linear)
 
     @classmethod
     def relative_luminance(cls, r, g, b):
-        linear = cls.rgb_to_linear(r, g, b)  # reuse existing method
-        return np.tensordot(linear, cls.rgb_to_xyz_array[1], axes=[0, 0])
+        """Return normalized XYZ Y using the configured RGB-to-XYZ matrix."""
+        linear = cls.rgb_to_linear(r, g, b)
+        return np.tensordot(cls.rgb_to_xyz_array[1], linear, axes=[0, 0])
 
     @classmethod
     def contrast_ratio(cls, rgb1, rgb2):
@@ -1568,17 +1570,23 @@ class ColorPalette:
         :rtype: matplotlib.figure.Figure
         """
         from .Graphics import GraphicsGrid
-        from .Primitives import Rectangle
+        from .Primitives import Rectangle, Text
 
-        cvd_types = cvd_types or self.DEFAULT_CVD_TYPES
+        if cvd_types is None:
+            cvd_types = self.DEFAULT_CVD_TYPES
         conditions = ["original"] + list(cvd_types)
 
-        grid = GraphicsGrid(nrows=1, ncols=len(conditions), spacings=[0, 0])
+        grid = GraphicsGrid(nrows=len(conditions), ncols=1,
+                            subimage_size=(600, 100), spacings=[0, 0],
+                            padding=((10, 10), (10, 10)))
         for row, cond in enumerate(conditions):
             colors = self._condition_colors(None if cond == "original" else cond)
-            fig = grid[0, row]
+            fig = grid[row, 0]
+            fig.set_options(ticks=[[], []],
+                            plot_range=[(-1.5, len(colors)), (-0.2, 1.2)], frame=False)
+            Text(cond, [-0.1, 0.5], ha="right", va="center", fontsize=10).plot(fig)
             for i, c in enumerate(colors):
-                Rectangle([[0, i/len(colors)], [1, (i+1)/len(colors)]], color=np.array(c) / 255).plot(fig)
+                Rectangle([[i, 0], [i + 1, 1]], color=np.array(c) / 255).plot(fig)
         return grid
 
     def plot_line_stress_test(self, cvd_type=None, severity=1.0):
@@ -1724,23 +1732,31 @@ class ColorPalette:
         :return: dict of {name: Figure}
         :rtype: dict
         """
-        cvd_types = cvd_types or self.DEFAULT_CVD_TYPES
+        if cvd_types is None:
+            cvd_types = self.DEFAULT_CVD_TYPES
+        cvd_types = tuple(cvd_types)
+        conditions = (None,) + cvd_types
         figures = {
             "swatches": self.plot_swatch_grid(cvd_types),
             "contrast": self.plot_contrast_heatmap(),
         }
 
-        for cvd in cvd_types:
-            figures[f"line_{cvd}"] = self.plot_line_stress_test(cvd)
-            figures[f"bar_{cvd}"] = self.plot_bar_stress_test(cvd)
-            figures[f"delta_e_{cvd}"] = self.plot_delta_e_heatmap(cvd, threshold=threshold)
+        for cvd in conditions:
+            label = cvd or "original"
+            figures[f"line_{label}"] = self.plot_line_stress_test(cvd)
+            figures[f"bar_{label}"] = self.plot_bar_stress_test(cvd)
+            figures[f"delta_e_{label}"] = self.plot_delta_e_heatmap(cvd, threshold=threshold)
 
-        worst = min(
-            self.delta_e_matrix(cvd)[np.triu_indices(len(self.rgb_colors), k=1)].min()
-            for cvd in cvd_types
-        )
-        status = "PASS" if worst >= threshold else "FAIL"
-        print(f"[{status}] worst-case ΔE across all CVD types: {worst:.1f} (threshold={threshold})")
+        if len(self.rgb_colors) < 2:
+            print("[N/A] pairwise ΔE requires at least two colors")
+        else:
+            worst = min(
+                self.delta_e_matrix(cvd)[np.triu_indices(len(self.rgb_colors), k=1)].min()
+                for cvd in conditions
+            )
+            status = "PASS" if worst >= threshold else "FAIL"
+            print(f"[{status}] worst-case ΔE across original and requested CVD types: "
+                  f"{worst:.1f} (threshold={threshold})")
 
         return figures
 

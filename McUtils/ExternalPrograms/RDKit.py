@@ -2262,7 +2262,19 @@ class RDMolecule(ExternalMolecule):
         :rtype: Any
         """
         if v is not None:
-            if k in cls._drawer_opts:
+            if k == 'atom_palette':
+                # RDKit uses -1 for the fallback color of every element. Keep
+                # the installed palette when only individual elements are set.
+                palette = v if isinstance(v, dict) else {-1: v}
+                palette = {
+                    int(atomic_number): cls._handle_color(color)
+                    for atomic_number, color in palette.items()
+                }
+                if -1 in palette:
+                    return draw_options.setAtomPalette(palette)
+                else:
+                    return draw_options.updateAtomPalette(palette)
+            elif k in cls._drawer_opts:
                 k = cls._drawer_opts[k]
                 if isinstance(k, str):
                     if k.endswith('colour'):
@@ -3695,6 +3707,7 @@ class RDMolecule(ExternalMolecule):
     def draw(self,
              figure=None,
              background=None,
+             atom_palette=None,
              remove_atom_numbers=None,
              remove_hydrogens=True,
              display_atom_numbers=False,
@@ -4270,6 +4283,7 @@ class RDMolecule(ExternalMolecule):
         draw_fig = drawer(mol,
                           figure=figure,
                           background=background,
+                          atom_palette=atom_palette,
                           format=format,
                           highlight_atoms=highlight_atoms,
                           highlight_bonds=highlight_bonds,

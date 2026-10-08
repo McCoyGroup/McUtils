@@ -2276,6 +2276,30 @@ class X3DBox(X3DGeometryGroup):
 class X3DCylinder(X3DGeometryGroup):
     tag_class = X3DHTML.Cylinder
 
+    @staticmethod
+    def _geometry_scale(radius, height, scale=None):
+        dimensions = np.array([radius, height, radius], dtype=float)
+        if scale is not None:
+            if isinstance(scale, str):
+                scale = scale.split()
+            dimensions = dimensions * np.asarray(scale, dtype=float)
+        return dimensions
+
+    def create_object(self, *, radius=1, height=2, scale=None, **opts):
+        # Animate a unit cylinder's transform. X3DOM 1.8.3 does not invalidate
+        # cylinder GPU positions when its radius reaches zero, leaving the last
+        # nonzero mesh visible. Transform.scale handles zero dimensions without
+        # changing cached geometry or requiring geometry-field update events.
+        return super().create_object(radius=1, height=1,
+                scale=self._geometry_scale(radius, height, scale), **opts)
+
+    def get_interpolated_attributes(self):
+        attrs = super().get_interpolated_attributes()
+        radius = attrs.pop('radius', 1)
+        height = attrs.pop('height', 2)
+        attrs['scale'] = self._geometry_scale(radius, height, attrs.get('scale'))
+        return attrs
+
     def prep_geometry_opts(self, starts, ends, radius=1, closed=True, top=None, bottom=None, **opts):
         """
         **LLM Docstring**
