@@ -70,6 +70,7 @@ class CubeFileParser(FileLineByLineReader):
         super().__init__(file, max_nesting_depth=0, **kw)
         self._flags = []
         self._total_atoms = -1
+        self._has_mo_fields = False
 
     _grid_tag_pat = RegexPattern([StartOfString, Optional(Whitespace),
                                   Integer, Whitespace, Number, Whitespace, Number, Whitespace, Number])
@@ -122,7 +123,8 @@ class CubeFileParser(FileLineByLineReader):
             elif 'grid' not in self._flags:
                 self._flags.append('grid')
                 self._total_atoms = int(line.strip().split()[0])
-                if self._total_atoms < 0:
+                self._has_mo_fields = self._total_atoms < 0
+                if self._has_mo_fields:
                     self._total_atoms = abs(self._total_atoms) + 1
                 return self.LineReaderTags.BLOCK_START, 'grid', line
             elif 'atoms' not in self._flags:
@@ -179,7 +181,8 @@ class CubeFileParser(FileLineByLineReader):
         :return: the parsed grid data
         :rtype: CubeFileGridData
         """
-        origin = np.array(grid_lines[0].split()[1:]).astype(float)
+        # The optional fifth field is NVAL, not a fourth coordinate.
+        origin = np.array(grid_lines[0].split()[1:4]).astype(float)
         axes = np.zeros((3, 3))
         steps = np.zeros(3, dtype=int)
         for i,line in enumerate(grid_lines[1:]):
@@ -206,7 +209,7 @@ class CubeFileParser(FileLineByLineReader):
         :rtype: Any
         """
         if label == 'atoms':
-            return self._parse_atoms(block_data)
+            return self._parse_atoms(block_data, has_mo_fields=self._has_mo_fields)
         elif label == 'grid':
             return self._parse_grid(block_data)
         elif label == 'header':
