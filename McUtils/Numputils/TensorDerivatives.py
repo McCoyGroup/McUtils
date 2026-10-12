@@ -152,13 +152,17 @@ def apply_nca_op(op, order, k,
     # next we need to move all of the derivative axes in the second tensor to the beginning
     # so we can symmetrize
     d = deriv_axis + s
-    sa = (A.ndim - len(axes[0]) if contract else A.ndim)
-    #TODO: figure out why this wasn't _shared_ since the idea is the same?
-    for i in range(k):
-        base = np.moveaxis(base, d+i, shared)
+    # Keep the A and B derivative blocks in the same order as `part`.
+    # Moving one axis at a time to the front reverses the B block and,
+    # for unequal blocks, symmetrizes the wrong partition.
+    base = np.moveaxis(base, list(range(d, d + k)),
+                       list(range(shared + s, shared + s + k)))
     part = [x for x in [s, k] if x > 0]
     if len(part) > 1:
-        base = nca_symmetrize(base, part, contract=contract, shared=shared, identical=identical)
+        # The two operands have labelled derivative assignments even when
+        # they alias. Reducing equal blocks loses Leibniz multiplicities and
+        # is also invalid for noncommuting tensor/matrix core products.
+        base = nca_symmetrize(base, part, contract=contract, shared=shared, identical=False)
     return base
 def nca_op_order_deriv(op, order, A_expansion, B_expansion, deriv_axis, a, b, contract, shared, identical):
     """
@@ -604,6 +608,8 @@ def scalarprod_deriv(s_expansion, A_expansion,
     :return: the scalar-product derivative expansion
     :rtype: list
     """
+    if not s_expansion or not A_expansion:
+        return [0]*((order+1) if is_numeric(order) else len(order))
     s_expansion = [np.asarray(s) for s in s_expansion]
     A_expansion = [np.asarray(a) for a in A_expansion]
     s0_shape = s_expansion[0].shape if len(s_expansion) > 0 else ()
@@ -685,11 +691,11 @@ def scalarfunc_deriv(scalar_func, arg_expansion, order):
     Compute the derivative expansion of applying a scalar function to a scalar
     argument expansion, via the chain rule.
 
-    `scalar_func(value, i)` must return the `i`-th Taylor coefficient of the outer
-    function at the argument value; those are combined with the argument's own
-    derivatives through `scalarprod_deriv`.
+    `scalar_func(value, i)` returns the `i`-th derivative of the outer function
+    at the argument value. The chain rule combines these with symmetrized
+    partition products of the argument derivatives.
 
-    :param scalar_func: callable returning the outer function's Taylor coefficients
+    :param scalar_func: callable returning the outer function's derivatives
     :type scalar_func: Callable
     :param arg_expansion: expansion of the scalar argument
     :type arg_expansion: list
@@ -698,8 +704,18 @@ def scalarfunc_deriv(scalar_func, arg_expansion, order):
     :return: the composed scalar-function expansion
     :rtype: list
     """
-    scalar_expansion = [scalar_func(arg_expansion[0], i) for i in range(order+1)]
-    return [scalar_expansion[0]] + scalarprod_deriv(scalar_expansion[1:], arg_expansion[1:], order)
+    arg_expansion = [np.asanyarray(a) for a in arg_expansion]
+    shared = arg_expansion[0].ndim
+    def derivative(o):
+        term = 0
+        for partitions in get_integer_partitions(o):
+            coefficient = scalar_func(arg_expansion[0], len(partitions[0]))
+            for partition in partitions:
+                term += _broadcast_mul(coefficient, nca_partition_prod(
+                    partition, arg_expansion[1:], shared=shared))
+        return term
+    return _deriv_construct(lambda: scalar_func(arg_expansion[0], 0),
+                            lambda orders: [derivative(o) for o in orders], order)
 
 def shift_expansion(expansion, scalar):
     """
@@ -757,7 +773,7 @@ def add_expansions(*expansions, order=None):
         order = max(len(e) for e in expansions) - 1
     o = order + 1
     pad_expansions = [
-        list(e) + [0]*(o - len(e))
+        list(e[:o]) + [0]*max(0, o - len(e))
         for e in expansions
     ]
     return [
@@ -785,7 +801,7 @@ def subtract_expansions(a_expansion, b_expansion, order=None):
         order = max([len(a_expansion), len(b_expansion)]) - 1
     o = order + 1
     a_expansion, b_expansion = [
-        list(e) + [0]*(o - len(e))
+        list(e[:o]) + [0]*max(0, o - len(e))
         for e in [a_expansion, b_expansion]
     ]
     return [
@@ -931,7 +947,7 @@ def inverse_transformation(forward_expansion, order, reverse_expansion=None,
         B = reverse_expansion[0]
 
     if not is_numeric(order): order = np.max(order)
-    order = list(range(2, order+1))
+    order = list(range(len(reverse_expansion) + 1, order + 1))
     shared = B.ndim - 2
 
     for o in order:
@@ -970,7 +986,7 @@ def renormalize_transformation(forward_transformation, reverse_transformation, n
     if nonzero_cutoff is not None:
         mask = np.abs(s) < nonzero_cutoff
         sq_eval[mask] = 1
-        vals = s/sq_eval
+        vals = 1/sq_eval
         vals[mask] = 0
     else:
         vals = 1/sq_eval
@@ -979,7 +995,8 @@ def renormalize_transformation(forward_transformation, reverse_transformation, n
     tf_right = np.moveaxis(v, -2, -1) @ scaling
 
     forward_transformation = tensor_reexpand([tf_left], forward_transformation)
-    reverse_transformation = tensor_reexpand(reverse_transformation, [tf_right])
+    reverse_transformation = tensor_reexpand(reverse_transformation, [tf_right],
+                                             order=len(reverse_transformation))
 
     return forward_transformation, reverse_transformation
 
@@ -1054,11 +1071,11 @@ def orthogonalize_transformations(transformation_pairs,
     if concatenate:
         _ = forward_transformations[0]
         for f in forward_transformations[1:]:
-            _ = concatenate_expansions(_, f, concatenate_values=True)
+            _ = concatenate_expansions(_, f, concatenate_values=False)
         forward_transformations = _
         _ = reverse_transformations[0]
         for f in reverse_transformations[1:]:
-            _ = concatenate_expansions(_, f, concatenate_values=False)
+            _ = concatenate_expansions(_, f, concatenate_values=True)
         reverse_transformations = _
     return forward_transformations, reverse_transformations
 
@@ -1087,7 +1104,8 @@ def kron_prod_derivs(A_expansion, B_expansion, order):
                                    )
     # now we need to reshape based on the fact that we end up with nnxmm
     return [
-        c.reshape(c.shape[:-4] + (c.shape[-4]*c.shape[-3], c.shape[-2]*c.shape[-1]))
+        0 if is_zero(c) else np.moveaxis(c, -2, -3).reshape(
+            c.shape[:-4] + (c.shape[-4]*c.shape[-2], c.shape[-3]*c.shape[-1]))
         for c in C_expansion
     ]
 
@@ -1160,24 +1178,25 @@ def sylv_derivs(A_expansion, B_expansion, C_expansion, order, shared=None, ks_ex
     :return: `(X_expansion, (kron_sum_expansion, inverse_expansion))`
     :rtype: tuple
     """
+    if shared is None:
+        shared = A_expansion[0].ndim - 2
     n = A_expansion[0].shape[-1]
     m = B_expansion[0].shape[-1]
-    B_expansion = [np.moveaxis(b, -1, -2) for b in B_expansion]
-    if ks_expansion is not None:
-        ks_expansion = list(ks_expansion) + kron_sum_derivs(A_expansion, B_expansion, order)
-    else:
-        ks_expansion = kron_sum_derivs(A_expansion, B_expansion, order)
-    if isinstance(order, list):
-        inv_expansion = matinv_deriv(ks_expansion, order[0], base_expansion=inv_expansion)
-    else:
-        inv_expansion = matinv_deriv(ks_expansion, order, base_expansion=inv_expansion)
-    C_expansion = [np.reshape(c, c.shape[:-2] + (c.shape[-1] * c.shape[-2],)) for c in C_expansion]
+    B_expansion = [0 if is_zero(b) else np.moveaxis(b, -1, -2) for b in B_expansion]
+    max_order = order if is_numeric(order) else max(order)
+    ks_expansion = [] if ks_expansion is None else list(ks_expansion)
+    missing_orders = list(range(len(ks_expansion), max_order + 1))
+    if missing_orders:
+        ks_expansion += kron_sum_derivs(A_expansion, B_expansion, missing_orders)
+    inv_expansion = matinv_deriv(ks_expansion, max_order, base_expansion=inv_expansion)
+    C_expansion = [0 if is_zero(c) else np.reshape(c, c.shape[:-2] + (c.shape[-1] * c.shape[-2],))
+                   for c in C_expansion]
     X_expansion = tensordot_deriv(C_expansion, inv_expansion, order,
                                   axes=[-1, -1],
                                   shared=shared
                                   )
 
-    return [np.reshape(x, x.shape[:-1] + (n,m)) for x in X_expansion], (ks_expansion, inv_expansion)
+    return [0 if is_zero(x) else np.reshape(x, x.shape[:-1] + (n,m)) for x in X_expansion], (ks_expansion, inv_expansion)
 
 def matsqrt_deriv(A_expansion, order):
     """
@@ -1220,8 +1239,9 @@ def matinv_deriv(A_expansion, order, base_expansion=None):
 
     Compute the derivative expansion of the matrix inverse.
 
-    The leading term is `inv(A[0])`; each higher order follows from the identity
-    `d(A⁻¹) = -A⁻¹ (dA) A⁻¹`, evaluated through `tensorops_deriv`.
+    The leading term is `inv(A[0])`; higher derivatives follow by
+    differentiating `A A⁻¹ = identity` and isolating the next inverse
+    derivative. Matrix factors retain their order for nonsymmetric inputs.
 
     :param A_expansion: expansion of the matrix
     :type A_expansion: list
@@ -1232,25 +1252,23 @@ def matinv_deriv(A_expansion, order, base_expansion=None):
     :return: the matrix-inverse expansion
     :rtype: list
     """
-    shared = s = A_expansion[0].ndim - 2
-    if shared == 0: shared = None
     if base_expansion is None:
-        B = np.linalg.inv(A_expansion[0])
-        base_expansion = [B]
+        base_expansion = [np.linalg.inv(A_expansion[0])]
+    shared = A_expansion[0].ndim - 2
     inverse_expansion = list(base_expansion)
-
-    for o in range(len(inverse_expansion), order+1):
-        expansion = tensorops_deriv(
-            A_expansion[1:],
-                [s+1, s + 1],
-            inverse_expansion,
-                [s+2, s + 0],
-            inverse_expansion,
-            order=[o - 1],
-            shared=shared
-        )
-        inverse_expansion = inverse_expansion + [-expansion[-1]]
-    return inverse_expansion
+    inverse = inverse_expansion[0]
+    # Differentiate A A^-1 = identity, isolate its highest inverse
+    # derivative, and left-multiply by the zeroth-order inverse.
+    for o in range(len(inverse_expansion), order + 1):
+        remainder = tensordot_deriv(
+            A_expansion[:o + 1], inverse_expansion + [0], [o],
+            axes=[-1, shared], shared=shared)[0]
+        if is_zero(remainder):
+            inverse_expansion.append(0)
+            continue
+        left = inverse.reshape(inverse.shape[:-2] + (1,) * o + inverse.shape[-2:])
+        inverse_expansion.append(-np.matmul(left, remainder))
+    return inverse_expansion[:order+1]
 
 def matdet_deriv(forward_expansion, order):
     """
@@ -1275,116 +1293,62 @@ def matdet_deriv(forward_expansion, order):
                                    axes=[1+shared, 1+shared],
                                    shared=shared
                                    )
-    tr_exp = [np.trace(a, axis1=-2, axis2=-1) for a in tr_inner_exp]
+    tr_exp = [0 if is_zero(a) else np.trace(a, axis1=-2, axis2=-1) for a in tr_inner_exp]
     det_exp = [np.linalg.det(forward_expansion[0])]
     for o in range(0, order):
         det_exp = det_exp + [scalarprod_deriv(det_exp, tr_exp, [o])[-1]]
     return det_exp
 
 def mateigh_deriv(mat_exp, order, *, diagonal_only=True, base_expansion=None):
+    """Derivatives of a Hermitian eigensystem with distinct eigenvalues.
+
+    Differentiate A Q = Q Lambda and Q.conj().T Q = identity. Eigenvector
+    phases are fixed by real overlaps with the base vectors. Both values of
+    diagonal_only return diagonal eigenvalue matrices; caches are not mutated.
+    Degenerate eigenvectors do not have unique derivatives and are rejected.
     """
-    **LLM Docstring**
-
-    Compute the derivative expansion of the symmetric eigen-decomposition
-    (eigenvalues and eigenvectors) of a matrix expansion.
-
-    Applies degenerate perturbation-theory-style recurrences: eigenvalue derivatives
-    come from the diagonal of the transformed matrix derivative, and eigenvector
-    derivatives from contracting the matrix derivative against the (regularized)
-    inverse of the eigenvalue-difference matrix. With `diagonal_only` set only the
-    diagonal eigenvalue block is tracked.
-
-    :param mat_exp: expansion of the (symmetric) matrix
-    :type mat_exp: list
-    :param order: the derivative order
-    :type order: int
-    :param diagonal_only: track only the diagonal eigenvalue contributions
-    :type diagonal_only: bool
-    :param base_expansion: precomputed `(eigenvalue_expansion, eigenvector_expansion)`
-    :type base_expansion: tuple | None
-    :return: `(eigenvalue_expansion, eigenvector_expansion)`
-    :rtype: tuple[list, list]
-    """
-    # I don't know if `diagonal_only=False` is meaningful in any way but I also
-    # don't know if any of this is right yet, so I'll leave it until I'm sure
     if base_expansion is None:
-        vals, vecs = np.linalg.eigh(mat_exp[0])
-        vals = vec_ops.vec_tensordiag(vals)
-        base_expansion = [vals], [vecs]
-    val_exp, vec_exp = base_expansion
-    mat_diff_exp = [[] for _ in range(val_exp[0].shape[-1])] if diagonal_only else []
-    mat_diff_inv_exp = [None for _ in range(val_exp[0].shape[-1])] if diagonal_only else None
-    shared = mat_exp[0].ndim - 2
-    if len(mat_exp) > 1:
-        nc = mat_exp[1].shape[-3]
-        for o in range(1, order+1):
-            if diagonal_only:
-                new_diag = np.zeros(val_exp[-1].shape[:-2] + (nc,) + val_exp[-1].shape[-2:])
-                for i in range(vec_exp[0].shape[-1]):
-                    subvec_exp = [v[..., (i,)] for v in vec_exp]
-                    new_diag[..., i, i] = tensorops_deriv(
-                            mat_exp[1:],
-                                [-2, -2],
-                            subvec_exp,
-                                [-2, -2],
-                            subvec_exp,
-                            order=[o - 1],
-                            shared=shared
-                        )[-1][..., 0, 0]
-                val_exp.append(new_diag)
-            else:
-                val_exp.append(
-                    tensorops_deriv(
-                        mat_exp[1:],
-                            [-2, -2],
-                        vec_exp,
-                            [-2, -2],
-                        vec_exp,
-                        order=[o-1],
-                        shared=shared
-                    )[-1]
-                )
-
-            # add one order as we expand the difference expansion
-            if diagonal_only:
-                new_diag = np.zeros(vec_exp[-1].shape[:-2] + (nc,) + vec_exp[-1].shape[-2:])
-                i_mat = np.eye(val_exp[-1].shape[-1])
-                for i in range(vec_exp[0].shape[-1]):
-                    v_I = val_exp[o - 1][..., i, i] * i_mat
-                    mat_diff_exp[i].append(v_I - (mat_exp[o - 1] if o < len(mat_exp) else 0))
-                    if mat_diff_inv_exp[i] is None:
-                        mat_diff_inv_exp[i] = [
-                            vec_ops.frac_powh(mat_diff_exp[i][0], -1, nonzero_cutoff=1e-12)
-                        ]
-                    else:
-                        mat_diff_inv_exp[i] = matinv_deriv(mat_diff_exp[i], o-1, base_expansion=mat_diff_inv_exp[i])
-                    subvec_exp = [v[..., (i,)] for v in vec_exp]
-                    new_diag[..., i] = tensorops_deriv(
-                        mat_exp[1:],
-                            [-2, -1],
-                        mat_diff_inv_exp[i],
-                            [-2, -2],
-                        subvec_exp,
-                        order=[o-1],
-                        shared=shared
-                    )[-1][..., 0]
-                vec_exp.append(new_diag)
-            else:
-                mat_diff_exp.append(val_exp[o-1] - (mat_exp[o-1] if o < len(mat_exp) else 0))
-                mat_diff_inv_exp = matinv_deriv(mat_diff_exp, o-1, base_expansion=mat_diff_inv_exp)
-                vec_exp.append(
-                    tensorops_deriv(
-                        mat_exp[1:],
-                            [-2, -1],
-                        mat_diff_inv_exp,
-                            [-2, -2],
-                        vec_exp,
-                        order=[o-1],
-                        shared=shared
-                    )[-1]
-                )
-
-    return val_exp, vec_exp
+        values, vectors = np.linalg.eigh(mat_exp[0])
+        val_exp, vec_exp = [vec_ops.vec_tensordiag(values)], [vectors]
+    else:
+        val_exp, vec_exp = map(list, base_expansion)
+        if len(val_exp) != len(vec_exp):
+            raise ValueError("eigenvalue and eigenvector caches must have equal orders")
+    shared = mat_exp[0].ndim-2
+    values = np.diagonal(val_exp[0], axis1=-2, axis2=-1)
+    gap = values[..., None, :] - values[..., :, None]
+    index = np.arange(values.shape[-1])
+    diagonal = np.eye(len(index), dtype=bool)
+    tolerance = np.finfo(values.dtype).eps*max(1., float(np.max(np.abs(values))))*32
+    degenerate = (np.abs(gap) <= tolerance) & ~diagonal
+    if order and np.any(degenerate) and any(not is_zero(t) and np.any(t) for t in mat_exp[1:]):
+        raise ValueError("eigenvector derivatives require distinct eigenvalues")
+    gap = np.where(np.abs(gap) <= tolerance, 1, gap)
+    base = vec_exp[0]
+    for o in range(len(val_exp), order+1):
+        vectors = vec_exp+[0]
+        eigenvalues = val_exp+[0]
+        aq = tensordot_deriv(mat_exp[:o+1], vectors, [o], axes=[-1,shared], shared=shared)[0]
+        ql = tensordot_deriv(vectors, eigenvalues, [o], axes=[-1,shared], shared=shared)[0]
+        remainder = aq-ql
+        adjoint = [0 if is_zero(q) else q.swapaxes(-1,-2).conj() for q in vectors]
+        norm = tensordot_deriv(adjoint, vectors, [o], axes=[-1,shared], shared=shared)[0]
+        if is_zero(remainder) and is_zero(norm):
+            val_exp.append(0)
+            vec_exp.append(0)
+            continue
+        shape = base.shape[:-2]+(1,)*o+base.shape[-2:]
+        left = base.swapaxes(-1,-2).conj().reshape(shape)
+        projected = (left@remainder if not is_zero(remainder)
+                     else np.zeros_like(norm))
+        derivative = projected/gap.reshape(shape)
+        derivative[...,index,index] = (0 if is_zero(norm)
+                                      else -.5*norm[...,index,index].real)
+        new_values = np.zeros_like(projected.real)
+        new_values[...,index,index] = projected[...,index,index].real
+        val_exp.append(new_values)
+        vec_exp.append(base.reshape(shape)@derivative)
+    return val_exp[:order+1], vec_exp[:order+1]
 
 def _broadcast_mul(scalar, other):
     """
@@ -1457,7 +1421,7 @@ def _scalarinv_deriv(scalar_expansion, o):
         #     nca_term = nca_partition_prod(p, scalar_expansion[1:], shared=shared)
         #     b_term = _broadcast_mul(scaling, nca_term)
         #     term += b_term
-        term = sum(
+        term += sum(
             _broadcast_mul(scaling, nca_partition_prod(p, scalar_expansion[1:], shared=shared))
             for p in parts
         )
@@ -1570,13 +1534,21 @@ def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_fail
     :type vec_expansion: list
     :param order: the derivative order(s)
     :type order: int | list[int]
-    :param base_expansion: unused placeholder (kept for signature parity)
+    :param base_expansion: cached norm derivatives with respect to vector components
     :type base_expansion: list | None
     :param raise_on_failure: raise on a zero-length vector rather than returning None
     :type raise_on_failure: bool
     :return: `(norm_expansion, unit_vector_expansion)`
     :rtype: tuple
     """
+    if not is_numeric(order):
+        orders = list(order)
+        if not orders:
+            return [], []
+        norms, units = vec_norm_unit_deriv(vec_expansion, max(orders),
+            base_expansion=base_expansion, raise_on_failure=raise_on_failure)
+        return (None, None) if norms is None else ([norms[o] for o in orders], [units[o] for o in orders])
+
     from ..Combinatorics import IntegerPartitioner
 
     a = vec_expansion[0]
@@ -1590,7 +1562,7 @@ def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_fail
             if raise_on_failure:
                 raise ValueError("can't get derivatives of zero vector")
             else:
-                return 0, 0 #TODO: get the shapes right
+                return None, None
         else:
             bad_pos = None
     else:
@@ -1610,10 +1582,9 @@ def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_fail
     if not is_numeric(order):
         order = max(order)
 
-    if base_expansion is None:
-        base_expansion = []
+    base_expansion = [] if base_expansion is None else list(base_expansion)
     shared = len(a.shape[:-1])
-    for o in range(order + 2):
+    for o in range(len(base_expansion), order + 2):
         if o == 0:
             base_expansion.append(r)
             continue
@@ -1676,7 +1647,7 @@ def vec_norm_unit_deriv(vec_expansion, order, base_expansion=None, raise_on_fail
         tensor_reexpand(
             vec_expansion[1:],
             base_expansion[1:],
-            order + 1
+            order
             # shared=vec_expansion[0].ndim - 1
         ) if order > 0 else []
     )
@@ -1733,6 +1704,11 @@ def vec_anglecos_deriv(A_expansion, B_expansion, order, unitized=False):
     :return: the cosine expansion
     :rtype: list
     """
+    if not is_numeric(order):
+        orders = list(order)
+        full = vec_anglecos_deriv(A_expansion, B_expansion, max(orders), unitized=unitized) if orders else []
+        return [full[o] for o in orders]
+
     if not unitized:
         A_expansion = vec_norm_unit_deriv(A_expansion, order)[1]
         B_expansion = vec_norm_unit_deriv(B_expansion, order)[1]
@@ -1981,6 +1957,16 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
     :return: the sine expansion (and unit normals if requested)
     :rtype: list | tuple
     """
+    if not is_numeric(order):
+        orders = list(order)
+        if not orders:
+            return ([], []) if return_unit_vectors else []
+        full = vec_anglesin_deriv(A_expansion, B_expansion, max(orders),
+            unitized=unitized, return_unit_vectors=return_unit_vectors, planar=planar,
+            up_vector=up_vector, component_vectors=component_vectors,
+            unit_expansions=unit_expansions, planar_threshold=planar_threshold)
+        return tuple([t[o] for o in orders] for t in full) if return_unit_vectors else [full[o] for o in orders]
+
     if is_numeric(order):
         max_order = order
     else:
@@ -1991,12 +1977,9 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
 
     if planar_threshold is None:
         planar_threshold = Options.zero_threshold
-    if not planar:
-        vec_cross = vec_cross_deriv(A_expansion, B_expansion, order=max_order)
-        if planar is None:
-            planar = np.linalg.norm(vec_cross[0], axis=-1) <= planar_threshold
-    else:
-        vec_cross = None
+    vec_cross = vec_cross_deriv(A_expansion, B_expansion, order=max_order)
+    if planar is None:
+        planar = np.linalg.norm(vec_cross[0], axis=-1) <= planar_threshold
 
     if up_vector is not None:
         if not is_expansion_like(up_vector):
@@ -2053,15 +2036,7 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
         nonplanar_geoms = [v[nonplanar_pos] for v in vec_cross]
         norms, units = vec_norm_unit_deriv(nonplanar_geoms, order)
         if up_vector is not None:
-            up_vector = up_vector[0]
-            signs = np.sign(
-                vec_ops.vec_tensordot(
-                    nonplanar_geoms[0][..., np.newaxis, :],
-                    up_vector[nonplanar_pos][..., :, np.newaxis],
-                    axes=[-1, -2]
-                )
-            )
-            signs = signs.reshape(signs.shape[:-2])
+            signs = np.sign(np.sum(nonplanar_geoms[0] * up_vector[0][nonplanar_pos], axis=-1))
             norms = [v * np.expand_dims(signs, [-(x+1) for x in range(o)]) for o, v in enumerate(norms)]
             units = [v * np.expand_dims(signs, [-(x+1) for x in range(o+1)]) for o, v in enumerate(units)]
 
@@ -2088,19 +2063,7 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
     else:
         norms, units = vec_norm_unit_deriv(vec_cross, order)
         if up_vector is not None:
-            up_vector = np.asanyarray(up_vector)
-            up_vector = np.expand_dims(
-                up_vector,
-                list(range((vec_cross[0].ndim - up_vector.ndim)))
-            )
-            signs = np.sign(
-                vec_ops.vec_tensordot(
-                    vec_cross[0][..., np.newaxis, :],
-                    up_vector[..., :, np.newaxis],
-                    axes=[-1, -2]
-                )
-            )
-            signs = signs.reshape(signs.shape[:-2])
+            signs = np.sign(np.sum(vec_cross[0] * up_vector[0], axis=-1))
             norms = [v * np.expand_dims(signs, [-(x+1) for x in range(o)]) for o, v in enumerate(norms)]
             units = [v * np.expand_dims(signs, [-(x+1) for x in range(o+1)]) for o, v in enumerate(units)]
 
@@ -2182,6 +2145,14 @@ def vec_angle_deriv(A_expansion, B_expansion, order, up_vector=None,
     :return: the angle expansion
     :rtype: list
     """
+    if not is_numeric(order):
+        orders = list(order)
+        full = vec_angle_deriv(A_expansion, B_expansion, max(orders),
+            up_vector=up_vector, component_vectors=component_vectors,
+            unit_expansions=unit_expansions, unitized=unitized, planar=planar,
+            planar_threshold=planar_threshold) if orders else []
+        return [full[o] for o in orders]
+
     if not unitized:
         units_A, A_expansion = vec_norm_unit_deriv(A_expansion, order)
         units_B, B_expansion = vec_norm_unit_deriv(B_expansion, order)
@@ -2296,6 +2267,14 @@ def vec_normal_deriv(A_expansion, B_expansion, order, up_vector=None,
     :return: the normal-vector expansion
     :rtype: list
     """
+    if not is_numeric(order):
+        orders = list(order)
+        full = vec_normal_deriv(A_expansion, B_expansion, max(orders),
+            up_vector=up_vector, component_vectors=component_vectors,
+            unit_expansions=unit_expansions, unitized=unitized, planar=planar,
+            planar_threshold=planar_threshold, normalize=normalize) if orders else []
+        return [full[o] for o in orders]
+
 
     if normalize:
         _, units = vec_anglesin_deriv(A_expansion, B_expansion, order,
@@ -2312,10 +2291,6 @@ def vec_normal_deriv(A_expansion, B_expansion, order, up_vector=None,
             max_order = order
         else:
             max_order = max(order)
-        if not unitized:
-            A_expansion = vec_norm_unit_deriv(A_expansion, max_order)[1]
-            B_expansion = vec_norm_unit_deriv(B_expansion, max_order)[1]
-
         vec_cross = vec_cross_deriv(A_expansion, B_expansion, order=max_order)
         return vec_cross
 
@@ -2351,6 +2326,13 @@ def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order,
     :return: the dihedral-angle expansion
     :rtype: list
     """
+    if not is_numeric(order):
+        orders = list(order)
+        full = vec_dihed_deriv(A_expansion, B_expansion, C_expansion, max(orders),
+            B_norms=B_norms, planar=planar, planar_threshold=planar_threshold,
+            up_vector=up_vector) if orders else []
+        return [full[o] for o in orders]
+
     # quick check
 
     if is_numeric(order):
@@ -2437,6 +2419,12 @@ def vec_plane_angle_deriv(A_expansion, B_expansion, C_expansion, D_expansion, or
     :return: the plane-angle expansion
     :rtype: list
     """
+    if not is_numeric(order):
+        orders = list(order)
+        full = vec_plane_angle_deriv(A_expansion, B_expansion, C_expansion, D_expansion,
+            max(orders), planar=planar, planar_threshold=planar_threshold) if orders else []
+        return [full[o] for o in orders]
+
     # quick check
 
     if is_numeric(order):
@@ -2529,7 +2517,7 @@ def get_nca_perm_iter(partition, identical=True):
     if identical:
         blocks, counts = np.unique(partition, return_counts=True)
         base_perm = sum([(b,) * (b*c) for b,c in zip(blocks, counts)], ())
-        inv_perm = np.argsort(sum([(b,) * b for b in partition], ()))
+        grouped_to_original = np.argsort(sum([(b,) * b for b in partition], ()), kind='stable')
     else:
         raise NotImplementedError("just use unique perms")
     base_perm_inds, _ = get_unique_permutations(base_perm)
@@ -2554,7 +2542,9 @@ def get_nca_perm_iter(partition, identical=True):
 
     for block_list in itertools.product(*sub_ind_blocks):
         sublist = np.concatenate(block_list)
-        p = set_ops.vector_take(sublist[inv_perm], base_perm_inds)
+        # First distribute equal-sized blocks within each size group, then
+        # distribute the size groups, and finally restore the original blocks.
+        p = grouped_to_original[set_ops.vector_take(sublist, base_perm_inds)]
         yield p
 def check_perm_sorting(block_counts, partition_inverse):
     """
@@ -2871,7 +2861,7 @@ def nca_partition_prod(partition, A_expansion, shared=None, symmetrize=True):
 
         B = vec_ops.vec_outer(B, A, axes=axes, order=0)
     if symmetrize:
-        B = nca_symmetrize(B, partition, shared=shared)
+        B = nca_symmetrize(B, partition, shared=shared, identical=True)
     return B
 
 def tensor_reexpand(derivs, vals, order=None, axes=None):
@@ -2938,53 +2928,45 @@ def tensor_reexpand(derivs, vals, order=None, axes=None):
     return terms
 
 def optimizing_transformation(expansion, order):
+    """Coordinates removing higher terms of a scalar potential expansion.
+
+    The input starts at the gradient, without a potential value. Return the
+    Jacobian and order higher transformation derivatives. At a stationary
+    point a nonsingular Hessian defines the retained quadratic normal form;
+    otherwise the retained normal form is linear in the new coordinates.
     """
-    **LLM Docstring**
-
-    Build, order by order, the transformation that brings an expansion to a
-    normal (optimizing) form.
-
-    Uses the leading gradient/Hessian to set the zeroth-order transform, then
-    Newton-style recurrences that re-expand the remaining terms and cancel them at
-    each order. Requires at least a gradient or Hessian.
-
-    :param expansion: the expansion to optimize
-    :type expansion: list
-    :param order: the derivative order
-    :type order: int
-    :return: the optimizing transformation expansion
-    :rtype: list
-    """
-    V = expansion
-
-    zero_order = 0
-    for v in V:
-        if is_zero(v):
-            zero_order += 1
+    gradient = expansion[0]
+    stationary = is_zero(gradient) or not np.any(gradient)
+    if stationary:
+        if len(expansion) < 2 or is_zero(expansion[1]):
+            raise ValueError("optimization requires a gradient or nonsingular Hessian")
+        hessian = np.asarray(expansion[1])
+        if hessian.ndim != 2:
+            raise ValueError("potential optimization requires a scalar potential")
+        if np.array_equal(hessian,np.diag(np.diag(hessian))):
+            weights, matrix = np.diag(hessian), np.eye(len(hessian))
         else:
-            break
-
-    if zero_order > 2:
-        raise ValueError("can't optimize without gradient or Hessian (tensor inverses not implemented)")
-
-    W = V[zero_order]
-    if zero_order == 0:
-        w = W
-        Q = [np.eye(V[1].shape[0])]
-    elif zero_order == 1 and np.allclose(np.diag(np.diag(W)), W):
-        Q = [np.eye(V[1].shape[0])]
-        w = np.diag(W)
+            weights, vectors = np.linalg.eigh(hessian)
+            matrix = vectors.T
+        if np.any(weights == 0):
+            raise ValueError("optimization requires a nonsingular Hessian")
     else:
-        Q = [np.linalg.inv(W)]
-        w = np.ones(len(W))
-
-    for o in range(1, order + 1):
-        V_rem = tensor_reexpand(Q, V, [o], axes=[-1, 0])[-1]
-        w = w[np.newaxis]
-        new_Q = -V_rem / ((o + 2) * w)
-        Q = Q + [new_Q]
-
-    return Q
+        gradient = np.asarray(gradient)
+        if gradient.ndim != 1:
+            raise ValueError("potential optimization requires a scalar potential")
+        matrix = np.eye(len(gradient))
+        direction = gradient/np.dot(gradient,gradient)
+    transformation = [matrix]
+    for o in range(1, order+1):
+        degree = o+2 if stationary else o+1
+        remainder = tensor_reexpand(transformation, expansion, [degree], axes=[-1,0])[0]
+        if is_zero(remainder):
+            transformation.append(0)
+        elif stationary:
+            transformation.append((-remainder/((o+2)*weights))@matrix)
+        else:
+            transformation.append(-remainder[...,None]*direction)
+    return transformation
 
 def apply_nca_multi_ops(partition, expansions, ops, shared, root_dim=2):
     """
@@ -3019,9 +3001,7 @@ def apply_nca_multi_ops(partition, expansions, ops, shared, root_dim=2):
     if shared is None: shared = 0
 
     A = terms[0]
-    d0 = expansions[0][0].ndim
-    d = A.ndim - root_dim - shared
-    scaling = 2 if len(partition) == 3 and tuple(partition) == (1, 0, 1) else 1
+    d = partition[0]
     for B,p,(op, axes, contract) in zip(terms[1:], partition[1:], ops):
         a_ax, b_ax = [[x] if is_numeric(x) else x for x in axes]
         a_ax = [a if a >= 0 else (A.ndim + a - d) for a in a_ax]
@@ -3054,9 +3034,9 @@ def apply_nca_multi_ops(partition, expansions, ops, shared, root_dim=2):
         # next we need to move all of the derivative axes in the second tensor to the beginning
         # so we can symmetrize
 
-        for i in range(p):
-            A = np.moveaxis(A, deriv_axis+i, deriv_axis - root_dim)
-        d += B.ndim - root_dim - shared
+        A = np.moveaxis(A, list(range(deriv_axis, deriv_axis + p)),
+                        list(range(shared + d, shared + d + p)))
+        d += p
     partition = [p for p in partition if p > 0]
     if len(partition) > 1:
         A = nca_symmetrize(A, partition, shared=shared, identical=False)
@@ -3281,6 +3261,8 @@ def tensorops_deriv(
     :rtype: list
     """
     expansions, ops = nca_canonicalize_multiops(expansion_op_pairs)
+    if shared is None:
+        shared = 0
     _ = []
     for i,(op, axes, contract) in enumerate(ops):
         if isinstance(axes, str): axes = [axes, axes]
