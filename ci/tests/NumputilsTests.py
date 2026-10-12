@@ -6,12 +6,43 @@ import os.path
 from Peeves.TestUtils import *
 from Peeves import BlockProfiler
 import McUtils.Numputils as nput
+from McUtils.Numputils.CoordOps import vec_norm_derivs, vec_sin_cos_derivs, vec_angle_derivs
 from McUtils.Numputils import *
 from McUtils.Zachary import FiniteDifferenceDerivative
 from unittest import TestCase
 import numpy as np, scipy, functools as ft
 
 class NumputilsTests(TestCase):
+
+    def _check_internal_derivatives(self, function, value_function, coords, atom_lists, periodic=False):
+        # Current expansion APIs return (primitive, flattened Cartesian axes...).
+        values, gradients, hessians = function(coords, *atom_lists, order=2)
+        for primitive, atoms in enumerate(zip(*atom_lists)):
+            selected = np.asarray(coords[list(atoms)]).copy()
+            active = np.array([3*a+c for a in atoms for c in range(3)])
+            flat = selected.ravel()
+            step = 2e-4
+            def value(q):
+                result = value_function(q.reshape(selected.shape))
+                if periodic:
+                    result = values[primitive] + np.arctan2(
+                        np.sin(result-values[primitive]), np.cos(result-values[primitive]))
+                return result
+            gradient = np.empty(len(flat))
+            hessian = np.empty((len(flat), len(flat)))
+            for i in range(len(flat)):
+                x = np.eye(len(flat))[i]*step
+                gradient[i] = (value(flat+x)-value(flat-x))/(2*step)
+                for j in range(len(flat)):
+                    y = np.eye(len(flat))[j]*step
+                    hessian[i,j] = (value(flat+x+y)-value(flat+x-y)-value(flat-x+y)+value(flat-x-y))/(4*step**2)
+            np.testing.assert_allclose(values[primitive],value(flat),atol=1e-13)
+            np.testing.assert_allclose(gradients[primitive,active],gradient,atol=2e-6,rtol=2e-6)
+            np.testing.assert_allclose(hessians[primitive][np.ix_(active,active)],hessian,atol=2e-5,rtol=2e-5)
+            inactive = np.setdiff1d(np.arange(coords.size),active)
+            np.testing.assert_allclose(gradients[primitive,inactive],0,atol=1e-13)
+            np.testing.assert_allclose(hessians[primitive,inactive],0,atol=1e-13)
+
 
     problem_coords = np.array([
                                   [-1.86403557e-17, -7.60465240e-02,  4.62443228e-02],
@@ -340,177 +371,30 @@ class NumputilsTests(TestCase):
 
     @validationTest
     def test_PtsDihedralsDeriv(self):
-        # need some proper values to test this against...
-        np.random.seed(0)
-        coords = np.random.rand(16, 3)
 
-        angs, derivs, derivs_2 = dihed_deriv(coords, [4, 7], [5, 6], [6, 5], [7, 4], order=2)
-        ang = angs[0]; deriv = derivs[:, 0, :]; deriv_2 = derivs_2[:, :, 0, :, :]
-        ang2 = pts_dihedrals(coords[4],  coords[5], coords[6], coords[7])
-
-        self.assertEquals(ang2, ang[0])
-
-        fd = FiniteDifferenceDerivative(
-            lambda pt: pts_dihedrals(pt[..., 0, :], pt[..., 1, :], pt[..., 2, :], pt[..., 3, :]),
-            function_shape=((None, 4, 3), 0),
-            mesh_spacing=1.0e-5
-        )
-        dihedDeriv_fd = FiniteDifferenceDerivative(
-            lambda pts: dihed_deriv(pts, 0, 1, 2, 3, order=1)[1].squeeze().transpose((1, 0, 2)),
-            function_shape=((None, 4, 3), (None, 4, 3)),
-            mesh_spacing=1.0e-5
-        )
-
-        fd1, fd2 = fd(coords[(4, 5, 6, 7),]).derivative_tensor([1, 2])
-        fd2_22 = dihedDeriv_fd(coords[(4, 5, 6, 7),]).derivative_tensor(1)
-
-        self.assertTrue(np.allclose(deriv.flatten(), fd1.flatten()), msg="{} and {} aren't close".format(
-            deriv.flatten(), fd1.flatten()
-        ))
-
-        d2_flat = np.concatenate(
-            [
-                np.concatenate([deriv_2[0, 0], deriv_2[0, 1], deriv_2[0, 2], deriv_2[0, 3]], axis=1),
-                np.concatenate([deriv_2[1, 0], deriv_2[1, 1], deriv_2[1, 2], deriv_2[1, 3]], axis=1),
-                np.concatenate([deriv_2[2, 0], deriv_2[2, 1], deriv_2[2, 2], deriv_2[2, 3]], axis=1),
-                np.concatenate([deriv_2[3, 0], deriv_2[3, 1], deriv_2[3, 2], deriv_2[3, 3]], axis=1)
-            ],
-            axis=0
-        )
-
-        bleh = fd2_22.reshape(12, 12)
-        # raise Exception("\n"+"\n".join("{} {}".format(a, b) for a, b in zip(
-        #     np.round(deriv_2[2, 2], 3), np.round(bleh[6:9, 6:9], 3))
-        #                                ))
-        # raise Exception(np.round(d2_flat-bleh, 3))
-        # raise Exception("\n"+"\n".join("{}\n{}".format(a, b) for a, b in zip(np.round(d2_flat, 3), np.round(bleh, 3))))
-        self.assertTrue(np.allclose(d2_flat.flatten(), bleh.flatten(), atol=1.0e-7), msg="d2: {} and {} differ".format(
-            d2_flat.flatten(), bleh.flatten()
-        ))
-        self.assertTrue(np.allclose(d2_flat.flatten(), fd2.flatten(), atol=1.0e-3), msg="d2: {} and {} differ".format(
-            d2_flat.flatten(), fd2.flatten()
-        ))
-
-        # raise Exception(fd2.flatten(), deriv_2.flatten())
-
-        coords = np.array([
-            [ 1,  0, 0],
-            [ 1, -1, 0],
-            [-1,  1, 0],
-            [-1,  0, 0],
-        ])
-
-        angs, derivs = dihed_deriv(coords, 0, 1, 2, 3, order=1)
-        ang = angs[0]
-        deriv = derivs
-        # deriv_2 = derivs_2[:, :, 0, :, :]
-        ang2 = pts_dihedrals(coords[0], coords[1], coords[2], coords[3])
-
-        self.assertTrue(np.allclose(np.abs(ang2), ang))
-
-        raise Exception(deriv)
-
-        fd = FiniteDifferenceDerivative(
-            lambda pt: pts_dihedrals(pt[..., 0, :], pt[..., 1, :], pt[..., 2, :], pt[..., 3, :]),
-            function_shape=((None, 4, 3), 0),
-            mesh_spacing=1.0e-5
-        )
-        # dihedDeriv_fd = FiniteDifferenceDerivative(
-        #     lambda pts: dihed_deriv(pts, 0, 1, 2, 3, order=1)[1].squeeze().transpose((1, 0, 2)),
-        #     function_shape=((None, 4, 3), (None, 4, 3)),
-        #     mesh_spacing=1.0e-5
-        # )
-
-        fd1 = fd(coords[(0, 1, 2, 3),]).derivative_tensor([1])[0]
-        # fd2_22 = dihedDeriv_fd(coords[(4, 5, 6, 7),]).derivative_tensor(1)
-
-        self.assertTrue(np.allclose(deriv.flatten(), fd1.flatten()), msg="{} and {} aren't close".format(
-            deriv.flatten(), fd1.flatten()
-        ))
+        coords = np.random.default_rng(0).normal(size=(16,3))
+        self._check_internal_derivatives(nput.dihed_deriv,
+            lambda c: nput.pts_dihedrals(*c), coords,
+            ([4,7],[5,6],[6,5],[7,4]), periodic=True)
+        planar = np.array([[1.,0.,0.],[1.,-1.,0.],[-1.,1.,0.],[-1.,0.,0.]])
+        self._check_internal_derivatives(nput.dihed_deriv,
+            lambda c: nput.pts_dihedrals(*c), planar,
+            ([0],[1],[2],[3]), periodic=True)
 
     @validationTest
     def test_PtsAngleDeriv(self):
-        # need some proper values to test this against...
-        np.random.seed(0)
-        coords = np.random.rand(16, 3)
 
-        angs, derivs, derivs_2 = angle_deriv(coords, [5, 5], [4, 6], [6, 4], order=2)
-
-        ang = angs[0]; deriv = derivs[:, 0, :]; deriv_2 = derivs_2[:, :, 0, :, :]
-        ang2 = vec_angles(coords[4] - coords[5], coords[6] - coords[5])[0]
-
-        self.assertEquals(ang2, ang)
-
-        fd = FiniteDifferenceDerivative(
-            lambda pt: vec_angles(pt[..., 1, :] - pt[..., 0, :], pt[..., 2, :] - pt[..., 0, :])[0],
-            function_shape=((None, 3), 0),
-            mesh_spacing=1.0e-5
-        )
-
-        fd1, fd2 = fd(coords[(5, 4, 6),]).derivative_tensor([1, 2])
-
-        self.assertTrue(np.allclose(deriv.flatten(), fd1.flatten()), msg="{} and {} aren't close".format(
-            deriv.flatten(), fd1.flatten()
-        ))
-
-        d2_flat = np.concatenate(
-            [
-                np.concatenate([deriv_2[0, 0], deriv_2[0, 1], deriv_2[0, 2]], axis=1),
-                np.concatenate([deriv_2[1, 0], deriv_2[1, 1], deriv_2[1, 2]], axis=1),
-                np.concatenate([deriv_2[2, 0], deriv_2[2, 1], deriv_2[2, 2]], axis=1)
-            ],
-            axis=0
-        )
-
-        # raise Exception("\n"+"\n".join("{} {}".format(a, b) for a, b in zip(d2_flat, fd2)))
-
-        self.assertTrue(np.allclose(d2_flat.flatten(), fd2.flatten(), atol=1.0e-3), msg="d2: {} and {} differ".format(
-            d2_flat.flatten(), fd2.flatten()
-        ))
-
-        # raise Exception(fd2.flatten(), deriv_2.flatten())
+        coords = np.random.default_rng(0).normal(size=(16,3))
+        self._check_internal_derivatives(nput.angle_deriv,
+            lambda c: nput.vec_angles(c[1]-c[0],c[2]-c[0])[0],
+            coords, ([5,5],[4,6],[6,4]))
 
     @validationTest
     def test_PtsDistDeriv(self):
-        # need some proper values to test this against...
-        np.random.seed(0)
-        coords = np.random.rand(16, 3)
 
-        dists, derivs, derivs_2 = dist_deriv(coords, [5, 4], [4, 5], order=2)
-
-        dist = dists[0]; deriv = derivs[:, 0, :]; deriv_2 = derivs_2[:, :, 0, :, :]
-        dists2 = vec_norms(coords[4] - coords[5])
-
-        self.assertEquals(dists2, dist)
-        # raise Exception(dist, dists2)
-
-        fd = FiniteDifferenceDerivative(
-            lambda pt: vec_norms(pt[..., 1, :] - pt[..., 0, :]),
-            function_shape=((None, 3), 0),
-            mesh_spacing=1.0e-5
-        )
-
-        fd1, fd2 = fd(coords[(5, 4),]).derivative_tensor([1, 2])
-
-        self.assertTrue(np.allclose(deriv.flatten(), fd1.flatten()), msg="{} and {} aren't close".format(
-            deriv.flatten(), fd1.flatten()
-        ))
-
-        d2_flat = np.concatenate(
-            [
-                np.concatenate([deriv_2[0, 0], deriv_2[0, 1]], axis=1),
-                np.concatenate([deriv_2[1, 0], deriv_2[1, 1]], axis=1)
-            ],
-            axis=0
-        )
-
-        # raise Exception("\n"+"\n".join("{} {}".format(a, b) for a, b in zip(d2_flat, fd2)))
-
-        self.assertTrue(np.allclose(d2_flat.flatten(), fd2.flatten(), atol=1.0e-3), msg="d2: {} and {} differ".format(
-            d2_flat.flatten(), fd2.flatten()
-        ))
-
-        # raise Exception(fd2.flatten(), deriv_2.flatten())
+        coords = np.random.default_rng(0).normal(size=(16,3))
+        self._check_internal_derivatives(nput.dist_deriv,
+            lambda c: np.linalg.norm(c[1]-c[0]), coords, ([5,4],[4,5]))
 
     @validationTest
     def test_NormDerivs(self):

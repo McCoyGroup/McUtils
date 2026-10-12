@@ -1229,11 +1229,11 @@ def frac_powh(A, k, eigsys=None, pow=None, nonzero_cutoff=None):
         pow_vals = pow(eigvals, k)
     # TODO: speed up with semisparse dot products
     if pow_vals.ndim == 1:
-        return Q @ np.diag(pow_vals) @ Q.T
+        return Q @ np.diag(pow_vals) @ Q.T.conj()
     else:
         shared = pow_vals.ndim - 1
-        v = vec_tensordiag(pow_vals, extra_dims=shared)
-        return vec_tensordot(vec_tensordot(Q, v, axes=[-1, -2], shared=shared), Q, axes=[-1, -2], shared=shared)
+        v = vec_tensordiag(pow_vals)
+        return vec_tensordot(vec_tensordot(Q, v, axes=[-1, -2], shared=shared), Q.conj(), axes=[-1, -1], shared=shared)
 ################################################
 #
 #       pts_norms
