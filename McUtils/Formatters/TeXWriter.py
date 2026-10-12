@@ -1538,6 +1538,131 @@ class TeX:
 
     bold = TeXBold
 
+    # Explicit executable paths take precedence over discovery.
+    latex_path = None
+    dvisvgm_path = None
+    tex_search_paths = ("/Library/TeX/texbin", "/opt/homebrew/bin", "/usr/local/bin")
+
+    @classmethod
+    def find_tex_tools(cls, *, latex_path=None, dvisvgm_path=None, search_paths=None):
+        """Return absolute executable paths, or ``None`` for tools not found.
+
+        Per-call paths override ``TeX.latex_path`` and ``TeX.dvisvgm_path``.
+        Unconfigured tools are searched on PATH, then in ``search_paths``
+        (default: ``TeX.tex_search_paths``). Paths may also be command names.
+        An invalid explicit path does not fall back to another installation.
+        """
+        if search_paths is None:
+            search_paths = cls.tex_search_paths
+        if isinstance(search_paths, (str, os.PathLike)):
+            search_paths = (search_paths,)
+        search_paths = tuple(search_paths)
+
+        def resolve(name, configured):
+            if configured is None:
+                found = shutil.which(name)
+                if found is None:
+                    for directory in search_paths:
+                        directory = os.path.expanduser(os.fspath(directory))
+                        found = shutil.which(os.path.join(directory, name))
+                        if found is not None:
+                            break
+            else:
+                found = shutil.which(os.path.expanduser(os.fspath(configured)))
+            return None if found is None else os.path.abspath(found)
+
+        return {
+            'latex': resolve('latex', cls.latex_path if latex_path is None else latex_path),
+            'dvisvgm': resolve('dvisvgm', cls.dvisvgm_path if dvisvgm_path is None else dvisvgm_path)
+        }
+
+    @classmethod
+    def render_svg(cls, code, *, load_svg=True, preamble=None, fontsize=12,
+                   latex_path=None, dvisvgm_path=None, search_paths=None, timeout=60):
+        r"""Render a TeX fragment through LaTeX and dvisvgm.
+
+        ``code`` is TeX source (including math delimiters where needed) or a
+        value supported by ``TeX.Writer.dispatch_format``. For example::
+
+            svg = TeX.render_svg(r'$\frac{1}{1+x^2}$')
+            xml = TeX.render_svg(TeX.Symbol('x') ** 2, load_svg=False)
+
+        Return a ``Jupyter.JHTML.SVG.Svg`` element by default, or SVG XML text
+        when ``load_svg=False``. The default preamble loads amsmath and
+        amssymb; ``preamble`` replaces it. The TeX installation must provide
+        the standalone class and preview package. ``fontsize`` is 10, 11,
+        or 12 TeX points; ``timeout`` applies to each subprocess (``None``
+        disables it). Executable overrides follow ``find_tex_tools``.
+
+        Glyphs are emitted as plain paths so separate fragments can be
+        embedded without sharing glyph IDs. No result cache or optimizer
+        is used, and no additional Python package is required.
+        """
+        import subprocess
+
+        if fontsize not in (10, 11, 12):
+            raise ValueError("fontsize must be 10, 11, or 12 TeX points")
+        tools = cls.find_tex_tools(
+            latex_path=latex_path, dvisvgm_path=dvisvgm_path, search_paths=search_paths
+        )
+        missing = [name for name, path in tools.items() if path is None]
+        if missing:
+            raise FileNotFoundError(
+                "TeX SVG rendering requires " + ', '.join(missing)
+                + "; set latex_path/dvisvgm_path or TeX.latex_path/TeX.dvisvgm_path."
+            )
+        if preamble is None:
+            preamble = r'\usepackage{amsmath,amssymb}'
+        document = (
+            r'\documentclass[' + str(int(fontsize)) + r'pt,preview]{standalone}'
+            + '\n' + preamble + '\n'
+            + '\\begin{document}\n\\begin{preview}\n'
+            + cls.Writer.dispatch_format(code, None)
+            + '\n\\end{preview}\n\\end{document}\n'
+        )
+        env = os.environ.copy()
+        env['PATH'] = os.pathsep.join(
+            [os.path.dirname(path) for path in tools.values()] + [env.get('PATH', '')]
+        )
+        with tf.TemporaryDirectory(prefix='mcutils-tex-') as directory:
+            with open(os.path.join(directory, 'code.tex'), 'w', encoding='utf-8') as stream:
+                stream.write(document)
+            commands = (
+                [tools['latex'], '-interaction=nonstopmode', '-halt-on-error', 'code.tex'],
+                [tools['dvisvgm'], '--no-fonts=1', '--exact-bbox', '--bbox=min',
+                 '--output=code.svg', 'code.dvi']
+            )
+            for command in commands:
+                try:
+                    result = subprocess.run(
+                        command, cwd=directory, env=env, stdout=subprocess.PIPE,
+                        stderr=subprocess.STDOUT, text=True, encoding='utf-8',
+                        errors='replace', timeout=timeout
+                    )
+                except subprocess.TimeoutExpired as exc:
+                    raise RuntimeError(
+                        "TeX SVG rendering timed out in {} after {} seconds".format(command[0], timeout)
+                    ) from exc
+                if result.returncode != 0:
+                    raise RuntimeError(
+                        "TeX SVG rendering failed in {} (exit code {}):\n{}".format(
+                            command[0], result.returncode, result.stdout
+                        )
+                    )
+            with open(os.path.join(directory, 'code.svg'), encoding='utf-8') as stream:
+                svg = stream.read()
+
+        if not load_svg:
+            return svg
+        from ..Jupyter.JHTML import SVG
+        root, namespaces = SVG._parse_etree(svg, preserve_namespaces=True)
+        # Select the SVG wrapper classes by local tag while retaining literal
+        # namespace declarations, attributes, and reference prefixes.
+        for node in root.iter():
+            if node.tag.startswith('{http://www.w3.org/2000/svg}'):
+                node.tag = node.tag.split('}', 1)[1]
+        return SVG.convert(root, namespace_data=namespaces)
+
     @classmethod
     def Matrix(cls, mat, **kwargs):
         """

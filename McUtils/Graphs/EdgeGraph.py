@@ -1700,7 +1700,7 @@ class EdgeGraph:
         branch_point = None
         cur_frag = [ordering[0]]
         for n,o in enumerate(ordering[1:]):
-            attached_points = self.map[o]
+            attached_points = self.map.get(o, ()) # isolated nodes (e.g. ions) have no bonds
             if cur_frag[-1] in attached_points:
                 cur_frag.append(o)
             else: # time to branch

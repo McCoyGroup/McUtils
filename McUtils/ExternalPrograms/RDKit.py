@@ -946,8 +946,17 @@ class RDMolecule(ExternalMolecule):
                      check_tag=True,
                      coords=None,
                      conf_tag=None,
-                     conformer_encoder=None):
-        """Build an `RDMolecule` from a tagged molecular string and parser."""
+                     conformer_encoder=None,
+                     hydrogens_in_tag=None):
+        """
+        Build an `RDMolecule` from a tagged molecular string and parser.
+
+        :param hydrogens_in_tag: for strings (InChI) whose parsed molecule only has heavy atoms.
+            `None` (default) picks whichever of the two options below matches the number of atoms the tag
+            encodes, `False` decodes the tag on that heavy-atom graph, and `True` decodes it on the
+            heavy-atom + implicit-hydrogen graph (a tag written by `to_inchi` with
+            `remove_implicit_hydrogens=False`)
+        """
         if os.path.isfile(string):
             string = dev.read_file(string)
 
@@ -957,6 +966,41 @@ class RDMolecule(ExternalMolecule):
                 conf_tag = None
 
         rdkit_mol = parser(string, conf_tag is not None)
+
+        if coords is None and conf_tag is not None and hydrogens_in_tag is None:
+            num_heavy = rdkit_mol.GetNumAtoms()
+            num_total = num_heavy + sum(atom.GetTotalNumHs() for atom in rdkit_mol.GetAtoms())
+            num_tag = cls.conformer_tag_num_atoms(conf_tag, conformer_encoder=conformer_encoder)
+            if num_tag == num_heavy:
+                hydrogens_in_tag = False
+            elif num_tag == num_total:
+                hydrogens_in_tag = True
+            else:
+                raise ValueError(
+                    f"conformer tag encodes {num_tag} atoms, but the molecule has {num_heavy} heavy atoms"
+                    f" and {num_total} atoms with hydrogens"
+                )
+
+        if coords is None and conf_tag is not None and hydrogens_in_tag is True:
+            from .. import Graphs
+            symbols, hbonds = cls._inchi_hydrogen_tag_graph(rdkit_mol)
+            graph = Graphs.EdgeGraph(np.arange(len(symbols)), [(i, j) for i, j, _ in hbonds])
+            coords = cls.conformer_from_smiles_tag(
+                conf_tag,
+                graph,
+                conformer_encoder=conformer_encoder
+            )
+            return cls.from_coords(
+                symbols,
+                coords,
+                bonds=[list(b) for b in hbonds],
+                add_implicit_hydrogens=False,
+                num_confs=num_confs,
+                optimize=optimize,
+                take_min=take_min,
+                force_field_type=force_field_type,
+                confgen_opts=confgen_opts
+            )
 
         if coords is None and conf_tag is not None:
             if reorder_from_atom_map:
@@ -1108,7 +1152,8 @@ class RDMolecule(ExternalMolecule):
             check_tag=check_tag,
             coords=coords,
             conf_tag=conf_tag,
-            conformer_encoder=conformer_encoder
+            conformer_encoder=conformer_encoder,
+            hydrogens_in_tag=False # SMILES tags are defined on the parsed atoms, whatever they are
         )
 
     @classmethod
@@ -1759,19 +1804,28 @@ class RDMolecule(ExternalMolecule):
                                        return_reordering=False,
                                        binary=False,
                                        conformer_encoder=None,
-                                       removed_hydrogens=False):
-        """Apply atom ordering, conformer tagging, and return-index mapping."""
+                                       removed_hydrogens=False,
+                                       tag_bonds=None):
+        """
+        Apply atom ordering, conformer tagging, and return-index mapping.
+
+        `tag_bonds`, if given, are the bonds (in output positions) the tag graph should use
+        instead of the bonds of `mol`
+        """
         if reordering is None:
             reordering = list(range(mol.GetNumAtoms()))
 
         if include_tag:
             coords = coords[reordering,]
             output_positions = {old: new for new, old in enumerate(reordering)}
-            bonds = [
-                (output_positions[i], output_positions[j])
-                for i, j, *_ in self.get_bonds(mol)
-                if i in output_positions and j in output_positions
-            ]
+            if tag_bonds is not None:
+                bonds = [tuple(b) for b in tag_bonds]
+            else:
+                bonds = [
+                    (output_positions[i], output_positions[j])
+                    for i, j, *_ in self.get_bonds(mol)
+                    if i in output_positions and j in output_positions
+                ]
             from .. import Graphs
             graph = Graphs.EdgeGraph(np.arange(len(reordering)), bonds)
             tag = self.conformer_smiles_tag(
@@ -1807,6 +1861,47 @@ class RDMolecule(ExternalMolecule):
             for component in numbering.split(';')
             for index in component.split(',')
         ]
+
+    @staticmethod
+    def _extend_reordering_with_hydrogens(mol, reordering):
+        """
+        InChI numbers only the heavy atoms, so a tag built from that ordering never sees the hydrogens.
+        Appends every atom the InChI left out (the hydrogens), ordered by the canonical position of the
+        heavy atom they are bonded to and then by their input order. Hydrogens on the same heavy atom
+        (e.g. a methyl group) are interchangeable, so their order follows the input atom order.
+        """
+        reordering = [int(i) for i in reordering]
+        rank = {atom: n for n, atom in enumerate(reordering)}
+        extra = []
+        for atom in mol.GetAtoms():
+            idx = atom.GetIdx()
+            if idx in rank:
+                continue
+            parent = min((rank[n.GetIdx()] for n in atom.GetNeighbors() if n.GetIdx() in rank),
+                         default=len(reordering))
+            extra.append((parent, idx))
+        return reordering + [idx for _, idx in sorted(extra)]
+
+    @staticmethod
+    def _inchi_hydrogen_tag_graph(parsed_mol):
+        """
+        The graph a hydrogen-containing InChI tag is defined on: the heavy atoms of an InChI-parsed mol, in
+        InChI order, followed by one `H` per implicit hydrogen, grouped by the heavy atom InChI puts it on.
+        Using InChI's own hydrogen placement (rather than the input structure's) keeps encoding and
+        decoding consistent when hydrogens are mobile (e.g. carboxylic acids).
+
+        :return: the element symbols and the `(i, j, order)` bonds
+        """
+        symbols = [atom.GetSymbol() for atom in parsed_mol.GetAtoms()]
+        bonds = [
+            (b.GetBeginAtomIdx(), b.GetEndAtomIdx(), b.GetBondTypeAsDouble())
+            for b in parsed_mol.GetBonds()
+        ]
+        for atom in parsed_mol.GetAtoms():
+            for _ in range(atom.GetTotalNumHs()):
+                bonds.append((atom.GetIdx(), len(symbols), 1.0))
+                symbols.append('H')
+        return symbols, bonds
 
     def to_smiles(self,
                   remove_hydrogens=None,
@@ -1896,7 +1991,12 @@ class RDMolecule(ExternalMolecule):
                  log_level=None,
                  treat_warning_as_error=False,
                  **opts):
-        """Serialize the molecule to a standard InChI string."""
+        """
+        Serialize the molecule to a standard InChI string.
+
+        :param remove_implicit_hydrogens: `None`/`True` keep the default behavior, where a conformer tag only
+            encodes the heavy atoms InChI numbers; `False` also encodes the hydrogens in the tag
+        """
         inchi_api = RDKitInterface.submodule("Chem.inchi")
         mol, coords, removed_hydrogens = self._prepare_string_serialization(
             remove_hydrogens=remove_hydrogens,
@@ -1917,9 +2017,20 @@ class RDMolecule(ExternalMolecule):
         if include_tag or return_reordering:
             inchi, aux_info = inchi_api.MolToInchiAndAuxInfo(mol, **inchi_opts)
             reordering = self._parse_inchi_reordering(aux_info)
+            tag_bonds = None
+            if remove_implicit_hydrogens is not None and not remove_implicit_hydrogens:
+                # explicitly asked to keep hydrogens: put them in the tag too
+                num_heavy = len(reordering)
+                reordering = self._extend_reordering_with_hydrogens(mol, reordering)
+                parsed = inchi_api.MolFromInchi(inchi, removeHs=False)
+                if parsed is not None:
+                    symbols, bonds = self._inchi_hydrogen_tag_graph(parsed)
+                    if len(symbols) == len(reordering) and parsed.GetNumAtoms() == num_heavy:
+                        tag_bonds = [(i, j) for i, j, _ in bonds]
         else:
             inchi = inchi_api.MolToInchi(mol, **inchi_opts)
             reordering = None
+            tag_bonds = None
         return self._finalize_string_serialization(
             inchi,
             mol,
@@ -1929,7 +2040,8 @@ class RDMolecule(ExternalMolecule):
             return_reordering=return_reordering,
             binary=binary,
             conformer_encoder=conformer_encoder,
-            removed_hydrogens=removed_hydrogens
+            removed_hydrogens=removed_hydrogens,
+            tag_bonds=tag_bonds
         )
 
     def to_inchi_key(self, options='', mol=None):
@@ -4563,8 +4675,18 @@ class RDMolecule(ExternalMolecule):
         if byte_encoding is None:
             byte_encoding = self.default_tag_byte_encoding
 
-        zdata = coordops.cartesian_to_zmatrix(coords, zmatrix)
-        flat_z = coordops.extract_zmatrix_values(zdata.coords, partial_embedding=True)
+        coords = np.asanyarray(coords)
+        if len(coords) < 3:
+            # Z-matrix conversion needs 3 atoms; a lone atom has no internal coordinates
+            # and a pair has only its distance
+            flat_z = (
+                np.array([np.linalg.norm(coords[1] - coords[0])])
+                if len(coords) == 2 else
+                np.zeros(0)
+            )
+        else:
+            zdata = coordops.cartesian_to_zmatrix(coords, zmatrix)
+            flat_z = coordops.extract_zmatrix_values(zdata.coords, partial_embedding=True)
         if encoder is None:
             encoder = self.default_conformer_compression
         if dev.str_is(encoder, 'plain'):
@@ -4651,7 +4773,7 @@ class RDMolecule(ExternalMolecule):
         :return: the decoded Cartesian coordinates
         :rtype: np.ndarray
         """
-        if zmatrix is None:
+        if zmatrix is None and not return_streams:
             frags = graph.get_canonical_fragments()
             zmatrix = coordops.canonical_fragment_zmatrix(frags, validate_additions=True)
 
@@ -4702,6 +4824,24 @@ class RDMolecule(ExternalMolecule):
             return coords
         else:
             return zcoords
+
+    @classmethod
+    def conformer_tag_num_atoms(cls, tag, conformer_encoder=None, **opts):
+        """
+        The number of atoms a conformer tag encodes, read from the tag alone (no graph needed). An empty
+        tag is a single atom (no internal coordinates).
+
+        :param tag: the conformer tag
+        :type tag: str
+        :return: the number of encoded atoms
+        :rtype: int
+        """
+        if len(tag) == 0:
+            return 1
+        zcoords = cls.conformer_from_smiles_tag(
+            tag, None, conformer_encoder=conformer_encoder, return_streams=True, **opts
+        )
+        return len(zcoords) + 1
 
     @classmethod
     def get_mol_edge_graph(cls, mol, bonds=None, reordering=None):
@@ -5109,12 +5249,17 @@ class RDMolecule(ExternalMolecule):
                    coords=None,
                    conf_tag=None,
                    conformer_encoder=None,
+                   hydrogens_in_tag=None,
                    log_level=None,
                    treat_warning_as_error=False,
                    **opts):
         """
         Build an `RDMolecule` from an InChI string, optional conformer tag,
         or explicit coordinates.
+
+        :param hydrogens_in_tag: whether the conformer tag encodes hydrogen positions (as written by
+            `to_inchi(include_tag=True, remove_implicit_hydrogens=False)`) or only heavy atoms. `None`
+            (default) detects this from the number of atoms in the tag; `True`/`False` force it
         """
         inchi_api = RDKitInterface.submodule("Chem.inchi")
 
@@ -5142,7 +5287,8 @@ class RDMolecule(ExternalMolecule):
             check_tag=check_tag,
             coords=coords,
             conf_tag=conf_tag,
-            conformer_encoder=conformer_encoder
+            conformer_encoder=conformer_encoder,
+            hydrogens_in_tag=hydrogens_in_tag
         )
 
     @classmethod
