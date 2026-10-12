@@ -1364,6 +1364,8 @@ def _broadcast_mul(scalar, other):
     :return: the broadcast product
     :rtype: np.ndarray | float
     """
+    if is_zero(scalar) or is_zero(other):
+        return 0
     if (
             isinstance(scalar, np.ndarray)
             and isinstance(other, np.ndarray)
@@ -2037,8 +2039,8 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
         norms, units = vec_norm_unit_deriv(nonplanar_geoms, order)
         if up_vector is not None:
             signs = np.sign(np.sum(nonplanar_geoms[0] * up_vector[0][nonplanar_pos], axis=-1))
-            norms = [v * np.expand_dims(signs, [-(x+1) for x in range(o)]) for o, v in enumerate(norms)]
-            units = [v * np.expand_dims(signs, [-(x+1) for x in range(o+1)]) for o, v in enumerate(units)]
+            norms = [0 if is_zero(v) else v * np.expand_dims(signs, [-(x+1) for x in range(o)]) for o, v in enumerate(norms)]
+            units = [0 if is_zero(v) else v * np.expand_dims(signs, [-(x+1) for x in range(o+1)]) for o, v in enumerate(units)]
 
         final_tensors = [
             np.zeros(base_shape + e.shape[1:])
@@ -2064,8 +2066,8 @@ def vec_anglesin_deriv(A_expansion, B_expansion, order, unitized=False, return_u
         norms, units = vec_norm_unit_deriv(vec_cross, order)
         if up_vector is not None:
             signs = np.sign(np.sum(vec_cross[0] * up_vector[0], axis=-1))
-            norms = [v * np.expand_dims(signs, [-(x+1) for x in range(o)]) for o, v in enumerate(norms)]
-            units = [v * np.expand_dims(signs, [-(x+1) for x in range(o+1)]) for o, v in enumerate(units)]
+            norms = [0 if is_zero(v) else v * np.expand_dims(signs, [-(x+1) for x in range(o)]) for o, v in enumerate(norms)]
+            units = [0 if is_zero(v) else v * np.expand_dims(signs, [-(x+1) for x in range(o+1)]) for o, v in enumerate(units)]
 
     if return_unit_vectors:
         return norms, units
@@ -2341,7 +2343,7 @@ def vec_dihed_deriv(A_expansion, B_expansion, C_expansion, order,
         max_order = max(order)
 
     if B_norms is None:
-        B_norms, B_expansion = vec_norm_unit_deriv(B_expansion, len(B_expansion))
+        B_norms, B_expansion = vec_norm_unit_deriv(B_expansion, max_order)
     # if not unitized:
     #     _, A_expansion = vec_norm_unit_deriv(A_expansion, len(A_expansion))
     #     _, B_expansion = vec_norm_unit_deriv(B_expansion, len(B_expansion))
