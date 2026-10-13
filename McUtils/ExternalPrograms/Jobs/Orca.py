@@ -1,4 +1,4 @@
-import json, numbers, os
+import json, numbers, os, re
 
 from .Jobs import ExternalProgramJob, OptionsBlock, SystemBlock
 
@@ -313,6 +313,39 @@ class OrcaSystemBlock(SystemBlock):
 @ExternalProgramJob.register("orca")
 class OrcaJob(ExternalProgramJob):
     extension = ".inp"
+    executable = 'orca'
+    stdout_output = True
+    parallel_model = 'mpi'
+
+    @classmethod
+    def get_dependencies(cls, **opts):
+        """
+        ORCA is licensed software, so it is not installable from a package index: it needs to be on `PATH`
+        (usually through an environment module).
+        """
+        deps = super().get_dependencies(**opts)
+        deps.add('module', 'orca', optional=True, reason='ORCA is normally provided by an environment module')
+        return deps
+
+    def get_run_command(self, input_file, output_file=None, *, nproc=None, executable=None, **run_opts):
+        """
+        ORCA launches its own MPI processes and so must be called by full path.
+        """
+        import shutil
+        exe = executable or shutil.which(self.executable) or self.executable
+        return [exe, input_file]
+
+    @classmethod
+    def parse_output(cls, text):
+        """
+        :return: ``terminated_normally`` and, if present, the final ``energy`` (Hartree) and all ``energies``
+        """
+        energies = [float(e) for e in re.findall(r"FINAL SINGLE POINT ENERGY\s+(-?\d+\.\d+)", text)]
+        res = {'terminated_normally': "ORCA TERMINATED NORMALLY" in text}
+        if len(energies) > 0:
+            res['energy'] = energies[-1]
+            res['energies'] = energies
+        return res
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'orca_job.inp')
     blocks = [
         OrcaKeywordsBlock,

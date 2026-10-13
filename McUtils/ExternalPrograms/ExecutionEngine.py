@@ -14,7 +14,9 @@ __all__ = [
     "ExecutionEngine",
     # "PoolSubmissionEngine",
     "ManagedJobQueueExecutionEngine",
-    "SLURMExecutionEngine"
+    "SLURMExecutionEngine",
+    "SubprocessExecutionEngine",
+    "SubprocessExecutionFuture"
 ]
 
 class ExecutionStatus(enum.Enum):
@@ -288,6 +290,18 @@ class ExecutionEngine(metaclass=abc.ABCMeta):
             self.submit_job(**dict(job, **kwargs))
             for job in jobs
         ])
+
+    def submit_command(self, submission, **opts) -> ExecutionFuture:
+        """
+        Submit a prepared `JobSubmission` (a run script plus its resource request). Engines that can run shell
+        commands override this; the default refuses.
+
+        :param submission: the `JobSubmission` describing the job
+        :param opts: engine-specific options (e.g. SLURM partition/account/time)
+        :return: the future for the running job
+        :rtype: ExecutionFuture
+        """
+        raise NotImplementedError(f"{type(self).__name__} cannot run external-program jobs")
 
     def __enter__(self):
         """
@@ -588,7 +602,9 @@ class SLURMExecutionFuture(ManagedJobQueueExecutionFuture):
         else:
             return super().get_status()
 
+@ExecutionEngine.register('slurm')
 class SLURMExecutionEngine(ManagedJobQueueExecutionEngine):
+    name = 'slurm'
     future_type = SLURMExecutionFuture
     def __init__(self, **opts):
         """
@@ -682,6 +698,46 @@ class SLURMExecutionEngine(ManagedJobQueueExecutionEngine):
             self.queue_manager,
             **fut_opts
         )
+
+    def submit_command(self, submission, *,
+                       partition=None, account=None, time=None, mem=None, nodes=1,
+                       job_name=None, poll_time=None, sbatch_opts=None,
+                       **extra_opts) -> ManagedJobQueueExecutionFuture:
+        """
+        Write an sbatch script that calls the submission's run script and submit it.
+        Shared-memory programs (``parallel_model='threads'``) request ``--cpus-per-task``,
+        MPI programs request ``--ntasks``; any further `#SBATCH` options (``qos``, ``constraint``, ...)
+        can be passed as keywords or through `sbatch_opts`.
+
+        :param submission: the `JobSubmission`
+        :param partition: the SLURM partition
+        :param account: the SLURM account
+        :param time: the wall-time limit
+        :param mem: the memory request (e.g. ``'8G'``); not inferred from the job's own memory setting
+        :param nodes: the node count
+        :param job_name: the job name (defaults to the submission name)
+        :param poll_time: seconds between status polls on the returned future
+        :param sbatch_opts: a dict of additional `#SBATCH` options
+        :return: the future for the queued job
+        """
+        from .Jobs.SBatch import SBatchJob
+
+        opts = dict(sbatch_opts or {}, **extra_opts)
+        if submission.nproc is not None and submission.nproc > 1:
+            key = 'ntasks' if submission.parallel_model == 'mpi' else 'cpus_per_task'
+            opts.setdefault(key, submission.nproc)
+        if time is not None:
+            opts['time'] = time
+        sbatch = SBatchJob(
+            job_name=job_name or submission.name,
+            account=account, partition=partition, mem=mem, nodes=nodes,
+            chdir=submission.work_dir,
+            steps=[f"bash {submission.run_script}"],
+            **opts
+        )
+        sbatch_file = sbatch.write(f"sbatch_{submission.name}.sh", output_dir=submission.work_dir)
+        return self.submit_job(sbatch_file, chdir=submission.work_dir, watch_dir=submission.work_dir,
+                               poll_time=poll_time)
 
 class ProcessExecutionFuture(JoinableExecutionFuture):
     def __init__(self, base_obj, **ignored):
@@ -810,3 +866,108 @@ class ProcessGeneratorExecutionEngine(ExecutionEngine):
         :rtype: None
         """
         self.proc_gen.__exit__()
+
+
+class SubprocessExecutionFuture(JoinableExecutionFuture):
+    """
+    A future for a locally running `subprocess.Popen` process.
+    """
+    def __init__(self, process, *, command=None, cwd=None, **opts):
+        super().__init__(**opts)
+        self.process = process
+        self.command = command
+        self.cwd = cwd
+
+    def await_result(self, timeout=None):
+        """
+        Wait for the process to exit.
+
+        :param timeout: maximum seconds to wait, or `None` for no deadline
+        :raises TimeoutError: if the process is still running after `timeout`
+        """
+        try:
+            self.process.wait(timeout=timeout)
+        except subprocess.TimeoutExpired as e:
+            raise TimeoutError(f"process {self.process.pid} still running after {timeout}s") from e
+        self.status = self.get_status()
+
+    def get_status(self) -> ExecutionStatus:
+        """
+        :return: `RUNNING` while the process is alive, then `COMPLETED` (exit code 0) or `ERROR`
+        """
+        code = self.process.poll()
+        if code is None:
+            return ExecutionStatus.RUNNING
+        return ExecutionStatus.COMPLETED if code == 0 else ExecutionStatus.ERROR
+
+    def get_result(self) -> dict:
+        """
+        :return: ``{'returncode': ..., 'pid': ...}`` once the process has exited, otherwise `None`
+        """
+        code = self.process.poll()
+        if code is None:
+            return None
+        return {'returncode': code, 'pid': self.process.pid, 'command': self.command, 'cwd': self.cwd}
+
+    def cancel(self):
+        """
+        Terminate the process if it is still running.
+        """
+        if self.process.poll() is None:
+            self.process.terminate()
+
+
+@ExecutionEngine.register('subprocess')
+class SubprocessExecutionEngine(ExecutionEngine):
+    """
+    Runs commands as local child processes (no scheduler). The default engine for `ExternalProgramJob.submit`.
+    """
+    name = 'subprocess'
+    future_type = SubprocessExecutionFuture
+
+    def submit_job(self, command, *, cwd=None, env=None, stdout=None, stderr=None, poll_time=None,
+                   **ignored) -> SubprocessExecutionFuture:
+        """
+        Start `command` and return immediately.
+
+        :param command: the argument list (or a shell string)
+        :param cwd: the working directory
+        :param env: extra environment variables (merged over the current environment)
+        :param stdout: a file path (or file object) to receive stdout; discarded if `None`
+        :param stderr: a file path (or file object) to receive stderr; defaults to the `stdout` target
+        :param poll_time: seconds between status polls on the future
+        """
+        import os, subprocess as sp
+        opened = []
+        def _open(target):
+            if isinstance(target, (str, os.PathLike)):
+                f = open(target, 'w')
+                opened.append(f)
+                return f
+            return target
+        out = _open(stdout) if stdout is not None else sp.DEVNULL
+        err = _open(stderr) if stderr is not None else (out if stdout is not None else sp.DEVNULL)
+        full_env = None if env is None else dict(os.environ, **{k: str(v) for k, v in env.items()})
+        try:
+            proc = sp.Popen(command, cwd=cwd, env=full_env, stdout=out, stderr=err,
+                            shell=isinstance(command, str), start_new_session=True)
+        finally:
+            for f in opened:  # the child holds its own copy of the descriptors
+                f.close()
+        return self.future_type(proc, command=command, cwd=cwd, poll_time=poll_time)
+
+    def submit_command(self, submission, *, poll_time=None, log_file=None, **ignored) -> SubprocessExecutionFuture:
+        """
+        Run the submission's run script with ``bash``.
+
+        :param submission: the `JobSubmission`
+        :param poll_time: seconds between status polls on the future
+        :param log_file: where to send the run script's own stdout/stderr (default ``run_<name>.log`` in the work dir)
+        """
+        import os
+        if log_file is None:
+            log_file = os.path.join(submission.work_dir, f"run_{submission.name}.log")
+        return self.submit_job(
+            ['bash', submission.run_script],
+            cwd=submission.work_dir, stdout=log_file, poll_time=poll_time
+        )

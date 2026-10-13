@@ -179,6 +179,26 @@ class CRESTSystemBlock(SystemBlock):
 
 @ExternalProgramJob.register("crest")
 class CRESTJob(ExternalProgramJob):
+    extension = '.sh'
+    output_extension = None  # the generated script names its own log file
+    executable = 'crest'
+
+    @classmethod
+    def get_dependencies(cls, **opts):
+        """
+        CREST drives xtb, and both are on conda-forge.
+        """
+        deps = super().get_dependencies(**opts)
+        deps.add('conda', 'crest')
+        deps.add('conda', 'xtb')
+        deps.add('executable', 'xtb')
+        return deps
+
+    def get_run_command(self, input_file, output_file=None, *, nproc=None, executable=None, **run_opts):
+        """
+        The input *is* a shell script that calls `crest`.
+        """
+        return ['bash', input_file]
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'crest_job.sh')
     blocks = [
         CRESTPathsBlock,

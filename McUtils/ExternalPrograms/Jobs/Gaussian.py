@@ -440,6 +440,31 @@ class GaussianRestBlock(GaussianOptionsBlock):
 @ExternalProgramJob.register("gaussian")
 class GaussianJob(ExternalProgramJob):
     extension = 'gjf'
+    executable = 'g16'
+    output_extension = '.log'  # g16 writes <input>.log itself
+
+    @classmethod
+    def get_dependencies(cls, **opts):
+        """
+        Gaussian is licensed software that needs to be on `PATH` (usually through an environment module).
+        """
+        deps = super().get_dependencies(**opts)
+        deps.add('executable', 'formchk', optional=True, reason='for .fchk files')
+        deps.add('module', 'gaussian', optional=True, reason='Gaussian is normally provided by an environment module')
+        return deps
+
+    @classmethod
+    def parse_output(cls, text):
+        """
+        :return: ``terminated_normally`` and, if present, the last SCF ``energy`` (Hartree)
+        """
+        import re
+        energies = [float(e) for e in re.findall(r"SCF Done:\s+E\([^)]*\)\s+=\s+(-?\d+\.\d+)", text)]
+        res = {'terminated_normally': "Normal termination" in text}
+        if len(energies) > 0:
+            res['energy'] = energies[-1]
+            res['energies'] = energies
+        return res
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'gaussian_job.gjf')
     blocks = [
         GaussianLinkBlock,
