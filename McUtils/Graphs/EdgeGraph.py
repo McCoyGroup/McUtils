@@ -1679,7 +1679,7 @@ class EdgeGraph:
             )
 
     def get_canonical_fragments(self, ordering=None, validate=False,
-                                local_attachment_references=False):
+                                local_attachment_references=True):
         """
         **LLM Docstring**
 
