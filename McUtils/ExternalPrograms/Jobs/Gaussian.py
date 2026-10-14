@@ -1,4 +1,4 @@
-import json
+import json, numbers
 import os.path
 
 from .Jobs import ExternalProgramJob, OptionsBlock, SystemBlock
@@ -156,6 +156,7 @@ class GaussianLinkBlock(GaussianOptionsBlock):
 
 class GaussianLOTBlock(GaussianOptionsBlock):
     opts_key = "LevelOfTheory"
+    __aliases__ = {'level_of_theory': ['method'], 'basis_set': ['basis']}  # the names the other programs use
 
     @classmethod
     def get_props(cls):
@@ -208,7 +209,7 @@ class GaussianLOTBlock(GaussianOptionsBlock):
 
             if 'basis_set' in opt_dict:
                 basis_set = opt_dict['basis_set']
-                del opt_dict[basis_set]
+                del opt_dict['basis_set']
             elif 'basis_set' in self.opts:
                 basis_set = self.opts['basis_set']
             else:
@@ -437,9 +438,43 @@ class GaussianRestBlock(GaussianOptionsBlock):
             return {"rest":{s.strip("{").strip("}"):[] for s in t.split()}}
         return cls._json
 
+def _gaussian_memory(memory, opts):
+    """
+    `%Mem` reads a bare number as 8-byte words; the common `memory` option follows the other programs (bare
+    numbers are megabytes).
+    """
+    if isinstance(memory, numbers.Number):
+        memory = f"{int(memory)}MB"
+    return 'Mem', memory
+
 @ExternalProgramJob.register("gaussian")
 class GaussianJob(ExternalProgramJob):
     extension = 'gjf'
+    executable = 'g16'
+    output_extension = '.log'  # g16 writes <input>.log itself
+
+    @classmethod
+    def get_dependencies(cls, **opts):
+        """
+        Gaussian is licensed software that needs to be on `PATH` (usually through an environment module).
+        """
+        deps = super().get_dependencies(**opts)
+        deps.add('executable', 'formchk', optional=True, reason='for .fchk files')
+        deps.add('module', 'gaussian', optional=True, reason='Gaussian is normally provided by an environment module')
+        return deps
+
+    @classmethod
+    def parse_output(cls, text):
+        """
+        :return: ``terminated_normally`` and, if present, the last SCF ``energy`` (Hartree)
+        """
+        import re
+        energies = [float(e) for e in re.findall(r"SCF Done:\s+E\([^)]*\)\s+=\s+(-?\d+\.\d+)", text)]
+        res = {'terminated_normally': "Normal termination" in text}
+        if len(energies) > 0:
+            res['energy'] = energies[-1]
+            res['energies'] = energies
+        return res
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'gaussian_job.gjf')
     blocks = [
         GaussianLinkBlock,
@@ -450,7 +485,7 @@ class GaussianJob(ExternalProgramJob):
     ]
 
     __common_aliases__ = {
-        'memory': 'Mem',
+        'memory': _gaussian_memory,
         'nproc': 'NProcShared',
         'checkpoint': 'Chk',
     }
@@ -530,16 +565,56 @@ class GaussianJob(ExternalProgramJob):
 
         return base_params
 
+    def format(self):
+        """
+        Render the input. The route section starts with a single `#`; the level-of-theory and
+        route blocks each emit their own, so the continuation lines lose theirs.
+        """
+        lines, in_route = [], False
+        for line in super().format().splitlines():
+            if in_route and line.startswith("#"):
+                line = line[1:]
+            if line.startswith("#"):
+                in_route = True
+            elif in_route and len(line.strip()) == 0:
+                in_route = False
+            lines.append(line)
+        return "\n".join(lines)
+
+    @classmethod
+    def energy(cls, *strs, **opts):
+        """
+        Construct a Gaussian single-point job (no extra route keyword).
+
+        :param strs: bare route keywords / level-of-theory strings
+        :param opts: the job options
+        :rtype: GaussianJob
+        """
+        return cls(*strs, **opts)
+
+    @classmethod
+    def frequencies(cls, *strs, **opts):
+        """
+        Construct a Gaussian harmonic-frequency job (adds the `Freq` route keyword).
+
+        :param strs: bare route keywords / level-of-theory strings
+        :param opts: the job options
+        :rtype: GaussianJob
+        """
+        if not any(s.lower() == 'freq' for s in strs) and 'freq' not in opts:
+            strs = ('Freq',) + strs
+        return cls(*strs, **opts)
+
     @classmethod
     def optimization(cls, *strs, **opts):
         """
-        Construct an ORCA geometry-optimization job (adds the `Opt` simple
+        Construct a Gaussian geometry-optimization job (adds the `Opt` simple
         keyword). Other keywords, `basis_set`, and `level_of_theory` pass
         through unchanged.
 
         :param strs: bare simple keywords
         :param opts: the job options
-        :rtype: OrcaJob
+        :rtype: GaussianJob
         """
         if not any(s.lower() == 'opt' for s in strs) and 'opt' not in opts:
             strs = ('Opt',) + strs

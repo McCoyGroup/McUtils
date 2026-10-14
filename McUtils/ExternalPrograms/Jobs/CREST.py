@@ -55,7 +55,7 @@ class CRESTProcessBlock(CRESTOptionsBlock):
             return None
 
         return "\n".join(
-            f'export {k} {v}'
+            f'export {k}={v}'
             for k, v in self.opts.items()
             if v is not None
         )
@@ -64,7 +64,7 @@ class CRESTProcessBlock(CRESTOptionsBlock):
         """
         **LLM Docstring**
 
-        Return the `command_line` parameter carrying the `export` commands (or an empty
+        Return the `process_setup` parameter carrying the `export` commands (or an empty
         dict).
 
         :return: the process template parameters
@@ -75,13 +75,13 @@ class CRESTProcessBlock(CRESTOptionsBlock):
             return {}
         else:
             return {
-                'command_line': cmd
+                'process_setup': cmd
             }
 
 class CRESTCommandLineBlock(CRESTOptionsBlock):
     opts_key = "CommandLine"
 
-    __aliases__ = {'chrg':'charge'}
+    __aliases__ = {'chrg':['charge']}
     @classmethod
     def get_props(cls):
         """
@@ -92,9 +92,9 @@ class CRESTCommandLineBlock(CRESTOptionsBlock):
         :return: the accepted property names
         :rtype: list
         """
-        return ["chrg"] + super().get_props()
+        return ["chrg", "multiplicity"] + super().get_props()
 
-    argument_spacer = "\\ \n" + " " * 14
+    argument_spacer = " \\\n" + " " * 14
     def format_command_line(self):
         """
         **LLM Docstring**
@@ -105,18 +105,22 @@ class CRESTCommandLineBlock(CRESTOptionsBlock):
         :return: the formatted command-line arguments, or `None` if there are none
         :rtype: str | None
         """
-        if len(self.opts) == 0:
+        opts = dict(self.opts)
+        mult = opts.pop('multiplicity', None)  # CREST counts unpaired electrons rather than spin multiplicity
+        if mult is not None and mult > 1:
+            opts.setdefault('uhf', mult - 1)
+        if len(opts) == 0:
             return None
-        elif len(self.opts) < 3:
+        elif len(opts) < 3:
             return "  ".join(
                 f"--{k}" if v is True else f'--{k} {v}'
-                for k, v in self.opts.items()
+                for k, v in opts.items()
                 if v is not None
             )
         else:
             return self.argument_spacer + self.argument_spacer.join(
-                f"--{k}  " if v is True else f'--{k} {v}  '
-                for k,v in self.opts.items()
+                f"--{k}" if v is True else f'--{k} {v}'
+                for k,v in opts.items()
                 if v is not None
             )
 
@@ -144,7 +148,7 @@ class CRESTPathsBlock(OptionsBlock):
 
 
 class CRESTSystemBlock(SystemBlock):
-    __props__ = ("atoms", "cartesians")
+    __props__ = ("atoms", "cartesians", "bonds")  # `bonds` is accepted (`from_mol` supplies it) but CREST's xyz input has none
 
     fmt_key = ""
 
@@ -179,6 +183,54 @@ class CRESTSystemBlock(SystemBlock):
 
 @ExternalProgramJob.register("crest")
 class CRESTJob(ExternalProgramJob):
+    __common_aliases__ = {'nproc': 'T'}  # the `--T` command-line flag
+    extension = '.sh'
+    output_extension = None  # the generated script names its own log file
+    executable = 'crest'
+
+    @classmethod
+    def get_dependencies(cls, **opts):
+        """
+        CREST drives xtb, and both are on conda-forge.
+        """
+        deps = super().get_dependencies(**opts)
+        deps.add('conda', 'crest')
+        deps.add('conda', 'xtb')
+        deps.add('executable', 'xtb')
+        return deps
+
+    def get_run_command(self, input_file, output_file=None, *, nproc=None, executable=None, **run_opts):
+        """
+        The input *is* a shell script that calls `crest`.
+        """
+        return ['bash', input_file]
+
+    @classmethod
+    def parse_output(cls, text):
+        """
+        :return: ``terminated_normally`` from the CREST log
+        """
+        return {'terminated_normally': "CREST terminated normally" in text}
+
+    @classmethod
+    def collect_results(cls, submission):
+        """
+        The log's `parse_output` plus the conformer ensemble CREST wrote (``atoms``, ``energies`` in Hartree,
+        ``coords`` in Angstrom) read with `CRESTParser`.
+        """
+        import numpy as np
+        from ..Parsers.Crest import CRESTParser
+
+        log = os.path.join(submission.work_dir, submission.job.job_opts.get('log_file', 'confgen.log'))
+        res = {}
+        if os.path.isfile(log):
+            with open(log, errors='replace') as inp:
+                res.update(cls.parse_output(inp.read()))
+        parser = CRESTParser(submission.work_dir)
+        if os.path.isfile(parser.conformers_file):
+            confs = parser.parse_conformers()
+            res.update(atoms=list(confs.atoms), energies=np.asarray(confs.energies), coords=np.asarray(confs.coords))
+        return res
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'crest_job.sh')
     blocks = [
         CRESTPathsBlock,

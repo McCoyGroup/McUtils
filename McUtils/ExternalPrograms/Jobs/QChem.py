@@ -118,6 +118,45 @@ class QChemSectionsBlock(QChemOptionsBlock):
 @ExternalProgramJob.register("qchem")
 class QChemJob(ExternalProgramJob):
     extension = ".in"
+    executable = 'qchem'
+    stdout_output = False  # `qchem input output` writes the output file itself
+
+    @classmethod
+    def get_dependencies(cls, **opts):
+        """
+        Q-Chem is licensed software that needs to be on `PATH`.
+        """
+        deps = super().get_dependencies(**opts)
+        deps.add('module', 'qchem', optional=True, reason='Q-Chem is normally provided by an environment module')
+        return deps
+
+    def get_run_command(self, input_file, output_file=None, *, nproc=None, executable=None, **run_opts):
+        """
+        ``qchem [-nt N] input output``
+        """
+        cmd = [executable or self.executable]
+        if nproc is not None and nproc > 1:
+            cmd += ['-nt', str(nproc)]
+        return cmd + [input_file, output_file]
+
+    @classmethod
+    def parse_output(cls, text):
+        """
+        :return: ``terminated_normally``, ``optimized`` (a geometry optimization converged) and, if present,
+            the final ``energy`` (Hartree)
+        """
+        import re
+        energies = [float(e) for e in re.findall(r"Total energy in the final basis set =\s+(-?\d+\.\d+)", text)]
+        if len(energies) == 0:  # newer versions label the SCF summary line `Total energy =`
+            energies = [float(e) for e in re.findall(r"^\s*Total energy\s+=\s+(-?\d+\.\d+)", text, re.M)]
+        res = {
+            'terminated_normally': "Thank you very much for using Q-Chem" in text,
+            'optimized': "OPTIMIZATION CONVERGED" in text
+        }
+        if len(energies) > 0:
+            res['energy'] = energies[-1]
+            res['energies'] = energies
+        return res
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'qchem_job.in')
     blocks = [
         QChemMoleculeBlock,
@@ -142,6 +181,30 @@ class QChemJob(ExternalProgramJob):
     @classmethod
     def load_template(cls):
         return cls.job_template
+
+    @classmethod
+    def energy(cls, *strs, **opts):
+        """
+        Construct a Q-Chem single-point job (`JOBTYPE = SP`).
+
+        :param strs: bare positional options
+        :param opts: the job options
+        :rtype: QChemJob
+        """
+        opts.setdefault('jobtype', 'sp')
+        return cls(*strs, **opts)
+
+    @classmethod
+    def frequencies(cls, *strs, **opts):
+        """
+        Construct a Q-Chem harmonic-frequency job (`JOBTYPE = FREQ`).
+
+        :param strs: bare positional options
+        :param opts: the job options
+        :rtype: QChemJob
+        """
+        opts.setdefault('jobtype', 'freq')
+        return cls(*strs, **opts)
 
     @classmethod
     def optimization(cls, *strs, **opts):

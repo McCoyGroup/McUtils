@@ -1,4 +1,7 @@
 import abc
+import os
+import re
+import tempfile
 from ... import Devutils as dev
 from ... import Coordinerds as coordops
 from ...Formatters import OptionalTemplate
@@ -530,6 +533,12 @@ class ExternalProgramJob(metaclass=abc.ABCMeta):
     # base_template = None
     extension: str
 
+    # how the program is run (used by `submit`)
+    executable = None  # name of the binary on PATH
+    output_extension = '.out'  # appended to the job name for the program's output file (`None` for no output file)
+    stdout_output = False  # whether the program prints its output to stdout, which `submit` then redirects to the output file
+    parallel_model = 'threads'  # 'threads' (shared memory; `--cpus-per-task`) or 'mpi' (`--ntasks`)
+
     registry = {}
     def to_readout(self, **opts):
         """
@@ -659,6 +668,7 @@ class ExternalProgramJob(metaclass=abc.ABCMeta):
 
         :param opts: the job options, distributed across the blocks
         """
+        self.job_opts = dict(opts)  # as supplied, before common-option translation (used by `dependencies` and `submit`)
         opts = self.translate_common_opts(opts)
         self.blocks = self.get_block_types()
         self.base_template = self.load_template()
@@ -776,3 +786,209 @@ class ExternalProgramJob(metaclass=abc.ABCMeta):
             with open(file, mode) as out:
                 out.write(self.format())
         return file
+
+    # ------------------------------------------------------------------
+    # dependencies, running, and submission
+    # ------------------------------------------------------------------
+    @classmethod
+    def get_dependencies(cls, **opts):
+        """
+        Hook for subclasses: the requirements of this program given (some of) the job options.
+        The base implementation only requires `executable` to be on `PATH`. Subclasses should start from
+        `super().get_dependencies(**opts)` and add what their options imply (extra programs, packages, ...).
+        Unknown options must be ignored.
+
+        :param opts: the job options (``method``, ``nproc``, ...), as they would be passed to the constructor
+        :return: the requirements
+        :rtype: JobDependencies
+        """
+        from .Dependencies import JobDependencies
+        deps = JobDependencies()
+        if cls.executable is not None:
+            deps.add('executable', cls.executable)
+        return deps
+
+    @classmethod
+    def discover_dependencies(cls, *, engine=None, **opts):
+        """
+        Work out what an environment needs in order to run this kind of job, without building or running it.
+        Environments can render the result with `to_pixi_toml`, `to_pyproject_toml` or `module_load_commands`,
+        or test it against the current environment with `check`.
+
+        :param engine: the engine the job will be submitted through (a registered name or an engine); a SLURM engine
+            adds ``sbatch``
+        :param opts: the job options; any that influence what is needed (method, nproc, ...) are taken into account
+        :return: the requirements
+        :rtype: JobDependencies
+        """
+        deps = cls.get_dependencies(**opts)
+        eng_name = engine if isinstance(engine, str) else getattr(engine, 'name', None)
+        if eng_name == 'slurm':
+            deps.add('executable', 'sbatch', reason='SLURM engine')
+        return deps
+
+    @property
+    def dependencies(self):
+        """
+        The dependencies of *this* job (`discover_dependencies` with the options it was built from).
+        """
+        return type(self).discover_dependencies(**getattr(self, 'job_opts', {}))
+
+    def get_run_command(self, input_file, output_file=None, *, nproc=None, executable=None, **run_opts):
+        """
+        The argument list that runs the program on `input_file`, from inside the work directory.
+        Subclasses override this when the program needs more than ``<executable> <input>``.
+
+        :param input_file: the input file name (relative to the work directory)
+        :param output_file: the output file name (relative to the work directory), if the job has one
+        :param nproc: the number of processes/threads the job was given
+        :param executable: an explicit binary (path or name) replacing `executable`
+        :param run_opts: program-specific command-line options
+        :rtype: list[str]
+        """
+        exe = executable or self.executable
+        if exe is None:
+            raise ValueError(f"{type(self).__name__} does not know which program to run; pass `executable`")
+        return [exe, input_file]
+
+    @classmethod
+    def parse_output(cls, text):
+        """
+        Pull what is cheaply available out of the program's output text. The base implementation finds nothing.
+
+        :param text: the output file contents
+        :return: parsed values (e.g. ``{'energy': ...}``)
+        :rtype: dict
+        """
+        return {}
+
+    @classmethod
+    def collect_results(cls, submission):
+        """
+        Gather the results of a finished job: by default, `parse_output` of its output file.
+
+        :param submission: the `JobSubmission` that was run
+        :rtype: dict
+        """
+        path = submission.output_path
+        if path is None or not os.path.isfile(path):
+            return {}
+        with open(path, errors='replace') as inp:
+            return cls.parse_output(inp.read())
+
+    def _resolve_nproc(self, nproc):
+        job_nproc = self.job_opts.get('nproc') if hasattr(self, 'job_opts') else None
+        if nproc is None:
+            return job_nproc
+        if job_nproc is not None and job_nproc != nproc:
+            raise ValueError(
+                f"{type(self).__name__} was built with nproc={job_nproc} but submit got nproc={nproc}; "
+                "the input file fixes the core count, so rebuild the job instead"
+            )
+        return nproc
+
+    def prepare_submission(self, work_dir=None, name=None, *,
+                           nproc=None, executable=None, modules=(), setup_commands=(), environment=None,
+                           run_options=None):
+        """
+        Describe how to run this job without writing or running anything.
+
+        :param work_dir: the directory the job runs in (a new temporary directory by default)
+        :param name: the base name of the input/output files (default: the program name)
+        :param nproc: the number of processes/threads (default: the job's own ``nproc``)
+        :param executable: an explicit binary replacing the class default
+        :param modules: environment modules to ``module load`` before running
+        :param setup_commands: extra shell lines to run before the program
+        :param environment: environment variables to export before running
+        :param run_options: program-specific options forwarded to `get_run_command`
+        :return: the submission
+        :rtype: JobSubmission
+        """
+        from .Submission import JobSubmission
+
+        if work_dir is None:
+            work_dir = tempfile.mkdtemp(prefix=type(self).__name__.lower() + "_")
+        if name is None:
+            name = type(self).__name__.replace("Job", "").lower() or "job"
+        name = re.sub(r"[^A-Za-z0-9_.-]", "_", name)
+        ext = getattr(self, 'extension', '.in')
+        input_file = name + (ext if ext.startswith('.') else '.' + ext)
+        output_file = None if self.output_extension is None else name + self.output_extension
+        nproc = self._resolve_nproc(nproc)
+        command = self.get_run_command(
+            input_file, output_file,
+            nproc=nproc, executable=executable, **(run_options or {})
+        )
+        return JobSubmission(
+            self, work_dir, name, command,
+            input_file=input_file,
+            output_file=output_file,
+            stdout_file=output_file if self.stdout_output else None,
+            nproc=nproc,
+            parallel_model=self.parallel_model,
+            modules=modules,
+            setup_commands=setup_commands,
+            environment=environment
+        )
+
+    @staticmethod
+    def _resolve_engine(engine):
+        from ..ExecutionEngine import ExecutionEngine
+        if engine is None:
+            engine = 'subprocess'
+        if isinstance(engine, str):
+            engine = ExecutionEngine.resolve(engine)
+        return engine
+
+    def submit(self, engine=None, *,
+               work_dir=None, name=None, nproc=None, executable=None,
+               modules=(), setup_commands=(), environment=None, run_options=None,
+               stage_only=False, check_dependencies=None,
+               **engine_opts):
+        """
+        Write the job's input into `work_dir` and run it through an `ExecutionEngine`.
+
+        :param engine: ``'subprocess'`` (default; a local child process), ``'slurm'``, any other registered engine
+            name, or an `ExecutionEngine` instance
+        :param work_dir: the directory the job runs in (a new temporary directory by default)
+        :param name: the base name of the input/output files
+        :param nproc: the number of processes/threads (default: the job's own ``nproc``)
+        :param executable: an explicit binary replacing the class default
+        :param modules: environment modules to load before running
+        :param setup_commands: extra shell lines to run before the program
+        :param environment: environment variables to export before running
+        :param run_options: program-specific options forwarded to `get_run_command`
+        :param stage_only: write the input file and run script, but don't run anything; returns the `JobSubmission`
+            (useful for staging a job to another machine)
+        :param check_dependencies: check required executables first and raise if they are missing.
+            The default (`None`) does this for local engines only, since a scheduler's compute nodes
+            may have programs the submitting machine does not.
+        :param engine_opts: engine-specific options (for SLURM: ``partition``, ``account``, ``time``, ``mem``, ...)
+        :return: a future whose `get_result` returns the output text and what was parsed from it
+        :rtype: ExternalProgramFuture | JobSubmission
+        """
+        from .Submission import ExternalProgramFuture
+
+        submission = self.prepare_submission(
+            work_dir, name,
+            nproc=nproc, executable=executable, modules=modules,
+            setup_commands=setup_commands, environment=environment, run_options=run_options
+        )
+        if stage_only:
+            return submission.write()
+
+        engine = self._resolve_engine(engine)
+        if check_dependencies is None:
+            check_dependencies = getattr(engine, 'name', None) == 'subprocess'
+        if check_dependencies:
+            exe = submission.command[0]
+            if exe != 'bash' and not (os.path.isabs(exe) and os.access(exe, os.X_OK)):
+                import shutil
+                if shutil.which(exe) is None and len(submission.modules) == 0 and len(submission.setup_commands) == 0:
+                    raise FileNotFoundError(
+                        f"can't find {exe!r} on PATH; pass `executable=`, load a module, or see "
+                        f"{type(self).__name__}.discover_dependencies()"
+                    )
+        submission.write()
+        future = engine.submit_command(submission, **engine_opts)
+        return ExternalProgramFuture(future, submission)

@@ -36,3 +36,5 @@ from .PermutationOps import *; from .PermutationOps import __all__ as _all
 __all__ += _all
 from .Serialization import *; from .Serialization import __all__ as _all
 __all__ += _all
+from .GeneralizedEigenproblems import *; from .GeneralizedEigenproblems import __all__ as _all
+__all__ += _all

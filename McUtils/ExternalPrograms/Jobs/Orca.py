@@ -1,4 +1,4 @@
-import json, numbers, os
+import json, numbers, os, re
 
 from .Jobs import ExternalProgramJob, OptionsBlock, SystemBlock
 
@@ -310,9 +310,53 @@ class OrcaSystemBlock(SystemBlock):
                 base_opts[self.fmt_key + "bonds"] = self.format_bonds_block()
         return base_opts
 
+def _orca_per_core_memory(memory, opts):
+    """
+    ORCA's `MaxCore` is per process, while the common `memory` option is the job's total (in MB).
+    """
+    nprocs = (opts.get('pal') or {}).get('nprocs') or 1
+    return 'MaxCore', max(1, int(memory) // int(nprocs))
+
 @ExternalProgramJob.register("orca")
 class OrcaJob(ExternalProgramJob):
     extension = ".inp"
+    executable = 'orca'
+    stdout_output = True
+    parallel_model = 'mpi'
+
+    @classmethod
+    def get_dependencies(cls, **opts):
+        """
+        ORCA is licensed software, so it is not installable from a package index: it needs to be on `PATH`
+        (usually through an environment module).
+        """
+        deps = super().get_dependencies(**opts)
+        deps.add('module', 'orca', optional=True, reason='ORCA is normally provided by an environment module')
+        return deps
+
+    def get_run_command(self, input_file, output_file=None, *, nproc=None, executable=None, **run_opts):
+        """
+        ORCA launches its own MPI processes and so must be called by full path.
+        """
+        import shutil
+        exe = executable or shutil.which(self.executable) or self.executable
+        return [exe, input_file]
+
+    @classmethod
+    def parse_output(cls, text):
+        """
+        :return: ``terminated_normally``, ``optimized`` (a geometry optimization converged) and, if present,
+            the final ``energy`` (Hartree) and all ``energies``
+        """
+        energies = [float(e) for e in re.findall(r"FINAL SINGLE POINT ENERGY\s+(-?\d+\.\d+)", text)]
+        res = {
+            'terminated_normally': "ORCA TERMINATED NORMALLY" in text,
+            'optimized': "THE OPTIMIZATION HAS CONVERGED" in text
+        }
+        if len(energies) > 0:
+            res['energy'] = energies[-1]
+            res['energies'] = energies
+        return res
     job_template = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'Templates', 'orca_job.inp')
     blocks = [
         OrcaKeywordsBlock,
@@ -323,10 +367,10 @@ class OrcaJob(ExternalProgramJob):
 
     __common_aliases__ = {
         'nproc': 'pal.nprocs',  # processed first (see _common_alias_priority)
-        'memory': 'MaxCore' # this is a bit risky, not total memory, but I'm not gonna worry too much right now...
+        'memory': _orca_per_core_memory
     }
 
-    def __init__(self, *strs, basis_set=None, level_of_theory=None, **opts):
+    def __init__(self, *strs, basis_set=None, level_of_theory=None, method=None, basis=None, **opts):
         """
         **LLM Docstring**
 
@@ -340,6 +384,8 @@ class OrcaJob(ExternalProgramJob):
         :type level_of_theory: str | None
         :param opts: the job options
         """
+        basis_set = basis_set if basis_set is not None else basis  # the names the other programs use
+        level_of_theory = level_of_theory if level_of_theory is not None else method
         if basis_set is not None:
             strs = (basis_set,) + strs
         if level_of_theory is not None:
@@ -355,6 +401,30 @@ class OrcaJob(ExternalProgramJob):
             opts[o.lower()] = True
         super().__init__(**opts)
 
+
+    @classmethod
+    def energy(cls, *strs, **opts):
+        """
+        Construct an ORCA single-point job (no extra simple keyword).
+
+        :param strs: bare simple keywords
+        :param opts: the job options
+        :rtype: OrcaJob
+        """
+        return cls(*strs, **opts)
+
+    @classmethod
+    def frequencies(cls, *strs, **opts):
+        """
+        Construct an ORCA harmonic-frequency job (adds the `Freq` simple keyword).
+
+        :param strs: bare simple keywords
+        :param opts: the job options
+        :rtype: OrcaJob
+        """
+        if not any(s.lower() == 'freq' for s in strs) and 'freq' not in opts:
+            strs = ('Freq',) + strs
+        return cls(*strs, **opts)
 
     @classmethod
     def optimization(cls, *strs, **opts):
