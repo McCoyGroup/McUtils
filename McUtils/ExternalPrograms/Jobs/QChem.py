@@ -142,11 +142,17 @@ class QChemJob(ExternalProgramJob):
     @classmethod
     def parse_output(cls, text):
         """
-        :return: ``terminated_normally`` and, if present, the final ``energy`` (Hartree)
+        :return: ``terminated_normally``, ``optimized`` (a geometry optimization converged) and, if present,
+            the final ``energy`` (Hartree)
         """
         import re
         energies = [float(e) for e in re.findall(r"Total energy in the final basis set =\s+(-?\d+\.\d+)", text)]
-        res = {'terminated_normally': "Thank you very much for using Q-Chem" in text}
+        if len(energies) == 0:  # newer versions label the SCF summary line `Total energy =`
+            energies = [float(e) for e in re.findall(r"^\s*Total energy\s+=\s+(-?\d+\.\d+)", text, re.M)]
+        res = {
+            'terminated_normally': "Thank you very much for using Q-Chem" in text,
+            'optimized': "OPTIMIZATION CONVERGED" in text
+        }
         if len(energies) > 0:
             res['energy'] = energies[-1]
             res['energies'] = energies
@@ -175,6 +181,30 @@ class QChemJob(ExternalProgramJob):
     @classmethod
     def load_template(cls):
         return cls.job_template
+
+    @classmethod
+    def energy(cls, *strs, **opts):
+        """
+        Construct a Q-Chem single-point job (`JOBTYPE = SP`).
+
+        :param strs: bare positional options
+        :param opts: the job options
+        :rtype: QChemJob
+        """
+        opts.setdefault('jobtype', 'sp')
+        return cls(*strs, **opts)
+
+    @classmethod
+    def frequencies(cls, *strs, **opts):
+        """
+        Construct a Q-Chem harmonic-frequency job (`JOBTYPE = FREQ`).
+
+        :param strs: bare positional options
+        :param opts: the job options
+        :rtype: QChemJob
+        """
+        opts.setdefault('jobtype', 'freq')
+        return cls(*strs, **opts)
 
     @classmethod
     def optimization(cls, *strs, **opts):

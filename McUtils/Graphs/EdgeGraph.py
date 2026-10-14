@@ -1678,7 +1678,8 @@ class EdgeGraph:
                 backbone=backbone
             )
 
-    def get_canonical_fragments(self, ordering=None, validate=False):
+    def get_canonical_fragments(self, ordering=None, validate=False,
+                                local_attachment_references=False):
         """
         **LLM Docstring**
 
@@ -1689,6 +1690,12 @@ class EdgeGraph:
 
         :param validate: Whether to run duplicate and attachment consistency checks.
         :type validate: object
+
+        :param local_attachment_references: Use a placed bonded predecessor for
+            nested branch planes when available. Defaults to False to preserve
+            the reference convention of previously encoded conformer tags.
+            Encoding and decoding must use the same reference policy.
+        :type local_attachment_references: bool
 
         :return: Nested node-index groups describing the resulting graph decomposition.
         :rtype: object
@@ -1755,7 +1762,13 @@ class EdgeGraph:
                                     else:
                                         branch_point = (i, j, -1)
                                 else:
-                                    branch_point = (i, j, branch_j[0])
+                                    pos_j = fragment_j.index(j)
+                                    if local_attachment_references and pos_j > 0:
+                                        # The remote fragment root can be nearly collinear
+                                        # with (i, j), making its plane unstable on packing.
+                                        branch_point = (i, j, fragment_j[pos_j - 1])
+                                    else:
+                                        branch_point = (i, j, branch_j[0])
                         break
                 else:
                     branch_point = None

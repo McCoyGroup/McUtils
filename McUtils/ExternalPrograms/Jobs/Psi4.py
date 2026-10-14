@@ -208,6 +208,7 @@ class Psi4Job(ExternalProgramJob):
 
     __common_aliases__ = {
         'nproc': 'threads',
+        'memory': 'memory',
     }
 
     def __init__(self, *strs, method=None, task=None, **opts):

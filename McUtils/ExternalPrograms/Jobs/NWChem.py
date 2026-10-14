@@ -267,6 +267,7 @@ class NWChemJob(ExternalProgramJob):
         NWChemTaskBlock
     ]
     executable = 'nwchem'
+    __common_aliases__ = {'memory': 'memory'}  # `nproc` is the `mpirun -np` count that `submit` takes
     stdout_output = True
     parallel_model = 'mpi'
     distance_units = 'Angstroms'

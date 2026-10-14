@@ -310,6 +310,13 @@ class OrcaSystemBlock(SystemBlock):
                 base_opts[self.fmt_key + "bonds"] = self.format_bonds_block()
         return base_opts
 
+def _orca_per_core_memory(memory, opts):
+    """
+    ORCA's `MaxCore` is per process, while the common `memory` option is the job's total (in MB).
+    """
+    nprocs = (opts.get('pal') or {}).get('nprocs') or 1
+    return 'MaxCore', max(1, int(memory) // int(nprocs))
+
 @ExternalProgramJob.register("orca")
 class OrcaJob(ExternalProgramJob):
     extension = ".inp"
@@ -338,10 +345,14 @@ class OrcaJob(ExternalProgramJob):
     @classmethod
     def parse_output(cls, text):
         """
-        :return: ``terminated_normally`` and, if present, the final ``energy`` (Hartree) and all ``energies``
+        :return: ``terminated_normally``, ``optimized`` (a geometry optimization converged) and, if present,
+            the final ``energy`` (Hartree) and all ``energies``
         """
         energies = [float(e) for e in re.findall(r"FINAL SINGLE POINT ENERGY\s+(-?\d+\.\d+)", text)]
-        res = {'terminated_normally': "ORCA TERMINATED NORMALLY" in text}
+        res = {
+            'terminated_normally': "ORCA TERMINATED NORMALLY" in text,
+            'optimized': "THE OPTIMIZATION HAS CONVERGED" in text
+        }
         if len(energies) > 0:
             res['energy'] = energies[-1]
             res['energies'] = energies
@@ -356,10 +367,10 @@ class OrcaJob(ExternalProgramJob):
 
     __common_aliases__ = {
         'nproc': 'pal.nprocs',  # processed first (see _common_alias_priority)
-        'memory': 'MaxCore' # this is a bit risky, not total memory, but I'm not gonna worry too much right now...
+        'memory': _orca_per_core_memory
     }
 
-    def __init__(self, *strs, basis_set=None, level_of_theory=None, **opts):
+    def __init__(self, *strs, basis_set=None, level_of_theory=None, method=None, basis=None, **opts):
         """
         **LLM Docstring**
 
@@ -373,6 +384,8 @@ class OrcaJob(ExternalProgramJob):
         :type level_of_theory: str | None
         :param opts: the job options
         """
+        basis_set = basis_set if basis_set is not None else basis  # the names the other programs use
+        level_of_theory = level_of_theory if level_of_theory is not None else method
         if basis_set is not None:
             strs = (basis_set,) + strs
         if level_of_theory is not None:
@@ -388,6 +401,30 @@ class OrcaJob(ExternalProgramJob):
             opts[o.lower()] = True
         super().__init__(**opts)
 
+
+    @classmethod
+    def energy(cls, *strs, **opts):
+        """
+        Construct an ORCA single-point job (no extra simple keyword).
+
+        :param strs: bare simple keywords
+        :param opts: the job options
+        :rtype: OrcaJob
+        """
+        return cls(*strs, **opts)
+
+    @classmethod
+    def frequencies(cls, *strs, **opts):
+        """
+        Construct an ORCA harmonic-frequency job (adds the `Freq` simple keyword).
+
+        :param strs: bare simple keywords
+        :param opts: the job options
+        :rtype: OrcaJob
+        """
+        if not any(s.lower() == 'freq' for s in strs) and 'freq' not in opts:
+            strs = ('Freq',) + strs
+        return cls(*strs, **opts)
 
     @classmethod
     def optimization(cls, *strs, **opts):
