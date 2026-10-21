@@ -29,6 +29,9 @@ def resolve_scene_view(scene, aspect, theme, cache=None):
     if cache is not None and key in cache:
         return cache[key]
     src = scene.get_source()
+    if src is None:
+        # HTML-only X3D scenes retain their authored camera; there is no mesh to fit.
+        return None
     view = SceneView.fit(src.vertices(), aspect=aspect, fov=theme.get("scene.fov"),
                          padding=theme.get("scene.padding"))
     if cache is not None:
@@ -342,4 +345,11 @@ class HTMLReadoutRenderer(ReadoutRenderer):
                 if res is not None:
                     res = res if isinstance(res, list) else [res]
                     items.append(H.Div(*res, cls="mcr-cell", style=f"width:{w + 2}px"))
-        return self._block_title(node) + [H.Div(*items, cls="mcr-gallery")]
+        style = None
+        if node.columns is not None:
+            import operator
+            columns = operator.index(node.columns)
+            if columns < 1:
+                raise ValueError("ReadoutGallery.columns must be a positive integer")
+            style = {"display": "grid", "grid-template-columns": f"repeat({columns}, max-content)"}
+        return self._block_title(node) + [H.Div(*items, cls="mcr-gallery", style=style)]

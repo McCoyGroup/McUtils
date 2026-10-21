@@ -16379,7 +16379,7 @@ class Mesh3DAxes(GraphicsAxes3D):
         if indices is None:
             indices = np.arange(len(points)).reshape(-1, 3)
         bits = [
-            MeshInformation(points, indices, material=mat, name='mesh')
+            MeshInformation(points, indices, vertex_colors=styles.get('vertex_colors'), material=mat, name='mesh')
         ]
         if emit:
             for b in bits: self._emit(b)

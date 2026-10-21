@@ -2082,7 +2082,7 @@ class X3DGeometryObject(X3DPrimitive):
         if prop_name in self.transform_props:
             return self.id + "-transform"
         else:
-            return self.id
+            return super().get_prop_node_id(prop_name)
     def to_x3d(self):
         """
         **LLM Docstring**

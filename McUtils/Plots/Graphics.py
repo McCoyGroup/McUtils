@@ -1304,18 +1304,15 @@ class GraphicsBase(metaclass=ABCMeta):
         if coordinates == 'absolute':
             raise NotImplementedError("can't construct inset axes with absolute coordinates")
         elif coordinates == 'scaled': # scaled to live within the frame
-            ((alx, aby), (arx, aty)) = self.axes.bbox.get_points()
-            alx = alx + self._axes_padding_offset[0]
-            arx = arx + self._axes_padding_offset[0]
-            aby = aby + self._axes_padding_offset[1]
-            aty = aty + self._axes_padding_offset[1]
+            # Axes wrappers expose their figure-relative bounding box in
+            # DPI_SCALING units; raw matplotlib display pixels vary with DPI.
+            ((sl, sb), (sr, st)) = np.asanyarray(self.axes.get_bbox()) / DPI_SCALING
             w, h = self.figure_parent.image_size
-            # we scale the coordinates to live within the axes screenbox
-            sl = alx / w
-            sr = arx / w
+            dx = self._axes_padding_offset[0] / w
+            dy = self._axes_padding_offset[1] / h
+            sl, sr = sl + dx, sr + dx
+            sb, st = sb + dy, st + dy
             sw = (sr - sl)
-            sb = aby / h
-            st = aty / h
             sh = (st - sb)
             lx = lx * sw + sl
             rx = rx * sw + sl
@@ -1329,7 +1326,7 @@ class GraphicsBase(metaclass=ABCMeta):
         # ax_par, fig_par = self._split_props_list(opts, self.axes_keys)
 
         with self.theme_manager.from_spec(self.theme, backend=self.backend):
-            ax = self.figure.add_axes([lx, by, rx-lx, ty-by])
+            ax = self.figure.create_inset([[lx, by], [rx, ty]])
         return graphics_class(figure=self, axes=ax, **opts)
 
 ########################################################################################################################
