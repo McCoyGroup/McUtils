@@ -2,7 +2,8 @@ from .JHTML import HTML
 from .. import Devutils as dev
 
 __all__ = [
-    "X3DHTML"
+    "X3DHTML",
+    "X3DControls"
 ]
 
 __reload_hooks__ = [".JHTML"]
@@ -340,3 +341,199 @@ class X3DHTML:
     class X3DVolumeDataNode(X3DElement): tag = "X3DVolumeDataNode"
     class X3DVolumeRenderStyleNode(X3DElement): tag = "X3DVolumeRenderStyleNode"
 
+
+class X3DControls:
+    """Reusable browser controls for native X3DOM scenes and primitives.
+
+    Build scenes and geometry with McUtils.Plots.X3DInterface, then place this
+    toolbar in a ReadoutHTML. Applications need no DOM scripting or HTML authoring.
+    Targets may be native objects or explicit DOM ids. Native primitive targets
+    resolve property aliases and their actual nodes through the native API.
+
+    The initial control values must match the initial scene attributes. For a
+    bare X3D object in a static ReadoutScene, set scene.opts['id'] = scene.id;
+    X3D.id otherwise identifies the outer wrapper created by to_widget(). Both
+    direct X3D nodes and to_widget() wrappers are supported by reset_view().
+    """
+
+    def __init__(self, *controls, id=None):
+        if len(controls) == 1 and isinstance(controls[0], (list, tuple)):
+            controls = tuple(controls[0])
+        self.controls = tuple(controls)
+        self.id = self._new_id() if id is None else self._check_id(id)
+
+    @staticmethod
+    def _new_id():
+        import uuid
+        return "x3d-controls-" + uuid.uuid4().hex
+
+    @staticmethod
+    def _check_id(value):
+        if not isinstance(value, str) or not value or any(c.isspace() for c in value):
+            raise ValueError("X3D target ids must be nonempty strings without whitespace")
+        return value
+
+    @classmethod
+    def _target_ids(cls, targets, property=None):
+        if isinstance(targets, str) or hasattr(targets, "id") or hasattr(targets, "figure") or hasattr(targets, "attrs"):
+            targets = [targets]
+        try:
+            targets = list(targets)
+        except TypeError:
+            raise TypeError("X3D controls need a target object/id or an iterable of targets") from None
+        result = []
+        for target in targets:
+            if isinstance(target, str):
+                target_id = target
+            elif property is not None and hasattr(target, "get_prop_node_id"):
+                target_id = target.get_prop_node_id(property)
+            elif hasattr(target, "id"):
+                target_id = target.id
+            elif hasattr(target, "figure") and hasattr(target.figure, "id"):
+                target_id = target.figure.id
+            elif hasattr(target, "attrs"):
+                target_id = target.attrs.get("id")
+            else:
+                raise TypeError("X3D target has no native id or property-node resolver")
+            target_id = cls._check_id(target_id)
+            if target_id not in result:
+                result.append(target_id)
+        if not result:
+            raise ValueError("X3D controls need at least one target")
+        return result
+
+    @staticmethod
+    def _json(value):
+        import json
+        return json.dumps(value, ensure_ascii=True)
+
+    @staticmethod
+    def _number(value, name):
+        import math
+        import numbers
+        if isinstance(value, bool) or not isinstance(value, numbers.Real) or not math.isfinite(value):
+            raise ValueError(name + " must be a finite real number")
+        return float(value)
+
+    @classmethod
+    def _property_targets(cls, targets, property):
+        if not isinstance(property, str) or not property or any(c.isspace() for c in property):
+            raise ValueError("An X3D property name is required")
+        if isinstance(targets, str) or hasattr(targets, "id") or hasattr(targets, "figure") or hasattr(targets, "attrs"):
+            targets = [targets]
+        bindings = []
+        for target in targets:
+            target_id = cls._target_ids(target, property=property)[0]
+            attribute = target.resolve_prop_attr(property) if hasattr(target, "resolve_prop_attr") else property
+            if not isinstance(attribute, str) or not attribute or any(c.isspace() for c in attribute):
+                raise ValueError("An X3D attribute name is required")
+            binding = {"id": target_id, "attribute": attribute}
+            if binding not in bindings:
+                bindings.append(binding)
+        if not bindings:
+            raise ValueError("X3D controls need at least one target")
+        return bindings
+
+    @classmethod
+    def switch(cls, targets, labels, *, value=0, label="Conformer", id=None):
+        """A select box that updates only the supplied Switch.whichChoice nodes."""
+        targets = cls._target_ids(targets)
+        if isinstance(labels, str):
+            raise TypeError("labels must be an iterable of choice labels")
+        labels = tuple(str(s) for s in labels)
+        if not labels:
+            raise ValueError("a Switch control needs at least one choice")
+        if isinstance(value, bool) or not isinstance(value, int) or not 0 <= value < len(labels):
+            raise ValueError("initial Switch choice must be a valid integer index")
+        control_id = cls._new_id() if id is None else cls._check_id(id)
+        handler = """
+const value = Number(this.value);
+if (!Number.isInteger(value) || value < 0 || value >= %d) return;
+for (const id of %s) {
+  const node = document.getElementById(id);
+  if (node) node.setAttribute('whichChoice', String(value));
+}
+""" % (len(labels), cls._json(targets))
+        options = [HTML.Option(text, value=str(i), **({"selected": True} if i == value else {}))
+                   for i, text in enumerate(labels)]
+        return HTML.Label(
+            str(label),
+            HTML.Select(*options, id=control_id, onchange=handler, **{"aria-label": str(label)}),
+            cls="mcutils-x3d-control",
+            style="display:inline-flex;align-items:center;gap:.45em;"
+        )
+
+    @classmethod
+    def slider(cls, targets, property, *, value=0, min=0, max=1, step=.01, label=None, id=None):
+        """Control a scalar numeric X3D property over a configurable range.
+
+        Native objects resolve both the property alias and its owning node.
+        Explicit DOM ids use property as the attribute name. Values are assigned
+        directly, without property-specific transformations or formatting.
+        """
+        targets = cls._property_targets(targets, property)
+        value, minimum, maximum, step = (cls._number(v, name) for v, name in
+                                         ((value, "value"), (min, "min"), (max, "max"), (step, "step")))
+        if minimum >= maximum:
+            raise ValueError("slider min must be less than max")
+        if step <= 0:
+            raise ValueError("slider step must be positive")
+        if not minimum <= value <= maximum:
+            raise ValueError("slider value must be within min and max")
+        if label is None:
+            label = property
+        control_id = cls._new_id() if id is None else cls._check_id(id)
+        output_id = control_id + "-value"
+        handler = """
+const raw = Number(this.value);
+if (!Number.isFinite(raw)) return;
+const value = Math.min(%s, Math.max(%s, raw));
+for (const target of %s) {
+  const node = document.getElementById(target.id);
+  if (node) node.setAttribute(target.attribute, String(value));
+}
+const output = document.getElementById(%s);
+if (output) output.textContent = String(value);
+""" % (cls._json(maximum), cls._json(minimum), cls._json(targets), cls._json(output_id))
+        return HTML.Label(
+            str(label),
+            HTML.Input(type="range", min=str(minimum), max=str(maximum), step=str(step), value=str(value),
+                       id=control_id, oninput=handler, **{"aria-label": str(label)}),
+            HTML.Output(str(value), id=output_id),
+            cls="mcutils-x3d-control",
+            style="display:inline-flex;align-items:center;gap:.45em;"
+        )
+
+    @classmethod
+    def reset_view(cls, targets, *, label="Reset views", id=None):
+        """Reset each target X3DOM runtime once, for direct nodes or wrappers."""
+        targets = cls._target_ids(targets)
+        control_id = cls._new_id() if id is None else cls._check_id(id)
+        handler = """
+const seen = new Set();
+for (const id of %s) {
+  const target = document.getElementById(id);
+  if (!target) continue;
+  const node = target.runtime ? target :
+    (target.querySelector('x3d, x3d-canvas') || target.closest('x3d, x3d-canvas'));
+  if (!node || seen.has(node)) continue;
+  seen.add(node);
+  if (node.runtime && typeof node.runtime.resetView === 'function') node.runtime.resetView();
+}
+""" % cls._json(targets)
+        return HTML.Button(str(label), type="button", id=control_id, onclick=handler,
+                           cls="mcutils-x3d-control")
+
+    def to_widget(self):
+        """The existing McUtils HTML element consumed by ReadoutHTML."""
+        return HTML.Div(*self.controls, id=self.id, cls="mcutils-x3d-controls",
+                        style="display:flex;flex-wrap:wrap;align-items:center;gap:1em;padding:.45em 0;")
+
+    def to_jhtml(self):
+        return self.to_widget()
+
+    def tostring(self, **opts):
+        return self.to_widget().tostring(**opts)
+
+    def _repr_html_(self):
+        return self.tostring()
