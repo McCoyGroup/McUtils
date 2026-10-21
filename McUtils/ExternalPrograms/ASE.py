@@ -446,8 +446,11 @@ class ASEMolecule(ExternalMolecule):
         :rtype: ASEMolecule
         """
 
-        if info is None and charge is not None or spin is not None:
-            info = {}
+        if info is None:
+            if charge is not None or spin is not None:
+                info = {}
+        else:
+            info = dict(info) # don't mutate (or drop) the caller's dict
         if charge is not None:
             info['charge'] = charge
         if spin is not None:

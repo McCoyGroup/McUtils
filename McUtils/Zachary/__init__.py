@@ -22,3 +22,5 @@ from .Polynomials import *; from .Polynomials import __all__ as exposed
 __all__ += exposed
 from .DifferentiableFunctions import *; from .DifferentiableFunctions import __all__ as exposed
 __all__ += exposed
+from .MultipoleExpansions import *; from .MultipoleExpansions import __all__ as exposed
+__all__ += exposed
