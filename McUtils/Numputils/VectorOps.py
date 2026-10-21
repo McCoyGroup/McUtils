@@ -3,6 +3,7 @@ A module of useful math for handling coordinate transformations and things
 """
 from __future__ import annotations
 import enum
+import functools
 import itertools
 import math
 
@@ -2357,130 +2358,214 @@ def symmetrize_array(a,
     if misc.is_numeric(axes[0]):
         axes = [axes]
 
-    axes_groups = axes
+    axes_groups = [[int(ax) for ax in np.atleast_1d(g)] for g in axes]
     del axes # easier debugging
 
     symmetrization_mode = symmetrization_mode.lower()
 
-    if (
-            not restricted_diagonal
-            and axes_block_ordering is None
-            and symmetrization_mode == 'total'
-    ):
-        if mixed_block_symmetrize:
-            axes_groups = np.concatenate(axes_groups)
-        b = a
-        for i,axes in enumerate(axes_groups):
-            a = b / math.factorial(len(axes))
-            missing = np.setdiff1d(np.arange(a.ndim), axes)
-            inv = np.argsort(np.concatenate([axes, missing]), axis=0)
-            perm_iter = itertools.permutations(axes)
-            b = a
-            next(perm_iter) # first step
-            if len(missing) == 0:
-                for p in itertools.permutations(axes):
-                    b += a.transpose(p)
-            else:
-                for p in itertools.permutations(axes):
-                    p = np.concatenate([p, missing])[inv]
-                    b += a.transpose(p)
-        if out is not None:
-            out[:] = b
-            b = out
+    if restricted_diagonal:
+        return _symmetrize_array_restricted_diagonal(
+            a, axes_groups, symmetrization_mode,
+            axes_block_ordering, mixed_block_symmetrize, out
+        )
+
+    # every mode reduces to "out[idx] = f(a at the canonical representative(s) of idx)",
+    # so we move the symmetrized axes to the front, flatten them, and apply one cached gather
+    # (or, for 'total', one segmented sum over each permutation orbit followed by a gather)
+    a = np.asanyarray(a)
+    flat_axes = [ax % a.ndim for g in axes_groups for ax in g]
+    group_sizes = tuple(len(g) for g in axes_groups)
+    k = len(flat_axes)
+    b = np.moveaxis(a, flat_axes, list(range(k)))
+    sym_shape = b.shape[:k]
+    rest_shape = b.shape[k:]
+    b = b.reshape((-1,) + rest_shape)
+
+    if symmetrization_mode == 'unhandled':
+        res = b.copy()
+    elif axes_block_ordering is not None:
+        starts = np.cumsum((0,) + group_sizes[:-1])
+        block_perm = tuple(
+            int(starts[f]) + i
+            for f in axes_block_ordering
+            for i in range(group_sizes[f])
+        )
+        res = b[_symmetrization_index_map(sym_shape, group_sizes, 'high', mixed_block_symmetrize, block_perm)]
+    elif symmetrization_mode in ('low', 'high'):
+        res = b[_symmetrization_index_map(sym_shape, group_sizes, symmetrization_mode, mixed_block_symmetrize)]
+    elif symmetrization_mode == 'average':
+        res = (
+                b[_symmetrization_index_map(sym_shape, group_sizes, 'low', mixed_block_symmetrize)]
+                + b[_symmetrization_index_map(sym_shape, group_sizes, 'high', mixed_block_symmetrize)]
+        ) / 2
+    elif symmetrization_mode == 'total':
+        # averaging over all permutations == averaging over each orbit of index tuples,
+        # since every orbit element appears equally often among the permuted copies
+        order, seg_starts, counts, inverse = _symmetrization_orbits(sym_shape, group_sizes, mixed_block_symmetrize)
+        sums = np.add.reduceat(b[order], seg_starts, axis=0)
+        res = (sums / counts.reshape((-1,) + (1,) * len(rest_shape)))[inverse]
     else:
-        flat_axes = np.concatenate(axes_groups)
-        rem_axes = np.setdiff1d(np.arange(a.ndim), flat_axes)
-        ordering = np.argsort(np.concatenate([flat_axes, rem_axes]))
-        nmodes = a.shape[0]
+        raise ValueError(
+            f"don't know what to do with `symmetrization_mode` '{symmetrization_mode}' "
+        )
 
-        if restricted_diagonal:
-            if mixed_block_symmetrize:
-                pos_spec = [
-                    sum(
-                        [(i,)*len(axes) for i,axes in zip(term, axes_groups)],
-                        ()
-                    )
-                    for term in itertools.combinations_with_replacement(
-                        range(nmodes),
-                        len(axes_groups)
-                    )
-                ]
-            else:
-                pos_spec = [
-                    sum(
-                        [(i,) * len(axes) for i, axes in zip(p, axes_groups)],
-                        ()
-                    )
-                    for term in itertools.combinations_with_replacement(
-                        range(nmodes),
-                        len(axes_groups)
-                    )
-                    for p in np.unique(list(itertools.permutations(term)), axis=0)
-                ]
-        else:
-            pos_spec = list(
-                itertools.combinations_with_replacement(
-                    range(nmodes),
-                    len(flat_axes)
-                )
-            )
+    res = np.moveaxis(res.reshape(sym_shape + rest_shape), list(range(k)), flat_axes)
+    if out is not None:
+        out[...] = res
+        res = out
+    return res
 
+def _symmetrization_groups(sym_shape, group_sizes, mixed):
+    if mixed:
+        bounds = [(0, len(sym_shape))]
+    else:
+        starts = np.cumsum((0,) + tuple(group_sizes[:-1]))
+        bounds = [(int(s), int(s) + g) for s, g in zip(starts, group_sizes)]
+    for s, e in bounds:
+        if len(set(sym_shape[s:e])) > 1:
+            raise ValueError(f"can't symmetrize axes of differing dimensions {sym_shape[s:e]}")
+    return bounds
+
+@functools.lru_cache(maxsize=None)
+def _symmetrization_index_map(sym_shape, group_sizes, mode, mixed, block_perm=None):
+    """
+    Flat index -> flat index of its canonical representative: indices sorted within each
+    symmetrized group (ascending for `'high'`, descending for `'low'`), optionally with the
+    groups then reordered by `block_perm`
+    """
+    k = len(sym_shape)
+    idx = np.indices(sym_shape).reshape(k, -1)
+    canon = idx.copy()
+    for s, e in _symmetrization_groups(sym_shape, group_sizes, mixed):
+        srt = np.sort(idx[s:e], axis=0)
+        canon[s:e] = srt[::-1] if mode == 'low' else srt
+    if block_perm is not None:
+        canon = canon[list(block_perm)]
+    flat = np.ravel_multi_index(tuple(canon), sym_shape)
+    flat.setflags(write=False)
+    return flat
+
+@functools.lru_cache(maxsize=None)
+def _symmetrization_orbits(sym_shape, group_sizes, mixed):
+    """
+    Sorting/segment data for summing over the orbits of the index-permutation group
+    """
+    canon = _symmetrization_index_map(sym_shape, group_sizes, 'high', mixed)
+    _, inverse, counts = np.unique(canon, return_inverse=True, return_counts=True)
+    inverse = inverse.reshape(-1)
+    order = np.argsort(inverse, kind='stable')
+    seg_starts = np.concatenate([[0], np.cumsum(counts)[:-1]])
+    for x in (order, seg_starts, counts, inverse):
+        x.setflags(write=False)
+    return order, seg_starts, counts, inverse
+
+def _symmetrize_array_restricted_diagonal(a, axes_groups,
+                                          symmetrization_mode,
+                                          axes_block_ordering,
+                                          mixed_block_symmetrize,
+                                          out
+                                          ):
+    """
+    Legacy permutation-loop implementation, retained (unchanged) only for
+    `restricted_diagonal=True`, which has no tests yet
+    """
+    restricted_diagonal = True
+    flat_axes = np.concatenate(axes_groups)
+    rem_axes = np.setdiff1d(np.arange(a.ndim), flat_axes)
+    ordering = np.argsort(np.concatenate([flat_axes, rem_axes]))
+    # `pos_arr` below is indexed by *position* within `flat_axes`, not by axis number,
+    # so that symmetrized axes need not be the leading ones
+    axis_pos = {int(ax): i for i, ax in enumerate(flat_axes)}
+    nmodes = a.shape[flat_axes[0]]
+
+    if restricted_diagonal:
         if mixed_block_symmetrize:
-            perms = itertools.permutations(np.arange(len(flat_axes)), len(flat_axes))
+            pos_spec = [
+                sum(
+                    [(i,)*len(axes) for i,axes in zip(term, axes_groups)],
+                    ()
+                )
+                for term in itertools.combinations_with_replacement(
+                    range(nmodes),
+                    len(axes_groups)
+                )
+            ]
         else:
-            cumlens = np.cumsum([0] + [len(a) for a in axes_groups])
-            perms = (
-                sum(t, ())
-                for t in itertools.product(*[
-                    itertools.permutations(range(l, l + len(x)), len(x))
-                    for x, l in zip(axes_groups, cumlens)
-                ])
+            pos_spec = [
+                sum(
+                    [(i,) * len(axes) for i, axes in zip(p, axes_groups)],
+                    ()
+                )
+                for term in itertools.combinations_with_replacement(
+                    range(nmodes),
+                    len(axes_groups)
+                )
+                for p in np.unique(list(itertools.permutations(term)), axis=0)
+            ]
+    else:
+        pos_spec = list(
+            itertools.combinations_with_replacement(
+                range(nmodes),
+                len(flat_axes)
             )
+        )
 
-        if out is None:
-            b = a.copy()
-        else:
-            b = out
+    if mixed_block_symmetrize:
+        perms = itertools.permutations(np.arange(len(flat_axes)), len(flat_axes))
+    else:
+        cumlens = np.cumsum([0] + [len(a) for a in axes_groups])
+        perms = (
+            sum(t, ())
+            for t in itertools.product(*[
+                itertools.permutations(range(l, l + len(x)), len(x))
+                for x, l in zip(axes_groups, cumlens)
+            ])
+        )
 
-        pos_arr = tuple(np.array(list(pos_spec)).T)
-        padding = (slice(None),) * len(rem_axes)
-        if symmetrization_mode == 'unhandled':
-            for perm in perms:
-                new_pos = tuple(pos_arr[flat_axes[p]] for p in perm) + padding
-                new_pos = tuple(new_pos[i] for i in ordering)
-                b[new_pos] = a[new_pos]
+    if out is None:
+        b = a.copy()
+    else:
+        b = out
+
+    pos_arr = tuple(np.array(list(pos_spec)).T)
+    padding = (slice(None),) * len(rem_axes)
+    if symmetrization_mode == 'unhandled':
+        for perm in perms:
+            new_pos = tuple(pos_arr[p] for p in perm) + padding
+            new_pos = tuple(new_pos[i] for i in ordering)
+            b[new_pos] = a[new_pos]
+    else:
+        if axes_block_ordering is not None:
+            new_pos = tuple(
+                pos_arr[axis_pos[int(p)]] for p in
+                np.concatenate([axes_groups[f] for f in axes_block_ordering])
+            ) + padding
+            new_pos = tuple(new_pos[i] for i in ordering)
+            val = a[new_pos]
         else:
-            if axes_block_ordering is not None:
-                new_pos = tuple(
-                    pos_arr[p] for p in
-                    np.concatenate([axes_groups[f] for f in axes_block_ordering])
-                ) + padding
+            if symmetrization_mode == 'low':
+                new_pos = tuple(pos_arr[f] for f in reversed(range(len(flat_axes)))) + padding
                 new_pos = tuple(new_pos[i] for i in ordering)
                 val = a[new_pos]
-            else:
-                if symmetrization_mode == 'low':
-                    new_pos = tuple(pos_arr[f] for f in reversed(flat_axes)) + padding
-                    new_pos = tuple(new_pos[i] for i in ordering)
-                    val = a[new_pos]
-                elif symmetrization_mode == 'high':
-                    new_pos = tuple(pos_arr[f] for f in flat_axes) + padding
-                    new_pos = tuple(new_pos[i] for i in ordering)
-                    val = a[new_pos]
-                elif symmetrization_mode == 'average':
-                    new_pos_1 = tuple(pos_arr[f] for f in reversed(flat_axes)) + padding
-                    new_pos_1 = tuple(new_pos_1[i] for i in ordering)
-                    new_pos_2 = tuple(pos_arr[f] for f in flat_axes) + padding
-                    new_pos_2 = tuple(new_pos_2[i] for i in ordering)
-                    val = (a[new_pos_1] + a[new_pos_2]) / 2
-                else:
-                    raise ValueError(
-                        f"don't know what to do with `symmetrization_mode` '{symmetrization_mode}' "
-                    )
-
-            for perm in perms:
-                new_pos = tuple(pos_arr[flat_axes[p]] for p in perm) + padding
+            elif symmetrization_mode == 'high':
+                new_pos = tuple(pos_arr[f] for f in range(len(flat_axes))) + padding
                 new_pos = tuple(new_pos[i] for i in ordering)
-                b[new_pos] = val
+                val = a[new_pos]
+            elif symmetrization_mode == 'average':
+                new_pos_1 = tuple(pos_arr[f] for f in reversed(range(len(flat_axes)))) + padding
+                new_pos_1 = tuple(new_pos_1[i] for i in ordering)
+                new_pos_2 = tuple(pos_arr[f] for f in range(len(flat_axes))) + padding
+                new_pos_2 = tuple(new_pos_2[i] for i in ordering)
+                val = (a[new_pos_1] + a[new_pos_2]) / 2
+            else:
+                raise ValueError(
+                    f"don't know what to do with `symmetrization_mode` '{symmetrization_mode}' "
+                )
+
+        for perm in perms:
+            new_pos = tuple(pos_arr[p] for p in perm) + padding
+            new_pos = tuple(new_pos[i] for i in ordering)
+            b[new_pos] = val
 
     return b
 
