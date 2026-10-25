@@ -129,7 +129,7 @@ class TestExamplesFormatter:
             [
                 "class {}({}):".format(
                     cls[0].name,
-                    ",".join(x.id for x in cls[0].bases)
+                    ",".join(self.parser.format_node(base).strip() for base in cls[0].bases)
                 ),
                 *(self.parser.format_node(node) for node in cls[1])
             ]
