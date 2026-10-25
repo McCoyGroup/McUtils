@@ -2073,16 +2073,15 @@ class UniquePartitions:
         """
         **LLM Docstring**
 
-        Set up the unique-partition generator for a multiset, precomputing its unique
-        permutations and the per-value "follower" table used to enumerate ordered
-        splittings.
+        Prepare a multiset for block splittings. The full unique-permutation
+        table is generated lazily through ``perms`` when explicitly requested.
 
         :param partition: the multiset to partition
         :type partition: np.ndarray
         """
         partition = np.asanyarray(partition)
         self.part = partition
-        self.perms = UniquePermutations(np.sort(partition)).permutations()
+        self._perms = None
         neg_part = -partition  # so we can build ordered partitions
         sorting = np.argsort(neg_part)
         sort_part = neg_part[sorting]
@@ -2094,6 +2093,16 @@ class UniquePartitions:
             [np.sum((x - f) > 0) for x in split_idx]
             for f in final_indices
         ])
+
+    @property
+    def perms(self):
+        if self._perms is None:
+            self._perms = UniquePermutations(np.sort(self.part)).permutations()
+        return self._perms
+
+    @perms.setter
+    def perms(self, value):
+        self._perms = value
 
     @classmethod
     def _take_partitions(self, partition, sizes, take_unique=True,
@@ -2167,12 +2176,12 @@ class UniquePartitions:
             inds = None
 
         N = len(subs) if subs is not None else len(inds)
-        self._populate_partitions(partition, np.array([s for s in sizes if s > 0]), tree_sizes, ind_blocks, N, subs, inds)
+        self._populate_partitions(partition, np.array([s for s in sizes if s > 0]), tuple(tree_sizes), tuple(ind_blocks), N, subs, inds)
 
         # TODO: find a way to handle unique masking inside numba loop
         if take_unique:
             uu = np.unique(partition)
-            if len(uu) <= len(partition):
+            if len(uu) < len(partition):
                 _, _, sort_uinds = unique(subs, axis=0, return_index=True)
                 uinds = np.sort(sort_uinds)
                 subs = subs[uinds,]
@@ -2203,7 +2212,7 @@ class UniquePartitions:
             ret += (inv,)
         return ret
     @staticmethod
-    # @jit(nopython=True, cache=True)
+    @jit(nopython=True, cache=True)
     def _populate_partitions(partition, sizes, tree_sizes, blocks, N, subs, inds):
         """
         :param partition:
@@ -2215,14 +2224,18 @@ class UniquePartitions:
 
         k = len(sizes)
         p = len(partition)
-        bs = np.concatenate([np.array([0]), np.cumsum(sizes)]) # block starts
+        bs = np.concatenate((np.array([0]), np.cumsum(sizes))) # block starts
         r = np.arange(p) # for remainder indices
         for i in range(N): # product of tree/block shapes
             # these assertions sometimes help numba
             assert i >= 0
             assert i < N
-            product_index = np.unravel_index(i, tree_sizes) # would be nicer to have a faster process...
-            mask = np.full(p, True, dtype=bool)
+            product_index = np.empty(k, dtype=np.int64)
+            remainder = i
+            for axis in range(k - 1, -1, -1):
+                product_index[axis] = remainder % tree_sizes[axis]
+                remainder //= tree_sizes[axis]
+            mask = np.ones(p, dtype=np.bool_)
             for j in range(k):
                 block_idx = blocks[j][product_index[j]]
                 if subs is not None:

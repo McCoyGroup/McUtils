@@ -40,3 +40,6 @@ from .GeneralizedEigenproblems import *; from .GeneralizedEigenproblems import _
 __all__ += _all
 from .Multipoles import *; from .Multipoles import __all__ as _all
 __all__ += _all
+
+from .GaussianIntegrals import *; from .GaussianIntegrals import __all__ as _all
+__all__ += _all
