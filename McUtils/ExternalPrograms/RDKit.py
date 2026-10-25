@@ -538,6 +538,7 @@ class RDMolecule(ExternalMolecule):
                     force_field_type='mmff',
                     confgen_opts=None,
                     sanitize=False,
+                    rdmol=None,
                     **opts
                     ):
         """
@@ -576,38 +577,64 @@ class RDMolecule(ExternalMolecule):
         :type confgen_opts: dict | None
         :param sanitize: run sanitization
         :type sanitize: bool
+        :param rdmol: optional RDKit molecular graph to copy without losing atom/bond metadata; atoms, supplied bonds and formal charges must agree
+        :type rdmol: Chem.Mol | None
         :return: the wrapped molecule (or a list, when multiple conformers are kept)
         :rtype: RDMolecule | list
         """
         Chem = cls.allchem_api()
-        mol = Chem.EditableMol(Chem.Mol())
-        mol.BeginBatchEdit()
-        if formal_charges is None:
-            formal_charges = [None] * len(atoms)
-        for a,fc in zip(atoms, formal_charges):
-            a = Chem.Atom(a)
-            if fc is not None:
-                if nput.is_int(fc):
-                    fc = int(fc)
-                else:
-                    fc = float(fc)
-                a.SetFormalCharge(fc)
-            mol.AddAtom(a)
-        if bonds is not None:
-            for b in bonds:
-                if len(b) == 2:
-                    i,j = b
-                    t = 1
-                else:
-                    i,j,t = b
-                if nput.is_numeric(t):
-                    t = cls.resolve_bond_type(t)
-                else:
-                    t = Chem.BondType.names[t]
-                mol.AddBond(int(i), int(j), t)
-        mol.CommitBatchEdit()
+        if rdmol is None:
+            mol = Chem.EditableMol(Chem.Mol())
+            mol.BeginBatchEdit()
+            if formal_charges is None:
+                formal_charges = [None] * len(atoms)
+            for a,fc in zip(atoms, formal_charges):
+                a = Chem.Atom(a)
+                if fc is not None:
+                    if nput.is_int(fc):
+                        fc = int(fc)
+                    else:
+                        fc = float(fc)
+                    a.SetFormalCharge(fc)
+                mol.AddAtom(a)
+            if bonds is not None:
+                for b in bonds:
+                    if len(b) == 2:
+                        i,j = b
+                        t = 1
+                    else:
+                        i,j,t = b
+                    if nput.is_numeric(t):
+                        t = cls.resolve_bond_type(t)
+                    else:
+                        t = Chem.BondType.names[t]
+                    mol.AddBond(int(i), int(j), t)
+            mol.CommitBatchEdit()
 
-        mol = mol.GetMol()
+            mol = mol.GetMol()
+        else:
+            mol = Chem.Mol(rdmol)
+            mol.RemoveAllConformers()
+            if guess_bonds is None:
+                guess_bonds = False
+            if [a.GetSymbol() for a in mol.GetAtoms()] != [Chem.Atom(a).GetSymbol() for a in atoms]:
+                raise ValueError("RDKit molecular template does not match the supplied ordered atoms")
+            if formal_charges is not None:
+                if len(formal_charges) != mol.GetNumAtoms() or any(
+                        value is not None and value != atom.GetFormalCharge()
+                        for value, atom in zip(formal_charges, mol.GetAtoms())):
+                    raise ValueError("RDKit molecular template and supplied formal charges disagree")
+            if bonds is not None:
+                expected = {}
+                for bond in bonds:
+                    i, j = map(int, bond[:2])
+                    order = 1 if len(bond) == 2 else bond[2]
+                    kind = cls.resolve_bond_type(order) if nput.is_numeric(order) else Chem.BondType.names[order]
+                    expected[tuple(sorted((i, j)))] = str(kind)
+                actual = {tuple(sorted((bond.GetBeginAtomIdx(), bond.GetEndAtomIdx()))): str(bond.GetBondType())
+                          for bond in mol.GetBonds()}
+                if expected != actual:
+                    raise ValueError("RDKit molecular template and supplied bonds disagree")
         cls._prep_mol(mol)
         if implicit_hydrogen_method is None:
             implicit_hydrogen_method = cls.implicit_hydrogen_to_conformer_method
@@ -696,13 +723,23 @@ class RDMolecule(ExternalMolecule):
                 return mols
         else:
             coords = np.asanyarray(coords)
-            mol = Chem.AddHs(mol, explicitOnly=(len(atoms) == len(coords)))
-            conf = Chem.Conformer(mol.GetNumAtoms())
-            conf.SetPositions(coords)
-            conf.SetId(0)
-            mol.AddConformer(conf)
-            if add_implicit_hydrogens:
-                mol = Chem.AddHs(mol, explicitOnly=False, addCoords=True)
+            if rdmol is not None and len(coords) == mol.GetNumAtoms():
+                # Attach the known coordinates before materializing bracket Hs.
+                # Their metadata is retained in the template, so AddHs may add
+                # vertices even when implicit hydrogens were not requested.
+                conf = Chem.Conformer(mol.GetNumAtoms())
+                conf.SetPositions(coords)
+                conf.SetId(0)
+                mol.AddConformer(conf)
+                mol = Chem.AddHs(mol, explicitOnly=not add_implicit_hydrogens, addCoords=True)
+            else:
+                mol = Chem.AddHs(mol, explicitOnly=(len(atoms) == len(coords)))
+                conf = Chem.Conformer(mol.GetNumAtoms())
+                conf.SetPositions(coords)
+                conf.SetId(0)
+                mol.AddConformer(conf)
+                if add_implicit_hydrogens:
+                    mol = Chem.AddHs(mol, explicitOnly=False, addCoords=True)
 
             if guess_bonds is None:
                 guess_bonds = bonds is None
@@ -1043,6 +1080,7 @@ class RDMolecule(ExternalMolecule):
                     [bond.GetBeginAtomIdx(), bond.GetEndAtomIdx(), bond.GetBondTypeAsDouble()]
                     for bond in rdkit_mol.GetBonds()
                 ],
+                rdmol=rdkit_mol,
                 add_implicit_hydrogens=add_implicit_hydrogens,
                 num_confs=num_confs,
                 optimize=optimize,

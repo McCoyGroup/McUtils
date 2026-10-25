@@ -283,6 +283,10 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         self._has_scenes = True
         if self.mode == "widget":
             elem = x3d.to_widget()
+        elif getattr(x3d, 'components', ()) or x3d.has_playback():
+            # Keep component controls and their lifecycle in standalone reports.
+            # render_document supplies the shared X3DOM runtime in the head.
+            elem = x3d.to_widget(dynamic_loading=False, include_resources=False)
         else:
             elem = x3d.to_x3d()
         kids = [elem]

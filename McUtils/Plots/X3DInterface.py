@@ -13,6 +13,8 @@ from .. import Numputils as nput
 
 __all__ = [
     "X3D",
+    "X3DScript",
+    "X3DComponent",
     "X3DPrimitive",
     "X3DGeometryObject",
     "X3DGeometryGroup",
@@ -129,6 +131,247 @@ class X3DObject(metaclass=abc.ABCMeta):
         """
         return self.id
 
+class X3DScript:
+    """Trusted JavaScript body for a browser-side :class:`X3DComponent`.
+
+    The body receives ``component`` and can return a controller object, exposed
+    as ``component.root.controller``. Scripts execute in the exported page and
+    need no live Python kernel. Application-specific scripts belong to callers.
+    """
+
+    def __init__(self, source):
+        if not isinstance(source, str):
+            raise TypeError("X3DScript source must be a JavaScript string")
+        self.source = source
+
+
+class X3DComponent:
+    """HTML controls, JSON data and a script bound to one X3DOM scene.
+
+    Scripts receive ``root``, ``scene``, ``data``, and a ``nodes`` alias mapping.
+    ``query(selector)`` searches the controls. ``setField(node_or_alias, name,
+    value)`` writes X3D fields, flattening numeric arrays. ``on`` attaches an
+    event listener and returns its remover; ``onDispose`` registers cleanup.
+    Listeners and cleanup callbacks are disposed when the component or scene is
+    removed. Initialization waits for the scene's own runtime to be ready.
+
+    Pass components to ``X3D(..., components=[...])``. They are included in
+    ``to_widget()`` and HTML exports; ``to_x3d()`` remains bare scene markup.
+    This lifecycle currently supports X3DOM, not X_ITE. Source is trusted code.
+    """
+
+    def __init__(self, *elements, script, data=None, nodes=None, id=None,
+                 placement='before', timeout=10000, **attrs):
+        if len(elements) == 1 and isinstance(elements[0], (tuple, list)):
+            elements = tuple(elements[0])
+        if isinstance(script, str):
+            script = X3DScript(script)
+        if not isinstance(script, X3DScript):
+            raise TypeError("script must be an X3DScript or JavaScript string")
+        if placement not in {'before', 'after'}:
+            raise ValueError("component placement must be 'before' or 'after'")
+        try:
+            timeout_value = float(timeout)
+        except (TypeError, ValueError):
+            raise ValueError("component timeout must be positive milliseconds") from None
+        if isinstance(timeout, (bool, str)) or not np.isfinite(timeout_value) or timeout_value <= 0:
+            raise ValueError("component timeout must be positive milliseconds")
+        if id is None:
+            id = 'x3d-component-' + uuid.uuid4().hex
+        self._check_id(id)
+        self.elements, self.script = tuple(elements), script
+        self.data, self.nodes = data, {} if nodes is None else dict(nodes)
+        self.id, self.placement, self.timeout = id, placement, timeout_value
+        self.attrs = attrs
+
+    @staticmethod
+    def _check_id(value):
+        if not isinstance(value, str) or not value or any(c.isspace() for c in value):
+            raise ValueError("X3D node ids must be nonempty strings without whitespace")
+        return value
+
+    @classmethod
+    def _node_id(cls, value):
+        if not isinstance(value, str):
+            if hasattr(value, 'id'):
+                value = value.id
+            elif hasattr(value, 'attrs'):
+                value = value.attrs.get('id')
+        return cls._check_id(value)
+
+    def _configuration(self, scene_id):
+        nodes = {}
+        for alias, node in self.nodes.items():
+            if not isinstance(alias, str) or not alias:
+                raise ValueError("component node aliases must be nonempty strings")
+            nodes[alias] = self._node_id(node)
+        return json.dumps(dict(sceneId=self._check_id(scene_id), data=self.data,
+                               nodes=nodes, timeout=self.timeout),
+                          default=lambda x: x.tolist() if hasattr(x, 'tolist') else
+                              (_ for _ in ()).throw(TypeError("component data must be JSON serializable")),
+                          ensure_ascii=True, allow_nan=False)
+
+    def get_bootstrap_script(self, scene_id):
+        """An event-handler body that also works for notebook HTML insertion."""
+        return r"""
+(function(image) {
+  const root = image.parentElement;
+  image.remove();
+  if (!root || root.__mcutilsX3DMounted) return;
+  root.__mcutilsX3DMounted = true;
+  const config = %s;
+  let scene = null, wrapper = null, timer = null, disposed = false;
+  const removers = [], callbacks = [], started = Date.now();
+  root.setAttribute('data-x3d-state', 'loading');
+  function dispose() {
+    if (disposed) return;
+    disposed = true;
+    if (timer !== null) clearTimeout(timer);
+    observer.disconnect();
+    for (const remove of removers.splice(0)) remove();
+    for (const callback of callbacks.splice(0).reverse()) {
+      try { callback(); } catch (error) { console.error(error); }
+    }
+    root.controller = null;
+    root.setAttribute('data-x3d-state', 'disposed');
+  }
+  function fail(error) {
+    dispose();
+    root.error = error;
+    root.setAttribute('data-x3d-state', 'error');
+    root.dispatchEvent(new CustomEvent('mcutils-x3d-error', {detail: error}));
+    console.error('X3D component initialization failed:', error);
+  }
+  const observer = new MutationObserver(() => {
+    if (!root.isConnected || (wrapper && !wrapper.isConnected) || (scene && !scene.isConnected)) dispose();
+  });
+  observer.observe(document.documentElement, {childList: true, subtree: true});
+  function byId(parent, id) {
+    if (parent.id === id) return parent;
+    for (const node of parent.querySelectorAll('[id]')) {
+      if (node.id === id) return node;
+    }
+    return null;
+  }
+  function fieldString(value) {
+    if (Array.isArray(value) || ArrayBuffer.isView(value)) {
+      return Array.from(value, fieldString).join(' ');
+    }
+    if (typeof value === 'number' && !Number.isFinite(value)) {
+      throw new TypeError('X3D fields require finite numbers');
+    }
+    if (!['string', 'number', 'boolean'].includes(typeof value)) {
+      throw new TypeError('X3D fields require strings, numbers, booleans or arrays');
+    }
+    return String(value);
+  }
+  function mount() {
+    const nodes = Object.create(null);
+    for (const [alias, id] of Object.entries(config.nodes)) {
+      const node = byId(scene, id);
+      if (!node) throw new Error('Missing X3D component node: ' + alias + ' (' + id + ')');
+      nodes[alias] = node;
+    }
+    function resolve(target) {
+      if (typeof target === 'string') target = nodes[target] || root.querySelector(target);
+      if (!target || typeof target.addEventListener !== 'function') {
+        throw new TypeError('Unknown X3D component target');
+      }
+      return target;
+    }
+    const component = {
+      root, scene, data: config.data, nodes,
+      query: selector => root.querySelector(selector),
+      setField(target, field, value) {
+        if (disposed) throw new Error('X3D component is disposed');
+        target = resolve(target);
+        if (!scene.contains(target)) throw new Error('X3D field target is outside this scene');
+        const serialized = fieldString(value);
+        const coordinateField = target.tagName.toLowerCase() === 'coordinateinterpolator' ? field.toLowerCase() : '';
+        if (coordinateField === 'key') {
+          // Keep key count current for a following keyValue write in the same
+          // event handler, before the DOM mutation observer has run.
+          const fields = scene.ownerDocument.defaultView.x3dom.fields;
+          target.setAttribute(field, serialized);
+          target.setFieldValue('key', fields.MFFloat.parse(serialized));
+        } else if (coordinateField === 'keyvalue') {
+          // X3DOM 1.8.3 stores coordinate frames as nested arrays. Its attribute
+          // parser cannot replace those arrays, so use the public field API.
+          const fields = scene.ownerDocument.defaultView.x3dom.fields;
+          const keyCount = target.getFieldValue('key').length;
+          const numbers = serialized.trim().split(/[\s,]+/).map(Number);
+          if (numbers.length %% 3 !== 0 || !numbers.every(Number.isFinite)) {
+            throw new Error('CoordinateInterpolator keyValue requires complete finite xyz coordinates');
+          }
+          const coordinates = fields.MFVec3f.parse(serialized);
+          if (!keyCount || !coordinates.length || coordinates.length %% keyCount !== 0) {
+            throw new Error('CoordinateInterpolator keyValue requires complete coordinate frames for each key');
+          }
+          const pointCount = coordinates.length / keyCount;
+          const frames = Array.from({length: keyCount}, (_, index) =>
+            coordinates.slice(index * pointCount, (index + 1) * pointCount));
+          target.setAttribute(field, serialized);
+          target.setFieldValue('keyValue', frames);
+        } else {
+          target.setAttribute(field, serialized);
+        }
+      },
+      on(target, event, listener, options) {
+        if (disposed) throw new Error('X3D component is disposed');
+        target = resolve(target);
+        target.addEventListener(event, listener, options);
+        let active = true;
+        const remove = () => {
+          if (active) target.removeEventListener(event, listener, options);
+          active = false;
+        };
+        removers.push(remove);
+        return remove;
+      },
+      onDispose(callback) {
+        if (typeof callback !== 'function') throw new TypeError('Expected a cleanup function');
+        if (disposed) callback(); else callbacks.push(callback);
+      },
+      dispose,
+      get disposed() { return disposed; }
+    };
+    const controller = (function(component) {
+%s
+    })(component);
+    if (disposed) return;
+    root.controller = controller === undefined ? component : controller;
+    root.setAttribute('data-x3d-state', 'ready');
+    root.dispatchEvent(new CustomEvent('mcutils-x3d-ready', {detail: root.controller}));
+  }
+  function wait() {
+    if (disposed) return;
+    if (!root.isConnected) { dispose(); return; }
+    if (!wrapper && root.parentElement) wrapper = byId(root.parentElement, config.sceneId);
+    if (wrapper) scene = wrapper.querySelector('x3d');
+    if (scene && scene.runtime && scene.runtime.isReady === true) {
+      try { mount(); } catch (error) { fail(error); }
+    } else if (Date.now() - started >= config.timeout) {
+      fail(new Error('Timed out waiting for X3DOM scene ' + config.sceneId));
+    } else {
+      timer = setTimeout(wait, 25);
+    }
+  }
+  wait();
+})(this);
+""" % (self._configuration(scene_id), self.script.source)
+
+    def to_widget(self, scene_id):
+        attrs = dict(self.attrs)
+        attrs.setdefault('cls', 'mcutils-x3d-component')
+        return JHTML.Div(
+            *self.elements,
+            JHTML.Image(src='data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7',
+                        onload=self.get_bootstrap_script(scene_id),
+                        style='display:none;', alt=''),
+            id=self.id, can_be_dynamic=False, **attrs
+        )
+
+
 class X3D(X3DObject):
     defaults = dict(
         width=500,
@@ -177,6 +420,8 @@ class X3D(X3DObject):
                  include_view_settings_button=False,
                  preload_scripts=None,
                  onload_scripts=None,
+                 components=None,
+                 playback=None,
                  **opts):
         """
         **LLM Docstring**
@@ -202,6 +447,11 @@ class X3D(X3DObject):
         :type include_view_settings_button: bool
         :param preload_scripts: scripts to run before the scene loads
         :param onload_scripts: scripts to run once the scene loads
+        :param components: scriptable HTML controls bound to this X3DOM scene
+        :type components: X3DComponent | iterable[X3DComponent] | None
+        :param playback: enable playback controls, disable them, or configure them;
+            None uses the native animators' playback settings
+        :type playback: bool | dict | None
         :param opts: extra scene options (e.g. width/height)
         """
         if len(children) == 1 and isinstance(children[0], (tuple, list)):
@@ -235,12 +485,257 @@ class X3D(X3DObject):
         self.include_mathjax = include_mathjax
         self.preload_scripts = preload_scripts
         self.onload_scripts = onload_scripts
+        if isinstance(components, X3DComponent):
+            components = [components]
+        self.components = tuple(() if components is None else components)
+        if any(not isinstance(component, X3DComponent) for component in self.components):
+            raise TypeError("X3D components must be X3DComponent objects")
+        if self.components and use_xite:
+            raise NotImplementedError("X3DComponent lifecycle currently requires X3DOM (use_xite=False)")
+        if playback is not None and not isinstance(playback, (bool, dict)):
+            raise TypeError("playback must be a boolean, a configuration dict, or None")
+        if use_xite and (playback is True or isinstance(playback, dict)):
+            raise NotImplementedError("X3D playback controls currently require X3DOM")
+        self.playback = playback
         self._widg = None
+        self._widget_cache = {}
 
     X_ITE_JS = "https://cdn.jsdelivr.net/npm/x_ite@11.5.11/dist/x_ite.min.js"
     X3DOM_JS = 'https://www.x3dom.org/download/1.8.3/x3dom-full.js'
     X3DOM_CSS = 'https://www.x3dom.org/download/x3dom.css'
     MATHJAX_CDN = 'https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js'
+
+    @staticmethod
+    def get_playback_controls():
+        """Reusable HTML toolbar for the generic X3D playback controller."""
+        role = lambda name: {'data-role': 'playback-' + name}
+        return JHTML.Div(
+            JHTML.Button('Pause', type='button', **role('toggle')),
+            JHTML.Button('Restart', type='button', **role('restart')),
+            JHTML.Button('Back 1%', type='button', **role('previous')),
+            JHTML.Button('Forward 1%', type='button', **role('next')),
+            JHTML.Input(type='range', min='0', max='1', step='any', value='0',
+                        **dict(role('position'), **{'aria-label': 'Animation position'})),
+            JHTML.Output('0%', **role('label')),
+            JHTML.Label('Speed ', JHTML.Input(type='number', min='.01', step='.25', value='1',
+                        style='width:4.5em;', **role('speed'))),
+            JHTML.Label(JHTML.Input(type='checkbox', checked=True, **role('loop')), ' Loop'),
+            cls='mcutils-x3d-playback',
+            style='display:flex;align-items:center;gap:.5em;flex-wrap:wrap;'
+        )
+
+    @staticmethod
+    def get_playback_script():
+        """A reusable controller factory for any routed X3D fraction animation.
+
+        A browser clock feeds public input fields on existing interpolators and
+        sequencers. Native TimeSensors are disabled while controlled, allowing
+        seek and speed changes without changing engine-private clock state.
+        """
+        return r"""
+function X3DPlayback(component, options = {}) {
+    const scene = component.scene;
+    const elements = Array.from(scene.querySelectorAll('*'));
+    const named = new Map();
+    for (const node of elements) {
+        for (const name of [node.id, node.getAttribute('DEF')]) if (name) named.set(name, node);
+    }
+    const clock = options.clock || component.nodes.clock || elements.find(node => node.tagName.toLowerCase() === 'timesensor');
+    if (!clock) throw new Error('X3D playback requires a TimeSensor');
+    let targets = options.targets;
+    if (!targets) {
+        const names = new Set([clock.id, clock.getAttribute('DEF')]);
+        targets = elements.filter(node => node.tagName.toLowerCase() === 'route'
+            && names.has(node.getAttribute('fromNode')) && node.getAttribute('fromField') === 'fraction_changed')
+            .map(route => ({node: named.get(route.getAttribute('toNode')), field: route.getAttribute('toField')}));
+    }
+    targets = targets.map(target => target && 'node' in target ? target : {node: target, field: 'set_fraction'});
+    if (!targets.length || targets.some(target => !target.node || !target.field)) {
+        throw new Error('X3D playback requires routed fraction targets');
+    }
+    const discrete = targets.every(target => /sequencer$/i.test(target.node.tagName));
+    const stepSize = Number(options.stepSize ?? .01);
+    if (!Number.isFinite(stepSize) || stepSize <= 0 || stepSize > 1) throw new RangeError('Playback step size must lie between 0 and 1');
+    const duration = Number(options.duration ?? clock.getAttribute('cycleInterval') ?? 1);
+    const speed = Number(options.speed ?? 1);
+    const fraction = Number(options.fraction ?? 0);
+    if (!Number.isFinite(duration) || duration <= 0) throw new RangeError('Animation duration must be positive');
+    if (!Number.isFinite(speed) || speed <= 0) throw new RangeError('Playback speed must be positive');
+    if (!Number.isFinite(fraction) || fraction < 0 || fraction > 1) throw new RangeError('Animation fraction must lie between 0 and 1');
+    let keys = !discrete ? [] : options.keys || targets.flatMap(target => (target.node.getAttribute('key') || '').trim().split(/[\s,]+/).filter(Boolean).map(Number));
+    keys = [...new Set(keys.map(Number).filter(key => Number.isFinite(key) && key >= 0 && key <= 1))].sort((a, b) => a - b);
+    if (discrete && !keys.length) {
+        const count = Number(clock.getAttribute('data-frame-count'));
+        keys = Number.isInteger(count) && count > 1 ? Array.from({length: count}, (_, index) => index / (count - 1)) : [0, 1];
+    }
+    const clockBoolean = (name, fallback) => {
+        const value = clock.getAttribute(name);
+        return value === null ? fallback : value.toLowerCase() === 'true';
+    };
+    const state = {fraction, duration, speed,
+        running: options.running ?? clockBoolean('enabled', true),
+        loop: options.loop ?? clockBoolean('loop', false)};
+    const controls = Object.fromEntries(['toggle', 'restart', 'previous', 'next', 'position', 'speed', 'loop', 'label']
+        .map(name => [name, component.query('[data-role="playback-' + name + '"]')]));
+    const listeners = new Set();
+    let disposed = false, animationFrame = null, lastTime = state.running ? performance.now() : null;
+    component.setField(clock, 'enabled', false);
+    if (typeof clock.setFieldValue === 'function') clock.setFieldValue('enabled', false);
+
+    function getState() {
+        if (!discrete) return {...state};
+        let frame = 0;
+        keys.forEach((key, index) => { if (key <= state.fraction + 1e-12) frame = index; });
+        return {...state, frame};
+    }
+    function check() { if (disposed) throw new Error('X3D playback is disposed'); }
+    function notify() {
+        const snapshot = getState();
+        if (controls.toggle) controls.toggle.textContent = state.running ? 'Pause' : 'Play';
+        if (controls.position) controls.position.value = String(state.fraction);
+        if (controls.speed) controls.speed.value = String(state.speed);
+        if (controls.loop) controls.loop.checked = state.loop;
+        if (controls.previous) controls.previous.textContent = discrete ? 'Previous frame' : 'Back ' + (stepSize * 100) + '%';
+        if (controls.next) controls.next.textContent = discrete ? 'Next frame' : 'Forward ' + (stepSize * 100) + '%';
+        if (controls.label) controls.label.textContent = (discrete ? (snapshot.frame + 1) + '/' + keys.length + ' · ' : '') + (state.fraction * 100).toFixed(1) + '%';
+        for (const listener of listeners) listener(snapshot);
+        scene.dispatchEvent(new CustomEvent('x3d-playback-change', {detail: {...snapshot, clock: clock.id || clock.getAttribute('DEF')}}));
+    }
+    function apply() {
+        for (const target of targets) component.setField(target.node, target.field, state.fraction);
+        notify();
+    }
+    function schedule() {
+        if (state.running && !disposed && animationFrame === null) animationFrame = requestAnimationFrame(tick);
+    }
+    function tick(time) {
+        animationFrame = null;
+        if (disposed || !state.running) return;
+        if (lastTime !== null) {
+            state.fraction += Math.max(0, time - lastTime) / 1000 * state.speed / duration;
+            if (state.fraction >= 1) {
+                if (state.loop) state.fraction %= 1;
+                else { state.fraction = 1; state.running = false; }
+            }
+        }
+        lastTime = time;
+        apply();
+        schedule();
+    }
+    function setRunning(running) {
+        check();
+        if (Boolean(running) === state.running) return;
+        if (running && !state.loop && state.fraction === 1) { state.fraction = 0; apply(); }
+        state.running = Boolean(running);
+        lastTime = state.running ? performance.now() : null;
+        if (!state.running && animationFrame !== null) { cancelAnimationFrame(animationFrame); animationFrame = null; }
+        schedule();
+        notify();
+    }
+    function seek(value) {
+        check();
+        if (!Number.isFinite(value) || value < 0 || value > 1) throw new RangeError('Animation fraction must lie between 0 and 1');
+        state.fraction = value;
+        lastTime = state.running ? performance.now() : null;
+        apply();
+    }
+    function setSpeed(value) {
+        check();
+        if (!Number.isFinite(value) || value <= 0) throw new RangeError('Playback speed must be positive');
+        state.speed = value;
+        lastTime = state.running ? performance.now() : null;
+        notify();
+    }
+    function setLoop(value) { check(); state.loop = Boolean(value); notify(); }
+    function step(count = 1) {
+        check();
+        if (!Number.isInteger(count)) throw new TypeError('Frame step must be an integer');
+        if (!count) return;
+        setRunning(false);
+        if (!discrete) {
+            seek(Math.max(0, Math.min(1, state.fraction + count * stepSize)));
+            return;
+        }
+        let index;
+        if (count > 0) {
+            index = keys.findIndex(key => key > state.fraction + 1e-12);
+            if (index < 0) index = keys.length - 1;
+            index += count - 1;
+        } else {
+            index = keys.length - 1;
+            while (index > 0 && keys[index] >= state.fraction - 1e-12) index--;
+            index += count + 1;
+        }
+        seek(keys[Math.max(0, Math.min(keys.length - 1, index))]);
+    }
+    function dispose() {
+        if (disposed) return;
+        disposed = true;
+        state.running = false;
+        if (animationFrame !== null) cancelAnimationFrame(animationFrame);
+        animationFrame = null;
+        listeners.clear();
+        clock.setAttribute('enabled', 'false');
+    }
+    const controller = {play: () => setRunning(true), pause: () => setRunning(false), setRunning,
+        restart: () => seek(0), seek, step, setSpeed, setLoop, getState, dispose,
+        onChange(listener) {
+            check();
+            if (typeof listener !== 'function') throw new TypeError('Expected a playback listener');
+            listeners.add(listener);
+            return () => listeners.delete(listener);
+        }};
+    if (controls.toggle) component.on(controls.toggle, 'click', () => setRunning(!state.running));
+    if (controls.restart) component.on(controls.restart, 'click', controller.restart);
+    if (controls.previous) component.on(controls.previous, 'click', () => step(-1));
+    if (controls.next) component.on(controls.next, 'click', () => step(1));
+    if (controls.position) component.on(controls.position, 'input', () => seek(Number(controls.position.value)));
+    if (controls.speed) component.on(controls.speed, 'change', () => setSpeed(Number(controls.speed.value)));
+    if (controls.loop) component.on(controls.loop, 'change', () => setLoop(controls.loop.checked));
+    component.onDispose(dispose);
+    apply();
+    schedule();
+    return controller;
+}
+"""
+
+    @staticmethod
+    def _walk_scene(element):
+        if isinstance(element, (list, tuple)):
+            for child in element:
+                yield from X3D._walk_scene(child)
+        elif hasattr(element, 'tag'):
+            yield element
+            for child in getattr(element, 'elems', ()):
+                yield from X3D._walk_scene(child)
+
+    def _playback_components(self, element):
+        if self.use_xite or self.playback is False:
+            return []
+        controls = []
+        for index, node in enumerate(self._walk_scene(element)):
+            if str(node.tag).lower() != 'timesensor':
+                continue
+            attrs = node.attrs
+            if self.playback is None and str(attrs.get('data-playback', False)).lower() != 'true':
+                continue
+            clock_id = attrs.get('id') or attrs.get('DEF') or self.id + '-clock-' + str(index)
+            node.attrs = dict(attrs, id=clock_id)
+            options = dict(self.playback) if isinstance(self.playback, dict) else {}
+            controls.append(X3DComponent(
+                self.get_playback_controls(), nodes={'clock': clock_id}, data=options,
+                id=clock_id + '-playback', placement='after',
+                script=self.get_playback_script() + '\nreturn X3DPlayback(component, {...component.data, clock: component.nodes.clock});'
+            ))
+        return controls
+
+    def has_playback(self):
+        """Whether the scene requests a generic playback toolbar."""
+        return not self.use_xite and self.playback is not False and any(
+            str(node.tag).lower() == 'timesensor' and (
+                self.playback is not None or str(node.attrs.get('data-playback', False)).lower() == 'true'
+            ) for node in self._walk_scene(self.to_x3d())
+        )
 
     @classmethod
     def get_export_script(self, id):
@@ -479,11 +974,24 @@ document.head.append(frag{i});
         else:
             return f'''const frag{i} = document.createRange().createContextualFragment(`{s.tostring()}`); document.head.appendChild(frag{i});'''
 
+    def get_resource_elements(self):
+        """Runtime, styles and preload dependencies for a complete HTML page."""
+        elems = [JHTML.Script(src=self.X_ITE_JS)] if self.use_xite else [
+            JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
+            JHTML.Script(src=self.X3DOM_JS)
+        ]
+        if self.include_mathjax:
+            elems.append(JHTML.Script(src=self.MATHJAX_CDN))
+        if self.preload_scripts is not None:
+            elems.extend(JHTML.Script(s) if isinstance(s, str) else s for s in self.preload_scripts)
+        return elems
+
     def to_widget(self,
                   dynamic_loading=None,
                   include_export_button=None,
                   include_record_button=None,
-                  include_view_settings_button=None
+                  include_view_settings_button=None,
+                  include_resources=True
                   ):
         """
         **LLM Docstring**
@@ -499,14 +1007,10 @@ document.head.append(frag{i});
         :type include_record_button: bool | None
         :param include_view_settings_button: include the view-settings button
         :type include_view_settings_button: bool | None
+        :param include_resources: emit dependencies (false when a document supplies them)
+        :type include_resources: bool
         :return: the widget
         """
-        if self._widg is not None:
-            return self._widg
-        id = self.id
-        x3d_embed = self.to_x3d()#.tostring()
-
-
         if dynamic_loading is None:
             dynamic_loading = self.dynamic_loading
         if include_export_button is None:
@@ -515,20 +1019,17 @@ document.head.append(frag{i});
             include_record_button = self.include_record_button
         if include_view_settings_button is None:
             include_view_settings_button = self.include_view_settings_button
+        cache_key = (bool(dynamic_loading), bool(include_export_button), bool(include_record_button),
+                     bool(include_view_settings_button), bool(include_resources))
+        if cache_key in self._widget_cache:
+            self._widg = self._widget_cache[cache_key]
+            return self._widg
+        id = self.id
+        x3d_embed = self.to_x3d()
+        components = self.components + tuple(self._playback_components(x3d_embed))
 
-        if not dynamic_loading:
-            elems = [
-                JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
-                JHTML.Script(src=self.X3DOM_JS)
-            ] if not self.use_xite else [
-                JHTML.Script(src=self.X_ITE_JS)
-            ]
-            if self.include_mathjax:
-                elems.append(JHTML.Script(src=self.MATHJAX_CDN))
-            if self.preload_scripts is not None:
-                elems.extend(
-                    JHTML.Script(s) if isinstance(s, str) else s for s in self.preload_scripts
-                )
+        if not dynamic_loading or not include_resources:
+            elems = self.get_resource_elements() if include_resources else []
             base_fig = JHTML.Div(
                 *elems,
                 x3d_embed,
@@ -538,24 +1039,21 @@ document.head.append(frag{i});
                 can_be_dynamic=False
             )
         else:
-            JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
-            load_scripts = [
-                JHTML.Script(src=self.X3DOM_JS)
-                    if not self.use_xite else
-                JHTML.Script(src=self.X_ITE_JS)
-            ]
-            if self.include_mathjax:
-                load_scripts.append(JHTML.Script(src=self.MATHJAX_CDN))
-            if self.preload_scripts is not None:
-                load_scripts.extend(
-                    JHTML.Script(s) if isinstance(s, str) else s for s in self.preload_scripts
-                )
+            load_scripts = self.get_resource_elements()
             loader_frags = "\n".join([
                 f'''
-                const frag{i} = document.createRange().createContextualFragment(`{load_script.tostring()}`);
-                document.head.appendChild(frag{i});'''
+                const frag{i} = document.createRange().createContextualFragment({json.dumps(load_script.tostring())});
+                const elem{i} = frag{i}.firstElementChild;
+                const url{i} = elem{i} && (elem{i}.getAttribute('src') || elem{i}.getAttribute('href'));
+                const present{i} = url{i} && Array.from(document.querySelectorAll('script[src], link[href]')).some(
+                    elem => (elem.getAttribute('src') || elem.getAttribute('href')) === url{i});
+                if (!present{i}) document.head.appendChild(frag{i});'''
                 for i,load_script in enumerate(load_scripts)
             ])
+            if not self.use_xite:
+                # A notebook can insert a new scene after X3DOM is already live.
+                # reload initializes only new X3D elements and preserves existing ones.
+                loader_frags += "\nif (window.x3dom && typeof window.x3dom.reload === 'function') window.x3dom.reload();"
             kill_id = "tmp-"+str(uuid.uuid4())[:10]
             base_fig = JHTML.Figure(
                 # JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
@@ -578,7 +1076,9 @@ document.head.append(frag{i});
                 can_be_dynamic=False
             )
 
-        elems = [base_fig]
+        elems = [component.to_widget(id) for component in components if component.placement == 'before']
+        elems.append(base_fig)
+        elems.extend(component.to_widget(id) for component in components if component.placement == 'after')
         if include_export_button:
             elems.append(JHTML.Button("Save Figure", onclick=self.get_export_script(self.id)))
         if include_record_button:
@@ -626,6 +1126,7 @@ document.head.append(frag{i});
         else:
             self._widg = elems[0]
 
+        self._widget_cache[cache_key] = self._widg
         return self._widg
 
     def to_html(self, *base_elems, header_elems=None,
@@ -654,15 +1155,11 @@ document.head.append(frag{i});
         x3d_embed = self.to_widget(
             dynamic_loading=dynamic_loading,
             include_export_button=include_export_button,
-            include_record_button=include_record_button
+            include_record_button=include_record_button,
+            include_resources=False
         )  # .tostring()
 
-        src = [
-            JHTML.Link(rel='stylesheet', href=self.X3DOM_CSS),
-            JHTML.Script(src=self.X3DOM_JS)
-        ] if not self.use_xite else [
-            JHTML.Script(src=self.X_ITE_JS)
-        ]
+        src = self.get_resource_elements()
 
         return JHTML.Html(
             JHTML.Head(
@@ -674,7 +1171,7 @@ document.head.append(frag{i});
                 *base_elems,
                 x3d_embed
             ),
-            id=id
+            id=id + '-document'
         )
 
     def _ipython_display_(self):
@@ -699,6 +1196,7 @@ document.head.append(frag{i});
         **LLM Docstring**
 
         Render the scene to its `<x3d>` DOM element, formatting the size and rendering each child.
+        Loose scene objects are placed inside a Scene so the runtime can initialize them.
 
         :return: the X3D element
         """
@@ -708,11 +1206,20 @@ document.head.append(frag{i});
                 v = base_opts[k]
                 if nput.is_numeric(v):
                     base_opts[k] = f'{v:.0f}px'
-        elem = X3DHTML.X3D(
-            JHTML.HTML.Head(),
-            *[a.to_x3d() if hasattr(a, 'to_x3d') else a for a in self.children],
-            **base_opts
-        )
+        children = [a.to_x3d() if hasattr(a, 'to_x3d') else a for a in self.children]
+        scenes, headers, loose = [], [], []
+        for child in children:
+            tag = str(getattr(child, 'tag', '')).lower()
+            (scenes if tag == 'scene' else headers if tag == 'head' else loose).append(child)
+        if not scenes:
+            scenes = [X3DScene(*loose).to_x3d()]
+        elif loose:
+            # Preserve an explicit scene's settings without changing a caller's
+            # already rendered element when adding animation drivers or objects.
+            scene = scenes[0].copy()
+            scene.elems = tuple(scene.elems) + tuple(loose)
+            scenes[0] = scene
+        elem = X3DHTML.X3D(*headers, *scenes, **base_opts)
         if self.use_xite:
             elem = X3DHTML.X3DCanvas(elem,
                                      width=base_opts['width'],
@@ -2063,6 +2570,14 @@ class X3DGeometryObject(X3DPrimitive):
         if up_vector is None:
             up_vector = [0, 1, 0]
         angs, crosses, norms = nput.vec_angles(up_vector, axis, return_crosses=True, return_norms=True)
+        # Antiparallel vectors have a zero cross product, but a pi rotation
+        # still needs a valid axis. This occurs for the reverse arrowhead.
+        antiparallel = (np.linalg.norm(crosses, axis=-1) < 1.e-12) & np.isclose(angs, np.pi)
+        if np.any(antiparallel):
+            up = np.broadcast_to(np.asarray(up_vector, dtype=float), np.shape(crosses))
+            reference = np.eye(3)[np.argmin(np.abs(up), axis=-1)]
+            fallback = nput.vec_crosses(up, reference, normalize=True)
+            crosses = np.where(np.asarray(antiparallel)[..., np.newaxis], fallback, crosses)
         if nput.is_numeric(angs):
             return np.concatenate([crosses, [angs]]), norms[1]
         else:
@@ -2383,13 +2898,20 @@ class X3DArrow(X3DGroup):
                  arrowhead_offset_mode='scaled',
                  cylinder_class=None,
                  arrowhead_class=None,
+                 double_sided=False,
                  **opts):
         """
         **LLM Docstring**
 
-        Build an arrow (a cylinder shaft plus a cone head) between two endpoints.
+        Build an arrow between two endpoints, optionally with a head at each end.
+
+        ``double_sided=True`` points both heads outward and trims the shaft at
+        both bases. Each head uses the existing radius and offset settings;
+        its length is capped at half the span so the heads do not cross.
 
         :param args: the arrow-defining arguments (endpoints, etc.)
+        :param double_sided: place outward-pointing heads at both endpoints
+        :type double_sided: bool
         :param opts: styling and geometry options
         """
         if arrowhead_class is None:
@@ -2397,25 +2919,37 @@ class X3DArrow(X3DGroup):
         if cylinder_class is None:
             cylinder_class = self.cylinder_class
 
-        ends = np.asanyarray(ends)
-        starts = np.asanyarray(starts)
+        starts, ends = np.broadcast_arrays(np.asarray(starts, dtype=float),
+                                           np.asarray(ends, dtype=float))
         arrow_vectors = ends - starts
         norms = nput.vec_norms(arrow_vectors)
+        unit_vectors = np.divide(arrow_vectors, np.asarray(norms)[..., np.newaxis],
+                                 out=np.zeros_like(arrow_vectors),
+                                 where=np.asarray(norms)[..., np.newaxis] != 0)
+        arrowhead_offset = np.asarray(arrowhead_offset)
         if arrowhead_offset_mode == 'scaled':
             arrowhead_offset = arrowhead_offset * norms
-        disp_vectors = arrowhead_offset * nput.vec_normalize(arrow_vectors, norms=norms)
+        if double_sided:
+            arrowhead_offset = np.minimum(arrowhead_offset, norms / 2)
+        disp_vectors = arrowhead_offset[..., np.newaxis] * unit_vectors
         arrow_starts = ends - disp_vectors
         if arrowhead_radius_mode == 'scaled':
-            arrowhead_radius = arrowhead_radius * radius
+            arrowhead_radius = np.asarray(arrowhead_radius) * np.asarray(radius)
         arrowheads = arrowhead_class(arrow_starts, ends,
                                      radius=arrowhead_radius,
                                      top_radius=top_radius,
                                      **opts)
-        cylinders = cylinder_class(starts, arrow_starts, radius=radius, **opts)
-
-        super().__init__(
-            arrowheads, cylinders
-        )
+        if double_sided:
+            tail_starts = starts + disp_vectors
+            tail_heads = arrowhead_class(tail_starts, starts,
+                                         radius=arrowhead_radius,
+                                         top_radius=top_radius,
+                                         **opts)
+            cylinders = cylinder_class(tail_starts, arrow_starts, radius=radius, **opts)
+            super().__init__(arrowheads, tail_heads, cylinders)
+        else:
+            cylinders = cylinder_class(starts, arrow_starts, radius=radius, **opts)
+            super().__init__(arrowheads, cylinders)
 
 class X3DCappedCylinder(X3DGroup):
 
@@ -2889,13 +3423,13 @@ class X3DIndexedFaceSet(X3DIndexedCoordinatesWrapper):
     tag_class = X3DHTML.IndexedFaceSet
 
 class X3DGenericAnimator(X3DGroup):
-    def __init__(self, *animation_data, id=None, animation_duration=2, running=True, slider=False,
+    def __init__(self, *animation_data, id=None, animation_duration=2, running=True, slider=False, playback=True,
                  **opts):
         """
         **LLM Docstring**
 
         Build an animator group: the animated objects, a time clock/sequencer, the
-        per-property interpolators/sequencers, and an optional frame slider.
+        per-property interpolators/sequencers, and playback controls outside the scene.
 
         :param animation_data: the animation data (interpreted by the subclass)
         :param id: the animator id (auto-generated if omitted)
@@ -2903,8 +3437,10 @@ class X3DGenericAnimator(X3DGroup):
         :type animation_duration: float
         :param running: start the animation running
         :type running: bool
-        :param slider: include a frame slider
+        :param slider: legacy alias enabling the playback toolbar and timeline
         :type slider: bool
+        :param playback: include general playback controls when embedded in X3D
+        :type playback: bool
         :param opts: extra options
         """
         self.uuid = str(uuid.uuid4())
@@ -2912,22 +3448,15 @@ class X3DGenericAnimator(X3DGroup):
             id = f"animation-{self.uuid}"
 
         animated_objects, attributes, nframes = self.get_animation_objects(animation_data, id)
-        elements = []
-        if slider:
-            elements.append(
-                JHTML.Input(type="range", value="0", min="0", max=f"{nframes}", step="1", cls="slider",
-                            oninput=f"""document.getElementById('{id}').setAttribute('whichChoice', this.value)""")
-            )
-        elements.extend(animated_objects)
-        # if running:
-        elements.extend(
-            self.build_animator_group(attributes,
+        elements = list(animated_objects)
+        driver = self.build_animator_group(attributes,
                                       nframes=nframes,
                                       animation_duration=animation_duration,
                                       running=running,
                                       uuid=self.uuid
                                       )
-        )
+        driver[0].attrs.update({'data-playback': bool(playback or slider), 'data-frame-count': nframes})
+        elements.extend(driver)
 
         super().__init__(elements, id=id, DEF=id, **opts)
 
@@ -2985,6 +3514,10 @@ class X3DGenericAnimator(X3DGroup):
             []
         )
         controls = [c for c in controls if c is not None]
+        if not any(str(c.tag).lower() == 'route'
+                   and c.attrs.get('fromNode') == f'animation-indexer-{uuid}' for c in controls):
+            # Interpolating-only animations have no discrete index consumer.
+            base = base[:1]
         return base + controls
 
     @classmethod
@@ -3269,7 +3802,7 @@ requestAnimationFrame(tick)
             values = " ".join(np.round(values, 4).flatten().astype(str))
         key_frames = np.linspace(0, 1, nframes)
 
-        iid = id + "-interpolator-" + cls.get_new_id(),
+        iid = id + "-interpolator-" + cls.get_new_id()
         interp_obj = (
             interpolator_type(key=key_frames, keyValue=values,
                               id=iid,
