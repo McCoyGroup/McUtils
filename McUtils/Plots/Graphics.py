@@ -1335,6 +1335,8 @@ class GraphicsBase(metaclass=ABCMeta):
 #
 class Graphics(GraphicsBase):
 
+    opt_keys = GraphicsBase.opt_keys | {'axes_scales'}
+
     default_style = dict(
         theme='mccoy',
         image_size=(370, 345),
@@ -1343,6 +1345,7 @@ class Graphics(GraphicsBase):
     )
 
     axes_keys = {
+        'axes_scales',
         'plot_label',
         'style_list',
         'plot_legend',
@@ -1382,6 +1385,7 @@ class Graphics(GraphicsBase):
                     grid_style=None,
                     ticks=None,
                     scale=None,
+                    axes_scales=None,
                     padding=None,
                     spacings=None,
                     ticks_style=None,
@@ -1412,7 +1416,8 @@ class Graphics(GraphicsBase):
         :param frame: which frame edges to draw
         :param frame_style: frame styling
         :param ticks: the tick specification
-        :param scale: the axis scaling
+        :param scale: legacy axis scaling (a scalar affects y only)
+        :param axes_scales: a scale name for all axes, or per-axis scales; None entries retain the current scale
         :param padding: the figure padding
         :param spacings: the panel spacings
         :param ticks_style: tick styling
@@ -1427,6 +1432,8 @@ class Graphics(GraphicsBase):
         :param parent_opts: options forwarded to the base class
         """
 
+        if axes_scales is not None and scale is not None:
+            raise ValueError('Specify axes_scales or its legacy scale alias, not both')
         super().set_options(prolog=prolog, epilog=epilog, theme=theme, **parent_opts)
 
         if theme is None:
@@ -1437,6 +1444,20 @@ class Graphics(GraphicsBase):
             axes_label_padding = self.get_axes_label_padding(axes_labels)
             padding = self.resolve_default_padding(padding, [plot_label_padding, axes_label_padding],
                                                    theme=theme)
+        # Resolve aliases before applying plot_range, whose public values are in
+        # data units even when a backend stores logarithmic ranges as exponents.
+        if axes_scales is not None:
+            self.axes_scales = axes_scales
+        elif scale is not None:
+            self.scale = scale
+        else:
+            configured = self._get_def_opt('axes_scales', None, theme)
+            if configured is not None:
+                self.axes_scales = configured
+            else:
+                configured = self._get_def_opt('scale', None, theme)
+                if configured is not None:
+                    self.scale = configured
         opts = (
             ('plot_label', plot_label),
             ('style_list', style_list),
@@ -1451,7 +1472,6 @@ class Graphics(GraphicsBase):
             ('ticks', ticks),
             ('ticks_style', ticks_style),
             ('ticks_label_style', ticks_label_style),
-            ('scale', scale),
             ('aspect_ratio', aspect_ratio),
             ('image_size', image_size),
             ('axes_bbox', axes_bbox),
@@ -1906,28 +1926,48 @@ class Graphics(GraphicsBase):
         self._prop_manager.ticks_label_style = value
 
     @property
+    def opts(self):
+        options = super().opts
+        configured = self._prop_manager._axes_scales
+        if configured is None:
+            # Querying or showing an untouched figure must not turn Plotly's
+            # automatic categorical/date inference into explicit linear axes.
+            options.pop('axes_scales', None)
+        else:
+            options['axes_scales'] = configured
+        return options
+
+    @property
+    def axes_scales(self):
+        """Per-axis scale names or Styled specifications.
+
+        A string applies to every axis. A two-element (2D) or three-element
+        (3D) tuple/list specifies axes independently; None leaves an axis alone.
+        Supported scales and Styled keyword options depend on the backend.
+        """
+        return self._prop_manager.axes_scales
+
+    @axes_scales.setter
+    def axes_scales(self, value):
+        self._prop_manager.axes_scales = value
+        self._record_axes_scale_option()
+
+    @property
     def scale(self):
-        """
-        **LLM Docstring**
-
-        The axis scaling (e.g. linear/log). Getter/setter delegate to the property manager (the setter also records
-        the change for copying).
-
-        :return: the scale value
-        """
+        """Legacy alias for axes_scales; a scalar applies to y only."""
         return self._prop_manager.scale
+
     @scale.setter
     def scale(self, value):
-        """
-        **LLM Docstring**
-
-        The axis scaling (e.g. linear/log). Getter/setter delegate to the property manager (the setter also records
-        the change for copying).
-
-        :return: the scale value
-        """
-        self._update_copy_opt('scale', value)
         self._prop_manager.scale = value
+        self._record_axes_scale_option()
+
+    def _record_axes_scale_option(self):
+        # Copies and plots awaiting their first draw must replay the current
+        # canonical setting, rather than a stale constructor alias.
+        for opts in (self._init_opts, self.__dict__.get('plot_opts', {})):
+            opts.pop('scale', None)
+            opts['axes_scales'] = self._prop_manager._axes_scales
 
     @property
     def axes_bbox(self):
@@ -2355,8 +2395,8 @@ class Graphics(GraphicsBase):
 class Graphics3D(Graphics):
 
     default_style = Graphics.default_style | dict(frame=((True, False), (True, False), (True, False)))
-    opt_keys = GraphicsBase.opt_keys | {'view_settings', 'box_ratios', 'projection_type', 'autoscale', 'aspect_ratio'}
-    known_keys = Graphics.opt_keys | {'animate'}
+    opt_keys = Graphics.opt_keys | {'view_settings', 'box_ratios', 'projection_type', 'autoscale', 'aspect_ratio'}
+    known_keys = Graphics.known_keys | {'animate', 'view_settings', 'box_ratios', 'projection_type', 'autoscale'}
 
     # layout_keys = axes_keys | figure_keys | GraphicsBase.layout_keys
     # known_keys = layout_keys
@@ -2374,6 +2414,7 @@ class Graphics3D(Graphics):
                  plot_legend=None,
                  ticks=None,
                  scale=None,
+                 axes_scales=None,
                  ticks_style=None,
                  image_size=None,
                  background=None,
@@ -2406,7 +2447,8 @@ class Graphics3D(Graphics):
         :param plot_range: the data range
         :param plot_legend: the legend
         :param ticks: the tick specification
-        :param scale: the axis scaling
+        :param scale: legacy axis scaling (a scalar affects y only)
+        :param axes_scales: a scale name for all axes, or per-axis scales; None entries retain the current scale
         :param ticks_style: tick styling
         :param image_size: the image size
         :param background: the background color
@@ -2433,6 +2475,7 @@ class Graphics3D(Graphics):
             plot_legend=plot_legend,
             ticks=ticks,
             scale=scale,
+            axes_scales=axes_scales,
             ticks_style=ticks_style,
             image_size=image_size,
             event_handlers=event_handlers,

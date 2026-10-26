@@ -340,6 +340,33 @@ class GraphicsAxes(metaclass=abc.ABCMeta):
     def set_autoscale_on(self, is_on):
         raise NotImplementedError(...)
 
+    def validate_axis_scale(self, axis, scale, **opts):
+        """Check a scale request before changing any backend state.
+
+        Backends without nonlinear scaling retain their existing linear axes.
+        This concrete default keeps optional backends instantiable and fails
+        explicitly when an unsupported transformation is requested.
+        """
+        if axis not in ('x', 'y', 'z') or (axis == 'z' and not hasattr(self, 'get_zlim')):
+            raise ValueError(f"{type(self).__name__} has no {axis!r} axis")
+        if scale != 'linear' or opts:
+            raise NotImplementedError(
+                f"{type(self).__name__} supports only 'linear' axis scales without options"
+            )
+
+    def get_xscale(self):
+        return 'linear'
+    def set_xscale(self, scale, **opts):
+        self.validate_axis_scale('x', scale, **opts)
+    def get_yscale(self):
+        return 'linear'
+    def set_yscale(self, scale, **opts):
+        self.validate_axis_scale('y', scale, **opts)
+    def get_zscale(self):
+        return 'linear'
+    def set_zscale(self, scale, **opts):
+        self.validate_axis_scale('z', scale, **opts)
+
     class _limit_adjuster_context:
         def __init__(self, ax, adjust_limits):
             self.ax = ax
@@ -2201,6 +2228,27 @@ class MPLAxes(GraphicsAxes):
     def set_autoscale_on(self, is_on):
         return self.obj.set_autoscale_on(is_on)
 
+    def get_xscale(self):
+        return self.obj.get_xscale()
+    def validate_axis_scale(self, axis, scale, **opts):
+        """Use Matplotlib's scale constructor for non-mutating validation."""
+        if axis not in ('x', 'y', 'z') or not hasattr(self.obj, axis + 'axis'):
+            raise ValueError(f"{type(self).__name__} has no {axis!r} axis")
+        from matplotlib.scale import ScaleBase, scale_factory
+        if isinstance(scale, ScaleBase):
+            if opts:
+                raise TypeError("A Matplotlib ScaleBase instance does not accept extra scale options")
+        else:
+            scale_factory(scale, getattr(self.obj, axis + 'axis'), **opts)
+    def set_xscale(self, scale, **opts):
+        self.validate_axis_scale('x', scale, **opts)
+        return self.obj.set_xscale(scale, **opts)
+    def get_yscale(self):
+        return self.obj.get_yscale()
+    def set_yscale(self, scale, **opts):
+        self.validate_axis_scale('y', scale, **opts)
+        return self.obj.set_yscale(scale, **opts)
+
     def get_xlabel(self):
         """
         **LLM Docstring**
@@ -2866,6 +2914,23 @@ class MPLAxes(GraphicsAxes):
         return path
 
 class MPLAxes3D(MPLAxes):
+    def validate_axis_scale(self, axis, scale, **opts):
+        super().validate_axis_scale(axis, scale, **opts)
+        name = scale if isinstance(scale, str) else getattr(scale, 'name', None)
+        version = tuple(int(part) for part in re.match(
+            r'(\d+)\.(\d+)', MPLManager.mpl_api().__version__).groups())
+        if name != 'linear' and version < (3, 11):
+            raise NotImplementedError(
+                "Nonlinear 3D axis scales require Matplotlib 3.11 or newer; "
+                f"installed version is {MPLManager.mpl_api().__version__}"
+            )
+
+    def get_zscale(self):
+        return self.obj.get_zscale()
+    def set_zscale(self, scale, **opts):
+        self.validate_axis_scale('z', scale, **opts)
+        return self.obj.set_zscale(scale, **opts)
+
     def __init__(self, mpl_axes_object, **opts):
         """
         **LLM Docstring**
@@ -5198,6 +5263,8 @@ class MPLBackend3D(MPLBackend):
 class PlotlyAxes(GraphicsAxes):
     base_axis_theme = {}
     base_theme = {}
+    axis_scale_types = ('linear', 'log', 'date', 'category', 'multicategory', '-')
+    scale_axis_names = ('x', 'y')
     def __init__(self, elements=None, xaxis=None, yaxis=None, annotations=None, **opts):
         """
         **LLM Docstring**
@@ -5449,6 +5516,100 @@ class PlotlyAxes(GraphicsAxes):
             **style
         )
 
+    @staticmethod
+    def _convert_log_axis_range(value, *, to_log):
+        """Translate data-unit limits to/from Plotly's base-10 exponent limits."""
+        if value is None:
+            return None
+        try:
+            values = list(value)
+        except TypeError:
+            raise ValueError("Axis limits must contain two bounds, optionally None") from None
+        if len(values) != 2:
+            raise ValueError("Axis limits must contain exactly two bounds")
+        converted = []
+        for bound in values:
+            if bound is None:
+                converted.append(None)
+                continue
+            if not isinstance(bound, (int, float, np.integer, np.floating)) or not np.isfinite(bound):
+                raise ValueError("Logarithmic axis limits must be finite real numbers or None")
+            if to_log:
+                if bound <= 0:
+                    raise ValueError("Logarithmic axis limits must be strictly positive")
+                bound = float(np.log10(bound))
+            else:
+                with np.errstate(over='ignore', under='ignore'):
+                    bound = float(np.power(10., bound))
+                if not np.isfinite(bound) or bound <= 0:
+                    raise ValueError("Plotly logarithmic limits exceed finite positive data units")
+            converted.append(bound)
+        return converted
+
+    def _get_axis_scale(self, axis):
+        # This is the configured wrapper default, not Plotly's browser-side
+        # inference from date/category trace values when no type is supplied.
+        return self.opts.get(axis + 'axis', {}).get('type') or 'linear'
+
+    def _range_for_scale(self, axis, scale):
+        current = self.opts.get(axis + 'axis', {})
+        value = current.get('range')
+        if value is not None:
+            old_scale = self._get_axis_scale(axis)
+            if old_scale == 'log' and scale != 'log':
+                value = self._convert_log_axis_range(value, to_log=False)
+            elif old_scale != 'log' and scale == 'log':
+                value = self._convert_log_axis_range(value, to_log=True)
+        return value
+
+    def validate_axis_scale(self, axis, scale, **opts):
+        if axis not in self.scale_axis_names:
+            raise ValueError(f"{type(self).__name__} has no {axis!r} axis")
+        if not isinstance(scale, str) or scale not in self.axis_scale_types:
+            raise ValueError(
+                f"{type(self).__name__} supports axis types {self.axis_scale_types}, got {scale!r}"
+            )
+        if opts:
+            raise TypeError(
+                "Plotly axis scales do not accept Matplotlib scale options: "
+                + ', '.join(sorted(opts))
+            )
+        self._range_for_scale(axis, scale)
+
+    def _set_axis_scale(self, axis, scale, **opts):
+        self.validate_axis_scale(axis, scale, **opts)
+        current = self.opts.get(axis + 'axis', {})
+        updated = current | {'type': scale}
+        if 'range' in current:
+            updated['range'] = self._range_for_scale(axis, scale)
+        self.opts[axis + 'axis'] = updated
+
+    def get_xscale(self):
+        return self._get_axis_scale('x')
+    def set_xscale(self, scale, **opts):
+        self._set_axis_scale('x', scale, **opts)
+    def get_yscale(self):
+        return self._get_axis_scale('y')
+    def set_yscale(self, scale, **opts):
+        self._set_axis_scale('y', scale, **opts)
+
+    def _get_axis_limits(self, axis):
+        value = self.opts.get(axis + 'axis', {}).get('range')
+        if value is None:
+            return self.get_plot_range()['xyz'.index(axis)]
+        if self._get_axis_scale(axis) == 'log':
+            value = self._convert_log_axis_range(value, to_log=False)
+        return value
+
+    def _set_axis_limits(self, axis, value, **opts):
+        current = self.opts.get(axis + 'axis', {})
+        scale = opts.get('type', self._get_axis_scale(axis))
+        if not isinstance(scale, str) or scale not in self.axis_scale_types:
+            raise ValueError(f"Unsupported Plotly axis type {scale!r}")
+        if scale == 'log':
+            value = self._convert_log_axis_range(value, to_log=True)
+        self.opts[axis + 'axis'] = current | opts | {'range': value}
+
     def get_plot_range(self):
         """
         **LLM Docstring**
@@ -5496,10 +5657,7 @@ class PlotlyAxes(GraphicsAxes):
 
         :return: the result
         """
-        xrange = self.opts.get('xaxis', {}).get('range')
-        if xrange is None:
-            xrange = self.get_plot_range()[0]
-        return xrange
+        return self._get_axis_limits('x')
     def set_xlim(self, val, **opts):
         """
         **LLM Docstring**
@@ -5509,10 +5667,7 @@ class PlotlyAxes(GraphicsAxes):
         :param val: the `(min, max)` limits
         :param opts: extra options
         """
-        self.opts['xaxis'] = self.opts.get('xaxis', {}) | dict(
-            range=val,
-            **opts
-        )
+        self._set_axis_limits('x', val, **opts)
     def get_ylim(self):
         """
         **LLM Docstring**
@@ -5521,10 +5676,7 @@ class PlotlyAxes(GraphicsAxes):
 
         :return: the result
         """
-        yrange = self.opts.get('yaxis', {}).get('range')
-        if yrange is None:
-            yrange = self.get_plot_range()[1]
-        return yrange
+        return self._get_axis_limits('y')
     def set_ylim(self, val, **opts):
         """
         **LLM Docstring**
@@ -5534,10 +5686,7 @@ class PlotlyAxes(GraphicsAxes):
         :param val: the `(min, max)` limits
         :param opts: extra options
         """
-        self.opts['yaxis'] = self.opts.get('yaxis', {}) | dict(
-            range=val,
-            **opts
-        )
+        self._set_axis_limits('y', val, **opts)
 
     def get_xticks(self):
         """
@@ -6863,6 +7012,13 @@ class PlotlyBackend(GraphicsBackend):
 
 class PlotlyAxes3D(PlotlyAxes):
     axes_props = ['xaxis', 'yaxis', 'zaxis', 'xaxis2', 'yaxis2', 'zaxis2']
+    axis_scale_types = ('linear', 'log', 'date', 'category', '-')
+    scale_axis_names = ('x', 'y', 'z')
+
+    def get_zscale(self):
+        return self._get_axis_scale('z')
+    def set_zscale(self, scale, **opts):
+        self._set_axis_scale('z', scale, **opts)
     def __init__(self, elements=None, *, zaxis=None, **opts):
         """
         **LLM Docstring**
@@ -7134,10 +7290,7 @@ class PlotlyAxes3D(PlotlyAxes):
 
         :return: the result
         """
-        zrange = self.opts.get('zaxis', {}).get('range')
-        if zrange is None:
-            zrange = self.get_plot_range()[2]
-        return zrange
+        return self._get_axis_limits('z')
     def set_zlim(self, val, **opts):
         """
         **LLM Docstring**
@@ -7147,10 +7300,7 @@ class PlotlyAxes3D(PlotlyAxes):
         :param val: the `(min, max)` limits
         :param opts: extra options
         """
-        self.opts['zaxis'] = self.opts.get('zaxis', {}) | dict(
-            range=val,
-            **opts
-        )
+        self._set_axis_limits('z', val, **opts)
     def get_zticks(self):
         """
         **LLM Docstring**
@@ -7321,6 +7471,24 @@ class PlotlyAxes3D(PlotlyAxes):
         :rtype: dict
         """
         return super().plot(x, y, z=z, type=type, line=line, **opts)
+
+    def plot_surface(self, x, y, z, **opts):
+        """Add a native Plotly surface without transforming its coordinates.
+
+        Surface styles follow Plotly's Surface schema. Unsupported Matplotlib
+        surface keywords fail here, before a malformed trace enters the figure.
+        """
+        from plotly.graph_objects import Surface
+        trace = dict(type='surface', x=x, y=y, z=z, **opts)
+        Surface(trace)  # Native schema validation; retain original data arrays.
+        self.elements.append(trace)
+        return trace
+
+    def get_plotter(self, method, **opts):
+        if method == 'plot_surface':
+            return self.plot_surface
+        return super().get_plotter(method, **opts)
+
     def scatter(self, x, y, z, line=None, type='scatter3d',
                 marker=None,
                 edge_color=None,

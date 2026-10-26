@@ -49,6 +49,7 @@ class GraphicsPropertyManager:
         self._plot_range = None
         self._ticks = None
         self._scale = None
+        self._axes_scales = None
         self._ticks_style = None
         self._ticks_label_style = None
         self._aspect_ratio = None
@@ -977,50 +978,71 @@ class GraphicsPropertyManager:
             self._grid_style
         )
 
+    _scale_axes = ('x', 'y')
+
+    @property
+    def axes_scales(self):
+        """Configured per-axis scales, including any explicit Styled options."""
+        specs = (None,) * len(self._scale_axes) if self._axes_scales is None else self._axes_scales
+        return tuple(getattr(self.axes, 'get_' + axis + 'scale')() if spec is None else spec
+                     for axis, spec in zip(self._scale_axes, specs))
+
+    @axes_scales.setter
+    def axes_scales(self, scales):
+        if scales is None:
+            return
+        n = len(self._scale_axes)
+        if isinstance(scales, (str, Styled)) or Styled.could_be(scales):
+            scales = (scales,) * n
+        elif not isinstance(scales, (tuple, list)):
+            raise TypeError('axes_scales must be a scale name or a per-axis tuple/list')
+        if len(scales) != n:
+            raise ValueError('axes_scales requires {} axis specifications'.format(n))
+
+        current = [None] * n if self._axes_scales is None else list(self._axes_scales)
+        pending = []
+        for i, (axis, spec) in enumerate(zip(self._scale_axes, scales)):
+            if spec is None:
+                continue
+            if Styled.could_be(spec):
+                spec = Styled.construct(spec)
+            if isinstance(spec, Styled):
+                if len(spec.val) != 1:
+                    raise ValueError('An axis scale Styled value requires one scale name')
+                name, opts = spec.val[0], dict(spec.opts)
+            else:
+                name, opts = spec, {}
+            if not isinstance(name, str) or not name:
+                raise TypeError('An axis scale must be a nonempty string or Styled scale name')
+            # Validate the entire update before changing any axis or cached value.
+            self.axes.validate_axis_scale(axis, name, **opts)
+            pending.append((axis, name, opts))
+            current[i] = spec
+        if not pending:
+            return
+        for axis, name, opts in pending:
+            getattr(self.axes, 'set_' + axis + 'scale')(name, **opts)
+        self._axes_scales = self._scale = tuple(current)
+
     @property
     def scale(self):
-        """
-        **LLM Docstring**
+        """Compatibility alias; a scalar scale continues to affect only y."""
+        return self.axes_scales
 
-        The per-axis scaling (e.g. linear/log). The getter returns the cached value; the
-        setter applies the x/y scales to the backend axes.
-
-        :return: the axis scaling
-        """
-        return self._scale
     @scale.setter
     def scale(self, scales):
-        """
-        **LLM Docstring**
-
-        The per-axis scaling (e.g. linear/log). The getter returns the cached value; the
-        setter applies the x/y scales to the backend axes.
-
-        :return: the axis scaling
-        """
-        if self._scale is None:
-            self._scale = (self.axes.get_xscale(), self.axes.get_yscale())
-        try:
-            x, y = scales
-        except ValueError:
-            x, y = scales = (self._scale[0], scales)
-
-        self._scale = tuple(scales)
-
-        if isinstance(x, Styled):
-            self.axes.set_xscale(*x.val, **x.opts)
-        elif Styled.could_be(x):
-            x = Styled.construct(x)
-            self.axes.set_xscale(*x.val, **x.opts)
-        elif x is not None:
-            self.axes.set_xscale(x)
-        if isinstance(y, Styled):
-            self.axes.set_yscale(*y.val, **y.opts)
-        elif y is not None:
-            self.axes.set_yscale(y)
-        elif Styled.could_be(y):
-            y = Styled.construct(y)
-            self.axes.set_yscale(*y.val, **y.opts)
+        if scales is None:
+            return
+        if isinstance(scales, (str, Styled)) or Styled.could_be(scales):
+            value = [None] * len(self._scale_axes)
+            value[1] = scales
+        elif isinstance(scales, (tuple, list)):
+            value = list(scales)
+            if len(value) == 2 and len(self._scale_axes) == 3:
+                value.append(None)
+        else:
+            raise TypeError('scale must be a scale name or a per-axis tuple/list')
+        self.axes_scales = value
 
     @property
     def padding(self):
@@ -1259,6 +1281,7 @@ class GraphicsPropertyManager:
         self._colorbar = c
 
 class GraphicsPropertyManager3D(GraphicsPropertyManager):
+    _scale_axes = ('x', 'y', 'z')
     def __init__(self, graphics, figure, axes, managed=False):
         """
         **LLM Docstring**

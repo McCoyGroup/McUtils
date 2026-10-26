@@ -1742,6 +1742,8 @@ class Plot3D(Graphics3D):  # basically a mimic of the Plot class but inheriting 
                  plot_style=None,
                  method=None, colorbar=None,
                  figure=None, axes=None, subplot_kw=None,
+                 display_format=None,
+                 postprocessor=None,
                  **opts
                  ):
         """
@@ -1763,15 +1765,13 @@ class Plot3D(Graphics3D):  # basically a mimic of the Plot class but inheriting 
         :type opts:
         """
 
-        super().__init__(figure=figure, axes=axes, subplot_kw=subplot_kw)
-        if method is None:
-           method = self.method
-        if isinstance(method, str):
-            method = self.axes.get_plotter(method)
-        self._method = method
-
         # we're gonna set things up so that we can have delayed evaluation of the plotting.
         # i.e. a Plot3D can be initialized but then do all its plotting later
+        self.graphics = None
+        self._data = None
+        self._initialized = False
+        self.display_format = display_format
+        self.postprocessor = postprocessor
         if plot_style is None:
             plot_style = {}
         for k,v in self.style_mapping.items():
@@ -1780,18 +1780,36 @@ class Plot3D(Graphics3D):  # basically a mimic of the Plot class but inheriting 
                 del opts[k]
         for k in self.known_styles:
             if k in opts:
-                plot_style[k] = opts[k]
+                plot_style[k] = opts.pop(k)
         for k in self.default_plot_style:
             if k not in plot_style:
                 plot_style[k] = self.default_plot_style[k]
         self._plot_style = plot_style
-        self.plot_style = plot_style
         self.plot_opts = opts
         self._colorbar = colorbar
-        self._initialized = False
+
+        super().__init__(figure=figure, axes=axes, subplot_kw=subplot_kw,
+                         colorbar=colorbar, **opts)
+        if method is None:
+            method = self.method
+        self._init_opts.update(plot_style=plot_style, method=method,
+                               colorbar=colorbar, display_format=display_format,
+                               postprocessor=postprocessor)
+        if isinstance(method, str):
+            method = self.axes.get_plotter(method)
+        self._method = method
 
         if len(params) > 0:
             self.plot(*params)
+
+    prep_styles = Plot.prep_styles
+    data = Plot.data
+    plot_style = Plot.plot_style
+
+    def _get_init_args(self, *init_args):
+        if self._data is None:
+            return init_args
+        return (*self._data[0], *init_args)
 
     def _initialize(self):
         """
@@ -1852,7 +1870,9 @@ class Plot3D(Graphics3D):  # basically a mimic of the Plot class but inheriting 
         :param plot_style: the styling options (merged with the defaults)
         :return: the backend graphics object
         """
-        return Plot.plot(self, *params, **plot_style)
+        graphics = Plot.plot(self, *params, **plot_style)
+        self._update_copy_opt('plot_style', self.plot_style)
+        return graphics
     def add_colorbar(self, **kw):
         """
         **LLM Docstring**
