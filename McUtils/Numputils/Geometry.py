@@ -22,6 +22,7 @@ from .Options import Options
 from .Lebedev import lebedev_grid, lebedev_rule
 
 __all__ = [
+    "ConstrainedConversion",
     "triangle_convert",
     "triangle_converter",
     "triangle_area",
@@ -63,30 +64,46 @@ __all__ = [
     "bezier_eval",
     "bezier_solve",
     "bezier_curvature",
-    "polygon_normal",
-    "triangulate_polygon",
     "refine_curve",
     "parametric_curve_evaluate",
     "parametric_curvature",
     "parametric_path_points",
     "parameteric_spline_interpolate",
     "parameteric_interpolation_curvature",
-    "check_triangle_intersection",
-    "check_bbox_intersections",
-    "check_interval_overlaps",
-    "check_line_intersection",
-    "check_segment_intersection",
-    "uv_mapping",
-    "fibonacci_sphere",
-    "uv_sphere",
-    "uv_cylinder",
-    "uv_cone",
-    "uv_box",
-    "orient_mesh_faces_outward",
     "lebedev_grid",
     "lebedev_rule"
 ]
 
+
+class ConstrainedConversion:
+    """A callable with value predicates and explicit alternative branches.
+
+    Predicates and alternatives accept the same arguments as the callable.
+    An unresolved conversion rejects values outside its constraints; callers
+    can inspect/evaluate alternatives without silently choosing a branch.
+    ``wrap`` carries this information through a change of input interface.
+    """
+    __slots__ = ('function', 'constraints', 'alternatives', '__name__')
+
+    def __init__(self, function, constraints=(), alternatives=()):
+        self.function = function
+        self.constraints = tuple(constraints)
+        self.alternatives = tuple(alternatives)
+        self.__name__ = getattr(function, '__name__', type(function).__name__)
+
+    def __call__(self, *args, **kwargs):
+        if not all(np.all(c(*args, **kwargs)) for c in self.constraints):
+            raise ValueError(f"value constraints not satisfied for {self.__name__}; inspect alternatives")
+        return self.function(*args, **kwargs)
+
+    def wrap(self, wrapper):
+        converted = type(self)(
+            wrapper(self.function),
+            (wrapper(c) for c in self.constraints),
+            (a.wrap(wrapper) for a in self.alternatives)
+        )
+        converted.__name__ = self.__name__
+        return converted
 
 def law_of_cosines_cos(a, b, c):
     return ((a**2 + b**2) - c**2) / (2*a*b)
@@ -1401,36 +1418,61 @@ def _permutation_trie(comb_lists, cache=None):
     # _ = []
     if cache is not None and comb_lists in cache:
         return cache[comb_lists]
-    trie = {}
-    for c,completion_func in comb_lists:
-        for p in itertools.permutations(c):
-            t = trie
-            for k in p[:-1]:
-                if k in t:
-                    if not isinstance(t[k], dict): break
+    # Prefixes with the same consumed arguments have identical continuations.
+    # Share those continuations instead of materializing every permutation.
+    # Tiny relations are cheaper to construct directly; repeated arguments
+    # also need their original positional rather than set semantics.
+    if all(len(c) <= 3 for c, _ in comb_lists) or any(len(set(c)) != len(c) for c, _ in comb_lists):
+        trie = {}
+        for c, completion_func in comb_lists:
+            leaf = (c, completion_func)
+            for p in itertools.permutations(c):
+                node = trie
+                for k in p[:-1]:
+                    if k in node:
+                        if not isinstance(node[k], dict): break
+                    else:
+                        node[k] = {}
+                    node = node[k]
                 else:
-                    t[k] = {}
-                t = t[k]
-            else:
-                t[p[-1]] = (c, completion_func)
+                    node[p[-1]] = leaf
+        if cache is not None:
+            cache[comb_lists] = trie
+        return trie
+    rules = [(c, f, frozenset(c)) for c, f in comb_lists]
+    states = {}
+    def build(consumed):
+        if consumed in states:
+            return states[consumed]
+        matches = [(c, f, s) for c, f, s in rules if consumed <= s]
+        for c, f, s in reversed(matches):
+            if consumed == s:
+                leaf = (c, f)
+                states[consumed] = leaf
+                return leaf
+        node = {}
+        states[consumed] = node
+        for c, _, _ in matches:
+            for k in c:
+                if k not in consumed and k not in node:
+                    node[k] = build(consumed | {k})
+        return node
+    trie = build(frozenset())
     if cache is not None:
         cache[comb_lists] = trie
     return trie
 def _expand_trie(t):
     comps = {}
-    queue = collections.deque()
-    for k,v in t.items():
-        queue.append([[k], v])
+    queue = list(t.values())
+    visited = set()
     while queue:
-        prev, new = queue.pop()
+        new = queue.pop()
         if not isinstance(new, dict):
-            completion,function = new
+            completion, function = new
             comps[tuple(completion)] = function
-            continue
-        queue.extend(
-            [prev + [k], v]
-            for k, v in new.items()
-        )
+        elif id(new) not in visited:
+            visited.add(id(new))
+            queue.extend(new.values())
     return comps
 def _expand_trie_iter(t, sorting=None):
     queue = collections.deque()
@@ -1459,6 +1501,7 @@ def _expand_trie_iter(t, sorting=None):
                     queue.append([prev + [k], v, sort_map[k]])
 def _completion_paths(dd, completions_trie, prop_func, return_trie=False):
     queue = collections.deque([[[], completions_trie]])
+    visited = {id(completions_trie)}
     fall_throughs = []
     res = None
     while res is None and queue:
@@ -1471,7 +1514,9 @@ def _completion_paths(dd, completions_trie, prop_func, return_trie=False):
                 if not isinstance(v, dict):
                     res = v
                     break
-                queue.append([path+[k], v])
+                if id(v) not in visited:
+                    visited.add(id(v))
+                    queue.append([path+[k], v])
         else:
             fall_throughs.append([path, trie])
     if res is not None:
@@ -1696,8 +1741,55 @@ def _triangle_property_C_from_sas(a, B, c):
 def _triangle_property_C_from_saa(a, B, A):
     return tri_saa_to_sas(a, B, A)[1]
 def _triangle_property_C_from_asa(A, c, B):
-    return tri_asa_to_sas(A, c, B)[1]
-def triangle_completions_c(a, b, A, B, C, cache=None):
+    return np.pi - (A + B)
+def _triangle_ssa_valid(a, b, A, supplementary=False):
+    a, b, A = np.broadcast_arrays(a, b, A)
+    with np.errstate(invalid='ignore'):
+        h = b * np.sin(A)
+    tangent = np.isclose(a, h, rtol=8*np.finfo(float).eps, atol=0)
+    domain = np.isfinite(a) & np.isfinite(b) & np.isfinite(A) & (a > 0) & (b > 0) & (A > 0) & (A < np.pi)
+    if supplementary:
+        # At a == h the two branches coincide; keep only the principal one.
+        return domain & (A < np.pi / 2) & (h < a) & ~tangent & (a < b)
+    return domain & ((h <= a) | tangent) & ((A < np.pi / 2) | (a > b))
+
+def _triangle_ssa_unique(a, b, A):
+    return _triangle_ssa_valid(a, b, A) & ~_triangle_ssa_valid(a, b, A, supplementary=True)
+
+def _triangle_property_B_from_ssa(a, b, A, supplementary=False):
+    B = np.arcsin(np.clip(law_of_sines_sin(a, b, A), -1, 1))
+    return np.pi - B if supplementary else B
+
+def _triangle_property_C_from_ssa(a, b, A, supplementary=False):
+    return np.pi - (A + _triangle_property_B_from_ssa(a, b, A, supplementary=supplementary))
+
+def _triangle_property_c_from_ssa(a, b, A, supplementary=False):
+    h = b * np.sin(A)
+    root = np.sqrt(np.maximum(0, (a - h) * (a + h)))
+    root = np.where(np.isclose(a, h, rtol=8*np.finfo(float).eps, atol=0), 0, root)
+    projection = b * np.cos(A)
+    if supplementary:
+        return (b - a) * (b + a) / (projection + root)
+    # Rationalize the small positive root for an obtuse supplied angle.
+    with np.errstate(divide='ignore', invalid='ignore'):
+        return np.where(projection < 0, (a - b) * (a + b) / (root - projection), projection + root)
+
+def _triangle_ssa_conversion(function):
+    def supplementary(a, b, A):
+        return function(a, b, A, supplementary=True)
+    def supplementary_valid(a, b, A):
+        return _triangle_ssa_valid(a, b, A, supplementary=True)
+    supplementary.__name__ = function.__name__ + '_supplementary'
+    return ConstrainedConversion(function, (_triangle_ssa_unique,), (
+        ConstrainedConversion(function, (_triangle_ssa_valid,)),
+        ConstrainedConversion(supplementary, (supplementary_valid,))
+    ))
+
+_triangle_ssa_c = _triangle_ssa_conversion(_triangle_property_c_from_ssa)
+_triangle_ssa_C = _triangle_ssa_conversion(_triangle_property_C_from_ssa)
+_triangle_ssa_B = _triangle_ssa_conversion(_triangle_property_B_from_ssa)
+
+def triangle_completions_c(a, b, A, B, C, cache=None, allow_ambiguous_completions=False):
     return _permutation_trie(
         (
             ((a, C, b), _triangle_property_c_from_sas),
@@ -1705,10 +1797,13 @@ def triangle_completions_c(a, b, A, B, C, cache=None):
             ((b, A, B), _triangle_property_c_from_saa),
             ((C, a, B), _triangle_property_c_from_asa),
             ((C, b, A), _triangle_property_c_from_asa)
+        ) + (
+            (((a, b, A), _triangle_ssa_c), ((b, a, B), _triangle_ssa_c))
+            if allow_ambiguous_completions else ()
         ),
         cache=cache
     )
-def triangle_completions_C(a, b, c, A, B, cache=None):
+def triangle_completions_C(a, b, c, A, B, cache=None, allow_ambiguous_completions=False):
     return _permutation_trie(
         (
             ((a, b, c), _triangle_property_C_from_sss),
@@ -1716,14 +1811,19 @@ def triangle_completions_C(a, b, c, A, B, cache=None):
             ((b, A, c), _triangle_property_C_from_sas),
             ((a, B, A), _triangle_property_C_from_saa),
             ((b, A, B), _triangle_property_C_from_saa),
-            ((A, c, B), _triangle_property_c_from_asa)
+            ((A, c, B), _triangle_property_C_from_asa)
+        ) + (
+            (((a, b, A), _triangle_ssa_C), ((b, a, B), _triangle_ssa_C),
+             ((a, c, A), _triangle_ssa_B), ((b, c, B), _triangle_ssa_B))
+            if allow_ambiguous_completions else ()
         ),
         cache=cache
     )
 class TriangleCoordinateType(enum.Enum):
     Distance = "distance"
     Angle = "angle"
-def triangle_completions_trie(tdata:TriangleData, field_name, return_args=False, cache=None):
+def triangle_completions_trie(tdata:TriangleData, field_name, return_args=False, cache=None,
+                              allow_ambiguous_completions=False):
     if field_name == tdata.a:
         args = tdata.b, tdata.c, tdata.B, tdata.C, tdata.A
         type = TriangleCoordinateType.Distance
@@ -1746,17 +1846,19 @@ def triangle_completions_trie(tdata:TriangleData, field_name, return_args=False,
         raise ValueError(f"can't interepret field name {field_name}")
 
     if type == TriangleCoordinateType.Distance:
-        trie = triangle_completions_c(*args, cache=cache)
+        trie = triangle_completions_c(*args, cache=cache, allow_ambiguous_completions=allow_ambiguous_completions)
     else:
-        trie = triangle_completions_C(*args, cache=cache)
+        trie = triangle_completions_C(*args, cache=cache, allow_ambiguous_completions=allow_ambiguous_completions)
 
     if return_args:
         return (args, type), trie
     else:
         return trie
-def triangle_completions(field_name, return_trie=False, return_args=False, **triangle_values):
+def triangle_completions(field_name, return_trie=False, return_args=False,
+                         allow_ambiguous_completions=False, **triangle_values):
     dd = make_symbolic_triangle(**triangle_values)
-    args, trie = triangle_completions_trie(dd, field_name, return_args=True)
+    args, trie = triangle_completions_trie(dd, field_name, return_args=True,
+                                           allow_ambiguous_completions=allow_ambiguous_completions)
     if not return_trie:
         completions = _expand_trie(trie)
     else:
@@ -1769,7 +1871,8 @@ def triangle_completion_paths(tdata: TriangleData, field_name,
                               return_trie=False,
                               indices=None,
                               positions=False,
-                              return_args=False
+                              return_args=False,
+                              allow_ambiguous_completions=False
                               ):
     field_name = _tri_prop(make_symbolic_triangle(indices=indices, positions=positions), field_name)
     args, completions_trie = triangle_completions(field_name,
@@ -1780,14 +1883,26 @@ def triangle_completion_paths(tdata: TriangleData, field_name,
 
     tri = make_symbolic_triangle(tdata, indices=indices, positions=positions)
     res = _completion_paths(tri, completions_trie, _tri_prop, return_trie=return_trie)
+    if not res[0] and allow_ambiguous_completions:
+        completions_trie = triangle_completions(field_name, return_trie=True,
+                                                indices=indices, positions=positions,
+                                                allow_ambiguous_completions=True)
+        res = _completion_paths(tri, completions_trie, _tri_prop, return_trie=return_trie)
 
     if return_args:
         return args, res
     else:
         return res
 def triangle_property_function(sample_tri: TriangleData, field_name,
-                               raise_on_missing=True
+                               raise_on_missing=True,
+                               allow_ambiguous_completions=False
                                ):
+    """Build a property callable, optionally retaining constrained SSA relations.
+
+    SSA callables expose ``constraints`` and ``alternatives`` accepting the
+    same TriangleData input. Calling an unresolved two-solution relation
+    raises; individual alternatives can be evaluated explicitly.
+    """
     if _tri_prop(sample_tri, field_name) is not None:
         if isinstance(field_name, str):
             field_name = _tdata_name_map[field_name]
@@ -1801,7 +1916,8 @@ def triangle_property_function(sample_tri: TriangleData, field_name,
             sample_tri,
             field_name,
             return_trie=True,
-            return_args=True
+            return_args=True,
+            allow_ambiguous_completions=allow_ambiguous_completions
         )
         if complete:
             args, func = conversion_specs
@@ -1811,9 +1927,12 @@ def triangle_property_function(sample_tri: TriangleData, field_name,
                 a
                 for a in args
             ]
-            def convert(tdata):
-                return func(*(tdata[i] for i in inds))
-            return convert
+            def wrap(func):
+                def convert(tdata):
+                    return func(*(tdata[i] for i in inds))
+                convert.__name__ = getattr(func, '__name__', 'convert')
+                return convert
+            return func.wrap(wrap) if isinstance(func, ConstrainedConversion) else wrap(func)
         else:
             if raise_on_missing:
                 raise ValueError(f"can't get property '{field_name}' from {sample_tri}")
@@ -3798,7 +3917,11 @@ def dihedral_completion_paths(dd: DihedralTetrahedronData, field_name,
                               ):
     if cache is None:
         cache = {}
-    if dd not in cache:
+    key = ('dihedral_completion_paths', dd, field_name,
+           tuple(indices) if indices is not None and indices is not True else indices,
+           tuple(positions) if positions is not None and positions is not True and positions is not False else positions,
+           return_trie)
+    if key not in cache:
         args, completions_trie = dihedral_completions(field_name,
                                                       return_trie=True,
                                                       return_args=True,
@@ -3807,8 +3930,8 @@ def dihedral_completion_paths(dd: DihedralTetrahedronData, field_name,
                                                       cache=cache)
 
         res = _completion_paths(dd, completions_trie, _dihed_prop, return_trie=return_trie)
-        cache[dd] = (args, res)
-    (args, res) = cache[dd]
+        cache[key] = (args, res)
+    (args, res) = cache[key]
 
 
     if return_args:
@@ -3978,7 +4101,8 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                     tri_conv = triangle_property_function(
                         tri,
                         tri_field_name,
-                        raise_on_missing=False
+                        raise_on_missing=False,
+                        allow_ambiguous_completions=allow_ambiguous_completions
                     )
                     if tri_conv is not None:
                         def convert(dihedron_data,
@@ -3989,6 +4113,13 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                             tri = dihedron_triangle(dihedron_data, tri_num)
                             return sign * tri_conv(tri, **kwargs)
                         convert.__name__ = 'convert_' + field_props['name']
+                        if isinstance(tri_conv, ConstrainedConversion):
+                            caller = convert
+                            def wrap(function):
+                                def converted(tdata, **kwargs):
+                                    return caller(tdata, tri_conv=function, **kwargs)
+                                return converted
+                            convert = tri_conv.wrap(wrap)
                         if return_depth:
                             return depth, convert
                         else:
@@ -4023,11 +4154,12 @@ def dihedron_property_function(sample_dihed: DihedralTetrahedronData, field_name
                 convertable_keys = cache.setdefault('convertable_keys', {}).setdefault(sample_dihed, {})
                 if 'trie_expansions' not in cache:
                     cache['trie_expansions'] = {}
-                if sample_dihed not in cache['trie_expansions']:
-                    cache['trie_expansions'][sample_dihed] = (
+                expansion_key = (sample_dihed, field_name)
+                if expansion_key not in cache['trie_expansions']:
+                    cache['trie_expansions'][expansion_key] = (
                         conversion_specs, [_expand_trie(trie) for _, trie in conversion_specs]
                     )
-                for (base_args, trie), trie_expansion in zip(*cache['trie_expansions'][sample_dihed]):
+                for (base_args, trie), trie_expansion in zip(*cache['trie_expansions'][expansion_key]):
                     for l,f in trie_expansion.items():
                         props = [sub_dict[ll] is not None for ll in l]
                         rem_inds = [i for i,j in enumerate(props) if not j]
@@ -4809,196 +4941,6 @@ def parameteric_interpolation_curvature(interpolations, t, **opts):
         **opts
     )
 
-def polygon_normal(vertices, normalize=True):
-    # Newell's method for best fit normal
-    verts = np.asanyarray(vertices)
-    if verts.ndim < 2 or verts.shape[-1] != 3 or verts.shape[-2] == 1:
-        raise ValueError(f"can't compute best fit normal for poly with vertices of shape {verts.shape}")
-    n = verts.shape[-2]
-    r, c = np.triu_indices(verts.shape[-1])
-    roll_verts = verts[..., np.roll(np.arange(n), 1), :]
-    normals = vec_crosses(verts, roll_verts)
-    vouters = verts[..., r] * verts[..., c]
-    routers = roll_verts[..., r] * roll_verts[..., c]
-    normals += vouters[..., (2, 1, 0)] - routers[..., (2, 1, 0)]  # yz, xz, xy
-    normal = np.sum(normals, axis=-2)
-    if normalize:
-        normal = vec_normalize(normal)
-    return normal
-
-
-def winding_sign(u, v, axis1=0, axis2=1, return_component=False, zero_threshold=1e-8):
-    u = np.asanyarray(u)
-    v = np.asanyarray(v)
-    z = u[..., axis1] * v[..., axis2] - u[..., axis2] * v[..., axis1]
-    if not return_component:
-        z = np.asanyarray(z)
-        z[np.abs(z) < zero_threshold] = 0
-        z = np.sign(z)
-    return z
-
-def winding_number(points, polygon, axis1=0, axis2=1, zero_threshold=None):
-    pts   = np.asanyarray(points)
-    verts = np.asanyarray(polygon)
-    v1 = verts
-    v2 = np.roll(verts, -1, axis=-2)
-
-    x,  y  = pts[..., axis1],  pts[..., axis2]
-    y1, y2 = v1[..., axis2],  v2[..., axis2]
-    upward = (y1[..., np.newaxis, :] <= y[..., :, np.newaxis]) & (y2[..., np.newaxis, :] >  y[..., :, np.newaxis])
-    downward = (y1[..., np.newaxis, :] >  y[..., :, np.newaxis]) & (y2[..., np.newaxis, :] <= y[..., :, np.newaxis])
-
-
-    x1, x2 = v1[..., axis1], v2[..., axis1]
-    cross = (
-        (x2 - x1)[..., np.newaxis, :] * (y[..., :, np.newaxis] - y1[..., np.newaxis, :]) -
-        (x[..., :, np.newaxis] - x1[..., np.newaxis, :]) * (y2 - y1)[..., np.newaxis, :]
-    )
-
-    if zero_threshold is None:
-        zero_threshold = Options.zero_threshold
-    w = np.sum(
-        upward & (cross > zero_threshold),
-         axis=-1
-    ) - np.sum(
-        downward & (cross < -zero_threshold),
-         axis=-1
-    )
-    return w
-
-def point_in_triangle(p, a, b, c, diffs=None, windings=None, **winding_args):
-    #TODO: handle coincident lines
-    if windings is not None:
-        d1, d2, d3 = windings
-    else:
-        if diffs is not None:
-            a, b, c = diffs
-        else:
-            a, b, c = a - p, b - p, c - p
-        d1 = winding_sign(a, b, **winding_args)
-        d2 = winding_sign(b, c, **winding_args)
-        d3 = winding_sign(c, a)
-    if misc.is_numeric(d1):
-        has_neg = (d1 < 0) or (d2 < 0) or (d3 < 0)
-        has_pos = (d1 > 0) or (d2 > 0) or (d3 > 0)
-        return not (has_neg and has_pos)
-    else:
-        d1, d2, d3 = np.asanyarray(d1), np.asanyarray(d2), np.asanyarray(d3)
-        has_neg = (d1 < 0) | (d2 < 0) | (d3 < 0)
-        has_pos = (d1 > 0) | (d2 > 0) | (d3 > 0)
-        return ~(has_neg & has_pos)
-
-def is_polygon_ear(plane_points, indices, i, j, k, diffs=None, windings=None):
-    a, b, c = plane_points[i], plane_points[j], plane_points[k]
-    # Ear must be a convex vertex (positive cross product = CCW winding)
-    if windings is None: # precomputed winding signs
-        if diffs is not None:
-            if winding_sign(diffs[j, i], diffs[k, i]) <= 0:
-                return False
-        else:
-            if winding_sign(b - a, c - a) <= 0:
-                return False
-    else:
-        if windings[i, j, k] <= 0:
-            return False
-
-    # No other vertex may lie inside the candidate ear triangle
-    for m, idx in enumerate(indices):
-        if idx in (i, j, k):
-            continue
-        if windings is None:
-            if diffs is not None:
-                if point_in_triangle(None, None, None, None,
-                                     diffs=(diffs[i, idx], diffs[j, idx], diffs[k, idx])):
-                    return False
-            else:
-                if point_in_triangle(plane_points[idx], a, b, c):
-                    return False
-        else:
-            if point_in_triangle(None, None, None, None,
-                                 windings=(windings[idx, a, b], windings[idx, b, c], windings[idx, c, a])):
-                return False
-    return True
-
-def ear_clipping_triangulation(plane_points, indices, diffs=None, windings=None):
-    plane_points = np.asanyarray(plane_points)
-    n = len(plane_points)
-
-    if diffs is None:
-        diffs = plane_points[..., :, np.newaxis, :] - plane_points[..., np.newaxis, :, :]
-
-    if windings is True:
-        # compute all winding signs
-        raise NotImplementedError("not sure precomputing windings is useful")
-
-    triangles = []
-    indices = list(indices)
-    for _ in range(n**2):
-        ear_found = False
-        for i in range(len(indices)):
-            prev = indices[(i - 1) % len(indices)]
-            curr = indices[i]
-            next = indices[(i + 1) % len(indices)]
-            if is_polygon_ear(plane_points, indices, prev, curr, next, diffs=diffs, windings=windings):
-                triangles.append((prev, curr, next))
-                indices.pop(i)
-                ear_found = True
-                break
-
-        if not ear_found:
-            raise ValueError("No ear found — polygon may be self-intersecting or degenerate")
-
-        if len(indices) <= 3:
-            break
-    else:
-        raise ValueError("Ear-clipping failed — polygon may be self-intersecting")
-
-    triangles.append((indices[0], indices[1], indices[2]))
-    return triangles
-
-def triangulate_polygon(vertices):
-    verts = np.asanyarray(vertices)
-    if verts.ndim != 2 or verts.shape[-1] != 3:
-        raise ValueError(f"can't triangulate poly with vertices of shape {verts.shape}")
-
-    n = verts.shape[-2]
-    base_shape = verts.shape[:-2]
-    if n < 3:
-        raise ValueError("Polygon must have at least 3 vertices")
-    if n == 3:
-        return broadcast_constant([0, 1, 2], base_shape + (3,))
-
-    # embed vertices in best fit plane of polygon
-    normal = polygon_normal(verts)
-    right_vecs = broadcast_constant(tmats.default_right_vector, normal.shape)
-    proj = vec_dots(right_vecs, normal) # good for completeness...should probably have a fast path for projecting onto x/y/z
-    bad_vecs = np.abs(proj > .9)
-    if np.any(bad_vecs):
-        right_vecs[bad_vecs] = broadcast_constant(tmats.default_up_vector, right_vecs[bad_vecs])
-    vm = tmats.view_matrix(right_vecs, view_vector=normal, output_order=["x", "y", "z"])
-    plane_points = vec_tensordot(verts, vm, axes=[-1, -2])
-
-    # Ensure CCW winding in 2D (so convex vertices have positive cross product)
-    clipping_indices = broadcast_constant(np.arange(n), base_shape + (n,)).copy()
-    poly_area = np.sum(
-        winding_sign(
-            plane_points[..., 1:-1, :] - plane_points[..., (0,), :],
-            plane_points[..., 2:, :] - plane_points[..., (0,), :],
-            return_component=True
-        ),
-        axis=-1
-    )
-    mask = poly_area < 0
-    clipping_indices[mask] = np.flip(clipping_indices[mask], axis=-1)
-
-    plane_points = np.reshape(plane_points, (-1, n, 3))
-    clipping_indices = np.reshape(clipping_indices, (-1, n))
-    triangles = np.array([
-        ear_clipping_triangulation(points, indices)
-        for points, indices in zip(plane_points, clipping_indices)
-    ])
-
-    return triangles.reshape(base_shape + triangles.shape[-2:])
 
 class PathElement(metaclass=abc.ABCMeta):
     def __init__(self, relative=False):
@@ -5305,790 +5247,11 @@ def parametric_path_points(path_elements, return_segments=False):
         return np.concatenate(point_lists, axis=0)
 
 
-
-def tri_tri_intersect(t1: np.ndarray, t2: np.ndarray, eps: float = 1e-9) -> bool:
-    """
-    Test whether two triangles in 3D intersect.
-    t1, t2 : (3, 3) arrays of vertex positions.
-    Returns True if they share any point (including edge/vertex touches).
-    """
-    def plane_of(tv):
-        n = np.cross(tv[1] - tv[0], tv[2] - tv[0])
-        ln = np.linalg.norm(n)
-        if ln < eps:
-            return None, None          # degenerate triangle
-        n = n / ln
-        return n, -np.dot(n, tv[0])   # (normal, offset d)  →  n·x + d = 0
-
-    # ── Step 1: plane rejection ───────────────────────────────────────────────
-    n2, d2 = plane_of(t2)
-    if n2 is None:
-        return False
-
-    sd1 = t1 @ n2 + d2                # signed dists of T1 verts to plane(T2)
-    if np.all(sd1 >  eps) or np.all(sd1 < -eps):
-        return False                  # T1 strictly on one side of plane(T2)
-
-    n1, d1 = plane_of(t1)
-    if n1 is None:
-        return False
-
-    sd2 = t2 @ n1 + d1                # signed dists of T2 verts to plane(T1)
-    if np.all(sd2 >  eps) or np.all(sd2 < -eps):
-        return False                  # T2 strictly on one side of plane(T1)
-
-    # ── Step 2: coplanar case ────────────────────────────────────────────────
-    L = np.cross(n1, n2)
-    if np.linalg.norm(L) < eps:
-        return _coplanar_tri_tri(t1, t2, n1, eps)
-
-    # ── Step 3: compute overlap intervals on L ───────────────────────────────
-    # Project vertices onto L (use largest-magnitude axis for numerical stability)
-    ax = np.argmax(np.abs(L))
-
-    def interval(tv, sd):
-        """Scalar interval [lo, hi] of tv's intersection with L."""
-        p = tv[:, ax]
-        pts = []
-        for i in range(3):
-            j = (i + 1) % 3
-            si, sj = sd[i], sd[j]
-            if abs(si - sj) < eps:
-                continue
-            if si * sj <= 0:          # edge crosses or touches the other plane
-                t = si / (si - sj)
-                pts.append(p[i] + t * (p[j] - p[i]))
-        # Verts that lie exactly on the plane also count
-        pts += [p[i] for i in range(3) if abs(sd[i]) <= eps]
-        if len(pts) < 2:
-            return None, None
-        return min(pts), max(pts)
-
-    lo1, hi1 = interval(t1, sd1)
-    lo2, hi2 = interval(t2, sd2)
-
-    if lo1 is None or lo2 is None:
-        return False
-
-    return hi1 >= lo2 - eps and hi2 >= lo1 - eps   # intervals overlap?
-
-
 # ── Coplanar fallback: 2D edge–edge + containment ────────────────────────────
 
-def _project_2d(tri, normal):
-    """Drop the axis most aligned with the normal → 2D projection."""
-    ax = np.argmax(np.abs(normal))
-    keep = [i for i in range(3) if i != ax]
-    return tri[:, keep]
-
-def _segments_intersect_2d(p1, p2, p3, p4, eps=1e-9) -> bool:
-    """Do line segments p1–p2 and p3–p4 intersect?"""
-    d1, d2 = p2 - p1, p4 - p3
-    cross = d1[0]*d2[1] - d1[1]*d2[0]
-    diff  = p3 - p1
-    if abs(cross) < eps:           # parallel
-        return False
-    t = (diff[0]*d2[1] - diff[1]*d2[0]) / cross
-    u = (diff[0]*d1[1] - diff[1]*d1[0]) / cross
-    return -eps <= t <= 1+eps and -eps <= u <= 1+eps
-
-def _point_in_tri_2d(p, tri2d, eps=1e-9) -> bool:
-    """Is point p inside triangle tri2d (2D)?"""
-
-    def sign(a, b, c):
-        return (a[0]-c[0])*(b[1]-c[1]) - (b[0]-c[0])*(a[1]-c[1])
-    d1 = sign(p, tri2d[0], tri2d[1])
-    d2 = sign(p, tri2d[1], tri2d[2])
-    d3 = sign(p, tri2d[2], tri2d[0])
-    has_neg = (d1 < -eps) or (d2 < -eps) or (d3 < -eps)
-    has_pos = (d1 >  eps) or (d2 >  eps) or (d3 >  eps)
-    return not (has_neg and has_pos)
-
-def _coplanar_tri_tri(t1, t2, normal, eps=1e-9) -> bool:
-    a, b = _project_2d(t1, normal), _project_2d(t2, normal)
-    # Edge–edge intersections
-    for i in range(3):
-        for j in range(3):
-            if _segments_intersect_2d(a[i], a[(i+1)%3],
-                                       b[j], b[(j+1)%3], eps):
-                return True
-    # One triangle fully inside the other?
-    if _point_in_tri_2d(a[0], b, eps):
-        return True
-    if _point_in_tri_2d(b[0], a, eps):
-        return True
-    return False
-
-def triangle_plane_embedding(tris, zero_threshold=None):
-    tris = np.asanyarray(tris)
-    crosses = vec_crosses(tris[..., 0, :] - tris[..., 1, :], tris[..., 2, :] - tris[..., 1, :])
-    crosses, norms = vec_normalize(crosses, return_norms=True)
-    if zero_threshold is None:
-        zero_threshold = Options
-    dead_points = norms < zero_threshold
-    shift = -vec_dots(crosses, tris[1])
-    return (crosses, shift), dead_points
-
-def check_triangle_plane_offsets(t1, t2, embeddings=None, zero_threshold=None, return_distances=False):
-    if embeddings is None:
-        embeddings = triangle_plane_embedding(t1)[0], triangle_plane_embedding(t2)[0]
-    (n1, d1), (n2, d2) = embeddings
-
-    if zero_threshold is None:
-        zero_threshold = Options.zero_threshold
-
-    sd1 = np.reshape(t1 @ n2[..., :, np.newaxis] + d2[..., np.newaxis], d2.shape)
-    mask = np.all(sd1 > zero_threshold, axis=-1) | np.all(sd1 < -zero_threshold, axis=-1)
-
-    submask = np.where(mask)
-    n1 = n1[submask]
-    d1 = d1[submask]
-    t2 = t2[submask]
-
-    sd2 = np.reshape(t2 @ n1[..., :, np.newaxis] + d1[..., np.newaxis], d1.shape)
-    subsubmask = np.any(sd2 < zero_threshold, axis=-1) & np.any(sd2 > -zero_threshold, axis=-1) # note boolean flip
-    s2 = tuple(s[subsubmask] for s in submask)
-
-    if return_distances:
-        sd2_full = np.zeros_like(sd1)
-        sd2_full[submask] = sd2
-
-    mask[s2] = False
-    if return_distances:
-        return mask, (sd1, sd2_full)
-    else:
-        return mask
-
-def check_coplanar_triangle_intersection(t1, t2, embeddings=None, zero_threshold=None,
-                                         return_crosses=False):
-    if embeddings is None:
-        embeddings = triangle_plane_embedding(t1)[0], triangle_plane_embedding(t2)[0]
-    (n1, d1), (n2, d2) = embeddings
-
-    base_shape = t1.shape[:-2]
-    n1 = n1.reshape((-1,) + n1.shape[-1:])
-    t1 = t1.reshape((-1,) + t1.shape[-2:])
-    n2 = n2.reshape((-1,) + n2.shape[-1:])
-    t2 = t2.reshape((-1,) + t2.shape[-2:])
-
-    crosses = vec_crosses(n1, n2)
-    cross_norms = vec_norms(crosses)
-    if zero_threshold is None:
-        zero_threshold = Options.zero_threshold
-
-    mask = cross_norms < zero_threshold # coplanar, need to check
-    check_inds = np.where(mask)
-
-    if len(check_inds[0]) > 0:
-        n1 = n1[mask]
-        t1 = t1[mask]
-        # n2 = n2[mask]
-        t2 = t2[mask]
-
-        # fast pseudo-2d projection for checks
-        i1 = np.argmax(np.abs(n1), axis=-1)
-        submask = np.full(t1.shape, True)
-        submask[np.arange(len(t1)), :, i1] = False
-        a = t1[submask].reshape(t1.shape[:-1] + (t1.shape[-1] - 1,))
-        b = t2[submask].reshape(t2.shape[:-1] + (t2.shape[-1] - 1,))
-
-        # if any segments intersect we can short circuit
-        for i in range(3): # 3 points in a triangle
-            for j in range(3):
-                seg_mask = check_segment_intersection_2d(
-                    a[..., i, :], a[..., (i + 1) % 3, :],
-                    b[..., j, :], b[..., (j + 1) % 3, :],
-                    zero_threshold=zero_threshold
-                )
-                nsm = ~seg_mask
-
-                a = a[nsm]
-                b = b[nsm]
-                check_inds = tuple(m[nsm] for m in check_inds)
-                if len(check_inds[0]) == 0:
-                    break
-            if len(check_inds[0]) == 0:
-                break
-
-        if len(check_inds[0]) > 0:
-            # One triangle fully inside the other?
-            contained_mask = point_in_triangle(a[..., 0, :], *np.moveaxis(b, -2, 0), zero_threshold)
-            ncm = ~contained_mask
-            a = a[ncm]
-            b = b[ncm]
-            check_inds = tuple(m[ncm] for m in check_inds)
-
-        if len(check_inds[0]) > 0:
-            contained_mask = point_in_triangle(b[..., 0, :], *np.moveaxis(a, -2, 0), zero_threshold)
-            ncm = ~contained_mask
-            check_inds = tuple(m[ncm] for m in check_inds)
-            mask[check_inds] = False
-
-    mask = mask.reshape(base_shape)
-    if return_crosses:
-        return mask, crosses
-    else:
-        return mask
-
-def get_bounding_boxes(polys, concatentate=False):
-    min_vals = np.min(polys, axis=-2)
-    max_vals = np.max(polys, axis=-2)
-
-    if concatentate:
-        return np.concatenate((min_vals[..., np.newaxis], max_vals[..., np.newaxis]), axis=-1)
-    else:
-        return min_vals, max_vals
-
-def check_interval_overlaps(bounds_1, bounds_2, include_endpoints=True, zero_threshold=None):
-    m1, M1 = bounds_1
-    m2, M2 = bounds_2
-    m1 = np.asanyarray(m1)
-    M1 = np.asanyarray(M1)
-    m2 = np.asanyarray(m2)
-    M2 = np.asanyarray(M2)
-
-    if zero_threshold is None:
-        zero_threshold = Options.zero_threshold
-    M1 = M1 + zero_threshold
-    M2 = M2 + zero_threshold
-
-    if include_endpoints:
-        mask = (M2 >= m1) & (M1 >= m2)
-    else:
-        mask = (M2 > m1) & (M1 > m2)
-
-    return mask
-
-def check_bbox_intersections(polys1, polys2, zero_threshold=None):
-    polys1 = np.asanyarray(polys1)
-    polys2 = np.asanyarray(polys2)
-
-    m1, M1 = get_bounding_boxes(polys1)
-    m2, M2 = get_bounding_boxes(polys2)
-
-    base_shape = polys1.shape[:-2]
-    ndim = m1.shape[-1]
-    m1 = m1.reshape((-1, ndim))
-    M1 = M1.reshape((-1, ndim))
-    m2 = m2.reshape((-1, ndim))
-    M2 = M2.reshape((-1, ndim))
-    mask_inds = np.arange(len(m1))
-    for i in range(ndim):
-        submask = check_interval_overlaps((m1[..., i], M1[..., i]), (m2[..., i], M2[..., i]),
-                                          zero_threshold=zero_threshold)
-        nsm = ~submask
-        m1 = m1[nsm]
-        m2 = m2[nsm]
-        M1 = M1[nsm]
-        M2 = M2[nsm]
-        mask_inds = mask_inds[nsm]
-        if len(mask_inds) == 0: break
-
-    mask = np.full(len(m1), False)
-    mask[mask_inds,] = True
-
-    return mask.reshape(base_shape)
-
-def check_line_intersection(line_1, line_2, zero_threshold=None):
-    p1, d1 = line_1
-    p2, d2 = line_2
-    p1, d1, p2, d2 = np.asanyarray(p1), np.asanyarray(d1), np.asanyarray(p2), np.asanyarray(d2)
-    M = np.concatenate([d1[..., np.newaxis, :], -d2[..., np.newaxis, :]])
-    rhs = p2 - p1
-
-    (s, t), residuals, rank, _ = np.linalg.lstsq(M, rhs, rcond=None)
-
-    # Lines intersect iff the system is solved exactly
-    if len(residuals) == 0:
-        residual = np.linalg.norm(M @ np.array([s, t]) - rhs)
-    else:
-        residual = float(np.sqrt(residuals[0]))
-
-    if zero_threshold is None:
-        zero_threshold = Options.zero_threshold
-    mask = residual < zero_threshold
-    s[~mask] = 0
-    t[~mask] = 0
-
-    return mask, s, t
-
-def check_segment_intersection(p1, p2, p3, p4, zero_threshold=None):
-    p1 = np.asanyarray(p1)
-    if p1.ndim == 2:
-        return check_segment_intersection_2d(p1, p2, p3, p4, zero_threshold=zero_threshold)
-    else:
-        p2 = np.asanyarray(p2)
-        p3 = np.asanyarray(p3)
-        p4 = np.asanyarray(p4)
-        line_1 = p1, (p2 - p1)
-        line_2 = p3, (p4 - p3)
-        mask, s, t = check_line_intersection(line_1, line_2, zero_threshold=zero_threshold)
-        d1 = vec_norms(line_1[1][mask])
-        d2 = vec_norms(line_2[1][mask])
-        mask[mask] = (-zero_threshold < s[mask]) & (s[mask] < d1) & (-zero_threshold < t[mask]) & (t[mask] < d2)
-        return mask
-
-def check_segment_intersection_2d(p1, p2, p3, p4, axis1=0, axis2=1, zero_threshold=None):
-        p1, p2, p3, p4 = np.asanyarray(p1), np.asanyarray(p2), np.asanyarray(p3), np.asanyarray(p4)
-
-        if zero_threshold is None:
-            zero_threshold = Options.zero_threshold
-        d1, d2 = p2 - p1, p4 - p3
-        cross = d1[..., axis1] * d2[..., axis2] - d1[..., axis2] * d2[..., axis1]
-        mask = np.abs(cross) > zero_threshold
-
-        mask_inds = np.where(mask)
-
-        diff = p3[mask] - p1[mask]
-        d1 = d1[mask]
-        d2 = d2[mask]
-        t = (diff[..., axis1] * d2[..., axis2] - diff[..., axis2] * d2[..., axis1])
-        u = (diff[..., axis1] * d1[..., axis2] - diff[..., axis2] * d1[..., axis1])
-
-        submask = (
-                (-zero_threshold < t ) &  (t < cross * (1 + zero_threshold))
-                & (-zero_threshold < u) & (u < cross * (1 + zero_threshold))
-        )
-        submask = ~submask # TODO: just invert the checks...
-        mask_inds = tuple(m[submask] for m in mask_inds)
-        mask[mask_inds] = False
-
-        return mask
-
-def _tri_overlap_intervals(p, sd, zero_threshold=None):
-    """Scalar intervals [lo, hi] for the triangle intersection points along the normal axis"""
-    if zero_threshold is None:
-        zero_threshold = Options.zero_threshold
-
-    needs_bounds = np.full(p.shape[:-1], sd)
-    min_bounds = np.zeros(p.shape[:-1], dtype=p.dtype)
-    max_bounds = np.zeros(p.shape[:-1], dtype=p.dtype)
-    for i in range(3): # three points in a triangle
-        boundary_mask = np.where(np.abs(sd[..., i]) < zero_threshold)
-        if len(boundary_mask[0]) > 0:
-            new_mask = needs_bounds[boundary_mask]
-            rem_mask = ~new_mask
-            new_mask = tuple(bm[new_mask] for bm in boundary_mask)
-            min_bounds[new_mask] = p[..., i][boundary_mask]
-            max_bounds[new_mask] = p[..., i][boundary_mask]
-            if np.any(rem_mask):
-                rem_mask = tuple(bm[rem_mask] for bm in boundary_mask)
-                min_bounds[rem_mask] = np.min([min_bounds[rem_mask], p[..., i][rem_mask]], axis=0)
-                max_bounds[rem_mask] = np.min([max_bounds[rem_mask], p[..., i][rem_mask]], axis=0)
-            needs_bounds[boundary_mask] = False
-
-    for i in range(3):
-        j = (i + 1) % 3
-        si, sj = sd[..., i], sd[..., j]
-        ds = si - sj
-        edge_mask = (
-                np.abs(ds) > zero_threshold
-                & (si * sj) <= 0
-        )
-        edge_mask = np.where(np.abs(sd[..., i]) < zero_threshold)
-        if len(edge_mask[0]) > 0: # edge crosses or touches the other plane
-            t = si[edge_mask] / ds[edge_mask]
-            pi = p[..., i][edge_mask]
-            pj = p[..., j][edge_mask]
-            new_p = pi + t * (pj - pi)
-
-            new_mask = needs_bounds[edge_mask]
-            rem_mask = ~new_mask
-            new_new_p = new_p[new_mask]
-            rem_new_p = new_p[rem_mask]
-            new_mask = tuple(bm[new_mask] for bm in edge_mask)
-            min_bounds[new_mask] = new_new_p
-            max_bounds[new_mask] = new_new_p
-            if np.any(rem_mask):
-                rem_mask = tuple(bm[rem_mask] for bm in edge_mask)
-                min_bounds[rem_mask] = np.min([min_bounds[rem_mask], rem_new_p], axis=0)
-                max_bounds[rem_mask] = np.min([max_bounds[rem_mask], rem_new_p], axis=0)
-            needs_bounds[edge_mask] = False
-
-    return needs_bounds, min_bounds, max_bounds
 
     # if len(pts) < 2:
     #     return None, None
     # return min(pts), max(pts)
 
-def check_triangle_intersection(tris1, tris2,
-                                embeddings=None,
-                                check_indices=None,
-                                check_direct_product=False,
-                                zero_threshold=None):
-    tris1 = np.asanyarray(tris1)
-    tris2 = np.asanyarray(tris2)
-    if embeddings is None:
-        embeddings = triangle_plane_embedding(tris1), triangle_plane_embedding(tris2)
-    ((e1, d1), mask1), ((e2, d2), mask2) = embeddings
-    if check_indices is None and check_direct_product:
-        check_indices = np.meshgrid(np.arange(len(tris1)), np.arange(len(tris2)))
-    if check_indices is not None:
-        i, j = check_indices
-        e1 = e1[..., i, :]
-        mask1 = mask1[..., i]
-        d1 = d1[..., i]
-        e2 = e2[..., j, :]
-        mask2 = mask2[..., j]
-        d2 = d2[..., j]
 
-    full_mask = mask1 & mask2
-    submask = np.where(full_mask)
-    tris1 = tris1[submask]
-    e1 = e1[submask]
-    d1 = d1[submask]
-    tris2 = tris2[submask]
-    e2 = e2[submask]
-    d2 = d2[submask]
-
-    if zero_threshold is None:
-        zero_threshold = Options.zero_threshold
-
-    ## duplicates later effort
-    # bbox_mask = check_bbox_intersections(tris1, tris2, zero_threshold=zero_threshold)
-    # s2 = tuple(s[bbox_mask] for s in submask)
-    # full_mask[s2] = False
-    #
-    # nbm = ~bbox_mask
-    # submask = tuple(s[nbm] for s in submask)
-    # tris1 = tris1[submask]
-    # e1 = e1[submask]
-    # d1 = d1[submask]
-    # tris2 = tris2[submask]
-    # e2 = e2[submask]
-    # d2 = d2[submask]
-
-    if len(submask[0]) > 0:
-        plane_mask, dists = check_triangle_plane_offsets(tris1, tris2,
-                                                         embeddings=((e1, d1), (e2, d2)),
-                                                         zero_threshold=zero_threshold,
-                                                         return_distances=True)
-        s2 = tuple(s[plane_mask] for s in submask)
-        full_mask[s2] = False
-
-        npm = ~plane_mask
-        submask = tuple(s[npm] for s in submask)
-        tris1 = tris1[submask]
-        e1 = e1[submask]
-        d1 = d1[submask]
-        tris2 = tris2[submask]
-        e2 = e2[submask]
-        d2 = d2[submask]
-
-        dists = (dists[0][submask], dists[1][submask])
-
-    if len(submask[0]) > 0:
-        coplanar_mask, crosses = check_coplanar_triangle_intersection(tris1, tris2,
-                                                                      embeddings=((e1, d1), (e2, d2)),
-                                                                      zero_threshold=zero_threshold,
-                                                                      return_crosses=True)
-        s2 = tuple(s[coplanar_mask] for s in submask)
-        full_mask[s2] = False
-
-        npm = ~coplanar_mask
-        submask = tuple(s[npm] for s in submask)
-        tris1 = tris1[submask]
-        # e1 = e1[submask]
-        # d1 = d1[submask]
-        tris2 = tris2[submask]
-        # e2 = e2[submask]
-        # d2 = d2[submask]
-
-        crosses = crosses[submask]
-        dists = (dists[0][submask], dists[1][submask])
-
-    if len(submask[0]) > 0:
-        ax = np.argmax(np.abs(crosses), axis=-1)
-        a = np.take_along_axis(tris1, ax, axis=-1)
-        b = np.take_along_axis(tris2, ax, axis=-1)
-
-        missing1, lo1, hi1 = _tri_overlap_intervals(a, dists[0])
-        missing2, lo2, hi2 = _tri_overlap_intervals(b, dists[1])
-
-        done_mask = missing1 | missing2
-        s2 = tuple(s[done_mask] for s in submask)
-        full_mask[s2] = False
-
-        rem_mask = ~done_mask
-        submask = tuple(s[rem_mask] for s in submask)
-        no_intersection = ~check_interval_overlaps(
-            (lo1[rem_mask], hi1[rem_mask]),
-            (lo2[rem_mask], hi2[rem_mask]),
-        )
-        submask = tuple(s[no_intersection] for s in submask)
-        full_mask[submask] = False
-
-    return full_mask
-
-def fibonacci_sphere(samples):
-    phi = np.pi * (np.sqrt(5.) - 1.)  # golden angle in radians
-    samps = np.arange(samples)
-    y = 1 - (samps / float(samples - 1)) * 2  # y goes from 1 to -1
-    radius = np.sqrt(1 - y * y)  # radius at y
-    theta = phi * samps  # golden angle increment
-    x = np.cos(theta) * radius
-    z = np.sin(theta) * radius
-
-    return np.stack([x, y, z], axis=-1)
-
-
-def uv_mapping(uv):
-    """
-    Map points on [0,1]^2 onto the unit sphere S^2 via the cylindrical
-    equal-area (Lambert / "hat-box") projection:
-
-        z   = 2v - 1
-        phi = 2*pi*u
-        x,y = sqrt(1-z^2)*cos(phi), sqrt(1-z^2)*sin(phi)
-
-    By Archimedes' hat-box theorem, orthogonal projection of the sphere
-    onto its circumscribing cylinder is area-preserving, so this map is
-    the inverse of that projection: it sends the *uniform* measure on the
-    square to the *uniform* (surface-area) measure on the sphere. That
-    means a low-discrepancy sequence on the square pushes forward to a
-    low-discrepancy-ish sample on the sphere -- no low-discrepancy
-    structure is invented in 3D, but no uniformity is lost in translation
-    either, since z is uniform in [-1,1] and phi uniform in [0,2*pi)
-    are exactly the two conditions that characterize the uniform
-    distribution on S^2.
-
-    Parameters
-    ----------
-    uv : (N,2) array, both columns in [0,1)
-
-    Returns
-    -------
-    (N,3) array of points on the unit sphere
-    """
-    u, v = uv[..., 0], uv[..., 1]
-    z = 2.0 * v - 1.0
-    phi = 2.0 * np.pi * u
-    r = np.sqrt(np.clip(1.0 - z * z, 0.0, None))
-    return np.moveaxis(np.array([r * np.cos(phi), r * np.sin(phi), z]), 0, -1)
-
-def uv_sphere(polar_samples, azimuthal_samples, return_faces=True):
-    n_theta = max(int(polar_samples), 2)
-    n_phi = max(int(azimuthal_samples), 3)
-
-    # --- vertex directions (unit sphere) ------------------------------------ #
-    theta = np.pi * np.arange(1, n_theta) / n_theta  # interior rings only
-    phi = 2 * np.pi * np.arange(n_phi) / n_phi
-    st, ct = np.sin(theta), np.cos(theta)
-    cp, sp = np.cos(phi), np.sin(phi)
-    ring = np.stack([
-        np.outer(st, cp),
-        np.outer(st, sp),
-        np.broadcast_to(ct[:, None], (n_theta - 1, n_phi)),
-    ], axis=-1).reshape(-1, 3)
-    dirs = np.concatenate([
-        [[0.0, 0.0, 1.0]],  # north pole
-        ring,
-        [[0.0, 0.0, -1.0]],  # south pole
-    ], axis=0)
-
-    north, south = 0, len(dirs) - 1
-
-    index_map: np.ndarray[int] = (
-            1
-            + np.arange(0, n_theta + 1)[:, np.newaxis] * n_phi
-            + (np.arange(n_phi + 1)[np.newaxis, :] % n_phi)
-    )
-
-    if return_faces:
-        faces = np.empty((2 * n_phi + 2 * (n_theta - 2) * n_phi, 3), dtype=int)
-        offset, end = 0, n_phi
-        # north cap
-        faces[offset:end, 0] = north
-        faces[offset:end, 1] = index_map[0, :n_phi]
-        faces[offset:end, 2] = index_map[0, 1:n_phi+1]
-        offset = end
-        # quad bands
-        i = np.arange(n_theta - 2)
-        j = np.arange(n_phi)
-        a = index_map[np.ix_(i, j)].reshape(-1)
-        b = index_map[np.ix_(i, j + 1)].reshape(-1)
-        c = index_map[np.ix_(i + 1, j)].reshape(-1)
-        d = index_map[np.ix_(i + 1, j+1)].reshape(-1)
-        end = offset + 2 * len(a)
-        faces[offset:end:2, 0] = a
-        faces[offset:end:2, 1] = b
-        faces[offset:end:2, 2] = c
-        faces[offset+1:end:2, 0] = b
-        faces[offset+1:end:2, 1] = c
-        faces[offset+1:end:2, 2] = d
-        offset = end
-        # south cap
-        end = offset + n_phi
-        last = n_theta - 1
-        faces[offset:end, 0] = south
-        j = np.arange(n_phi)
-        faces[offset:end, 1] = index_map[last-1, j + 1]
-        faces[offset:end, 2] = index_map[last-1, j]
-
-        # orient outward, independent of the construction winding above
-        tri = dirs[faces]
-        fn = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
-        flip = np.einsum('ij,ij->i', fn, tri.mean(axis=1)) < 0
-        faces[flip] = faces[flip][:, ::-1]
-
-        return dirs, faces
-    else:
-        return dirs
-
-def uv_cylinder(azimuthal_samples, return_faces=True):
-    n_phi = max(int(azimuthal_samples), 3)
-    start = np.array([0, 0, 0])
-    end = np.array([0, 0, 1])
-
-    phi = 2 * np.pi * np.arange(n_phi) / n_phi
-    cp = np.cos(phi)
-    sp = np.sin(phi)
-
-    verts = np.zeros((2*n_phi + 2, 3), dtype=float)
-    verts[1:n_phi+1, 0] = cp
-    verts[1:n_phi+1, 1] = sp
-    verts[n_phi+1:2*n_phi+1, 0] = cp
-    verts[n_phi+1:2*n_phi+1, 1] = sp
-    verts[n_phi+1:2*n_phi+1, 2] = 1 # offset along z
-    verts[-1, 2] = 1
-
-    if return_faces:
-        faces = np.empty((4*n_phi, 3), dtype=int)
-
-        j = np.arange(n_phi)
-
-        # bottom cap
-        cb = 0
-        faces[:n_phi, 0] = cb
-        faces[:n_phi, 1] = 1 + (j + 1) % n_phi
-        faces[:n_phi, 2] = 1 + j
-
-        off = 1
-        # barrel
-        b0, b1 = off + j, off + (j + 1) % n_phi
-        t0, t1 = off + n_phi + j, off + n_phi + (j + 1) % n_phi
-        faces[n_phi:3*n_phi:2, 0] = b0
-        faces[n_phi:3*n_phi:2, 1] = b1
-        faces[n_phi:3*n_phi:2, 2] = t0
-        faces[n_phi+1:3*n_phi:2, 0] = b1
-        faces[n_phi+1:3*n_phi:2, 1] = t1
-        faces[n_phi+1:3*n_phi:2, 2] = t0
-
-        # top cap
-        off = n_phi + 1
-        ct = off + n_phi
-        faces[3*n_phi:, 0] = ct
-        faces[3*n_phi:, 1] = off + j
-        faces[3*n_phi:, 2] = off + (j + 1) % n_phi
-
-        faces = np.array(faces, dtype=np.int64)
-        tri = verts[faces]  # robust outward orientation
-        fn = np.cross(tri[:, 1] - tri[:, 0], tri[:, 2] - tri[:, 0])
-        flip = np.einsum('ij,ij->i', fn, tri.mean(axis=1) - (start + end) / 2) < 0
-        faces[flip] = faces[flip][:, ::-1]
-        return verts, faces
-    return verts
-
-def uv_cone(azimuthal_samples, top_radius=0, tol=1e-6, return_faces=True):
-    cyl_data = uv_cylinder(azimuthal_samples, return_faces=return_faces)
-    if not return_faces:
-        verts = cyl_data
-        faces = None
-    else:
-        verts, faces = cyl_data
-
-    n_phi = max(int(azimuthal_samples), 3)
-    if top_radius < tol:
-        verts = np.concatenate([
-            verts[:1+n_phi],
-            verts[(-1,), :]
-        ], axis=0)
-        faces = faces[:n_phi]
-        top = faces.copy()
-        top[:, 0] = len(verts) - 1
-        top = top[:, ::-1]
-        faces = np.concatenate([faces, top], axis=0)
-    else:
-        verts[1+n_phi:, :2] *= top_radius
-
-    if return_faces:
-        return verts, faces
-    else:
-        return faces
-
-
-def uv_box(return_faces=True, allow_normals=False):
-    if allow_normals:
-        pts = np.array([[0., 0., 0.],
-                        [0., 0., 0.],
-                        [0., 0., 0.],
-                        [0., 0., 1.],
-                        [0., 0., 1.],
-                        [0., 0., 1.],
-                        [0., 1., 0.],
-                        [0., 1., 0.],
-                        [0., 1., 0.],
-                        [0., 1., 1.],
-                        [0., 1., 1.],
-                        [0., 1., 1.],
-                        [1., 0., 0.],
-                        [1., 0., 0.],
-                        [1., 0., 0.],
-                        [1., 0., 1.],
-                        [1., 0., 1.],
-                        [1., 0., 1.],
-                        [1., 1., 0.],
-                        [1., 1., 0.],
-                        [1., 1., 0.],
-                        [1., 1., 1.],
-                        [1., 1., 1.],
-                        [1., 1., 1.]])
-    else:
-        pts = np.array([[0., 0., 0.],
-                        [0., 0., 1.],
-                        [0., 1., 0.],
-                        [0., 1., 1.],
-                        [1., 0., 0.],
-                        [1., 0., 1.],
-                        [1., 1., 0.],
-                        [1., 1., 1.]])
-    if return_faces:
-        if allow_normals:
-            faces = np.array([[9,  6,   0],
-                              [3,  9,   0],
-                              [12, 18, 21],
-                              [12, 21, 15],
-                              [1,  13, 16],
-                              [1,  16,  4],
-                              [22, 19,  7],
-                              [10, 22,  7],
-                              [20, 14,  2],
-                              [8,  20,  2],
-                              [5,  17, 23],
-                              [5,  23, 11]])
-        else:
-            faces = np.array([[3, 2, 0],
-                              [1, 3, 0],
-                              [4, 6, 7],
-                              [4, 7, 5],
-                              [0, 4, 5],
-                              [0, 5, 1],
-                              [7, 6, 2],
-                              [3, 7, 2],
-                              [6, 4, 0],
-                              [2, 6, 0],
-                              [1, 5, 7],
-                              [1, 7, 3]])
-        return pts, faces
-    return pts
-
-def orient_mesh_faces_outward(verts, faces, reference):
-    """Flip face winding so normals point away from `reference` (a point or per-face array)."""
-    tri = verts[faces]
-    normals = vec_crosses(tri[:, 0] - tri[:, 1], tri[:, 2] - tri[:, 1])
-    centroids = tri.mean(axis=1)
-    outward = centroids - np.asarray(reference)
-    flip = vec_dots(normals, outward) < 0
-    faces = faces.copy()
-    faces[flip] = faces[flip][:, (0, 2, 1)]
-    return faces

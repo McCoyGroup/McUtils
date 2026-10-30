@@ -4383,7 +4383,7 @@ def update_triangulation(
 
         return tri_set, dihed_set
 
-def _triangle_conversion_function(inds, tri, coord):
+def _triangle_conversion_function(inds, tri, coord, allow_ambiguous_completions=False):
     """
     **LLM Docstring**
 
@@ -4408,7 +4408,8 @@ def _triangle_conversion_function(inds, tri, coord):
             idx.append(ix)
     b = canonicalize_internal(idx)
     target = nput.triangle_property_specifiers(b)
-    return nput.triangle_property_function(tri, target['name'], raise_on_missing=False)
+    return nput.triangle_property_function(tri, target['name'], raise_on_missing=False,
+                                           allow_ambiguous_completions=allow_ambiguous_completions)
 def _dihedral_conversion_function(inds, dihed, coord, allow_completion=True, cache=None, completion_handler=None,
                                   disallowed_conversions=None, allow_ambiguous_completions=False, verbose=False):
     """
@@ -4430,7 +4431,7 @@ def _dihedral_conversion_function(inds, dihed, coord, allow_completion=True, cac
     :type completion_handler: Any
     :param disallowed_conversions: Coordinate conversions that must not be used while searching for a target conversion.
     :type disallowed_conversions: Any
-    :param allow_ambiguous_completions: Whether a missing intermediate may be accepted when more than one completion path exists.
+    :param allow_ambiguous_completions: Whether to retain ambiguous SSA relations with value constraints and explicit alternatives.
     :type allow_ambiguous_completions: Any
     :param verbose: Whether diagnostic information is emitted during the search.
     :type verbose: Any
@@ -4585,6 +4586,18 @@ class InternalCoordinateConversion:
         except:
             ints = np.asanyarray(internals)
             raise ValueError(f"caller error in calling {self} on internals of shape {ints.shape}")
+    @property
+    def constraints(self):
+        return getattr(self.caller, 'constraints', ())
+
+    @property
+    def alternatives(self):
+        return tuple(type(self)(a, self.provenance) for a in getattr(self.caller, 'alternatives', ()))
+
+    @property
+    def conversions(self):
+        return getattr(self.caller, 'conversions', ())
+
     def __repr__(self):
         """
         **LLM Docstring**
@@ -4650,7 +4663,7 @@ def find_internal_conversion(internals, targets,
     :type return_completions: Any
     :param allow_recursive_completions: Whether completing one coordinate may recursively request additional intermediate completions.
     :type allow_recursive_completions: Any
-    :param allow_ambiguous_completions: Whether a missing intermediate may be accepted when more than one completion path exists.
+    :param allow_ambiguous_completions: Whether to retain ambiguous SSA relations with value constraints and explicit alternatives.
     :type allow_ambiguous_completions: Any
     :param dihedral_intersections: Allowed overlap rules when combining multiple dihedron records for a conversion.
     :type dihedral_intersections: Any
@@ -4688,21 +4701,7 @@ def find_internal_conversion(internals, targets,
     if allow_recursive_completions is None:
         allow_recursive_completions = allow_completion
     # completable_dihedrons = {}
-    dihedral_sets = {k:set(k) for k in dihedrals.keys()}
-    if dihedral_intersections is None:
-        base_intersections = {
-            k:{
-                b:len(dihedral_sets[k] & dihedral_sets[b])
-                for b in dihedrals.keys()
-            }
-            for k in dihedrals.keys()
-        }
-        pruned_intersections = {
-            k:{b:v for b,v in di.items() if v > 2}
-            for k,di in base_intersections.items()
-        }
-        dihedral_intersections = (base_intersections, pruned_intersections)
-    dihedral_intersections, pruned_dihedral_intersections = dihedral_intersections
+    dihedral_sets = None
     for target_coord in targets:
         if verbose: print("======>", target_coord)
         if canonicalize:
@@ -4722,7 +4721,8 @@ def find_internal_conversion(internals, targets,
             if n in {2, 3}:
                 for a, v in triangles.items():
                     tri = v
-                    conv = _triangle_conversion_function(a, v, target_coord)
+                    conv = _triangle_conversion_function(a, v, target_coord,
+                                                         allow_ambiguous_completions=allow_ambiguous_completions)
                     if conv is not None:
                         break
                     else:
@@ -4734,8 +4734,8 @@ def find_internal_conversion(internals, targets,
                     n in {2, 3}
                     or allow_ambiguous_completions
             ):
-                if allow_ambiguous_completions:
-                    raise ValueError("!")
+                if allow_ambiguous_completions and n == 4:
+                    raise ValueError("ambiguous signed dihedral conversion requires a resolver")
                 for a, v in dihedrals.items():
                     dihed = v
                     completion_handler = None
@@ -4750,6 +4750,22 @@ def find_internal_conversion(internals, targets,
                         dihed = None
 
             if conv is None and n == 4:
+                if dihedral_sets is None:
+                    dihedral_sets = {k:set(k) for k in dihedrals.keys()}
+                    if dihedral_intersections is None:
+                        base_intersections = {
+                            k:{
+                                b:len(dihedral_sets[k] & dihedral_sets[b])
+                                for b in dihedrals.keys()
+                            }
+                            for k in dihedrals.keys()
+                        }
+                        pruned_intersections = {
+                            k:{b:v for b,v in di.items() if v > 2}
+                            for k,di in base_intersections.items()
+                        }
+                        dihedral_intersections = (base_intersections, pruned_intersections)
+                    dihedral_intersections, pruned_dihedral_intersections = dihedral_intersections
                 # we search for a pair of dihedrals we can complete
                 # to get (i,j,k,l) we need (i,j,k,a) and (b,j,k,l)
                 for a, v in dihedrals.items():
@@ -4950,6 +4966,13 @@ def find_internal_conversion(internals, targets,
                                 subargs[k] = subconv(internal_list)
                         subtri = nput.make_triangle(**subargs)
                         return conv(subtri)
+                    if isinstance(conv, nput.ConstrainedConversion):
+                        caller = convert
+                        def wrap(function, caller=caller):
+                            def converted(internal_list, **kwargs):
+                                return caller(internal_list, conv=function, **kwargs)
+                            return converted
+                        convert = conv.wrap(wrap)
                     convert = InternalCoordinateConversion(
                         convert,
                         tri,
@@ -4999,6 +5022,13 @@ def find_internal_conversion(internals, targets,
                                 subargs[k] = subconv(internal_list)
                         subdihed = nput.make_dihedron(**subargs)
                         return conv(subdihed)
+                    if isinstance(conv, nput.ConstrainedConversion):
+                        caller = convert
+                        def wrap(function, caller=caller):
+                            def converted(internal_list, **kwargs):
+                                return caller(internal_list, conv=function, **kwargs)
+                            return converted
+                        convert = conv.wrap(wrap)
                     convert = InternalCoordinateConversion(
                         convert,
                         dihed,
@@ -5130,6 +5160,9 @@ def find_internal_conversion(internals, targets,
                         np.moveaxis(np.array([c[i] for c in convs]), 0, -1)
                         for i in range(order + 1)
                     ]
+
+            # Keep component constraints and alternatives available to a future resolver.
+            convert.conversions = tuple(conversions)
 
     res = (convert,)
     if include_shapes:
@@ -6592,7 +6625,7 @@ class InternalCoordinateGraph:
         :type unconvertable_atoms: Any
         :param allow_recursive_completions: Whether completing one coordinate may recursively request additional intermediate completions.
         :type allow_recursive_completions: Any
-        :param allow_ambiguous_completions: Whether a missing intermediate may be accepted when more than one completion path exists.
+        :param allow_ambiguous_completions: Whether to retain ambiguous SSA relations with value constraints and explicit alternatives.
         :type allow_ambiguous_completions: Any
         :param find_unreachable: Whether the search also identifies targets that cannot be reached from current coordinates.
         :type find_unreachable: Any
@@ -6612,11 +6645,12 @@ class InternalCoordinateGraph:
         :rtype: Any
         """
         initial_set = target_internals
+        ambiguous_conversions = {}
 
         target_internals = [
             i for i in target_internals
             if i not in self._conversions
-               and i not in self._unreachable
+               and (allow_ambiguous_completions or i not in self._unreachable)
         ]
         if len(target_internals) > 0:
             expanded_internals, expanded_triangulation, expanded_intersections = self._get_expanded_internals(update_triangulation=False)
@@ -6642,7 +6676,10 @@ class InternalCoordinateGraph:
                 shapes.append(s)
 
             # this gives us the basic completeable set of coordinates
-            new_conv = {i:c for i,c in zip(target_internals, conversions) if c is not None}
+            ambiguous_conversions = {i:c for i,c in zip(target_internals, conversions)
+                                     if c is not None and c.alternatives}
+            new_conv = {i:c for i,c in zip(target_internals, conversions)
+                        if c is not None and i not in ambiguous_conversions}
             if len(new_conv) > 0:
                 self._update_conversions(new_conv, update_triangulation=False)
 
@@ -6722,7 +6759,8 @@ class InternalCoordinateGraph:
                                     self._unreachable.update(unreachable_edits)
 
                         # unconvertable_atoms.update(d)
-        conversions = [self._make_conversion(self._conversions.get(i)) for i in initial_set]
+        conversions = [ambiguous_conversions.get(i) or self._make_conversion(self._conversions.get(i))
+                       for i in initial_set]
         c2 = []
         raise_on_missing = dev.str_is(missing_val, 'raise')
         for t,c in zip(target_internals, conversions):
@@ -6763,6 +6801,7 @@ class InternalCoordinateGraph:
                         for i in range(order + 1)
                     ]
                 return res
+            convert.conversions = tuple(conversions)
             return InternalCoordinateConversion(
                 convert,
                 conversions,

@@ -1392,63 +1392,92 @@ class ZacharyTests(TestCase):
 
     # region Interpolation
 
-    # region Mesh
+    # region PointMesh
+
+    @validationTest
+    def test_PointMeshDeprecation(self):
+        import warnings
+        # The one temporary compatibility constructor returns the new type.
+        from McUtils.Zachary import Mesh
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always', DeprecationWarning)
+            mesh = Mesh([[0., 0.], [1., 1.]])
+        self.assertIs(type(mesh), PointMesh)
+        self.assertEqual(len(caught), 1)
+        self.assertIs(caught[0].category, DeprecationWarning)
+        self.assertEqual(caught[0].filename, __file__)
+
+    @validationTest
+    def test_MeshGeometryComparison(self):
+        vertices = np.array([[0.,0.,0.], [1.,0.,0.], [1.,1.,0.], [0.,1.,0.]])
+        faces = np.array([[0,1,2], [0,2,3]])
+        mesh = MeshGeometry(vertices, faces)
+        self.assertAlmostEqual(mesh.surface_area(), 1.)
+        self.assertEqual(mesh.topology()['euler_characteristic'], 1)
+        self.assertEqual(len(mesh.incidence().edges), 5)
+        moved = MeshGeometry(vertices + [0.,0.,.1], faces)
+        self.assertTrue(mesh.compare(moved).same_connectivity)
+        flipped = MeshGeometry(vertices, [[0,1,3], [1,2,3]])
+        comparison = mesh.compare(flipped)
+        self.assertFalse(comparison.same_connectivity)
+        self.assertFalse(comparison.topology_change_detected)
+
 
     @validationTest
     def test_LinSpaceMesh(self):
-        mg = Mesh(np.linspace(-1, 1, 3))
-        self.assertIs(mg.mesh_type, MeshType.Structured)
+        mg = PointMesh(np.linspace(-1, 1, 3))
+        self.assertIs(mg.mesh_type, MeshType.Regular)
         self.assertEquals(mg.shape, (3,))
 
     @validationTest
     def test_MeshGridMesh(self):
         mg = np.array(np.meshgrid(np.array([-1, 0, 1]), np.array([-1, 0, 1]), indexing='ij'))
-        regmesh = Mesh(mg)
+        regmesh = PointMesh(mg)
         self.assertIs(regmesh.mesh_type, MeshType.Regular)
         self.assertEquals(regmesh.shape, (3, 3, 2))
 
     @validationTest
     def test_StructuredMesh(self):
         mg = np.array(np.meshgrid(np.array([-1, -.5, 0, 1]), np.array([-1, 0, 1]), indexing='ij'))
-        regmesh = Mesh(mg)
+        regmesh = PointMesh(mg)
         self.assertIs(regmesh.mesh_type, MeshType.Structured)
         self.assertEquals(regmesh.shape, (4, 3, 2))
 
     @validationTest
     def test_UnstructuredMesh(self):
         mg = np.random.rand(100, 10, 2)
-        regmesh = Mesh(mg)
+        regmesh = PointMesh(mg)
         self.assertIs(regmesh.mesh_type, MeshType.Unstructured)
 
     @validationTest
     def test_RegularMesh(self):
-        regmesh = Mesh.RegularMesh([-1, 1, 3], [-1, 1, 3])
+        regmesh = PointMesh.RegularMesh([-1, 1, 3], [-1, 1, 3])
         self.assertIs(regmesh.mesh_type, MeshType.Regular)
         self.assertEquals(regmesh.shape, (3, 3, 2))
 
     @validationTest
     def test_RegMeshSubgrids(self):
-        regmesh = Mesh.RegularMesh([-1, 1, 3], [-1, 1, 3])
-        m = [Mesh(g) for g in regmesh.subgrids]
+        regmesh = PointMesh.RegularMesh([-1, 1, 3], [-1, 1, 3])
+        m = [PointMesh(g) for g in regmesh.subgrids]
         self.assertTrue(all(g.mesh_type is MeshType.Regular for g in m))
 
     @inactiveTest
     def test_SemiStructuredMesh(self):
-        semi_mesh = Mesh([[np.arange(i)] for i in range(10, 25)])
+        semi_mesh = PointMesh([[np.arange(i)] for i in range(10, 25)])
         self.assertIs(semi_mesh.mesh_type, MeshType.SemiStructured)
 
     @validationTest
     def test_MeshFromList(self):
         try:
             wat = np.asarray([[-1, 0, 1], [-1, 0, 1]])
-            bad = Mesh(wat)
-        except Mesh.MeshError:
+            bad = PointMesh(wat)
+        except PointMesh.MeshError:
             pass
         else:
-            # just to make it accessible through Mesh
-            self.assertIs(bad.mesh_type, MeshType.Indeterminate)
+            # just to make it accessible through PointMesh
+            self.assertIs(bad.mesh_type, MeshType.Unstructured)
 
-    #endregion Mesh
+    #endregion PointMesh
 
 
     @validationTest

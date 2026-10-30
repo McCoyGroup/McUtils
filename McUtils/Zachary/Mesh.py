@@ -4,8 +4,10 @@ know what kind of data is fed in
 """
 
 import numpy as np, enum
+import warnings
+from .. import Numputils as nput
 
-__all__ = [ "Mesh", "MeshType" ]
+__all__ = ["PointMesh", "MeshGeometry", "Mesh", "MeshType"]
 
 # we define a bunch of MeshType attributes so that the string names can change up or whatever but the interface
 # can remain consistent
@@ -19,14 +21,14 @@ class MeshType(enum.Enum):
 class MeshError(Exception):
     ...
 
-class Mesh(np.ndarray):
+class PointMesh(np.ndarray):
     """
-    A general Mesh class representing data points in n-dimensions
+    A general PointMesh class representing data points in n-dimensions
     in either a structured, unstructured, or semi-structured manner.
     Exists mostly to provides a unified interface to difference FD and Surface methods.
     """
 
-    # just to make it accessible through Mesh
+    # just to make it accessible through PointMesh
     MeshError = MeshError
     MeshType = MeshType
 
@@ -188,7 +190,7 @@ class Mesh(np.ndarray):
         :return:
         :rtype: int
         """
-        if isinstance(g, Mesh):
+        if isinstance(g, PointMesh):
             g = g.view(np.ndarray)
         return np.reshape(g, (cls.get_npoints(g), g.shape[-1]))
 
@@ -204,7 +206,7 @@ class Mesh(np.ndarray):
         :rtype:
         """
 
-        if isinstance(grid, Mesh):
+        if isinstance(grid, PointMesh):
             grid = grid.view(np.ndarray)
         if tol is None:
             tol = grid.dtype.itemsize
@@ -387,3 +389,98 @@ class Mesh(np.ndarray):
         cg = np.array(np.meshgrid(*coords, indexing='ij'))
         wat = np.moveaxis(cg, 0, len(mesh_specs))
         return cls(wat, mesh_type=MeshType.Regular)
+
+class Mesh:
+    """Temporary constructor stub; use PointMesh for point/grid data."""
+
+    def __new__(cls, *args, **kwargs):
+        warnings.warn("Mesh is deprecated; use PointMesh instead.",
+                      DeprecationWarning, stacklevel=2)
+        return PointMesh(*args, **kwargs)
+
+
+class MeshGeometry:
+    """Triangle geometry with cached quantities backed by Numputils.MeshOps.
+
+    Treat the vertex/index arrays as a snapshot when using cached quantities.
+    Molecular ownership, reconstruction and plotting belong in subclasses.
+    """
+    curvature_types = ('mean', 'gaussian')
+    default_curvature_method = 'quadric'
+
+    def __init__(self, verts, inds, *, normals=None, vertex_normals=None, curvatures=None):
+        self.verts, self.inds = nput.mesh_arrays(verts, inds)
+        if nput.is_numeric_array_like(normals):
+            normals = (np.asarray(normals), None)
+        self._normals = normals
+        self.vertex_normals = vertex_normals
+        self._curvatures = {} if curvatures is None else {
+            key: np.asarray(value) for key, value in dict(curvatures).items() if value is not None
+        }
+        self._derivative_term_cache = {}
+
+    def surface_area(self, return_components=False):
+        return nput.mesh_surface_area(self.verts, self.inds, return_components=return_components)
+
+    def volume(self, return_components=False):
+        return nput.mesh_volume(self.verts, self.inds, return_components=return_components)
+
+    def get_normals(self, normalize=True):
+        return nput.mesh_normals(self.verts, self.inds, normalize=normalize, return_norms=True)
+
+    @property
+    def normals(self):
+        if self._normals is None:
+            self._normals = self.get_normals()
+        return self._normals[0]
+
+    @classmethod
+    def estimate_vertex_curvatures(cls, verts, inds, vertex_normals=None, method=None, rings=2):
+        return nput.estimate_mesh_vertex_curvatures(verts, inds, vertex_normals=vertex_normals,
+            method=cls.default_curvature_method if method is None else method, rings=rings)
+
+    def vertex_curvatures(self, curvature_type=None, recompute=False, method=None):
+        """Return stored or estimated mean/Gaussian curvature at each vertex."""
+        types = self.curvature_types if curvature_type is None else (curvature_type,)
+        if any(kind not in self.curvature_types for kind in types):
+            raise ValueError('unknown curvature type: '+str(curvature_type))
+        if recompute or any(kind not in self._curvatures for kind in types):
+            mean, gaussian = self.estimate_vertex_curvatures(self.verts, self.inds,
+                vertex_normals=self.vertex_normals, method=method)
+            estimated = {'mean': mean, 'gaussian': gaussian}
+            if recompute:
+                return estimated if curvature_type is None else estimated[curvature_type]
+            for kind in types:
+                self._curvatures.setdefault(kind, estimated[kind])
+        return {kind: self._curvatures[kind] for kind in types} if curvature_type is None else self._curvatures[curvature_type]
+
+    def normal_derivatives(self, order=1):
+        return nput.mesh_normal_derivatives(self.verts, self.inds, order=order,
+                                            cache=self._derivative_term_cache)
+
+    def area_derivatives(self, order=1, return_components=False):
+        return nput.mesh_area_derivatives(self.verts, self.inds, order=order,
+            return_components=return_components, cache=self._derivative_term_cache)
+
+    def centroid_derivatives(self, order=1, return_components=False):
+        return nput.mesh_centroid_derivatives(self.verts, self.inds, order=order,
+            return_components=return_components, cache=self._derivative_term_cache)
+
+    def volume_derivatives(self, order=1, return_components=False,
+                           normal_order=None, area_order=None, centroid_order=None):
+        return nput.mesh_volume_derivatives(self.verts, self.inds, order=order,
+            return_components=return_components, normal_order=normal_order, area_order=area_order,
+            centroid_order=centroid_order, cache=self._derivative_term_cache)
+
+    def incidence(self):
+        return nput.mesh_incidence(self.inds, nvertices=len(self.verts))
+
+    def topology(self):
+        return nput.mesh_topology(self.inds, nvertices=len(self.verts))
+
+    def compare(self, other, **options):
+        return nput.compare_meshes(self, other, **options)
+
+    def check_deformation(self, other, **options):
+        """Validate a deformation to another vertex array with these indices."""
+        return nput.check_mesh_deformation(self.verts, other, self.inds, **options)
