@@ -6,7 +6,7 @@ import typing
 import numpy as np, abc, enum, math
 import scipy.interpolate as interpolate
 import scipy.spatial as spat
-from .Mesh import Mesh, MeshType
+from .Mesh import PointMesh, MeshType
 
 from .. import Numputils as nput
 from .NeighborBasedInterpolators import *
@@ -464,7 +464,7 @@ class Interpolator:
         :param interpolation_opts: the options to be fed into the interpolating_function
         :type interpolation_opts:
         """
-        self.grid = grid = Mesh(grid) if not isinstance(grid, Mesh) else grid
+        self.grid = grid = PointMesh(grid) if not isinstance(grid, PointMesh) else grid
         self.vals = vals
         if interpolation_function is None:
             interpolation_function = self.get_interpolator(grid, vals,
@@ -489,7 +489,7 @@ class Interpolator:
         """Returns a function that can be called on grid points to interpolate them
 
         :param grid:
-        :type grid: Mesh
+        :type grid: PointMesh
         :param vals:
         :type vals: np.ndarray
         :param interpolation_order:
@@ -541,7 +541,7 @@ class Interpolator:
         Returns an Extrapolator that can be called on grid points to extrapolate them
 
         :param grid:
-        :type grid: Mesh
+        :type grid: PointMesh
         :param extrapolation_order:
         :type extrapolation_order: int
         :return: extrapolator

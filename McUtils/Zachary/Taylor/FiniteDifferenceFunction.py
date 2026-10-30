@@ -3,7 +3,7 @@ Provides a general, convenient FiniteDifferenceFunction class to handle all of o
 """
 import numpy as np, scipy.sparse as sparse, math
 from ... import Numputils as nput
-from ..Mesh import Mesh, MeshType
+from ..Mesh import PointMesh, MeshType
 __reload_hook__ = [ '..Mesh' ]
 
 __all__ = [
@@ -244,7 +244,7 @@ class FiniteDifferenceFunction:
             if len(missing)>0:
                 new_grid = new_grid[(0,)*len(missing)]
 
-            gp = Mesh(new_grid)
+            gp = PointMesh(new_grid)
             subgrids = gp.subgrids#[sg[a] if a is not None else a for a in sel_ax]
             if subgrids is None:
                 raise ValueError("can't apply finite difference to mesh of type {}".format(gp.mesh_type))
@@ -260,7 +260,7 @@ class FiniteDifferenceFunction:
                 if len(g) == 0:
                     raise ValueError("finite difference can't be applied to subgrid {} of {}".format(g, grid))
 
-                m = Mesh(g)
+                m = PointMesh(g)
                 # raise Exception(..., m.mesh_type)
                 if m.mesh_type == MeshType.Regular:
                     diffs[i] = RegularGridFiniteDifference(
@@ -286,7 +286,7 @@ class FiniteDifferenceFunction:
                             f"irregular structured grids require `allow_irregular=True` (got spacings {np.diff(g)})"
                         )
                 else:
-                    raise ValueError("don't know how to do FD on a Mesh with type {}".format(m.mesh_type))
+                    raise ValueError("don't know how to do FD on a PointMesh with type {}".format(m.mesh_type))
         return cls(*diffs, contract=contract, axes=axes)
 
 ##########################################################################################

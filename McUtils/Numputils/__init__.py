@@ -43,3 +43,6 @@ __all__ += _all
 
 from .GaussianIntegrals import *; from .GaussianIntegrals import __all__ as _all
 __all__ += _all
+
+from .MeshOps import *; from .MeshOps import __all__ as _all
+__all__ += _all

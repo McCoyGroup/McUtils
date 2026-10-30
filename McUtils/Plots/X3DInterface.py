@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import abc
+from dataclasses import dataclass, field
 import collections
 import uuid
 import numpy as np
@@ -44,7 +45,10 @@ __all__ = [
     "X3DIndexedLineSet",
     "X3DSwitch",
     "X3DListAnimator",
-    "X3DInterpolatingAnimator"
+    "X3DInterpolatingAnimator",
+    "X3DPrimitiveRecord",
+    "X3DPrimitiveDecoder",
+    "x3d_to_primitives"
 ]
 
 #TODO: cache these resources or put them on a path that is accessible by Jupyter
@@ -62,6 +66,10 @@ class X3DObject(metaclass=abc.ABCMeta):
         :return: the X3D element
         """
         ...
+
+    def to_primitives(self, *, records=False, strict=True):
+        """Reconstruct supported plotting primitives; unsupported nodes are explicit."""
+        return x3d_to_primitives(self, records=records, strict=strict)
 
     def get_interpolated_attributes(self):
         """
@@ -521,7 +529,7 @@ class X3D(X3DObject):
                         style='width:4.5em;', **role('speed'))),
             JHTML.Label(JHTML.Input(type='checkbox', checked=True, **role('loop')), ' Loop'),
             cls='mcutils-x3d-playback',
-            style='display:flex;align-items:center;gap:.5em;flex-wrap:wrap;'
+            style='display:flex;align-items:center;gap:.5em;flex-wrap:wrap;position:relative;z-index:1;pointer-events:auto;'
         )
 
     @staticmethod
@@ -590,10 +598,13 @@ function X3DPlayback(component, options = {}) {
     }
     function check() { if (disposed) throw new Error('X3D playback is disposed'); }
     function notify() {
+        for (const name of Object.keys(controls)) {
+            controls[name] = component.query('[data-role="playback-' + name + '"]');
+        }
         const snapshot = getState();
         if (controls.toggle) controls.toggle.textContent = state.running ? 'Pause' : 'Play';
         if (controls.position) controls.position.value = String(state.fraction);
-        if (controls.speed) controls.speed.value = String(state.speed);
+        if (controls.speed && controls.speed.ownerDocument.activeElement !== controls.speed) controls.speed.value = String(state.speed);
         if (controls.loop) controls.loop.checked = state.loop;
         if (controls.previous) controls.previous.textContent = discrete ? 'Previous frame' : 'Back ' + (stepSize * 100) + '%';
         if (controls.next) controls.next.textContent = discrete ? 'Next frame' : 'Forward ' + (stepSize * 100) + '%';
@@ -601,8 +612,19 @@ function X3DPlayback(component, options = {}) {
         for (const listener of listeners) listener(snapshot);
         scene.dispatchEvent(new CustomEvent('x3d-playback-change', {detail: {...snapshot, clock: clock.id || clock.getAttribute('DEF')}}));
     }
+    function writeFraction(target, value) {
+        // Input events must reach the live engine immediately. A markup-only
+        // change depends on MutationObserver delivery and can leave the UI and
+        // rendered geometry out of step, especially while seeking or pausing.
+        if (typeof target.node.setFieldValue === 'function') {
+            target.node.setFieldValue(target.field, value);
+        } else {
+            component.setField(target.node, target.field, value);
+        }
+    }
     function apply() {
-        for (const target of targets) component.setField(target.node, target.field, state.fraction);
+        for (const target of targets) writeFraction(target, state.fraction);
+        if (scene.runtime && typeof scene.runtime.triggerRedraw === 'function') scene.runtime.triggerRedraw();
         notify();
     }
     function schedule() {
@@ -685,13 +707,35 @@ function X3DPlayback(component, options = {}) {
             listeners.add(listener);
             return () => listeners.delete(listener);
         }};
-    if (controls.toggle) component.on(controls.toggle, 'click', () => setRunning(!state.running));
-    if (controls.restart) component.on(controls.restart, 'click', controller.restart);
-    if (controls.previous) component.on(controls.previous, 'click', () => step(-1));
-    if (controls.next) component.on(controls.next, 'click', () => step(1));
-    if (controls.position) component.on(controls.position, 'input', () => seek(Number(controls.position.value)));
-    if (controls.speed) component.on(controls.speed, 'change', () => setSpeed(Number(controls.speed.value)));
-    if (controls.loop) component.on(controls.loop, 'change', () => setLoop(controls.loop.checked));
+    // Delegate to the component root so controls remain connected when their
+    // displayed text changes. Use the event target's value while editing.
+    component.on(component.root, 'click', event => {
+        const button = event.target.closest('[data-role]');
+        if (!button || !component.root.contains(button)) return;
+        switch (button.getAttribute('data-role')) {
+            case 'playback-toggle': setRunning(!state.running); break;
+            case 'playback-restart': controller.restart(); break;
+            case 'playback-previous': step(-1); break;
+            case 'playback-next': step(1); break;
+        }
+    });
+    component.on(component.root, 'input', event => {
+        const role = event.target.getAttribute('data-role');
+        if (role === 'playback-position') seek(Number(event.target.value));
+        if (role === 'playback-speed') {
+            const value = Number(event.target.value);
+            if (Number.isFinite(value) && value > 0) setSpeed(value);
+        }
+    });
+    component.on(component.root, 'change', event => {
+        const role = event.target.getAttribute('data-role');
+        if (role === 'playback-loop') setLoop(event.target.checked);
+        if (role === 'playback-speed') {
+            const value = Number(event.target.value);
+            if (Number.isFinite(value) && value > 0) setSpeed(value);
+            else event.target.value = String(state.speed);
+        }
+    });
     component.onDispose(dispose);
     apply();
     schedule();
@@ -728,6 +772,22 @@ function X3DPlayback(component, options = {}) {
                 script=self.get_playback_script() + '\nreturn X3DPlayback(component, {...component.data, clock: component.nodes.clock});'
             ))
         return controls
+
+    def _mesh_components(self, element):
+        components = []
+        for node in self._walk_scene(element):
+            data = getattr(node, 'mesh_animation_data', None)
+            if data is not None:
+                components.append(X3DComponent(script=MESH_PLAYER, data=data,
+                    nodes=node.mesh_animation_nodes, id=node.attrs['id'] + '-component',
+                    placement='after', timeout=20000))
+        return components
+
+    def get_mesh_comparisons(self):
+        """Automatic mesh comparison summaries attached while building frames."""
+        return [node.mesh_animation_data['comparisons']
+                for node in self._walk_scene(self.to_x3d())
+                if getattr(node, 'mesh_animation_data', None) is not None]
 
     def has_playback(self):
         """Whether the scene requests a generic playback toolbar."""
@@ -1026,7 +1086,7 @@ document.head.append(frag{i});
             return self._widg
         id = self.id
         x3d_embed = self.to_x3d()
-        components = self.components + tuple(self._playback_components(x3d_embed))
+        components = self.components + tuple(self._mesh_components(x3d_embed)) + tuple(self._playback_components(x3d_embed))
 
         if not dynamic_loading or not include_resources:
             elems = self.get_resource_elements() if include_resources else []
@@ -3757,9 +3817,6 @@ requestAnimationFrame(tick)
         ]
 
 
-
-
-
     @classmethod
     def prep_interpolator(cls, interpolator_type, name, values, nframes, id, clock_id):
         """
@@ -4003,15 +4060,15 @@ class X3DInterpolatingAnimator(X3DGenericAnimator):
                     if not diffed:
                         diffed = (
                                 v is None and v2 is not None
-                                or v2 is None and v is None
+                                or v2 is None and v is not None
                         )
                         if not diffed:
                             if nput.is_numeric_array_like(v):
                                 if not nput.is_numeric_array_like(v2):
                                     diffed = True
                                 else:
-                                    diffed = not np.allclose(v, v2)
-                            elif nput.is_numeric_array_like(2):
+                                    diffed = np.shape(v) != np.shape(v2) or not np.allclose(v, v2)
+                            elif nput.is_numeric_array_like(v2):
                                 diffed = True
                             else:
                                 diffed = v2 != v
@@ -4024,7 +4081,7 @@ class X3DInterpolatingAnimator(X3DGenericAnimator):
         return statics, changes
 
     @classmethod
-    def from_frames(cls, frames:list[X3DObject|X3DHTML.X3DElement], **opts):
+    def from_frames(cls, frames:list[X3DObject|X3DHTML.X3DElement], *, detect_meshes=True, mesh_options=None, **opts):
         """
         **LLM Docstring**
 
@@ -4036,6 +4093,15 @@ class X3DInterpolatingAnimator(X3DGenericAnimator):
         :param opts: options for the animator
         :return: the animation (or the single frame if nothing changes)
         """
+        frames = list(frames)
+        if not frames:
+            raise ValueError('no animation frames were supplied')
+        if len(frames) == 1:
+            return frames[0]
+        if detect_meshes:
+            prepared = _prepare_x3d_mesh_animation(frames, mesh_options=mesh_options, **opts)
+            if prepared is not None:
+                return prepared
         static_objects, interpolated_objects = cls.frame_diffs(*frames)
         if len(interpolated_objects) == 0:
             return frames[0]
@@ -4045,3 +4111,475 @@ class X3DInterpolatingAnimator(X3DGenericAnimator):
                 anim = X3DGroup(static_objects + [anim])
             return anim
 
+
+# X3D primitive reconstruction and automatic mesh animation.
+def _attrs(node):
+    return {str(k).lower().replace('_',''):v for k,v in getattr(node,'attrs',{}).items()}
+
+
+def _numbers(value, dtype=float):
+    if isinstance(value,str):
+        # Reject malformed numbers rather than accepting np.fromstring's prefix.
+        return np.array([dtype(x) for x in value.replace(',',' ').split()],dtype=dtype)
+    if dtype is int and np.any(np.asarray(value)!=np.asarray(value,dtype=int)):
+        raise ValueError('X3D indices must be integers')
+    return np.asarray(value,dtype=dtype).ravel()
+
+
+def _rotation(value):
+    value=_numbers(value)
+    if value.shape!=(4,):raise ValueError('axis-angle rotations require four numbers')
+    axis=value[:3];length=np.linalg.norm(axis)
+    if not length:
+        if value[3]:raise ValueError('nonzero rotation requires a nonzero axis')
+        return np.eye(3)
+    x,y,z=axis/length;c,s=np.cos(value[3]),np.sin(value[3])
+    cross=np.array([[0,-z,y],[z,0,-x],[-y,x,0]])
+    return np.eye(3)*c+(1-c)*np.outer(axis/length,axis/length)+s*cross
+
+
+def _transform(attrs):
+    def translation(value):
+        result=np.eye(4);result[:3,3]=_numbers(value);return result
+    center=_numbers(attrs.get('center',[0,0,0]))
+    r=np.eye(4);r[:3,:3]=_rotation(attrs.get('rotation',[0,0,1,0]))
+    sr=np.eye(4);sr[:3,:3]=_rotation(attrs.get('scaleorientation',[0,0,1,0]))
+    scale=np.eye(4);scale[:3,:3]=np.diag(_numbers(attrs.get('scale',[1,1,1])))
+    return translation(attrs.get('translation',[0,0,0]))@translation(center)@r@sr@scale@sr.T@translation(-center)
+
+
+@dataclass
+class X3DPrimitiveRecord:
+    primitive: object
+    node: object
+    path: tuple
+    shape_path: object
+    transform: np.ndarray
+    source_id: object = None
+    vertices: object = None
+    faces: object = None
+    vertex_ids: object = None
+    material: dict = field(default_factory=dict)
+    metadata: dict = field(default_factory=dict)
+    reason: object = None
+
+    @property
+    def supported(self):return self.primitive is not None and self.reason is None
+
+
+class X3DPrimitiveDecoder:
+    """Registry-based conversion skeleton, initially supporting mesh detection.
+
+    Register a handler as ``handler(decoder, node, matrix, path, shape_path,
+    material) -> X3DPrimitiveRecord``. Geometry never disappears on an unknown
+    tag; strict conversion raises instead of returning an incomplete result.
+    """
+    handlers={}
+    geometry_tags={'indexedtriangleset','triangleset','indexedfaceset','indexedquadset',
+        'sphere','cylinder','cone','box','pointset','indexedlineset','lineset','text',
+        'elevationgrid','extrusion','binarygeometry','buffergeometry','rectangle2d',
+        'circle2d','disk2d','polyline2d','arc2d','arcclose2d','trianglefan','trianglestripset'}
+    ignored={'appearance','material','color','colorrgba','normal','coordinate','texturecoordinate',
+        'viewpoint','navigationinfo','environment','background','directionallight','pointlight','spotlight',
+        'route','timesensor','scalarinterpolator','coordinateinterpolator','positioninterpolator',
+        'orientationinterpolator','colorinterpolator','integersequencer','proximitysensor','script'}
+
+    @classmethod
+    def register(cls, tag, handler):cls.handlers[tag.lower()]=handler
+
+    def decode(self, value, strict=False):
+        roots=list(value) if isinstance(value,(list,tuple)) else [value]
+        self.roots=[v.to_x3d() if hasattr(v,'to_x3d') else v for v in roots]
+        self.definitions={}
+        def collect(node):
+            attrs=_attrs(node)
+            if attrs.get('def'):self.definitions.setdefault(attrs['def'],[]).append(node)
+            for child in getattr(node,'elems',()):collect(child)
+        for root in self.roots:collect(root)
+        self.records=[]
+        for i,root in enumerate(self.roots):self._walk(root,np.eye(4),(i,),None,{},set())
+        if strict and any(not r.supported for r in self.records):
+            raise NotImplementedError('; '.join(str(r.reason) for r in self.records if not r.supported))
+        return self.records
+
+    def _walk(self,node,matrix,path,shape_path,material,seen):
+        tag=str(getattr(node,'tag','')).lower();attrs=_attrs(node)
+        if attrs.get('use'):
+            refs=self.definitions.get(attrs['use'],[])
+            if len(refs)!=1 or attrs['use'] in seen:
+                self.records.append(self._record(node,matrix,path,shape_path,material,
+                    reason='unresolved, ambiguous or cyclic USE: '+str(attrs['use'])))
+                return
+            return self._walk(refs[0],matrix,path,shape_path,material,seen|{attrs['use']})
+        if tag in self.ignored:return
+        if tag=='transform':matrix=matrix@_transform(attrs)
+        if tag=='matrixtransform':
+            self.records.append(self._record(node,matrix,path,shape_path,material,
+                reason='MatrixTransform conversion is reserved for a future handler'));return
+        if tag=='switch':
+            self.records.append(self._record(node,matrix,path,shape_path,material,
+                reason='Switch selection requires an explicit scene-state detector'));return
+        if tag=='shape':
+            shape_path=path
+            material={}
+            def find_material(n):
+                if str(getattr(n,'tag','')).lower()=='material':material.update(_attrs(n))
+                if str(getattr(n,'tag','')).lower() in ('imagetexture','movietexture','multitexture','pixeltexture'):
+                    material['__textured__']=True
+                for c in getattr(n,'elems',()):find_material(c)
+            find_material(node)
+        if tag in self.handlers:
+            self.records.append(self.handlers[tag](self,node,matrix,path,shape_path,material));return
+        if tag in self.geometry_tags:
+            self.records.append(self._record(node,matrix,path,shape_path,material,
+                reason='conversion is not yet implemented for '+tag));return
+        children=getattr(node,'elems',())
+        if not children and tag not in {'group','scene','x3d','staticgroup'}:
+            self.records.append(self._record(node,matrix,path,shape_path,material,
+                reason='unknown X3D node '+tag));return
+        for i,child in enumerate(children):self._walk(child,matrix,path+(i,),shape_path,material,seen)
+
+    def _record(self,node,matrix,path,shape_path,material,**kwargs):
+        attrs=_attrs(node)
+        return X3DPrimitiveRecord(None,node,path,shape_path,matrix.copy(),
+            source_id=attrs.get('id',attrs.get('def')),material=dict(material),**kwargs)
+
+    def resolve_child(self,node,tag):
+        for child in getattr(node,'elems',()):
+            attrs=_attrs(child)
+            if attrs.get('use'):
+                refs=self.definitions.get(attrs['use'],[])
+                if len(refs)!=1:raise ValueError('ambiguous or missing geometric USE')
+                child=refs[0]
+            if str(getattr(child,'tag','')).lower()==tag:return child
+        return None
+
+    def mesh(self,node,matrix,path,shape_path,material):
+        from .Primitives import Triangle
+        coordinate=self.resolve_child(node,'coordinate')
+        if coordinate is None:raise ValueError('mesh geometry requires Coordinate')
+        vertices=_numbers(_attrs(coordinate).get('point',[])).reshape(-1,3)
+        attrs=_attrs(node);tag=str(node.tag).lower()
+        if tag=='triangleset':
+            if len(vertices)%3:raise ValueError('TriangleSet requires complete triangles')
+            faces=np.arange(len(vertices)).reshape(-1,3)
+        elif tag=='indexedtriangleset':
+            faces=_numbers(attrs.get('index',[]),int).reshape(-1,3)
+        elif tag=='indexedquadset':
+            quads=_numbers(attrs.get('index',[]),int).reshape(-1,4)
+            faces=np.concatenate([quads[:,[0,1,2]],quads[:,[0,2,3]]])
+        else:
+            values=_numbers(attrs.get('coordindex',[]),int);polygons=[];begin=0
+            for end in list(np.flatnonzero(values==-1))+[len(values)]:
+                polygon=values[begin:end];begin=end+1
+                if not len(polygon):continue
+                if len(polygon)<3:raise ValueError('IndexedFaceSet face has fewer than three vertices')
+                if np.any(polygon<0) or np.any(polygon>=len(vertices)):raise ValueError('face index out of range')
+                if len(polygon)==3:polygons.append(polygon[None,:])
+                else:
+                    local=np.asarray(nput.triangulate_polygon(vertices[polygon])).reshape(-1,3)
+                    polygons.append(polygon[local])
+            faces=np.concatenate(polygons) if polygons else np.empty((0,3),int)
+        vertices,faces=nput.mesh_arrays(vertices,faces)
+        world=vertices@matrix[:3,:3].T+matrix[:3,3]
+        ccw=attrs.get('ccw',True)
+        ccw=ccw.lower()!='false' if isinstance(ccw,str) else bool(ccw)
+        if (not ccw) != (np.linalg.det(matrix[:3,:3])<0):faces=faces[:,[0,2,1]]
+        ids=attrs.get('data-vertex-ids',_attrs(coordinate).get('data-vertex-ids'))
+        if isinstance(ids,str):ids=json.loads(ids)
+        options={}
+        if 'diffusecolor' in material:options['color']=_numbers(material['diffusecolor'])
+        if 'transparency' in material:options['transparency']=float(material['transparency'])
+        primitive=Triangle(world,indices=faces,**options)
+        colors=self.resolve_child(node,'color')
+        channels=3
+        if colors is None:
+            colors=self.resolve_child(node,'colorrgba');channels=4
+        metadata={'geometry_attributes':attrs}
+        if material.get('__textured__'):
+            metadata['unsupported_animation']='textured meshes need an appearance/UV correspondence handler'
+        if colors is not None:
+            color_values=_numbers(_attrs(colors).get('color',[])).reshape(-1,channels)
+            per_vertex=attrs.get('colorpervertex',True)
+            per_vertex=per_vertex.lower()!='false' if isinstance(per_vertex,str) else bool(per_vertex)
+            if not per_vertex:
+                metadata['unsupported_animation']='per-face colors need a face-attribute correspondence handler'
+            elif len(color_values)!=len(vertices):raise ValueError('vertex colors must match coordinate count')
+            metadata['vertex_colors']=color_values.tolist()
+            primitive.opts['vertex_colors']=color_values
+        record=self._record(node,matrix,path,shape_path,material,vertices=world,faces=faces,
+                            vertex_ids=ids,metadata=metadata)
+        record.primitive=primitive
+        record.reason=metadata.get('unsupported_animation')
+        return record
+
+    def sphere(self,node,matrix,path,shape_path,material):
+        from .Primitives import Sphere
+        lengths=np.linalg.norm(matrix[:3,:3],axis=0)
+        record=self._record(node,matrix,path,shape_path,material)
+        if not np.allclose(matrix[:3,:3].T@matrix[:3,:3],np.eye(3)*lengths[0]**2):
+            record.reason='nonuniformly transformed Sphere needs an ellipsoid/mesh handler';return record
+        record.primitive=Sphere(matrix[:3,3],radius=float(_attrs(node).get('radius',1))*lengths[0])
+        return record
+
+
+for _tag in ('triangleset','indexedtriangleset','indexedfaceset','indexedquadset'):
+    X3DPrimitiveDecoder.register(_tag,X3DPrimitiveDecoder.mesh)
+X3DPrimitiveDecoder.register('sphere',X3DPrimitiveDecoder.sphere)
+
+
+def x3d_to_primitives(value, *, records=False, strict=True):
+    result=X3DPrimitiveDecoder().decode(value,strict=strict)
+    return result if records else [r.primitive for r in result if r.supported]
+
+# --- mesh animation ---
+
+
+MESH_PLAYER = r"""
+function mountComparedMesh(component) {
+    const {frames, intervals, times} = component.data;
+    const fields = component.scene.ownerDocument.defaultView.x3dom.fields;
+    const {geometry, coordinate, normal, driver, material, color} = component.nodes;
+    let lastFrame = -1, lastFaces = null, updates = 0, indexUpdates = 0;
+    function vectors(values) {
+        const result = new fields.MFVec3f();
+        for (const v of values) result.push(new fields.SFVec3f(v[0],v[1],v[2]));
+        return result;
+    }
+    function apply(fraction) {
+        let k = 0;
+        while (k+1 < times.length && times[k+1] <= fraction) k++;
+        const current = frames[k], following = frames[Math.min(k+1,frames.length-1)];
+        const interval = intervals[k];
+        const alpha = interval && interval.interpolate ?
+            Math.max(0,Math.min(1,(fraction-times[k])/(times[k+1]-times[k]))) : 0;
+        const points = current.vertices.map((v,i) => {
+            const w = alpha ? following.vertices[interval.next_vertices[i]] : v;
+            return v.map((x,j) => x + alpha*(w[j]-x));
+        });
+        const normals = points.map(() => [0,0,0]);
+        for (const [a,b,c] of current.faces) {
+            const u=points[b].map((x,j)=>x-points[a][j]),v=points[c].map((x,j)=>x-points[a][j]);
+            const n=[u[1]*v[2]-u[2]*v[1],u[2]*v[0]-u[0]*v[2],u[0]*v[1]-u[1]*v[0]];
+            for (const i of [a,b,c]) for(let j=0;j<3;j++) normals[i][j]+=n[j];
+        }
+        for (const n of normals) {
+            const length=Math.hypot(...n);
+            if(length) for(let j=0;j<3;j++)n[j]/=length; else n[2]=1;
+        }
+        coordinate.setFieldValue('point',vectors(points));
+        normal.setFieldValue('vector',vectors(normals));
+        if(color) {
+            const values=current.colors.map((v,i)=>v.map((x,j)=>x+alpha*((alpha?following.colors[interval.next_vertices[i]][j]:x)-x)));
+            const parser=values[0]?.length===4?fields.MFColorRGBA:fields.MFColor;
+            color.setFieldValue('color',parser.parse(values.flat().join(' ')));
+        }
+        const indicesChanged = lastFaces === null || current.faces.length !== lastFaces.length ||
+            current.faces.some((face,i)=>face.some((v,j)=>v!==lastFaces[i][j]));
+        if (lastFrame !== k && indicesChanged) {
+            const index=new fields.MFInt32();
+            for(const f of current.faces)index.push(f[0],f[1],f[2],-1);
+            geometry.setFieldValue('coordIndex',index);
+            indexUpdates++;
+        }
+        lastFaces=current.faces;lastFrame=k;
+        const names={diffusecolor:'diffuseColor',emissivecolor:'emissiveColor',specularcolor:'specularColor',
+                     transparency:'transparency',shininess:'shininess',ambientintensity:'ambientIntensity'};
+        for(const [key,name] of Object.entries(names)) {
+            let value=current.material[key];
+            if(value===undefined)continue;
+            const next=following.material[key];
+            if(alpha && next!==undefined) value=Array.isArray(value)?value.map((x,j)=>x+alpha*(next[j]-x)):value+alpha*(next-value);
+            if(Array.isArray(value))value=new fields.SFColor(value[0],value[1],value[2]);
+            material.setFieldValue(name,value);
+        }
+        updates++;
+        if(component.scene.runtime?.triggerRedraw)component.scene.runtime.triggerRedraw();
+        return {frame:k,fraction,interpolated:alpha>0,updates,indexUpdates};
+    }
+    component.on(driver,'outputchange',event=>{if(event.fieldName==='value_changed')apply(Number(event.value));});
+    apply(0);
+    return {apply,getState:()=>({frame:lastFrame,updates,indexUpdates}),comparisons:component.data.comparisons};
+}
+return mountComparedMesh(component);
+"""
+
+
+def _material(record):
+    defaults={'diffusecolor':[.8,.8,.8],'emissivecolor':[0.,0.,0.],
+              'specularcolor':[0.,0.,0.],'transparency':0.,'shininess':.2,'ambientintensity':.2}
+    for key,value in record.material.items():
+        if key not in defaults:continue
+        if isinstance(value,str):value=[float(x) for x in value.replace(',',' ').split()]
+        defaults[key]=np.asarray(value,float).tolist() if 'color' in key else float(np.asarray(value).ravel()[0])
+    return defaults
+
+
+def _animate_nonmesh(roots, clock_id):
+    """Attach numeric field drivers to one retained raw scene tree.
+
+    Keeping the tree intact avoids rendering children twice when a parent
+    Transform and one of its descendants both need animation.
+    """
+    controls=[];times=np.linspace(0,1,len(roots))
+    queue=[tuple(roots)]
+    while queue:
+        nodes=queue.pop();first=nodes[0]
+        if not hasattr(first,'tag'):
+            if any(node!=first for node in nodes):raise ValueError('changing non-numeric scene text is unsupported')
+            continue
+        if any(str(node.tag).lower()!=str(first.tag).lower() for node in nodes):
+            raise ValueError('non-mesh scene structure changed')
+        children=[list(getattr(node,'elems',())) for node in nodes]
+        if len({len(c) for c in children})!=1:raise ValueError('non-mesh scene structure changed')
+        queue.extend(zip(*children))
+        names=set().union(*(node.attrs.keys() for node in nodes))-{'id','def','DEF'}
+        for name in names:
+            values=[node.attrs.get(name) for node in nodes]
+            def same(a,b):
+                if a is None or b is None:return a is b
+                try:return np.shape(a)==np.shape(b) and bool(np.all(np.asarray(a)==np.asarray(b)))
+                except (ValueError,TypeError):return False
+            if all(same(values[0],v) for v in values[1:]):continue
+            parsed=[]
+            try:
+                for value in values:
+                    if isinstance(value,str):value=[float(x) for x in value.replace(',',' ').split()]
+                    parsed.append(np.asarray(value,dtype=float).ravel())
+            except (ValueError,TypeError):raise ValueError('unsupported changing X3D field '+str(name)) from None
+            if len({len(v) for v in parsed})!=1:raise ValueError('non-mesh field sizes changed')
+            size=len(parsed[0]);field=str(name).lower()
+            if size==1:kind=X3DHTML.ScalarInterpolator
+            elif size==4 and field in ('rotation','orientation','scaleorientation'):kind=X3DHTML.OrientationInterpolator
+            elif size==3 and 'color' in field:kind=X3DHTML.ColorInterpolator
+            elif size==3:kind=X3DHTML.PositionInterpolator
+            elif field=='point' and size%3==0:kind=X3DHTML.CoordinateInterpolator
+            else:raise ValueError('unsupported changing X3D field '+str(name))
+            identifier=first.attrs.get('id') or first.attrs.get('DEF') or 'mesh-companion-'+uuid.uuid4().hex
+            first.attrs=dict(first.attrs,id=identifier,DEF=identifier)
+            driver_id='mesh-companion-driver-'+uuid.uuid4().hex
+            driver=kind(id=driver_id,DEF=driver_id,
+                key=' '.join(format(t,'.17g') for t in times),
+                keyValue=' '.join(format(x,'.17g') for x in np.concatenate(parsed)))
+            controls.extend([driver,X3DHTML.Route(fromNode=clock_id,fromField='fraction_changed',toNode=driver_id,toField='set_fraction'),
+                X3DHTML.Route(fromNode=driver_id,fromField='value_changed',toNode=identifier,toField='set_'+name)])
+    return X3DHTML.Group(roots[0],*controls)
+
+
+def _prepare_x3d_mesh_animation(frames, *, mesh_options=None, **options):
+    """Return an automatic mesh animation, or None when no mesh is present.
+
+    Detection currently matches mesh shapes by scene path. This is intentionally
+    a replaceable policy, not a claim to recognize arbitrary scene edits.
+    Unresolved vertex correspondence holds the old geometry until the next key;
+    it still updates the same mesh node, never a whole-animation Switch.
+    """
+    mesh_options={} if mesh_options is None else dict(mesh_options)
+    correspondence=mesh_options.pop('correspondence','auto')
+    decoder_factory=mesh_options.pop('decoder',X3DPrimitiveDecoder)
+    track_key=mesh_options.pop('track_key',None)
+    check_deformation=mesh_options.pop('check_deformation',True)
+    atol=mesh_options.pop('atol',1e-8);rtol=mesh_options.pop('rtol',1e-7)
+    if mesh_options:raise ValueError('unknown mesh options: '+', '.join(mesh_options))
+    roots=[];decoded=[]
+    for frame in frames:
+        if isinstance(frame,(list,tuple)):frame=X3DGroup(frame)
+        decoder=decoder_factory();records=decoder.decode(frame,strict=False)
+        roots.append(decoder.roots[0])
+        decoded.append([r for r in records if r.vertices is not None])
+    if not any(decoded):return None
+    counts=[collections.Counter(r.source_id for r in records if r.source_id is not None) for records in decoded]
+    stable_ids=set.intersection(*[{key for key,count in counter.items() if count==1} for counter in counts])
+    meshes=[]
+    for records in decoded:
+        matched={}
+        for record in records:
+            key=track_key(record) if track_key is not None else (
+                ('id',record.source_id) if record.source_id in stable_ids else ('path',record.path))
+            if key in matched:raise ValueError('ambiguous mesh track identity; provide mesh_options[track_key]')
+            matched[key]=record
+        meshes.append(matched)
+    paths=set(meshes[0])
+    if any(set(m)!=paths for m in meshes):
+        raise ValueError('mesh shape paths changed; a scene correspondence detector is required')
+    def strip(node,path,removed):
+        if path in removed:return None
+        if not hasattr(node,'tag'):return node
+        children=[strip(c,path+(i,),removed) for i,c in enumerate(getattr(node,'elems',()))]
+        children=[c for c in children if c is not None]
+        return type(node)(*children,**dict(node.attrs))
+    stripped=[]
+    for root,records in zip(roots,meshes):
+        removed={r.shape_path or r.path for r in records.values()}
+        stripped.append(strip(root,(0,),removed) or X3DHTML.Group())
+    prefix='mesh-animation-'+uuid.uuid4().hex
+    clock=X3DHTML.TimeSensor(id=prefix+'-clock',DEF=prefix+'-clock',
+        cycleInterval=options.get('animation_duration',2),enabled=options.get('running',True),loop=True,
+        **{'data-playback':options.get('playback',True),'data-frame-count':len(frames)})
+    body=[_animate_nonmesh(stripped,clock.attrs['id']),clock]
+    times=np.linspace(0,1,len(frames))
+    reports=[]
+    for track,path in enumerate(sorted(paths,key=repr)):
+        records=[m[path] for m in meshes]
+        for record in records:
+            if record.metadata.get('unsupported_animation'):
+                raise NotImplementedError(record.metadata['unsupported_animation'])
+        intervals=[];comparisons=[]
+        for first,second in zip(records[:-1],records[1:]):
+            ids=(first.vertex_ids,second.vertex_ids) if first.vertex_ids is not None and second.vertex_ids is not None else None
+            comparison=nput.compare_meshes((first.vertices,first.faces),(second.vertices,second.faces),
+                vertex_ids=ids,correspondence=correspondence,atol=atol,rtol=rtol)
+            comparisons.append(comparison)
+            mapping={int(global_id):i for i,global_id in enumerate(comparison.vertex_maps.second)}
+            full=all(int(v) in mapping for v in comparison.vertex_maps.first) and len(first.vertices)==len(second.vertices)
+            indices=[mapping[int(v)] for v in comparison.vertex_maps.first] if full else []
+            interpolate=comparison.correspondence!='unresolved' and full and not len(comparison.winding_changes)
+            validation=None
+            if interpolate and comparison.same_connectivity and check_deformation:
+                validation=nput.check_mesh_deformation(first.vertices,second.vertices[indices],first.faces,
+                    samples=5,check_intersections=True)
+                interpolate=validation['valid']
+            intervals.append({'interpolate':bool(interpolate),'next_vertices':indices,
+                'correspondence':comparison.correspondence,
+                'connectivity_changed':not comparison.same_connectivity,
+                'topology_change_detected':comparison.topology_change_detected,
+                'validation':None if validation is None else {'valid':validation['valid'],
+                    'continuous_collision_certified':False}})
+        key=prefix+'-'+str(track)
+        first=records[0]
+        if any(len(r.vertices)>65535 for r in records):
+            raise ValueError('automatic mesh animation currently supports <=65535 vertices per mesh')
+        material=X3DHTML.Material(id=key+'-material',DEF=key+'-material',
+                                 diffuseColor=_material(first)['diffusecolor'],transparency=_material(first)['transparency'])
+        coordinate=X3DHTML.Coordinate(id=key+'-coordinate',DEF=key+'-coordinate',point=first.vertices.ravel())
+        normal=X3DHTML.Normal(id=key+'-normal',DEF=key+'-normal',vector=nput.mesh_vertex_normals(first.vertices,first.faces).ravel())
+        faces=np.column_stack([first.faces,np.full(len(first.faces),-1)]).ravel()
+        geometry=X3DHTML.IndexedFaceSet(coordinate,normal,id=key+'-geometry',DEF=key+'-geometry',
+                                      coordIndex=faces,normalPerVertex=True,creaseAngle=np.pi,
+                                      normalUpdateMode='none',solid=False)
+        colors=[r.metadata.get('vertex_colors') for r in records]
+        channels=4 if any(c and len(c[0])==4 for c in colors) else 3
+        colors=[(c if c is not None else [[1.]*channels for _ in r.vertices]) for c,r in zip(colors,records)]
+        if channels==4:colors=[[v+[1.] if len(v)==3 else v for v in c] for c in colors]
+        has_colors=any('vertex_colors' in r.metadata for r in records)
+        if has_colors:
+            color_class=X3DHTML.ColorRGBA if channels==4 else X3DHTML.Color
+            color=color_class(id=key+'-color',DEF=key+'-color',color=np.asarray(colors[0]).ravel())
+            geometry=X3DHTML.IndexedFaceSet(coordinate,normal,color,**dict(geometry.attrs))
+        shape=X3DHTML.Shape(X3DHTML.Appearance(material),geometry)
+        driver=X3DHTML.ScalarInterpolator(id=key+'-driver',DEF=key+'-driver',key='0 1',keyValue='0 1')
+        driver.mesh_animation_data={'frames':[{'vertices':r.vertices.tolist(),'faces':r.faces.tolist(),
+            'material':_material(r),'colors':c} for r,c in zip(records,colors)], 'times':times.tolist(),'intervals':intervals,
+            'comparisons':[{'correspondence':c.correspondence,'same_connectivity':c.same_connectivity,
+                'faces_added':len(c.added_faces),'faces_removed':len(c.removed_faces),
+                'winding_changes':len(c.winding_changes),'topology_change_detected':c.topology_change_detected}
+                for c in comparisons]}
+        driver.mesh_animation_nodes={name:key+'-'+suffix for name,suffix in
+            [('geometry','geometry'),('coordinate','coordinate'),('normal','normal'),('material','material'),('driver','driver')]}
+        if has_colors:driver.mesh_animation_nodes['color']=key+'-color'
+        body.extend([shape,driver,X3DHTML.Route(fromNode=clock.attrs['id'],fromField='fraction_changed',
+                                              toNode=key+'-driver',toField='set_fraction')])
+        reports.append(comparisons)
+    result=X3DGroup(body)
+    result.mesh_comparisons=reports
+    return result
