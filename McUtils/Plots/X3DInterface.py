@@ -521,7 +521,7 @@ class X3D(X3DObject):
                         style='width:4.5em;', **role('speed'))),
             JHTML.Label(JHTML.Input(type='checkbox', checked=True, **role('loop')), ' Loop'),
             cls='mcutils-x3d-playback',
-            style='display:flex;align-items:center;gap:.5em;flex-wrap:wrap;'
+            style='display:flex;align-items:center;gap:.5em;flex-wrap:wrap;position:relative;z-index:1;pointer-events:auto;'
         )
 
     @staticmethod
@@ -590,10 +590,13 @@ function X3DPlayback(component, options = {}) {
     }
     function check() { if (disposed) throw new Error('X3D playback is disposed'); }
     function notify() {
+        for (const name of Object.keys(controls)) {
+            controls[name] = component.query('[data-role="playback-' + name + '"]');
+        }
         const snapshot = getState();
         if (controls.toggle) controls.toggle.textContent = state.running ? 'Pause' : 'Play';
         if (controls.position) controls.position.value = String(state.fraction);
-        if (controls.speed) controls.speed.value = String(state.speed);
+        if (controls.speed && controls.speed.ownerDocument.activeElement !== controls.speed) controls.speed.value = String(state.speed);
         if (controls.loop) controls.loop.checked = state.loop;
         if (controls.previous) controls.previous.textContent = discrete ? 'Previous frame' : 'Back ' + (stepSize * 100) + '%';
         if (controls.next) controls.next.textContent = discrete ? 'Next frame' : 'Forward ' + (stepSize * 100) + '%';
@@ -601,8 +604,19 @@ function X3DPlayback(component, options = {}) {
         for (const listener of listeners) listener(snapshot);
         scene.dispatchEvent(new CustomEvent('x3d-playback-change', {detail: {...snapshot, clock: clock.id || clock.getAttribute('DEF')}}));
     }
+    function writeFraction(target, value) {
+        // Input events must reach the live engine immediately. A markup-only
+        // change depends on MutationObserver delivery and can leave the UI and
+        // rendered geometry out of step, especially while seeking or pausing.
+        if (typeof target.node.setFieldValue === 'function') {
+            target.node.setFieldValue(target.field, value);
+        } else {
+            component.setField(target.node, target.field, value);
+        }
+    }
     function apply() {
-        for (const target of targets) component.setField(target.node, target.field, state.fraction);
+        for (const target of targets) writeFraction(target, state.fraction);
+        if (scene.runtime && typeof scene.runtime.triggerRedraw === 'function') scene.runtime.triggerRedraw();
         notify();
     }
     function schedule() {
@@ -685,13 +699,35 @@ function X3DPlayback(component, options = {}) {
             listeners.add(listener);
             return () => listeners.delete(listener);
         }};
-    if (controls.toggle) component.on(controls.toggle, 'click', () => setRunning(!state.running));
-    if (controls.restart) component.on(controls.restart, 'click', controller.restart);
-    if (controls.previous) component.on(controls.previous, 'click', () => step(-1));
-    if (controls.next) component.on(controls.next, 'click', () => step(1));
-    if (controls.position) component.on(controls.position, 'input', () => seek(Number(controls.position.value)));
-    if (controls.speed) component.on(controls.speed, 'change', () => setSpeed(Number(controls.speed.value)));
-    if (controls.loop) component.on(controls.loop, 'change', () => setLoop(controls.loop.checked));
+    // Delegate to the component root so controls remain connected when their
+    // displayed text changes. Use the event target's value while editing.
+    component.on(component.root, 'click', event => {
+        const button = event.target.closest('[data-role]');
+        if (!button || !component.root.contains(button)) return;
+        switch (button.getAttribute('data-role')) {
+            case 'playback-toggle': setRunning(!state.running); break;
+            case 'playback-restart': controller.restart(); break;
+            case 'playback-previous': step(-1); break;
+            case 'playback-next': step(1); break;
+        }
+    });
+    component.on(component.root, 'input', event => {
+        const role = event.target.getAttribute('data-role');
+        if (role === 'playback-position') seek(Number(event.target.value));
+        if (role === 'playback-speed') {
+            const value = Number(event.target.value);
+            if (Number.isFinite(value) && value > 0) setSpeed(value);
+        }
+    });
+    component.on(component.root, 'change', event => {
+        const role = event.target.getAttribute('data-role');
+        if (role === 'playback-loop') setLoop(event.target.checked);
+        if (role === 'playback-speed') {
+            const value = Number(event.target.value);
+            if (Number.isFinite(value) && value > 0) setSpeed(value);
+            else event.target.value = String(state.speed);
+        }
+    });
     component.onDispose(dispose);
     apply();
     schedule();
