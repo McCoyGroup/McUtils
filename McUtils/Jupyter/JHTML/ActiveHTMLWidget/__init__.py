@@ -4,6 +4,8 @@
 # Copyright (c) b3m2a1.
 # Distributed under the terms of the Modified BSD License.
 
+# McUtils ships this implementation and its matching frontend assets together.
+# Always use the vendored class, including when ActiveHTMLWidget is installed.
 from .widget import HTMLElement
 from ._version import __version__, version_info
 
