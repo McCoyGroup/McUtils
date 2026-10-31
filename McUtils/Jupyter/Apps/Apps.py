@@ -9,7 +9,8 @@ import types, typing
 
 import numpy as np
 
-from ..JHTML import JHTML, DefaultOutputWidget#, HTML, ActiveHTMLWrapper
+from ..JHTML import DefaultOutputWidget
+from .Themes import AppTheme, AppHTML as JHTML
 from .Interfaces import *
 from .Controls import Control, FunctionDisplay
 from .Variables import WidgetControl, InterfaceVars, DefaultVars
@@ -205,6 +206,7 @@ class App(Component):
                  sidebar=None,
                  toolbar=None,
                  theme='primary',
+                 ui_theme=None,
                  layout='grid',
                  cls='app border',
                  output=None,
@@ -236,9 +238,11 @@ class App(Component):
         :param attrs: extra layout attributes
         """
         self._parent = None if len(self._app_stack) == 0 else self._app_stack[-1]
-        super().__init__()
+        if isinstance(theme,str) and theme in AppTheme.names:
+            ui_theme, theme = theme, 'primary'
+        super().__init__(ui_theme=ui_theme)
         self.vars = DefaultVars.resolve() if vars is None else vars
-        self.output = JHTML.OutputArea(autoclear=True) if output is None else output
+        self._output_area = output
         self.capture_output = self._parent is None if capture_output is None else capture_output
         self.theme = self.themes[theme] if isinstance(theme, str) else self.merge_themes(self.themes['primary'], theme)
         self._body = [None, body]
@@ -252,6 +256,16 @@ class App(Component):
         self._out = None
         self._vv = None
         self._stack_depth = 0
+    @property
+    def output(self):
+        if self._output_area is None and AppTheme.mode() != 'static':
+            self._output_area=JHTML.OutputArea(autoclear=True)
+        return self._output_area
+
+    @output.setter
+    def output(self,value):
+        self._output_area=value
+
     def __enter__(self):
         """
         **LLM Docstring**
@@ -263,6 +277,8 @@ class App(Component):
         :rtype: App
         """
         if self._stack_depth == 0:
+            self._presentation=AppTheme.rendering(self.ui_theme)
+            self._presentation.__enter__()
             self._vv = DefaultVars(self.vars)
             self._vv.__enter__()
             self._out = DefaultOutputWidget(self.output)
@@ -281,13 +297,17 @@ class App(Component):
         :param exc_val: the exception value, if any
         :param exc_tb: the traceback, if any
         """
-        self._stack_depth -= max(0, self._stack_depth - 1)
+        if self._stack_depth <= 0:
+            raise RuntimeError('App context exited without entering')
+        self._stack_depth -= 1
         if self._stack_depth == 0:
             self._vv.__exit__(exc_type, exc_val, exc_tb)
             self._vv = None
             self._out.__exit__(exc_type, exc_val, exc_tb)
             self._out = None
             self._app_stack.remove(self)
+            self._presentation.__exit__(exc_type,exc_val,exc_tb)
+            self._presentation=None
     @property
     def body(self):
         """
@@ -691,7 +711,7 @@ class App(Component):
                 if self.toolbar is not None:
                     nrows += 1
                     ncols += 1
-                if self.capture_output:
+                if self.capture_output and AppTheme.mode() != 'static':
                     nrows += 1
                 if self.body is not None:
                     nrows += 1 if not isinstance(self.body, list) else len(self.body)
@@ -738,7 +758,7 @@ class App(Component):
                     column_width.append('1fr')
                     elements.append(body)
 
-                if self.capture_output:
+                if self.capture_output and AppTheme.mode() != 'static':
                     output_list = []
                     if self.sidebar is not None:
                         output_list.append(None)
@@ -772,6 +792,10 @@ class App(Component):
         :return: the JHTML element
         """
         return self.construct_layout().to_jhtml()
+    def to_readout(self, **opts):
+        with AppTheme.rendering(self.ui_theme):
+            return self.construct_layout().to_readout(**opts)
+
 class SettingsPane(App):
     themes = {
         'primary': App.merge_themes(

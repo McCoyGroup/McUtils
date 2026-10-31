@@ -23,6 +23,7 @@ __all__ = [
     "ReadoutEquation",
     "ReadoutCode",
     "ReadoutHTML",
+    "ReadoutWidget",
     "ReadoutPresML",
     "as_readout_node",
 ]
@@ -44,7 +45,7 @@ def _strip_svg_prolog(svg):
 
 def _resolve(obj):
     if callable(obj) and not any(hasattr(obj, a) for a in ("savefig", "figure", "format_tex", "tostring",
-                                                           "to_presml", "to_jhtml")):
+                                                           "to_presml", "to_jhtml", "to_widget")):
         return obj()
     return obj
 
@@ -184,9 +185,11 @@ class ReadoutHTML(ReadoutNode):
         self.fallback = fallback
         self.head = tuple(head)
 
-    def get_element(self):
+    def get_element(self, mode='static'):
         el = _resolve(self.element)
-        if hasattr(el, "to_jhtml") and not hasattr(el, "tostring"):
+        if mode == 'widget' and callable(getattr(el, 'to_widget', None)):
+            el = el.to_widget()
+        elif hasattr(el, "to_jhtml") and not hasattr(el, "tostring"):
             el = el.to_jhtml()
         return el
 
@@ -207,6 +210,49 @@ class ReadoutHTML(ReadoutNode):
         lines = [" ".join(l.split()) for l in text.splitlines()]
         text = "\n".join(l for l in lines if l).strip()
         return text[:max_chars] or None
+
+
+class ReadoutWidget(ReadoutHTML):
+    """An arbitrary ``to_widget()`` object, retained without serializing it.
+
+    Notebook rendering preserves live widget models. A standalone document uses
+    serializable HTML, an explicit ``fallback``, or a clear live-kernel notice.
+    No ipywidgets layout classes are involved.
+    """
+    _unset = object()
+
+    def __init__(self, widget, **opts):
+        super().__init__(widget, **opts)
+        self._widget = self._unset
+
+    def get_widget(self):
+        if self._widget is self._unset:
+            from ..JHTML import JHTML, ActiveHTMLWrapper
+            value = _resolve(self.element)
+            seen = []
+            while callable(getattr(value, 'to_widget', None)):
+                if isinstance(value,(JHTML.HTML.XMLElement,ActiveHTMLWrapper)):
+                    break
+                if any(value is previous for previous in seen):
+                    raise ValueError('Cycle while resolving to_widget()')
+                if len(seen)>=64:
+                    raise ValueError('to_widget() delegation did not resolve within 64 steps')
+                seen.append(value)
+                value = value.to_widget()
+            self._widget = value
+        return self._widget
+
+    def get_element(self, mode='widget'):
+        from ..Apps.Interfaces import Component
+        if mode == 'static' and isinstance(self.element,Component):
+            from ..Apps import AppTheme
+            with AppTheme.rendering(self.element.ui_theme,mode='static'):
+                return self.element.to_jhtml()
+        value=self.get_widget()
+        if mode=='static' and not hasattr(value,'model_id') and callable(getattr(value,'_repr_html_',None)):
+            html=value._repr_html_()
+            if isinstance(html,str):return html
+        return value
 
 
 class ReadoutPresML(ReadoutNode):
@@ -302,6 +348,8 @@ def as_readout_node(obj, caption=None, dispatch=True, **opts):
         return ReadoutPresML(obj, **opts)
     if module.endswith("OpenXML.Elements") or cls_name == "Element" and hasattr(obj, "to_presml"):
         return ReadoutPresML(obj, **opts)
+    if callable(getattr(obj, 'to_widget', None)) or (hasattr(obj,'model_id') and callable(getattr(obj,'_repr_mimebundle_',None))):
+        return ReadoutWidget(obj, **opts)
     if hasattr(obj, "to_jhtml") or (hasattr(obj, "tostring") and "JHTML" in module) or \
             (hasattr(obj, "tostring") and "Jupyter" in module):
         return ReadoutHTML(obj, **opts)

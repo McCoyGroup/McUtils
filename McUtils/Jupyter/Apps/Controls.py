@@ -3,7 +3,7 @@ import abc, uuid, numpy as np
 import asyncio, traceback, sys
 import time
 
-from ..JHTML import JHTML
+from .Themes import AppTheme, AppHTML as JHTML
 
 from .Interfaces import Component, ListGroup, Dropdown, Progress
 from .Variables import Var, InterfaceVars
@@ -53,6 +53,7 @@ class Control(Component):
         :param parent: the parent component
         :return: the widget
         """
+        self._prepare_widget_theme()
         needs_link = self._widget_cache is None
         widg = super().to_widget(parent=parent)
         if needs_link:
@@ -272,7 +273,8 @@ class InputField(ValueWidget):
         # if value is not None and not isinstance(value, str):
         #     value = str(value)
         # self._attrs['value'] = value
-        field = JHTML.Input(**self.attrs)
+        attrs = dict(self.attrs, value=str(self.var.value) if self.var.value is not None else '')
+        field = JHTML.Input(**attrs)
         return field
 class StringField(InputField):
     # base_cls = ['form-text']
@@ -753,6 +755,7 @@ class FunctionDisplay(Component):
         :param parent: the parent component
         :return: the widget
         """
+        self._prepare_widget_theme()
         needs_link = self._widget_cache is None
         dt = self.delay_time
         db = self.debounce

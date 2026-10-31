@@ -1,7 +1,7 @@
 """Shared renderer machinery: node dispatch and the render-time context."""
 
 from ..Styles import ReadoutTheme
-from ..Nodes import ReadoutArray
+from ..Nodes import ReadoutArray, ReadoutSection
 
 __all__ = [
     "is_visible",
@@ -24,7 +24,7 @@ def is_visible(node):
     """Whether a node has anything to display (export-only arrays don't)."""
     if isinstance(node, ReadoutArray):
         return node.display
-    if node.kind in ("section", "gallery", "readout"):
+    if isinstance(node, ReadoutSection) or node.kind == "gallery":
         return any(is_visible(c) for c in node.get_children())
     return True
 

@@ -6,7 +6,9 @@ import threading
 from .types import *
 
 from ...Misc import mixedmethod
-from ..JHTML import JHTML, DefaultOutputWidget
+from ..JHTML import DefaultOutputWidget
+from .Themes import AppTheme, AppHTML as JHTML
+import functools
 from ..JHTML.WidgetTools import JupyterAPIs, frozendict
 
 class JHTMLConversionError(Exception):
@@ -139,64 +141,32 @@ class WidgetInterface(metaclass=abc.ABCMeta):
         JupyterAPIs.get_display_api().display(self.to_widget())
         self.initialize()
 
-    bootstrap_js_bundle_opts = dict(
-        src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js",
-        integrity="sha384-Fy6S3B9q64WdZWQUiU+q4/2Lc9npb8tCaSX9FK7E8HnRr0Jz8D6OP9dO5Vg3Q9ct",
-        crossorigin="anonymous"
-    )
-    bootstrap_jquery_bundle_opts = dict(
-        src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js",
-        integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj",
-        crossorigin="anonymous"
-    )
-    bootstrap_css_opts = dict(
-        rel="stylesheet",
-        href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css",
-        integrity="sha384-xOolHFLEh07PJGoPkLv1IbcEPTNtaed2xpHsD9ESMhqIYd0nLMwNLD69Npy4HI+N",
-        crossorigin="anonymous"
-    )
     @classmethod
     def _get_boostrap_links(cls):
-        """
-        **LLM Docstring**
+        """Compatibility entry point; Bootstrap is an explicit presentation choice."""
+        return AppTheme('bootstrap').resources()
 
-        Return the Bootstrap CSS/JS `<link>`/`<script>` elements for static HTML.
+    def to_static_html(self, include_bootstrap=None, create_body=True, ui_theme=None):
+        """Export using the selected Apps theme, with no Bootstrap by default.
 
-        :return: the link/script elements
-        :rtype: list
+        Python-only actions are disabled in static exports; notebook widgets keep
+        their live callbacks. Explicit ``include_bootstrap=True`` selects that UI.
         """
-        return [
-            JHTML.Link(**cls.bootstrap_css_opts),
-            JHTML.Script(**cls.bootstrap_jquery_bundle_opts),
-            JHTML.Script(**cls.bootstrap_js_bundle_opts)
-        ]
-    def to_static_html(self, include_bootstrap=True, create_body=True):
-        """
-        **LLM Docstring**
-
-        Render the interface to static HTML, optionally embedding the Bootstrap links and
-        wrapping it in a full document.
-
-        :param include_bootstrap: embed the Bootstrap links
-        :type include_bootstrap: bool
-        :param create_body: wrap in a full `<html><body>` document
-        :type create_body: bool
-        :return: the static HTML element
-        :raises ValueError: if the widget can't reduce to static HTML
-        """
-        w = self.to_widget()
-        if not isinstance(w, JHTML.HTML.XMLElement):
-            raise ValueError(f"widget {w} can't reduce to static HTML")
-        if include_bootstrap:
-            if create_body:
-                w = JHTML.HTML.Html(
-                    JHTML.Head(*self._get_boostrap_links()),
-                    JHTML.Body(w)
-                )
+        selected = 'bootstrap' if include_bootstrap is True else ui_theme
+        with AppTheme.rendering(selected or getattr(self, 'ui_theme', None), mode='static') as (theme, _):
+            if hasattr(self,'to_jhtml'):
+                body=self.to_jhtml()
             else:
-                w = JHTML.HTML.Div(*self._get_boostrap_links())
-            w = w.clean_props(attr_converter=lambda attrs:{k.replace("data-bs-", "data-"):v for k,v in attrs.items()})
-        return w
+                body=self.to_widget()
+                if not isinstance(body,JHTML.HTML.XMLElement):
+                    raise ValueError('This widget requires a live Python kernel')
+            resources = theme.resources()
+            if include_bootstrap is False and theme.name == 'bootstrap':
+                resources = []
+            if create_body:
+                return JHTML.HTML.Html(JHTML.HTML.Head(*resources),
+                                       JHTML.HTML.Body(body, cls=['mcui-root','mcui-'+theme.name]))
+            return JHTML.HTML.Div(*resources, body, cls=['mcui-root','mcui-'+theme.name])
 
     _display_locks = set()
     def display(self):
@@ -238,7 +208,17 @@ class Component(WidgetInterface):
     Provides an abstract base class for an interface element
     to allow for the easy construction of interesting interfaces
     """
-    def __init__(self, dynamic=True, debug_pane=None, **attrs):
+    def __init_subclass__(cls, **kwargs):
+        super().__init_subclass__(**kwargs)
+        method = cls.__dict__.get('to_jhtml')
+        if method is not None:
+            @functools.wraps(method)
+            def themed(self, *args, **kw):
+                with AppTheme.rendering(getattr(self, 'ui_theme', None)):
+                    return method(self, *args, **kw)
+            cls.to_jhtml = themed
+
+    def __init__(self, dynamic=True, debug_pane=None, ui_theme=None, **attrs):
         """
         **LLM Docstring**
 
@@ -251,7 +231,10 @@ class Component(WidgetInterface):
         """
         super().__init__()
         self._parents = weakref.WeakSet()
+        self.ui_theme = AppTheme(ui_theme).name if ui_theme is not None else AppTheme.selected()
         self._widget_cache = None
+        self._widget_theme = None
+        self._widget_root = None
         attrs['dynamic'] = dynamic
         self._attrs = attrs
         self.debug_pane = DefaultOutputWidget.get_default() if debug_pane is None else debug_pane
@@ -278,6 +261,9 @@ class Component(WidgetInterface):
         :return: the attributes
         :rtype: frozendict
         """
+        value = dict(value)
+        if 'ui_theme' in value:
+            self.ui_theme = AppTheme(value.pop('ui_theme')).name
         self._attrs = value
 
     def get_attr(self, key):
@@ -565,31 +551,35 @@ class Component(WidgetInterface):
         :return: the JHTML element
         """
         ...
+    def _prepare_widget_theme(self):
+        name = AppTheme(self.ui_theme).name if self.ui_theme is not None else AppTheme.current().name
+        if getattr(self, '_widget_theme', None) != name:
+            self._widget_cache = None
+            self._widget_root = None
+            self._widget_theme = name
+
     def to_widget(self, parent=None):
-        """
-        **LLM Docstring**
-
-        Render the component to a widget (cached), registering the parent and wrapping any
-        conversion failure as a `JHTMLConversionError`.
-
-        :param parent: the parent component
-        :return: the widget
-        :raises JHTMLConversionError: if conversion fails
-        """
         if parent is not None:
             self._parents.add(parent)
-        if self._widget_cache is None:
-            with DefaultOutputWidget(self.debug_pane):
-                try:
-                    self._widget_cache = self.to_jhtml()
-                except JHTMLConversionError as e:
-                    raise JHTMLConversionError(e.widgets + [self], e.base_cause, e.base_tb) from None
-                except:
-                    _, e, tb = sys.exc_info()
-                    raise JHTMLConversionError([self], e, tb) from None
-                self._widget_cache.component = self
-            # self._widget_cache.to_widget.observe(self.set_value, )
-        return self._widget_cache
+        with AppTheme.rendering(self.ui_theme) as (theme, outermost):
+            self._prepare_widget_theme()
+            if self._widget_cache is None:
+                with DefaultOutputWidget(self.debug_pane):
+                    try:
+                        self._widget_cache = self.to_jhtml()
+                    except JHTMLConversionError as e:
+                        raise JHTMLConversionError(e.widgets + [self], e.base_cause, e.base_tb) from None
+                    except Exception:
+                        _, error, traceback = sys.exc_info()
+                        raise JHTMLConversionError([self], error, traceback) from None
+                    self._widget_cache.component = self
+                self._widget_root = None
+            if outermost:
+                if self._widget_root is None:
+                    self._widget_root = theme.decorate(self._widget_cache)
+                return self._widget_root
+            return self._widget_cache
+
     def mutate(self, fn):
         """
         **LLM Docstring**
@@ -617,7 +607,7 @@ class WrapperComponent(Component):
     Takes a `dict` of `wrappers` naming the successive levels of the interface
     along with a `theme` that provides style declarations for each level.
 
-    Used primarily to create `Bootstrap`-based interfaces.
+    Presentation is selected independently through ``ui_theme``.
     """
     wrappers = dict(wrapper=JHTML.Div)
     theme = dict(wrapper={'cls': []})
@@ -626,6 +616,7 @@ class WrapperComponent(Component):
                  wrappers=None,
                  theme=None,
                  extend_base_theme=True,
+                 ui_theme=None,
                  **attrs):
         """
         **LLM Docstring**
@@ -666,7 +657,7 @@ class WrapperComponent(Component):
             self.wrapper = wrappers[0][1]
         if is_dynamic is not None:
             attrs['dynamic'] = is_dynamic
-        super().__init__(**attrs) # need to delegate attr updates to the theme...
+        super().__init__(ui_theme=ui_theme, **attrs) # delegate attribute updates to the theme
 
         # self.item_attrs = theme.get(item[0], {})
         # self.item = item[-1]
@@ -872,7 +863,7 @@ class WrapperComponent(Component):
         if isinstance(self.wrappers, JHTML.Compound):
             attrs = self.attrs.copy()
             wrapper_attrs = self.attrs.get('wrapper_attrs', {}).copy()
-            for k,v in wrapper_attrs:
+            for k,v in wrapper_attrs.items():
                 wrapper_attrs[k] = self.handle_variants(v.copy())
             del attrs['wrapper_attrs']
             return self.wrapper(*items, wrapper_attrs=wrapper_attrs, **attrs)
@@ -942,7 +933,7 @@ class Container(WrapperComponent):
                     in enumerate(item_wrappers)
                 ])
             else:
-                self.item_attrs = item_theme.get(wrappers[0][1], {})
+                self.item_attrs = item_theme.get(item_wrappers[0][0], {})
                 self.item = item_wrappers[0][1]
 
     @property
@@ -1167,9 +1158,25 @@ class ModifierComponent(Component):
         :return: the JHTML element
         """
         base = self.base
-        if hasattr(base, 'to_jhtml'):
-            base = base.to_jhtml()
-        for k,v in self.attrs.items():
+        if AppTheme.mode() == 'widget' and callable(getattr(base,'to_widget',None)):
+            base=base.to_widget()
+        elif hasattr(base, 'to_jhtml'):
+            base=base.to_jhtml()
+        theme = AppTheme.current()
+        attrs = theme.attrs(self.attrs)
+        kind = attrs.get('data_mcui_toggle') or attrs.get('data-mcui-toggle')
+        if theme.name == 'native' and kind in ('tooltip','popover'):
+            if 'title' in attrs:
+                attrs['data_mcui_title'] = attrs.pop('title')
+            if 'tabindex' in attrs:
+                base['tabindex'] = attrs.pop('tabindex')
+            if AppTheme.mode() == 'widget':
+                attrs['javascript_handles'] = theme.javascript_api()
+                attrs['onevents'] = {'initialize':'mcui_mount','remove':'mcui_remove',
+                                     'view-change:data-mcui-title':'mcui_refresh',
+                                     'view-change:data-mcui-content':'mcui_refresh'}
+            return theme.component(kind, base, **attrs)
+        for k,v in attrs.items():
             if k not in self.blacklist:
                 base[k] = v
         return base
@@ -1240,7 +1247,8 @@ class Button(WrapperComponent):
         """
         if self.action is not None and self._eval_lock is None:
             self._eval_lock = True
-            w = self.to_widget()
+            self.to_widget()
+            w = self._widget_cache
             try:
                 pane = w.debug_pane
             except AttributeError:
@@ -1312,7 +1320,8 @@ class Progress(WrapperComponent):
 
         :return: the container
         """
-        return self.to_widget().compound_wrapper_data["container"]
+        self.to_widget()
+        return self._widget_cache.compound_wrapper_data["wrapper"]
     @property
     def bar(self):
         """
@@ -1322,7 +1331,8 @@ class Progress(WrapperComponent):
 
         :return: the bar
         """
-        return self.to_widget().compound_wrapper_data["bar"]
+        self.to_widget()
+        return self._widget_cache.compound_wrapper_data["bar"]
     def update_widget_attr(self, attr, val):
         """
         **LLM Docstring**
@@ -1648,7 +1658,7 @@ class Carousel(MenuComponent):
 
 class TabList(MenuComponent):
     wrappers = {
-        'wrapper': JHTML.Ul,
+        'wrapper': JHTML.AppElement('tab-list', fallback='Ul'),
         'item': {'list-item':JHTML.Li, 'tab-button':JHTML.Button}
     }
     theme = {
@@ -1741,6 +1751,7 @@ class TabPane(MenuComponent):
         item = super().create_item(item, id=item_id, role='tabpanel', cls=cls, **kw)
         return item
 class Tabs(ComponentContainer):
+    wrappers = {'wrapper': JHTML.AppElement('tabs')}
     components = {
         'list':TabList,
         'pane':TabPane
@@ -1776,98 +1787,51 @@ class Tabs(ComponentContainer):
         )
 
 class AccordionHeader(Container):
-    wrapper_classes = ['accordion-header']
-    item = JHTML.Button
-    item_classes = ['accordion-button']
-    def __init__(self, key, base_name=None, **kw):
-        """
-        **LLM Docstring**
+    wrappers={'wrapper':JHTML.Div,'item':JHTML.Button}
+    theme={'wrapper':{'cls':['accordion-header']},'item':{'cls':['accordion-button']}}
 
-        An accordion item's header (toggle).
+    def __init__(self,key,base_name=None,**attrs):
+        self.base_name=base_name
+        super().__init__([key],id=base_name+'-heading',**attrs)
 
-        :param key: the item's id
-        :param base_name: the accordion id prefix
-        :param kw: extra attributes
-        """
-        self.base_name = base_name
-        super().__init__([key], id=self.base_name+'-heading', **kw)
-    def create_item(self, i, **kw):
-        """
-        **LLM Docstring**
+    def create_item(self,item,**attrs):
+        return super().create_item(item,type='button',data_bs_toggle='collapse',
+                                   data_bs_target='#'+self.base_name+'-collapse',**attrs)
 
-        Build the accordion header element.
 
-        :param i: the header content
-        :param kw: extra options
-        :return: the header element
-        """
-        return super().create_item(i, type='button', data_bs_toggle='collapse', data_bs_target='#'+self.base_name+'-collapse')
 class AccordionBody(Container):
-    wrapper_classes = ['accordion-collapse', 'collapse']
-    item = JHTML.Div
-    item_classes = ['accordion-body']
-    def __init__(self, key, parent_name=None, base_name=None, **kw):
-        """
-        **LLM Docstring**
+    wrappers={'wrapper':JHTML.Div,'item':JHTML.Div}
+    theme={'wrapper':{'cls':['accordion-collapse','collapse']},'item':{'cls':['accordion-body']}}
 
-        An accordion item's collapsible body.
+    def __init__(self,item,parent_name=None,base_name=None,**attrs):
+        self.base_name=base_name
+        super().__init__([item],id=base_name+'-collapse',data_bs_parent='#'+parent_name,
+                         aria_labelledby=base_name+'-heading',**attrs)
 
-        :param key: the item's id
-        :param parent_name: the accordion id
-        :param base_name: the item id prefix
-        :param kw: extra attributes
-        """
-        self.base_name = base_name
-        super().__init__([key], id=self.base_name+'-collapse', data_bs_parent='#'+parent_name, **kw)
+
 class Accordion(MenuComponent):
-    wrapper_classes = ['accordion']
-    item = JHTML.Div
-    item_classes = ['accordion-item']
-    header_classes = ['h2']
-    def __init__(self, items, base_name=None, header_classes=None, **attrs):
-        """
-        **LLM Docstring**
+    wrappers={'wrapper':JHTML.Div,'item':JHTML.Div}
+    theme={'wrapper':{'cls':['accordion']},'item':{'cls':['accordion-item']}}
 
-        A Bootstrap accordion of collapsible items.
+    def __init__(self,items,base_name=None,header_classes=None,**attrs):
+        self.base_name=base_name or 'accordion-'+short_uuid()
+        self.header_classes=header_classes
+        items=list(items.items()) if isinstance(items,dict) else list(items)
+        self._active=items[0][0] if items else None
+        super().__init__(items,id=self.base_name,**attrs)
 
-        :param items: the `{label: content}` items
-        :param base_name: the accordion id prefix
-        :param header_classes: extra header CSS classes
-        :param attrs: extra attributes
-        """
-        if base_name is None:
-            base_name = 'accordion-' + short_uuid()
-        self.base_name = base_name
-        if isinstance(items, dict):
-            items = items.items()
-        self._active = None
-        if header_classes is not None:
-            self.header_classes = JHTML.manage_class(header_classes)
-        super().__init__(items, id=self.base_name, **attrs)
-    def create_item(self, item, cls=None, **kw):
-        """
-        **LLM Docstring**
+    def create_item(self,item,cls=None,**attrs):
+        key,body=item
+        index=next(i for i,value in enumerate(self._items) if value is item)
+        item_id=self.base_name+'-'+str(index)
+        active=key==self._active
+        header=AccordionHeader(key,base_name=item_id,
+                               theme={'wrapper':{'cls':JHTML.manage_class(self.header_classes)},
+                                      'item':{'cls':[] if active else ['collapsed']}})
+        content=AccordionBody(body,parent_name=self.base_name,base_name=item_id,
+                              cls=JHTML.manage_class(cls)+(['show'] if active else []))
+        return super().create_item([header,content],**attrs)
 
-        Build an accordion item (header plus collapsible body).
-
-        :param item: the item spec
-        :param cls: extra CSS classes
-        :param kw: extra options
-        :return: the item element
-        """
-        key, item = item
-        item_id = self.base_name + "-" + short_uuid(3)
-        cls = JHTML.manage_class(cls)
-        if self._active is None:
-            cls = cls + ['show']
-            self._active = item_id
-            header_cls = None
-        else:
-            header_cls = ['collapsed']
-
-        header = AccordionHeader(key, base_name=item_id, item_attrs={'cls':header_cls}, wrapper_classes=self.header_classes)
-        body = AccordionBody(item, parent_name=self.base_name, base_name=item_id, cls=cls, **kw)
-        return super().create_item([header, body])
 
 class OpenerHeader(Container):
     wrappers = {
@@ -1924,7 +1888,7 @@ class OpenerBody(Container):
         super().__init__([key], id=self.base_name+'-collapse', **kw)#, data_bs_parent='#'+parent_name, **kw)
 class Opener(MenuComponent):
     wrappers = {
-        'wrapper':JHTML.Div,
+        'wrapper':JHTML.AppElement('opener'),
         'item':JHTML.Div
     }
     theme = {
@@ -2054,6 +2018,18 @@ class Card(ComponentContainer):
             },
             **attrs
         )
+
+    def to_readout(self, **opts):
+        from ..Readouts import ReadoutPanel
+        parts = self.create_components()
+        opts.setdefault('ui_theme',self.ui_theme or AppTheme.selected())
+        attrs = dict(self.attrs)
+        opts.setdefault('style', attrs.pop('style', None))
+        attrs.pop('dynamic', None)
+        opts.setdefault('html_attrs', attrs)
+        return ReadoutPanel(*(parts['body'].items if 'body' in parts else []),
+                            header=parts['header'].items if 'header' in parts else None,
+                            footer=parts['footer'].items if 'footer' in parts else None,**opts)
 
 class Modal(Container):
     wrapper_classes = ['modal', 'fade']
@@ -2742,7 +2718,7 @@ if (widget.popover !== null && widget.popover !== undefined) {
 class LayoutItem(Component):
     wrapper = JHTML.Div
     properties = []
-    def __init__(self, item, **attrs):
+    def __init__(self, item, ui_theme=None, **attrs):
         """
         **LLM Docstring**
 
@@ -2751,7 +2727,7 @@ class LayoutItem(Component):
         :param item: the item content
         :param attrs: extra attributes
         """
-        super().__init__()
+        super().__init__(ui_theme=ui_theme)
         self.item = item
         self.attrs = attrs
     @abc.abstractmethod
@@ -2780,6 +2756,7 @@ class LayoutItem(Component):
             style = dict(attrs['style'], **style)
             attrs = attrs.copy()
             del attrs['style']
+        style.setdefault('min-width', 0)
         wat = self.wrapper(
             self.item,
             style=style,
@@ -2789,7 +2766,7 @@ class LayoutItem(Component):
 class Layout(Component):
     wrapper = JHTML.Div
     Item = LayoutItem
-    def __init__(self, elements, wrapper=None, item_attrs=None, style=None, **attrs):
+    def __init__(self, elements, wrapper=None, item_attrs=None, style=None, ui_theme=None, **attrs):
         """
         **LLM Docstring**
 
@@ -2802,7 +2779,7 @@ class Layout(Component):
         :param style: extra container styles
         :param attrs: extra attributes
         """
-        super().__init__()
+        super().__init__(ui_theme=ui_theme)
         if item_attrs is None:
             item_attrs = {}
         self.layout_settings, self.elements = self.setup_layout(elements, item_attrs)
@@ -2834,6 +2811,15 @@ class Layout(Component):
         :rtype: tuple
         """
         return None, [self.wrap_item(e, item_attrs) for e in elements]
+    def to_readout(self, **opts):
+        from ..Readouts import ReadoutGrid, ReadoutFlex
+        if isinstance(self, Grid):
+            return ReadoutGrid.from_layout(self, **opts)
+        if isinstance(self, Flex):
+            return ReadoutFlex.from_layout(self, **opts)
+        from ..Readouts import ReadoutWidget
+        return ReadoutWidget(self, **opts)
+
     @abc.abstractmethod
     def get_layout_styles(self, **kwargs):
         """
@@ -2949,6 +2935,7 @@ class GridItem(LayoutItem):
             alignment=self.alignment, justification=self.justification,
         )
 class Grid(Layout):
+    wrapper = JHTML.AppElement('grid')
     Item = GridItem
     def __init__(self, elements,
                  rows=None, cols=None,
@@ -2957,6 +2944,7 @@ class Grid(Layout):
                  item_attrs=None,
                  row_height='auto',
                  column_width='1fr',
+                 collapse_below=None,
                  **attrs
                  ):
         """
@@ -2976,6 +2964,9 @@ class Grid(Layout):
         :param column_width: the column track sizing
         :param attrs: extra attributes
         """
+        self.collapse_below=collapse_below
+        if collapse_below is not None:
+            attrs.setdefault('id','mcui-grid-'+uuid.uuid4().hex[:12])
         super().__init__(elements, item_attrs=item_attrs, **attrs)
         if rows is None:
             rows = self.layout_settings['rows']
@@ -2989,6 +2980,22 @@ class Grid(Layout):
         self.col_gaps = col_spacing
         self.row_height = row_height
         self.col_width = column_width
+    @staticmethod
+    def responsive_css(identifier, width):
+        import math,json,numbers
+        if not isinstance(width,numbers.Real) or isinstance(width,bool) or not math.isfinite(width) or width <= 0:
+            raise ValueError('collapse_below must be a positive finite pixel width')
+        selector='[id='+json.dumps(str(identifier),ensure_ascii=False)+']'
+        return ('@media(max-width:'+str(width)+'px){'+selector+
+                '{grid-template-columns:minmax(0,1fr)!important}'+selector+
+                '>div{grid-column:auto!important;grid-row:auto!important}}')
+
+    def to_jhtml(self):
+        body=super().to_jhtml()
+        if self.collapse_below is not None:
+            return JHTML.Div(JHTML.Style(self.responsive_css(self.attrs['id'],self.collapse_below)),body)
+        return body
+
     def setup_layout(self, grid, attrs):
         """
         **LLM Docstring**
@@ -3010,12 +3017,12 @@ class Grid(Layout):
                 elem = self.wrap_item(el, dict(attrs, row=i+1, col=j+1))
                 n = elem.row
                 if elem.row_span is not None:
-                    n += elem.row_span
+                    n += elem.row_span - 1
                 if n > nrows:
                     nrows = n
                 m = elem.col
                 if elem.col_span is not None:
-                    m += elem.col_span
+                    m += elem.col_span - 1
                 if m > ncols:
                     ncols = m
                 elements.append(elem)
@@ -3263,12 +3270,12 @@ class Table(Grid):
                 elem = self.wrap_item(el, dict(attrs, row=i+1, col=j+1))
                 n = elem.row
                 if elem.row_span is not None:
-                    n += elem.row_span
+                    n += elem.row_span - 1
                 if n > nrows:
                     nrows = n
                 m = elem.col
                 if elem.col_span is not None:
-                    m += elem.col_span
+                    m += elem.col_span - 1
                 if m > ncols:
                     ncols = m
                 tr.append(elem)
@@ -3349,6 +3356,7 @@ class FlexItem(LayoutItem):
             alignment=self.alignment
         )
 class Flex(Layout):
+    wrapper = JHTML.AppElement('flex')
     Item = FlexItem
     def __init__(self,
                  elements,

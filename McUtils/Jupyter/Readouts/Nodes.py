@@ -23,6 +23,9 @@ __all__ = [
     "ReadoutImage",
     "ReadoutScene",
     "ReadoutGallery",
+    "ReadoutGrid",
+    "ReadoutFlex",
+    "ReadoutPanel",
     "Readout",
 ]
 
@@ -52,6 +55,10 @@ class ReadoutNode:
         self.style = dict(style or {})
         self.meta = dict(meta or {})
         self.description = description
+
+    def to_widget(self, style=None, **opts):
+        from .Renderers.HTML import HTMLReadoutRenderer
+        return HTMLReadoutRenderer(style, mode='widget', **opts).render_fragment(self)
 
     def get_children(self):
         return self.children
@@ -85,6 +92,12 @@ class ReadoutNode:
 
 class ReadoutSection(ReadoutNode):
     kind = "section"
+
+    def __init__(self, *children, **opts):
+        from .Views import as_readout_node
+        if len(children) == 1 and isinstance(children[0], (list, tuple)):
+            children = children[0]
+        super().__init__(*[as_readout_node(child) for child in children if child is not None], **opts)
 
     @classmethod
     def compose(cls, *items, **opts):
@@ -240,6 +253,120 @@ class ReadoutGallery(ReadoutNode):
         self.shared_view = shared_view
         self.per_slide = per_slide
         self.columns = columns
+
+
+def _app_ui_theme(ui_theme):
+    from ..Apps.Themes import AppTheme
+    return AppTheme(ui_theme).name if ui_theme is not None else AppTheme.selected()
+
+
+class ReadoutGrid(ReadoutSection):
+    """A semantic grid, using Apps' CSS Grid sizing and placement conventions.
+
+    ``rows`` is a list of rows; a cell may be any readout/widget object, None,
+    or an existing ``Grid.Item`` carrying explicit placement and spans.
+    """
+    kind = 'grid'
+
+    def __init__(self, rows, column_width='1fr', row_height='auto', row_spacing=None,
+                 col_spacing=None, alignment=None, justification=None, ui_theme=None,
+                 style=None, collapse_below=None, html_attrs=None, **opts):
+        from .Views import as_readout_node
+        from ..Apps import Grid
+        cells = []
+        nrows = ncols = 0
+        for i, row in enumerate(rows, 1):
+            for j, value in enumerate(row, 1):
+                if value is None:
+                    continue
+                if isinstance(value, Grid.Item):
+                    placement = dict(row=i if value.row is None else value.row,
+                                     col=j if value.col is None else value.col,
+                                     row_span=value.row_span, col_span=value.col_span,
+                                     alignment=value.alignment, justification=value.justification)
+                    attrs = dict(value.attrs)
+                    value = value.item
+                else:
+                    placement = dict(row=i, col=j)
+                    attrs = {}
+                for key in ('row','col','row_span','col_span'):
+                    count = placement.get(key)
+                    if count is not None and (isinstance(count,bool) or int(count) != count or count < 1):
+                        raise ValueError('Grid positions and spans must be positive integers')
+                nrows = max(nrows, placement['row']+(placement.get('row_span') or 1)-1)
+                ncols = max(ncols, placement['col']+(placement.get('col_span') or 1)-1)
+                cells.append((as_readout_node(value), placement, attrs))
+        super().__init__(*[cell[0] for cell in cells], style=style, **opts)
+        self.cells = cells
+        self.grid_options = dict(rows=nrows,cols=ncols,row_height=row_height,col_width=column_width,
+                                 row_gap=row_spacing,col_gap=col_spacing,
+                                 alignment=alignment,justification=justification)
+        self.ui_theme = _app_ui_theme(ui_theme)
+        self.collapse_below = collapse_below
+        self.html_attrs = dict(html_attrs or {})
+
+    @classmethod
+    def from_layout(cls, layout, **opts):
+        from ..Apps import AppTheme
+        opts.setdefault('ui_theme',layout.ui_theme or AppTheme.selected())
+        opts.setdefault('style',layout._style)
+        opts.setdefault('html_attrs',layout.attrs)
+        opts.setdefault('collapse_below',getattr(layout,'collapse_below',None))
+        # Explicit GridItems carry their original positions; a single storage
+        # row does not change their layout or semantic reading order.
+        return cls([layout.elements], column_width=layout.col_width,row_height=layout.row_height,
+                   row_spacing=layout.row_gaps,col_spacing=layout.col_gaps,
+                   alignment=layout.alignment,justification=layout.justification,**opts)
+
+
+class ReadoutFlex(ReadoutSection):
+    """A semantic flex layout retaining Apps item order/grow/shrink/basis."""
+    kind = 'flex'
+
+    def __init__(self, *items, direction='row', wrap=None, gap=None, alignment=None,
+                 justification=None, content_alignment=None, ui_theme=None, html_attrs=None, **opts):
+        from ..Apps import Flex
+        from .Views import as_readout_node
+        cells=[]
+        for item in items:
+            if isinstance(item,Flex.Item):
+                placement={key:getattr(item,key) for key in ('order','grow','shrink','basis','alignment')}
+                attrs=dict(item.attrs);item=item.item
+            else:placement={};attrs={}
+            if item is not None:cells.append((as_readout_node(item),placement,attrs))
+        super().__init__(*[cell[0] for cell in cells],**opts)
+        if isinstance(wrap,bool):wrap='wrap' if wrap else 'nowrap'
+        self.flex_options=dict(direction=direction,wrap=wrap,alignment=alignment,
+                               justification=justification,content_alignment=content_alignment)
+        self.ui_theme=_app_ui_theme(ui_theme);self.gap=gap;self.cells=cells
+        self.html_attrs = dict(html_attrs or {})
+
+    @classmethod
+    def from_layout(cls, layout, **opts):
+        from ..Apps import AppTheme
+        opts.setdefault('ui_theme',layout.ui_theme or AppTheme.selected())
+        opts.setdefault('style',layout._style)
+        opts.setdefault('html_attrs',layout.attrs)
+        return cls(*layout.elements,direction=layout.direction,wrap=layout.wrap,
+                   gap=layout._style.get('gap'),alignment=layout.alignment,
+                   justification=layout.justification,content_alignment=layout.content_alignment,**opts)
+
+
+class ReadoutPanel(ReadoutSection):
+    """A panel with independent header/body/footer flow, retaining node data."""
+    kind = 'panel'
+
+    def __init__(self, *body, header=None, footer=None, ui_theme=None, html_attrs=None, **opts):
+        from .Views import as_readout_node
+        def part(value, name):
+            if value is None:return None
+            if isinstance(value,(list,tuple)):return ReadoutSection.compose(*value,id=name)
+            return as_readout_node(value)
+        self.header,self.footer = part(header,'header'),part(footer,'footer')
+        self.body = [as_readout_node(item) for item in body if item is not None]
+        super().__init__(self.header,*self.body,self.footer,**opts)
+        self.ui_theme = _app_ui_theme(ui_theme)
+        self.html_attrs = dict(html_attrs or {})
 
 
 class Readout(ReadoutSection):
