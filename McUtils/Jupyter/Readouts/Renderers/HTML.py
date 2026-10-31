@@ -14,8 +14,9 @@ import html as _html
 import os
 
 from ..Nodes import (ReadoutNode, ReadoutSection, ReadoutText, ReadoutFields, ReadoutTable,
-                     ReadoutArray, ReadoutImage, ReadoutScene, ReadoutGallery, Readout)
-from ..Views import ReadoutPlot, ReadoutEquation, ReadoutCode, ReadoutHTML, ReadoutPresML
+                     ReadoutArray, ReadoutImage, ReadoutScene, ReadoutGallery, Readout,
+                     ReadoutGrid, ReadoutFlex, ReadoutPanel)
+from ..Views import ReadoutPlot, ReadoutEquation, ReadoutCode, ReadoutHTML, ReadoutPresML, ReadoutWidget
 from ..Scenes import SceneView
 from .Base import ReadoutRenderer, RenderContext, handles, is_visible
 
@@ -130,7 +131,10 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         self.scene_size = scene_size or self.theme.get("html.scene_size")
         self.gallery_scene_size = gallery_scene_size or self.theme.get("html.gallery_scene_size")
         from ... import JHTML
-        self.H = JHTML.HTML
+        class WidgetElements:
+            def __getattr__(self, name):
+                return getattr(JHTML, name) if hasattr(JHTML, name) else getattr(JHTML.HTML, name)
+        self.H = WidgetElements() if mode == "widget" else JHTML.HTML
 
     # ---- documents ------------------------------------------------------------------- #
     def css(self):
@@ -150,6 +154,13 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         self._head = []
         return self.render(readout, RenderContext())
 
+    def render_fragment(self, node):
+        self._has_scenes = False
+        self._head = []
+        body = self.render(node, RenderContext())
+        items = body if isinstance(body,list) else [body]
+        return self.H.Div(self.H.Style(self.css()), *items, cls='mcr-root')
+
     def runtime_elements(self):
         H = self.H
         from ....Plots.X3DInterface import X3D
@@ -168,7 +179,10 @@ class HTMLReadoutRenderer(ReadoutRenderer):
     def render_document(self, readout):
         H = self.H
         body = self.render_readout(readout)
-        head = [H.Meta(charset="utf-8"), H.Meta(name="viewport", content="width=device-width, initial-scale=1"),
+        viewport=H.Meta(name='viewport')
+        # `content` is also a CSS property in JHTML; set the actual Meta attribute.
+        viewport.attrs=dict(viewport.attrs,content='width=device-width, initial-scale=1')
+        head = [H.Meta(charset="utf-8"), viewport,
                 H.Title(readout.title or "Readout"),
                 H.Style("html,body{margin:0;background:#F6F8FA} body{padding:16px 0}")]
         if self._has_scenes and self.mode == "static":
@@ -325,10 +339,97 @@ class HTMLReadoutRenderer(ReadoutRenderer):
     @handles(ReadoutHTML)
     def render_html(self, node, ctx):
         self._head.extend(node.head)
-        el = node.get_element()
-        if isinstance(el, str):
+        from ...Apps.Interfaces import Component
+        if isinstance(node,ReadoutWidget) and isinstance(node.element,Component):
+            from ...Apps import AppTheme
+            app_theme = AppTheme(node.element.ui_theme or AppTheme.current().name)
+            key = ('app-theme',app_theme.name)
+            if self.mode == 'static' and key not in ctx.cache:
+                ctx.cache[key]=True
+                self._head.extend(app_theme.resources())
+        el = node.get_element(mode=self.mode)
+        if isinstance(node, ReadoutWidget) and self.mode == 'static':
+            from ...JHTML import JHTML, ActiveHTMLWrapper
+            if not isinstance(el,(str,JHTML.HTML.XMLElement)) and not hasattr(el,'tostring'):
+                if node.fallback is not None:
+                    return self.render(node.fallback,ctx)
+                return self.H.P((node.title or 'Interactive widget')+' requires a live Python kernel.',
+                                cls='mcr-note',data_requires_kernel='true')
+        if isinstance(el,str):
             el = self.H.RawHTML(el)
-        return self._block_title(node) + [self.H.Div(el, cls="mcr-html")]
+        return self._block_title(node)+[self.H.Div(el,cls='mcr-html')]
+
+    def _app_theme(self, node, ctx):
+        from ...Apps import AppTheme
+        theme = AppTheme(node.ui_theme) if node.ui_theme is not None else ctx.extra.get('app_theme',AppTheme.current())
+        key = ('app-theme',theme.name)
+        if key not in ctx.cache:
+            ctx.cache[key] = True
+            if self.mode == 'static':
+                self._head.extend(theme.resources())
+        return theme
+
+    def _layout_child(self, child, ctx, theme):
+        from ...Apps import AppTheme
+        with AppTheme.rendering(theme):
+            result = self.render(child,ctx.child(child,app_theme=theme))
+        return result if isinstance(result,list) else [result] if result is not None else []
+
+    def _layout_root(self, body, theme):
+        if self.mode == 'widget':
+            return theme.decorate(body)
+        return theme.component('root',body,mode=self.mode,cls=['mcui-root','mcui-'+theme.name])
+
+    @handles(ReadoutGrid)
+    def render_grid(self, node, ctx):
+        from ...Apps import Grid
+        theme = self._app_theme(node,ctx)
+        cells = []
+        for child, placement, attrs in node.cells:
+            attrs = theme.attrs(attrs)
+            style = dict(attrs.pop('style',{}),**Grid.Item.get_grid_styles(**placement))
+            style.setdefault('min-width',0)
+            cells.append(self.H.Div(*self._layout_child(child,ctx,theme),style=style,**attrs))
+        style = dict(node.style,**Grid.get_grid_styles(**node.grid_options))
+        attrs=theme.attrs(node.html_attrs)
+        attrs.setdefault('id','mcr-grid-'+node.id)
+        body = theme.component('grid',*cells,mode=self.mode,style=style,**attrs)
+        if node.collapse_below is not None:
+            body = self.H.Div(self.H.Style(Grid.responsive_css(attrs['id'],node.collapse_below)),body)
+        return self._layout_root(body,theme)
+
+    @handles(ReadoutFlex)
+    def render_flex(self, node, ctx):
+        from ...Apps import Flex
+        theme = self._app_theme(node,ctx)
+        style = dict(node.style,**Flex.get_flex_styles(**node.flex_options))
+        style.setdefault('min-width',0)
+        if node.gap is not None:style['gap']=node.gap
+        cells=[]
+        for child,placement,attrs in node.cells:
+            attrs=theme.attrs(attrs)
+            item_style=dict(attrs.pop('style',{}),**Flex.Item.get_flex_styles(**placement))
+            item_style.setdefault('min-width',0)
+            cells.append(self.H.Div(*self._layout_child(child,ctx,theme),style=item_style,**attrs))
+        return self._layout_root(theme.component('flex',*cells,mode=self.mode,style=style,**theme.attrs(node.html_attrs)),theme)
+
+    @handles(ReadoutPanel)
+    def render_panel(self, node, ctx):
+        theme = self._app_theme(node,ctx)
+        prefix = 'mcui-' if theme.name == 'native' else ''
+        def content(child):
+            if type(child) is ReadoutSection and child.title is None:
+                return [item for nested in child.children for item in self._layout_child(nested,ctx.child(child),theme)]
+            return self._layout_child(child,ctx,theme)
+        parts=[]
+        if node.header is not None:parts.append(theme.component('panel-header',*content(node.header),mode=self.mode,cls=prefix+'card-header'))
+        if node.title:parts.append(theme.component('panel-header',node.title,mode=self.mode,cls=prefix+'card-header'))
+        parts.append(theme.component('panel-body',*[item for child in node.body for item in content(child)],mode=self.mode,cls=prefix+'card-body'))
+        if node.footer is not None:parts.append(theme.component('panel-footer',*content(node.footer),mode=self.mode,cls=prefix+'card-footer'))
+        attrs = theme.attrs(node.html_attrs)
+        from ...JHTML import JHTML
+        attrs['cls'] = JHTML.manage_class(attrs.get('cls')) + [prefix+'card']
+        return self._layout_root(theme.component('panel',*parts,mode=self.mode,style=node.style,**attrs),theme)
 
     @handles(ReadoutPresML)
     def render_presml(self, node, ctx):
