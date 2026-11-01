@@ -1846,15 +1846,11 @@ class PureMonicPolynomial(SparsePolynomial):
             if key_func is None:
                 key_func = lambda key1,key2:k+k2
             new_terms = {}
-            term_hashes = {}
             for k,v in self.terms.items():
                 for k2,v2 in other.terms.items():
-                    new_hash = self.key_hash(k) + self.key_hash(k2)
-                    if new_hash in term_hashes:
-                        t = term_hashes[new_hash]
-                    else:
-                        t = self.canonical_key(key_func(k, k2)) # construct new tuple and canonicalize
-                        term_hashes[new_hash] = t
+                    # The supplied remapping may distinguish left and right.
+                    # An order-independent hash cannot identify its output key.
+                    t = self.canonical_key(key_func(k, k2))
                     new_terms[t] = new_terms.get(t, 0) + mul(v, v2) # this is the case where after mult. two terms merge
                     if new_terms[t] == 0:
                         del new_terms[t]

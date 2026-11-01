@@ -805,6 +805,21 @@ class UniquePermutations:
 
         return multinomial
 
+    def iter_permutations(self, block_size=65536):
+        """Yield bounded blocks using the native compiled permutation fill."""
+        if block_size < 1:
+            raise ValueError('block_size must be positive')
+        first = self.part.copy()
+        remaining = int(self.num_permutations)
+        while remaining:
+            count = min(block_size, remaining)
+            lookahead = int(remaining > count)
+            values = self.get_subsequent_permutations(first, num_perms=count + lookahead)
+            if lookahead:
+                first = values[count].copy()
+            yield values[:count]
+            remaining -= count
+
     def permutations(self, initial_permutation=None, return_indices=False, num_perms=None, position_blocks=None):
         """
         Returns the permutations of the input array
@@ -835,7 +850,7 @@ class UniquePermutations:
             if return_indices:
                 inds, perms = ret
                 if self.sorting is not None:
-                    inds = vector_take(self.inv, inds)
+                    inds = vector_take(self.sorting, inds)
                 ret = (inds, perms)
             return ret
 
@@ -3747,6 +3762,37 @@ class SymmetricGroupGenerator:
         perm_sorting = [c[2] for c in class_data]
 
         return sum_sorting, perm_sorting, usums, perm_classes, perm_subsortings
+
+    def iter_permutation_rule_direct_sum(self, perms, rules, block_size=65536):
+        """Yield (source positions, output occupations), with bounded outputs.
+
+        Unlike the collecting API this allocates neither a whole direct product
+        nor its full-product offset/indexing tables. Ranking and filtering can
+        be performed by the consumer on each yielded block.
+        """
+        if block_size < 1:
+            raise ValueError('block_size must be positive')
+        perms = np.asarray(perms)
+        if perms.ndim == 1:
+            perms = perms[np.newaxis]
+        if perms.shape[1] != self.dim:
+            raise ValueError('input dimension does not match the symmetric group')
+        signatures = dict.fromkeys(tuple(sorted(int(x) for x in rule if x)) for rule in rules)
+        for start in range(0, len(perms), block_size):
+            source = perms[start:start + block_size].astype(np.int64, copy=False)
+            width = max(1, block_size // len(source))
+            for rule in signatures:
+                if len(rule) > self.dim:
+                    continue
+                padded = np.zeros(self.dim, dtype=np.int64)
+                padded[:len(rule)] = rule
+                for delta in UniquePermutations(padded).iter_permutations(width):
+                    values = source[:, None, :] + delta[None, :, :]
+                    values = values.reshape(-1, self.dim)
+                    valid = np.all(values >= 0, axis=1)
+                    if np.any(valid):
+                        rows = np.repeat(np.arange(start, start + len(source)), len(delta))
+                        yield rows[valid], values[valid]
 
     def take_permutation_rule_direct_sum(self,
                                          perms, rules,
