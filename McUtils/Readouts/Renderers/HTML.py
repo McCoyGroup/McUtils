@@ -130,7 +130,7 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         self.collapsible = self.theme.get("html.collapsible") if collapsible is None else collapsible
         self.scene_size = scene_size or self.theme.get("html.scene_size")
         self.gallery_scene_size = gallery_scene_size or self.theme.get("html.gallery_scene_size")
-        from ... import JHTML
+        from ...Jupyter import JHTML
         class WidgetElements:
             def __getattr__(self, name):
                 return getattr(JHTML, name) if hasattr(JHTML, name) else getattr(JHTML.HTML, name)
@@ -163,7 +163,7 @@ class HTMLReadoutRenderer(ReadoutRenderer):
 
     def runtime_elements(self):
         H = self.H
-        from ....Plots.X3DInterface import X3D
+        from ...Plots.X3DInterface import X3D
         path = self.x3dom_path
         local = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
                              "resources", "x3dom-full.js")
@@ -339,9 +339,9 @@ class HTMLReadoutRenderer(ReadoutRenderer):
     @handles(ReadoutHTML)
     def render_html(self, node, ctx):
         self._head.extend(node.head)
-        from ...Apps.Interfaces import Component
+        from ...Jupyter.Apps.Interfaces import Component
         if isinstance(node,ReadoutWidget) and isinstance(node.element,Component):
-            from ...Apps import AppTheme
+            from ...Jupyter.Apps import AppTheme
             app_theme = AppTheme(node.element.ui_theme or AppTheme.current().name)
             key = ('app-theme',app_theme.name)
             if self.mode == 'static' and key not in ctx.cache:
@@ -349,7 +349,7 @@ class HTMLReadoutRenderer(ReadoutRenderer):
                 self._head.extend(app_theme.resources())
         el = node.get_element(mode=self.mode)
         if isinstance(node, ReadoutWidget) and self.mode == 'static':
-            from ...JHTML import JHTML, ActiveHTMLWrapper
+            from ...Jupyter.JHTML import JHTML, ActiveHTMLWrapper
             if not isinstance(el,(str,JHTML.HTML.XMLElement)) and not hasattr(el,'tostring'):
                 if node.fallback is not None:
                     return self.render(node.fallback,ctx)
@@ -360,7 +360,7 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         return self._block_title(node)+[self.H.Div(el,cls='mcr-html')]
 
     def _app_theme(self, node, ctx):
-        from ...Apps import AppTheme
+        from ...Jupyter.Apps import AppTheme
         theme = AppTheme(node.ui_theme) if node.ui_theme is not None else ctx.extra.get('app_theme',AppTheme.current())
         key = ('app-theme',theme.name)
         if key not in ctx.cache:
@@ -370,7 +370,7 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         return theme
 
     def _layout_child(self, child, ctx, theme):
-        from ...Apps import AppTheme
+        from ...Jupyter.Apps import AppTheme
         with AppTheme.rendering(theme):
             result = self.render(child,ctx.child(child,app_theme=theme))
         return result if isinstance(result,list) else [result] if result is not None else []
@@ -382,7 +382,7 @@ class HTMLReadoutRenderer(ReadoutRenderer):
 
     @handles(ReadoutGrid)
     def render_grid(self, node, ctx):
-        from ...Apps import Grid
+        from ...Jupyter.Apps import Grid
         theme = self._app_theme(node,ctx)
         cells = []
         for child, placement, attrs in node.cells:
@@ -400,7 +400,7 @@ class HTMLReadoutRenderer(ReadoutRenderer):
 
     @handles(ReadoutFlex)
     def render_flex(self, node, ctx):
-        from ...Apps import Flex
+        from ...Jupyter.Apps import Flex
         theme = self._app_theme(node,ctx)
         style = dict(node.style,**Flex.get_flex_styles(**node.flex_options))
         style.setdefault('min-width',0)
@@ -427,7 +427,7 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         parts.append(theme.component('panel-body',*[item for child in node.body for item in content(child)],mode=self.mode,cls=prefix+'card-body'))
         if node.footer is not None:parts.append(theme.component('panel-footer',*content(node.footer),mode=self.mode,cls=prefix+'card-footer'))
         attrs = theme.attrs(node.html_attrs)
-        from ...JHTML import JHTML
+        from ...Jupyter.JHTML import JHTML
         attrs['cls'] = JHTML.manage_class(attrs.get('cls')) + [prefix+'card']
         return self._layout_root(theme.component('panel',*parts,mode=self.mode,style=node.style,**attrs),theme)
 

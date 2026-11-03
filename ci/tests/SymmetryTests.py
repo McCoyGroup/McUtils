@@ -9,7 +9,7 @@ from unittest import TestCase
 # from McUtils.Data import UnitsData, PotentialData
 # from McUtils.Zachary import Interpolator, Symbols
 # import McUtils.Plots as plt
-# from McUtils.GaussianInterface import GaussianLogReader
+# from McUtils.ExternalPrograms.Parsers import GaussianLogReader
 
 from McUtils.Symmetry import *
 # from Psience.Molecools import Molecule

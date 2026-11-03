@@ -37,7 +37,7 @@ __all__ = [
 
 
 def _unshare(mesh):
-    from ...Plots.Mesh3DAnimation import Mesh3DAnimation
+    from ..Plots.Mesh3DAnimation import Mesh3DAnimation
     return Mesh3DAnimation._unshare_for_x3d(mesh)
 
 
@@ -91,7 +91,7 @@ class MeshSceneSource:
 
     def to_x3d(self, view=None, width=None, height=None, background=None, animate=True, **x3d_opts):
         """An `X3D` scene using the same camera as the `.glb` and the poster."""
-        from ...Plots.Backends import Mesh3DFigure
+        from ..Plots.Backends import Mesh3DFigure
         background = background or self.background
         if self.animated and animate:
             anim = self.animation

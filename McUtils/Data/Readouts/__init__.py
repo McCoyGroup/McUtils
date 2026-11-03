@@ -2,7 +2,7 @@
 Readouts for `McUtils.Data` records (`DataRecord`, e.g. ``AtomData['O']``).
 """
 
-from ...Jupyter.Readouts import ReadoutAdapter, readout_section, record_nodes
+from ...Readouts import ReadoutAdapter, readout_section, record_nodes
 
 __all__ = [
     "DataRecordReadout",

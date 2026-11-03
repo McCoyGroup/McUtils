@@ -6,7 +6,7 @@ and optionally how they route to target callables). `Logger` readouts are log-fi
 
 import numpy as np
 
-from ...Jupyter.Readouts import (
+from ...Readouts import (
     ReadoutAdapter, readout_section, ReadoutSectionUnavailable, ReadoutTable, Column, TabularData,
     record_nodes, mask_secrets,
 )

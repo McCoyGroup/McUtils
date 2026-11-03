@@ -256,7 +256,7 @@ class ReadoutGallery(ReadoutNode):
 
 
 def _app_ui_theme(ui_theme):
-    from ..Apps.Themes import AppTheme
+    from ..Jupyter.Apps.Themes import AppTheme
     return AppTheme(ui_theme).name if ui_theme is not None else AppTheme.selected()
 
 
@@ -272,7 +272,7 @@ class ReadoutGrid(ReadoutSection):
                  col_spacing=None, alignment=None, justification=None, ui_theme=None,
                  style=None, collapse_below=None, html_attrs=None, **opts):
         from .Views import as_readout_node
-        from ..Apps import Grid
+        from ..Jupyter.Apps import Grid
         cells = []
         nrows = ncols = 0
         for i, row in enumerate(rows, 1):
@@ -307,7 +307,7 @@ class ReadoutGrid(ReadoutSection):
 
     @classmethod
     def from_layout(cls, layout, **opts):
-        from ..Apps import AppTheme
+        from ..Jupyter.Apps import AppTheme
         opts.setdefault('ui_theme',layout.ui_theme or AppTheme.selected())
         opts.setdefault('style',layout._style)
         opts.setdefault('html_attrs',layout.attrs)
@@ -325,7 +325,7 @@ class ReadoutFlex(ReadoutSection):
 
     def __init__(self, *items, direction='row', wrap=None, gap=None, alignment=None,
                  justification=None, content_alignment=None, ui_theme=None, html_attrs=None, **opts):
-        from ..Apps import Flex
+        from ..Jupyter.Apps import Flex
         from .Views import as_readout_node
         cells=[]
         for item in items:
@@ -343,7 +343,7 @@ class ReadoutFlex(ReadoutSection):
 
     @classmethod
     def from_layout(cls, layout, **opts):
-        from ..Apps import AppTheme
+        from ..Jupyter.Apps import AppTheme
         opts.setdefault('ui_theme',layout.ui_theme or AppTheme.selected())
         opts.setdefault('style',layout._style)
         opts.setdefault('html_attrs',layout.attrs)
@@ -384,7 +384,7 @@ class Readout(ReadoutSection):
 
     # ---- text --------------------------------------------------------------------------- #
     def to_text(self, style=None):
-        from .Renderers.Text import TextReadoutRenderer
+        from .Renderers.Base import TextReadoutRenderer
         return TextReadoutRenderer(style).render_readout(self)
 
     def __str__(self):

@@ -9,7 +9,7 @@ import numbers
 
 import numpy as np
 
-from ...Jupyter.Readouts import (
+from ...Readouts import (
     ReadoutAdapter, readout_section, ReadoutSectionUnavailable, ReadoutSection, ReadoutFields, ReadoutTable,
     ReadoutCode, FieldSet, Field, Column, TabularData, structure_scene, atoms_table, record_nodes, is_secret_key,
 )

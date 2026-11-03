@@ -8,7 +8,7 @@ readout with `ReadoutSection.compose(...)`.
 
 import numpy as np
 
-from ...Jupyter.Readouts import (
+from ...Readouts import (
     ReadoutAdapter, readout_section, ReadoutSectionUnavailable, ReadoutFields, FieldSet, Field,
     as_readout_node,
 )

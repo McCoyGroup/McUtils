@@ -10,7 +10,7 @@ import re
 
 import numpy as np
 
-from ...Jupyter.Readouts import (
+from ...Readouts import (
     ReadoutAdapter, readout_section, ReadoutSectionUnavailable, ReadoutFields, ReadoutTable, ReadoutArray,
     FieldSet, Field, ArrayData, Column, TabularData, structure_scene, cell_matrix, element_symbol,
 )
@@ -213,7 +213,7 @@ class CIFReadout(ReadoutAdapter):
         for x in s:
             counts[x] = counts.get(x, 0) + 1
         comp = " ".join(f"{k}{v}" for k, v in counts.items())
-        from ...Jupyter.Readouts import guess_bonds
+        from ...Readouts import guess_bonds
         bl = guess_bonds(s, xyz) if bonds else None
         cols = [Column("site", np.array([labels[i] for i in idx]), label="Site"),
                 Column("element", np.array(s), label="Element")]

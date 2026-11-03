@@ -227,7 +227,7 @@ class ReadoutWidget(ReadoutHTML):
 
     def get_widget(self):
         if self._widget is self._unset:
-            from ..JHTML import JHTML, ActiveHTMLWrapper
+            from ..Jupyter.JHTML import JHTML, ActiveHTMLWrapper
             value = _resolve(self.element)
             seen = []
             while callable(getattr(value, 'to_widget', None)):
@@ -243,9 +243,9 @@ class ReadoutWidget(ReadoutHTML):
         return self._widget
 
     def get_element(self, mode='widget'):
-        from ..Apps.Interfaces import Component
+        from ..Jupyter.Apps.Interfaces import Component
         if mode == 'static' and isinstance(self.element,Component):
-            from ..Apps import AppTheme
+            from ..Jupyter.Apps import AppTheme
             with AppTheme.rendering(self.element.ui_theme,mode='static'):
                 return self.element.to_jhtml()
         value=self.get_widget()
@@ -364,5 +364,5 @@ def as_readout_node(obj, caption=None, dispatch=True, **opts):
         return ReadoutText(obj, **opts)
     if isinstance(obj, np.ndarray):
         return ReadoutArray(ArrayData(opts.pop("id", "array"), obj), display=True, **opts)
-    from .Registry import record_nodes
+    from .Interface import record_nodes
     return ReadoutSection(*record_nodes(obj), **opts)

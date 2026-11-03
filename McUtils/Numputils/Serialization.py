@@ -134,7 +134,7 @@ class MemmappedNPZFile:
 
         :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
         :return: the readout
-        :rtype: McUtils.Jupyter.Readouts.Readout
+        :rtype: McUtils.Readouts.Readout
         """
         from ..Scaffolding.Readouts import ArchiveReadout
         return ArchiveReadout(self).to_readout(**opts)
@@ -244,7 +244,7 @@ class MemmappedNPTarFile:
 
         :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
         :return: the readout
-        :rtype: McUtils.Jupyter.Readouts.Readout
+        :rtype: McUtils.Readouts.Readout
         """
         from ..Scaffolding.Readouts import ArchiveReadout
         return ArchiveReadout(self).to_readout(**opts)

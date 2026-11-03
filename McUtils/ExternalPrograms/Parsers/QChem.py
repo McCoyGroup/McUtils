@@ -35,7 +35,7 @@ class QChemLogReader(ElectronicStructureLogReader):
 
         :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
         :return: the readout
-        :rtype: McUtils.Jupyter.Readouts.Readout
+        :rtype: McUtils.Readouts.Readout
         """
         from ..Readouts.ElectronicStructure import QChemLogReadout
         return QChemLogReadout.from_reader(self, keys=keys).to_readout(**opts)

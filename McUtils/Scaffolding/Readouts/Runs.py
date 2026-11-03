@@ -15,7 +15,7 @@ import sys
 
 import numpy as np
 
-from ...Jupyter.Readouts import (
+from ...Readouts import (
     ReadoutAdapter, readout_section, ReadoutSectionUnavailable, ReadoutSection, ReadoutFields, ReadoutTable,
     FieldSet, Field, Column, TabularData, record_nodes,
 )

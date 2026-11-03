@@ -36,7 +36,7 @@ class ExecutionFuture(metaclass=abc.ABCMeta):
 
         :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
         :return: the readout
-        :rtype: McUtils.Jupyter.Readouts.Readout
+        :rtype: McUtils.Readouts.Readout
         """
         from .Readouts.Jobs import ExecutionReadout
         if refresh:
@@ -141,7 +141,7 @@ class ExecutionQueue:
 
         :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
         :return: the readout
-        :rtype: McUtils.Jupyter.Readouts.Readout
+        :rtype: McUtils.Readouts.Readout
         """
         from .Readouts.Jobs import ExecutionReadout
         if refresh:

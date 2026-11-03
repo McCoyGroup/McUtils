@@ -161,7 +161,7 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
                          appearance={"fill": t.color("rule")}, name="Title rule")
 
     def render_readout(self, readout):
-        from ....Plots.PowerPoint import PowerPointPresentation
+        from ...Plots.PowerPoint import PowerPointPresentation
         W, H = self.theme.get("slide.size")
         pres = PowerPointPresentation(size=(W, H), units=self.theme.get("slide.units"))
         flow = _Flow(self, pres)
@@ -410,7 +410,7 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
         return w, h
 
     def _image_asset(self, data, content_type):
-        from ....Plots.PowerPoint import PresentationMLAsset
+        from ...Plots.PowerPoint import PresentationMLAsset
         ext = {"image/png": "png", "image/svg+xml": "svg", "image/jpeg": "jpg", "image/gif": "gif"}.get(content_type, "png")
         return PresentationMLAsset(data if isinstance(data, bytes) else data.encode(), content_type, ext)
 
@@ -464,10 +464,10 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
                            x, y, w, h, "caption", family=t.get("font.pptx_mono"), fill=t.color("stripe"),
                            name=node.title or "Code")
         elif isinstance(node, ReadoutPresML):
-            from ....Plots.PowerPoint import PresentationMLElementLayout
+            from ...Plots.PowerPoint import PresentationMLElementLayout
             p = node.primitive
             if not hasattr(p, "layout"):
-                from ....Plots.PowerPoint import PresentationMLPrimitive
+                from ...Plots.PowerPoint import PresentationMLPrimitive
                 p = PresentationMLPrimitive(p)
             pw, ph = node.size or (w, h)
             p.layout = PresentationMLElementLayout.from_options(p.layout, bounds=(x, y, min(pw, w), min(ph, h)),
@@ -587,7 +587,7 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
 
     # ---- scenes ------------------------------------------------------------------------- #
     def _lighting(self):
-        from ....Plots.PowerPoint import PresentationML
+        from ...Plots.PowerPoint import PresentationML
         lights = []
         for l in self.theme.get("scene.lighting"):
             l = dict(l)
@@ -620,7 +620,7 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
         return self.posters[key]
 
     def draw_scene(self, slide, node, x, y, w, h, view, path):
-        from ....Plots.PowerPoint import PresentationML, PresentationMLAsset
+        from ...Plots.PowerPoint import PresentationML, PresentationMLAsset
         src = node.get_source()
         if src is None:
             raise ValueError(f"{path}: scene has no mesh model to export")

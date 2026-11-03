@@ -771,7 +771,7 @@ class PresentationMLPrimitive:
 
         :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
         :return: the readout
-        :rtype: McUtils.Jupyter.Readouts.Readout
+        :rtype: McUtils.Readouts.Readout
         """
         from .Readouts import ViewReadout
         return ViewReadout(self, caption=caption).to_readout(**opts)

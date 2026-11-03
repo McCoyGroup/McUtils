@@ -21,6 +21,8 @@ from . import Plots
 __all__ += ["Plots"]
 from . import Jupyter
 __all__ += ["Jupyter"]
+from . import Readouts
+__all__ += ["Readouts"]
 from . import Parsers
 __all__ += ["Parsers"]
 from . import Formatters

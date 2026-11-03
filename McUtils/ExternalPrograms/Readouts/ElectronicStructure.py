@@ -12,7 +12,7 @@ import os
 
 import numpy as np
 
-from ...Jupyter.Readouts import (
+from ...Readouts import (
     ReadoutAdapter, readout_section, ReadoutSectionUnavailable, ReadoutSection, ReadoutFields, ReadoutTable,
     ReadoutText, ReadoutGallery, ReadoutArray, ReadoutCode, FieldSet, Field, TabularData, Column, ArrayData,
     structure_scene, trajectory_scene, atoms_table, line_chart, stick_chart, matrix_chart, record_nodes,
