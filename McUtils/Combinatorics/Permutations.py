@@ -3763,36 +3763,135 @@ class SymmetricGroupGenerator:
 
         return sum_sorting, perm_sorting, usums, perm_classes, perm_subsortings
 
-    def iter_permutation_rule_direct_sum(self, perms, rules, block_size=65536):
-        """Yield (source positions, output occupations), with bounded outputs.
+    @staticmethod
+    def _iter_direct_sum_lowering_positions(representative, values, counts):
+        """Assign decrement classes to eligible positions, without a product table."""
+        positions = np.empty(int(np.sum(counts)), dtype=np.intp)
+        used = np.zeros(len(representative), dtype=bool)
 
-        Unlike the collecting API this allocates neither a whole direct product
-        nor its full-product offset/indexing tables. Ranking and filtering can
-        be performed by the consumer on each yielded block.
+        def descend(level, offset):
+            if level == len(values):
+                yield positions
+                return
+            candidates = np.flatnonzero((representative >= -values[level]) & ~used)
+            count = int(counts[level])
+            for selected in itertools.combinations(candidates, count):
+                selected = np.asarray(selected, dtype=np.intp)
+                positions[offset:offset+count] = selected
+                used[selected] = True
+                yield from descend(level+1, offset+count)
+                used[selected] = False
+
+        yield from descend(0, 0)
+
+    def iter_permutation_rule_direct_sum(self, perms, rules, block_size=65536):
+        """Yield bounded (source positions, output occupations) blocks.
+
+        As in ``take_permutation_rule_direct_sum``, equivalent source
+        occupations share a standard representative, and rules share native
+        multiset class/count data. Apply each rule to the representative and
+        restore the original source permutations in bounded output blocks.
+
+        Decrements are placed only on sufficiently occupied modes. This avoids
+        enumerating the padded rule permutations which must produce negatives.
+        Neither the full product nor a table of its offsets is allocated.
+        Output order is unspecified; source identities and multiplicities are
+        preserved. ``block_size`` bounds both source and emitted output rows.
         """
         if block_size < 1:
             raise ValueError('block_size must be positive')
         perms = np.asarray(perms)
         if perms.ndim == 1:
             perms = perms[np.newaxis]
-        if perms.shape[1] != self.dim:
+        if perms.ndim != 2 or perms.shape[1] != self.dim:
             raise ValueError('input dimension does not match the symmetric group')
-        signatures = dict.fromkeys(tuple(sorted(int(x) for x in rule if x)) for rule in rules)
+        signatures = {}
+        for rule in rules:
+            signature = tuple(sorted(int(x) for x in rule if x))
+            if len(signature) <= self.dim:
+                signatures[signature] = None
+        signatures = list(signatures)
+        if not signatures or not len(perms):
+            return
+
+        # A zero net change produces diagonal state pairs. Its operator value
+        # is still evaluated by the consumer, so no coefficient is assumed.
+        if () in signatures:
+            for start in range(0, len(perms), block_size):
+                source = perms[start:start+block_size].astype(np.int64, copy=False)
+                valid = np.all(source >= 0, axis=1)
+                if np.any(valid):
+                    yield start+np.flatnonzero(valid), source[valid]
+            signatures.remove(())
+            if not signatures:
+                return
+
+        # Reuse the collecting implementation's rule multiset partitioning.
+        # Plans contain O(ndim) metadata, never generated source/target pairs.
+        plans = []
+        for group in self._get_direct_sum_rule_groups(signatures, self.dim, np.int64):
+            for values, counts in group:
+                values = np.asarray(values, dtype=np.int64)
+                counts = np.asarray(counts, dtype=np.intp)
+                neg = values < 0
+                order = np.argsort(values[neg])  # most restrictive decrement first
+                lowering = values[neg][order]
+                lowering_counts = counts[neg][order]
+                changes = np.repeat(lowering, lowering_counts)
+                positive = (UniquePermutations.get_standard_permutation(
+                    counts[~neg], values[~neg]) if np.any(~neg)
+                    else np.empty(0, dtype=np.int64))
+                generator = UniquePermutations(positive) if len(positive) else None
+                plans.append((lowering, lowering_counts, changes, generator))
+
         for start in range(0, len(perms), block_size):
-            source = perms[start:start + block_size].astype(np.int64, copy=False)
-            width = max(1, block_size // len(source))
-            for rule in signatures:
-                if len(rule) > self.dim:
-                    continue
-                padded = np.zeros(self.dim, dtype=np.int64)
-                padded[:len(rule)] = rule
-                for delta in UniquePermutations(padded).iter_permutations(width):
-                    values = source[:, None, :] + delta[None, :, :]
-                    values = values.reshape(-1, self.dim)
-                    valid = np.all(values >= 0, axis=1)
-                    if np.any(valid):
-                        rows = np.repeat(np.arange(start, start + len(source)), len(delta))
-                        yield rows[valid], values[valid]
+            source = perms[start:start+block_size].astype(np.int64, copy=False)
+            # Use the same representative/permutation decomposition as the
+            # native equivalence-class implementation, without populating all
+            # partitions of any unvisited total-quanta manifold.
+            sorting = np.argsort(-source, axis=1, kind='stable')
+            standards = np.take_along_axis(source, sorting, axis=1)
+            inverse_sorting = np.argsort(sorting, axis=1)
+            representatives, inverse = np.unique(standards, axis=0, return_inverse=True)
+            ordering = np.argsort(inverse, kind='stable')
+            boundaries = np.flatnonzero(np.diff(inverse[ordering]))+1
+            members = np.split(ordering, boundaries)
+            for representative, selected in zip(representatives, members):
+                source_values, source_counts = UniquePermutations.get_permutation_class_counts(
+                    representative)
+                mapping = inverse_sorting[selected]
+                rows = start+selected
+                width = max(1, block_size//len(rows))
+                signed_source = np.any(representative < 0)
+                for lowering, lowering_counts, changes, generator in plans:
+                    # Nested eligibility sets give an exact capacity test for
+                    # the entire decrement assignment, at arbitrary rule order.
+                    needed = 0
+                    for value, count in zip(lowering, lowering_counts):
+                        needed += int(count)
+                        if np.sum(source_counts[source_values >= -value]) < needed:
+                            break
+                    else:
+                        for positions in self._iter_direct_sum_lowering_positions(
+                                representative, lowering, lowering_counts):
+                            base = representative.copy()
+                            base[positions] += changes
+                            available = np.ones(self.dim, dtype=bool)
+                            available[positions] = False
+                            available = np.flatnonzero(available)
+                            blocks = (generator.iter_permutations(width) if generator is not None
+                                      else (np.empty((1, 0), dtype=np.int64),))
+                            for positive in blocks:
+                                outputs = np.broadcast_to(base, (len(positive), self.dim)).copy()
+                                outputs[:, available] += positive
+                                if signed_source:
+                                    outputs = outputs[np.all(outputs >= 0, axis=1)]
+                                if len(outputs):
+                                    # The representative sum is shared across
+                                    # all equivalent input permutations.
+                                    yield (np.tile(rows, len(outputs)),
+                                           outputs[:, mapping].reshape(-1, self.dim))
+
 
     def take_permutation_rule_direct_sum(self,
                                          perms, rules,
