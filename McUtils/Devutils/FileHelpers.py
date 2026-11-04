@@ -3,6 +3,10 @@ from typing import *
 
 import io
 import os
+import contextlib
+import threading
+import uuid
+import warnings
 import pathlib
 import json
 import shutil
@@ -19,6 +23,11 @@ __all__ = [
     "read_file",
     "read_json",
     "write_json",
+    "atomic_file",
+    "atomic_write",
+    "atomic_write_json",
+    "atomic_dir",
+    "FileStoreLock",
     "split_path",
     "drop_directory_prefix",
     "filename",
@@ -786,3 +795,191 @@ class StreamInterface:
                 self._stream.__exit__(exc_type, exc_val, exc_tb)
             self._stream = None
             self._was_open = None
+
+
+#region Atomic writes and locking
+@contextlib.contextmanager
+def atomic_file(path, mode='wb', *, overwrite=True, fsync=True, keep_mode=True, **open_options):
+    """
+    **LLM Docstring**
+
+    Open a temporary file next to `path` and publish it as `path` only if the block finishes without an
+    error, so readers (and a process that dies mid-write) see either the old file or the complete new one.
+    Symlinks are followed, so the file they point at is what gets replaced.
+
+    :param path: the file to write
+    :type path: str | os.PathLike
+    :param mode: the mode to open the temporary file with (`'wb'`, `'w'`, `'w+'`, ...)
+    :type mode: str
+    :param overwrite: whether an existing `path` may be replaced; if `False` a `FileExistsError` is raised
+        instead (checked atomically, even if another writer creates `path` meanwhile)
+    :type overwrite: bool
+    :param fsync: whether to flush the data to disk before publishing it
+    :type fsync: bool
+    :param keep_mode: whether an existing file's permissions carry over to the new one
+    :type keep_mode: bool
+    :param open_options: extra arguments for `open` (`encoding`, `newline`, ...)
+    :return: a context manager yielding the open temporary file
+    :rtype: file-like
+    """
+    target = os.path.realpath(os.fspath(path))
+    temp = os.path.join(
+        os.path.dirname(target),
+        ".{}.{}.tmp".format(os.path.basename(target), uuid.uuid4().hex)
+    )
+    try:
+        with open(temp, mode, **open_options) as stream:
+            yield stream
+            stream.flush()
+            if fsync:
+                try:
+                    os.fsync(stream.fileno())
+                except (AttributeError, OSError, ValueError):
+                    pass
+        if keep_mode:
+            try:
+                shutil.copymode(target, temp)
+            except OSError: # nothing to copy permissions from
+                pass
+        if overwrite:
+            os.replace(temp, target)
+        else:
+            os.link(temp, target)
+    finally:
+        if os.path.exists(temp):
+            os.remove(temp)
+
+def atomic_write(path, data, mode=None, **opts):
+    """
+    **LLM Docstring**
+
+    Write `data` to `path` with `atomic_file`.
+
+    :param path: the file to write
+    :type path: str | os.PathLike
+    :param data: bytes, text (written as UTF-8 unless `encoding` is given), or a function that writes to the open file
+    :type data: bytes | str | callable
+    :param mode: file mode, inferred from `data` when not given (functions get `'wb'`)
+    :type mode: str | None
+    :param opts: forwarded to `atomic_file`
+    :return: the path that was written
+    :rtype: str | os.PathLike
+    """
+    if isinstance(data, str):
+        opts.setdefault('encoding', 'utf-8')
+        mode = 'w' if mode is None else mode
+    else:
+        mode = 'wb' if mode is None else mode
+    with atomic_file(path, mode, **opts) as stream:
+        if callable(data):
+            data(stream)
+        else:
+            stream.write(data)
+    return path
+
+def atomic_write_json(path, data, *, indent=2, sort_keys=False, trailing_newline=True,
+                      fsync=True, keep_mode=True, **json_opts):
+    """
+    **LLM Docstring**
+
+    Write `data` to `path` as JSON with `atomic_file`.
+
+    :param path: the file to write
+    :type path: str | os.PathLike
+    :param data: the JSON-serializable value
+    :type data: object
+    :param indent: the JSON indent
+    :type indent: int | None
+    :param sort_keys: whether to sort object keys (for stable diffs and hashing)
+    :type sort_keys: bool
+    :param trailing_newline: whether to end the file with a newline
+    :type trailing_newline: bool
+    :param fsync: forwarded to `atomic_file`
+    :param keep_mode: forwarded to `atomic_file`
+    :param json_opts: further arguments for `json.dumps`
+    :return: the path that was written
+    :rtype: str | os.PathLike
+    """
+    text = json.dumps(data, indent=indent, sort_keys=sort_keys, **json_opts)
+    if trailing_newline:
+        text += "\n"
+    return atomic_write(path, text, encoding='utf-8', newline='\n', fsync=fsync, keep_mode=keep_mode)
+
+@contextlib.contextmanager
+def atomic_dir(path, *, replace=True):
+    """
+    **LLM Docstring**
+
+    Build a directory in a temporary sibling and rename it to `path` when the block finishes without an
+    error, so an interrupted build never leaves a half-written directory behind.
+
+    :param path: the directory to create
+    :type path: str | os.PathLike
+    :param replace: whether an existing `path` is removed and replaced (otherwise `FileExistsError`)
+    :type replace: bool
+    :return: a context manager yielding the temporary directory to fill
+    :rtype: str
+    """
+    target = os.path.abspath(os.fspath(path))
+    parent = os.path.dirname(target)
+    os.makedirs(parent, exist_ok=True)
+    temp = os.path.join(parent, ".{}.{}.tmp".format(os.path.basename(target), uuid.uuid4().hex))
+    os.makedirs(temp)
+    try:
+        yield temp
+        if os.path.isdir(target) or os.path.exists(target):
+            if not replace:
+                raise FileExistsError(target)
+            if os.path.isdir(target):
+                shutil.rmtree(target)
+            else:
+                os.remove(target)
+        os.replace(temp, target)
+    finally:
+        if os.path.isdir(temp):
+            shutil.rmtree(temp)
+
+try:
+    import fcntl as _fcntl
+except ImportError: # not POSIX
+    _fcntl = None
+_WARNED_NO_FLOCK = []
+
+class FileStoreLock:
+    """Reentrant thread/process lock on a stable sidecar file (POSIX; threads only elsewhere, with a warning)."""
+
+    _registry = {}
+    _guard = threading.Lock()
+
+    def __init__(self, path):
+        self.path = os.path.realpath(os.fspath(path))
+
+    @contextlib.contextmanager
+    def __call__(self):
+        key = (os.getpid(), self.path)
+        with self._guard:
+            mutex, local = self._registry.setdefault(key, (threading.RLock(), threading.local()))
+        with mutex:
+            depth = getattr(local, "depth", 0)
+            if depth == 0 and _fcntl is not None:
+                os.makedirs(os.path.dirname(self.path), exist_ok=True)
+                local.stream = open(self.path, "a+b")
+                try:
+                    _fcntl.flock(local.stream.fileno(), _fcntl.LOCK_EX)
+                except BaseException:
+                    local.stream.close()
+                    raise
+            elif depth == 0 and not _WARNED_NO_FLOCK:
+                _WARNED_NO_FLOCK.append(True)
+                warnings.warn("`fcntl` isn't available, so `FileStoreLock` only locks between threads of this process")
+            local.depth = depth + 1
+            try:
+                yield
+            finally:
+                local.depth -= 1
+                if local.depth == 0 and _fcntl is not None:
+                    try:
+                        _fcntl.flock(local.stream.fileno(), _fcntl.LOCK_UN)
+                    finally:
+                        local.stream.close()
+#endregion

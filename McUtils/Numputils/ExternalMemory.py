@@ -1,6 +1,7 @@
 """External integer sort/unique and mapped sparse matrix storage."""
 from pathlib import Path
 import tempfile
+from ..Devutils.FileHelpers import atomic_file
 import os
 import functools
 import numpy as np
@@ -159,15 +160,9 @@ def save_sparse_matrix(file, matrix):
     # NumPy writes zip members in bounded buffers; use uncompressed members
     # so the existing McUtils archive reader can map their data offsets.
     path=Path(file);path.parent.mkdir(parents=True,exist_ok=True)
-    temporary=None
-    try:
-        with tempfile.NamedTemporaryFile(dir=path.parent,suffix='.npz',delete=False) as stream:
-            temporary=Path(stream.name)
-        np.savez(temporary,data=matrix.data,indices=matrix.indices,indptr=matrix.indptr,
+    with atomic_file(path,'wb',fsync=False,keep_mode=False) as stream:
+        np.savez(stream,data=matrix.data,indices=matrix.indices,indptr=matrix.indptr,
                  shape=np.asarray(matrix.shape,dtype=np.int64))
-        os.replace(temporary,path)
-    finally:
-        if temporary is not None and temporary.exists():temporary.unlink()
 
 
 def load_sparse_matrix(file, *, mode='r'):

@@ -9,6 +9,8 @@ import os
 from pathlib import Path
 import tempfile
 
+from ...Devutils.FileHelpers import atomic_file
+
 import numpy as np
 
 from ...Scaffolding.Serializers import NumpyTreeArchive
@@ -86,18 +88,8 @@ def _save_archive(archive, output_file, compress=True, overwrite=False):
     # Save before publishing the result, so a failed conversion cannot leave a
     # partial archive or damage an existing one. link also checks no-overwrite
     # atomically, including when another writer creates the output meanwhile.
-    temporary = None
-    try:
-        with tempfile.NamedTemporaryFile(dir=output.parent, prefix=".gaussian-", suffix=".npz", delete=False) as stream:
-            temporary = Path(stream.name)
-            archive.save(stream, compress=compress)
-        if overwrite:
-            os.replace(temporary, output)
-        else:
-            os.link(temporary, output)
-    finally:
-        if temporary is not None:
-            temporary.unlink(missing_ok=True)
+    with atomic_file(output, "wb", overwrite=overwrite, fsync=False, keep_mode=False) as stream:
+        archive.save(stream, compress=compress)
     return output
 
 

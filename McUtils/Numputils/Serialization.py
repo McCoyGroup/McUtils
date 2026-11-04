@@ -165,7 +165,7 @@ class _ArrayArchive(Mapping):
         with open(file, "wb") as stream:
             cls._writer(stream, **arrays)
 
-    def save(self, file, writer=None):
+    def save(self, file, writer=None):  # NB: stays stdlib-only on purpose (no Devutils.atomic_file); see test_numeric_archive_module_works_without_importing_scaffolding
         """Save the current array values, replacing filesystem targets atomically."""
         arrays = dict(self.items())
         writer = self._writer if writer is None else writer

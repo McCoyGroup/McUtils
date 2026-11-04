@@ -1,5 +1,5 @@
 
-import abc, os
+import abc, os, shutil, uuid
 from .. import Devutils as dev
 from .Serializers import *
 
@@ -116,7 +116,7 @@ class Checkpointer(metaclass=abc.ABCMeta):
                         opts = dict(opts, **allowed_opts)
                     else:
                         omitted_opts = dev.Schema(['omitted_keys']).to_dict(checkpoint['keys'], throw=False)
-                        if allowed_opts is not None:
+                        if omitted_opts is not None:
                             opts = dict(opts, **omitted_opts)
                         else:
                             opts['allowed_keys'] = checkpoint['keys']
@@ -217,6 +217,13 @@ class Checkpointer(metaclass=abc.ABCMeta):
             args=args,
             kwargs=kwargs
         )
+
+    def flush(self):
+        """
+        Persist anything buffered in memory. A no-op for checkpointers that write
+        each value as it is saved; `DumpCheckpointer` writes the whole file here.
+        """
+        pass
 
     @property
     def is_open(self):
@@ -507,11 +514,20 @@ class Checkpointer(metaclass=abc.ABCMeta):
 class DumpCheckpointer(Checkpointer):
     """
     A subclass of `CheckpointerBase` that writes an entire dump to file at once & maintains
-    a backend cache to update it cleanly
+    a backend cache to update it cleanly.
+
+    A file path is never opened for writing until there is something to write, and it is
+    written to a temporary sibling that is `os.replace`d over the target. So entering a
+    checkpoint block can't empty the file, and a process that dies inside one (or mid-write)
+    leaves the previous contents intact. The file is written when the outermost block exits
+    (even if it exits with an exception), or on `flush()`, and only if a value was saved or
+    deleted; mutating an object you loaded without saving it back isn't tracked.
+    With `autoflush=True` every `save`/`delete` writes immediately.
     """
     def __init__(self, file, cache=None, open_kwargs=None,
                  allowed_keys=None,
-                 omitted_keys=None
+                 omitted_keys=None,
+                 autoflush=False
                  ):
         """
         **LLM Docstring**
@@ -528,6 +544,8 @@ class DumpCheckpointer(Checkpointer):
         :type allowed_keys: object
         :param omitted_keys: optional blacklist of top-level keys
         :type omitted_keys: object
+        :param autoflush: whether to write the file after every `save`/`delete` instead of when the block exits
+        :type autoflush: bool
         :return: No explicit value; the method mutates state or performs I/O.
         :rtype: None
         """
@@ -536,6 +554,8 @@ class DumpCheckpointer(Checkpointer):
         if open_kwargs is None:
             open_kwargs = {'mode':"w+"}
         self.open_kwargs = open_kwargs
+        self.autoflush = autoflush
+        self._dirty = cache is not None # an initial cache hasn't been written yet
     def load_cache(self):
         """
         **LLM Docstring**
@@ -562,7 +582,7 @@ class DumpCheckpointer(Checkpointer):
         """
         **LLM Docstring**
 
-        Dump the entire cache before closing the stream, even when cleanup must run after a dump failure.
+        Write the cache (if anything changed) when the outermost block exits, then close, even when the write fails.
 
         :param exc_type: exception type passed by the context manager protocol
         :type exc_type: object
@@ -574,17 +594,57 @@ class DumpCheckpointer(Checkpointer):
         :rtype: None
         """
         try:
-            self.dump()
+            if self._open_depth == 1:
+                self.flush()
         finally:
             super().__exit__(exc_type, exc_val, exc_tb)
     @abc.abstractmethod
-    def dump(self):
+    def dump(self, stream=None):
         """
-        Writes the entire data structure
+        Writes the entire data structure to `stream` (default: the open stream)
+        :param stream: where to write
+        :type stream: file-like | None
         :return:
         :rtype:
         """
         raise NotImplementedError("DumpCheckpointer is an ABC and doesn't know how to write to file")
+    def flush(self):
+        """
+        **LLM Docstring**
+
+        Write the whole cache if a value was saved or deleted since the last write. A path target is
+        replaced atomically; a file-like target is rewritten from the start.
+
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
+        if not self._dirty:
+            return
+        target = self.checkpoint_file
+        if isinstance(target, str):
+            self._dump_atomically(target)
+        else:
+            try:
+                target.seek(0)
+                target.truncate()
+            except (AttributeError, OSError, ValueError):
+                pass
+            self.dump(target)
+        self._dirty = False
+    def _dump_atomically(self, target):
+        """
+        **LLM Docstring**
+
+        Dump to a uniquely named temporary file next to `target`, fsync it, and `os.replace` it over `target`.
+        The temporary file is removed if anything goes wrong, and an existing file's permissions are kept.
+
+        :param target: the checkpoint path
+        :type target: str
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
+        with dev.atomic_file(target, **self.open_kwargs) as stream:
+            self.dump(stream)
     def convert(self):
         """
         Converts the cache to an exportable form if needed
@@ -600,8 +660,8 @@ class DumpCheckpointer(Checkpointer):
         :return:
         :rtype:
         """
-        if isinstance(chk, str):
-            chk = open(chk, **self.open_kwargs)
+        # a path isn't opened until `flush` has something to write (see the class docstring),
+        # so the "stream" of a path target is just the path
         return chk
     def close_checkpoint_file(self, stream):
         """
@@ -611,8 +671,7 @@ class DumpCheckpointer(Checkpointer):
         :return:
         :rtype:
         """
-        if not self._came_open:
-            stream.close()
+        pass # nothing is held open: paths are written atomically by `flush`, streams belong to the caller
     def save_parameter(self, key, value):
         """
         Saves a parameter to the checkpoint file
@@ -633,6 +692,9 @@ class DumpCheckpointer(Checkpointer):
             base[cur] = value
         else:
             self.backend[key] = value
+        self._dirty = True
+        if self.autoflush:
+            self.flush()
     def check_parameter(self, key):
         """
         Loads a parameter from the checkpoint file
@@ -690,6 +752,9 @@ class DumpCheckpointer(Checkpointer):
             del base[cur]
         else:
             del self.backend[key]
+        self._dirty = True
+        if self.autoflush:
+            self.flush()
 
     def keys(self):
         """
@@ -713,7 +778,8 @@ class JSONCheckpointer(DumpCheckpointer):
     default_extension=JSONSerializer.default_extension
     def __init__(self, file, cache=None, serializer=None, open_kwargs=None,
                  allowed_keys=None,
-                 omitted_keys=None
+                 omitted_keys=None,
+                 autoflush=False
                  ):
         """
         **LLM Docstring**
@@ -738,7 +804,8 @@ class JSONCheckpointer(DumpCheckpointer):
         if serializer is None:
             serializer = JSONSerializer()
         self.serializer = serializer
-        super().__init__(file, cache=cache, open_kwargs=open_kwargs, allowed_keys=allowed_keys, omitted_keys=omitted_keys)
+        super().__init__(file, cache=cache, open_kwargs=open_kwargs, allowed_keys=allowed_keys, omitted_keys=omitted_keys,
+                         autoflush=autoflush)
 
     def load_cache(self):
         """
@@ -762,13 +829,13 @@ class JSONCheckpointer(DumpCheckpointer):
                 cache = {}
             self.backend = cache
 
-    def dump(self):
+    def dump(self, stream=None):
         """
-        Writes the entire data structure
+        Writes the entire data structure to `stream` (default: the open stream)
         :return:
         :rtype:
         """
-        self.serializer.serialize(self.stream, self.backend)
+        self.serializer.serialize(self.stream if stream is None else stream, self.backend)
 
 class NumPyCheckpointer(DumpCheckpointer):
     """
@@ -778,7 +845,8 @@ class NumPyCheckpointer(DumpCheckpointer):
     default_extension = NumPySerializer.default_extension
     def __init__(self, file, cache=None, serializer=None, open_kwargs=None,
                  allowed_keys=None,
-                 omitted_keys=None
+                 omitted_keys=None,
+                 autoflush=False
                  ):
         """
         **LLM Docstring**
@@ -814,7 +882,8 @@ class NumPyCheckpointer(DumpCheckpointer):
             open_kwargs = {'mode':'bw'}
         super().__init__(file, cache=cache, open_kwargs=open_kwargs,
                          allowed_keys=allowed_keys,
-                         omitted_keys=omitted_keys
+                         omitted_keys=omitted_keys,
+                         autoflush=autoflush
                          )
 
     def load_cache(self):
@@ -839,13 +908,13 @@ class NumPyCheckpointer(DumpCheckpointer):
                 cache = {}
             self.backend = cache
 
-    def dump(self):
+    def dump(self, stream=None):
         """
-        Writes the entire data structure
+        Writes the entire data structure to `stream` (default: the open stream)
         :return:
         :rtype:
         """
-        self.serializer.serialize(self.stream, self.backend)
+        self.serializer.serialize(self.stream if stream is None else stream, self.backend)
 
 class HDF5Checkpointer(Checkpointer):
     """
@@ -929,6 +998,12 @@ class HDF5Checkpointer(Checkpointer):
             raise IOError("stream for {} got closed and won't reopen".format(self.checkpoint_file))
         self.serializer.serialize(self.stream, {key:value})
 
+    def flush(self):
+        """
+        Flush the open HDF5 file object, if any
+        """
+        if self.stream is not None and hasattr(self.stream, 'flush'):
+            self.stream.flush()
     def load_parameter(self, key):
         """
         Loads a parameter from the checkpoint file

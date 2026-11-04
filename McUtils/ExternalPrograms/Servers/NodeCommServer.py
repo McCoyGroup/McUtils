@@ -4,6 +4,7 @@ A simple handler interprocess communication on HPC systems
 import abc
 import os
 import shutil
+from ...Devutils.FileHelpers import atomic_write_json
 import threading, time
 import socket, socketserver, json, traceback, subprocess
 import sys
@@ -265,10 +266,7 @@ class NodeCommHandler(socketserver.StreamRequestHandler):
     def write_connection_file(cls, connection_file, connection, mode):
         """Write the connection details out as JSON for clients to consume."""
         details = cls.serialize_connection(connection, mode)
-        tmp = connection_file + ".tmp"
-        with open(tmp, "w") as f:
-            json.dump(details, f, indent=2)
-        os.replace(tmp, connection_file)  # atomic write
+        atomic_write_json(connection_file, details, trailing_newline=False)
         return details
 
     @classmethod

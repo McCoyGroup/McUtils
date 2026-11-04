@@ -41,6 +41,8 @@ The rest of the pipeline lives in this file too, in order:
 import ast, collections, contextlib, datetime, fnmatch, hashlib, html, importlib, inspect, io, json, linecache, os, \
     queue, random, re, shutil, signal, subprocess, sys, tempfile, threading, time, traceback
 
+from ..Devutils.FileHelpers import atomic_dir, atomic_write, atomic_write_json
+
 __all__ = [
     "ExampleMarkerError",
     "ExampleBlock",
@@ -203,12 +205,12 @@ def key_options(options):
 
 def compute_key(source, options, prev_key=""):
     """
-    ``md5(version, previous key, canonical output-affecting options, normalized source bytes)``.
+    ``sha256(version, previous key, canonical output-affecting options, normalized source bytes)``.
 
     ``id``, ``timeout`` and ``isolated`` are *not* hashed, so renaming an example or changing its
     time budget doesn't invalidate it; ``isolated`` acts by passing ``prev_key=""``.
     """
-    h = hashlib.md5()
+    h = hashlib.sha256()
     h.update(KEY_VERSION.encode("utf-8") + b"\0")
     h.update((prev_key or "").encode("ascii") + b"\0")
     h.update(json.dumps(key_options(options), sort_keys=True, separators=(",", ":"),
@@ -478,7 +480,7 @@ class ReadoutStore:
     # ---- entries ---- #
     @staticmethod
     def _check_key(key):
-        if not re.fullmatch(r"[0-9a-f]{32}", key or ""):
+        if not re.fullmatch(r"[0-9a-f]{64}", key or ""):
             raise ValueError("not an example key: {!r}".format(key))
         return key
 
@@ -516,11 +518,8 @@ class ReadoutStore:
         """
         self._check_key(key)
         final = self.entry_path(key)
-        tmp = os.path.join(self.root, ".tmp-{}-{}".format(key, os.getpid()))
-        if os.path.isdir(tmp):
-            shutil.rmtree(tmp)
-        os.makedirs(tmp)
-        try:
+        os.makedirs(self.root, exist_ok=True)
+        with atomic_dir(final) as tmp:
             full_meta = dict(meta, key=key, store_version=self.format_version,
                              written=datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
             for name, data in (files or {}).items():
@@ -529,22 +528,8 @@ class ReadoutStore:
                     raise ValueError("`{}` is reserved".format(self.meta_name))
                 path = os.path.join(tmp, *name.split("/"))
                 os.makedirs(os.path.dirname(path), exist_ok=True)
-                if isinstance(data, str):
-                    with open(path, "w", encoding="utf-8", newline="\n") as f:
-                        f.write(data)
-                else:
-                    with open(path, "wb") as f:
-                        f.write(data)
-            with open(os.path.join(tmp, self.meta_name), "w", encoding="utf-8", newline="\n") as f:
-                json.dump(full_meta, f, indent=2, sort_keys=True)
-                f.write("\n")
-            os.makedirs(os.path.dirname(final), exist_ok=True)
-            if os.path.isdir(final):
-                shutil.rmtree(final)
-            os.replace(tmp, final)
-        finally:
-            if os.path.isdir(tmp):
-                shutil.rmtree(tmp)
+                atomic_write(path, data, fsync=False, keep_mode=False)
+            atomic_write_json(os.path.join(tmp, self.meta_name), full_meta, sort_keys=True, fsync=False)
         return final
 
     def read_file(self, key, name, binary=False):
@@ -592,10 +577,7 @@ class ReadoutStore:
                 if f.read() == css:
                     return False
         os.makedirs(self.root, exist_ok=True)
-        tmp = path + ".tmp-{}".format(os.getpid())
-        with open(tmp, "w", encoding="utf-8", newline="\n") as f:
-            f.write(css)
-        os.replace(tmp, path)
+        atomic_write(path, css, newline="\n")
         return True
 
     def stylesheet_md5(self):
@@ -635,10 +617,7 @@ class ReadoutStore:
                 if f.read() == text:
                     return False
         os.makedirs(self.root, exist_ok=True)
-        tmp = path + ".tmp-{}".format(os.getpid())
-        with open(tmp, "w", encoding="utf-8", newline="\n") as f:
-            f.write(text)
-        os.replace(tmp, path)
+        atomic_write(path, text, newline="\n")
         return True
 
 

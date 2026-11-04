@@ -17,3 +17,5 @@ from .Schema import *; from .Schema import __all__ as _all
 __all__ += _all
 from .Deprecation import *; from .Deprecation import __all__ as _all
 __all__ += _all
+from .Fingerprints import *; from .Fingerprints import __all__ as _all
+__all__ += _all
