@@ -21,12 +21,12 @@ this suite is deliberately scoped to what can be validated headlessly:
 
 Plain `unittest` is used, matching the rest of this batch.
 """
+from McUtils.ExternalPrograms import *
 
 import unittest
 
 import numpy as np
 
-from McUtils.ExternalPrograms import SLURMSubmissionHandler, SBatchJob, RDKitInterface, RDMolecule
 
 
 class ExternalProgramsTests(unittest.TestCase):
@@ -82,7 +82,6 @@ class ExternalProgramsTests(unittest.TestCase):
     # region Interface: ExternalProgramInterface (generic dispatch, using a stdlib stand-in)
 
     def test_ExternalProgramInterfaceMethodDispatch(self):
-        from McUtils.McUtils.ExternalPrograms.Interface import ExternalProgramInterface
         """`ExternalProgramInterface.method` lazily resolves and returns a callable from the target module."""
         class FakeInterface(ExternalProgramInterface):
             name = 'fake'

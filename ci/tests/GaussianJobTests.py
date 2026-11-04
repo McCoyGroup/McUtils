@@ -1,7 +1,7 @@
+from McUtils.ExternalPrograms import *
 
 from Peeves.TestUtils import *
 from unittest import TestCase
-from McUtils.ExternalPrograms.Parsers import *
 import sys, os, numpy as np
 
 class GaussianJobTests(TestCase):

@@ -1,3 +1,4 @@
+from McUtils.ExternalPrograms import *
 
 from Peeves.TestUtils import *
 from unittest import TestCase
@@ -43,7 +44,6 @@ class DeprecationTests(TestCase):
 
     @debugTest
     def test_SameObjects(self):
-        from McUtils.ExternalPrograms.Parsers import GaussianLogReader, GaussianFChkReader
         import McUtils.GaussianInterface as old
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")

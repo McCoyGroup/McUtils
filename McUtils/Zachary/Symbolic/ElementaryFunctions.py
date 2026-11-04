@@ -8,6 +8,7 @@ from  ...Misc import Abstract
 
 
 __all__ = [
+    "ElementaryFunction",
     "Symbols",
     "SymPyFunction"
     # "Summation",

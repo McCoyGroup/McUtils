@@ -4,8 +4,31 @@ from ...Parsers import FileLineByLineReader
 
 __all__ = [
     "CIFParser",
-    "CIFConverter"
+    "CIFConverter",
+    "expand_cif_sites"
 ]
+
+def expand_cif_sites(symbols, fractional, transformations, tol=1e-3):
+    """
+    Apply each 4×4 fractional-space symmetry operation to every site, wrap into [0, 1) and drop
+    duplicates. Returns ``(symbols, fractional (n, 3), site_index (n,))``.
+    """
+    fractional = np.asarray(fractional, dtype=float)
+    out_s, out_f, out_i = [], [], []
+    for i, (s, f) in enumerate(zip(symbols, fractional)):
+        h = np.append(f, 1.0)
+        imgs = np.einsum("nij,j->ni", np.asarray(transformations, dtype=float), h)[:, :3]
+        imgs = imgs - np.floor(imgs + tol / 10)
+        kept = []
+        for p in imgs:
+            if all(np.linalg.norm((p - q) - np.round(p - q)) > tol for q in kept):
+                kept.append(p)
+        for p in kept:
+            out_s.append(s)
+            out_f.append(p)
+            out_i.append(i)
+    return out_s, np.array(out_f), np.array(out_i)
+
 
 class CIFSymmetriesArray:
     def __init__(self, key, symmetry_list):
