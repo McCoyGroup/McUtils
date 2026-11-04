@@ -101,9 +101,9 @@ class JupyterSessionManager:
                         if new_loc is not None:
                             os.rename(new_loc, target)
 
-                from IPython.core.display import HTML
+                from .JHTML import JHTML
                 if copied:
-                    return HTML(
+                    return JHTML.APIs().display_api.HTML(
                         f"<h4>Extension installed to {target}. "
                         "You will need to reload the page to apply changes.</h4>"
                     )

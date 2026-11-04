@@ -49,15 +49,15 @@ class SubprocessExampleRunner:
     :param sys_path: extra import paths for the worker (default: the parent's ``sys.path``)
     :param cwd: working directory of the worker
     :param env: extra environment variables for the worker
-    :param revisions, style, x3dom_path, css, seed, max_output: as for `ExampleRunner`
+    :param revisions, style, x3dom_path, css, seed, max_output, imports: as for `ExampleRunner`
     """
 
     def __init__(self, store, revisions=None, style=None, x3dom_path=None, css="inline", seed=True,
                  timeout=None, page_timeout=None, kill_grace=15.0, startup_timeout=120.0, python=None,
-                 sys_path=None, cwd=None, env=None, max_output=20000, verbose=False, stream=None):
+                 sys_path=None, cwd=None, env=None, max_output=20000, verbose=False, stream=None, imports=True):
         # an in-process runner is used for planning and to record failures the worker couldn't
         self.local = ExampleRunner(store, revisions=revisions, style=style, x3dom_path=x3dom_path, css=css,
-                                   seed=seed, timeout=timeout, max_output=max_output)
+                                   seed=seed, timeout=timeout, max_output=max_output, imports=imports)
         self.store = store
         self.cache = self.local.cache
         self.revisions = dict(revisions or {})
@@ -65,6 +65,7 @@ class SubprocessExampleRunner:
         self.x3dom_path = x3dom_path
         self.css = css
         self.seed = seed
+        self.imports = imports
         self.timeout = timeout
         self.page_timeout = page_timeout
         self.kill_grace = kill_grace
@@ -141,7 +142,7 @@ class SubprocessExampleRunner:
             "text": str(parsed), "owner": parsed.owner, "first_line": parsed.first_line, "refresh": refresh,
             "store": self.store.root, "revisions": self.revisions, "style": self.style,
             "x3dom_path": self.x3dom_path, "css": self.css, "seed": self.seed, "timeout": self.timeout,
-            "max_output": self.max_output, "sys_path": self.sys_path,
+            "max_output": self.max_output, "sys_path": self.sys_path, "imports": self.imports,
         }
 
     def _environment(self):

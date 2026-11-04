@@ -38,7 +38,7 @@ def main(argv=None):
         runner = ExampleRunner(
             store, revisions=job.get("revisions"), style=job.get("style"), x3dom_path=job.get("x3dom_path"),
             css=job.get("css", "inline"), seed=job.get("seed", True), timeout=job.get("timeout"),
-            max_output=job.get("max_output", 20000)
+            max_output=job.get("max_output", 20000), imports=job.get("imports", True)
         )
         parsed = ExampleParser.parse(job["text"], owner=job.get("owner"), first_line=job.get("first_line", 1))
         emit(event="ready")

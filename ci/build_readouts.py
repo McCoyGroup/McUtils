@@ -7,6 +7,7 @@ so CI never runs example code.
     python ci/build_readouts.py --status            # report what is stored, run nothing
     python ci/build_readouts.py --refresh 'water-*' # also re-run examples whose id matches
     python ci/build_readouts.py --refresh stale     # re-run entries made with older library revisions
+    python ci/build_readouts.py --refresh errors    # retry examples whose stored run failed
     python ci/build_readouts.py --refresh all
     python ci/build_readouts.py --prune [--dry-run] # delete stored entries no example refers to
 
@@ -76,6 +77,12 @@ def parse_args(argv, store_default):
     ap.add_argument("--strict", action="store_true", help="exit with status 1 if any example is missing or failed")
     ap.add_argument("--timeout", type=float, default=120.0, help="per-example limit in seconds (default: %(default)s)")
     ap.add_argument("--css", choices=("inline", "stylesheet"), default="inline")
+    ap.add_argument("--no-implicit-imports", action="store_true",
+                    help="don't start each page's examples with the public names of the module they document\n"
+                         "(by default a page can use e.g. IntegerPartitioner without importing it)")
+    ap.add_argument("--cwd", metavar="DIR", default=None,
+                    help="working directory for the examples: a fresh scratch directory by default, so examples that write\n"
+                         "files (logs, json, ...) don't litter the repository; 'repo' for the repository root, or a path")
     ap.add_argument("--in-process", action="store_true", help="run examples in this process (debugging only)")
     ap.add_argument("-v", "--verbose", action="store_true", help="show the docs walk and per-example progress")
     args = ap.parse_args(argv)
@@ -84,16 +91,28 @@ def parse_args(argv, store_default):
     args.refresh_plan = False
     if args.refresh:
         flags = set(args.refresh)
-        globs = [r for r in args.refresh if r not in ("all", "stale")]
+        globs = [r for r in args.refresh if r not in ("all", "stale", "errors")]
         if "all" in flags:
             args.refresh_plan = True
-        elif "stale" in flags and globs:
-            ap.error("combine --refresh stale with id globs by running twice")
+        elif flags & {"stale", "errors"} and (globs or flags >= {"stale", "errors"}):
+            ap.error("combine --refresh stale, errors and id globs by running twice")
         elif "stale" in flags:
             args.refresh_plan = "stale"
+        elif "errors" in flags:
+            args.refresh_plan = "errors"
         else:
             args.refresh_plan = globs
     return args
+
+
+@contextlib.contextmanager
+def example_cwd(spec):
+    """The working directory examples run in: a scratch directory (``None``), the repository root (``'repo'``) or a path."""
+    if spec is None:
+        with tempfile.TemporaryDirectory(prefix="readout-cwd-") as tmp:
+            yield tmp
+    else:
+        yield root if spec == "repo" else os.path.abspath(spec)
 
 
 def select_pages(collector, only):
@@ -128,13 +147,34 @@ def report_status(store, cache, pages, out=print):
     return counts, mismatched
 
 
+def run_pages(runner, pages, args):
+    """Runs what each page needs and reports it; returns how many examples failed or were blocked."""
+    failures = 0
+    for owner, parsed in pages:
+        todo = runner.plan(parsed, args.refresh_plan)
+        if not todo:
+            continue
+        print("{}: running {} example(s)".format(owner, len(todo)))
+        for result in runner.run_page(parsed, refresh=args.refresh_plan):
+            note = ""
+            if result.status == "error":
+                err = result.meta["error"]
+                note = "  {}: {}".format(err["type"], err["message"].splitlines()[0] if err["message"] else "")
+                failures += 1
+            elif result.status == "blocked":
+                note = "  (blocked by `{}`)".format(result.blocked_by)
+                failures += 1
+            print("  {:8s} {} ({}){}".format(result.status, result.block.id, result.reason, note))
+    return failures
+
+
 def main(argv=None):
     config = load_doc_config()
     store_default = os.path.join(config.get("target", os.path.join(root, "ci", "docs")), "readouts")
     args = parse_args(argv, store_default)
 
     from McUtils.Docs import ReadoutStore, ExampleCache, ExampleRunner, SubprocessExampleRunner
-    store = ReadoutStore(args.store)
+    store = ReadoutStore(os.path.abspath(args.store))
     revisions = {p["id"] if isinstance(p, dict) else p: git_revision(root) for p in config.get("packages", [])}
     cache = ExampleCache(store, revisions)
 
@@ -150,25 +190,12 @@ def main(argv=None):
         failures = counts["missing"] + counts["error"]
     elif pages:
         Runner = ExampleRunner if args.in_process else SubprocessExampleRunner
-        kwargs = dict(revisions=revisions, css=args.css, timeout=args.timeout)
-        if not args.in_process:
-            kwargs.update(verbose=args.verbose, stream=sys.stdout, cwd=root)
-        runner = Runner(store, **kwargs)
-        for owner, parsed in pages:
-            todo = runner.plan(parsed, args.refresh_plan)
-            if not todo:
-                continue
-            print("{}: running {} example(s)".format(owner, len(todo)))
-            for result in runner.run_page(parsed, refresh=args.refresh_plan):
-                note = ""
-                if result.status == "error":
-                    err = result.meta["error"]
-                    note = "  {}: {}".format(err["type"], err["message"].splitlines()[0] if err["message"] else "")
-                    failures += 1
-                elif result.status == "blocked":
-                    note = "  (blocked by `{}`)".format(result.blocked_by)
-                    failures += 1
-                print("  {:8s} {} ({}){}".format(result.status, result.block.id, result.reason, note))
+        kwargs = dict(revisions=revisions, css=args.css, timeout=args.timeout, imports=not args.no_implicit_imports)
+        with example_cwd(args.cwd) as cwd:
+            if not args.in_process:
+                kwargs.update(verbose=args.verbose, stream=sys.stdout, cwd=cwd)
+            runner = Runner(store, **kwargs)
+            failures += run_pages(runner, pages, args)
         cache.sync_manifest([b for _, p in pages for b in p.blocks])
         if not any(True for _ in pages):
             pass

@@ -9,6 +9,7 @@ from ..Views import ReadoutPlot, ReadoutEquation, ReadoutCode, ReadoutHTML, Read
 
 __all__ = [
     "is_visible",
+    "is_trivial",
     "array_preview",
     "ReadoutRenderer",
     "RenderContext",
@@ -32,6 +33,32 @@ def is_visible(node):
     if isinstance(node, ReadoutSection) or node.kind == "gallery":
         return any(is_visible(c) for c in node.get_children())
     return True
+
+
+_CONTAINER_KINDS = ("section", "readout", "gallery", "grid", "flex", "panel")
+
+
+def is_trivial(node):
+    """
+    Whether a node is not worth showing on its own: it says (almost) nothing a plain ``repr`` wouldn't.
+
+    A leaf is trivial if it is empty text, a hidden (export-only) array, or marked ``meta["trivial"] = True`` by
+    whatever made it (a bare number or string wrapped in a one-field record is marked so; a record that merely has
+    one field is not). Everything else (tables, arrays, images, scenes, plots, equations, code, html, ...) is not. A container (section, readout, gallery, layout) is trivial unless at least one of its
+    children is not, so wrapping trivial content in more containers never makes it interesting.
+    """
+    kind = getattr(node, "kind", None)
+    if kind not in _CONTAINER_KINDS and "trivial" in node.meta:
+        return bool(node.meta["trivial"])
+    if kind in _CONTAINER_KINDS:
+        return all(is_trivial(c) for c in node.get_children())
+    if kind == "text":
+        return not str(node.text).strip()
+    if kind == "fields":
+        return bool(node.meta.get("trivial", False))
+    if kind == "array":
+        return not node.display
+    return False
 
 
 def array_preview(data, theme=None, max_rows=12, max_cols=10):

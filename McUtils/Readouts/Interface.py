@@ -495,7 +495,7 @@ def record_nodes(obj, name="record", depth=0, max_depth=3, max_items=12, units=N
                                            all(isinstance(x, numbers.Number) for x in obj)):
             return [ReadoutArray(ArrayData(_slug(name), np.asarray(obj)), display=True)]
         if _is_scalar(obj):
-            return [ReadoutFields(FieldSet([Field(_slug(name), _scalar(obj))]))]
+            return [ReadoutFields(FieldSet([Field(_slug(name), _scalar(obj))]), meta={"trivial": True})]
         return [ReadoutText(f"{type(obj).__name__}: {str(obj)[:200]}", role="note")]
     fields, nodes = [], []
     for k, v in items:

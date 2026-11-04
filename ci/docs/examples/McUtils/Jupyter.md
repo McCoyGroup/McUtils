@@ -33,6 +33,7 @@ drawing.display()
 
 ### Build a small interactive control panel
 
+<!-- readout(id="mcutils-jupyter-3", isolated=True) -->
 ```python
 from McUtils.Jupyter import JHTML, Button
 

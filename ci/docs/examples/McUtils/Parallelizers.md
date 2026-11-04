@@ -21,6 +21,7 @@ MultiprocessingParallelizer().run(run_job)
 ```
 <div class="card-body out-block" markdown="1">
 
+<!-- readout(id="mcutils-parallelizers-2", isolated=True) -->
 ```python
 [67, 67, 67, 67, 67, 67, 67, 67, 67, 67, 66, 66, 66, 66, 66]
 ```
@@ -50,6 +51,7 @@ MultiprocessingParallelizer().run(map_applier)
 
 <div class="card-body out-block" markdown="1">
 
+<!-- readout(id="mcutils-parallelizers-4", isolated=True) -->
 ```python
 [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 ```
@@ -62,6 +64,7 @@ but all of these will work equivalently well if the `parallelizer` were a `MPIPa
 This also adapts itself well to more object-oriented solutions. 
 Here's a sample class that can effectively use a parallelizer
 
+<!-- readout(id="mcutils-parallelizers-5", isolated=True, display="output") -->
 ```python
 class SampleProgram:
     
@@ -162,6 +165,7 @@ To support MPI-style calling, a `ClientServerRunner` is also provided.
 
 ### Write backend-independent numerical code
 
+<!-- readout(id="mcutils-parallelizers-8", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Parallelizers import SerialNonParallelizer
@@ -213,6 +217,7 @@ finally:
 
 ### Use one parallelizer contract for serial and MPI execution
 
+<!-- readout(id="mcutils-parallelizers-11", isolated=True, display="both") -->
 ```python
 from McUtils.Parallelizers import Parallelizer
 
@@ -240,6 +245,7 @@ assert np.allclose(combined, data**2)
 
 ### Share structured state
 
+<!-- readout(id="mcutils-parallelizers-13", isolated=True, display="output") -->
 ```python
 from McUtils.Parallelizers import SharedMemoryDict
 

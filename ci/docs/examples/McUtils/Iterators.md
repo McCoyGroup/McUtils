@@ -2,6 +2,7 @@
 
 ### Batch a stream of calculations
 
+<!-- readout(id="mcutils-iterators-1", isolated=True, display="output") -->
 ```python
 from McUtils.Iterators import chunked, counts
 
@@ -18,6 +19,7 @@ for batch_number, batch in enumerate(chunked(jobs, 2), 1):
 
 ### Flatten nested results while preserving records
 
+<!-- readout(id="mcutils-iterators-2", isolated=True, display="both") -->
 ```python
 from McUtils.Iterators import flatten, delete_duplicates
 
@@ -32,6 +34,7 @@ print("energies:", energies)
 
 ### Traverse a Cartesian product in zigzag order
 
+<!-- readout(id="mcutils-iterators-3", isolated=True, display="output") -->
 ```python
 from McUtils.Iterators import zigzag_product
 
@@ -44,6 +47,7 @@ for temperature, pressure in scan:
 
 ### Transpose ragged result streams
 
+<!-- readout(id="mcutils-iterators-4", isolated=True, display="both") -->
 ```python
 from McUtils.Iterators import transpose
 
@@ -57,6 +61,7 @@ print(timings)
 
 ### Interleave atomic positions and footer info
 
+<!-- readout(id="mcutils-iterators-5", isolated=True, display="output") -->
 ```python
 from McUtils.Iterators import riffle
 
@@ -70,6 +75,7 @@ for block in riffle(records, joins):
 
 ### Find the first converged result
 
+<!-- readout(id="mcutils-iterators-6", isolated=True, display="both") -->
 ```python
 from McUtils.Iterators import first
 

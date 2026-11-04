@@ -131,6 +131,7 @@ assert np.allclose(hessian, [[2., 1.], [1., 4.]], atol=1e-6)
 
 ### Interpolate a periodic torsional potential
 
+<!-- readout(id="mcutils-zachary-6", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Zachary import Interpolator
@@ -147,6 +148,7 @@ print("barrier:", interpolated.max(), "maximum slope:", np.abs(derivative).max()
 
 ### Construct a solvent-excluded surface
 
+<!-- readout(id="mcutils-zachary-7", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Data import UnitsData
@@ -168,6 +170,7 @@ mesh.plot(vertex_values=mesh.verts[:, 2], distance_units="Angstroms").show()
 derivatives. Here two Morse oscillators act on different coordinates and are coupled by
 a product term.
 
+<!-- readout(id="mcutils-zachary-8", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Zachary import MorseFunction
@@ -189,6 +192,7 @@ print("Hessian shape:", hessian.shape)
 coordinate conversions. Its chain-rule machinery maps the resulting gradient and
 Hessian back onto the Cartesian atom coordinates.
 
+<!-- readout(id="mcutils-zachary-9", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Zachary import CoordinateFunction
@@ -207,6 +211,7 @@ print("Cartesian Hessian:", hessian.shape)
 
 ### Interpolate a Cartesian reaction path
 
+<!-- readout(id="mcutils-zachary-10", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Zachary import CoordinateInterpolator
@@ -221,6 +226,7 @@ print("reaction-path images:", images.shape)
 
 ### Evaluate a symbolic tensor norm and Hessian
 
+<!-- readout(id="mcutils-zachary-11", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Zachary import TensorExpression

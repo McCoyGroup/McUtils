@@ -1,5 +1,6 @@
 import os.path, pathlib
 import sys
+import json, hashlib, shutil, subprocess, itertools, re
 import weakref, io, asyncio, threading, time
 from .HTML import CSS, HTML, HTMLManager
 from .WidgetTools import JupyterAPIs, DefaultOutputWidget
@@ -449,6 +450,14 @@ class ActiveHTMLWrapper:
             self.id
         )
     def display(self):
+        HTMLWidgets.check_extension()
+        if HTMLWidgets.use_static_fallback():
+            try:
+                static = self.to_html()
+            except Exception:
+                static = None
+            if static is not None:
+                return JupyterAPIs.get_display_api().display(HTMLWidgets.fallback_page(static))
         wrapper = HTMLWidgets.Div(self, cls='jhtml')
         return JupyterAPIs.get_display_api().display(wrapper.elem)
     def _ipython_display_(self):
@@ -599,7 +608,7 @@ class ActiveHTMLWrapper:
         elif key == "onevents":
             self.onevents = value
         elif key == "style":
-            self.elem.styleDict = HTMLManager.manage_styles(value)
+            self.elem.styleDict = HTMLManager.manage_styles(value).props    # a dict, as in the constructor path
             self.elem.send_state('styleDict')
         else:
             key = HTMLManager.clean_key(key)
@@ -1085,7 +1094,9 @@ class HTMLWidgets:
 
     @classmethod
     def get_exec_prefix(cls):
-        import subprocess
+        env = cls.server_environment()
+        if env.get("prefix"):
+            return env["prefix"]
         ext_call = subprocess.run(["jupyter", "labextension", "list"], capture_output=True)
         path_list = ext_call.stdout.decode() + "\n" + ext_call.stderr.decode()
         end_path = ("share", "jupyter", "labextensions")
@@ -1102,20 +1113,526 @@ class HTMLWidgets:
 
     @classmethod
     def load(cls, exec_prefix=None, overwrite=False):
+        """
+        Installs the ``ActiveHTMLWidget`` frontend extension (JupyterLab and the classic notebook) under
+        ``exec_prefix``. An installed copy that differs from the one shipped with McUtils (a different version or
+        build, which stops the frontend loading the widget model) is replaced even without ``overwrite``; after
+        installing it reports any outdated copy elsewhere that Jupyter would still pick up first.
+
+        :param exec_prefix: where to install; by default the environment ``jupyter labextension list`` reports
+        :param overwrite: replace an installed copy even if it is current
+        """
         from .ActiveHTMLWidget import HTMLElement
+        from IPython.core.display import display
         if exec_prefix is None:
             exec_prefix = cls.get_exec_prefix()
 
-        nb = HTMLElement.jupyternb_install(exec_prefix=exec_prefix, overwrite=overwrite)
-        lab = HTMLElement.jupyterlab_install(exec_prefix=exec_prefix, overwrite=overwrite)
         res = []
-        if nb is not None:
-            res.append(nb)
-        if lab is not None:
-            res.append(lab)
-        if len(res) > 0:
-            from IPython.core.display import display
-            display(*res)
+        for kind, install in (("labextension", HTMLElement.jupyterlab_install),
+                              ("nbextension", HTMLElement.jupyternb_install)):
+            target = os.path.join(str(exec_prefix), "share", "jupyter", kind + "s", cls.extension_name)
+            stale = None
+            if os.path.isdir(target):
+                found = cls.extension_copy_status(target, kind)
+                stale = None if found["current"] else found
+            done = install(exec_prefix=exec_prefix, overwrite=overwrite or stale is not None)
+            if done is not None:
+                res.append(done)
+                if stale is not None:
+                    res.append(HTML.Div("Replaced the outdated {} at {}: {}.".format(kind, stale["path"], stale["reason"])))
+        if not res:
+            res.append(HTML.Div(
+                "The extension under {} is already installed and current; nothing was changed. If widgets still "
+                "fail, hard-reload the page, or pass overwrite=True.".format(exec_prefix)
+            ))
+        shadowing = [c for copies in cls.extension_status().values() for c in copies[:1] if not c["current"]]
+        if shadowing:
+            res.append(HTML.Div(
+                HTML.Strong("Jupyter will still use an outdated copy: "),
+                HTML.List(*(HTML.ListItem(HTML.Code(c["path"]), ": ", c["reason"]) for c in shadowing)),
+                "Replace it with JHTML.load(exec_prefix=<that environment's prefix>, overwrite=True)."
+            ))
+        display(*res)
+
+    extension_name = "ActiveHTMLWidget"
+    _extension_checked = False
+    @classmethod
+    def extension_locations(cls):
+        """
+        Finds where the ``ActiveHTMLWidget`` frontend extension is installed for the Jupyter server, in the order it
+        searches (see `server_environment`); if that isn't known, this kernel's environment and the usual places.
+
+        :return: the directories holding it, keyed by ``'labextension'`` and ``'nbextension'``
+        :rtype: dict
+        """
+        env = cls.server_environment()
+        found = {}
+        for kind in ("labextension", "nbextension"):
+            dirs = env.get(kind)
+            if not dirs:
+                prefix = env.get("prefix") or sys.exec_prefix
+                dirs = [os.path.join(prefix, "share", "jupyter", kind + "s")]
+                if not env.get("prefix"):
+                    try:
+                        from jupyter_core.paths import jupyter_path
+                    except ImportError:
+                        pass
+                    else:
+                        dirs.extend(jupyter_path(kind + "s"))
+            found[kind] = [
+                d for i, d in enumerate(dirs)
+                if d not in dirs[:i] and os.path.isdir(os.path.join(d, cls.extension_name))
+            ]
+        return found
+
+    @classmethod
+    def extension_installed(cls):
+        """
+        Whether the ``ActiveHTMLWidget`` extension is installed for either JupyterLab or the classic notebook.
+        This can only see the installation on disk; a page opened before it was installed still has to be reloaded.
+        """
+        return any(len(v) > 0 for v in cls.extension_locations().values())
+
+    # ---- which Python launched Jupyter? ---- #
+    # The frontend loads the extension from the environment of the Jupyter *server*, which is not necessarily the
+    # kernel's environment, so that is where to look for it and install it.
+    _SERVER_PROGRAMS = ("jupyter-lab", "jupyter-notebook", "jupyter-server", "jupyter-nbclassic",
+                        "jupyterhub-singleuser", "jupyter_server", "jupyterlab")
+    _SERVER_MODULES = ("jupyterlab", "jupyter_server", "notebook", "nbclassic", "jupyterhub")
+
+    @classmethod
+    def _is_jupyter_server(cls, argv):
+        """Whether a command line is a Jupyter server (``jupyter-lab ...``, ``python -m jupyterlab``, ...)."""
+        for i, arg in enumerate(argv):
+            if i == 0:
+                continue
+            base = re.split(r"[\\/]", arg)[-1]       # either separator, whatever this platform is
+            if len(base) > 80 or any(c.isspace() for c in base):
+                continue    # prose, such as the script text in `bash -c "..."`, is not a program name
+            if base.lower().endswith(".exe"):
+                base = base[:-4]
+            if base.startswith(cls._SERVER_PROGRAMS):
+                return True
+            if argv[i - 1] == "-m" and arg.split(".")[0] in cls._SERVER_MODULES:
+                return True
+        return False
+
+    class _Argv(list):
+        """A command line that remembers the process it came from."""
+        pid = None
+
+    @staticmethod
+    def _launcher_of(pid):
+        """
+        The interpreter a process was *asked* to run: on macOS a virtual environment's ``python`` re-executes the
+        framework build's ``Python.app``, so the process's own ``argv[0]``/exe is the base interpreter, and the
+        environment is only recorded in ``__PYVENV_LAUNCHER__``.
+        """
+        if not pid:
+            return None
+        env = None
+        try:
+            import psutil
+            env = psutil.Process(pid).environ()
+        except Exception:
+            try:
+                with open("/proc/{}/environ".format(pid), "rb") as f:
+                    env = dict(e.decode(errors="replace").partition("=")[::2] for e in f.read().split(b"\0") if e)
+            except OSError:
+                pass
+        launcher = (env or {}).get("__PYVENV_LAUNCHER__")
+        return launcher if launcher and os.path.exists(launcher) else None
+
+    @classmethod
+    def _python_of(cls, argv):
+        """
+        The interpreter that ran a command line, as the *environment* sees it. In order: the ``python`` beside the
+        launcher script (``<env>/bin/jupyter-lab``), the recorded ``__PYVENV_LAUNCHER__`` (macOS), then ``argv[0]``.
+        """
+        first = argv[0]
+        for arg in argv[1:]:
+            base = re.split(r"[\\/]", arg)[-1]
+            if base.startswith(cls._SERVER_PROGRAMS) and os.path.isabs(arg) and os.path.exists(arg):
+                here = os.path.dirname(arg)
+                for name in ("python", "python3", "python.exe"):
+                    if os.path.exists(os.path.join(here, name)):
+                        return os.path.join(here, name)
+        launcher = cls._launcher_of(getattr(argv, "pid", None))
+        if launcher:
+            return launcher
+        if re.fullmatch(r"pythonw?(\d+(\.\d+)*)?(\.exe)?", re.split(r"[\\/]", first)[-1], re.I):
+            return first if os.path.dirname(first) else shutil.which(first)
+        here = os.path.dirname(first)
+        for name in ("python", "python3", "python.exe"):
+            candidate = os.path.join(here, name)
+            if here and os.path.exists(candidate):
+                return candidate
+        return None
+
+    @staticmethod
+    def _read_process(pid):
+        """``(argv, parent pid)`` of a process without psutil, or ``(None, None)``."""
+        try:
+            with open("/proc/{}/cmdline".format(pid), "rb") as f:
+                argv = [a.decode(errors="replace") for a in f.read().split(b"\0") if a]
+            with open("/proc/{}/stat".format(pid)) as f:
+                parent = int(f.read().rsplit(")", 1)[1].split()[1])
+            return argv, parent
+        except (OSError, ValueError, IndexError):
+            pass
+        try:
+            import shlex
+            out = subprocess.run(["ps", "-o", "ppid=,args=", "-p", str(pid)], capture_output=True, text=True, timeout=5)
+            ppid, _, args = out.stdout.strip().partition(" ")
+            return shlex.split(args.strip()), int(ppid)
+        except Exception:
+            return None, None
+
+    @classmethod
+    def _process_chain(cls):
+        """The command lines of this process and its parents, nearest first."""
+        try:
+            import psutil
+        except ImportError:
+            psutil = None
+        pid, seen = os.getpid(), set()
+        while pid and pid not in seen and len(seen) < 32:
+            seen.add(pid)
+            if psutil is not None:
+                try:
+                    proc = psutil.Process(pid)
+                    argv, parent = proc.cmdline(), proc.ppid()
+                except Exception:
+                    return
+            else:
+                argv, parent = cls._read_process(pid)
+            if not argv:
+                return
+            argv = cls._Argv(argv)
+            argv.pid = pid
+            yield argv
+            pid = parent
+
+    _jupyter_python = None
+    _server_env = None
+    @classmethod
+    def jupyter_python(cls, refresh=False):
+        """
+        Finds the Python that launched Jupyter: the interpreter of the nearest parent process that is a Jupyter
+        server (a virtual environment's ``python`` stays the environment's ``python``), else the one in the
+        shebang of the ``jupyter`` command on ``PATH``, else this kernel's.
+
+        :return: ``{'path': ..., 'how': ...}``
+        :rtype: dict
+        """
+        if cls._jupyter_python is not None and not refresh:
+            return cls._jupyter_python
+        found = None
+        for argv in itertools.islice(cls._process_chain(), 1, None):
+            if cls._is_jupyter_server(argv):
+                python = cls._python_of(argv)
+                if python:
+                    found = {"path": python, "how": "the Jupyter server process that started this kernel"}
+                    break
+        if found is None:
+            script = shutil.which("jupyter")
+            try:
+                with open(script, "rb") as f:
+                    first = f.readline().decode(errors="replace").strip()
+            except (OSError, TypeError):
+                first = ""
+            if first.startswith("#!"):
+                parts = first[2:].split()
+                python = shutil.which(parts[1]) if parts and os.path.basename(parts[0]) == "env" and len(parts) > 1 else (parts[0] if parts else None)
+                if python and os.path.exists(python) and "python" in os.path.basename(python):
+                    found = {"path": python, "how": "the `jupyter` command on PATH"}
+        if found is None:
+            found = {"path": sys.executable, "how": "this kernel (no Jupyter server was found)"}
+        cls._jupyter_python = found
+        return found
+
+    @staticmethod
+    def _prefix_of_python(python):
+        here = os.path.dirname(os.path.abspath(python))
+        return os.path.dirname(here) if os.path.basename(here) in ("bin", "Scripts") else here
+
+    @classmethod
+    def server_environment(cls, refresh=False):
+        """
+        The environment of the Jupyter server, asked of its own Python: the ``prefix`` extensions install under,
+        and the directories (in search order) it looks for ``labextension``/``nbextension`` copies in.
+
+        :return: ``{'python', 'how', 'prefix', 'labextension', 'nbextension'}``; the last two are ``None`` when that
+            Python has no ``jupyter_core`` (the caller then falls back to the usual places)
+        :rtype: dict
+        """
+        if cls._server_env is not None and not refresh:
+            return cls._server_env
+        found = cls.jupyter_python(refresh)
+        env = {"python": found["path"], "how": found["how"], "prefix": None, "labextension": None, "nbextension": None}
+        data = None
+        # not `samefile`: a virtual environment's `python` is a link to the base interpreter, but not the same environment
+        same = os.path.normcase(os.path.abspath(found["path"])) == os.path.normcase(os.path.abspath(sys.executable))
+        if same:
+            try:
+                from jupyter_core.paths import jupyter_path
+                data = {"prefix": sys.prefix, "labextension": jupyter_path("labextensions"),
+                        "nbextension": jupyter_path("nbextensions")}
+            except ImportError:
+                data = {"prefix": sys.prefix}
+        else:
+            code = ("import json, sys\n"
+                    "try:\n"
+                    "    from jupyter_core.paths import jupyter_path\n"
+                    "    lab, nb = jupyter_path('labextensions'), jupyter_path('nbextensions')\n"
+                    "except Exception:\n"
+                    "    lab = nb = None\n"
+                    "print(json.dumps({'prefix': sys.prefix, 'labextension': lab, 'nbextension': nb}))\n")
+            try:
+                out = subprocess.run([found["path"], "-c", code], capture_output=True, text=True, timeout=30)
+                data = json.loads(out.stdout.strip().splitlines()[-1])
+            except Exception:
+                data = None
+        if data:
+            env.update({k: v for k, v in data.items() if k in env})
+        else:
+            env["prefix"] = cls._prefix_of_python(found["path"])
+        cls._server_env = env
+        return env
+
+    @classmethod
+    def install_script(cls):
+        """The standalone installer shipped next to the extension (needs only the standard library)."""
+        return str(cls.extension_source("labextension").parent / "install_extension.py")
+
+    @classmethod
+    def install_command(cls):
+        """A shell line for a notebook cell (``!...``) that installs the extension with the Jupyter server's own Python."""
+        python = cls.server_environment()["python"]
+        parts = [python, cls.install_script()]
+        if os.name == "nt":
+            return "!" + subprocess.list2cmdline(parts)
+        import shlex
+        return "!" + " ".join(shlex.quote(p) for p in parts)
+
+    @classmethod
+    def extension_source(cls, kind):
+        """The copy of the extension shipped with McUtils (``kind`` is ``'labextension'`` or ``'nbextension'``)."""
+        from .ActiveHTMLWidget import HTMLElement
+        return pathlib.Path(HTMLElement._here).resolve().parent / kind
+
+    @classmethod
+    def extension_fingerprint(cls, path, kind):
+        """
+        The version and build of an extension directory, from ``package.json`` and the hashed
+        ``remoteEntry.<hash>.js`` file name (lab) or the contents of ``extension.js`` and ``index.js`` (notebook).
+
+        :return: ``{'version': ..., 'build': ...}``, or ``None`` if the directory can't be read
+        :rtype: dict | None
+        """
+        path = pathlib.Path(path)
+        try:
+            if kind == "labextension":
+                with open(path / "package.json") as f:
+                    version = json.load(f).get("version")
+                build = sorted(p.name for p in (path / "static").glob("remoteEntry.*.js"))
+                return {"version": version, "build": build} if build else None
+            digest = hashlib.md5()
+            for name in ("extension.js", "index.js"):
+                digest.update((path / name).read_bytes())
+            return {"version": None, "build": digest.hexdigest()}
+        except (OSError, ValueError):
+            return None
+
+    @staticmethod
+    def _version_satisfies(installed, required):
+        """``installed`` satisfies a caret range such as ``'^0.2.0'`` (for ``0.y.z`` the ``y`` must match)."""
+        def parse(v):
+            parts = str(v).strip().lstrip("^~>=v ").split("-")[0].split(".")[:3]
+            return tuple(int(x) for x in parts) + (0,) * (3 - len(parts))
+        try:
+            have, need = parse(installed), parse(required)
+        except ValueError:
+            return True      # a range we can't read isn't a reason to complain
+        if need[0] == 0:
+            return have[:2] == need[:2] and have >= need
+        return have[0] == need[0] and have >= need
+
+    @classmethod
+    def extension_copy_status(cls, path, kind):
+        """
+        Compares an installed copy of the extension with the one shipped with McUtils.
+
+        :return: ``{'path', 'version', 'current', 'reason'}``; ``reason`` says why a copy is not current
+        :rtype: dict
+        """
+        from .ActiveHTMLWidget._frontend import module_version
+        installed = cls.extension_fingerprint(path, kind)
+        shipped = cls.extension_fingerprint(cls.extension_source(kind), kind)
+        status = {"path": str(path), "version": None if installed is None else installed["version"],
+                  "current": True, "reason": None}
+        if installed is None:
+            status.update(current=False, reason="it can't be read (an incomplete install?)")
+        elif installed["version"] is not None and not cls._version_satisfies(installed["version"], module_version):
+            status.update(current=False, reason="version {} is installed but this McUtils needs {}".format(
+                installed["version"], module_version))
+        elif shipped is not None and installed["build"] != shipped["build"]:
+            status.update(current=False, reason="it is a different build from the one shipped with McUtils")
+        return status
+
+    @classmethod
+    def extension_status(cls):
+        """
+        Every installed copy of the extension, in the order Jupyter searches for it (the first one is the one used).
+
+        :return: ``{'labextension': [status, ...], 'nbextension': [status, ...]}`` (see `extension_copy_status`)
+        :rtype: dict
+        """
+        return {
+            kind: [cls.extension_copy_status(os.path.join(d, cls.extension_name), kind) for d in dirs]
+            for kind, dirs in cls.extension_locations().items()
+        }
+
+    @classmethod
+    def extension_state(cls):
+        """
+        ``'missing'`` (not installed for JupyterLab or the notebook), ``'outdated'`` (the copy Jupyter would use
+        differs from the one shipped with McUtils, which is what makes the frontend fail to load the widget model),
+        or ``'current'``.
+        """
+        status = cls.extension_status()
+        if not any(status.values()):
+            return "missing"
+        if any(copies and not copies[0]["current"] for copies in status.values()):
+            return "outdated"
+        return "current"
+
+    @staticmethod
+    def _install_prefix(path):
+        """The ``exec_prefix`` that installs to ``path`` (``<prefix>/share/jupyter/<kind>s/ActiveHTMLWidget``), or ``None``."""
+        parts = pathlib.Path(path).parts
+        if len(parts) > 4 and parts[-4:-2] == ("share", "jupyter"):
+            return str(pathlib.Path(*parts[:-4]))
+        return None
+
+    @classmethod
+    def extension_notice(cls, state="missing"):
+        """
+        The static (widget-free) message shown when the extension is missing or out of date: what is wrong, a
+        code block to run, and what to do afterwards.
+
+        :param state: ``'missing'`` or ``'outdated'`` (see `extension_state`)
+        """
+        style = {
+            "border": "1px solid #c55a11", "border-radius": "6px",
+            "padding": ".6em 1em", "margin": ".4em 0"
+        }
+        if state != "outdated":
+            return HTML.Div(
+                HTML.Strong("The ActiveHTMLWidget extension is not installed for this Jupyter environment."),
+                HTML.Text(
+                    "Interactive elements will show \u201cClick to show javascript error\u201d until it is. "
+                    "Copy this into a cell and run it once:"
+                ),
+                HTML.Pre(HTML.Code("from McUtils.Jupyter import JHTML\nJHTML.load()")),
+                HTML.Text("Or, to install with the Python that launched Jupyter whatever this kernel runs in (it needs only "
+                          "the standard library), run this in a cell:"),
+                HTML.Pre(HTML.Code(cls.install_command())),
+                HTML.NumberedList(
+                    HTML.ListItem("Run it. It installs the extension and says when it is done."),
+                    HTML.ListItem(
+                        "Reload the page (refresh the browser tab; no kernel restart is needed)."
+                    ),
+                    HTML.ListItem("Re-run the cell that displayed this message."),
+                ),
+                HTML.Text(
+                    HTML.Em(
+                        "If it is already installed but Jupyter runs from a different environment, "
+                        "use JHTML.load(exec_prefix=<that environment's prefix>). This environment is "
+                    ), HTML.Code(cls.server_environment().get("prefix") or sys.exec_prefix), ". Jupyter's Python is ",
+                    HTML.Code(cls.server_environment()["python"]), " (",
+                    cls.server_environment()["how"], ")."
+                ),
+                cls="jhtml-extension-notice",
+                style=style
+            )
+        stale = [c for copies in cls.extension_status().values() for c in copies[:1] if not c["current"]]
+        calls = []
+        for c in stale:
+            prefix = cls._install_prefix(c["path"])
+            call = "JHTML.load(exec_prefix={!r}, overwrite=True)".format(prefix) if prefix else "JHTML.load(overwrite=True)"
+            if call not in calls:
+                calls.append(call)
+        return HTML.Div(
+            HTML.Strong("The ActiveHTMLWidget extension installed for Jupyter is out of date."),
+            HTML.Text(
+                "The frontend can't load the widget model from it (\u201cFailed to load model class "
+                "'ActiveHTMLModel'\u201d or \u201cClick to show javascript error\u201d). Jupyter uses:"
+            ),
+            HTML.List(*(HTML.ListItem(HTML.Code(c["path"]), ": ", c["reason"]) for c in stale)),
+            HTML.Text("Copy this into a cell and run it once to replace it with the version shipped with McUtils:"),
+            HTML.Pre(HTML.Code("from McUtils.Jupyter import JHTML\n" + "\n".join(calls))),
+            HTML.Text("Or, to replace it with the Python that launched Jupyter whatever this kernel runs in (it needs "
+                      "only the standard library), run this in a cell:"),
+            HTML.Pre(HTML.Code(cls.install_command())),
+            HTML.Text(HTML.Em("Jupyter's Python is "), HTML.Code(cls.server_environment()["python"]),
+                      " (", cls.server_environment()["how"], ")."),
+            HTML.NumberedList(
+                HTML.ListItem("Run it. It replaces the extension and says when it is done."),
+                HTML.ListItem(
+                    "Hard-reload the page (Cmd+Shift+R or Ctrl+Shift+R) so the browser drops the old copy; "
+                    "no kernel restart is needed."
+                ),
+                HTML.ListItem("Re-run the cell that displayed this message."),
+            ),
+            cls="jhtml-extension-notice",
+            style=style
+        )
+
+    @classmethod
+    def check_extension(cls, force=False):
+        """
+        Checks, on the first widget display of a session (or when ``force``), that the ``ActiveHTMLWidget``
+        extension is installed and matches the one shipped with McUtils; if not, displays `extension_notice`
+        as plain HTML (which needs no extension).
+
+        :return: whether the extension is installed and current, or ``None`` when it isn't applicable (no
+            ``ipywidgets``) or has already been checked
+        :rtype: bool | None
+        """
+        if cls._extension_checked and not force:
+            return None
+        if JupyterAPIs.get_widgets_api() is None:
+            return None
+        cls._extension_checked = True
+        state = cls._extension_state = cls.extension_state()
+        if state != "current":
+            JupyterAPIs.get_display_api().display(cls.extension_notice(state))
+        return state == "current"
+
+    static_fallback = True
+    _extension_state = None
+    @classmethod
+    def use_static_fallback(cls):
+        """
+        Whether widgets should be shown as plain static HTML instead: the extension was found missing or outdated
+        at the last check, so the frontend would only show "Failed to load model class" (the frontend gives a widget
+        no hook for that failure, so this is decided here, before display). Set ``static_fallback = False`` to
+        always display the widget.
+        """
+        return cls.static_fallback and cls._extension_state in ("missing", "outdated")
+
+    @classmethod
+    def fallback_page(cls, static):
+        """Wraps a static rendering of a widget with a one-line note on why it isn't interactive."""
+        return HTML.Div(
+            HTML.Div(HTML.Em(
+                "Static view: interactive features are off because the ActiveHTMLWidget extension is {}. "
+                "See the message above, or run JHTML.check_extension(force=True).".format(cls._extension_state)
+            ), style={"font-size": "smaller", "opacity": "0.75", "margin-bottom": ".4em"}),
+            static,
+            cls="jhtml jhtml-static-fallback"
+        )
 
     _cls_map = None
     @classmethod

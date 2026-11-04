@@ -4,6 +4,7 @@ Optional programs and toolkits must be installed for the corresponding examples.
 
 ### Generate and visualize RDKit conformers
 
+<!-- readout(id="mcutils-externalprograms-1", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.ExternalPrograms import RDMolecule
@@ -70,6 +71,7 @@ if status is ExecutionStatus.COMPLETED:
 
 ### Optimize and differentiate an RDKit force field
 
+<!-- readout(id="mcutils-externalprograms-5", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.ExternalPrograms import RDMolecule

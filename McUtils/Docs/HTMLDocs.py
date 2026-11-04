@@ -25,7 +25,8 @@ elements -- no live kernel, no ipywidgets, works fine on mobile.
 import io
 import contextlib
 
-from .DocWalker import DocWalker
+from .DocWalker import DocWalker, doc_logger
+from ..Jupyter.JHTML.CodeHighlighting import CodeHighlighter
 from ..Jupyter import JHTML
 from ..Formatters.TemplateEngine.TemplateEngine import (
     TemplateInterfaceEngine, TemplateHandler
@@ -599,7 +600,8 @@ class JHTMLDocumentationEngine(TemplateInterfaceEngine):
 # Public entry point -- the static sibling of `jdoc`
 # --------------------------------------------------------------------------
 
-def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True, verbose=False, return_string=False):
+def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True, verbose=False, return_string=False,
+               readouts=None, strict_readouts=False, frame=None, **walker_kwargs):
     """
     The static-HTML sibling of `McUtils.Docs.jdoc`.
 
@@ -620,11 +622,25 @@ def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True
         otherwise the HTML string itself is returned
     :param include_finx_js: whether to bake in finx's `init.js` (+ a CDN jQuery) for
         the sidebar-toggle behavior; the CSS is always included
-    :param verbose: `DocWalker` prints a line per module/class it visits;
-        set `True` to see that progress chatter
-    :return: the HTML string, or the path written to if `out_file` was given
+    :param verbose: how much `DocWalker` prints, as in `jdoc` (``False``: nothing; ``True``: a line per module;
+        ``"Debug"``: also each module's source and member table)
+    :param readouts: the store of example output made by ``ci/build_readouts.py`` (a directory or
+        `McUtils.Docs.ReadoutStore`). Each marked example (``<!-- readout(...) -->``) then gets the output stored for
+        it written into the page, so the file stays self-contained. Nothing is executed.
+    :param strict_readouts: raise if a marked example has no stored output, or a failed one
+    :param frame: return a ``JHTML.Iframe`` holding the page (``True``, or a dict of style overrides) instead. It
+        displays itself in a notebook like any other JHTML element, and the page's stylesheet stays inside the
+        frame instead of restyling the notebook
+    :param walker_kwargs: passed to `DocWalker`, exactly as `jdoc` passes its extra arguments (``examples_directory``,
+        ``tests_directory``, ...)
+    :return: the JHTML page (the HTML string if ``return_string``, the path written to if `out_file` was given,
+        or the frame if ``frame``)
     """
     engine = JHTMLDocumentationEngine()
+    embedder = None
+    if readouts is not None:
+        from .ExampleEmbed import ExampleEmbedder
+        embedder = ExampleEmbedder(readouts, inline=True, strict=strict_readouts, warn=None)
 
     # `check_should_write` guesses "is this stdlib?" from `sys.prefix` + the
     # string `"site-packages"`; that heuristic misfires for anything installed
@@ -648,13 +664,23 @@ def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True
         base = self.identifier.split(".", 1)[0]
         return base not in self.blacklist_packages
     TemplateHandler.check_should_write = _check_should_write
-    sink = contextlib.nullcontext() if verbose else contextlib.redirect_stdout(io.StringIO())
+    sink = contextlib.redirect_stdout(io.StringIO()) if doc_logger(verbose).verbosity <= 0 else contextlib.nullcontext()
     try:
         with sink:
-            walker = DocWalker(out=None, engine=engine, description="")
+            walker = DocWalker(out=None, engine=engine, description="", examples_processor=embedder,
+                                verbose=verbose, **walker_kwargs)
             content = walker.write([obj], max_depth=max_depth)
     finally:
         TemplateHandler.check_should_write = old_check
+    runtime = []
+    if embedder is not None:
+        embedder.finish()
+        x3dom = embedder.assets.get("x3dom")
+        if x3dom:
+            if x3dom.get("stylesheet"):
+                runtime.append(JHTML.Link(rel="stylesheet", href=x3dom["stylesheet"]))
+            if x3dom.get("script"):
+                runtime.append(JHTML.Script(src=x3dom["script"]))
 
     name = title or getattr(obj, "__name__", str(obj))
 
@@ -667,6 +693,8 @@ def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True
             viewport_meta,
             JHTML.Title(name),
             *_bake_finx_assets(include_js=include_finx_js),
+            *CodeHighlighter.head_elements(),
+            *runtime,
             JHTML.Style(
                 "body{max-width:900px;margin:0 auto;}"
                 ".main-content{padding:1rem 1rem 4rem 1rem;}"
@@ -681,6 +709,12 @@ def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True
         ),
         lang="en"
     )
+    if frame:
+        style = {"width": "100%", "height": "500px", "border": "1px solid rgba(0,0,0,.2)"}
+        if isinstance(frame, dict):
+            style.update(frame)
+        html_string = "<!DOCTYPE html>\n" + page.tostring().replace("<Html", "<html").replace("</Html>", "</html>")
+        return JHTML.Iframe(srcdoc=html_string, style=style)
     if return_string or out_file is not None:
         html_string = "<!DOCTYPE html>\n" + page.tostring().replace("<Html", "<html").replace("</Html>", "</html>")
 

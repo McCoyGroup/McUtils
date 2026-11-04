@@ -1,11 +1,13 @@
 Get all partitions of `3`
 
+<!-- readout(id="mcutils-combinatorics-1", isolated=True) -->
 ```python
 IntegerPartitioner.partitions(3)
 ```
 
 Count the number of partitions up to 10
 
+<!-- readout(id="mcutils-combinatorics-2", isolated=True) -->
 ```python
 IntegerPartitioner.count_partitions(10)
 ```
@@ -13,6 +15,7 @@ IntegerPartitioner.count_partitions(10)
 Count the number of partitions of `4` of length exactly `2`
 with minimum component between `2` and `4`
 
+<!-- readout(id="mcutils-combinatorics-3", isolated=True) -->
 ```python
 IntegerPartitioner.count_exact_length_partitions_in_range(4, 4, 2, 2)
 ```
@@ -26,6 +29,7 @@ perms = UniquePermutations(parts[0]).permutations()
 
 Get all 9D state vectors and indices for states with up to 4 quanta of excitation
 
+<!-- readout(id="mcutils-combinatorics-5", isolated=True) -->
 ```python
 SymmetricGroupGenerator(9).get_terms([1, 2, 3, 4])
 ```
@@ -34,6 +38,7 @@ SymmetricGroupGenerator(9).get_terms([1, 2, 3, 4])
 
 ### Enumerate vibrational basis states
 
+<!-- readout(id="mcutils-combinatorics-6", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Combinatorics import SymmetricGroupGenerator
@@ -79,6 +84,7 @@ generator.print_tableaux(tableaux)
 
 ### Encode and decode arbitrary permutations
 
+<!-- readout(id="mcutils-combinatorics-9", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Combinatorics import lehmer_encode, lehmer_decode
@@ -92,6 +98,7 @@ print("Lehmer codes:", codes)
 
 ### Generate low-discrepancy integration points
 
+<!-- readout(id="mcutils-combinatorics-10", isolated=True, display="both") -->
 ```python
 from McUtils.Combinatorics import halton_sequence, sobol_sequence
 

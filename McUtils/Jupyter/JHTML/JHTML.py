@@ -37,13 +37,23 @@ class JHTML:
     manage_attrs = HTMLManager.manage_attrs
     @classmethod
     def load(cls, exec_prefix=None, overwrite=False):
-        from IPython.core.display import display
+        display = JupyterAPIs().display_api.display
 
         elems = [
             HTMLWidgets.load(exec_prefix=exec_prefix, overwrite=overwrite)
             # BootstrapWidgets.load()
         ]
         display(*(e for e in elems if e is not None))
+
+    extension_installed = HTMLWidgets.extension_installed
+    extension_state = HTMLWidgets.extension_state
+    extension_status = HTMLWidgets.extension_status
+    check_extension = HTMLWidgets.check_extension
+    server_environment = HTMLWidgets.server_environment
+    jupyter_python = HTMLWidgets.jupyter_python
+    install_command = HTMLWidgets.install_command
+    install_script = HTMLWidgets.install_script
+    extension_locations = HTMLWidgets.extension_locations
 
     # RawHTML = JupyterAPIs.raw_html
     @classmethod

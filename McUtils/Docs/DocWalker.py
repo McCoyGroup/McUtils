@@ -8,6 +8,7 @@ import sys
 
 from ..Formatters.TemplateEngine import *
 from ..Misc import mixedmethod
+from ..Devutils.Loggers import Logger, LogLevel
 from .ExamplesParser import ExamplesParser
 from .MarkdownTemplates import MarkdownTemplateFormatter, MarkdownOps
 
@@ -21,10 +22,49 @@ __all__ = [
     "MethodWriter",
     "ObjectWriter",
     "IndexWriter",
-    "jdoc"
+    "jdoc",
+    "doc_logger"
 ]
 
 from ..Formatters.TemplateEngine.TemplateEngine import TemplateInterfaceList
+
+
+def id_of(x):
+    return id(x)
+
+
+def doc_logger(verbose=None):
+    """
+    Resolves the ``verbose`` argument of the documentation tools to a `McUtils.Devutils.Logger`, using the logger's
+    own `LogLevel` scheme:
+
+    ===============  =====================================================
+    ``Quiet`` (0)    nothing at all (``False``, ``None``)
+    ``Warnings`` (1) only problems
+    ``Normal`` (10)  one line per module/package being documented (``True``)
+    ``Debug`` (50)   plus the source object and its member table
+    ``All`` (100)    everything
+    ===============  =====================================================
+
+    :param verbose: a `LogLevel`, its name (``"Debug"``), a number, a bool, or a ready `Logger`
+    :type verbose: bool | int | str | LogLevel | Logger | None
+    :return: the logger (a given `Logger` is used as it is)
+    :rtype: Logger
+    """
+    if isinstance(verbose, Logger):
+        return verbose
+    if verbose is None or verbose is False:
+        level = LogLevel.Quiet
+    elif verbose is True:
+        level = LogLevel.Normal
+    elif isinstance(verbose, LogLevel):
+        level = verbose
+    elif isinstance(verbose, str):
+        level = LogLevel[verbose.strip().capitalize() if verbose.strip().lower() != "moredebug" else "MoreDebug"]
+    else:
+        level = verbose     # a number; `Logger` compares levels numerically
+    return Logger(log_level=level)
+
 
 
 class DocSpec(ObjectSpec):
@@ -146,7 +186,8 @@ class DocTemplateOps(MarkdownOps):
     ...
 
 class InteractiveTemplateEngine(TemplateInterfaceEngine):
-    def __init__(self, templates:TemplateInterfaceList=None, ignore_missing=False, formatter_class=None, ignore_paths=()):
+    def __init__(self, templates:TemplateInterfaceList=None, ignore_missing=False, formatter_class=None, ignore_paths=(),
+                 readouts=None, live_examples=True, example_namespace=None, show_stored=True):
         """
         **LLM Docstring**
 
@@ -165,7 +206,26 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
 
         :param ignore_paths: template paths to ignore
         :type ignore_paths: Iterable[str]
+
+        :param readouts: the store (`ReadoutStore` or directory) of example output made by ``ci/build_readouts.py``;
+            when given, each marked example first shows the output stored for it
+        :type readouts: str | Any | None
+
+        :param live_examples: give each marked example (``<!-- readout(...) -->``) a **Run** button
+        :type live_examples: bool
+
+        :param example_namespace: where examples run: ``None`` for a private namespace per examples page, a dict,
+            or ``"user"`` for the notebook's own namespace
+        :type example_namespace: None | dict | str
+
+        :param show_stored: show the stored output (if there is a store) before an example is run
+        :type show_stored: bool
         """
+        self.readouts = readouts
+        self.live_examples = live_examples
+        self.example_namespace = example_namespace
+        self.show_stored = show_stored
+        self._example_pages = {}
         if templates is None:
             templates = {
                 'index.md':self.index_browser,
@@ -220,12 +280,75 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
         return {
             JHTML.SubsubsubHeading(k):
                 (
-                    JHTML.Markdown(v) if k in {'Details', 'Examples'}
+                    self.format_examples(v, writer) if k == 'Examples'
+                    else JHTML.Markdown(v) if k in {'Details'}
                     else self.format_related_links(writer, v) if k in {'Related'}
                     else v
                 )
                 for k, v in pars.items()
         }
+    def example_page(self, examples, owner=None):
+        """
+        The `LiveExamplePage` for an examples text, created once per (owner, text) so the namespace a page's
+        examples build up lasts as long as the engine.
+
+        :param examples: examples Markdown with marked blocks
+        :type examples: str
+        :param owner: the documented object's name
+        :type owner: str | None
+        :return: the page
+        :rtype: LiveExamplePage
+        """
+        from .ExampleLive import LiveExamplePage
+        import hashlib
+        key = (owner, hashlib.md5(examples.encode("utf-8")).hexdigest())
+        page = self._example_pages.get(key)
+        if page is None:
+            page = self._example_pages[key] = LiveExamplePage(
+                examples, owner=owner, store=self.readouts, namespace=self.example_namespace
+            )
+        return page
+
+    def format_examples(self, examples, writer=None, markdown=True):
+        """
+        Renders an examples text. Without marked examples (or with ``live_examples`` off) this is exactly the
+        Markdown view it always was; with them, the text is split so each marked block's code is followed by
+        a **Run** button and an output area (and its stored output, if the engine has a store).
+
+        :param examples: examples Markdown
+        :type examples: str | None
+        :param writer: the handler of the documented object, used to name the page
+        :type writer: DocTemplateHandler | None
+        :param markdown: when the text has no marked examples, return it as a Markdown element (``True``) or
+            unchanged (``False``)
+        :type markdown: bool
+        :return: the rendered examples
+        :rtype: Any
+        """
+        from ..Jupyter import JHTML, Flex
+        from .ExampleLive import split_examples
+        if not isinstance(examples, str):
+            return examples
+        pieces = split_examples(examples, getattr(writer, 'identifier', None)) if self.live_examples else None
+        if pieces is None:
+            return JHTML.Markdown(examples) if markdown else examples
+        page = self.example_page(examples, getattr(writer, 'identifier', None))
+        body = []
+        for kind, piece in pieces:
+            if kind == "text":
+                body.append(JHTML.Markdown(piece))
+            else:
+                body.append(JHTML.Markdown(piece.fence))
+                body.append(page.control(piece, show_stored=self.show_stored and self.readouts is not None))
+        return Flex(body, direction='column')
+
+    def format_section(self, name, text, writer=None):
+        """Renders one named section body: `format_examples` for ``Examples``, Markdown otherwise."""
+        from ..Jupyter import JHTML
+        if name == 'Examples':
+            return self.format_examples(text, writer)
+        return JHTML.Markdown(text)
+
     def format_parameters_table(self, parameters):
         """
         **LLM Docstring**
@@ -350,7 +473,7 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
             ]
         params = self.clean_params({
                 'Details': details,
-                'Examples': examples,
+                'Examples': self.format_examples(examples, _self, markdown=False),
                 'Related': related
             })
         if len(params) > 0:
@@ -361,6 +484,63 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
             return self.pane
         else:
             return disp
+
+    @staticmethod
+    def signature_source(name, signature, decorator=None):
+        """The source text of a function/method header, as shown (and highlighted) on its page."""
+        decorators = "" if decorator is None or not str(decorator).strip() else str(decorator).strip("\n") + "\n"
+        return decorators + "def " + name + signature + ":"
+
+    def member_index(self, members, _self, id=None):
+        """
+        The members of a module as collapsible sections, one per member. A member's documentation is built the first
+        time its header is clicked and then lives in its section, so it can be collapsed again; nothing is built up
+        front.
+
+        :param members: the member identifiers (dotted names)
+        :type members: Mapping[str, Any]
+        :param _self: the template handler of the module
+        :type _self: DocTemplateHandler
+        :param id: the module's id
+        :type id: str | None
+        :return: the index (a ``JHTML.Div``)
+        :rtype: Any
+        """
+        from ..Jupyter import JHTML, Opener
+        from ..Jupyter.JHTML.HTMLWidgets import ActiveHTMLWrapper
+        from .ExampleLive import LiveExamplePage
+
+        def widget_of(comp):
+            while hasattr(comp, 'to_widget') and not isinstance(comp, ActiveHTMLWrapper):
+                comp = comp.to_widget()
+            return comp
+
+        slots, names, loaded = {}, {}, {}
+        items = {}
+        for k in members.keys():
+            label = JHTML.Code(k.split(".")[-1])
+            slot = JHTML.Div(cls="mcui-doc-member", dynamic=True)
+            items[label] = slot
+            slots[id_of(label)] = slot
+            names[id_of(label)] = k
+
+        def on_open(label):
+            key = id_of(label)
+            k = names[key]
+            if k in loaded:
+                return
+            short = k.split(".")[-1]
+            entry = _self.tree.get(k)
+            comp = entry.get('output') if entry else None
+            if comp is None:
+                comp = jdoc(getattr(_self.obj, short), engine=self)
+            loaded[k] = widget_of(comp)
+            try:
+                LiveExamplePage.place(slots[key], loaded[k])
+            except TypeError:
+                LiveExamplePage.place(slots[key], JHTML.Markdown(str(loaded[k])).tostring())
+
+        return JHTML.Div(JHTML.SubsubHeading("Members"), Opener(items, on_open=on_open), cls="mcui-doc-index")
 
     def module_browser(self,
                        members=None,
@@ -385,29 +565,14 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
         :return: the rendered JHTML/Flex component
         :rtype: Any
         """
-        from ..Jupyter import JHTML, Flex, Opener, CardOpener, Button, LinkButton, VariableDisplay, Var
+        from ..Jupyter import JHTML, Flex, Opener, LinkButton
 
         body = [
             JHTML.SubsubHeading(JHTML.Code("module"), " ",
                                 LinkButton(name, lambda *_,**__:subprocess.call(['open', _self.obj.__file__]))
                                 ),
             JHTML.Markdown(description),
-            CardOpener({
-                JHTML.Bold(k.split(".")[-1]):
-                    _self.tree.get(k, {
-                        # 'output': Button("Click to load...",
-                        #                  lambda *_, **__: Var(k, namespace=id).set_value(k)
-                        #                  )
-                        'output': VariableDisplay(
-                            Var(k, namespace=id),
-                            value=Button("Click to load...",
-                                         lambda *_, k=k, **__: Var(k, namespace=id).set_value(
-                                             jdoc(getattr(_self.obj, k.split(".")[-1]), engine=self)
-                                         ))
-                        )
-                    })['output']
-                for k in members.keys()
-            })
+            self.member_index(members, _self, id)
         ]
 
         # print(
@@ -416,7 +581,7 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
         params = self.clean_params({
             # 'ID': id,
             JHTML.SubsubsubHeading('Details'): details,
-            JHTML.SubsubsubHeading('Examples'): examples,
+            JHTML.SubsubsubHeading('Examples'): self.format_examples(examples, _self, markdown=False),
             JHTML.SubsubsubHeading('Tests'): tests,
             JHTML.SubsubsubHeading('Related'): related
         })
@@ -500,6 +665,7 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
                        examples=None,
                        tests=None,
                        details=None,
+                       _self=None,
                        **_
                        ):
         """
@@ -512,25 +678,16 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
         :return: the rendered JHTML/Flex component
         :rtype: Any
         """
-        from ..Jupyter import JHTML, Flex, Opener
+        from ..Jupyter import JHTML, Flex, Opener, HighlightedCode
 
-        header = JHTML.Pre(JHTML.Code(
-            # decorator+
-            # "def "+name+signature+":",
-            JHTML.Span(decorator, cls="cm-meta"),
-            JHTML.Span("def", cls="cm-keyword"),
-            " ",
-            JHTML.Span(name, cls="cm-def"),
-            signature + ":",
-            cls="cm-s-jupyter language-python"
-        ))
+        header = HighlightedCode(self.signature_source(name, signature, decorator))
 
         body = Flex(
             [
                 JHTML.Markdown(description) if description is not None and len(description.strip()) > 0 else "",
                 self.format_parameters_table(parameters),
                 Opener({
-                    JHTML.SubsubsubHeading(k): JHTML.Markdown(v) for k, v in
+                    JHTML.SubsubsubHeading(k): self.format_section(k, v, _self) for k, v in
                     self.clean_params({
                         # 'ID': id,
                         'Details': details,
@@ -582,7 +739,7 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
                 JHTML.Markdown(description),
                 str(parameters),
                 Opener({
-                    JHTML.SubsubsubHeading(k): JHTML.Markdown(v) for k, v in
+                    JHTML.SubsubsubHeading(k): self.format_section(k, v, _self) for k, v in
                     self.clean_params({
                         # 'ID': id,
                         'Details': details,
@@ -607,6 +764,7 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
                          examples=None,
                          tests=None,
                          details=None,
+                         _self=None,
                          **_
                          ):
         """
@@ -619,19 +777,13 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
         :return: the rendered JHTML/Flex component
         :rtype: Any
         """
-        from ..Jupyter import JHTML, Flex, Opener
+        from ..Jupyter import JHTML, Flex, Opener, HighlightedCode
 
         return Flex(
             [
                 JHTML.SubsubHeading(JHTML.Code("function"), " ", name),
                 JHTML.Div(
-                    JHTML.Pre(JHTML.Code(
-                        JHTML.Span("def", cls="cm-keyword"),
-                        " ",
-                        JHTML.Span(name, cls="cm-def"),
-                        signature + ":",
-                        cls="cm-s-jupyter language-python"
-                    )),
+                    HighlightedCode(self.signature_source(name, signature)),
                     JHTML.Div(
                         JHTML.Markdown(description) if description is not None and len(description.strip()) > 0 else "",
                         self.format_parameters_table(parameters),
@@ -640,7 +792,7 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
                     cls='ps-4'
                 ),
                 Opener({
-                    JHTML.SubsubsubHeading(k): JHTML.Markdown(v) for k, v in
+                    JHTML.SubsubsubHeading(k): self.format_section(k, v, _self) for k, v in
                     self.clean_params({
                         # 'ID': id,
                         'Details': details,
@@ -1017,12 +1169,11 @@ class ModuleWriter(DocTemplateHandler):
         ex = self.load_examples()
         tests = self.load_tests()
 
-        print(
-            f'documenting module {self.identifier}:',
-            f'source: {self.obj}',
-            f'members: {idents}',
-            sep='\n'
-        )
+        walker = getattr(self, 'walker', None)
+        if walker is not None:
+            walker.log(f'documenting module {self.identifier}', level=LogLevel.Normal)
+            walker.log(f'source: {self.obj}', level=LogLevel.Debug)
+            walker.log(f'members: {idents}', level=LogLevel.Debug)
         return dict({
             'id': ident,
             'root':ident.rsplit('.', 1)[0],
@@ -1494,6 +1645,7 @@ class DocWalker(TemplateWalker):
         self.tests_loader = self.get_tests_loader(tests_directory)
         self.examples_processor = examples_processor
         self.verbose = verbose
+        self.logger = doc_logger(verbose)
 
         super().__init__(engine, out=out, **extra_fields)
 
@@ -1556,6 +1708,19 @@ class DocWalker(TemplateWalker):
         if tests_loader is not None and not isinstance(tests_loader, TestsExtractor):
             tests_loader = TestsExtractor(tests_loader)
         return tests_loader
+    def log(self, message, level=LogLevel.Normal):
+        """
+        Writes a progress message if the walker's verbosity allows it (see `doc_logger` for the levels).
+
+        :param message: the message; braces are written as they are
+        :type message: str
+        :param level: the level the message belongs to
+        :type level: LogLevel
+        """
+        logger = getattr(self, 'logger', None)
+        if logger is not None and level <= logger.verbosity:
+            logger.log_print(message.replace("{", "{{").replace("}", "}}"), log_level=level)
+
     def get_handler(self, *args, examples_loader=None, tests_loader=None, examples_processor=None, **kwargs):
         """
         **LLM Docstring**
@@ -1612,10 +1777,16 @@ class DocWalker(TemplateWalker):
         :return: the documentation produced by the base walker
         :rtype: Any
         """
-        if verbose is None:
-            verbose = self.verbose
-        if verbose:
-            print('documenting root package', o)
+        old_logger = self.logger
+        if verbose is not None:
+            self.logger = doc_logger(verbose)
+        try:
+            return self._visit_root(o, tests_directory=tests_directory, examples_directory=examples_directory, **kwargs)
+        finally:
+            self.logger = old_logger
+
+    def _visit_root(self, o, tests_directory=None, examples_directory=None, **kwargs):
+        self.log('documenting root package {}'.format(o), level=LogLevel.Normal)
         if tests_directory is None and isinstance(o, dict):
             tests_directory = o.get('tests_root', None)
         old_tl = self.tests_loader
@@ -1645,7 +1816,7 @@ class DocWalker(TemplateWalker):
         return jdoc(cls)
 
 
-def jdoc(obj, max_depth=1, engine=None, verbose=False, **etc):
+def jdoc(obj, max_depth=1, engine=None, verbose=False, readouts=None, example_namespace=None, live_examples=True, **etc):
     """
     provides documentation in a Jupyter-friendly environment
 
@@ -1653,6 +1824,18 @@ def jdoc(obj, max_depth=1, engine=None, verbose=False, **etc):
     :type obj: Any
     :param max_depth: the depth in the object tree to go down to (default: `1`)
     :type max_depth: int
+    :param verbose: how much to print while walking, in `McUtils.Devutils.LogLevel` terms: ``False`` (default,
+        ``Quiet``) prints nothing at all, ``True`` is ``Normal`` (a line per module), ``"Debug"`` adds each module's
+        source and member table; a `LogLevel`, its name, a number or a ready `Logger` also work (see `doc_logger`)
+    :type verbose: bool | int | str | LogLevel | Logger
+    :param readouts: the store of example output made by ``ci/build_readouts.py`` (a directory); marked
+        examples show the output stored for them before they are run
+    :type readouts: str | None
+    :param example_namespace: where marked examples run: `None` (a private namespace per page of examples),
+        a dict, or `"user"` for the notebook's own namespace
+    :type example_namespace: None | dict | str
+    :param live_examples: give each marked example a **Run** button (a custom `engine` brings its own settings)
+    :type live_examples: bool
     :return docs:
     :rtype docs: ..Jupyter.Component
 
@@ -1683,9 +1866,35 @@ def jdoc(obj, max_depth=1, engine=None, verbose=False, **etc):
     ```
 
     """
-    return DocWalker(
-        description="",
-        engine=engine,
-        verbose=verbose,
-        **etc
-    ).write([obj], max_depth=max_depth)
+    if engine is None:
+        # Without a working ActiveHTMLWidget extension the interactive view can't be displayed (the frontend only
+        # shows "Failed to load model class"), so give the static page, which needs none. `check_extension` has
+        # already told the user why, in this cell.
+        from ..Jupyter.JHTML.HTMLWidgets import HTMLWidgets
+        if HTMLWidgets.static_fallback:
+            HTMLWidgets.check_extension()
+            if HTMLWidgets.use_static_fallback():
+                try:
+                    from .HTMLDocs import static_doc
+                    page = static_doc(obj, max_depth=max_depth, verbose=verbose, readouts=readouts, frame=True, **etc)
+                except Exception:
+                    page = None
+                if page is not None:
+                    return HTMLWidgets.fallback_page(page)
+    if engine is None and (readouts is not None or example_namespace is not None or not live_examples):
+        engine = InteractiveTemplateEngine(
+            readouts=readouts, example_namespace=example_namespace, live_examples=live_examples
+        )
+    import contextlib, io
+    from ..Jupyter.JHTML.CodeHighlighting import CodeHighlighter
+    CodeHighlighter.ensure_loaded()     # code blocks in the page are highlighted in the browser
+    logger = doc_logger(verbose)
+    # `jdoc` is silent unless asked: at `Quiet` nothing the walk prints (from any depth) reaches the notebook
+    sink = contextlib.redirect_stdout(io.StringIO()) if logger.verbosity <= LogLevel.Quiet else contextlib.nullcontext()
+    with sink:
+        return DocWalker(
+            description="",
+            engine=engine,
+            verbose=logger,
+            **etc
+        ).write([obj], max_depth=max_depth)

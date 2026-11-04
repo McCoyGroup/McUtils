@@ -4,6 +4,7 @@ These examples focus on the heavily reused vector, geometry, transformation, and
 
 ### Build molecular coordinate frames
 
+<!-- readout(id="mcutils-numputils-1", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Numputils import vec_crosses, view_matrix
@@ -33,6 +34,7 @@ assert np.allclose(restored, coords)
 
 ### Store a block-sparse operator
 
+<!-- readout(id="mcutils-numputils-3", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Numputils import SparseArray
@@ -63,6 +65,7 @@ print(bond.mean(), np.degrees(angle).mean(), np.degrees(dihedral).std())
 
 ### Rotate vectors between directions
 
+<!-- readout(id="mcutils-numputils-5", isolated=True, display="output") -->
 ```python
 import numpy as np
 from McUtils.Numputils import vec_normalize, rotation_matrix
@@ -81,6 +84,7 @@ assert np.allclose(target2, target)
 
 ### Deduplicate rows with vectorized set operations
 
+<!-- readout(id="mcutils-numputils-6", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Numputils import unique

@@ -2,6 +2,7 @@
 
 ### Route options to the functions that accept them
 
+<!-- readout(id="mcutils-devutils-1", isolated=True, display="both") -->
 ```python
 from McUtils.Devutils import OptionsSet
 
@@ -31,6 +32,7 @@ assert schema.validate(config)
 
 ### Safely write and read JSON
 
+<!-- readout(id="mcutils-devutils-3", isolated=True, display="both") -->
 ```python
 from McUtils.Devutils import write_json, read_json, file_hash
 
@@ -43,6 +45,7 @@ print("configuration hash:", file_hash("calculation.json"))
 
 ### Use explicit default sentinels
 
+<!-- readout(id="mcutils-devutils-4", isolated=True, display="both") -->
 ```python
 from McUtils.Devutils import default, is_default
 
@@ -56,6 +59,7 @@ print(choose_backend(), choose_backend("numba"))
 
 ### Capture output through a logger
 
+<!-- readout(id="mcutils-devutils-5", isolated=True, display="output") -->
 ```python
 import sys
 from McUtils.Devutils import Logger, StreamRedirect

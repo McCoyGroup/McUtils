@@ -7,6 +7,7 @@ from .types import *
 
 from ...Misc import mixedmethod
 from ..JHTML import DefaultOutputWidget
+from ..JHTML.HTMLWidgets import HTMLWidgets
 from .Themes import AppTheme, AppHTML as JHTML
 import functools
 from ..JHTML.WidgetTools import JupyterAPIs, frozendict
@@ -60,6 +61,7 @@ __all__ = [
     "ListGroup",
     "Button",
     "LinkButton",
+    "HighlightedCode",
     "Spinner",
     "Progress",
     "ButtonGroup",
@@ -138,6 +140,15 @@ class WidgetInterface(metaclass=abc.ABCMeta):
 
         Display the interface's widget in IPython, then run `initialize`.
         """
+        HTMLWidgets.check_extension()
+        if HTMLWidgets.use_static_fallback():
+            try:
+                static = self.to_static_html(create_body=False)
+            except Exception:
+                # no static form (it holds live components); a widget that can't load would only add an error box
+                static = JHTML.HTML.Div(JHTML.HTML.Code(type(self).__name__), " has no static view; it needs the extension.")
+            JupyterAPIs.get_display_api().display(HTMLWidgets.fallback_page(static))
+            return
         JupyterAPIs.get_display_api().display(self.to_widget())
         self.initialize()
 
@@ -1265,6 +1276,32 @@ class LinkButton(Button):
     wrappers = dict(button=JHTML.Anchor)
     theme = dict(button={'cls':[]})
 
+class HighlightedCode(WrapperComponent):
+    """
+    A block of code, syntax-highlighted in the browser by a CDN-loaded highlighter (see `CodeHighlighter`). The
+    code is escaped text in a ``<pre><code class="language-...">`` and is coloured once the page has loaded the
+    highlighter, so it reads as plain code if the CDN can't be reached.
+    """
+    wrappers = dict(wrapper=JHTML.Pre)
+    theme = dict(wrapper={'cls': ['mcui-code']})
+    def __init__(self, code, language='python', load=True, **attrs):
+        """
+        :param code: the source text
+        :type code: str
+        :param language: the highlight.js language name (``'python'``, ``'bash'``, ``'json'``, ...)
+        :type language: str | None
+        :param load: make sure the highlighter is loaded on the page (shown once per kernel)
+        :type load: bool
+        :param attrs: extra attributes for the ``<pre>``
+        """
+        from ..JHTML.CodeHighlighting import CodeHighlighter
+        self.code = code
+        self.language = language
+        if load:
+            CodeHighlighter.ensure_loaded()
+        cls = ['language-' + language] if language else []
+        super().__init__(JHTML.Code(code, cls=' '.join(cls)) if cls else JHTML.Code(code), **attrs)
+
 class Spinner(WrapperComponent):
     wrappers = {'spinner':JHTML.Div}
     theme = {'spinner':{'cls':[], 'base-cls':'spinner', 'variant':'border'}}
@@ -1842,7 +1879,7 @@ class OpenerHeader(Container):
         'wrapper':{'cls':['collapse-header']},
         'item':{'cls':['accordion-button']},
     }
-    def __init__(self, key, base_name=None, **kw):
+    def __init__(self, key, base_name=None, action=None, **kw):
         """
         **LLM Docstring**
 
@@ -1850,9 +1887,11 @@ class OpenerHeader(Container):
 
         :param key: the opener id
         :param base_name: the id prefix
+        :param action: called (with the click event) when the header is clicked, in addition to the toggle itself
         :param kw: extra attributes
         """
         self.base_name = base_name
+        self._action = action
         super().__init__([key], id=self.base_name+'-heading', **kw)
     def create_item(self, i, **kw):
         """
@@ -1864,7 +1903,8 @@ class OpenerHeader(Container):
         :param kw: extra options
         :return: the header element
         """
-        return super().create_item(i, type='button', data_bs_toggle='collapse', data_bs_target='#'+self.base_name+'-collapse')
+        extra = {} if self._action is None else {'action': self._action}
+        return super().create_item(i, type='button', data_bs_toggle='collapse', data_bs_target='#'+self.base_name+'-collapse', **extra)
 class OpenerBody(Container):
     wrappers = {
         'wrapper': JHTML.Div,
@@ -1897,7 +1937,7 @@ class Opener(MenuComponent):
         'header':{},
         'body':{}
     }
-    def __init__(self, items, base_name=None, open=False, **attrs):
+    def __init__(self, items, base_name=None, open=False, on_open=None, **attrs):
         """
         **LLM Docstring**
 
@@ -1907,12 +1947,15 @@ class Opener(MenuComponent):
         :param base_name: the id prefix
         :param open: start expanded
         :type open: bool
+        :param on_open: ``callable(label)`` run when an item's header is clicked (it fires on closing too, so make it
+            idempotent). Lets an item's content be built the first time it is wanted.
         :param attrs: extra attributes
         """
         if base_name is None:
             base_name = 'opener-' + short_uuid()
         self.base_name = base_name
         self.default_open=open
+        self.on_open = on_open
         if isinstance(items, dict):
             items = items.items()
         super().__init__(items, id=self.base_name, **attrs)
@@ -1948,7 +1991,8 @@ class Opener(MenuComponent):
             {'cls': [] if not open else ['show']}
         )
 
-        header = OpenerHeader(key, base_name=item_id, theme=ht)
+        action = None if self.on_open is None else (lambda *_, key=key: self.on_open(key))
+        header = OpenerHeader(key, base_name=item_id, theme=ht, action=action)
         body = OpenerBody(item, base_name=item_id, theme=bt, **kw)
         return super().create_item([header, body])
 class CardOpener(Opener):

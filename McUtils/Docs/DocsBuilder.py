@@ -155,8 +155,8 @@ class DocBuilder:
         for fname in ['404.html', 'Contributing.md', 'Gemfile']:
             conf_file = os.path.join(self.target, fname)  # hard coded for now, can change later
             base_file = self.template_dir.locate(fname)
-            if not os.path.isfile(conf_file) and os.path.isfile(fname):
-                print('writing {} file to {}'.format(fname, fname))
+            if not os.path.isfile(conf_file) and base_file is not None and os.path.isfile(base_file):
+                print('writing {} file to {}'.format(fname, conf_file))
                 try:
                     os.makedirs(os.path.dirname(conf_file))
                 except OSError:
