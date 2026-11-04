@@ -17,7 +17,7 @@ class XYZParser(FileLineByLineReader):
 
         :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
         :return: the readout
-        :rtype: McUtils.Jupyter.Readouts.Readout
+        :rtype: McUtils.Readouts.Readout
         """
         from ..ExternalPrograms.Readouts.Structures import XYZReadout
         return XYZReadout.from_file(self.stream._file, max_blocks=max_blocks).to_readout(**opts)

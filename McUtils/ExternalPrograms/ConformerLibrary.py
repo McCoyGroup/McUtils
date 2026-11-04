@@ -289,7 +289,7 @@ class ConformerLibrary:
 
         :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
         :return: the readout
-        :rtype: McUtils.Jupyter.Readouts.Readout
+        :rtype: McUtils.Readouts.Readout
         """
         from .Readouts.Conformers import ConformerLibraryReadout
         return ConformerLibraryReadout(self).to_readout(**opts)

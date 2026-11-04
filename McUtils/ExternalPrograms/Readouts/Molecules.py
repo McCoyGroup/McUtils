@@ -7,7 +7,7 @@ are in Å.
 
 import numpy as np
 
-from ...Jupyter.Readouts import (
+from ...Readouts import (
     ReadoutAdapter, readout_section, ReadoutSectionUnavailable, ReadoutFields, ReadoutTable, ReadoutImage,
     FieldSet, Field, Column, TabularData, structure_scene, atoms_table,
 )

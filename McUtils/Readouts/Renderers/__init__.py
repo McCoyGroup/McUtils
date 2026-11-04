@@ -8,8 +8,6 @@ independently.
 __all__ = []
 from .Base import *; from .Base import __all__ as exposed
 __all__ += exposed
-from .Text import *; from .Text import __all__ as exposed
-__all__ += exposed
 from .Data import *; from .Data import __all__ as exposed
 __all__ += exposed
 from .HTML import *; from .HTML import __all__ as exposed

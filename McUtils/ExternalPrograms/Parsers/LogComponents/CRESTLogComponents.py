@@ -58,19 +58,6 @@ calc_start_tag = FileStreamerTag(
     follow_ups=("----------------",)
 )
 calc_end_tag = "----------------"
-def parse_command_line(inp_str):
-    """
-    **LLM Docstring**
-
-    Pass the matched block through unchanged (the command-line / calculation-info
-    text is stored as-is).
-
-    :param inp_str: the block text
-    :type inp_str: str
-    :return: the block text unchanged
-    :rtype: str
-    """
-    return inp_str
 
 Components["CalculationInfo"] = {
     "tag_start": calc_start_tag,

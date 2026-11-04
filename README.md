@@ -365,16 +365,19 @@ print("lowest relative energies:", energies[:5])
 best_geometry = coordinates[0]
 ```
 
-#### [`McUtils.GaussianInterface`](https://mccoygroup.github.io/McUtils/McUtils/GaussianInterface.html)
+#### [`McUtils.GaussianInterface`](https://mccoygroup.github.io/McUtils/McUtils/GaussianInterface.html) (deprecated)
 
-`GaussianInterface` is a compatibility-oriented entry point for importing
+`GaussianInterface` is a deprecated alias for the Gaussian readers in
+`McUtils.ExternalPrograms.Parsers`; importing from it emits a
+`McUtilsDeprecationWarning` (set `MCUTILS_DEPRECATIONS=error` to find remaining callers).
+It is a compatibility-oriented entry point for importing
 Gaussian results. It exposes log- and formatted-checkpoint readers together with
 helpers for extracting energies, geometries, normal modes, force constants, and
 higher derivative tensors. New program-neutral work generally belongs in
 `ExternalPrograms`, where the underlying Gaussian implementation now lives.
 
 ```python
-from McUtils.GaussianInterface import GaussianLogReader
+from McUtils.ExternalPrograms.Parsers import GaussianLogReader
 
 with GaussianLogReader("frequency.log") as reader:
     parsed = reader.parse([

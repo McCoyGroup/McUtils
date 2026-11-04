@@ -11,7 +11,7 @@ import zipfile
 
 import numpy as np
 
-from ...Jupyter.Readouts import (
+from ...Readouts import (
     ReadoutAdapter, readout_section, ReadoutSectionUnavailable, ReadoutFields, ReadoutTable, ReadoutArray,
     ReadoutText, FieldSet, Field, Column, TabularData, ArrayData,
 )

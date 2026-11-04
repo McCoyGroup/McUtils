@@ -8,7 +8,7 @@ import os
 
 import numpy as np
 
-from ...Jupyter.Readouts import (
+from ...Readouts import (
     ReadoutAdapter, readout_section, ReadoutSectionUnavailable, ReadoutSection, ReadoutFields, ReadoutTable,
     ReadoutGallery, ReadoutArray, ReadoutCode, ReadoutText, FieldSet, Field, Column, TabularData, ArrayData,
     structure_scene, atoms_table, line_chart, bar_chart,

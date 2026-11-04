@@ -6,7 +6,9 @@ a backend-neutral tree of sections, tables, fields and 3D scenes. The same tree 
 Jupyter and exports to HTML, PowerPoint, plain text, ``.npz``, pandas and JSON, and every export
 reports the same values in the same (display) units.
 
-Despite living under `McUtils.Jupyter`, nothing here requires Jupyter.
+Nothing at import time depends on Jupyter or the plotting stack: the renderers load `McUtils.Jupyter` (HTML) and
+`McUtils.Plots` (scenes, PowerPoint) only when something is actually rendered. `McUtils.Jupyter.Readouts` remains as
+an alias of this package.
 """
 
 __all__ = []
@@ -22,11 +24,7 @@ from .Interface import *; from .Interface import __all__ as exposed
 __all__ += exposed
 from .Views import *; from .Views import __all__ as exposed
 __all__ += exposed
-from .Registry import *; from .Registry import __all__ as exposed
-__all__ += exposed
-from .Structures import *; from .Structures import __all__ as exposed
-__all__ += exposed
-from .Charts import *; from .Charts import __all__ as exposed
+from .Builders import *; from .Builders import __all__ as exposed
 __all__ += exposed
 from .Renderers import *; from .Renderers import __all__ as exposed
 __all__ += exposed

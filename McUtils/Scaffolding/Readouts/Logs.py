@@ -9,7 +9,7 @@ import re
 
 import numpy as np
 
-from ...Jupyter.Readouts import (
+from ...Readouts import (
     ReadoutAdapter, readout_section, ReadoutSectionUnavailable, ReadoutSection, ReadoutFields, ReadoutTable,
     ReadoutCode, ReadoutText, FieldSet, Field, Column, TabularData, line_chart,
 )

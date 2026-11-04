@@ -12,7 +12,7 @@ import dataclasses
 
 import numpy as np
 
-from ...Jupyter.Readouts import (
+from ...Readouts import (
     ReadoutAdapter, readout_section, ReadoutSectionUnavailable, ReadoutFields, ReadoutTable, ReadoutArray,
     ReadoutText, ReadoutPlot, FieldSet, Field, Column, TabularData, ArrayData, line_chart,
 )

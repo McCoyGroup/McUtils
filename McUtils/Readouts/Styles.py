@@ -81,7 +81,7 @@ class ReadoutUnits:
             return cls.local_factors[key]
         if (target, source) in cls.local_factors:
             return 1 / cls.local_factors[(target, source)]
-        from ...Data import UnitsData
+        from ..Data import UnitsData
         return UnitsData.convert(source, target)
 
     def convert(self, values, quantity, source_unit):

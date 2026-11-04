@@ -4,7 +4,7 @@ This is a focused vocabulary, not a bundled copy of the Office specification.
 Unknown extensions remain available through OpenXML.Element/register_element.
 Element names follow the MIT-licensed Open XML SDK nomenclature.
 """
-from .Elements import OpenXML
+from .Core import OpenXML
 
 class Drawing:
     class Accent1Color(OpenXML.TagElement): tag = "a:accent1"

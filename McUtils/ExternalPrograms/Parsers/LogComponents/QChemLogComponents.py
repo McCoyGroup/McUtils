@@ -12,6 +12,7 @@ import numpy as np
 
 from ....Parsers import *
 from collections import namedtuple, OrderedDict
+from ._common import strip_recursive
 
 #TODO: speed these parsers up, they're just whatever unoptimized code Claude came up with
 
@@ -30,22 +31,6 @@ Components = OrderedDict()  # we'll register on this bit by bit
 #     "parser"      : parser, # function that'll parse the returned list of blocks ("List") or block ("Single")
 #     "mode"        : mode # "List" or "Single"
 # }
-
-
-def strip_recursive(at_list):
-    """
-    Recursively strip whitespace (and leading integer labels) from every string in a
-    nested list.
-
-    :param at_list: the (possibly nested) list of strings
-    :type at_list: list
-    :return: the cleaned list
-    :rtype: list
-    """
-    return [
-        Integer.remove(s.strip()) if isinstance(s, str) else strip_recursive(s)
-        for s in at_list
-    ]
 
 
 ########################################################################################################################

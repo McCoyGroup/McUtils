@@ -1,27 +1,20 @@
 """
-A module for making use of the results of calculations run by the Gaussian electronic structure package.
-We'd like to be able to also support the NWChem and Psi4 packages, but haven't had the time, yet, to write it out.
+**Deprecated.** The Gaussian readers now live in `McUtils.ExternalPrograms.Parsers`, alongside the readers for the
+other electronic structure programs::
 
-Two main avenues of support are provided:
+    from McUtils.ExternalPrograms.Parsers import GaussianLogReader, GaussianFChkReader
 
-    1. importing Gaussian results
-    2. setting up Gaussian jobs
-
-The first is likely to be more useful to you, but we're hoping to be able to hook (2.) into the `Psience.Molecools` package.
-The goal there is to provide automated support for setting up scans of molecular vibrations & the like.
-
-There are already direct hooks into (1.) in `Psience.Data` through the `DipoleSurface` and `PotentialSurface` objects.
-These are still in the prototype stage, but hopefully will allow us to unify strands of our Gaussian support,
- and also make it easy to unify support for Psi4 and NWChem data, once we have the basic interface down.
+This package is kept as a thin alias (resolving to the very same classes) until the Gaussian parsers are folded into
+`ExternalPrograms` proper. Using any name from it emits a `McUtilsDeprecationWarning`; set
+``MCUTILS_DEPRECATIONS=error`` to turn those into errors so remaining callers can be found.
 """
-from ..ExternalPrograms.Parsers.GaussianImporter import *
-# from ..ExternalPrograms.Parsers.GaussianJob import *
-from ..ExternalPrograms.Parsers.FChkDerivatives import *
+from ..Devutils.Deprecation import deprecate_module_namespace
+from ..ExternalPrograms.Parsers import GaussianImporter as _importer
+from ..ExternalPrograms.Parsers import FChkDerivatives as _derivatives
 
-__all__ = []
-from ..ExternalPrograms.Parsers.GaussianImporter import __all__ as exposed
-__all__ += exposed
-# from .GaussianJob import __all__ as exposed
-# __all__ += exposed
-from ..ExternalPrograms.Parsers.FChkDerivatives import __all__ as exposed
-__all__ += exposed
+deprecate_module_namespace(
+    __name__, globals(), [_importer, _derivatives],
+    new="McUtils.ExternalPrograms.Parsers",
+    since="1.8.0",
+    remove_in="2.0.0"
+)

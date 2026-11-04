@@ -51,7 +51,7 @@ class GaussianLogReader(FileStreamReader):
 
         :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
         :return: the readout
-        :rtype: McUtils.Jupyter.Readouts.Readout
+        :rtype: McUtils.Readouts.Readout
         """
         from ..Readouts.ElectronicStructure import GaussianLogReadout
         return GaussianLogReadout.from_reader(self, keys=keys).to_readout(**opts)
@@ -308,7 +308,7 @@ class GaussianFChkReader(FileStreamReader):
 
         :param opts: `ReadoutInterface.to_readout` options (``include``, ``exclude``, ``units``, ...)
         :return: the readout
-        :rtype: McUtils.Jupyter.Readouts.Readout
+        :rtype: McUtils.Readouts.Readout
         """
         from ..Readouts.ElectronicStructure import GaussianFChkReadout
         return GaussianFChkReadout.from_reader(self, keys=keys).to_readout(**opts)
