@@ -405,6 +405,21 @@ class Readout(ReadoutSection):
             return file
         return html
 
+    def to_html_fragment(self, style=None, x3dom_path=None, css="inline", header="auto", **opts):
+        """
+        An embeddable HTML fragment (no ``<html>``/``<head>``), for documentation pages and other hosts.
+
+        :param css: ``'inline'`` (the fragment carries its ``<style>``) or ``'stylesheet'`` (the fragment
+            relies on a shared stylesheet; its text is returned as ``result.css``)
+        :param x3dom_path: ``None`` (default CDN) or the URL of a published X3DOM script; the host page loads it
+            when ``'x3dom'`` is in ``result.needs``
+        :param header: ``'auto'`` shows the title block only if the readout has a title; ``True``/``False`` force it
+        :return: a `FragmentResult` (``html``, ``needs``, ``runtime``, ``head``, ``css``)
+        """
+        from .Renderers.HTML import HTMLReadoutRenderer
+        return HTMLReadoutRenderer(style, mode="static", x3dom_path=x3dom_path, css=css, header=header,
+                                   **opts).render_fragment_result(self)
+
     def to_widget(self, style=None, **opts):
         return self.to_html_element(mode="widget", style=style, **opts)
 

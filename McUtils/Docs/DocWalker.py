@@ -663,6 +663,7 @@ class DocTemplateHandler(TemplateHandler):
                  root=None,
                  examples_loader:ExamplesExtractor=None,
                  tests_loader:TestsExtractor=None,
+                 examples_processor=None,
                  include_line_numbers=True,
                  walker:'TemplateWalker'=None,
                  **extra_fields
@@ -690,6 +691,9 @@ class DocTemplateHandler(TemplateHandler):
         :param tests_loader: the tests resource loader
         :type tests_loader: TestsExtractor | None
 
+        :param examples_processor: ``callable(markdown, handler) -> markdown`` applied to the final merged
+            ``examples`` template parameter (e.g. an `ExampleEmbedder`); defaults to the walker's
+
         :param include_line_numbers: whether source-line lookup is enabled
         :type include_line_numbers: bool
 
@@ -707,8 +711,26 @@ class DocTemplateHandler(TemplateHandler):
 
         self.examples_loader = examples_loader
         self.tests_loader = tests_loader
+        self.examples_processor = examples_processor if examples_processor is not None else getattr(walker, 'examples_processor', None)
         self.include_line_numbers = include_line_numbers
         super().__init__(obj, out=out, engine=engine, root=root, walker=walker, **extra_fields)
+
+    def template_params(self, **kwargs):
+        """
+        Merges the handler's fields with the object's parameters, then runs the examples processor on the
+        *final* ``examples`` value. This has to happen after the merge: a docstring ``:examples:`` field
+        overrides what the examples loader returned, so processing the loader's result would miss it.
+
+        :return: the template parameters
+        :rtype: dict
+        """
+        params = super().template_params(**kwargs)
+        processor = self.examples_processor
+        if processor is not None:
+            examples = params.get('examples')
+            if isinstance(examples, str) and examples.strip():
+                params['examples'] = processor(examples, self)
+        return params
 
     def __repr__(self):
         """
@@ -962,7 +984,7 @@ class ModuleWriter(DocTemplateHandler):
         ident_depth = len(ident)
         ident = ".".join(ident)
         # get identifiers
-        mems = [inspect.getattr_static(mod, a) for a in self.get_members(mod)]
+        mems = [self.get_static_member(mod, a) for a in self.get_members(mod)]
         idents = {
             self.get_identifier(a):".".join(self.get_target_extension(a))
             for a in mems
@@ -1012,6 +1034,18 @@ class ModuleWriter(DocTemplateHandler):
             'tests': tests,
             'lineno' : self.get_lineno()
         }, **fields)
+
+    @staticmethod
+    def get_static_member(mod, name):
+        """
+        Looks a member up without triggering descriptors; falls back to normal attribute access for names a
+        module provides lazily (a module-level ``__getattr__``, as deprecated alias modules use), which
+        ``inspect.getattr_static`` can't see.
+        """
+        try:
+            return inspect.getattr_static(mod, name)
+        except AttributeError:
+            return getattr(mod, name)
 
     @classmethod
     def get_members(cls, mod):
@@ -1440,9 +1474,12 @@ class DocWalker(TemplateWalker):
                  template_locator=None,
                  examples_directory=None,
                  tests_directory=None,
+                 examples_processor=None,
                  **extra_fields
                  ):
         """
+        :param examples_processor: ``callable(markdown, handler) -> markdown`` applied to every object's final
+            ``examples`` parameter, e.g. an `ExampleEmbedder` that adds stored example output
         :param objects: the objects to write out
         :type objects: Iterable[Any]
         :param out: the directory in which to write the files (`None` means `sys.stdout`)
@@ -1455,6 +1492,7 @@ class DocWalker(TemplateWalker):
             engine = self.get_engine(template_locator)
         self.examples_loader = self.get_examples_loader(examples_directory)
         self.tests_loader = self.get_tests_loader(tests_directory)
+        self.examples_processor = examples_processor
         self.verbose = verbose
 
         super().__init__(engine, out=out, **extra_fields)
@@ -1518,7 +1556,7 @@ class DocWalker(TemplateWalker):
         if tests_loader is not None and not isinstance(tests_loader, TestsExtractor):
             tests_loader = TestsExtractor(tests_loader)
         return tests_loader
-    def get_handler(self, *args, examples_loader=None, tests_loader=None, **kwargs):
+    def get_handler(self, *args, examples_loader=None, tests_loader=None, examples_processor=None, **kwargs):
         """
         **LLM Docstring**
 
@@ -1533,6 +1571,9 @@ class DocWalker(TemplateWalker):
         :param tests_loader: an optional per-handler tests-loader override
         :type tests_loader: TestsExtractor | None
 
+        :param examples_processor: an optional per-handler examples-processor override
+        :type examples_processor: Callable | None
+
         :param kwargs: additional handler options
         :type kwargs: Any
         :return: the selected template handler
@@ -1542,6 +1583,7 @@ class DocWalker(TemplateWalker):
             *args,
             examples_loader=self.examples_loader if examples_loader is None else examples_loader,
             tests_loader=self.tests_loader if tests_loader is None else tests_loader,
+            examples_processor=self.examples_processor if examples_processor is None else examples_processor,
             **kwargs
         )
 

@@ -2,6 +2,7 @@
 import os, shutil
 
 from .DocWalker import DocWalker
+from .ExampleEmbed import ExampleEmbedder, publish_readouts
 from ..Formatters.TemplateEngine import ResourceLocator
 
 __all__ = [
@@ -32,7 +33,8 @@ class DocBuilder:
                  templates_directory=None,
                  examples_directory=None,
                  tests_directory=None,
-                 readme=None
+                 readme=None,
+                 readouts=None
                  ):
         """
         :param packages: list of package configs to write
@@ -45,8 +47,14 @@ class DocBuilder:
         :type root: str
         :param root: root directory
         :type root: str
+        :param readouts: embed stored example output (made by ``ci/build_readouts.py``) into the pages: the
+            store's directory, or a dict with ``store`` and any of ``strict``, ``lazy``, ``url_template``,
+            ``stylesheet_url_template``. Nothing is executed during the documentation build.
+        :type readouts: str | dict | None
         """
         self.packages = packages
+        self.readouts = readouts
+        self.embedder = None
         self.config = config
         self.target = target
         self.root = root
@@ -171,8 +179,31 @@ class DocBuilder:
             template_locator=self.template_dir,
             examples_directory=self.examples_dir,
             tests_directory=self.tests_directory,
+            examples_processor=self.load_embedder(),
             **self.config
         )
+
+    def load_embedder(self):
+        """
+        Creates the `ExampleEmbedder` for the ``readouts`` setting (``None`` when it isn't set).
+        A hook that can be overridden.
+        """
+        if self.readouts is None:
+            self.embedder = None
+        else:
+            opts = {"store": self.readouts} if isinstance(self.readouts, (str, os.PathLike)) else dict(self.readouts)
+            self.embedder = ExampleEmbedder(opts.pop("store"), **opts)
+        return self.embedder
+
+    def finish_readouts(self):
+        """Reports embedding problems (raising if ``strict``) and publishes the store next to the pages."""
+        if self.embedder is None:
+            return None
+        problems = self.embedder.finish()
+        dest = publish_readouts(self.embedder.store, self.target)
+        print("embedded {} readout(s) ({} problem(s)); store published at {}".format(
+            len(self.embedder.embedded), len(problems), dest))
+        return problems
 
     def build(self):
         """
@@ -185,4 +216,6 @@ class DocBuilder:
         print("using examples from {}".format(self.examples_dir))
         self.create_layout()
         walker = self.load_walker()
-        return walker.write(self.packages)
+        result = walker.write(self.packages)
+        self.finish_readouts()
+        return result

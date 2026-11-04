@@ -20,7 +20,7 @@ from ..Views import ReadoutPlot, ReadoutEquation, ReadoutCode, ReadoutHTML, Read
 from ..Scenes import SceneView
 from .Base import ReadoutRenderer, RenderContext, handles, is_visible
 
-__all__ = ["HTMLReadoutRenderer", "resolve_scene_view", "resolve_gallery_views"]
+__all__ = ["HTMLReadoutRenderer", "FragmentResult", "resolve_scene_view", "resolve_gallery_views"]
 
 
 def resolve_scene_view(scene, aspect, theme, cache=None):
@@ -117,15 +117,57 @@ pre.mcr-code{{background:var(--mcr-stripe);border:1px solid var(--mcr-rule);bord
 """
 
 
+class FragmentResult:
+    """
+    A readout rendered as an embeddable HTML fragment (no ``<html>``/``<head>``).
+
+    :ivar html: the fragment's markup (a single ``.mcr-root`` element)
+    :ivar needs: runtime requirements the host page must satisfy, e.g. ``{'x3dom'}``
+    :ivar runtime: where each requirement comes from, e.g.
+        ``{'x3dom': {'script': url, 'stylesheet': url}}``
+    :ivar head: de-duplicated extra ``<head>`` markup some nodes ask for (strings)
+    :ivar css: the stylesheet text to publish as ``mcr.css`` when rendered with ``css='stylesheet'``;
+        ``None`` when the CSS is inline in ``html``
+    """
+
+    def __init__(self, html, needs=(), runtime=None, head=(), css=None):
+        self.html = html
+        self.needs = frozenset(needs)
+        self.runtime = dict(runtime or {})
+        self.head = tuple(head)
+        self.css = css
+
+    def to_dict(self):
+        """JSON-able summary (everything but ``html`` and ``css`` text)."""
+        return {"needs": sorted(self.needs), "runtime": self.runtime, "head": list(self.head),
+                "css": "stylesheet" if self.css is not None else "inline"}
+
+    def __repr__(self):
+        return "{}({} chars, needs={})".format(type(self).__name__, len(self.html), sorted(self.needs))
+
+
 class HTMLReadoutRenderer(ReadoutRenderer):
     hook_name = "readout_html"
 
     def __init__(self, style=None, mode="static", x3dom_path=None, collapsible=None, scene_size=None,
-                 gallery_scene_size=None):
+                 gallery_scene_size=None, css="inline", header=True):
+        """
+        :param css: ``'inline'`` puts the theme ``<style>`` in the markup (the default);
+            ``'stylesheet'`` leaves it out so the host page can load one shared ``mcr.css``
+            (the text is `HTMLReadoutRenderer.css()`)
+        :param header: show the title block of a `Readout`: ``True``, ``False``, or ``'auto'`` (only if
+            the readout has a title/subtitle)
+        """
         super().__init__(style)
         if mode not in ("static", "widget"):
             raise ValueError("mode must be 'static' or 'widget'")
+        if css not in ("inline", "stylesheet"):
+            raise ValueError("css must be 'inline' or 'stylesheet'")
+        if header not in (True, False, "auto"):
+            raise ValueError("header must be True, False or 'auto'")
         self.mode = mode
+        self.css_mode = css
+        self.header = header
         self.x3dom_path = x3dom_path
         self.collapsible = self.theme.get("html.collapsible") if collapsible is None else collapsible
         self.scene_size = scene_size or self.theme.get("html.scene_size")
@@ -159,7 +201,45 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         self._head = []
         body = self.render(node, RenderContext())
         items = body if isinstance(body,list) else [body]
-        return self.H.Div(self.H.Style(self.css()), *items, cls='mcr-root')
+        style = [] if self.css_mode == "stylesheet" else [self.H.Style(self.css())]
+        return self.H.Div(*style, *items, cls='mcr-root')
+
+    def runtime_info(self):
+        """
+        Where the X3DOM runtime comes from, for pages that load it themselves:
+        ``{'script': url, 'stylesheet': url or None}``. ``x3dom_path`` must be ``None`` (the default CDN)
+        or a URL; ``'local'``/``'inline'`` only make sense in standalone documents.
+        """
+        from ...Plots.X3DInterface import X3D
+        path = self.x3dom_path
+        if path is None:
+            return {"script": X3D.X3DOM_JS, "stylesheet": X3D.X3DOM_CSS}
+        if path in ("local", "inline"):
+            raise ValueError("x3dom_path={!r} can't be used for an embedded fragment; "
+                             "pass None (CDN) or the URL of a published x3dom script".format(path))
+        return {"script": path, "stylesheet": None}
+
+    def render_fragment_result(self, node):
+        """
+        Renders ``node`` (a `Readout` or any node) as a `FragmentResult`.
+        Always uses static elements; ``mode='widget'`` renderers are rejected.
+        """
+        if self.mode != "static":
+            raise ValueError("fragments are static HTML; use mode='static'")
+        element = self.render_readout(node) if isinstance(node, Readout) else self.render_fragment(node)
+        needs = set()
+        runtime = {}
+        if self._has_scenes:
+            needs.add("x3dom")
+            runtime["x3dom"] = self.runtime_info()
+        head, seen = [], set()
+        for el in self._head:
+            text = el if isinstance(el, str) else el.tostring()
+            if text not in seen:
+                seen.add(text)
+                head.append(text)
+        css = self.css() if self.css_mode == "stylesheet" else None
+        return FragmentResult(element.tostring(), needs, runtime, head, css)
 
     def runtime_elements(self):
         H = self.H
@@ -208,15 +288,19 @@ class HTMLReadoutRenderer(ReadoutRenderer):
     @handles(Readout)
     def render_root(self, node, ctx):
         H = self.H
-        header = [H.Div(node.title or "Readout", cls="mcr-title")]
-        if node.subtitle:
-            header.append(H.Div(node.subtitle, cls="mcr-subtitle"))
-        if node.units is not None:
-            labels = [f"{q}: {self.theme.get_unit_label(u)}" for q, u in node.units.units.items() if u is not None]
-            if labels:
-                header.append(H.Div("Units — " + ", ".join(labels), cls="mcr-meta"))
-        return H.Div(H.Style(self.css()), H.Div(*header, cls="mcr-header"), *self._children(node, ctx),
-                     cls="mcr-root", id="mcr-" + node.id)
+        header = []
+        if self.header is not False:
+            if self.header is True or node.title:
+                header.append(H.Div(node.title or "Readout", cls="mcr-title"))
+            if node.subtitle:
+                header.append(H.Div(node.subtitle, cls="mcr-subtitle"))
+            if node.units is not None:
+                labels = [f"{q}: {self.theme.get_unit_label(u)}" for q, u in node.units.units.items() if u is not None]
+                if labels:
+                    header.append(H.Div("Units — " + ", ".join(labels), cls="mcr-meta"))
+        style = [] if self.css_mode == "stylesheet" else [H.Style(self.css())]
+        head_div = [H.Div(*header, cls="mcr-header")] if header else []
+        return H.Div(*style, *head_div, *self._children(node, ctx), cls="mcr-root", id="mcr-" + node.id)
 
     @handles(ReadoutSection)
     def render_section(self, node, ctx):
