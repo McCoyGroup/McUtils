@@ -9,7 +9,7 @@ import unittest
 from unittest import mock
 
 from McUtils.Docs.Examples import ExampleRunner, ExampleParser, ReadoutStore
-from McUtils.Docs.ExampleProcess import ExampleWorkerCrash, ExampleWorkerError, SubprocessExampleRunner
+from McUtils.Docs.Examples import ExampleWorkerCrash, ExampleWorkerError, SubprocessExampleRunner
 
 
 def block(id, code, **options):

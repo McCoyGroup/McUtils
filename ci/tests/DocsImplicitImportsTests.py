@@ -10,8 +10,8 @@ import textwrap
 import unittest
 
 from McUtils.Docs.Examples import ExampleCache, ExampleParser, ExampleRunner, ReadoutStore, implicit_namespace
-from McUtils.Docs.ExampleLive import LiveExamplePage
-from McUtils.Docs.ExampleProcess import SubprocessExampleRunner
+from McUtils.Docs.Examples import LiveExamplePage
+from McUtils.Docs.Examples import SubprocessExampleRunner
 
 CI = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 

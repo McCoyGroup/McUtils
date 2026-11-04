@@ -13,7 +13,7 @@ import unittest
 
 from McUtils.Docs import DocBuilder, ExamplesParser
 from McUtils.Docs.Examples import ExampleParser, ExampleRunner, ReadoutStore
-from McUtils.Docs.ExampleEmbed import (
+from McUtils.Docs.Examples import (
     ExampleCollector, ExampleEmbedder, ExampleEmbedError, EXAMPLE_LOADER_JS, EXAMPLE_DEBUG_JS, publish_readouts
 )
 

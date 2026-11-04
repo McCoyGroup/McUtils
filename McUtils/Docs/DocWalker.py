@@ -9,7 +9,7 @@ import sys
 from ..Formatters.TemplateEngine import *
 from ..Misc import mixedmethod
 from ..Devutils.Loggers import Logger, LogLevel
-from .ExamplesParser import ExamplesParser
+from .Examples import ExamplesParser
 from .MarkdownTemplates import MarkdownTemplateFormatter, MarkdownOps
 
 __reload_hook__ = ["..Misc"]
@@ -299,7 +299,7 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
         :return: the page
         :rtype: LiveExamplePage
         """
-        from .ExampleLive import LiveExamplePage
+        from .Examples import LiveExamplePage
         import hashlib
         key = (owner, hashlib.md5(examples.encode("utf-8")).hexdigest())
         page = self._example_pages.get(key)
@@ -326,7 +326,7 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
         :rtype: Any
         """
         from ..Jupyter import JHTML, Flex
-        from .ExampleLive import split_examples
+        from .Examples import split_examples
         if not isinstance(examples, str):
             return examples
         pieces = split_examples(examples, getattr(writer, 'identifier', None)) if self.live_examples else None
@@ -508,7 +508,7 @@ class InteractiveTemplateEngine(TemplateInterfaceEngine):
         """
         from ..Jupyter import JHTML, Opener
         from ..Jupyter.JHTML.HTMLWidgets import ActiveHTMLWrapper
-        from .ExampleLive import LiveExamplePage
+        from .Examples import LiveExamplePage
 
         def widget_of(comp):
             while hasattr(comp, 'to_widget') and not isinstance(comp, ActiveHTMLWrapper):
