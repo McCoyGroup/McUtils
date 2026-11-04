@@ -346,7 +346,7 @@ def as_readout_node(obj, caption=None, dispatch=True, **opts):
         return ReadoutEquation(obj, **opts)
     if "PowerPoint" in module and hasattr(obj, "to_presml"):
         return ReadoutPresML(obj, **opts)
-    if module.endswith("OpenXML.Elements") or cls_name == "Element" and hasattr(obj, "to_presml"):
+    if module.endswith(("OpenXML.Elements", "OpenXML.Core")) or cls_name == "Element" and hasattr(obj, "to_presml"):
         return ReadoutPresML(obj, **opts)
     if callable(getattr(obj, 'to_widget', None)) or (hasattr(obj,'model_id') and callable(getattr(obj,'_repr_mimebundle_',None))):
         return ReadoutWidget(obj, **opts)
