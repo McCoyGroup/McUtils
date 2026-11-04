@@ -11,7 +11,7 @@ import tempfile
 
 import numpy as np
 
-from ...Scaffolding import NumpyTreeArchive
+from ...Scaffolding.Serializers import NumpyTreeArchive
 
 __all__ = ["export_gaussian_log"]
 

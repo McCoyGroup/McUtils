@@ -31,7 +31,7 @@ one of those external formats.
 import abc, os
 
 from .. import Devutils as dev
-from ..Scaffolding import NumpyTreeArchive
+from ..Scaffolding.Serializers import NumpyTreeArchive
 from .SMILES import SMILESSupplier
 from .QM9 import QM9
 from .GEOM import GEOMLoader

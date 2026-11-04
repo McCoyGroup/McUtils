@@ -11,6 +11,7 @@ from .Misc import is_numeric, is_zero, is_numeric_array_like
 from .Options import Options
 
 __all__ = [
+    "nca_symmetrize",
     "nca_op_deriv",
     "tensordot_deriv",
     "tensorprod_deriv",

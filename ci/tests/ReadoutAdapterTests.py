@@ -1,4 +1,5 @@
 """Readout adapters in the per-module ``Readouts`` packages, reached through ``to_readout`` hooks."""
+from McUtils.ExternalPrograms import *
 import io
 import json
 import os
@@ -54,7 +55,6 @@ class _Exports:
 
 class ElectronicStructureReadoutTests(unittest.TestCase, _Exports):
     def test_gaussian_log_hook(self):
-        from McUtils.ExternalPrograms.Parsers import GaussianLogReader
         r = GaussianLogReader(data("water_freq.log")).to_readout()
         for s in ("summary", "structure", "vibrations"):
             self.assertIn(s, section_ids(r))
@@ -62,12 +62,10 @@ class ElectronicStructureReadoutTests(unittest.TestCase, _Exports):
         self.assertExports(r)
 
     def test_fchk_and_qchem(self):
-        from McUtils.ExternalPrograms.Parsers import GaussianFChkReader, QChemLogReader
         self.assertIn("hessian", section_ids(GaussianFChkReader(data("water_freq.fchk")).to_readout()))
         self.assertIn("energies", section_ids(QChemLogReader(data("qchem_samp.out")).to_readout()))
 
     def test_scan_log(self):
-        from McUtils.ExternalPrograms.Parsers import GaussianLogReader
         r = GaussianLogReader(data("water_OH_scan.log")).to_readout()
         self.assertIn("scan", section_ids(r))
         self.assertFalse(problems(r))
@@ -75,13 +73,11 @@ class ElectronicStructureReadoutTests(unittest.TestCase, _Exports):
 
 class StructureReadoutTests(unittest.TestCase, _Exports):
     def test_cube(self):
-        from McUtils.ExternalPrograms.Parsers import CubeFileParser
         r = CubeFileParser(data("samp.cube")).to_readout()
         self.assertEqual(section_ids(r)[:2], ["grid", "atoms"])
         self.assertExports(r)
 
     def test_cif(self):
-        from McUtils.ExternalPrograms.Parsers import CIFParser
         r = CIFParser(data("samp.cif")).to_readout()
         self.assertIn("cell", section_ids(r))
         self.assertFalse(problems(r))
@@ -95,8 +91,6 @@ class StructureReadoutTests(unittest.TestCase, _Exports):
         self.assertIn("trajectory", section_ids(r))
 
     def test_registered_records(self):
-        from McUtils.ExternalPrograms.Parsers import CRESTParser
-        from McUtils.ExternalPrograms.Conformers import ConformerRecord
         conf = CRESTParser(TEST_DATA).parse_conformers()
         self.assertIsNotNone(find_readout_adapter(conf))
         r = to_readout(conf)

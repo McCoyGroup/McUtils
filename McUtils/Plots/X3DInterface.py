@@ -520,11 +520,12 @@ class X3D(X3DObject):
         return JHTML.Div(
             JHTML.Button('Pause', type='button', **role('toggle')),
             JHTML.Button('Restart', type='button', **role('restart')),
-            JHTML.Button('Back 1%', type='button', **role('previous')),
-            JHTML.Button('Forward 1%', type='button', **role('next')),
+            JHTML.Button('‹', type='button', title='Step backward',
+                         **dict(role('previous'), **{'aria-label': 'Step backward'})),
+            JHTML.Button('›', type='button', title='Step forward',
+                         **dict(role('next'), **{'aria-label': 'Step forward'})),
             JHTML.Input(type='range', min='0', max='1', step='any', value='0',
                         **dict(role('position'), **{'aria-label': 'Animation position'})),
-            JHTML.Output('0%', **role('label')),
             JHTML.Label('Speed ', JHTML.Input(type='number', min='.01', step='.25', value='1',
                         style='width:4.5em;', **role('speed'))),
             JHTML.Label(JHTML.Input(type='checkbox', checked=True, **role('loop')), ' Loop'),
@@ -539,6 +540,8 @@ class X3D(X3DObject):
         A browser clock feeds public input fields on existing interpolators and
         sequencers. Native TimeSensors are disabled while controlled, allowing
         seek and speed changes without changing engine-private clock state.
+        Each step advances stepSize times the current speed, capped at 10% of
+        the animation per step, for both interpolated and discrete animations.
         """
         return r"""
 function X3DPlayback(component, options = {}) {
@@ -583,7 +586,7 @@ function X3DPlayback(component, options = {}) {
     const state = {fraction, duration, speed,
         running: options.running ?? clockBoolean('enabled', true),
         loop: options.loop ?? clockBoolean('loop', false)};
-    const controls = Object.fromEntries(['toggle', 'restart', 'previous', 'next', 'position', 'speed', 'loop', 'label']
+    const controls = Object.fromEntries(['toggle', 'restart', 'position', 'speed', 'loop']
         .map(name => [name, component.query('[data-role="playback-' + name + '"]')]));
     const listeners = new Set();
     let disposed = false, animationFrame = null, lastTime = state.running ? performance.now() : null;
@@ -606,9 +609,6 @@ function X3DPlayback(component, options = {}) {
         if (controls.position) controls.position.value = String(state.fraction);
         if (controls.speed && controls.speed.ownerDocument.activeElement !== controls.speed) controls.speed.value = String(state.speed);
         if (controls.loop) controls.loop.checked = state.loop;
-        if (controls.previous) controls.previous.textContent = discrete ? 'Previous frame' : 'Back ' + (stepSize * 100) + '%';
-        if (controls.next) controls.next.textContent = discrete ? 'Next frame' : 'Forward ' + (stepSize * 100) + '%';
-        if (controls.label) controls.label.textContent = (discrete ? (snapshot.frame + 1) + '/' + keys.length + ' · ' : '') + (state.fraction * 100).toFixed(1) + '%';
         for (const listener of listeners) listener(snapshot);
         scene.dispatchEvent(new CustomEvent('x3d-playback-change', {detail: {...snapshot, clock: clock.id || clock.getAttribute('DEF')}}));
     }
@@ -671,24 +671,11 @@ function X3DPlayback(component, options = {}) {
     function setLoop(value) { check(); state.loop = Boolean(value); notify(); }
     function step(count = 1) {
         check();
-        if (!Number.isInteger(count)) throw new TypeError('Frame step must be an integer');
+        if (!Number.isInteger(count)) throw new TypeError('Playback step must be an integer');
         if (!count) return;
         setRunning(false);
-        if (!discrete) {
-            seek(Math.max(0, Math.min(1, state.fraction + count * stepSize)));
-            return;
-        }
-        let index;
-        if (count > 0) {
-            index = keys.findIndex(key => key > state.fraction + 1e-12);
-            if (index < 0) index = keys.length - 1;
-            index += count - 1;
-        } else {
-            index = keys.length - 1;
-            while (index > 0 && keys[index] >= state.fraction - 1e-12) index--;
-            index += count + 1;
-        }
-        seek(keys[Math.max(0, Math.min(keys.length - 1, index))]);
+        const increment = Math.min(stepSize * state.speed, .1);
+        seek(Math.max(0, Math.min(1, state.fraction + count * increment)));
     }
     function dispose() {
         if (disposed) return;
@@ -3484,7 +3471,7 @@ class X3DIndexedFaceSet(X3DIndexedCoordinatesWrapper):
 
 class X3DGenericAnimator(X3DGroup):
     def __init__(self, *animation_data, id=None, animation_duration=2, running=True, slider=False, playback=True,
-                 **opts):
+                 playback_controls=True, **opts):
         """
         **LLM Docstring**
 
@@ -3501,6 +3488,9 @@ class X3DGenericAnimator(X3DGroup):
         :type slider: bool
         :param playback: include general playback controls when embedded in X3D
         :type playback: bool
+        :param playback_controls: show the playback toolbar (defaults to True);
+            False hides it even when playback or the legacy slider is enabled
+        :type playback_controls: bool
         :param opts: extra options
         """
         self.uuid = str(uuid.uuid4())
@@ -3515,7 +3505,7 @@ class X3DGenericAnimator(X3DGroup):
                                       running=running,
                                       uuid=self.uuid
                                       )
-        driver[0].attrs.update({'data-playback': bool(playback or slider), 'data-frame-count': nframes})
+        driver[0].attrs.update({'data-playback': bool(playback_controls and (playback or slider)), 'data-frame-count': nframes})
         elements.extend(driver)
 
         super().__init__(elements, id=id, DEF=id, **opts)
@@ -4515,7 +4505,7 @@ def _prepare_x3d_mesh_animation(frames, *, mesh_options=None, **options):
     prefix='mesh-animation-'+uuid.uuid4().hex
     clock=X3DHTML.TimeSensor(id=prefix+'-clock',DEF=prefix+'-clock',
         cycleInterval=options.get('animation_duration',2),enabled=options.get('running',True),loop=True,
-        **{'data-playback':options.get('playback',True),'data-frame-count':len(frames)})
+        **{'data-playback':bool(options.get('playback_controls',True) and options.get('playback',True)),'data-frame-count':len(frames)})
     body=[_animate_nonmesh(stripped,clock.attrs['id']),clock]
     times=np.linspace(0,1,len(frames))
     reports=[]

@@ -4,6 +4,8 @@ Mostly relevant for doing format conversions/parsing, but other utilities do exi
 """
 
 __all__ = []
+from .Interface import *; from .Interface import __all__ as exposed
+__all__ += exposed
 from .Jobs import *; from .Jobs import __all__ as exposed
 __all__ += exposed
 from .Parsers import *; from .Parsers import __all__ as exposed

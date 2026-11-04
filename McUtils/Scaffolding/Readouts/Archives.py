@@ -77,6 +77,8 @@ class ArchiveReadout(ReadoutAdapter):
             return {"npz": "npz", "json": "json", "nptar": "nptar", "hdf5": "hdf5", "h5": "hdf5"}.get(ext, "file")
         if name == "NumpyTreeArchive":
             return "tree"
+        if name == "IndexedTarStore":
+            return "tar"
         if name.endswith("Checkpointer"):
             return "checkpointer"
         if name in ("MemmappedNPZFile", "MemmappedNPTarFile"):
@@ -85,6 +87,9 @@ class ArchiveReadout(ReadoutAdapter):
             return "shared"
         if isinstance(a, dict):
             return "dict"
+        from ..Storage import ArchiveMapping, LineIndexedSupplier
+        if isinstance(a, (ArchiveMapping, LineIndexedSupplier)):
+            return "records"
         return "object"
 
     def path(self):
@@ -134,6 +139,14 @@ class ArchiveReadout(ReadoutAdapter):
             for key in list(a.keys())[:self.max_entries]:
                 v = a[key]
                 out.append((key, v.shape, v.dtype, v.nbytes, (lambda v=v: np.asarray(v))))
+        elif k == "tar":
+            for key in list(a.keys())[:self.max_entries]:
+                info = a.member_info(key)
+                if info.isfile():
+                    out.append((key, (info.size,), np.dtype('uint8'), info.size,
+                                (lambda key=key: np.frombuffer(a[key], dtype=np.uint8))))
+        elif k == "records":
+            out = self._walk({str(key): a[key] for key in list(a.keys())[:self.max_entries]})
         elif k == "shared":
             out.append(("array", a.shape, a.dtype, a.nbytes, (lambda: np.asarray(a))))
         elif k == "dict":
