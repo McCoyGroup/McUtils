@@ -49,3 +49,10 @@ __all__ += _all
 
 from .ExternalMemory import *; from .ExternalMemory import __all__ as _all
 __all__ += _all
+
+from .AngularMomentum import *; from .AngularMomentum import __all__ as _all
+__all__ += _all
+from .IsotropicTensors import *; from .IsotropicTensors import __all__ as _all
+__all__ += _all
+from .RotationalAveraging import *; from .RotationalAveraging import __all__ as _all
+__all__ += _all

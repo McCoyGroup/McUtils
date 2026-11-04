@@ -1,6 +1,8 @@
 
 import abc, numpy as np, typing, weakref, hashlib
 import collections
+import operator
+from fractions import Fraction
 
 from ...Numputils import vec_outer, vec_tensordot
 from ...Combinatorics import IntegerPartitioner, UniquePermutations
@@ -17,6 +19,11 @@ class TensorExpression:
         self.expr = expr
         self.vars = vars
         self._prims = None
+    @classmethod
+    def symbol(cls, name, rank):
+        """An unevaluated tensor using the existing Term/eval architecture."""
+        return cls.SymbolTerm(name, rank)
+
     def eval(self, subs:dict=None, print_terms=False):
         if subs is None:
             subs = self.vars
@@ -25,11 +32,15 @@ class TensorExpression:
         prims = self.primitives
         cache = {}
         names = {p.name:p for p in prims}
+        bindings = {}
+        for k in subs.keys() & names.keys():
+            p, v = names[k], subs[k]
+            if isinstance(p, TensorExpression.SymbolTerm):
+                v = p.validate_substitution(v)
+            bindings[p] = v
         _ac = TensorExpression.Term._array_cache
         TensorExpression.Term._array_cache = {k:v for k,v in zip(_ac.keys(), _ac.values())}
-        for k in subs.keys() & names.keys():
-            p = names[k]
-            v = subs[k]
+        for p, v in bindings.items():
             cache[p] = TensorExpression.Term._array_cache.get(p, None)
             TensorExpression.Term._array_cache[p] = v
 
@@ -410,6 +421,52 @@ class TensorExpression:
         def __rmul__(self, other):
             return TensorExpression.ScalingTerm(self, other)
 
+        def __sub__(self, other):
+            return self + (-other)
+
+        def permute(self, permutation):
+            """Permute zero-based tensor slots, retaining any ArrayStack axes."""
+            permutation = tuple(operator.index(i) for i in permutation)
+            if sorted(permutation) != list(range(self.ndim)):
+                raise ValueError('permutation must include every tensor slot')
+            if permutation == tuple(range(self.ndim)):
+                return self
+            if isinstance(self, TensorExpression.PermutationTerm):
+                return self.term.permute(tuple(self.permutation[i] for i in permutation))
+            return TensorExpression.PermutationTerm(self, permutation)
+
+        def contract(self, other, pairs):
+            """Zero-based (self_slot,other_slot) pairs; uncontracted slots stay ordered.
+
+            This constructs the existing ContractionTerm. dot() retains its
+            original one-based convention. Empty pairs give an ordered outer
+            product with self's axes followed by other's axes.
+            """
+            if not isinstance(other, TensorExpression.Term):
+                raise TypeError('contraction requires another tensor term')
+            pairs = tuple(tuple(operator.index(i) for i in p) for p in pairs)
+            if any(len(p) != 2 for p in pairs):
+                raise ValueError('each contraction must have two slots')
+            left, right = [i for i, _ in pairs], [j for _, j in pairs]
+            if (len(set(left)) != len(left) or len(set(right)) != len(right)
+                    or any(i < 0 or i >= self.ndim for i in left)
+                    or any(j < 0 or j >= other.ndim for j in right)):
+                raise ValueError('contractions must pair distinct valid slots')
+            return self.dot(other, [i+1 for i in left], [j+1 for j in right])
+
+        def trace(self, pairs):
+            """Trace disjoint zero-based slot pairs using the existing TraceTerm."""
+            pairs = tuple(tuple(operator.index(i) for i in p) for p in pairs)
+            used = [i for p in pairs for i in p]
+            if (any(len(p) != 2 for p in pairs) or len(set(used)) != len(used)
+                    or any(i < 0 or i >= self.ndim for i in used)):
+                raise ValueError('traces must pair distinct valid slots')
+            result, remaining = self, list(range(self.ndim))
+            for i, j in pairs:
+                result = result.tr(remaining.index(i)+1, remaining.index(j)+1)
+                remaining = [k for k in remaining if k not in (i, j)]
+            return result
+
         def __pos__(self):
             return self
         def __neg__(self):
@@ -462,6 +519,80 @@ class TensorExpression:
 
         # def __eq__(self, other):
         #     return str(self) == str(other)
+
+    class SymbolTerm(Term):
+        """A named free tensor; values are supplied through TensorExpression.eval."""
+        def __init__(self, name, rank):
+            if not isinstance(name, str):
+                raise TypeError('tensor symbol names must be strings')
+            super().__init__(name=name)
+            self.tensor_rank = operator.index(rank)
+            if self.tensor_rank < 0:
+                raise ValueError('rank must be nonnegative')
+
+        def get_children(self):
+            return []
+
+        def rank(self):
+            return self.tensor_rank
+
+        def get_hash(self):
+            return hash((type(self), self.name, self.tensor_rank))
+
+        def to_string(self):
+            return f'Symbol({self.name!r},rank={self.tensor_rank})'
+
+        def validate_substitution(self, value):
+            if not hasattr(value, 'ndim'):
+                value = np.asarray(value)
+            if value.ndim != self.tensor_rank:
+                raise ValueError(f'symbol {self.name!r} requires rank {self.tensor_rank}')
+            return value
+
+        def array_generator(self, **kwargs):
+            raise ValueError(f'no value supplied for tensor symbol {self.name!r}')
+
+        def reduce_terms(self, check_arrays=False):
+            return self
+
+        def deriv(self):
+            # A free tensor's derivative is another free symbol; substitution
+            # must provide it. Existing dQ operations prepend a derivative axis.
+            return type(self)(f'dQ({self.name})', self.tensor_rank+1)
+
+    class PermutationTerm(Term):
+        """General tensor-slot permutation within the existing expression tree."""
+        def __init__(self, term, permutation, array=None, name=None):
+            super().__init__(array=array, name=name)
+            self.term = term
+            self.permutation = tuple(operator.index(i) for i in permutation)
+            if sorted(self.permutation) != list(range(term.ndim)):
+                raise ValueError('permutation must include every tensor slot')
+
+        def get_children(self):
+            return [self.term]
+
+        def rank(self):
+            return self.term.ndim
+
+        def to_string(self):
+            return f'Permute({self.term},{self.permutation})'
+
+        def array_generator(self, print_terms=False):
+            value = self.term.asarray(print_terms=print_terms)
+            if isinstance(value, TensorExpression.ArrayStack):
+                offset = value.stack_dim
+                axes = tuple(range(offset))+tuple(offset+i for i in self.permutation)
+                return TensorExpression.ArrayStack(value.stack_shape, value.array.transpose(axes))
+            if hasattr(value, 'permute'):
+                return value.permute(self.permutation)
+            return np.asarray(value).transpose(self.permutation)
+
+        def reduce_terms(self, check_arrays=False):
+            return self.term.simplify(check_arrays=check_arrays).permute(self.permutation)
+
+        def deriv(self):
+            return self.term.dQ().permute((0,)+tuple(i+1 for i in self.permutation))
 
     class SumTerm(Term):
         def __init__(self, *terms: 'TensorExpression.Term', array=None, name=None):
@@ -567,6 +698,8 @@ class TensorExpression:
                             scaling = np.expand_dims(scaling, 0)
             else:
                 term = self.term.asarray(print_terms=print_terms)
+            if isinstance(scaling, Fraction) and isinstance(term, (np.ndarray, TensorExpression.ArrayStack)):
+                scaling = float(scaling)
             arr = scaling * term
             return arr
 
@@ -915,6 +1048,10 @@ class TensorExpression:
         def array_generator(self, print_terms=False):
             a = self.a.asarray(print_terms=print_terms)
             b = self.b.asarray(print_terms=print_terms)
+            from .IsotropicTensors import IsotropicTensor
+            if isinstance(a, IsotropicTensor) and isinstance(b, IsotropicTensor):
+                # Preserve OuterTerm's existing axis order: b, then a.
+                return b.outer(a)
             # print(self)
             # print(">", type(a), type(b), a.shape, b.shape)
             og_bdim = b.ndim
@@ -989,6 +1126,13 @@ class TensorExpression:
                     j = j - 1
                 else:
                     j = [x - 1 for x in j]
+                from .IsotropicTensors import IsotropicTensor
+                if isinstance(t1, IsotropicTensor) and isinstance(t2, IsotropicTensor):
+                    left = [i] if isinstance(i, (int, np.integer)) else list(i)
+                    right = [j] if isinstance(j, (int, np.integer)) else list(j)
+                    if len(left) != len(right):
+                        raise ValueError('contraction axis counts differ')
+                    return t1.outer(t2).trace([(a, b+t1.rank) for a, b in zip(left, right)])
                 if isinstance(t1, TensorExpression.ArrayStack):
                     return t1.tensordot(t2, axes=[i, j])
                 elif isinstance(t2, TensorExpression.ArrayStack):
@@ -1009,7 +1153,8 @@ class TensorExpression:
                 #     raise ValueError("failed to execute {}".format(self))
 
         def rank(self):
-            return self.left.ndim + self.right.ndim - 2
+            count = 1 if isinstance(self.i, (int, np.integer)) else len(self.i)
+            return self.left.ndim + self.right.ndim - 2*count
 
         def deriv(self):
             t1 = type(self)(self.left.dQ(),
@@ -1157,6 +1302,9 @@ class TensorExpression:
 
         def array_generator(self, print_terms=False):
             t = self.term.asarray(print_terms=print_terms)
+            from .IsotropicTensors import IsotropicTensor
+            if isinstance(t, IsotropicTensor):
+                return t.trace([(self.axis1-1, self.axis2-1)])
             stack_shape = None
             offset = 0
             if isinstance(t, TensorExpression.ArrayStack):

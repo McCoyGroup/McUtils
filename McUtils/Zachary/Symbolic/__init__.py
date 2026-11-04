@@ -10,3 +10,7 @@ from .TensorExpressions import *; from .TensorExpressions import __all__ as expo
 __all__ += exposed
 from .ElementaryFunctions import *; from .ElementaryFunctions import __all__ as exposed
 __all__ += exposed
+from .IsotropicTensors import *; from .IsotropicTensors import __all__ as exposed
+__all__ += exposed
+from .YoungOperators import *; from .YoungOperators import __all__ as exposed
+__all__ += exposed
