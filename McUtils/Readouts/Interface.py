@@ -415,7 +415,32 @@ def find_readout_adapter(obj):
 
 
 def to_readout(obj, *, title=None, **opts):
-    """Build a `Readout` for any object (see the module docstring for the dispatch order)."""
+    """
+    Build a `Readout` for any object (see the module docstring for the dispatch order).
+
+    :examples:
+    Any mapping becomes a record readout; arrays are summarized and numbers are formatted.
+
+    <!-- readout(id="to-readout-record") -->
+    ```python
+    import numpy as np
+    from McUtils.Readouts.Interface import to_readout
+
+    data = {
+        "energy": -76.0267,
+        "n_atoms": 3,
+        "frequencies": np.array([1648.2, 3832.7, 3943.9]),
+    }
+    to_readout(data, title="Water")
+    ```
+
+    Later blocks on the page share the namespace, and `display="output"` shows what was printed instead.
+
+    <!-- readout(id="to-readout-output", display="output") -->
+    ```python
+    print("mean frequency:", round(float(data["frequencies"].mean()), 1))
+    ```
+    """
     if isinstance(obj, Readout):
         return obj
     adapter = find_readout_adapter(obj)

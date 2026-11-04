@@ -8,6 +8,7 @@ import json
 import os
 import re
 import sys
+import textwrap
 import tokenize
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional, Tuple
@@ -161,6 +162,25 @@ def _parse_list_field(text: str) -> List[str]:
     return [re.sub(r'^[-*\u2022]\s*', '', l) for l in lines if l]
 
 
+def _trim_blank_lines(text: str) -> str:
+    """Drop leading and trailing whitespace-only lines without touching any indentation."""
+    lines = text.split("\n")
+    while lines and not lines[0].strip():
+        lines.pop(0)
+    while lines and not lines[-1].strip():
+        lines.pop()
+    return "\n".join(lines)
+
+
+def _dedent_block(text: str) -> str:
+    """Strip the indentation common to every non-blank line of `text` and trim blank lines at both ends.
+
+    Relative indentation is preserved, so code and Markdown fences in an examples block
+    keep their structure (unlike a per-line ``strip()``).
+    """
+    return _trim_blank_lines(textwrap.dedent(text or ""))
+
+
 def _blank_params(node: ast.AST) -> Tuple[Dict[str, Any], Dict[str, Any]]:
     """Seed (params, returns) dicts straight from the signature, with no docs yet."""
     sig = _signature_types(node)
@@ -299,7 +319,7 @@ class GoogleDialectHandler(DocstringDialectHandler):
             return "\n".join(l.strip() for l in s.strip().split("\n"))
 
         for key in ("example", "examples"):
-            body = sections.get(key, "").strip()
+            body = _dedent_block(sections.get(key, ""))
             if body:
                 examples.append(body)
                 seen.add(norm(body))
@@ -446,7 +466,12 @@ class SphinxDialectHandler(DocstringDialectHandler):
             return " ".join(l.strip() for l in body_lines if l.strip())
 
         def multi_line(body_lines):
-            return "\n".join(l.strip() for l in body_lines).strip()
+            # `body_lines[0]` is the text on the same line as the tag; the rest are continuation
+            # lines, which share whatever indentation the docstring gave them. Remove that common
+            # indentation but keep the relative indentation (code, nested lists, fenced blocks).
+            first = body_lines[0].strip()
+            rest = textwrap.dedent("\n".join(body_lines[1:]))
+            return _trim_blank_lines(first + "\n" + rest if first else rest)
 
         for tag, arg, body_lines in directives:
             if tag in ("param", "parameter"):
