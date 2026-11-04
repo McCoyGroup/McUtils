@@ -8,7 +8,7 @@ from typing import Iterable, Optional, Sequence, Union
 from .. import Devutils as dev
 from .. import Numputils as nput
 from .RDKit import RDMolecule
-from ..Scaffolding import LineIndexedSupplier
+from ..Scaffolding.Storage import LineIndexedSupplier
 import numpy as np
 import hashlib
 import json
@@ -50,6 +50,8 @@ class SMILESSupplier(LineIndexedSupplier):
     ``split_idx`` and ``split_char`` remain supported, but are implemented by
     the default ``deserialization_function`` rather than by the generic base.
     Passing the legacy ``line_parser`` argument still takes precedence.
+    The default parser returns ``None`` for blank and full-line comment rows,
+    preserving physical row indices while leaving ``#`` bonds in SMILES intact.
     """
 
     STORED_FILE_NAME = "lines.smi"
@@ -130,6 +132,9 @@ class SMILESSupplier(LineIndexedSupplier):
         )
 
     def _default_parser(self, line):
+        content = line.lstrip()
+        if not content or content.startswith(b"#"):
+            return None
         return self._split_smi(
             line,
             split_idx=self.split_idx,

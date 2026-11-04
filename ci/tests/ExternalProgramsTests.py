@@ -1,4 +1,7 @@
 import tempfile
+from contextlib import closing
+from pathlib import Path
+import tarfile
 
 from Peeves.TestUtils import *
 from unittest import TestCase
@@ -932,3 +935,84 @@ class ExternalProgramsTest(TestCase):
         # rec = lib[1]
         # self.assertEqual(rec['smi'], 'CC')
         # np.testing.assert_array_equal(rec['coord'], coords1)
+
+class SMILESSupplierTests(TestCase):
+    def setUp(self):
+        directory = tempfile.TemporaryDirectory()
+        self.addCleanup(directory.cleanup)
+        self.root = Path(directory.name)
+        self.path = self.root / "molecules.smi"
+
+    def read_records(self, supplier, **options):
+        try:
+            with closing(supplier.consume_iter(**options)) as records:
+                return list(records)
+        finally:
+            supplier.close()
+
+    def test_blank_and_comment_rows_do_not_end_iteration(self):
+        for row in (b"\n", b"\r\n", b" \t\r\n", b"# comment\n", b"  # note\n", b"\t#\r\n"):
+            with self.subTest(row=row):
+                self.path.write_bytes(row + b"C#N cyanide\n")
+                self.assertEqual(self.read_records(SMILESSupplier(str(self.path))), [None, "C#N"])
+
+    def test_empty_file_and_final_rows_without_newline(self):
+        for data, expected in ((b"", []), (b" \t", [None]), (b"# comment", [None]), (b"C#N", ["C#N"])):
+            with self.subTest(data=data):
+                self.path.write_bytes(data)
+                self.assertEqual(self.read_records(SMILESSupplier(str(self.path))), expected)
+
+    def test_triple_bonds_and_inline_metadata(self):
+        for smiles in ("C#N", "N#Cc1ccccc1", "[C-]#[O+]", "CC#C", "[13C]#N"):
+            with self.subTest(smiles=smiles):
+                self.path.write_text(f"# header\n\n  {smiles} CHEMBL_example # metadata\n")
+                self.assertEqual(self.read_records(SMILESSupplier(str(self.path))), [None, None, smiles])
+
+    def test_configured_columns_and_leading_empty_fields(self):
+        self.path.write_bytes(b"# header\n\n\tC#N\tcyanide\n42\tN#N\tnitrogen\n")
+        self.assertEqual(self.read_records(SMILESSupplier(str(self.path), split_idx=1, split_char="\t")),
+                         [None, None, "C#N", "N#N"])
+        self.path.write_bytes(b"# header\n\n42 C#N cyanide\n43 N#N nitrogen\n")
+        self.assertEqual(self.read_records(SMILESSupplier(str(self.path), split_idx=1)),
+                         [None, None, "C#N", "N#N"])
+
+    def test_custom_parser_receives_all_rows(self):
+        self.path.write_bytes(b"# custom\n\nC#N\n")
+        for option in ("line_parser", "deserialization_function"):
+            with self.subTest(option=option):
+                parser = lambda line: line.decode().rstrip("\n")
+                self.assertEqual(self.read_records(SMILESSupplier(str(self.path), **{option: parser})),
+                                 ["# custom", "", "C#N"])
+
+    def test_random_access_and_jump_database_preserve_row_metadata(self):
+        self.path.write_bytes(b"# header\n\n42\tC#N\tcyanide\n \t# note\n43\t[O+]#[C-]\tcarbon monoxide\n")
+        expected = [None, None, "C#N", None, "[O+]#[C-]"]
+        source = SMILESSupplier(str(self.path), split_idx=1, split_char="\t")
+        try:
+            self.assertIsNone(source.find_smi(1))
+            self.assertEqual(source.find_smi(2), "C#N")
+            self.assertEqual(source.find_smi(4), "[O+]#[C-]")
+            source.write_database_index(self.root / "molecules.tar", metadata_arrays={"row": np.arange(5)})
+        finally:
+            source.close()
+        packaged = SMILESSupplier.from_line_index_database(str(self.root / "molecules.tar"))
+        try:
+            self.assertEqual(list(packaged.consume_iter(include_metadata=False)), expected)
+            self.assertEqual(packaged.find_smi(3), (None, {"row": 3}))
+            self.assertEqual(packaged.find_smi(4), ("[O+]#[C-]", {"row": 4}))
+        finally:
+            packaged.close()
+        expanded = self.root / "expanded"
+        with tarfile.open(self.root / "molecules.tar", "r:") as archive:
+            archive.extractall(expanded, filter="data")
+        self.assertEqual(self.read_records(SMILESSupplier.from_line_index_database(str(expanded)),
+                                          include_metadata=False), expected)
+
+    def test_multiprocessing_state_preserves_parser_options(self):
+        self.path.write_bytes(b"# header\n\n42 C#N cyanide\n")
+        source = SMILESSupplier(str(self.path), split_idx=1)
+        try:
+            state = source.to_mp_state()
+        finally:
+            source.close()
+        self.assertEqual(self.read_records(SMILESSupplier.from_mp_state(state)), [None, None, "C#N"])

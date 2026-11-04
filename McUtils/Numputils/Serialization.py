@@ -27,13 +27,16 @@ Both wrapper classes support the same access pattern as a regular
 from __future__ import annotations
 
 import io
+import os
 import struct
 import tarfile
 import zipfile
+import tempfile
 from typing import Iterator
 
 import numpy as np
 from numpy.lib import format as npy_format
+from collections.abc import Mapping
 
 __all__ = [
     "load_npz_memmap",
@@ -73,6 +76,8 @@ def _read_npy_header(fh) -> tuple[tuple[int, ...], bool, np.dtype]:
 
 
 def _npy_memmap_at(path, data_offset, dtype, shape, fortran_order, mode):
+    if dtype.hasobject:
+        raise ValueError("object arrays cannot be memory-mapped")
     order = "F" if fortran_order else "C"
     # A 0-d or 0-size array has no bytes to map; np.memmap chokes on
     # shape containing a 0 in some numpy versions, so special-case it.
@@ -118,7 +123,71 @@ def _memmap_npz_member(npz_path, member_name, mode="r"):
     return _npy_memmap_at(npz_path, data_offset, dtype, shape, fortran_order, mode)
 
 
-class MemmappedNPZFile:
+class _ArrayArchive(Mapping):
+    def unpack(self):
+        return dict(self.items())
+
+    def close(self):
+        owned = getattr(self, "_owned_directory", None)
+        if owned is not None:
+            owned.cleanup()
+            self._owned_directory = None
+
+    @classmethod
+    def load(cls, file, **reader_options):
+        return cls(file, **reader_options)
+
+    @property
+    def files(self):
+        return self._files
+
+    @files.setter
+    def files(self, value):
+        self._files = value
+
+    @classmethod
+    def from_tree(cls, tree, file=None, **reader_options):
+        """Create an archive from a flat mapping of names to arrays."""
+        owned = tempfile.TemporaryDirectory(prefix="mcutils-arrays-") if file is None else None
+        target = os.path.join(owned.name, "arrays") if owned is not None else file
+        try:
+            cls._write_arrays(target, tree)
+            archive = cls.load(target, **reader_options)
+            archive._owned_directory = owned
+            return archive
+        except BaseException:
+            if owned is not None:
+                owned.cleanup()
+            raise
+
+    @classmethod
+    def _write_arrays(cls, file, arrays):
+        with open(file, "wb") as stream:
+            cls._writer(stream, **arrays)
+
+    def save(self, file, writer=None):
+        """Save the current array values, replacing filesystem targets atomically."""
+        arrays = dict(self.items())
+        writer = self._writer if writer is None else writer
+        if hasattr(file, "write"):
+            return writer(file, **arrays)
+        target = os.path.abspath(os.fspath(file))
+        fd, temporary = tempfile.mkstemp(prefix=".array-archive-", dir=os.path.dirname(target))
+        try:
+            with os.fdopen(fd, "wb") as stream:
+                writer(stream, **arrays)
+                stream.flush()
+                os.fsync(stream.fileno())
+            os.replace(temporary, target)
+            if os.path.realpath(target) == os.path.realpath(self.path):
+                self._reload_index()
+        finally:
+            if os.path.exists(temporary):
+                os.unlink(temporary)
+        return file
+
+
+class MemmappedNPZFile(_ArrayArchive):
     """
     Lazy, memory-mapped stand-in for `numpy.lib.npyio.NpzFile`.
 
@@ -142,7 +211,12 @@ class MemmappedNPZFile:
     def __init__(self, path, mode: str = "r"):
         self.path = path
         self.mode = mode
-        self._zf = zipfile.ZipFile(path, "r")
+        self._reload_index()
+
+    def _reload_index(self):
+        if hasattr(self, "_zf"):
+            self._zf.close()
+        self._zf = zipfile.ZipFile(self.path, "r")
         self._name_map = {
             _strip_npy_suffix(n): n for n in self._zf.namelist()
         }
@@ -184,6 +258,7 @@ class MemmappedNPZFile:
     def close(self):
         self._cache.clear()
         self._zf.close()
+        super().close()
 
     def __enter__(self):
         return self
@@ -195,7 +270,7 @@ class MemmappedNPZFile:
         return f"MemmappedNPZFile({self.path!r}, files={self.files})"
 
 
-def load_npz_memmap(file, mode: str = "r") -> MemmappedNPZFile:
+def load_npz_memmap(file, mode: str = "r", allow_pickle=False) -> MemmappedNPZFile:
     """
     Open an uncompressed .npz archive (written with `np.savez`, NOT
     `np.savez_compressed`) for memory-mapped, lazy array access.
@@ -228,7 +303,7 @@ def _memmap_npy_member(tar_path, member: tarfile.TarInfo, mode: str = "r"):
     return _npy_memmap_at(tar_path, data_offset, dtype, shape, fortran_order, mode)
 
 
-class MemmappedNPTarFile:
+class MemmappedNPTarFile(_ArrayArchive):
     """
     Lazy, memory-mapped reader for `.nptar` archives: plain (uncompressed)
     tar files whose members are `.npy` arrays, written by `save_nptar`.
@@ -252,7 +327,10 @@ class MemmappedNPTarFile:
     def __init__(self, path, mode: str = "r"):
         self.path = path
         self.mode = mode
-        with tarfile.open(path, "r:") as tf:  # "r:" refuses compressed tars
+        self._reload_index()
+
+    def _reload_index(self):
+        with tarfile.open(self.path, "r:") as tf:  # "r:" refuses compressed tars
             members = [m for m in tf.getmembers() if m.isfile()]
         self._name_map = {_strip_npy_suffix(m.name): m for m in members}
         self._cache: dict[str, np.memmap] = {}
@@ -290,6 +368,7 @@ class MemmappedNPTarFile:
 
     def close(self):
         self._cache.clear()
+        super().close()
 
     def __enter__(self):
         return self
@@ -301,7 +380,7 @@ class MemmappedNPTarFile:
         return f"MemmappedNPTarFile({self.path!r}, files={self.files})"
 
 
-def load_nptar(file, mode: str = "r") -> MemmappedNPTarFile:
+def load_nptar(file, mode: str = "r", allow_pickle=False) -> MemmappedNPTarFile:
     """
     Open an uncompressed .nptar archive (written by `save_nptar`) for
     memory-mapped, lazy array access.
@@ -336,7 +415,8 @@ def save_nptar(file, *args, **kwds) -> None:
 
     # "w" (not "w:gz" / "w:bz2" / "w:xz") -> uncompressed tar, required for
     # member data to be a contiguous, directly memmap-able byte range.
-    with tarfile.open(file, mode="w") as tf:
+    options = {"fileobj": file} if hasattr(file, "write") else {"name": file}
+    with tarfile.open(mode="w", **options) as tf:
         for name, arr in named.items():
             arr = np.asanyarray(arr)
             buf = io.BytesIO()
@@ -346,3 +426,13 @@ def save_nptar(file, *args, **kwds) -> None:
             info = tarfile.TarInfo(name=f"{name}.npy")
             info.size = len(data)
             tf.addfile(info, io.BytesIO(data))
+
+
+MemmappedNPZFile._writer = staticmethod(np.savez)
+MemmappedNPTarFile._writer = staticmethod(save_nptar)
+
+
+def _load_npy_member_bytes(archive, member):
+    """Read an index-aligned metadata array when a mapped view is not needed."""
+    with archive.extractfile(member) as stream:
+        return np.load(io.BytesIO(stream.read()), allow_pickle=True)
