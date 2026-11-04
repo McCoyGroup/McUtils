@@ -10,6 +10,8 @@ import abc
 import base64
 import collections
 from collections import OrderedDict
+import importlib
+import inspect
 import io
 import json
 import os
@@ -17,6 +19,7 @@ import pickle
 import re
 import tarfile
 import tempfile
+import threading
 import types
 import uuid
 import warnings
@@ -26,13 +29,56 @@ from .. import Numputils as nput
 from .Storage import ArchiveMapping
 
 __all__ = [
-    "PseudoPickler", "ConvertedData", "BaseSerializer", "PicklingSerializer",
+    "PseudoPickler", "UnsafeLoadError", "ConvertedData", "BaseSerializer", "PicklingSerializer",
     "JSONSerializer", "YAMLSerializer", "NumPySerializer", "NDarrayMarshaller",
     "HDF5Serializer", "ModuleSerializer",
     "dictify_lists", "disambiguate_tree", "flatten_tree", "merge_trees",
     "undictify_lists", "unflatten_tree", "build_jump_table", "write_flat_tree",
     "read_flat_tree", "write_flat_tree_zarr", "read_flat_tree_zarr", "NumpyTreeArchive"
 ]
+
+
+class UnsafeLoadError(ValueError):
+    """Raised when loading a spec would need `pickle` but the pickler was built with `allow_pickle=False`."""
+
+
+class _PickleMemo:
+    """Per-walk bookkeeping for shared references (write side)."""
+    def __init__(self):
+        self.done = {}      # id(obj) -> spec dict that was written for it
+        self.ids = {}       # id(obj) -> reference number (only for objects that were referenced again)
+        self.active = set() # ids of objects whose spec is being built (cycle detection)
+        self.order = []     # ids in completion order, for rollback
+        self.keep = []      # keeps objects alive so ids stay unique during the walk
+
+
+class _LoadMemo:
+    """Per-walk bookkeeping for shared references (read side)."""
+    def __init__(self, spec):
+        self.specs = {}     # reference number -> spec dict that defines it
+        self.objects = {}   # reference number -> restored object
+        self.active = set()
+        stack = [spec]
+        while stack:
+            item = stack.pop()
+            if isinstance(item, dict):
+                if 'pseudopickle_id' in item:
+                    self.specs[_as_int(item['pseudopickle_id'])] = item
+                stack.extend(item.values())
+            elif isinstance(item, (list, tuple)):
+                stack.extend(item)
+
+
+def _as_int(val):
+    return int(val.item()) if isinstance(val, np.ndarray) else int(val)
+
+
+def _accepts_keyword(fn, name):
+    try:
+        params = inspect.signature(fn).parameters
+    except (TypeError, ValueError):
+        return False
+    return name in params or any(p.kind == p.VAR_KEYWORD for p in params.values())
 
 
 class PseudoPickler:
@@ -43,13 +89,21 @@ class PseudoPickler:
     supporting objects with `to_state` and `from_state` methods by converting
     them to more primitive serializble types like arrays, strings, numbers,
     etc.
-    Falls back to naive pickling when necessary.
+    Falls back to naive pickling when `allow_pickle=True` and nothing else works.
+
+    Protocol 2 (written by default) stores classes by import path
+    (`{"module": ..., "qualname": ...}`, with moved names handled by `register_alias`),
+    writes objects that are referenced more than once a single time (later uses are
+    `{"pseudopickle_ref": n}`), and records an optional `state_version` class attribute.
+    Protocol 1 specs (which hold pickled classes) can still be read, but only with
+    `allow_pickle=True`, and with a `DeprecationWarning`. Reference cycles can't be
+    rebuilt without a two-phase `from_state`, so they raise an error (or fall back to
+    pickle when that is allowed).
     """
 
-    _cache = None
     def __init__(self,
                  allow_pickle=False,
-                 protocol=1,
+                 protocol=2,
                  b64encode=False
                  ):
         """
@@ -57,12 +111,13 @@ class PseudoPickler:
 
         Configure pseudo-pickling fallback, protocol marker, and optional base64 encoding for embedded pickle bytes.
 
-        :param allow_pickle: whether unsupported values may fall back to pickle
-        :type allow_pickle: object
-        :param protocol: pseudo-pickle protocol marker
-        :type protocol: object
+        :param allow_pickle: whether unsupported values may be written with pickle, and whether `pickle_data`
+            (and protocol 1 class specs) may be read back
+        :type allow_pickle: bool
+        :param protocol: pseudo-pickle protocol marker written into specs
+        :type protocol: int
         :param b64encode: whether pickle bytes are base64 encoded
-        :type b64encode: object
+        :type b64encode: bool
         :return: No explicit value; the method mutates state or performs I/O.
         :rtype: None
         """
@@ -81,6 +136,87 @@ class PseudoPickler:
                          )
     _safe_modules = ["numpy", "multiprocessing"]
 
+    _aliases = {}
+    @classmethod
+    def register_alias(cls, old_path, new_path):
+        """
+        **LLM Docstring**
+
+        Record that the class stored as `old_path` now lives at `new_path`, so files written before a
+        move or rename still load.
+
+        :param old_path: the old location as `"module:Qual.Name"` or `"module.Name"`
+        :type old_path: str
+        :param new_path: the new location in the same format
+        :type new_path: str
+        :return: No explicit value; the alias table is updated.
+        :rtype: None
+        """
+        cls._aliases[cls._normalize_path(old_path)] = cls._normalize_path(new_path)
+
+    @staticmethod
+    def _normalize_path(path):
+        if ':' in path:
+            return path
+        module, _, name = path.rpartition('.')
+        if not module:
+            raise ValueError("expected 'module:Qual.Name' or 'module.Name', got {!r}".format(path))
+        return module + ':' + name
+
+    def _class_spec(self, cls):
+        module, qualname = cls.__module__, cls.__qualname__
+        if '<locals>' in qualname:
+            raise ValueError("can't store {} by import path (defined inside a function)".format(cls))
+        try:
+            found = self._import_path(module, qualname)
+        except (ImportError, AttributeError):
+            found = None
+        if found is not cls:
+            raise ValueError("can't store {} by import path ({}:{} doesn't resolve to it)".format(cls, module, qualname))
+        return {"module": module, "qualname": qualname}
+
+    def _import_path(self, module, qualname):
+        key = module + ':' + qualname
+        seen = {key}
+        while key in self._aliases:
+            key = self._aliases[key]
+            if key in seen:
+                raise ImportError("alias cycle at {}".format(key))
+            seen.add(key)
+        module, _, qualname = key.partition(':')
+        obj = importlib.import_module(module)
+        for name in qualname.split('.'):
+            obj = getattr(obj, name)
+        return obj
+
+    def _load_class(self, spec):
+        if isinstance(spec, dict) and 'module' in spec and 'qualname' in spec:
+            return self._import_path(str(spec['module']), str(spec['qualname']))
+        # protocol 1 stored the class as pickle bytes
+        if isinstance(spec, dict) and 'pickle_data' in spec:
+            if not self.allow_pickle:
+                raise UnsafeLoadError("this spec holds a pickled class (pseudopickle protocol 1), "
+                                      "which can only be loaded with `allow_pickle=True`")
+            warnings.warn("loading a pseudopickle protocol 1 spec; re-save it to upgrade to protocol 2",
+                          DeprecationWarning, stacklevel=3)
+            return self._load_pickle(spec['pickle_data'])
+        raise NotImplementedError("don't know how to load a class from {}".format(spec))
+
+    def _load_pickle(self, byte_stream):
+        if not self.allow_pickle:
+            raise UnsafeLoadError("this spec holds pickled data, which can only be loaded with `allow_pickle=True`")
+        if not isinstance(byte_stream, bytes):
+            if isinstance(byte_stream, np.ndarray):
+                byte_stream = byte_stream.tolist()
+                # corner case that I don't think should ever happen in the
+                # use cases I've worked with...
+                if isinstance(byte_stream, list):
+                    byte_stream = bytes(byte_stream)
+            if isinstance(byte_stream, str):
+                byte_stream = byte_stream.encode('ascii')
+            byte_stream = base64.b64decode(byte_stream)
+        return pickle.loads(byte_stream)
+
     def _sanitize_key(self, key):
         """
         **LLM Docstring**
@@ -96,79 +232,23 @@ class PseudoPickler:
         if not isinstance(key, (str, int, float, bool)):
             raise ValueError("serialized keys must be primitive types")
         return key
-    def _to_state(self, obj, cache):
-        """
-        Tries to extract state for `obj` by walking through the
-        object dict
 
-        :param obj:
-        :type obj:
-        :param cache: cache of written objects to prevent cycles
-        :type cache: set
-        :return:
-        :rtype:
-        """
+    @staticmethod
+    def _is_spec(obj):
+        return isinstance(obj, dict) and ('pseudopickle_protocol' in obj or 'pseudopickle_ref' in obj)
 
-        if obj is None:
-            return None
-        elif isinstance(obj, self._primitive_types):
-            return obj
-        elif isinstance(obj, np.ndarray):
-            if obj.dtype == np.dtype(object):
-                objid = id(obj)
-                if objid in cache:
-                    raise ValueError("multiple references to single object not allowed ({} already written)".format(obj))
-                cache.add(objid)
-                convobj = np.array([self.serialize(v, cache) for v in obj.flatten()])
-                obj = convobj.reshape(obj.shape)
-                # raise ValueError("don't support arbitrary object NumPy data yet")
-            return obj
-        elif isinstance(obj, self._list_types):
-            return type(obj)(self.serialize(v, cache) for v in obj)
-        elif isinstance(obj, self._dict_types):
-            return type(obj)((self._sanitize_key(k), self.serialize(v, cache)) for k,v in obj.items())
-        elif isinstance(obj, self._importable_types):
-            return self._to_importable_state(obj)
-        elif self._can_import(obj):
-            return self._to_importable_state(obj)
-        else:
-            objid = id(obj)
-            if objid in cache:
-                raise ValueError("multiple references to single object not allowed ({} already written)".format(obj))
-            cache.add(id(obj))
-            try:
-                odict = dict(obj.__dict__)
-            except AttributeError:
-                raise_err = True
-            else:
-                raise_err = False
+    def _spec(self, **fields):
+        return dict({"pseudopickle_protocol": self.protocol}, **fields)
 
-            if raise_err:
-                raise ValueError("can't psuedopickle object of type {} (not a primitive nor supporting `obj.__dict__`): {}".format(type(obj), obj))
-
-            return self.serialize(odict, cache=cache)
-
-    def _to_importable_state(self, obj):
-        """
-        **LLM Docstring**
-
-        Pickle an importable object and wrap the bytes with protocol metadata, optionally base64-encoding them.
-
-        :param obj: object to serialize or manage
-        :type obj: object
-        :return: a protocol-tagged mapping containing pickle bytes or base64 text
-        :rtype: dict
-        """
+    def _pickle_spec(self, obj):
         try:
             dump = pickle.dumps(obj)
-        except:
-            raise ValueError("unable to pickle {}; needed to be able to restore state".format(obj))
+        except Exception as e:
+            raise ValueError("unable to pickle {}; needed to be able to restore state".format(obj)) from e
         if self.b64encode:
             dump = base64.b64encode(dump).decode('ascii')
-        return {
-            "pseudopickle_protocol": self.protocol,
-            "pickle_data": dump
-        }
+        return self._spec(pickle_data=dump)
+
     def _can_import(self, obj):
         """
         **LLM Docstring**
@@ -180,128 +260,240 @@ class PseudoPickler:
         :return: Whether the tested condition is satisfied.
         :rtype: bool
         """
-        # print(type(obj).__module__)
         return (
                 type(obj).__module__.split(".")[0] in self._safe_modules
                 or isinstance(obj, types.BuiltinFunctionType)
         )
 
+    #region write
+    def _walk(self, obj, memo):
+        """Convert `obj` to a structure of primitives, arrays and spec dicts"""
+        if obj is None or isinstance(obj, self._primitive_types):
+            return obj
+        if isinstance(obj, np.ndarray):
+            if type(obj) is not np.ndarray and hasattr(obj, 'to_state'):
+                return self._walk_object(obj, memo) # array subclass that carries more than its data
+            if obj.dtype != np.dtype(object):
+                return obj
+            result = np.empty(obj.shape, dtype=object)
+            for idx in np.ndindex(*obj.shape):
+                result[idx] = self._walk(obj[idx], memo)
+            return result
+        if self._is_spec(obj):
+            return obj # already converted (e.g. by a `to_state` that called `serializer.serialize`)
+        if isinstance(obj, self._list_types):
+            return type(obj)(self._walk(v, memo) for v in obj)
+        if isinstance(obj, self._dict_types):
+            return type(obj)((self._sanitize_key(k), self._walk(v, memo)) for k, v in obj.items())
+        if isinstance(obj, type):
+            return self._spec(type=self._class_spec(obj))
+        if isinstance(obj, (bytes, bytearray, memoryview)):
+            kind = 'bytearray' if isinstance(obj, bytearray) else 'bytes'
+            return self._spec(bytes=base64.b64encode(bytes(obj)).decode('ascii'), kind=kind)
+        if isinstance(obj, np.dtype):
+            if obj.names is not None or obj.hasobject:
+                raise ValueError("can't store structured dtype {} directly".format(obj))
+            return self._spec(dtype=obj.str)
+        return self._walk_object(obj, memo)
+
+    def _walk_object(self, obj, memo):
+        oid = id(obj)
+        if oid in memo.done:
+            n = memo.ids.setdefault(oid, len(memo.ids))
+            memo.done[oid]['pseudopickle_id'] = n
+            return {"pseudopickle_ref": n}
+        if oid in memo.active:
+            raise ValueError("cyclic reference to {} (reference cycles can't be rebuilt without a two-phase `from_state`)".format(type(obj)))
+        mark = len(memo.order)
+        memo.active.add(oid)
+        memo.keep.append(obj)
+        try:
+            try:
+                spec = self._object_spec(obj, memo)
+            except ValueError as err:
+                for rolled in memo.order[mark:]: # forget everything the failed attempt registered
+                    memo.done.pop(rolled, None)
+                    memo.ids.pop(rolled, None)
+                del memo.order[mark:]
+                if not self.allow_pickle:
+                    raise ValueError("couldn't serialize {}: {}".format(type(obj), err)) from err
+                spec = self._pickle_spec(obj)
+        finally:
+            memo.active.discard(oid)
+        memo.done[oid] = spec
+        memo.order.append(oid)
+        return spec
+
+    def _object_spec(self, obj, memo):
+        cls = type(obj)
+        if hasattr(obj, 'to_state'):
+            if _accepts_keyword(obj.to_state, 'serializer'):
+                state = obj.to_state(serializer=self)
+            else:
+                state = obj.to_state()
+            state = self._walk(state, memo) # `to_state` may hand back live objects; convert them too
+        elif self._can_import(obj):
+            return self._pickle_spec(obj)
+        else:
+            try:
+                odict = dict(obj.__dict__)
+            except AttributeError:
+                raise ValueError("can't psuedopickle object of type {} (not a primitive nor supporting `obj.__dict__`): {}".format(cls, obj))
+            state = self._walk(odict, memo)
+        spec = self._spec(**{"class": self._class_spec(cls), "state": state})
+        version = getattr(cls, 'state_version', None)
+        if version is not None:
+            spec['state_version'] = version
+        return spec
+
+    def _begin(self):
+        local = self.__dict__.setdefault('_local', threading.local())
+        owns = getattr(local, 'memo', None) is None
+        if owns:
+            local.memo = _PickleMemo()
+        return local, local.memo, owns
+
     def to_state(self, obj, cache=None):
         """
-        Tries to extract state from `obj`, first through its `to_state`
-        interface, but that failing by recursively walking the object
-        tree
+        Extracts the state for `obj` (what goes in the `state` field of its spec), through its
+        `to_state` interface or by walking its `__dict__`
 
-        :param obj:
-        :type obj:
-        :return:
-        :rtype:
+        :param obj: the object to get the state of
+        :type obj: object
+        :param cache: unused, kept for compatibility (the walk keeps its own memo)
+        :return: the converted state
+        :rtype: object
         """
-
-        if hasattr(obj, 'to_state') and not isinstance(obj, type):
-            # try:
-            return obj.to_state(serializer=self)
-            # except TypeError: # usually mean we're pickling the class
-            #     pass
+        local, memo, owns = self._begin()
         try:
-            return self._to_state(obj, cache)
-        except ValueError:
+            if obj is None or isinstance(obj, self._primitive_types + self._list_types + self._dict_types + self._importable_types + (np.ndarray,)):
+                return self._walk(obj, memo)
+            return self._object_spec(obj, memo)['state'] if not self._can_import(obj) or hasattr(obj, 'to_state') \
+                else self._pickle_spec(obj)
+        except ValueError as e:
             if self.allow_pickle:
-                dump = pickle.dumps(obj)
-                if self.b64encode:
-                    dump = base64.b64encode(dump).decode('ascii')
-                return {
-                    "pseudopickle_protocol": self.protocol,
-                    "pickle_data": dump
-                }
-            else:
-                raise ValueError("couldn't serialize {}".format(obj))
+                return self._pickle_spec(obj)
+            raise ValueError("couldn't serialize {}".format(obj)) from e
+        finally:
+            if owns:
+                local.memo = None
 
     def serialize(self, obj, cache=None):
         """
         Serializes an object first by checking for a `to_state`
         method, and that missing, by converting to primitive-ish types
-        in a recursive strategy if the object passes `is_simple`, otherwise
-        falling back to `pickle`
+        in a recursive strategy, falling back to `pickle` when that is allowed.
+        Objects reached more than once are written once and referenced afterwards.
 
         :param obj: object to be serialized
         :type obj:
+        :param cache: unused, kept for compatibility (the walk keeps its own memo per thread)
         :return: spec for the pseudo-pickled data
         :rtype: dict
         """
         if obj is None:
             return obj
+        local, memo, owns = self._begin()
+        try:
+            return self._walk(obj, memo)
+        finally:
+            if owns:
+                local.memo = None
+    #endregion
 
-        reset_cache = False
-        if cache is None:
-            if self._cache is None:
-                reset_cache = True
-                cache = set()
-                type(self)._cache = cache
-            else:
-                cache = self._cache
-        state = self.to_state(obj, cache=cache)
-        if isinstance(obj, self._primitive_types + self._list_types + self._dict_types + self._importable_types):
-            return state
-
-        state = {
-            "pseudopickle_protocol": self.protocol,
-            "class": self.to_state(type(obj)),
-            "state": state
-        }
-
-        if reset_cache:
-            type(self)._cache = None
-
-        return state
-
-    # def _from_qualname(self, spec):
-    #     woof = importlib.import_module(spec['module_name'])
-    #     subnames = spec['qual_name'].split('.')
-    #     for a in subnames:
-    #         woof = getattr(woof, a)
-    #     return woof
+    #region read
     def deserialize(self, spec):
         """
-        Deserializes from an object spec, dispatching
-        to regular pickle where necessary
+        Deserializes from an object spec. Classes are imported by path (honoring registered aliases),
+        and `pickle` is only used for specs that contain pickled data when `allow_pickle=True`
+        (otherwise `UnsafeLoadError`).
 
-        :param object:
-        :type object:
-        :return:
-        :rtype:
+        :param spec: the spec produced by `serialize`
+        :type spec: object
+        :return: the restored object
+        :rtype: object
         """
+        local = self.__dict__.setdefault('_local', threading.local())
+        owns = getattr(local, 'load_memo', None) is None
+        if owns:
+            local.load_memo = _LoadMemo(spec)
+        try:
+            return self._restore(spec, local.load_memo)
+        finally:
+            if owns:
+                local.load_memo = None
 
+    def _restore(self, spec, memo):
+        if isinstance(spec, dict) and 'pseudopickle_ref' in spec:
+            return self._restore_ref(_as_int(spec['pseudopickle_ref']), memo)
         if isinstance(spec, dict) and 'pseudopickle_protocol' in spec:
-            if 'class' in spec:
-                cls = self.deserialize(spec['class'])
-                if hasattr(cls, 'from_state'):
-                    return cls.from_state(spec['state'], serializer=self)
-                else:
-                    return {"class": cls, "state": spec['state']}
-            elif 'pickle_data' in spec:
-                byte_stream = spec['pickle_data']
-                if not isinstance(byte_stream, bytes):
-                    if isinstance(byte_stream, np.ndarray):
-                        byte_stream = byte_stream.tolist()
-                        # corner case that I don't think should ever happen in the
-                        # use cases I've worked with...
-                        if isinstance(byte_stream, list):
-                            byte_stream = bytes(byte_stream)
-                    if isinstance(byte_stream, str):
-                        byte_stream = byte_stream.encode('ascii')
-                    byte_stream = base64.b64decode(byte_stream)
-                return pickle.loads(byte_stream)
-            else:
-                raise NotImplementedError("don't know how to pseudo-unpickle from {}".format(spec))
+            n = _as_int(spec['pseudopickle_id']) if 'pseudopickle_id' in spec else None
+            if n is not None:
+                if n in memo.objects:
+                    return memo.objects[n]
+                if n in memo.active:
+                    raise ValueError("cyclic reference while restoring pseudopickle object {}".format(n))
+                memo.active.add(n)
+            try:
+                obj = self._restore_spec(spec, memo)
+            finally:
+                if n is not None:
+                    memo.active.discard(n)
+            if n is not None:
+                memo.objects[n] = obj
+            return obj
         elif spec is None or isinstance(spec, self._primitive_types):
             return spec
+        elif isinstance(spec, np.ndarray):
+            if spec.dtype == np.dtype(object):
+                result = np.empty(spec.shape, dtype=object)
+                for idx in np.ndindex(*spec.shape):
+                    result[idx] = self._restore(spec[idx], memo)
+                return result
+            return spec
         elif isinstance(spec, self._list_types):
-            return type(spec)(self.deserialize(v) for v in spec)
+            return type(spec)(self._restore(v, memo) for v in spec)
         elif isinstance(spec, self._dict_types):
-            return type(spec)((k, self.deserialize(v)) for k,v in spec.items())
+            return type(spec)((k, self._restore(v, memo)) for k, v in spec.items())
         else:
             return spec
+
+    def _restore_ref(self, n, memo):
+        if n in memo.objects:
+            return memo.objects[n]
+        if n not in memo.specs:
+            raise ValueError("pseudopickle reference {} has no definition".format(n))
+        return self._restore(memo.specs[n], memo)
+
+    def _restore_spec(self, spec, memo):
+        if 'class' in spec:
+            cls = self._load_class(spec['class'])
+            state = self._restore(spec['state'], memo) # nested specs first, so `from_state` sees objects
+            if hasattr(cls, 'from_state'):
+                kwargs = {}
+                if _accepts_keyword(cls.from_state, 'serializer'):
+                    kwargs['serializer'] = self
+                if 'state_version' in spec and _accepts_keyword(cls.from_state, 'version'):
+                    kwargs['version'] = spec['state_version']
+                return cls.from_state(state, **kwargs)
+            elif isinstance(state, dict):
+                obj = cls.__new__(cls)
+                obj.__dict__.update(state)
+                return obj
+            else:
+                raise NotImplementedError("don't know how to rebuild {} from state {}".format(cls, type(state)))
+        elif 'type' in spec:
+            return self._load_class(spec['type'])
+        elif 'bytes' in spec:
+            data = base64.b64decode(spec['bytes'])
+            return bytearray(data) if spec.get('kind') == 'bytearray' else data
+        elif 'dtype' in spec:
+            return np.dtype(str(spec['dtype']))
+        elif 'pickle_data' in spec:
+            return self._load_pickle(spec['pickle_data'])
+        else:
+            raise NotImplementedError("don't know how to pseudo-unpickle from {}".format(spec))
+    #endregion
 
 class ConvertedData:
     """
@@ -462,7 +654,7 @@ class PicklingSerializer(BaseSerializer):
     default_extension = ".pkl"
     binary = True
 
-    def __init__(self, allow_pickle=True, pseudopickler=None):
+    def __init__(self, allow_pickle=False, pseudopickler=None):
         """
         **LLM Docstring**
 
@@ -476,7 +668,7 @@ class PicklingSerializer(BaseSerializer):
         :rtype: None
         """
         if pseudopickler is None:
-            pseudopickler = PseudoPickler(b64encode=True)
+            pseudopickler = PseudoPickler(b64encode=True, allow_pickle=allow_pickle)
         self.pickler = pseudopickler
         self.allow_pickle = allow_pickle
     def convert(self, data):
@@ -559,8 +751,7 @@ class PicklingSerializer(BaseSerializer):
             else:
                 dat = dat[key]
 
-        if self.allow_pickle:
-            dat = self.pickler.deserialize(dat)
+        dat = self.pickler.deserialize(dat)
         return dat
     def loads(self, data, key=None, **kwargs):
         """
@@ -605,7 +796,7 @@ class JSONSerializer(BaseSerializer):
     """
     default_extension = ".json"
     class BaseEncoder(json.JSONEncoder):
-        def __init__(self, *args, pseudopickler=None, allow_pickle=True, **kwargs):
+        def __init__(self, *args, pseudopickler=None, allow_pickle=False, **kwargs):
             """
             **LLM Docstring**
 
@@ -624,7 +815,7 @@ class JSONSerializer(BaseSerializer):
             """
             super().__init__(*args, **kwargs)
             if pseudopickler is None:
-                pseudopickler = PseudoPickler(b64encode=True)
+                pseudopickler = PseudoPickler(b64encode=True, allow_pickle=allow_pickle)
             self.allow_pickle=allow_pickle
             self.pickler = pseudopickler
         def default(self, obj):
@@ -638,23 +829,23 @@ class JSONSerializer(BaseSerializer):
             :return: a JSON-compatible primitive, list, or pseudo-pickle state
             :rtype: object
             """
-            if isinstance(obj, np.ndarray):
+            if hasattr(obj, 'to_state') and not isinstance(obj, type):
+                # checked first so array subclasses with state (e.g. `CoordinateSet`) keep it
+                return self.pickler.serialize(obj)
+            elif isinstance(obj, np.ndarray):
                 return obj.tolist()
             elif isinstance(obj, (np.integer,)):
                 return int(obj)
             elif isinstance(obj, (np.floating,)):
                 return float(obj)
             else:
-                if self.allow_pickle:
-                    try:
-                        stream = json.JSONEncoder.default(self, obj)
-                    except TypeError:
-                        stream = self.pickler.serialize(obj)
-                    return stream
-                else:
-                    return json.JSONEncoder.default(self, obj)
+                try:
+                    stream = json.JSONEncoder.default(self, obj)
+                except TypeError:
+                    stream = self.pickler.serialize(obj) # pickle only if the pickler allows it
+                return stream
 
-    def __init__(self, encoder=None, allow_pickle=True, pseudopickler=None):
+    def __init__(self, encoder=None, allow_pickle=False, pseudopickler=None):
         """
         **LLM Docstring**
 
@@ -670,7 +861,7 @@ class JSONSerializer(BaseSerializer):
         :rtype: None
         """
         if pseudopickler is None:
-            pseudopickler = PseudoPickler(b64encode=True)
+            pseudopickler = PseudoPickler(b64encode=True, allow_pickle=allow_pickle)
         self.pseudopickler = pseudopickler
         self.allow_pickle = allow_pickle
         if encoder is None:
@@ -686,6 +877,8 @@ class JSONSerializer(BaseSerializer):
         :return: The converted representation described above.
         :rtype: object
         """
+        # one walk for the whole value, so objects that appear more than once are written once
+        data = self.pseudopickler.serialize(data)
         return ConvertedData(self.encoder.encode(data), self)
     def deconvert(self, data):
         """
@@ -755,8 +948,7 @@ class JSONSerializer(BaseSerializer):
             else:
                 dat = dat[key]
 
-        if self.allow_pickle:
-            dat = self.pseudopickler.deserialize(dat)
+        dat = self.pseudopickler.deserialize(dat)
         return dat
     def loads(self, file, key=None, **kwargs):
         """
@@ -895,7 +1087,7 @@ class NDarrayMarshaller:
 
     def __init__(self,
                  base_serializer=None,
-                 allow_pickle=True,
+                 allow_pickle=False,
                  psuedopickler=None,
                  allow_records=False,
                  all_dicts=False,
@@ -924,8 +1116,8 @@ class NDarrayMarshaller:
 
         self.parent=base_serializer
         self.allow_pickle = allow_pickle
-        if allow_pickle and psuedopickler is None:
-            psuedopickler = PseudoPickler(b64encode=True)
+        if psuedopickler is None:
+            psuedopickler = PseudoPickler(b64encode=True, allow_pickle=allow_pickle)
         self._seen_cache = None
         self.psuedopickler = psuedopickler
         self.all_dicts = all_dicts
@@ -946,8 +1138,9 @@ class NDarrayMarshaller:
         :rtype: collections.OrderedDict
         """
         return OrderedDict((
+            (lambda x: hasattr(x, 'to_state') and not isinstance(x, type),
+             lambda x, s: s._psuedo_pickle_to_numpy(x)), # before ndarray, so array subclasses with state keep it
             ((np.ndarray,), lambda data, cls: cls._iterable_to_numpy(data)),
-            ('to_state', lambda x, s: s._psuedo_pickle_to_numpy(x)),
             ('asarray', lambda data, cls: cls._iterable_to_numpy(data.asarray())),
             ((type(None),), lambda x, cls: cls._none_to_none(x)),
             (self.atomic_types, lambda x, cls: cls._literal_to_numpy(x)),
@@ -1050,14 +1243,14 @@ class NDarrayMarshaller:
                         if not try_numpy: break
 
                 if try_numpy:
-                    #TODO: need to reset this later
                     try:
                         warning_type = np.VisibleDeprecationWarning
                     except AttributeError:
                         warning_type = DeprecationWarning
-                    warnings.filterwarnings('error', category=warning_type)
                     try:
-                        arr = np.asanyarray(data)
+                        with warnings.catch_warnings(): # (this used to switch the warning to an error for the whole process)
+                            warnings.simplefilter('error', category=warning_type)
+                            arr = np.asanyarray(data)
                     except (ValueError, warning_type):
                         arr = np.empty(shape=(len(data),), dtype=object)
                         for i, v in enumerate(data):
@@ -1241,8 +1434,8 @@ class NDarrayMarshaller:
                     converter = f
                     break
 
-            if converter is None and allow_pickle:
-                converter = self._default_convert
+            if converter is None:
+                converter = self._default_convert # the pickler decides whether pickle is allowed
 
             if converter is None:
                 raise TypeError("no registered converter to coerce {} into HDF5 compatible format".format(data))
@@ -1272,12 +1465,28 @@ class NDarrayMarshaller:
     def deconvert(self, data):
         """
         Reverses the conversion process
-        used to marshall the data
+        used to marshall the data. Pseudo-pickled objects are restored once, after the
+        whole tree is rebuilt, so references between them resolve.
 
         :param data:
         :type data:
         :return:
         :rtype:
+        """
+        local = self.__dict__.setdefault('_local', threading.local())
+        depth = getattr(local, 'depth', 0)
+        local.depth = depth + 1
+        try:
+            res = self._deconvert(data)
+        finally:
+            local.depth = depth
+        if depth == 0:
+            res = self.psuedopickler.deserialize(res)
+        return res
+
+    def _deconvert(self, data):
+        """
+        Reverses the conversion for one level of the tree, without restoring pseudo-pickled objects
         """
 
         # we loop through the keys and recursively build up a dict
@@ -1303,19 +1512,16 @@ class NDarrayMarshaller:
         else:
             res = data
 
+        # byte strings are how HDF5 stores text, so they come back as `str`
+        if isinstance(res, np.ndarray) and res.dtype.kind == 'S':
+            try:
+                res = np.char.decode(res, 'utf-8')
+            except UnicodeDecodeError:
+                pass # not text after all
+
         # for primitive data...
         if isinstance(res, np.ndarray) and res.shape == ():
-            dtype_name = str(res.dtype)
-            if '|S' in dtype_name:
-                # convert back from bytes to unicode...
-                try:
-                    res = res.astype(dtype=dtype_name.replace('|S', '<U'))
-                except:
-                    pass
             res = res.tolist()
-
-        if self.allow_pickle:
-            res = self.psuedopickler.deserialize(res)
 
         return res
 
@@ -1345,7 +1551,7 @@ class HDF5Serializer(BaseSerializer):
     """
     default_extension = ".hdf5"
     binary = True
-    def __init__(self, allow_pickle=True, psuedopickler=None, converters=None):
+    def __init__(self, allow_pickle=False, psuedopickler=None, converters=None):
         """
         **LLM Docstring**
 
@@ -1363,8 +1569,8 @@ class HDF5Serializer(BaseSerializer):
         import h5py as api
         self.api = api
         self.allow_pickle = allow_pickle
-        if allow_pickle and psuedopickler is None:
-            psuedopickler = PseudoPickler(b64encode=True)
+        if psuedopickler is None:
+            psuedopickler = PseudoPickler(b64encode=True, allow_pickle=allow_pickle)
         self.psuedopickler = psuedopickler
         self.marshaller = NDarrayMarshaller(
             self,
@@ -1383,6 +1589,8 @@ class HDF5Serializer(BaseSerializer):
         :return:
         :rtype:
         """
+        # one walk for the whole value, so objects that appear more than once are written once
+        data = self.psuedopickler.serialize(data)
         return ConvertedData(self.marshaller(data), self)
 
     def _create_dataset(self, h5_obj, key, data):
@@ -1490,8 +1698,8 @@ class HDF5Serializer(BaseSerializer):
             # clean up string datatypes
             dtype_name = str(data.dtype)
             if '<U' in dtype_name:
-                # If so, convert the array to one with bytes
-                data = data.astype(dtype=dtype_name.replace('<U', '|S'))
+                # If so, convert the array to one with (utf-8) bytes
+                data = np.char.encode(data, 'utf-8')
 
         if isinstance(key, str):
             key = [key]
@@ -1684,8 +1892,27 @@ class NumPySerializer(BaseSerializer):
     binary = True
 
     # we define a converter layer that will coerce everything to NumPy arrays
-    atomic_types = (str, int, float)
+    atomic_types = (str, int, float, np.generic)
     converter_dispatch = None
+
+    def __init__(self, allow_pickle=False, pseudopickler=None):
+        """
+        **LLM Docstring**
+
+        Configure how objects that aren't arrays, scalars, lists or dicts are stored: through the pseudo-pickler
+        (objects with `to_state`, or anything else when `allow_pickle` is on) as plain NumPy-compatible trees.
+
+        :param allow_pickle: whether pseudo-pickled objects are written and restored (and whether `pickle` may be used for them)
+        :type allow_pickle: bool
+        :param pseudopickler: pseudo-pickler used for arbitrary objects
+        :type pseudopickler: PseudoPickler | None
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
+        if pseudopickler is None:
+            pseudopickler = PseudoPickler(b64encode=True, allow_pickle=allow_pickle)
+        self.pickler = pseudopickler
+        self.allow_pickle = allow_pickle
     @classmethod
     def get_default_converters(self):
         """
@@ -1697,6 +1924,9 @@ class NumPySerializer(BaseSerializer):
         :rtype: collections.OrderedDict
         """
         return OrderedDict((
+        ((type(None),), lambda data, cls: cls._none_to_numpy()),
+        (lambda x: hasattr(x, 'to_state') and not isinstance(x, type),
+         lambda x, cls: cls._pseudo_pickle_to_numpy(x)), # before ndarray, so array subclasses with state keep it
         ((np.ndarray,), lambda data, cls: data),
         ('asarray', lambda data, cls: data.asarray()),
         (self.atomic_types, lambda x, cls: cls._literal_to_numpy(x)),
@@ -1735,7 +1965,31 @@ class NumPySerializer(BaseSerializer):
         return np.array([data]).reshape(())
 
     @classmethod
-    def _dict_to_numpy(cls, data):
+    def _none_to_numpy(cls):
+        """
+        **LLM Docstring**
+
+        Encode `None` as a marker entry (NPZ has no empty value).
+
+        :return: the marker mapping
+        :rtype: dict
+        """
+        return {'_none': np.array(True)}
+
+    def _pseudo_pickle_to_numpy(self, data):
+        """
+        **LLM Docstring**
+
+        Convert an object to its pseudo-pickle spec and then to NumPy-compatible form.
+
+        :param data: object to store
+        :type data: object
+        :return: the converted spec
+        :rtype: object
+        """
+        return self._convert(self.pickler.serialize(data))
+
+    def _dict_to_numpy(self, data):
         """
         **LLM Docstring**
 
@@ -1746,10 +2000,11 @@ class NumPySerializer(BaseSerializer):
         :return: The converted representation described above.
         :rtype: object
         """
-        return {k: cls._convert(v) for k, v in data.items()}
+        if len(data) == 0:
+            return {'_empty_dict': np.array(True)}
+        return {k: self._convert(v) for k, v in data.items()}
 
-    @classmethod
-    def _iterable_to_numpy(cls, data):
+    def _iterable_to_numpy(self, data):
         """
         **LLM Docstring**
 
@@ -1760,16 +2015,26 @@ class NumPySerializer(BaseSerializer):
         :return: The converted representation described above.
         :rtype: object
         """
-        arr = np.array(data)
+        try:
+            arr = np.array(data)
+        except ValueError: # ragged
+            arr = np.empty(len(data), dtype=object)
+        if arr.dtype.kind in 'US':
+            # NumPy would silently turn a mix like `[1, "a"]` into strings
+            try:
+                flat = np.asarray(data, dtype=object).ravel()
+            except ValueError:
+                flat = ()
+            if any(not isinstance(v, str) for v in flat):
+                arr = np.empty(len(data), dtype=object)
         if arr.dtype == np.dtype(object):
             # map iterable into a stack of datasets :|
-            return dict({'_list_item_' + str(i): cls._convert(v) for i, v in enumerate(data)},
-                        _list_numitems=cls._convert(len(data)))
+            return dict({'_list_item_' + str(i): self._convert(v) for i, v in enumerate(data)},
+                        _list_numitems=self._convert(len(data)))
         else:
             return arr
 
-    @classmethod
-    def _convert(cls, data):
+    def _convert(self, data):
         """
         Recursively loop through, test data, make sure NumPy compatible
         :param data:
@@ -1778,7 +2043,7 @@ class NumPySerializer(BaseSerializer):
         :rtype:
         """
         converter = None
-        for k, f in cls.get_converters().items():
+        for k, f in self.get_converters().items():
             if isinstance(k, tuple):  # check if we're dispatching based on type
                 if isinstance(data, k):
                     converter = f
@@ -1792,9 +2057,12 @@ class NumPySerializer(BaseSerializer):
                 break
 
         if converter is None:
-            raise TypeError("no registered converter to coerce {} into HDF5 compatible format".format(data))
+            converter = lambda x, cls: cls._pseudo_pickle_to_numpy(x) # the pickler decides whether pickle is allowed
 
-        return converter(data, cls)
+        if converter is None:
+            raise TypeError("no registered converter to coerce {} into NumPy compatible format".format(data))
+
+        return converter(data, self)
 
     dict_key_sep="::>|<::" # we pick a somewhat goofy separator to avoid conflicts in most cases
     def _flatten_dict(self, d, sep=None):
@@ -1828,6 +2096,8 @@ class NumPySerializer(BaseSerializer):
         :return: The converted representation described above.
         :rtype: object
         """
+        # one walk for the whole value, so objects that appear more than once are written once
+        data = self.pickler.serialize(data)
         first_pass = self._convert(data)
         if isinstance(first_pass, dict):
             # we need to flatten out nested dictionaries
@@ -1850,16 +2120,47 @@ class NumPySerializer(BaseSerializer):
         :rtype: object
         """
         if isinstance(data, dict):
+            if 'pseudopickle_protocol' in data or 'pseudopickle_ref' in data:
+                # a pseudo-pickled object: back to plain python so `from_state` sees what `to_state` wrote
+                # (objects are restored in one go by `deconvert`, so references between them resolve)
+                return self._to_plain(data)
             # we check to make sure we don't have an implicitly encoded mixed-type list
             if '_list_numitems' in data:
                 # actually an iterable but with inconsistent shape
-                n_items = data['_list_numitems']
-                res = [ data['_list_item_' + str(i)] for i in range(n_items) ]
+                n_items = int(data['_list_numitems'])
+                res = [ self._deconvert_val(data['_list_item_' + str(i)]) for i in range(n_items) ]
+            elif list(data.keys()) == ['_none']:
+                res = None
+            elif list(data.keys()) == ['_empty_dict']:
+                res = {}
             else:
                 res = {k: self._deconvert_val(v) for k,v in data.items()}
         else:
             res = data
         return res
+
+    def _to_plain(self, data):
+        """
+        **LLM Docstring**
+
+        Undo the list/`None`/empty-dict markers and turn zero-dimensional arrays back into python scalars.
+
+        :param data: converted data
+        :type data: object
+        :return: the plain python structure
+        :rtype: object
+        """
+        if isinstance(data, dict):
+            if '_list_numitems' in data:
+                return [self._to_plain(data['_list_item_' + str(i)]) for i in range(int(data['_list_numitems']))]
+            elif list(data.keys()) == ['_none']:
+                return None
+            elif list(data.keys()) == ['_empty_dict']:
+                return {}
+            return {k: self._to_plain(v) for k, v in data.items()}
+        elif isinstance(data, np.ndarray) and data.shape == ():
+            return data.item()
+        return data
 
     def deconvert(self, data, sep=None):
         """
@@ -1891,7 +2192,8 @@ class NumPySerializer(BaseSerializer):
                     else:
                         where_do_i_go = where_do_i_go[k]
                 where_do_i_go[k_list[-1]] = data[main_key]
-            return self._deconvert_val(new_data)
+            res = self._deconvert_val(new_data)
+            return self.pickler.deserialize(res)
 
     def serialize(self, file, data, **kwargs):
         """

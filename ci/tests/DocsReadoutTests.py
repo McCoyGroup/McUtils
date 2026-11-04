@@ -29,7 +29,7 @@ class ParserTests(unittest.TestCase):
         self.assertEqual(b.source, "x = 1\nx\n")
         self.assertEqual(b.owner, "pkg.fn")
         self.assertEqual(b.line, 3)
-        self.assertEqual(len(b.key), 32)
+        self.assertEqual(len(b.key), 64)
 
     def test_default_ids(self):
         text = page(block("a", marker="<!-- readout -->"), block("b", marker="<!-- readout() -->"))
@@ -270,7 +270,7 @@ class StoreTests(unittest.TestCase):
         self.addCleanup(self._tmp.cleanup)
         self.root = os.path.join(self._tmp.name, "readouts")
         self.store = ReadoutStore(self.root)
-        self.key = "ab" + "0" * 30
+        self.key = "ab" + "0" * 62
 
     def test_round_trip(self):
         self.assertFalse(self.store.has(self.key))
@@ -303,14 +303,14 @@ class StoreTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     self.store.write(self.key, {}, {name: "x"})
         self.assertEqual(self.store.keys(), [])  # nothing half-written
-        for key in ("short", "../" + "a" * 29, "Z" * 32):
+        for key in ("short", "../" + "a" * 61, "Z" * 64):
             with self.subTest(key):
                 with self.assertRaises(ValueError):
                     self.store.entry_path(key)
 
     def test_prune(self):
-        k2 = "cd" + "1" * 30
-        k3 = "ab" + "2" * 30
+        k2 = "cd" + "1" * 62
+        k3 = "ab" + "2" * 62
         for k in (self.key, k2, k3):
             self.store.write(k, {"status": "ok"})
         self.assertEqual(self.store.prune([self.key], dry_run=True), sorted([k2, k3]))

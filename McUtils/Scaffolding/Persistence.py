@@ -8,6 +8,7 @@ Two classes of persistence are provided.
 """
 import json
 import os, shutil, tempfile as tf, weakref
+from .. import Devutils as dev
 
 from .Checkpointing import Checkpointer, NumPyCheckpointer
 from .Configurations import Config
@@ -17,6 +18,24 @@ __all__ = [
     "PersistenceManager",
     "ResourceManager"
 ]
+
+def warn_config_persistence_deprecated(name):
+    """
+    **LLM Docstring**
+
+    Warn that the config-based persistence framework (`PersistenceManager`, `JobManager`, `Job`) is
+    deprecated. Use `Checkpointer`s for key/value persistence and `ResourceManager` for files.
+
+    :param name: the deprecated name being used
+    :type name: str
+    :return: No explicit value; warns or raises depending on `MCUTILS_DEPRECATIONS`.
+    :rtype: None
+    """
+    dev.warn_deprecated(
+        name, "Checkpointer / ResourceManager",
+        message="`{}` is part of the config-based persistence framework (`PersistenceManager`, `JobManager`, `Job`), "
+                "which is deprecated and will be removed; use `Checkpointer`s (or `ResourceManager`) instead".format(name)
+    )
 
 class PersistenceLocation:
     """
@@ -47,10 +66,15 @@ class PersistenceLocation:
         if delete is None:
             delete = not os.path.isdir(loc)
 
+        self._tempdir = None
         absloc = os.path.abspath(loc)
         if not os.path.isdir(absloc):
             if absloc != loc:
-                loc = os.path.join(tf.TemporaryDirectory().name, loc)
+                # a relative name that doesn't exist lives in a temporary directory this object owns
+                # (it used to point into one that had already been cleaned up)
+                self._tempdir = tf.TemporaryDirectory()
+                loc = os.path.join(self._tempdir.name, loc)
+                os.makedirs(loc, exist_ok=True)
         else:
             loc = absloc
 
@@ -59,7 +83,7 @@ class PersistenceLocation:
         # delete...note that if the location
         # dies and then is reborn as a deletable
         # then it will be deleted
-        for k,v in self._cache.items():
+        for k,v in list(self._cache.items()):
             if v.loc == loc:
                 if not delete:
                     v.delete = False
@@ -96,7 +120,7 @@ class PersistenceLocation:
         :return: No explicit value; the method mutates state or performs I/O.
         :rtype: None
         """
-        if self.delete:
+        if getattr(self, 'delete', False):
             try:
                 shutil.rmtree(self.loc)
             except OSError:
@@ -115,6 +139,7 @@ class PersistenceManager:
         :param persistence_loc: location from which to load/save objects
         :type persistence_loc: str | None
         """
+        warn_config_persistence_deprecated("McUtils.Scaffolding.PersistenceManager")
         self.cls = cls
         if persistence_loc is None:
             if not hasattr(cls, 'persistence_loc'):
@@ -360,6 +385,7 @@ class ResourceManager:
         return os.path.join(self.location, self.name, *path)
 
     blacklist_files = ['.DS_Store']
+    metadata_suffix = '.meta.json'
     def list_resources(self):
         """
         **LLM Docstring**
@@ -374,7 +400,7 @@ class ResourceManager:
         return {
             p:os.path.join(base_dir, p)
             for p in os.listdir(base_dir)
-            if p not in self.blacklist_files
+            if p not in self.blacklist_files and not p.endswith(self.metadata_suffix)
         }
 
     binary_resource = True
@@ -394,7 +420,7 @@ class ResourceManager:
         """
         with open(loc, 'w+' if not self.binary_resource else 'wb') as res_file:
             if self.json_resource:
-                json.dump(res_file, val)
+                json.dump(val, res_file)
             else:
                 res_file.write(val)
     def load_resource(self, loc):
@@ -425,7 +451,7 @@ class ResourceManager:
         :return: The resolved filesystem path or basename.
         :rtype: str
         """
-        return name + '.meta.json'
+        return name + self.metadata_suffix
     def get_resource_metadata(self, loc):
         """
         **LLM Docstring**
@@ -479,6 +505,9 @@ class ResourceManager:
             if resource_function is not None:
                 default_val = resource_function(name)
                 self.save_resource(loc, default_val)
+                if self.write_metadata:
+                    with open(self.get_resource_path(self.get_metadata_filename(resource_file)), 'w+') as meta_file:
+                        json.dump(self.get_resource_metadata(loc), meta_file)
             else:
                 return None
         if load_resource:

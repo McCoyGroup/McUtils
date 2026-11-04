@@ -4,7 +4,7 @@ job
 """
 
 import time, datetime, os, shutil
-from .Persistence import PersistenceManager
+from .Persistence import PersistenceManager, warn_config_persistence_deprecated
 from .Checkpointing import JSONCheckpointer
 from .Logging import Logger, NullLogger
 
@@ -62,6 +62,7 @@ class Job:
         :return: No explicit value; the method mutates state or performs I/O.
         :rtype: None
         """
+        warn_config_persistence_deprecated("McUtils.Scaffolding.Job")
         self.dir = job_dir
         self.end = None
 
@@ -268,6 +269,7 @@ class JobManager(PersistenceManager):
         :return: No explicit value; the method mutates state or performs I/O.
         :rtype: None
         """
+        warn_config_persistence_deprecated("McUtils.Scaffolding.JobManager")
         if job_type is None:
             job_type = self.default_job_type
         super().__init__(job_type, persistence_loc=job_dir)

@@ -23,6 +23,7 @@ import threading
 import uuid
 import numpy as np
 from .. import Devutils as dev
+from ..Devutils.FileHelpers import FileStoreLock, atomic_file
 from ..Numputils.Serialization import _memmap_npy_member, _load_npy_member_bytes
 
 __all__ = [
@@ -851,20 +852,8 @@ class SerializedObjectSupplier(LineIndexedSupplier):
 
     @classmethod
     def _replace_line_index(cls, index_file, line_indices):
-        index_dir = os.path.dirname(os.path.abspath(index_file))
-        temp_name = None
-        try:
-            with tempfile.NamedTemporaryFile(
-                mode="wb", dir=index_dir, prefix=".line_indices-", delete=False
-            ) as temp:
-                temp_name = temp.name
-                cls.save_line_index(temp, line_indices)
-                temp.flush()
-            os.replace(temp_name, index_file)
-            temp_name = None
-        finally:
-            if temp_name is not None and os.path.exists(temp_name):
-                os.unlink(temp_name)
+        with atomic_file(index_file, "wb", fsync=False, keep_mode=False) as temp:
+            cls.save_line_index(temp, line_indices)
 
     @classmethod
     def create_jump_database(
@@ -999,44 +988,6 @@ class NPZLSupplier(SerializedObjectSupplier):
             finally:
                 self._max_offset = ninds
             return self._offsets[: self._max_offset] if return_index else None
-
-
-class FileStoreLock:
-    """Reentrant thread/process lock on a stable sidecar file (POSIX)."""
-
-    _registry = {}
-    _guard = threading.Lock()
-
-    def __init__(self, path):
-        self.path = os.path.realpath(os.fspath(path))
-
-    @contextlib.contextmanager
-    def __call__(self):
-        import fcntl
-
-        key = (os.getpid(), self.path)
-        with self._guard:
-            mutex, local = self._registry.setdefault(key, (threading.RLock(), threading.local()))
-        with mutex:
-            depth = getattr(local, "depth", 0)
-            if depth == 0:
-                os.makedirs(os.path.dirname(self.path), exist_ok=True)
-                local.stream = open(self.path, "a+b")
-                try:
-                    fcntl.flock(local.stream.fileno(), fcntl.LOCK_EX)
-                except BaseException:
-                    local.stream.close()
-                    raise
-            local.depth = depth + 1
-            try:
-                yield
-            finally:
-                local.depth -= 1
-                if local.depth == 0:
-                    try:
-                        fcntl.flock(local.stream.fileno(), fcntl.LOCK_UN)
-                    finally:
-                        local.stream.close()
 
 
 class _MemberReader(io.RawIOBase):
@@ -1486,21 +1437,13 @@ class IndexedTarStore(ArchiveMapping):
             return
         with self.lock(), self._index() as db:
             rows = db.execute("SELECT name, offset, size, header FROM members ORDER BY offset").fetchall()
-            fd, temporary = tempfile.mkstemp(prefix=".tar-compact-", dir=os.path.dirname(self.path))
-            try:
-                with os.fdopen(fd, "wb") as stream:
-                    with tarfile.open(fileobj=stream, mode="w") as archive:
-                        for _, offset, size, header in rows:
-                            info = self._info(header)
-                            with _MemberReader(self.path, offset, size) if info.isfile() else contextlib.nullcontext() as source:
-                                archive.addfile(info, source)
-                    stream.flush()
-                    os.fsync(stream.fileno())
-                os.replace(temporary, self.path)
-                self._rebuild(db)
-            finally:
-                if os.path.exists(temporary):
-                    os.unlink(temporary)
+            with atomic_file(self.path, "wb", keep_mode=False) as stream:
+                with tarfile.open(fileobj=stream, mode="w") as archive:
+                    for _, offset, size, header in rows:
+                        info = self._info(header)
+                        with _MemberReader(self.path, offset, size) if info.isfile() else contextlib.nullcontext() as source:
+                            archive.addfile(info, source)
+            self._rebuild(db)
 
     def _write_snapshot(self, db, stream):
         rows = db.execute("SELECT offset, size, header FROM members ORDER BY offset").fetchall()
@@ -1525,15 +1468,7 @@ class IndexedTarStore(ArchiveMapping):
                 stack.enter_context(lock())
             db = stack.enter_context(self._index())
             target_db = stack.enter_context(target._index())
-            fd, temporary = tempfile.mkstemp(prefix=".tar-save-", dir=os.path.dirname(target.path))
-            try:
-                with os.fdopen(fd, "wb") as stream:
-                    self._write_snapshot(db, stream)
-                    stream.flush()
-                    os.fsync(stream.fileno())
-                os.replace(temporary, target.path)
-                target._rebuild(target_db)
-            finally:
-                if os.path.exists(temporary):
-                    os.unlink(temporary)
+            with atomic_file(target.path, "wb", keep_mode=False) as stream:
+                self._write_snapshot(db, stream)
+            target._rebuild(target_db)
         return file

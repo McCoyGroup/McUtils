@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from multiprocessing import Manager, shared_memory
 from multiprocessing.managers import DictProxy, ListProxy
 
-from ..Scaffolding import BaseObjectManager, NDarrayMarshaller
+from ..Scaffolding import NDarrayMarshaller
 
 __all__ = [
     "SharedObjectManager",
@@ -604,6 +604,9 @@ class SharedMemoryArrayTree:
         self._owner = owner
         self._closed = False
         self._unlinked = False
+
+    def __fingerprint__(self):
+        return self.tree # the contents, not the arena that happens to hold them
 
     @staticmethod
     def _align(offset, alignment):
@@ -1407,7 +1410,7 @@ class SharedAttribute:
 class PrimitiveTypeHolder:
     val: object
 
-class SharedObjectManager(BaseObjectManager):
+class SharedObjectManager:
     """
     Provides a high-level interface to create a manager
     that supports shared memory objects through the multiprocessing
@@ -1427,10 +1430,40 @@ class SharedObjectManager(BaseObjectManager):
 
         if self.is_primitive(obj):
             obj = PrimitiveTypeHolder(obj)
-        super().__init__(obj)
+        self.obj = obj
+        self._base_name = None
 
         self.base_dict = SharedMemoryDict(parallelizer=parallelizer) if base_dict is None else base_dict
         self.parallelizer = parallelizer
+
+    def get_basename(self):
+        """
+        **LLM Docstring**
+
+        Build a storage basename from the object type and its `serialization_id` or runtime identity.
+
+        :return: the generated storage basename
+        :rtype: str
+        """
+        if hasattr(self.obj, 'serialization_id'):
+            obj_id = self.obj.serialization_id
+        else:
+            obj_id = id(self.obj)
+        return "{}_{}".format(type(self.obj).__name__, obj_id)
+
+    @property
+    def basename(self):
+        """
+        **LLM Docstring**
+
+        Lazily compute and cache the manager basename.
+
+        :return: The resolved filesystem path or basename.
+        :rtype: str
+        """
+        if self._base_name is None:
+            self._base_name = self.get_basename()
+        return self._base_name
 
     primitive_types = (
         set,
