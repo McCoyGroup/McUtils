@@ -38,7 +38,7 @@ def parts(control):
 @unittest.skipUnless(have_widgets(), "ipywidgets/markdown not installed")
 class RunControlTests(unittest.TestCase):
     def setUp(self):
-        from McUtils.Docs.ExampleLive import LiveExamplePage
+        from McUtils.Docs.Examples import LiveExamplePage
         self.page = LiveExamplePage(BLOCKS, owner="controls.demo")
         self.displayed()      # keep the runtime script out of the test output
 
@@ -72,7 +72,7 @@ class RunControlTests(unittest.TestCase):
         self.assertTrue(html.startswith("<pre>"))
         self.assertIn("ZeroDivisionError", html)
         self.assertNotIn("<example", html)          # the file name is escaped, not parsed as a tag
-        self.assertNotIn("ExampleLive.py", html)    # nothing of the machinery in the traceback
+        self.assertNotIn("Examples.py", html)    # nothing of the machinery in the traceback
 
     def test_the_button_goes_after_a_successful_run_but_stays_after_a_failure(self):
         ok_button, _ = parts(self.page.control("c-1"))
@@ -92,7 +92,7 @@ class RunControlTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             store = ReadoutStore(os.path.join(tmp, "readouts"))
             ExampleRunner(store, timeout=20).run_text(BLOCKS.split("<!-- readout(id=\"c-2\")")[0], owner="controls.demo")
-            from McUtils.Docs.ExampleLive import LiveExamplePage
+            from McUtils.Docs.Examples import LiveExamplePage
             page = LiveExamplePage(BLOCKS, owner="controls.demo", store=store)
             stored = parts(page.control("c-1"))
             self.assertEqual(len(stored), 1)                            # just the output
@@ -106,7 +106,7 @@ class RunControlTests(unittest.TestCase):
 
     def test_a_block_from_another_parse_of_the_same_text_runs(self):
         """`split_examples` parses separately from the page; the engine hands those blocks to `control`."""
-        from McUtils.Docs.ExampleLive import split_examples
+        from McUtils.Docs.Examples import split_examples
         pieces = [p for kind, p in split_examples(BLOCKS, "controls.demo") if kind != "text"]
         self.assertIsNot(pieces[0], self.page.blocks[0])
         button, out = parts(self.page.control(pieces[0]))
@@ -121,7 +121,7 @@ class RunControlTests(unittest.TestCase):
         self.assertIn("mcr-run", classes)
 
     def test_place_accepts_markup_elements_and_widgets(self):
-        from McUtils.Docs.ExampleLive import LiveExamplePage, Fragment
+        from McUtils.Docs.Examples import LiveExamplePage, Fragment
         from McUtils.Jupyter import JHTML
         out = JHTML.Div(dynamic=True)
         LiveExamplePage.place(out, Fragment("<i>ready</i>"))
@@ -149,7 +149,7 @@ class RunControlTests(unittest.TestCase):
         return shown
 
     def test_scene_output_is_written_like_any_other_fragment(self):
-        from McUtils.Docs.ExampleLive import LiveExamplePage
+        from McUtils.Docs.Examples import LiveExamplePage
         from McUtils.Jupyter import JHTML
         from McUtils.Readouts.Renderers.HTML import FragmentResult
         out = JHTML.Div(dynamic=True)
@@ -174,7 +174,7 @@ class RunControlTests(unittest.TestCase):
         self.assertIn(X3D.X3DOM_CSS, markup)
 
     def test_a_runner_with_a_published_x3dom_url_is_respected(self):
-        from McUtils.Docs.ExampleLive import LiveExamplePage
+        from McUtils.Docs.Examples import LiveExamplePage
         from McUtils.Docs.Examples import ExampleRunner
         shown = self.displayed()
         page = LiveExamplePage(BLOCKS, owner="controls.demo", runner=ExampleRunner(None, x3dom_path="https://x.org/x3dom.js"))
@@ -187,7 +187,7 @@ class RunControlTests(unittest.TestCase):
 
     @unittest.skipUnless(shutil.which("node"), "node not installed")
     def test_the_watcher_is_valid_javascript(self):
-        from McUtils.Docs.ExampleEmbed import X3DOM_WATCHER_JS
+        from McUtils.Docs.Examples import X3DOM_WATCHER_JS
         script = X3DOM_WATCHER_JS.replace("__RUNTIME__", json.dumps({"script": "s.js", "stylesheet": "c.css"}))
         with tempfile.TemporaryDirectory() as tmp:
             path = os.path.join(tmp, "watcher.js")
@@ -197,7 +197,7 @@ class RunControlTests(unittest.TestCase):
             self.assertEqual(done.returncode, 0, done.stderr)
 
     def test_example_live_never_imports_ipywidgets_or_ipython_display(self):
-        import McUtils.Docs.ExampleLive as module
+        import McUtils.Docs.Examples as module
         with open(module.__file__) as f:
             source = f.read()
         self.assertIsNone(re.search(r"^\s*(from|import)\s+ipywidgets", source, re.M))
@@ -250,7 +250,7 @@ class TrivialReadoutTests(unittest.TestCase):
         self.assertIsNotNone(ExampleView(block, {"a": 1, "b": 2}).node())
 
     def test_live_page_reports_empty(self):
-        from McUtils.Docs.ExampleLive import LiveExamplePage
+        from McUtils.Docs.Examples import LiveExamplePage
         text = '<!-- readout(id="t-1") -->\n```python\nimport numpy as np\nnp.int64(1)\n```\n'
         page = LiveExamplePage(text, imports=False)
         self.assertEqual(page.try_run(page.blocks[0]).status, "empty")

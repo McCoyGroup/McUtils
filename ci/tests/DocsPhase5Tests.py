@@ -13,8 +13,8 @@ import unittest
 
 from McUtils.Docs import DocBuilder
 from McUtils.Docs.Examples import ExampleParser, ExampleRunner, ReadoutStore
-from McUtils.Docs.ExampleEmbed import ExampleEmbedder
-from McUtils.Docs.ExampleLive import LiveExamplePage, split_examples
+from McUtils.Docs.Examples import ExampleEmbedder
+from McUtils.Docs.Examples import LiveExamplePage, split_examples
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -163,7 +163,7 @@ class LiveExamplePageTests(unittest.TestCase):
         return LiveExamplePage(text, owner="demo", **kw)
 
     def test_blocks_share_a_namespace_in_order(self):
-        page = self.page(block("a", "x = 21", display="none") + block("b", "x * 2"))
+        page = self.page(block("a", "x = 21", display="none") + block("b", "x * 2", show_trivial=True))
         result = page.try_run("b")
         self.assertEqual(result.status, "ok")
         self.assertEqual(result.view.value, 42)
@@ -178,7 +178,7 @@ class LiveExamplePageTests(unittest.TestCase):
         self.assertEqual(page.run("c").value, ["a", "b", "b"])
 
     def test_isolated_blocks_start_fresh(self):
-        text = block("a", "x = 1", display="none") + block("b", "x = 2\nx", isolated=True) + block("c", "x", isolated=True)
+        text = block("a", "x = 1", display="none") + block("b", "x = 2\nx", isolated=True, show_trivial=True) + block("c", "x", isolated=True)
         page = self.page(text)
         self.assertEqual(page.try_run("b").status, "ok")
         result = page.try_run("c")
@@ -192,7 +192,7 @@ class LiveExamplePageTests(unittest.TestCase):
         self.assertIn("ZeroDivisionError", result.error)
         self.assertIn("1/0", result.error)
         self.assertNotIn("Examples.py", result.error)
-        self.assertNotIn("ExampleLive.py", result.error)
+        self.assertNotIn("Examples.py", result.error)
         with self.assertRaises(ZeroDivisionError):
             page.run("boom")
 
@@ -455,7 +455,7 @@ class StaticDocTests(unittest.TestCase):
     def test_a_missing_entry_leaves_a_note_and_strict_raises(self):
         empty = ReadoutStore(os.path.join(self._tmp.name, "empty"))
         self.assertIn("Readout not generated yet", self.doc(readouts=empty))
-        from McUtils.Docs.ExampleEmbed import ExampleEmbedError
+        from McUtils.Docs.Examples import ExampleEmbedError
         with self.assertRaises(ExampleEmbedError):
             self.doc(readouts=empty, strict_readouts=True)
 

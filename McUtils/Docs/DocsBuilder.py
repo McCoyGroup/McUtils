@@ -2,7 +2,7 @@
 import os, shutil
 
 from .DocWalker import DocWalker
-from .ExampleEmbed import ExampleEmbedder, publish_readouts
+from .Examples import ExampleEmbedder, publish_readouts
 from ..Formatters.TemplateEngine import ResourceLocator
 
 __all__ = [

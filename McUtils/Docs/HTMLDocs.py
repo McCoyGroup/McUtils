@@ -639,7 +639,7 @@ def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True
     engine = JHTMLDocumentationEngine()
     embedder = None
     if readouts is not None:
-        from .ExampleEmbed import ExampleEmbedder
+        from .Examples import ExampleEmbedder
         embedder = ExampleEmbedder(readouts, inline=True, strict=strict_readouts, warn=None)
 
     # `check_should_write` guesses "is this stdlib?" from `sys.prefix` + the

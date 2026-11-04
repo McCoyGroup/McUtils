@@ -11,15 +11,7 @@ from .HTMLDocs import *; from .HTMLDocs import __all__ as exposed
 __all__ += exposed
 from .Stubs import *; from .Stubs import __all__ as exposed
 __all__ += exposed
-from .ExamplesParser import *; from .ExamplesParser import __all__ as exposed
-__all__ += exposed
 from .Examples import *; from .Examples import __all__ as exposed
 __all__ += exposed
 from .Docstrings import *; from .Docstrings import __all__ as exposed
-__all__ += exposed
-from .ExampleProcess import *; from .ExampleProcess import __all__ as exposed
-__all__ += exposed
-from .ExampleEmbed import *; from .ExampleEmbed import __all__ as exposed
-__all__ += exposed
-from .ExampleLive import *; from .ExampleLive import __all__ as exposed
 __all__ += exposed

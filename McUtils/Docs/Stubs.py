@@ -33,7 +33,7 @@ import sys
 from .. import Devutils as dev
 from ..Formatters import TemplateHandler
 
-from .ExamplesParser import ExamplesParser
+from .Examples import ExamplesParser
 
 __all__ = [
     "StubSummaryBuilder",
@@ -1329,12 +1329,12 @@ class ExampleHandler(PackageHandler):
     USAGE_GRAPH_FILENAME = "usage_graph.json"
     EXAMPLE_FILE_HEADER_TEMPLATE = (
         '"""Extracted from {class_name}.{method_name} via '
-        'McUtils.Docs.ExamplesParser -- not the original file, and may '
+        'McUtils.Docs.Examples -- not the original file, and may '
         'reference test-only setup/state. Run with: '
         'python -m unittest {class_name}.{method_name}"""\n\n'
     )
     EXAMPLES_PARSER_UNAVAILABLE_WARNING = (
-        "[INFO] McUtils.Docs.ExamplesParser not importable -- skipping example extraction."
+        "[INFO] McUtils.Docs.Examples not importable -- skipping example extraction."
     )
     EXAMPLES_PARSE_ERROR_TEMPLATE = (
         "[WARN] failed to parse tests for {package_name!r} ({test_file}): {error}"
@@ -1481,7 +1481,7 @@ class ExampleHandler(PackageHandler):
 
     def extract_examples(self, package_name, tests_directory=None):
         """For one top-level package: locate its test file (see
-        locate_test_file), parse it with McUtils.Docs.ExamplesParser,
+        locate_test_file), parse it with McUtils.Docs.Examples,
         write each example under
         <out_dir>/examples/<package_name>/, and merge its usage into
         dispatcher.usage_graph. Safe to call even when no test file
