@@ -54,6 +54,7 @@ for match in matches[:5]:
 
 <div class="card-body out-block" markdown="1">
 
+<!-- readout(id="mcutils-parsers-3", isolated=True) -->
 ```python
 {'key': '0', 'value': 'g09'}
 {'key': 'Input', 'value': 'water_OH_scan'}
@@ -120,6 +121,7 @@ For efficiency sake, `StringParser` objects also provide a `block_handlers` argu
 A handler is a function that can be applied to a parsed piece of text and should directly return a `NumPy` array so that it can be worked into the returned `StructuredTypeArray`.
 The simplest handlers are already provided for convenience on `StringParser`, e.g. from `GaussianLogComponents.py`
 
+<!-- readout(id="mcutils-parsers-8", isolated=True) -->
 ```python
 Named(
     Repeating(
@@ -139,6 +141,7 @@ We also see the `prefix` and `joiner` options to `RegexPattern` in action.
 
 ### Build a declarative parser for numerical records
 
+<!-- readout(id="mcutils-parsers-9", isolated=True, display="both") -->
 ```python
 from McUtils.Parsers import RegexPattern, Repeating, Capturing
 from McUtils.Parsers import Number, Whitespace, Optional, StringParser
@@ -181,6 +184,7 @@ print("expanded structure:", len(atoms), coordinates.shape)
 
 ### Compose named fields into structured data
 
+<!-- readout(id="mcutils-parsers-12", isolated=True, display="both") -->
 ```python
 from McUtils.Parsers import RegexPattern, Named, Number, VariableName, Whitespace
 from McUtils.Parsers import StringParser

@@ -5,3 +5,5 @@
 {include$:'includes/source_links.md'}
 {description}
 {include$:'includes/parameters.md'}
+
+{include$:'includes/examples.md'}

@@ -24,3 +24,44 @@ mcui-dropdown,mcui-tooltip,mcui-popover{display:inline-block}
 .mcui-bg-light{background:var(--mcui-soft)}.mcui-bg-secondary,.mcui-bg-dark{background:#314958;color:white}.mcui-text-muted{color:var(--mcui-muted)}.mcui-text-center{text-align:center}.mcui-border{border:1px solid var(--mcui-rule)}.mcui-border-top{border-top:1px solid var(--mcui-rule)}.mcui-border-bottom{border-bottom:1px solid var(--mcui-rule)}.mcui-border-start{border-inline-start:1px solid var(--mcui-rule)}.mcui-border-end{border-inline-end:1px solid var(--mcui-rule)}
 .mcui-p-0,.mcui-px-0,.mcui-ps-0{padding-inline-start:0}.mcui-p-0,.mcui-px-0,.mcui-pe-0{padding-inline-end:0}.mcui-p-0,.mcui-py-0,.mcui-pt-0{padding-top:0}.mcui-p-0,.mcui-py-0,.mcui-pb-0{padding-bottom:0}.mcui-m-2{margin:8px}
 @media(prefers-reduced-motion:reduce){.mcui-spinner-border,.mcui-spinner-grow{animation:none}}
+
+/* Document defaults (a Bootstrap "reboot" subset) for prose inside native elements, so Markdown, headings, code and
+   lists keep the spacing the old Bootstrap pages had. Element selectors only (low specificity): anything with its
+   own class, such as a readout's .mcr-root rules or a component theme, wins. */
+:root{--mcui-link:#432c85;--mcui-code:#d63384;--mcui-pre-bg:#f5f5f5;--mcui-doc-rule:#dee2e6}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel){line-height:1.5}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel)
+  :is(h1,h2,h3,h4,h5,h6){margin:0 0 .5rem;font-weight:500;line-height:1.2}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) h1{font-size:2.5rem}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) h2{font-size:2rem}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) h3{font-size:1.75rem}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) h4{font-size:1.5rem}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) h5{font-size:1.25rem}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) h6{font-size:1rem}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel)
+  :is(p,ul,ol,dl,pre,blockquote,table){margin:0 0 1rem}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) :is(ul,ol){padding-left:2rem}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) li>:is(ul,ol){margin-bottom:0}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) a:not([class]){color:var(--mcui-link);text-decoration:underline}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) :is(code,kbd,samp,pre){font-family:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:.875em}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) :not(pre)>code{color:var(--mcui-code);word-wrap:break-word}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) pre{display:block;overflow:auto;padding:.5rem .75rem;background:var(--mcui-pre-bg)}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) pre code{color:inherit;font-size:inherit}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) blockquote{padding-left:.75rem;border-left:.25rem solid #ced4da}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) hr{margin:1rem 0;border:0;border-top:1px solid var(--mcui-doc-rule)}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) :is(th,td){padding:.25rem .5rem}
+.mcui-accordion-button{display:flex;justify-content:flex-start;align-items:center;text-align:left}
+.collapse-header>.mcui-accordion-button{width:100%}
+.mcui-doc-member{min-width:0;padding:.5rem 0}
+:is(button,.mcui-button,.mcui-accordion-button) code{color:inherit}
+.mcui-code{display:block;margin:0 0 1rem;padding:.75rem 1rem;overflow:auto;background:var(--mcui-pre-bg,#f5f5f5);border-radius:6px;font-family:SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;font-size:.875em;line-height:1.45}
+.mcui-code code{font-family:inherit;font-size:inherit;color:inherit}
+/* highlight.js brings its own block padding and background; the surrounding <pre> already provides both */
+pre code.hljs.hljs{padding:0;background:transparent;display:inline}
+:is(mcui-root,mcui-grid,mcui-flex,mcui-panel,mcui-panel-body,mcui-tabs,mcui-opener,mcui-accordion,mcui-collapse,mcui-carousel) pre{border-radius:6px}
+/* an opened member is a visibly nested subsection: left-aligned, indented, ruled; stated with enough specificity that
+   it doesn't depend on rule order or on which utility classes a theme defines */
+mcui-collapse{text-align:left}
+mcui-collapse>.collapse-body{margin:.25rem 0 .75rem .5rem;padding:.25rem 0 .25rem 1rem;border-left:3px solid var(--mcui-doc-rule);text-align:left}
+mcui-collapse>.collapse-body mcui-flex{align-items:stretch;justify-content:flex-start}
+.collapse-header>.mcui-accordion-button.mcui-button{justify-content:flex-start;text-align:left}

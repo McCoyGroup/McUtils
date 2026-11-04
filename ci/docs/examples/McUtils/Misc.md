@@ -17,6 +17,7 @@ assert np.allclose(energy(points), [7., .375])
 
 ### Write code that works with or without Numba
 
+<!-- readout(id="mcutils-misc-2", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Misc import njit
@@ -63,6 +64,7 @@ print(function(grid))
 
 ### Build a symbolic NumPy reduction
 
+<!-- readout(id="mcutils-misc-5", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Misc import Abstract
@@ -75,6 +77,7 @@ print("RMS:", rms(np.array([1., -2., 3.])))
 
 ### Inspect whether Numba is available
 
+<!-- readout(id="mcutils-misc-6", isolated=True, display="both") -->
 ```python
 from McUtils.Misc.NumbaTools import NumbaState, load_numba
 

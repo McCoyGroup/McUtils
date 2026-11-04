@@ -97,6 +97,7 @@ AtomData["D", "Mass"]
 
 <div class="card-body out-block" markdown="1">
 
+<!-- readout(id="mcutils-7", isolated=True) -->
 ```python
 2.01410177812
 ```
@@ -131,6 +132,7 @@ UnitsData.convert("Hartrees", "Wavenumbers")
 
 <div class="card-body out-block" markdown="1">
 
+<!-- readout(id="mcutils-11", isolated=True) -->
 ```python
 219474.6313632
 ```
@@ -164,6 +166,7 @@ UnitsData.convert("AtomicMassUnits", "Wavenumbers")
 
 <div class="card-body out-block" markdown="1">
 
+<!-- readout(id="mcutils-14", isolated=True) -->
 ```python
 7513006610400.0
 ```
@@ -179,6 +182,7 @@ UnitsData.data[("AtomicMassUnits", "Hartrees")]
 
 <div class="card-body out-block" markdown="1">
 
+<!-- readout(id="mcutils-16", isolated=True) -->
 ```python
 {'Value': 34231776.874,
  'Uncertainty': 0.01,

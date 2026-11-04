@@ -2,6 +2,7 @@
 
 ### Describe a compiled function signature
 
+<!-- readout(id="mcutils-extensions-1", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Extensions import FunctionSignature, Argument

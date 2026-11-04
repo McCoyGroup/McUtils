@@ -2,6 +2,7 @@
 
 ### Format a hierarchical results table
 
+<!-- readout(id="mcutils-formatters-1", isolated=True, display="both") -->
 ```python
 from McUtils.Formatters import TableFormatter
 
@@ -18,6 +19,7 @@ print(table)
 
 ### Build a TeX equation
 
+<!-- readout(id="mcutils-formatters-2", isolated=True, display="both") -->
 ```python
 from McUtils.Formatters import TeX
 
@@ -31,6 +33,7 @@ print(block.format_tex())
 
 ### Render a mixed TeX table
 
+<!-- readout(id="mcutils-formatters-3", isolated=True, display="both") -->
 ```python
 from McUtils.Formatters import TeX
 
@@ -57,6 +60,7 @@ writer.write_all({"method": "B3LYP", "basis": "6-31G*", "charge": 0})
 
 ### Select files with composable matchers
 
+<!-- readout(id="mcutils-formatters-5", isolated=True, display="both") -->
 ```python
 from pathlib import Path
 from McUtils.Formatters import FileMatcher, StringMatcher

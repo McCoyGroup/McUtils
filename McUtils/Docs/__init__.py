@@ -21,3 +21,5 @@ from .ExampleProcess import *; from .ExampleProcess import __all__ as exposed
 __all__ += exposed
 from .ExampleEmbed import *; from .ExampleEmbed import __all__ as exposed
 __all__ += exposed
+from .ExampleLive import *; from .ExampleLive import __all__ as exposed
+__all__ += exposed

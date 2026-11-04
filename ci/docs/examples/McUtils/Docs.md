@@ -42,6 +42,7 @@ print("summary bytes:", summary["summary_size"])
 
 ### Render static HTML documentation
 
+<!-- readout(id="mcutils-docs-4", isolated=True, display="both") -->
 ```python
 from McUtils.Docs import static_doc
 from McUtils.Combinatorics import UniquePermutations
@@ -55,6 +56,7 @@ print("generated HTML characters:", len(html))
 
 ### Walk an object hierarchy
 
+<!-- readout(id="mcutils-docs-5", isolated=True, display="both") -->
 ```python
 from McUtils.Docs import DocWalker
 from McUtils import Numputils

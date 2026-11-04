@@ -28,7 +28,7 @@ Importing this module does not import the plotting/Jupyter stack; that is loaded
 readout is actually built. Only `ExampleRunner` executes example code.
 """
 
-import ast, collections, contextlib, datetime, fnmatch, hashlib, io, json, linecache, os, random, re, \
+import ast, importlib, collections, contextlib, datetime, fnmatch, hashlib, io, json, linecache, os, random, re, \
     shutil, signal, sys, threading, time, traceback
 
 __all__ = [
@@ -111,6 +111,7 @@ _OPTIONS = collections.OrderedDict([
     ("style",    _Option(_check_units_style, True)),
     ("display",  _Option(_check_choice("readout", "output", "both", "none"), True)),
     ("css",      _Option(_check_choice("inline", "stylesheet"), True)),
+    ("show_trivial", _Option(_check_bool, True)),
     ("isolated", _Option(_check_bool, False)),
     ("timeout",  _Option(_check_timeout, False)),
 ])
@@ -231,6 +232,12 @@ class ExampleBlock:
     def isolated(self):
         return bool(self.options.get("isolated", False))
 
+    @property
+    def fence(self):
+        """The block's code fence as Markdown (its original text without the marker comment), ending in a newline."""
+        fence = self.raw[len(self.marker):].lstrip("\r\n")
+        return fence if fence.endswith("\n") else fence + "\n"
+
     def __repr__(self):
         return "{}(id={!r}, key={}, line={})".format(
             type(self).__name__, self.id, None if self.key is None else self.key[:8], self.line
@@ -288,6 +295,13 @@ class ExampleParser:
     """
 
     marker_start = re.compile(r"^[ \t]*<!--[ \t\n]*readout\b")
+
+    @classmethod
+    def has_markers(cls, text):
+        """Cheap check for whether ``text`` contains a line that starts a ``readout(...)`` marker."""
+        return isinstance(text, str) and "readout" in text and any(
+            cls.marker_start.match(line) for line in text.splitlines()
+        )
 
     @classmethod
     def parse(cls, text, owner=None, first_line=1):
@@ -642,20 +656,25 @@ class ExampleCache:
     def plan(self, blocks, refresh=False):
         """
         :param blocks: blocks to consider
-        :param refresh: ``False`` (only missing entries), ``"stale"`` (missing and stale), ``True``/``"all"``
-                        (everything), or a glob / list of globs over block ids (those, plus missing entries)
+        :param refresh: ``False`` (only missing entries), ``"stale"`` (missing and stale), ``"errors"`` (missing and
+                        failed: retry what failed), ``True``/``"all"`` (everything), or a glob / list of globs over block ids (those, plus missing entries)
         :return: ``[(block, reason), ...]`` in page order; reasons are ``"missing"``, ``"stale"``,
-                 ``"refresh"``. Executing a block also requires replaying the earlier blocks of its chain
+                 ``"refresh"``, ``"retry"``. Executing a block also requires replaying the earlier blocks of its chain
                  (`ParsedExamples.chain`); the plan lists only the blocks whose *output* must be produced.
         """
         if refresh is True or refresh == "all":
             return [(b, "refresh") for b in blocks]
+        errors = False
         if refresh is False or refresh is None:
             globs = []
             stale = False
         elif refresh == "stale":
             globs = []
             stale = True
+        elif refresh == "errors":
+            globs = []
+            stale = False
+            errors = True
         else:
             globs = [refresh] if isinstance(refresh, str) else list(refresh)
             stale = False
@@ -668,6 +687,8 @@ class ExampleCache:
                 todo.append((b, "refresh"))
             elif stale and status == "stale":
                 todo.append((b, "stale"))
+            elif errors and status == "error":
+                todo.append((b, "retry"))
         return todo
 
     def report(self, blocks):
@@ -784,9 +805,12 @@ class ExampleView:
     :param value: the value of the block's last expression (or ``_NO_VALUE``/``None``)
     :param stdout: the text the block printed
     :param to_readout: override for `value_to_readout` (a callable ``(value, options) -> Readout``)
+    :param show_trivial: show readouts that say next to nothing (a bare number's one-field record, see
+        `is_trivial`); ``None`` (default) defers to the block's ``show_trivial`` option, which defaults to off
     """
 
-    def __init__(self, block, value=_NO_VALUE, stdout="", to_readout=None, max_output=20000):
+    def __init__(self, block, value=_NO_VALUE, stdout="", to_readout=None, max_output=20000, show_trivial=None):
+        self.show_trivial = show_trivial
         self.block = block
         self.value = value
         self.stdout = stdout or ""
@@ -800,6 +824,12 @@ class ExampleView:
     @property
     def has_value(self):
         return self.value is not _NO_VALUE and self.value is not None
+
+    @property
+    def shows_trivial(self):
+        if self.show_trivial is not None:
+            return bool(self.show_trivial)
+        return str(self.block.options.get("show_trivial", False)).lower() in ("1", "true", "yes", "on")
 
     def node(self, include_code=False):
         """
@@ -835,6 +865,10 @@ class ExampleView:
         lead = [ReadoutCode(self.block.source.rstrip("\n"), language="python")] if include_code else []
         if base is None:
             return Readout(*lead, *extra, id="example-" + self.block.key[:8])
+        if not (lead or extra or self.shows_trivial):
+            from ..Readouts.Renderers.Base import is_trivial
+            if is_trivial(base):
+                return None
         if lead or extra:
             return Readout(*lead, *base.get_children(), *extra, title=base.title, subtitle=base.subtitle,
                            units=base.units, id=base.id, meta=base.meta)
@@ -845,13 +879,14 @@ class ExampleView:
         node = self.node()
         return None if node is None else node.to_html_fragment(style=style, x3dom_path=x3dom_path, css=css)
 
-    def to_element(self, mode="static", style=None, css="inline", **opts):
+    def to_element(self, mode="static", style=None, css="inline", include_code=True, **opts):
         """
         The code plus its output as an element: ``mode="static"`` (plain elements, ``.tostring()``) for
-        pages, ``mode="widget"`` for Jupyter.
+        pages, ``mode="widget"`` for Jupyter. With ``include_code=False`` only the output (``None`` for
+        ``display="none"``), for hosts that already show the code.
         """
         from ..Readouts.Renderers.HTML import HTMLReadoutRenderer
-        node = self.node(include_code=True)
+        node = self.node(include_code=include_code)
         if node is None:
             return None
         return HTMLReadoutRenderer(style, mode=mode, css=css, header="auto", **opts).render_readout(node)
@@ -882,6 +917,42 @@ class ExampleResult:
         return "{}({!r}, {})".format(type(self).__name__, self.block.id, self.status)
 
 
+_IMPLICIT_NAMES = {}
+
+
+def implicit_namespace(owner):
+    """
+    The names an example page can use without importing them: what ``from <module> import *`` gives for the
+    longest importable prefix of ``owner`` (the documented object's dotted name, e.g. ``McUtils.Zachary`` for
+    ``McUtils.Zachary.FiniteDifferenceFunction.finite_difference``), plus the top-level package itself. A module
+    without ``__all__`` contributes its public names. Best effort: a prefix that fails to import is skipped, and
+    ``{}`` comes back for no owner or nothing importable.
+    """
+    if not owner:
+        return {}
+    if owner not in _IMPLICIT_NAMES:
+        parts = owner.split(".")
+        names = {}
+        for n in range(len(parts), 0, -1):
+            try:
+                module = importlib.import_module(".".join(parts[:n]))
+            except Exception:
+                continue
+            exported = getattr(module, "__all__", None)
+            if exported is None:
+                exported = [k for k in dir(module) if not k.startswith("_")]
+            for k in exported:
+                if isinstance(k, str) and hasattr(module, k):
+                    names[k] = getattr(module, k)
+            break
+        try:
+            names.setdefault(parts[0], importlib.import_module(parts[0]))
+        except Exception:
+            pass
+        _IMPLICIT_NAMES[owner] = names
+    return dict(_IMPLICIT_NAMES[owner])
+
+
 class ExampleRunner:
     """
     Runs the example blocks that need it and writes their output to a `ReadoutStore`.
@@ -898,12 +969,16 @@ class ExampleRunner:
     :param css: default ``'inline'`` or ``'stylesheet'`` (a marker's ``css`` overrides it)
     :param seed: seed ``random`` and ``numpy.random`` from each block's key before it runs
     :param namespace: names every chain's namespace starts with
+    :param imports: ``True`` (default) starts every chain with `implicit_namespace` of the page's owner, so
+        examples on a module's page can use its public names without importing them (explicit imports in an
+        example still work and win); ``False`` for an empty start
     :param timeout: default per-block time limit in seconds (a marker's ``timeout`` overrides it)
     :param to_readout: override for `value_to_readout`
     """
 
     def __init__(self, store, revisions=None, style=None, x3dom_path=None, css="inline", seed=True,
-                 namespace=None, timeout=None, to_readout=None, max_output=20000, clock=time.perf_counter):
+                 namespace=None, timeout=None, to_readout=None, max_output=20000, clock=time.perf_counter,
+                 imports=True):
         if css not in ("inline", "stylesheet"):
             raise ValueError("css must be 'inline' or 'stylesheet'")
         self.store = store
@@ -914,6 +989,7 @@ class ExampleRunner:
         self.css = css
         self.seed = seed
         self.namespace = dict(namespace or {})
+        self.imports = imports
         self.timeout = timeout
         self.to_readout = to_readout
         self.max_output = max_output
@@ -979,7 +1055,7 @@ class ExampleRunner:
         failed = None
         for b in blocks:
             if b.index == 0 or b.isolated:
-                namespace = self._new_namespace()
+                namespace = self._new_namespace(parsed.owner)
                 failed = None
             if b.id in doomed:
                 add(b, ExampleResult(b, "blocked", reason=reasons[b.id], blocked_by=doomed[b.id]))
@@ -1011,8 +1087,27 @@ class ExampleRunner:
         return results
 
     # ---- execution ---- #
-    def _new_namespace(self):
+    def new_namespace(self, owner=None):
+        """A fresh namespace for a chain of blocks on the page of ``owner`` (see ``imports``)."""
+        return self._new_namespace(owner)
+
+    def execute(self, block, namespace):
+        """
+        Runs one block in ``namespace`` without touching the store (the interactive path).
+
+        :return: ``{"value", "stdout", "stderr", "duration", "timeout_enforced"}``
+        :raises: whatever the example raises (including `ExampleTimeout`)
+        """
+        return self._execute(block, namespace)
+
+    def format_error(self, exc):
+        """The user-code-only traceback text recorded for a failed example."""
+        return self._format_error(exc)
+
+    def _new_namespace(self, owner=None):
         ns = {"__name__": "__mcr_example__"}
+        if self.imports:
+            ns.update(implicit_namespace(owner))
         ns.update(self.namespace)
         return ns
 
@@ -1052,8 +1147,10 @@ class ExampleRunner:
         }
 
     def _format_error(self, exc):
-        frames = [f for f in traceback.extract_tb(exc.__traceback__)
-                  if os.path.abspath(f.filename) != os.path.abspath(__file__)]
+        here = os.path.dirname(os.path.abspath(__file__))
+        frames = [f for f in traceback.extract_tb(exc.__traceback__)   # drop the example machinery's own frames
+                  if not (os.path.dirname(os.path.abspath(f.filename)) == here
+                          and os.path.basename(f.filename).startswith("Example"))]
         lines = ["Traceback (most recent call last):\n"] if frames else []
         lines += traceback.format_list(frames)
         lines += traceback.format_exception_only(type(exc), exc)

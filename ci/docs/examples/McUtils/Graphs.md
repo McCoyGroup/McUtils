@@ -2,6 +2,7 @@
 
 ### Analyze a molecular graph
 
+<!-- readout(id="mcutils-graphs-1", isolated=True, display="both") -->
 ```python
 from McUtils.Graphs import EdgeGraph
 
@@ -16,6 +17,7 @@ print("three-bond neighborhood:", list(ethanol.neighbor_iterator(0, num=3)))
 
 ### Detect rings and break a bond
 
+<!-- readout(id="mcutils-graphs-2", isolated=True, display="both") -->
 ```python
 from McUtils.Graphs import EdgeGraph
 
@@ -30,6 +32,7 @@ print("opened-chain distances:", opened.get_distances(0))
 
 ### Traverse nested scientific data
 
+<!-- readout(id="mcutils-graphs-3", isolated=True, display="output") -->
 ```python
 from McUtils.Graphs import tree_iter
 from McUtils.Iterators import riffle
@@ -44,6 +47,7 @@ for path, is_term in tree_iter(workflow, yield_paths='terminal', traversal_order
 
 ### Compare two labeled graphs
 
+<!-- readout(id="mcutils-graphs-4", isolated=True, display="both") -->
 ```python
 from McUtils.Graphs import EdgeGraph
 
@@ -69,6 +73,7 @@ figure.show()
 
 ### Test generic rigidity
 
+<!-- readout(id="mcutils-graphs-6", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Graphs import statistically_rigid

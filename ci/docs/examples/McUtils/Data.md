@@ -44,6 +44,7 @@ assert UnitsData.convert("Wavenumbers", "AtomicUnitOfEnergy") == UnitsData.conve
 
 ### Look up atomic and bond data
 
+<!-- readout(id="mcutils-data-5", isolated=True, display="both") -->
 ```python
 from McUtils.Data import AtomData, BondData
 
@@ -57,6 +58,7 @@ print("reference C=O length:", co_length)
 
 ### Convert spectroscopic units
 
+<!-- readout(id="mcutils-data-6", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Data import UnitsData
@@ -71,6 +73,7 @@ print("energies / eV:", energies_ev)
 
 ### Estimate an isotope shift
 
+<!-- readout(id="mcutils-data-7", isolated=True, display="both") -->
 ```python
 from McUtils.Data import AtomData
 
@@ -86,6 +89,7 @@ print(f"estimated O-D frequency: {od_frequency:.1f} cm^-1")
 
 ### Inspect named colors
 
+<!-- readout(id="mcutils-data-8", isolated=True, display="output") -->
 ```python
 from McUtils.Data import ColorData
 
@@ -98,6 +102,7 @@ for name in ["red", "navy", "forestgreen", "gold"]:
 
 ### Compare isotope records
 
+<!-- readout(id="mcutils-data-9", isolated=True, display="both") -->
 ```python
 from McUtils.Data import AtomData, DataRecord
 
@@ -110,6 +115,7 @@ print([record["Mass"] for record in [protium, deuterium, tritium]])
 
 ### Traverse a chain of unit conversions
 
+<!-- readout(id="mcutils-data-10", isolated=True, display="both") -->
 ```python
 from McUtils.Data import UnitsData
 

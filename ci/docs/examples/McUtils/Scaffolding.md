@@ -3,6 +3,7 @@
 
 ### Serialize and restore a sparse scientific object
 
+<!-- readout(id="mcutils-scaffolding-1", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Numputils import SparseArray
@@ -18,6 +19,7 @@ print("protocol:", payload["pseudopickle_protocol"])
 
 ### Checkpoint an iterative calculation
 
+<!-- readout(id="mcutils-scaffolding-2", isolated=True, display="output") -->
 ```python
 import numpy as np
 from McUtils.Scaffolding import JSONCheckpointer
@@ -46,6 +48,7 @@ logger.log_print("Calculation complete")
 
 ### Cache an expensive calculation
 
+<!-- readout(id="mcutils-scaffolding-4", isolated=True, display="both") -->
 ```python
 from McUtils.Scaffolding import MaxSizeCache
 

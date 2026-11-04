@@ -359,9 +359,10 @@ class PipelineTests(PipelineTestBase):
         self.assertEqual(energy.count('class="mcr-example"'), 2)
         self.assertEqual(energy.count("<script>"), 1)
         self.assertNotIn("from-file", energy)
-        # method examples are generated and embedded like any other, but the stock `method.md` template has no
-        # `{examples}` slot, so they don't appear on the class page (see DESIGN.md, open issues)
-        self.assertNotIn("readout(", self.page(target, "Box.md"))
+        # method examples are generated and embedded like any other, on the class page (`method.md` has an examples slot)
+        box = self.page(target, "Box.md")
+        self.assertNotIn("readout(", box)
+        self.assertIn('data-readout="box-volume"', box)
         self.assertIn('data-readout="mod-inline"', self.page(target, "demopkg.md"))
         # the store is published next to the pages, ready for the loader to fetch
         key = manifest["energy-1"]["key"]

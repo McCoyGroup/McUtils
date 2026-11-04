@@ -153,7 +153,9 @@
     }
 
     update() {
-      const specified = this.getAttribute('value');
+      // an empty `value` is "not controlled": treating it as a selection closed every panel on each child mutation
+      // (so an Opener collapsed itself whenever something inside it, such as a Run output, changed)
+      const specified = this.getAttribute('value') || null;
       let active = false;
       for (const panel of this.panels) {
         panel.refresh();

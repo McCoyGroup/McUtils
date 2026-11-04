@@ -2,6 +2,7 @@
 
 ### Convert Cartesian coordinates to a Z-matrix and back
 
+<!-- readout(id="mcutils-coordinerds-1", isolated=True, display="output") -->
 ```python
 import numpy as np
 from McUtils.Coordinerds import CoordinateSet, CartesianCoordinates3D, ZMatrixCoordinates
@@ -17,6 +18,7 @@ assert np.allclose(rebuilt, water)
 
 ### Convert a batch of geometries
 
+<!-- readout(id="mcutils-coordinerds-2", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Coordinerds import CoordinateSet, CartesianCoordinates3D, ZMatrixCoordinates
@@ -48,6 +50,7 @@ assert np.allclose(restored, coords)
 
 ### Canonicalize internal-coordinate specifications
 
+<!-- readout(id="mcutils-coordinerds-4", isolated=True, display="output") -->
 ```python
 from McUtils.Coordinerds import canonicalize_internal
 
@@ -59,6 +62,7 @@ for original, normalized in zip(specs, canonical):
 
 ### Generate primitive coordinates from a bond graph
 
+<!-- readout(id="mcutils-coordinerds-5", isolated=True, display="both") -->
 ```python
 from McUtils.Coordinerds import PrimitiveCoordinatePicker
 
@@ -73,6 +77,7 @@ print(coordinates[:10])
 
 ### Reindex a Z-matrix ordering
 
+<!-- readout(id="mcutils-coordinerds-6", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Coordinerds import reindex_zmatrix

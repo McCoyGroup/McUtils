@@ -27,6 +27,41 @@ class ExampleEmbedError(Exception):
 
 # (Deliberately not in ``__all__``: the doc walker treats exported strings as importable names.)
 # The loader must not contain Liquid delimiters (double braces or brace-percent), since pages go through Jekyll.
+# For a notebook, where examples are run and shown after the page has loaded: nothing in a readout fragment loads the
+# X3DOM runtime (a fragment is markup only), so this loads it the first time an ``<x3d>`` element appears in the
+# document and asks X3DOM to pick up each new scene. It is shown once per ``jdoc`` call through the display API (which
+# runs scripts, in trusted notebooks); a second copy does nothing.
+X3DOM_WATCHER_JS = """
+(function(){
+if(window.mcrX3DOMWatch){return;}
+var runtime=__RUNTIME__;
+var once={};
+function memo(key,make,keep){if(!once[key]){once[key]=make();once[key].then(null,function(){delete once[key];});}return once[key];}
+function loadScript(src){return memo("s:"+src,function(){return new Promise(function(ok,no){var s=document.createElement("script");s.src=src;s.onload=ok;s.onerror=function(){s.remove();no(new Error("could not load X3DOM from "+src));};document.head.appendChild(s);});});}
+function loadCss(href){if(href&&!once["c:"+href]){once["c:"+href]=Promise.resolve();var l=document.createElement("link");l.rel="stylesheet";l.href=href;document.head.appendChild(l);}}
+function sync(){
+var fresh=document.querySelectorAll("x3d:not([data-mcr-x3d])");
+if(!fresh.length){return;}
+loadCss(runtime.stylesheet);
+loadScript(runtime.script).then(function(){
+var todo=document.querySelectorAll("x3d:not([data-mcr-x3d])");
+if(!todo.length){return;}
+for(var i=0;i<todo.length;i++){todo[i].setAttribute("data-mcr-x3d","1");}
+if(window.x3dom&&window.x3dom.reload){window.x3dom.reload();}
+},function(e){console.error(e);});
+}
+window.mcrX3DOMWatch=sync;
+var pending=false;
+function hasScene(n){return n.nodeType===1&&(n.matches("x3d")||!!n.querySelector("x3d"));}
+new MutationObserver(function(records){
+var added=false;
+for(var i=0;i<records.length&&!added;i++){var nodes=records[i].addedNodes;for(var j=0;j<nodes.length&&!added;j++){added=hasScene(nodes[j]);}}
+if(added&&!pending){pending=true;setTimeout(function(){pending=false;sync();},50);}
+}).observe(document.documentElement,{childList:true,subtree:true});
+sync();
+})();
+"""
+
 EXAMPLE_LOADER_JS = """
 (function(){
 if(window.mcrReadouts){return;}
@@ -106,13 +141,16 @@ class ExampleEmbedder:
     :param warn: callable for warnings (default ``print``)
     :param debug: also add a small script that shows a corner badge (and logs to the console) with how many
         readouts on the page have loaded, for checking a built site by eye
+    :param inline: put each stored fragment directly into the page instead of a placeholder that is fetched
+        later (for single-file HTML such as `static_doc`). No loader script is emitted; what the page still has
+        to provide (an X3DOM runtime) is collected in ``assets``.
     """
 
     default_url_template = "{{ '/readouts/{key2}/{key}/fragment.html' | relative_url }}"
     default_stylesheet_url_template = "{{ '/readouts/mcr.css' | relative_url }}"
 
     def __init__(self, store, url_template=None, stylesheet_url_template=None, lazy=True, strict=False, warn=print,
-                 loader=True, debug=False):
+                 loader=True, debug=False, inline=False):
         self.store = store if isinstance(store, ReadoutStore) else ReadoutStore(store)
         self.cache = ExampleCache(self.store)
         self.url_template = url_template or self.default_url_template
@@ -122,8 +160,10 @@ class ExampleEmbedder:
         self.warn = warn
         self.loader = loader
         self.debug = debug
+        self.inline = inline
         self.problems = []   # [(owner, id, kind, detail)]
         self.embedded = []   # [(owner, id, key)]
+        self.assets = {}     # inline mode: what the host page must provide, e.g. {"x3dom": {"script": ..., "stylesheet": ...}}
 
     # ---- the processor interface ---- #
     def __call__(self, text, handler=None, owner=None):
@@ -138,14 +178,12 @@ class ExampleEmbedder:
         state = {"first": True}
 
         def replace(block):
-            fence = block.raw[len(block.marker):].lstrip("\r\n")
-            if not fence.endswith("\n"):
-                fence += "\n"
+            fence = block.fence
             extra = self.placeholder(block, owner)
             if extra is None:
                 return fence
             out = fence + "\n" + extra + "\n"
-            if self.loader and state["first"]:
+            if self.loader and not self.inline and state["first"]:
                 out += "\n<script>\n" + EXAMPLE_LOADER_JS + "\n</script>\n"
                 if self.debug:
                     out += "\n<script>\n" + EXAMPLE_DEBUG_JS + "\n</script>\n"
@@ -183,6 +221,8 @@ class ExampleEmbedder:
             self._problem(owner, block, "missing", "the entry has no fragment")
             return None
         fragment = meta.get("fragment") or {}
+        if self.inline:
+            return self._inline_markup(block, owner, fragment)
         url = self.url(block.key)
         attrs = ['class="mcr-example"', 'data-readout="{}"'.format(_attr(block.id)), 'data-key="{}"'.format(block.key),
                  'data-src="{}"'.format(url)]
@@ -200,6 +240,23 @@ class ExampleEmbedder:
             attrs.append('data-lazy="false"')
         self.embedded.append((owner, block.id, block.key))
         return "<div {}><a href=\"{}\">Open readout</a></div>".format(" ".join(attrs), url)
+
+    def _inline_markup(self, block, owner, fragment):
+        html = self.store.read_file(block.key, "fragment.html")
+        parts = []
+        if fragment.get("css") == "stylesheet" and not self.assets.get("stylesheet"):
+            css_path = os.path.join(self.store.root, self.store.stylesheet_name)
+            if os.path.isfile(css_path):
+                with open(css_path, encoding="utf-8") as f:
+                    self.assets["stylesheet"] = f.read()
+                parts.append("<style>\n" + self.assets["stylesheet"] + "\n</style>")
+        if "x3dom" in (fragment.get("needs") or []):
+            x3 = (fragment.get("runtime") or {}).get("x3dom") or {}
+            self.assets.setdefault("x3dom", {k: x3[k] for k in ("script", "stylesheet") if x3.get(k)})
+        self.embedded.append((owner, block.id, block.key))
+        parts.append('<div class="mcr-example mcr-inline" data-readout="{}" data-key="{}">\n{}\n</div>'.format(
+            _attr(block.id), block.key, html))
+        return "\n".join(parts)
 
     def finish(self):
         """Raises `ExampleEmbedError` listing every problem if ``strict``; otherwise returns the problems."""

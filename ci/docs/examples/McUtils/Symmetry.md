@@ -2,6 +2,7 @@
 
 ### Inspect a point-group character table
 
+<!-- readout(id="mcutils-symmetry-1", isolated=True, display="both") -->
 ```python
 from McUtils.Symmetry import CharacterTable
 
@@ -14,6 +15,7 @@ print("Cartesian-axis representation:", decomposition)
 
 ### Reduce the Cartesian modes of water
 
+<!-- readout(id="mcutils-symmetry-2", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Symmetry import CharacterTable
@@ -27,6 +29,7 @@ print("3N representation by irrep:", reduction)
 
 ### Generate symmetry operations
 
+<!-- readout(id="mcutils-symmetry-3", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Symmetry import point_group_data
@@ -40,6 +43,7 @@ print("class sizes:", [len(c) for c in classes])
 
 ### Decompose a custom representation
 
+<!-- readout(id="mcutils-symmetry-4", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Symmetry import CharacterTable
@@ -52,6 +56,7 @@ print("irrep multiplicities:", np.rint(multiplicities).astype(int))
 
 ### Compare common molecular point groups
 
+<!-- readout(id="mcutils-symmetry-5", isolated=True, display="output") -->
 ```python
 from McUtils.Symmetry import CharacterTable
 
@@ -64,6 +69,7 @@ for fixed in ["Td", "Oh"]:
 
 ### Identify symmetry-related coordinate modes
 
+<!-- readout(id="mcutils-symmetry-6", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Symmetry import CharacterTable

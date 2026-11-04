@@ -3,6 +3,7 @@
 
 ### Time a numerical block
 
+<!-- readout(id="mcutils-profilers-1", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Profilers import Timer
@@ -45,6 +46,7 @@ with BlockProfiler.profiler("matrix multiplication", mode="deterministic"):
 
 ### Record explicit laps
 
+<!-- readout(id="mcutils-profilers-4", isolated=True, display="both") -->
 ```python
 import numpy as np
 from McUtils.Profilers import Timer
@@ -75,6 +77,7 @@ with profiler:
 
 ### Disable profiling without branching
 
+<!-- readout(id="mcutils-profilers-6", isolated=True, display="both") -->
 ```python
 from McUtils.Profilers import BlockProfiler
 
