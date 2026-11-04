@@ -42,6 +42,7 @@ __all__ = [
     "X3DPolyline2D",
     "X3DTriangleSet",
     "X3DIndexedTriangleSet",
+    "X3DScalarFieldIsosurface",
     "X3DIndexedLineSet",
     "X3DSwitch",
     "X3DListAnimator",
@@ -763,6 +764,13 @@ function X3DPlayback(component, options = {}) {
     def _mesh_components(self, element):
         components = []
         for node in self._walk_scene(element):
+            field_data = getattr(node, 'scalar_field_animation_data', None)
+            if field_data is not None:
+                from ..Zachary import ScalarFieldIsosurface
+                components.append(X3DComponent(
+                    script=ScalarFieldIsosurface.javascript_source() + '\n' + SCALAR_FIELD_PLAYER,
+                    data=field_data, nodes=node.scalar_field_animation_nodes,
+                    id=node.attrs['id'] + '-component', placement='after', timeout=20000))
             data = getattr(node, 'mesh_animation_data', None)
             if data is not None:
                 components.append(X3DComponent(script=MESH_PLAYER, data=data,
@@ -3447,6 +3455,23 @@ class X3DTriangleSet(X3DCoordinatesWrapper):
     tag_class = X3DHTML.TriangleSet
 class X3DIndexedTriangleSet(X3DIndexedCoordinatesWrapper):
     tag_class = X3DHTML.IndexedTriangleSet
+
+
+class X3DScalarFieldIsosurface(X3DIndexedTriangleSet):
+    """An ordinary mesh for display, retaining its field for animation detection."""
+
+    def __init__(self, isosurface, *, coordinate_scale=1., **styles):
+        self.isosurface = isosurface
+        self.coordinate_scale = float(coordinate_scale)
+        mesh = isosurface.get_mesh()
+        super().__init__(mesh.verts * self.coordinate_scale, mesh.inds, **styles)
+
+    def create_tag_object(self, **options):
+        node = super().create_tag_object(**options)
+        node.scalar_field_isosurface = self.isosurface
+        node.scalar_field_coordinate_scale = self.coordinate_scale
+        return node
+
 class X3DIndexedLineSet(X3DIndexedCoordinatesWrapper):
     tag_class = X3DHTML.IndexedLineSet
     def prep_geometry_opts(self, point, indices, **etc):
@@ -4286,6 +4311,10 @@ class X3DPrimitiveDecoder:
         if colors is None:
             colors=self.resolve_child(node,'colorrgba');channels=4
         metadata={'geometry_attributes':attrs}
+        source = getattr(node, 'scalar_field_isosurface', None)
+        if source is not None:
+            metadata['scalar_field_isosurface'] = source
+            metadata['scalar_field_coordinate_scale'] = node.scalar_field_coordinate_scale
         if material.get('__textured__'):
             metadata['unsupported_animation']='textured meshes need an appearance/UV correspondence handler'
         if colors is not None:
@@ -4395,6 +4424,67 @@ return mountComparedMesh(component);
 """
 
 
+SCALAR_FIELD_PLAYER = r"""
+const evaluator = createScalarFieldIsosurfaceEvaluator(component.data);
+const fields = component.scene.ownerDocument.defaultView.x3dom.fields;
+let state = {fraction: null, updates: 0};
+function vectors(values) {
+    const result = new fields.MFVec3f();
+    for (const v of values) result.push(new fields.SFVec3f(v[0], v[1], v[2]));
+    return result;
+}
+function apply(fraction) {
+    if (state.fraction === fraction) return state;
+    const result = evaluator.evaluate(fraction);
+    for (const [trackIndex, mesh] of result.meshes.entries()) {
+        const track = component.data.tracks[trackIndex], prefix = trackIndex + '_';
+        const {vertices, faces} = mesh;
+        if (vertices.length > 65535) throw new RangeError('Scalar-field animation currently supports at most 65535 vertices per mesh');
+        const normals = vertices.map(() => [0, 0, 0]);
+        for (const [a, b, c] of faces) {
+            const u = vertices[b].map((v, j) => v - vertices[a][j]);
+            const v = vertices[c].map((v, j) => v - vertices[a][j]);
+            const n = [u[1]*v[2]-u[2]*v[1], u[2]*v[0]-u[0]*v[2], u[0]*v[1]-u[1]*v[0]];
+            for (const i of [a, b, c]) for (let j = 0; j < 3; j++) normals[i][j] += n[j];
+        }
+        for (const n of normals) {
+            const length = Math.hypot(...n);
+            if (length) for (let j = 0; j < 3; j++) n[j] /= length;
+            else n[2] = 1;
+        }
+        const geometry = component.nodes[prefix + 'geometry'];
+        // Clear stale faces before shrinking a vertex pool. All updates occur
+        // in the same fraction event, before the renderer's next draw.
+        geometry.setFieldValue('coordIndex', new fields.MFInt32());
+        component.nodes[prefix + 'coordinate'].setFieldValue('point', vectors(vertices));
+        component.nodes[prefix + 'normal'].setFieldValue('vector', vectors(normals));
+        const indices = new fields.MFInt32();
+        for (const f of faces) indices.push(f[0], f[1], f[2], -1);
+        geometry.setFieldValue('coordIndex', indices);
+        const a = track.materials[result.segment], b = track.materials[result.segment + 1];
+        const names = {diffusecolor:'diffuseColor', emissivecolor:'emissiveColor', specularcolor:'specularColor',
+                       transparency:'transparency', shininess:'shininess', ambientintensity:'ambientIntensity'};
+        for (const [key, name] of Object.entries(names)) {
+            if (a[key] === undefined || b[key] === undefined) continue;
+            let value = Array.isArray(a[key]) ? a[key].map((v,j) => (1-result.alpha)*v + result.alpha*b[key][j])
+                                             : (1-result.alpha)*a[key] + result.alpha*b[key];
+            if (Array.isArray(value)) value = new fields.SFColor(...value);
+            component.nodes[prefix + 'material'].setFieldValue(name, value);
+        }
+    }
+    state = {fraction, segment: result.segment, fieldFraction: result.alpha, updates: state.updates + 1,
+             meshes: result.meshes.map(mesh => ({vertices: mesh.vertices.length, faces: mesh.faces.length}))};
+    component.scene.runtime?.triggerRedraw();
+    return state;
+}
+component.on(component.nodes.driver, 'outputchange', event => {
+    if (event.fieldName === 'value_changed') apply(Number(event.value));
+});
+apply(0);
+return {apply, getState: () => state};
+"""
+
+
 def _material(record):
     defaults={'diffusecolor':[.8,.8,.8],'emissivecolor':[0.,0.,0.],
               'specularcolor':[0.,0.,0.],'transparency':0.,'shininess':.2,'ambientintensity':.2}
@@ -4457,10 +4547,12 @@ def _animate_nonmesh(roots, clock_id):
 
 
 def _prepare_x3d_mesh_animation(frames, *, mesh_options=None, **options):
-    """Return an automatic mesh animation, or None when no mesh is present.
+    """Return automatic field/mesh tracks, or None when no mesh is present.
 
     Detection currently matches mesh shapes by scene path. This is intentionally
     a replaceable policy, not a claim to recognize arbitrary scene edits.
+    Source-retaining isosurfaces interpolate their fields and regenerate meshes;
+    detached meshes retain the correspondence-based interpolation policy.
     Unresolved vertex correspondence holds the old geometry until the next key;
     it still updates the same mesh node, never a whole-animation Switch.
     """
@@ -4509,13 +4601,30 @@ def _prepare_x3d_mesh_animation(frames, *, mesh_options=None, **options):
     body=[_animate_nonmesh(stripped,clock.attrs['id']),clock]
     times=np.linspace(0,1,len(frames))
     reports=[]
+    field_data = {'fields': [], 'tracks': [], 'times': times.tolist(), 'interpolation': 'linear'}
+    field_ids = {}
+    field_nodes = {}
     for track,path in enumerate(sorted(paths,key=repr)):
         records=[m[path] for m in meshes]
         for record in records:
             if record.metadata.get('unsupported_animation'):
                 raise NotImplementedError(record.metadata['unsupported_animation'])
+        sources = [record.metadata.get('scalar_field_isosurface') for record in records]
+        is_field = any(source is not None for source in sources)
+        if is_field and not all(source is not None for source in sources):
+            raise ValueError('an animated isosurface must retain its scalar field at every key')
+        if is_field:
+            for source, record in zip(sources, records):
+                if 'vertex_colors' in record.metadata:
+                    raise ValueError('scalar-field animation currently supports uniform materials, not per-vertex colors')
+                sources[0].field.require_compatible(source.field)
+                if source.interpolation != sources[0].interpolation:
+                    raise ValueError('isosurface interpolation policies differ between keys')
+                if (record.metadata['scalar_field_coordinate_scale'] != records[0].metadata['scalar_field_coordinate_scale']
+                        or not np.allclose(record.transform, records[0].transform)):
+                    raise ValueError('scalar-field animation requires a fixed display transform and coordinate units')
         intervals=[];comparisons=[]
-        for first,second in zip(records[:-1],records[1:]):
+        for first,second in ([] if is_field else zip(records[:-1],records[1:])):
             ids=(first.vertex_ids,second.vertex_ids) if first.vertex_ids is not None and second.vertex_ids is not None else None
             comparison=nput.compare_meshes((first.vertices,first.faces),(second.vertices,second.faces),
                 vertex_ids=ids,correspondence=correspondence,atol=atol,rtol=rtol)
@@ -4557,6 +4666,24 @@ def _prepare_x3d_mesh_animation(frames, *, mesh_options=None, **options):
             color=color_class(id=key+'-color',DEF=key+'-color',color=np.asarray(colors[0]).ravel())
             geometry=X3DHTML.IndexedFaceSet(coordinate,normal,color,**dict(geometry.attrs))
         shape=X3DHTML.Shape(X3DHTML.Appearance(material),geometry)
+        if is_field:
+            track_index = len(field_data['tracks'])
+            field_indices = []
+            for source in sources:
+                identity = id(source.field)
+                if identity not in field_ids:
+                    field_ids[identity] = len(field_data['fields'])
+                    field_data['fields'].append(source.field.to_animation_data())
+                field_indices.append(field_ids[identity])
+            field_data['tracks'].append(dict(
+                fields=field_indices, isovalues=[source.isovalue for source in sources],
+                coordinate_scale=records[0].metadata['scalar_field_coordinate_scale'],
+                transform=first.transform.tolist(), reverse_winding=bool(np.linalg.det(first.transform[:3,:3]) < 0),
+                materials=[_material(record) for record in records]))
+            field_nodes.update({str(track_index) + '_' + name: key + '-' + name
+                                for name in ('geometry', 'coordinate', 'normal', 'material')})
+            body.append(shape)
+            continue
         driver=X3DHTML.ScalarInterpolator(id=key+'-driver',DEF=key+'-driver',key='0 1',keyValue='0 1')
         driver.mesh_animation_data={'frames':[{'vertices':r.vertices.tolist(),'faces':r.faces.tolist(),
             'material':_material(r),'colors':c} for r,c in zip(records,colors)], 'times':times.tolist(),'intervals':intervals,
@@ -4570,6 +4697,15 @@ def _prepare_x3d_mesh_animation(frames, *, mesh_options=None, **options):
         body.extend([shape,driver,X3DHTML.Route(fromNode=clock.attrs['id'],fromField='fraction_changed',
                                               toNode=key+'-driver',toField='set_fraction')])
         reports.append(comparisons)
+    if field_data['tracks']:
+        from ..Zachary import ScalarFieldIsosurface
+        field_data['tables'] = ScalarFieldIsosurface.marching_cubes_tables()
+        key = prefix + '-scalar-fields'
+        driver = X3DHTML.ScalarInterpolator(id=key, DEF=key, key='0 1', keyValue='0 1')
+        driver.scalar_field_animation_data = field_data
+        driver.scalar_field_animation_nodes = dict(field_nodes, driver=key)
+        body.extend([driver, X3DHTML.Route(fromNode=clock.attrs['id'], fromField='fraction_changed',
+                                         toNode=key, toField='set_fraction')])
     result=X3DGroup(body)
     result.mesh_comparisons=reports
     return result

@@ -1,14 +1,21 @@
 from __future__ import annotations
 
 import numpy as np
-from ..Zachary import Interpolator, marching_cubes
+from ..Zachary import Interpolator, marching_cubes, ScalarField, ScalarFieldIsosurface
 from .Parsers import CubeFileParser
 
 __all__ = [
-    "CubePropEvaluator"
+    "CubePropEvaluator",
+    "CubeFileIsosurface"
 ]
 
-class CubePropEvaluator:
+class CubePropEvaluator(ScalarField):
+    coordinate_units = "BohrRadius"
+
+    def isosurface(self, isovalue, **options):
+        """Retain this cube field for dynamic isosurface generation and animation."""
+        return CubeFileIsosurface(self, isovalue, **options)
+
     def to_readout(self, **opts):
         """
         **LLM Docstring**
@@ -232,3 +239,17 @@ class CubePropEvaluator:
         return marching_cubes(self.values, isoval,
                               transformation=self.unembed_points,
                               **opts)
+
+
+class CubeFileIsosurface(ScalarFieldIsosurface):
+    """A source-retaining isosurface of a parsed cube field."""
+
+    def __init__(self, scalar_field, isovalue=.02, **options):
+        if not isinstance(scalar_field, CubePropEvaluator):
+            scalar_field = CubePropEvaluator.from_file(scalar_field)
+        super().__init__(scalar_field, isovalue, **options)
+
+    @classmethod
+    def from_file(cls, file, isovalue=.02, *, interpolation_options=None, **options):
+        field = CubePropEvaluator.from_file(file, **({} if interpolation_options is None else interpolation_options))
+        return cls(field, isovalue, **options)

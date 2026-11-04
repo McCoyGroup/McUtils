@@ -14406,6 +14406,12 @@ class X3DAxes(GraphicsAxes3D):
         self.children.append(rects)
 
         return rects
+    def draw_isosurface(self, isosurface, *, coordinate_scale=1., **styles):
+        """Draw a field-backed mesh and retain its source for dynamic animation."""
+        shape = x3d.X3DScalarFieldIsosurface(isosurface, coordinate_scale=coordinate_scale, **styles)
+        self.children.append(shape)
+        return shape
+
     def draw_triangle(self, points, indices=None, **styles):
         """
         **LLM Docstring**

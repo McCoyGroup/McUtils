@@ -418,7 +418,8 @@ class ResourceManager:
         :return: No explicit value; the method mutates state or performs I/O.
         :rtype: None
         """
-        with open(loc, 'w+' if not self.binary_resource else 'wb') as res_file:
+        os.makedirs(os.path.dirname(os.path.abspath(loc)), exist_ok=True)
+        with dev.atomic_file(loc, 'w' if not self.binary_resource else 'wb') as res_file:
             if self.json_resource:
                 json.dump(val, res_file)
             else:
@@ -506,7 +507,7 @@ class ResourceManager:
                 default_val = resource_function(name)
                 self.save_resource(loc, default_val)
                 if self.write_metadata:
-                    with open(self.get_resource_path(self.get_metadata_filename(resource_file)), 'w+') as meta_file:
+                    with dev.atomic_file(self.get_resource_path(self.get_metadata_filename(resource_file)), 'w') as meta_file:
                         json.dump(self.get_resource_metadata(loc), meta_file)
             else:
                 return None

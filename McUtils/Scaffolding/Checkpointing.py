@@ -1,7 +1,9 @@
 
-import abc, os, shutil, uuid
+import abc, io, os, shutil, urllib.parse, uuid
+import numpy as np
 from .. import Devutils as dev
 from .Serializers import *
+from .Storage import IndexedTarStore
 
 __all__ = [
     "Checkpointer",
@@ -9,6 +11,7 @@ __all__ = [
     "DumpCheckpointer",
     "JSONCheckpointer",
     "NumPyCheckpointer",
+    "IndexedNumPyCheckpointer",
     "HDF5Checkpointer",
     "DictCheckpointer",
     "NullCheckpointer"
@@ -86,7 +89,7 @@ class Checkpointer(metaclass=abc.ABCMeta):
         if cls._ext_map is not None:
             return cls._ext_map
         else:
-            return {c.default_extension:c for c in [JSONCheckpointer, HDF5Checkpointer, NumPyCheckpointer]}
+            return {c.default_extension:c for c in [JSONCheckpointer, HDF5Checkpointer, NumPyCheckpointer, IndexedNumPyCheckpointer]}
 
     @classmethod
     def build_canonical(cls, checkpoint):
@@ -837,21 +840,293 @@ class JSONCheckpointer(DumpCheckpointer):
         """
         self.serializer.serialize(self.stream if stream is None else stream, self.backend)
 
+class IndexedNumPyCheckpointer(Checkpointer):
+    """
+    A checkpointer that keeps one member per key in an `IndexedTarStore`, so saving or loading a key
+    costs the size of that key and not the size of the file. Values are written as soon as they are saved
+    (an interrupted write is rolled back by the store), and reading only touches the requested member.
+    Plain NumPy arrays are stored as `.npy` members and can be memory mapped with `mmap=True`; anything
+    else goes through `NumPySerializer`. Rewriting a key leaves its old bytes in the file until `compact()`.
+
+    Changes made inside a `with` block are published together when the outermost block exits (also when
+    it exits with an error), in one append, so a process that dies mid-block leaves the file as it was;
+    `flush()` publishes early and `autoflush=True` publishes every change at once.
+    """
+    default_extension = ".nptar"
+
+    def __init__(self, file, cache=None, serializer=None, open_kwargs=None,
+                 allowed_keys=None,
+                 omitted_keys=None,
+                 autoflush=False,
+                 mmap=False
+                 ):
+        """
+        **LLM Docstring**
+
+        Set up the store for a checkpoint path.
+
+        :param file: the path of the archive (the index and lock live next to it)
+        :type file: str
+        :param cache: values to save the first time the checkpoint is opened
+        :type cache: dict | None
+        :param serializer: serializer for values that aren't plain arrays
+        :type serializer: NumPySerializer | None
+        :param open_kwargs: accepted for compatibility with `NumPyCheckpointer`, unused
+        :param allowed_keys: optional whitelist of permitted top-level keys
+        :param omitted_keys: optional blacklist of top-level keys
+        :param autoflush: publish every save/delete immediately instead of when the block exits
+        :type autoflush: bool
+        :param mmap: whether arrays are returned as read-only memory maps
+        :type mmap: bool
+        :return: No explicit value; the method mutates state or performs I/O.
+        :rtype: None
+        """
+        if not isinstance(file, (str, os.PathLike)):
+            raise TypeError("the indexed NumPy checkpointer needs a file path, not {}".format(type(file).__name__))
+        file = os.fspath(file)
+        super().__init__(file, allowed_keys=allowed_keys, omitted_keys=omitted_keys)
+        self.serializer = NumPySerializer() if serializer is None else serializer
+        self.mmap = mmap
+        self.autoflush = autoflush
+        self.store = IndexedTarStore(file)
+        self._initial = cache
+        self._pending = {} # key -> {member name: bytes}, or None for a deletion
+
+    @staticmethod
+    def _member_prefix(key):
+        if not isinstance(key, str):
+            raise TypeError("checkpoint keys must be strings, got {!r}".format(key))
+        return urllib.parse.quote(key, safe='').replace('.', '%2E')
+
+    def _members(self, key):
+        prefix = self._member_prefix(key)
+        return prefix + "/array.npy", prefix + "/object"
+
+    def open_checkpoint_file(self, chk):
+        """
+        Returns the store, writing any initial values the first time
+        """
+        initial, self._initial = self._initial, None
+        if initial:
+            for k, v in initial.items():
+                self.save_parameter(k, v)
+        return self.store
+
+    def close_checkpoint_file(self, stream):
+        """
+        Publishes the changes made in the block
+        """
+        self.flush()
+
+    def flush(self):
+        """
+        Publishes pending saves (in one append) and then pending deletions
+        """
+        if not self._pending:
+            return
+        pending, self._pending = self._pending, {}
+        saves = [(self._member_prefix(k), None, files) for k, files in pending.items() if files is not None]
+        deletes = [k for k, files in pending.items() if files is None]
+        try:
+            if saves:
+                self.store.write_trees(saves)
+            for k in deletes:
+                self.store.discard(self._member_prefix(k))
+        except BaseException:
+            for k, files in pending.items():
+                self._pending.setdefault(k, files)
+            raise
+
+    def save_parameter(self, key, value):
+        """
+        Writes one key as its own member, replacing any earlier value
+        """
+        array_name, object_name = self._members(key)
+        if type(value) is np.ndarray and value.dtype != np.dtype(object):
+            buffer = io.BytesIO()
+            np.lib.format.write_array(buffer, value, allow_pickle=False)
+            name = array_name
+        else:
+            buffer = io.BytesIO()
+            self.serializer.serialize(buffer, value)
+            name = object_name
+        self._pending[key] = {name.split('/', 1)[1]: buffer.getvalue()}
+        if self.autoflush:
+            self.flush()
+
+    def load_parameter(self, key):
+        """
+        Reads one member
+        """
+        array_name, object_name = self._members(key)
+        if key in self._pending:
+            files = self._pending[key]
+            if files is None:
+                raise CheckpointerKeyError(key)
+            (member, data), = files.items()
+            if member == 'array.npy':
+                return np.lib.format.read_array(io.BytesIO(data), allow_pickle=False)
+            return self.serializer.deserialize(io.BytesIO(data))
+        if self.mmap and array_name in self.store:
+            return self.store.memmap(array_name)
+        try:
+            data = self.store.read(array_name)
+        except FileNotFoundError:
+            try:
+                data = self.store.read(object_name)
+            except FileNotFoundError:
+                raise CheckpointerKeyError(key) from None
+            return self.serializer.deserialize(io.BytesIO(data))
+        return np.lib.format.read_array(io.BytesIO(data), allow_pickle=False)
+
+    def delete_parameter(self, key):
+        """
+        Forgets a key (`compact` reclaims its bytes)
+        """
+        if not self.check_parameter(key):
+            raise CheckpointerKeyError(key)
+        self._pending[key] = None
+        if self.autoflush:
+            self.flush()
+
+    def check_parameter(self, key):
+        """
+        Tests for a permitted key without reading its value
+        """
+        try:
+            self.check_allowed_key(key)
+        except KeyError:
+            return False
+        if key in self._pending:
+            return self._pending[key] is not None
+        return bool(self.store.names(self._member_prefix(key)))
+
+    def keys(self):
+        """
+        Returns the stored keys
+        """
+        found = []
+        for name in self.store.names():
+            top = urllib.parse.unquote(name.split('/', 1)[0])
+            if top not in found and self._pending.get(top, 0) is not None:
+                found.append(top)
+        found.extend(k for k, files in self._pending.items() if files is not None and k not in found)
+        return found
+
+    def compact(self):
+        """
+        Rewrites the file with live members only, reclaiming the bytes of replaced and deleted keys
+        """
+        self.flush()
+        self.store.compact()
+
+
 class NumPyCheckpointer(DumpCheckpointer):
     """
     A checkpointer that uses NumPy as a backend
     """
 
     default_extension = NumPySerializer.default_extension
+
+    @staticmethod
+    def _resolve_file(file):
+        if isinstance(file, str) and not os.path.exists(file):
+            if os.path.exists(file + '.npz'):
+                file = file + '.npz'
+            elif os.path.exists(file + '.npy'):
+                file = file + '.npy'
+        return file
+
+    @classmethod
+    def sniff_backend(cls, file):
+        """
+        **LLM Docstring**
+
+        Decide which backend a path uses: `'npz'` for an existing zip/`.npy` file, `'indexed'` for an existing
+        indexed tar and for a path that doesn't exist yet or is empty (the default for new files).
+
+        :param file: the checkpoint path
+        :type file: str
+        :return: `'npz'` or `'indexed'`
+        :rtype: str
+        """
+        if not isinstance(file, str):
+            return 'npz'
+        file = cls._resolve_file(file)
+        if os.path.exists(file) and os.stat(file).st_size > 0:
+            with open(file, 'rb') as stream:
+                head = stream.read(512)
+            if head[:2] == b'PK' or head[:6] == b'\x93NUMPY':
+                return 'npz'
+            return 'indexed'
+        return 'indexed'
+
+    def __new__(cls, file=None, *args, backend=None, **kwargs):
+        if cls is NumPyCheckpointer:
+            if backend is None:
+                backend = cls.sniff_backend(file)
+            if backend not in ('npz', 'indexed'):
+                raise ValueError("unknown NumPy checkpoint backend {!r} (use 'npz' or 'indexed')".format(backend))
+            if backend == 'indexed':
+                # a different class, so `__init__` isn't called for us
+                obj = object.__new__(IndexedNumPyCheckpointer)
+                obj.__init__(cls._resolve_file(file), *args, **kwargs)
+                return obj
+        return super().__new__(cls)
+
+    @classmethod
+    def convert_file(cls, path, to='indexed'):
+        """
+        **LLM Docstring**
+
+        Rewrite a NumPy checkpoint in the other format, in place and atomically.
+
+        :param path: the checkpoint file
+        :type path: str
+        :param to: `'indexed'` (one tar member per key) or `'npz'` (one whole-file archive)
+        :type to: str
+        :return: the path
+        :rtype: str
+        """
+        path = cls._resolve_file(path)
+        current = cls.sniff_backend(path)
+        if to not in ('npz', 'indexed'):
+            raise ValueError("unknown NumPy checkpoint backend {!r}".format(to))
+        if current == to:
+            return path
+        source = NumPyCheckpointer(path, backend=current)
+        with source:
+            items = {k: source[k] for k in source.keys()}
+        temp = "{}.{}.tmp".format(path, uuid.uuid4().hex)
+        try:
+            target = NumPyCheckpointer(temp, backend=to)
+            with target:
+                for k, v in items.items():
+                    target[k] = v
+            if to == 'indexed':
+                target.compact()
+            os.replace(temp, path)
+        finally:
+            for extra in (temp, temp + ".index.sqlite3", temp + ".lock"):
+                if os.path.exists(extra):
+                    os.remove(extra)
+        for stale in (path + ".index.sqlite3",): # the index is rebuilt from the tar when it's needed
+            if os.path.exists(stale):
+                os.remove(stale)
+        return path
+
     def __init__(self, file, cache=None, serializer=None, open_kwargs=None,
                  allowed_keys=None,
                  omitted_keys=None,
-                 autoflush=False
+                 autoflush=False,
+                 backend=None
                  ):
         """
         **LLM Docstring**
 
         Resolve existing `.npz` or `.npy` variants and configure a binary NumPy dump backend.
+        (`NumPyCheckpointer(path)` returns an `IndexedNumPyCheckpointer` unless the file is an existing
+        whole-file archive or `backend='npz'` is passed.)
 
         :param file: path or file-like object
         :type file: object
@@ -868,12 +1143,7 @@ class NumPyCheckpointer(DumpCheckpointer):
         :return: No explicit value; the method mutates state or performs I/O.
         :rtype: None
         """
-        if isinstance(file, str):
-            if not os.path.exists(file):
-                if os.path.exists(file + '.npz'):
-                    file = file + '.npz'
-                elif os.path.exists(file + '.npy'):
-                    file = file + '.npy'
+        file = self._resolve_file(file)
 
         if serializer is None:
             serializer = NumPySerializer()
@@ -925,7 +1195,8 @@ class HDF5Checkpointer(Checkpointer):
     default_extension = HDF5Serializer.default_extension
     def __init__(self, checkpoint_file, serializer=None,
                  allowed_keys=None,
-                 omitted_keys=None
+                 omitted_keys=None,
+                 keep_open=False
                  ):
         """
         **LLM Docstring**
@@ -947,6 +1218,8 @@ class HDF5Checkpointer(Checkpointer):
         if serializer is None:
             serializer = HDF5Serializer()
         self.serializer = serializer
+        self.keep_open = keep_open # keep the file open between `with` blocks (call `close()` when done)
+        self._kept = None
 
     def open_checkpoint_file(self, chk):
         """
@@ -956,12 +1229,17 @@ class HDF5Checkpointer(Checkpointer):
         :return:
         :rtype:
         """
+        if self._kept is not None and not self._kept.closed:
+            return self._kept
         if not self._came_open:
             try:
                 if os.path.exists(chk):
-                    return open(chk, 'r+b')
+                    stream = open(chk, 'r+b')
                 else:
-                    return open(chk, "w+b")
+                    stream = open(chk, "w+b")
+                if self.keep_open:
+                    self._kept = stream
+                return stream
             except ValueError as e:
                 if e.args[0] == 'seek of closed file':
                     raise IOError("existing HDF5 file {} is corrupted and can't be opened".format(chk))
@@ -981,7 +1259,21 @@ class HDF5Checkpointer(Checkpointer):
         :rtype:
         """
         if not self._came_open:
-            self.stream.close()
+            if self.keep_open and self._kept is not None:
+                self._kept.flush() # stays open for the next block
+            else:
+                self.stream.close()
+
+    def close(self):
+        """
+        Closes a file that was kept open with `keep_open=True`
+        """
+        if self._kept is not None:
+            try:
+                if not self._kept.closed:
+                    self._kept.close()
+            finally:
+                self._kept = None
 
     def save_parameter(self, key, value):
         """

@@ -23,6 +23,7 @@ __all__ = [
     "fingerprint",
     "file_hash",
     "implementation_signature",
+    "chained_key",
 ]
 
 def file_hash(path, algorithm='sha256', chunk_size=1 << 20):
@@ -173,3 +174,26 @@ def implementation_signature(*modules):
     :rtype: dict
     """
     return dict(_implementation_signature(tuple(modules)))
+
+
+def chained_key(*parts, algorithm='sha256', **freeze_options):
+    """
+    **LLM Docstring**
+
+    A key built by folding the fingerprints of `parts` in order (each step hashes the previous key with
+    the next part's fingerprint), so a key depends on every earlier part and on their order.
+
+    :param parts: the values (or already-computed keys) that define the result
+    :param algorithm: a `hashlib` algorithm name
+    :type algorithm: str
+    :param freeze_options: forwarded to `freeze`
+    :return: the hex digest
+    :rtype: str
+    """
+    if not parts:
+        raise ValueError("chained_key needs at least one part")
+    key = ''
+    for part in parts:
+        text = json.dumps(freeze(part, **freeze_options), sort_keys=True)
+        key = hashlib.new(algorithm, (key + ':' + text).encode()).hexdigest()
+    return key
