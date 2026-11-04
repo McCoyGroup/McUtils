@@ -24,3 +24,5 @@ from .DifferentiableFunctions import *; from .DifferentiableFunctions import __a
 __all__ += exposed
 from .MultipoleExpansions import *; from .MultipoleExpansions import __all__ as exposed
 __all__ += exposed
+from .RotationalAveraging import *; from .RotationalAveraging import __all__ as exposed
+__all__ += exposed
