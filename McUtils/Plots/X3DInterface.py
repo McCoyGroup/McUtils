@@ -3456,6 +3456,12 @@ class X3DTriangleSet(X3DCoordinatesWrapper):
 class X3DIndexedTriangleSet(X3DIndexedCoordinatesWrapper):
     tag_class = X3DHTML.IndexedTriangleSet
 
+    def create_tag_object(self, *, point, **options):
+        node = super().create_tag_object(point=point, **options)
+        # Keep geometric conversion independent of display serialization precision.
+        node.mesh_source_vertices = np.asarray(point, dtype=float)
+        return node
+
 
 class X3DScalarFieldIsosurface(X3DIndexedTriangleSet):
     """An ordinary mesh for display, retaining its field for animation detection."""
@@ -4109,6 +4115,8 @@ class X3DInterpolatingAnimator(X3DGenericAnimator):
         :return: the animation (or the single frame if nothing changes)
         """
         frames = list(frames)
+        if opts.get('mesh_mode') == 'signed_distance' and not detect_meshes:
+            raise ValueError('signed_distance animation requires mesh detection')
         if not frames:
             raise ValueError('no animation frames were supplied')
         if len(frames) == 1:
@@ -4311,6 +4319,9 @@ class X3DPrimitiveDecoder:
         if colors is None:
             colors=self.resolve_child(node,'colorrgba');channels=4
         metadata={'geometry_attributes':attrs}
+        raw_vertices = getattr(node, 'mesh_source_vertices', None)
+        if raw_vertices is not None:
+            metadata['mesh_source_vertices'] = np.asarray(raw_vertices, dtype=float)
         source = getattr(node, 'scalar_field_isosurface', None)
         if source is not None:
             metadata['scalar_field_isosurface'] = source
@@ -4546,7 +4557,7 @@ def _animate_nonmesh(roots, clock_id):
     return X3DHTML.Group(roots[0],*controls)
 
 
-def _prepare_x3d_mesh_animation(frames, *, mesh_options=None, **options):
+def _prepare_x3d_mesh_animation(frames, *, mesh_options=None, mesh_mode=None, signed_distance_options=None, **options):
     """Return automatic field/mesh tracks, or None when no mesh is present.
 
     Detection currently matches mesh shapes by scene path. This is intentionally
@@ -4556,6 +4567,10 @@ def _prepare_x3d_mesh_animation(frames, *, mesh_options=None, **options):
     Unresolved vertex correspondence holds the old geometry until the next key;
     it still updates the same mesh node, never a whole-animation Switch.
     """
+    if mesh_mode not in (None, 'signed_distance'):
+        raise ValueError('unknown mesh interpolation mode: ' + str(mesh_mode))
+    if signed_distance_options is not None and mesh_mode != 'signed_distance':
+        raise ValueError('signed_distance_options requires signed_distance animation mode')
     mesh_options={} if mesh_options is None else dict(mesh_options)
     correspondence=mesh_options.pop('correspondence','auto')
     decoder_factory=mesh_options.pop('decoder',X3DPrimitiveDecoder)
@@ -4569,7 +4584,10 @@ def _prepare_x3d_mesh_animation(frames, *, mesh_options=None, **options):
         decoder=decoder_factory();records=decoder.decode(frame,strict=False)
         roots.append(decoder.roots[0])
         decoded.append([r for r in records if r.vertices is not None])
-    if not any(decoded):return None
+    if not any(decoded):
+        if mesh_mode == 'signed_distance':
+            raise ValueError('signed_distance animation requires closed triangle meshes')
+        return None
     counts=[collections.Counter(r.source_id for r in records if r.source_id is not None) for records in decoded]
     stable_ids=set.intersection(*[{key for key,count in counter.items() if count==1} for counter in counts])
     meshes=[]
@@ -4602,6 +4620,8 @@ def _prepare_x3d_mesh_animation(frames, *, mesh_options=None, **options):
     times=np.linspace(0,1,len(frames))
     reports=[]
     field_data = {'fields': [], 'tracks': [], 'times': times.tolist(), 'interpolation': 'linear'}
+    if mesh_mode == 'signed_distance':
+        field_data['representation'] = 'signed_distance'
     field_ids = {}
     field_nodes = {}
     for track,path in enumerate(sorted(paths,key=repr)):
@@ -4609,6 +4629,21 @@ def _prepare_x3d_mesh_animation(frames, *, mesh_options=None, **options):
         for record in records:
             if record.metadata.get('unsupported_animation'):
                 raise NotImplementedError(record.metadata['unsupported_animation'])
+        if mesh_mode == 'signed_distance':
+            from ..Zachary import MeshSignedDistanceField
+            # Decoder coordinates are already in display/world units. The
+            # conversion never consults any retained cube/field samples.
+            for record in records:
+                raw_vertices = record.metadata.get('mesh_source_vertices')
+                if raw_vertices is not None:
+                    record.vertices = raw_vertices @ record.transform[:3,:3].T + record.transform[:3,3]
+            fields = MeshSignedDistanceField.from_meshes(
+                [(record.vertices, record.faces) for record in records],
+                **({} if signed_distance_options is None else signed_distance_options))
+            for record, scalar_field in zip(records, fields):
+                record.metadata['scalar_field_isosurface'] = scalar_field.isosurface(0.)
+                record.metadata['scalar_field_coordinate_scale'] = 1.
+                record.transform = np.eye(4)
         sources = [record.metadata.get('scalar_field_isosurface') for record in records]
         is_field = any(source is not None for source in sources)
         if is_field and not all(source is not None for source in sources):
@@ -4620,6 +4655,8 @@ def _prepare_x3d_mesh_animation(frames, *, mesh_options=None, **options):
                 sources[0].field.require_compatible(source.field)
                 if source.interpolation != sources[0].interpolation:
                     raise ValueError('isosurface interpolation policies differ between keys')
+                if source.normal_direction != sources[0].normal_direction:
+                    raise ValueError('isosurface normal directions differ between keys')
                 if (record.metadata['scalar_field_coordinate_scale'] != records[0].metadata['scalar_field_coordinate_scale']
                         or not np.allclose(record.transform, records[0].transform)):
                     raise ValueError('scalar-field animation requires a fixed display transform and coordinate units')
@@ -4677,6 +4714,8 @@ def _prepare_x3d_mesh_animation(frames, *, mesh_options=None, **options):
                 field_indices.append(field_ids[identity])
             field_data['tracks'].append(dict(
                 fields=field_indices, isovalues=[source.isovalue for source in sources],
+                normal_direction=sources[0].normal_direction,
+                representation=getattr(sources[0].field, 'representation', 'scalar_field'),
                 coordinate_scale=records[0].metadata['scalar_field_coordinate_scale'],
                 transform=first.transform.tolist(), reverse_winding=bool(np.linalg.det(first.transform[:3,:3]) < 0),
                 materials=[_material(record) for record in records]))

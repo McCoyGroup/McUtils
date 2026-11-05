@@ -14,6 +14,7 @@ __all__ = ["ScalarField"]
 
 class ScalarField:
     coordinate_units = None
+    default_normal_direction = 'auto'
 
     def __init__(self, values, origin=None, axes=None, coordinate_units=None, **interpolation_options):
         values = np.asarray(values)
@@ -94,9 +95,12 @@ class ScalarField:
             return self
         if fraction == 1:
             return other
-        return ScalarField((1 - fraction) * self.values + fraction * other.values,
-                           origin=self.origin, axes=self.axes, coordinate_units=self.coordinate_units,
-                           **self.interpolation_opts)
+        field = ScalarField((1 - fraction) * self.values + fraction * other.values,
+                            origin=self.origin, axes=self.axes, coordinate_units=self.coordinate_units,
+                            **self.interpolation_opts)
+        if self.default_normal_direction == other.default_normal_direction:
+            field.default_normal_direction = self.default_normal_direction
+        return field
 
     def get_isosurface(self, isovalue, **options):
         if self.values.ndim != 3:
@@ -106,6 +110,7 @@ class ScalarField:
 
     def isosurface(self, isovalue, **options):
         from .Surfaces.ScalarFieldIsosurface import ScalarFieldIsosurface
+        options.setdefault('normal_direction', self.default_normal_direction)
         return ScalarFieldIsosurface(self, isovalue, **options)
 
     def to_animation_data(self):

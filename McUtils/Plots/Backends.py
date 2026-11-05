@@ -14840,9 +14840,13 @@ class X3DFigure(GraphicsFigure):
     allow_fallback = True
     def animate_frames(self, frames: list['X3DAxes'], mode=None, allow_fallback=None, **animation_opts):
         """
-        **LLM Docstring**
+        Animate frames with the standard X3D clock and playback controls.
 
-        Animate a sequence of frames (X3D backend).
+        ``mode='signed_distance'`` converts closed triangle-mesh tracks to
+        negative-inside distance fields on a shared grid before interpolation.
+        ``signed_distance_options`` accepts the grid or spacing/padding in
+        display/world units, plus MeshSignedDistanceField sampling options.
+        Source scalar values are not used by this explicit mesh mode.
 
         :param frames: the animation frames
         :param mode: the `mode`
@@ -14865,7 +14869,9 @@ class X3DFigure(GraphicsFigure):
                     frame_data,
                     **animation_opts
                 )
-        elif mode == 'interpolated':
+        elif mode in ('interpolated', 'signed_distance'):
+            if mode == 'signed_distance':
+                animation_opts = dict(animation_opts, mesh_mode='signed_distance')
             animation = x3d.X3DInterpolatingAnimator.from_frames(
                 frame_data,
                 **animation_opts

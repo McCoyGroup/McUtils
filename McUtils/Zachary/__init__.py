@@ -10,6 +10,8 @@ from .Mesh import *; from .Mesh import __all__ as exposed
 __all__ += exposed
 from .ScalarFields import *; from .ScalarFields import __all__ as exposed
 __all__ += exposed
+from .MeshFields import *; from .MeshFields import __all__ as exposed
+__all__ += exposed
 from .Surfaces import *; from .Surfaces import __all__ as exposed
 __all__ += exposed
 from .FittableModels import *; from .FittableModels import __all__ as exposed

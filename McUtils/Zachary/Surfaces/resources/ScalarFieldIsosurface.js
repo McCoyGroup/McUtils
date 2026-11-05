@@ -73,6 +73,8 @@ function createScalarFieldIsosurfaceEvaluator(data) {
             for (let i = 0; i < row.length && row[i] !== -1; i += 3) {
                 const face = [vertex(row[i]), vertex(row[i + 1]), vertex(row[i + 2])];
                 if (iso < 0) [face[0], face[1]] = [face[1], face[0]];
+                if ((track.normal_direction === 'increasing' && iso >= 0) ||
+                    (track.normal_direction === 'decreasing' && iso < 0)) [face[1], face[2]] = [face[2], face[1]];
                 if (track.reverse_winding) [face[1], face[2]] = [face[2], face[1]];
                 faces.push(face);
             }
