@@ -22,6 +22,7 @@ needed by the baked-in `init.js`), explorable via native `<details>`
 elements -- no live kernel, no ipywidgets, works fine on mobile.
 """
 
+import re
 import io
 import contextlib
 
@@ -32,7 +33,7 @@ from ..Formatters.TemplateEngine.TemplateEngine import (
     TemplateInterfaceEngine, TemplateHandler
 )
 
-__all__ = ["JHTMLDocumentationEngine", "static_doc"]
+__all__ = ["JHTMLDocumentationEngine", "static_doc", "static_markdown"]
 
 # --------------------------------------------------------------------------
 # finx (https://github.com/McCoyGroup/finx) assets, baked in verbatim
@@ -600,6 +601,61 @@ class JHTMLDocumentationEngine(TemplateInterfaceEngine):
 # Public entry point -- the static sibling of `jdoc`
 # --------------------------------------------------------------------------
 
+def _x3dom_runtime(embedder):
+    """The ``<head>`` elements an inline-embedded page needs for the X3DOM scenes it holds."""
+    runtime = []
+    if embedder is not None:
+        embedder.finish()
+        x3dom = embedder.assets.get("x3dom")
+        if x3dom:
+            if x3dom.get("stylesheet"):
+                runtime.append(JHTML.Link(rel="stylesheet", href=x3dom["stylesheet"]))
+            if x3dom.get("script"):
+                runtime.append(JHTML.Script(src=x3dom["script"]))
+    return runtime
+
+
+def _static_page(content, title, runtime=(), include_finx_js=True):
+    """
+    Wraps `content` in the single-file page `static_doc` and `static_markdown` share.
+
+    :param content: the body (a JHTML element)
+    :param title: the page title
+    :param runtime: extra ``<head>`` elements (e.g. the X3DOM runtime)
+    :param include_finx_js: whether to bake in finx's ``init.js``
+    :return: the JHTML page
+    """
+    viewport_meta = JHTML.Meta(name="viewport")
+    viewport_meta.attrs = dict(viewport_meta.attrs, content="width=device-width, initial-scale=1")
+
+    return JHTML.Html(
+        JHTML.Head(
+            JHTML.Meta(charset="utf-8"),
+            viewport_meta,
+            JHTML.Title(title),
+            *_bake_finx_assets(include_js=include_finx_js),
+            *CodeHighlighter.head_elements(),
+            *runtime,
+            JHTML.Style(
+                "body{max-width:900px;margin:0 auto;}"
+                ".main-content{padding:1rem 1rem 4rem 1rem;}"
+                "details{border:1px solid rgba(0,0,0,.15);border-radius:8px;padding:.4em .8em;margin:.5em 0;}"
+                "details.docs-class{border:none;padding:0;}"
+                "summary{cursor:pointer;font-weight:600;}"
+                ".doc-body{margin-top:.5em;}"
+            ),
+        ),
+        JHTML.Body(
+            JHTML.Div(content, cls='main-content', id='main-content')
+        ),
+        lang="en"
+    )
+
+
+def _page_string(page):
+    return "<!DOCTYPE html>\n" + page.tostring().replace("<Html", "<html").replace("</Html>", "</html>")
+
+
 def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True, verbose=False, return_string=False,
                readouts=None, strict_readouts=False, frame=None, **walker_kwargs):
     """
@@ -672,51 +728,19 @@ def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True
             content = walker.write([obj], max_depth=max_depth)
     finally:
         TemplateHandler.check_should_write = old_check
-    runtime = []
-    if embedder is not None:
-        embedder.finish()
-        x3dom = embedder.assets.get("x3dom")
-        if x3dom:
-            if x3dom.get("stylesheet"):
-                runtime.append(JHTML.Link(rel="stylesheet", href=x3dom["stylesheet"]))
-            if x3dom.get("script"):
-                runtime.append(JHTML.Script(src=x3dom["script"]))
+    runtime = _x3dom_runtime(embedder)
 
     name = title or getattr(obj, "__name__", str(obj))
 
-    viewport_meta = JHTML.Meta(name="viewport")
-    viewport_meta.attrs = dict(viewport_meta.attrs, content="width=device-width, initial-scale=1")
-
-    page = JHTML.Html(
-        JHTML.Head(
-            JHTML.Meta(charset="utf-8"),
-            viewport_meta,
-            JHTML.Title(name),
-            *_bake_finx_assets(include_js=include_finx_js),
-            *CodeHighlighter.head_elements(),
-            *runtime,
-            JHTML.Style(
-                "body{max-width:900px;margin:0 auto;}"
-                ".main-content{padding:1rem 1rem 4rem 1rem;}"
-                "details{border:1px solid rgba(0,0,0,.15);border-radius:8px;padding:.4em .8em;margin:.5em 0;}"
-                "details.docs-class{border:none;padding:0;}"
-                "summary{cursor:pointer;font-weight:600;}"
-                ".doc-body{margin-top:.5em;}"
-            ),
-        ),
-        JHTML.Body(
-            JHTML.Div(content, cls='main-content', id='main-content')
-        ),
-        lang="en"
-    )
+    page = _static_page(content, name, runtime=runtime, include_finx_js=include_finx_js)
     if frame:
         style = {"width": "100%", "height": "500px", "border": "1px solid rgba(0,0,0,.2)"}
         if isinstance(frame, dict):
             style.update(frame)
-        html_string = "<!DOCTYPE html>\n" + page.tostring().replace("<Html", "<html").replace("</Html>", "</html>")
+        html_string = _page_string(page)
         return JHTML.Iframe(srcdoc=html_string, style=style)
     if return_string or out_file is not None:
-        html_string = "<!DOCTYPE html>\n" + page.tostring().replace("<Html", "<html").replace("</Html>", "</html>")
+        html_string = _page_string(page)
 
         if out_file is not None:
             with open(out_file, "w") as f:
@@ -726,3 +750,47 @@ def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True
             return html_string
     else:
         return page
+
+
+def static_markdown(text, title=None, out_file=None, readouts=None, strict_readouts=False,
+                    include_finx_js=False, return_string=True, owner=None):
+    """
+    Markdown text (with readout markers) -> one self-contained HTML page. Nothing is executed.
+
+    This is the Markdown sibling of `static_doc`: each marked example (``<!-- readout(...) -->`` followed by a
+    Python fence) gets the output stored for it written into the page, and the page is assembled exactly as
+    `static_doc` assembles its own.
+
+    :param text: the Markdown
+    :param title: the page title (default: ``"Document"``)
+    :param out_file: if given, the HTML is written to this path and the path is returned
+    :param readouts: the store of example output (a directory or `McUtils.Docs.ReadoutStore`); without one the
+        Markdown is converted as it is
+    :param strict_readouts: raise if a marked example has no stored output, or a failed one
+    :param include_finx_js: whether to bake in finx's ``init.js`` (the sidebar toggles; not needed here)
+    :param return_string: return the HTML string (otherwise the JHTML page)
+    :param owner: the name attached to the examples in warnings
+    :return: the HTML string, the path written to if `out_file` was given, or the JHTML page
+    """
+    embedder = None
+    if readouts is not None:
+        from .Examples import ExampleEmbedder
+        embedder = ExampleEmbedder(readouts, inline=True, strict=strict_readouts, warn=None)
+        text = embedder(text, owner=owner)
+    # The Markdown's HTML goes into the page as it is. Parsing it as XML (`JHTML.Markdown`) rejects what browsers
+    # accept (void elements, script text containing `<`) and, being non-strict, then writes the page's own markup
+    # out as escaped text.
+    import markdown
+    from ..Jupyter.JHTML.HTML import HTML
+    html = markdown.markdown(text, extensions=["fenced_code"])
+    html = re.sub(r"<!--.*?-->", "", html, flags=re.DOTALL)     # markers and metadata comments aren't page content
+    body = HTML.RawHTML(html)
+    page = _static_page(body, title or "Document", runtime=_x3dom_runtime(embedder),
+                        include_finx_js=include_finx_js)
+    if out_file is not None:
+        with open(out_file, "w", encoding="utf-8") as f:
+            f.write(_page_string(page))
+        return out_file
+    if return_string:
+        return _page_string(page)
+    return page

@@ -137,6 +137,8 @@ _OPTIONS = collections.OrderedDict([
     ("display",  _Option(_check_choice("readout", "output", "both", "none"), True)),
     ("css",      _Option(_check_choice("inline", "stylesheet"), True)),
     ("show_trivial", _Option(_check_bool, True)),
+    ("header",   _Option(_check_bool, True)),     # show (True) or hide (False) the readout's own title block
+    ("show_code", _Option(_check_bool, False)),   # False: an embedded page shows only the output, not the fence
     ("isolated", _Option(_check_bool, False)),
     ("timeout",  _Option(_check_timeout, False)),
 ])
@@ -208,8 +210,8 @@ def compute_key(source, options, prev_key=""):
     """
     ``sha256(version, previous key, canonical output-affecting options, normalized source bytes)``.
 
-    ``id``, ``timeout`` and ``isolated`` are *not* hashed, so renaming an example or changing its
-    time budget doesn't invalidate it; ``isolated`` acts by passing ``prev_key=""``.
+    ``id``, ``timeout``, ``isolated`` and ``show_code`` are *not* hashed, so renaming an example, changing its
+    time budget or hiding its code doesn't invalidate it; ``isolated`` acts by passing ``prev_key=""``.
     """
     h = hashlib.sha256()
     h.update(KEY_VERSION.encode("utf-8") + b"\0")
@@ -797,7 +799,8 @@ class ExampleView:
     def to_fragment(self, style=None, x3dom_path=None, css="inline"):
         """The embeddable `FragmentResult` for the site, or ``None`` for ``display="none"``."""
         node = self.node()
-        return None if node is None else node.to_html_fragment(style=style, x3dom_path=x3dom_path, css=css)
+        return None if node is None else node.to_html_fragment(style=style, x3dom_path=x3dom_path, css=css,
+                                                               header=self.block.options.get("header", "auto"))
 
     def to_element(self, mode="static", style=None, css="inline", include_code=True, **opts):
         """
@@ -1099,7 +1102,8 @@ class ExampleRunner:
         if node is not None:
             css = block.options.get("css", self.css)
             fragment = node.to_html_fragment(
-                style=block.options.get("style", self.style), x3dom_path=self.x3dom_path, css=css
+                style=block.options.get("style", self.style), x3dom_path=self.x3dom_path, css=css,
+                header=block.options.get("header", "auto")
             )
             if fragment.css is not None:
                 digest = hashlib.md5(fragment.css.encode("utf-8")).hexdigest()
@@ -1623,11 +1627,11 @@ class ExampleEmbedder:
         state = {"first": True}
 
         def replace(block):
-            fence = block.fence
+            fence = block.fence if block.options.get("show_code", True) else ""
             extra = self.placeholder(block, owner)
             if extra is None:
                 return fence
-            out = fence + "\n" + extra + "\n"
+            out = (fence + "\n" if fence else "") + extra + "\n"
             if self.loader and not self.inline and state["first"]:
                 out += "\n<script>\n" + EXAMPLE_LOADER_JS + "\n</script>\n"
                 if self.debug:

@@ -205,6 +205,7 @@ class ReadoutInterface:
     readout_id = None
     readout_title = None
     readout_sections = {}
+    report_template = None      # a `McUtils.Readouts.Reports.ReportTemplate` (class or instance) for reports on this object
 
     def __init_subclass__(cls, **kwargs):
         super().__init_subclass__(**kwargs)

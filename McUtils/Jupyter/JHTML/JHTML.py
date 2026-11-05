@@ -218,8 +218,10 @@ class JHTML:
             if not dynamic:
                 dynamic = track_value or handlers is not None
             if not dynamic:
-                Widget = JupyterAPIs.get_widgets_api().Widget
-                dynamic = any(isinstance(x, (ActiveHTMLWrapper, Widget)) for x in base.elems)
+                # without ipywidgets there are no widget instances to look for
+                widgets_api = JupyterAPIs.get_widgets_api()
+                dynamic_types = (ActiveHTMLWrapper,) if widgets_api is None else (ActiveHTMLWrapper, widgets_api.Widget)
+                dynamic = any(isinstance(x, dynamic_types) for x in base.elems)
             if dynamic:
                 base = HTMLWidgets.from_HTML(base, track_value=track_value, event_handlers=handlers)
 

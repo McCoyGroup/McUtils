@@ -1,5 +1,6 @@
 """Readout adapters in the per-module ``Readouts`` packages, reached through ``to_readout`` hooks."""
 from McUtils.ExternalPrograms import *
+from McUtils.ExternalPrograms.Conformers import ConformerRecord
 import io
 import json
 import os
@@ -11,7 +12,7 @@ import zipfile
 
 import numpy as np
 
-from McUtils.Jupyter import Readout, ReadoutSection, ReadoutHTML, ReadoutText, to_readout, register_readout, \
+from McUtils.Readouts import Readout, ReadoutSection, ReadoutHTML, ReadoutText, to_readout, register_readout, \
     find_readout_adapter, mask_secrets, as_readout_node
 
 warnings.filterwarnings("ignore")

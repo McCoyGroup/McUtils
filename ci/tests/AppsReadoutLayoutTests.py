@@ -7,8 +7,8 @@ try:
     import ipywidgets as widgets
 except ImportError:
     widgets=None
-from McUtils.Jupyter import (JHTML,AppTheme,App,Card,Grid,Flex,Button,Dropdown,Tabs,Accordion,
-                             Readout,ReadoutText,ReadoutFields,ReadoutSection,ReadoutGrid,
+from McUtils.Jupyter import (JHTML,AppTheme,App,Card,Grid,Flex,Button,Dropdown,Tabs,Accordion)
+from McUtils.Readouts import (Readout,ReadoutText,ReadoutFields,ReadoutSection,ReadoutGrid,
                              ReadoutPanel,ReadoutFlex,ReadoutWidget,as_readout_node)
 
 class Markup(HTMLParser):
@@ -134,8 +134,9 @@ class ReadoutTests(unittest.TestCase):
 
 import asyncio
 from McUtils.Jupyter import (AppTheme,Button,Card,Grid,Flex,Slider,VariableNamespace,Var,
-                            Readout,ReadoutFields,ReadoutPanel,ReadoutWidget,ReadoutGrid,
-                            as_readout_node,ReadoutScene,Popover,Tooltip)
+                            Popover,Tooltip)
+from McUtils.Readouts import (Readout,ReadoutFields,ReadoutPanel,ReadoutWidget,ReadoutGrid,
+                            as_readout_node,ReadoutScene)
 
 @unittest.skipIf(widgets is None,'live widget tests need ipywidgets')
 class ProtocolTests(unittest.TestCase):
@@ -157,7 +158,7 @@ class ProtocolTests(unittest.TestCase):
         self.assertEqual(card.ui_theme,'bootstrap')
         self.assertIn('bootstrap@5.1.3',card.to_static_html().tostring())
         self.assertEqual(AppTheme.current().name,'native')
-        from McUtils.Jupyter import ReadoutFlex
+        from McUtils.Readouts import ReadoutFlex
         with AppTheme('bootstrap'):
             panel=ReadoutPanel('Saved panel')
             grid=ReadoutGrid([['Saved grid']])
@@ -318,7 +319,8 @@ class NoWidgets(importlib.abc.MetaPathFinder):
         if fullname=='ipywidgets' or fullname.startswith('ipywidgets.'):
             raise ModuleNotFoundError('deliberately unavailable ipywidgets')
 sys.meta_path.insert(0,NoWidgets())
-from McUtils.Jupyter import App,Card,Grid,Readout,ReadoutFields
+from McUtils.Jupyter import App,Card,Grid
+from McUtils.Readouts import Readout,ReadoutFields
 app=App(body=Card('Body',header='Header'),capture_output=False)
 html=app.to_static_html().tostring()
 assert 'mcui-card' in html and 'cdn.jsdelivr' not in html

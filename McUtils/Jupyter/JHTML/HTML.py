@@ -1914,7 +1914,21 @@ class XMLBase:
     base_element = None
     @classmethod
     def get_element_type(cls, tag, namespace=None, attrs=None):
-        return cls.get_class_map().get(tag, cls.base_element)
+        el = cls.get_class_map().get(tag)
+        if el is None and tag[:1].isupper():
+            # X3D tags are capitalized; without their element classes, X3D-specific attributes that
+            # collide with CSS names (``position``, ``height``, ``top``, ...) get moved into ``style``,
+            # which X3DOM ignores (e.g. a ``Viewpoint`` loses its camera position)
+            el = cls._get_x3d_element_type(tag)
+        return cls.base_element if el is None else el
+
+    @classmethod
+    def _get_x3d_element_type(cls, tag):
+        try:
+            from ..X3D import X3DHTML
+        except ImportError: # pragma: no cover
+            return None
+        return X3DHTML.get_x3d_map().get(tag)
 
     @classmethod
     def convert(cls, etree:ElementTree.Element, strip=True, converter=None, namespace_data=None, **extra_attrs):
@@ -1993,8 +2007,36 @@ class XMLBase:
             node._attr_view = None
         return node
 
+    _void_tag_pattern = re.compile(
+        r"""<(area|base|br|col|embed|hr|img|input|link|meta|param|source|track|wbr)"""
+        r"""((?:\s(?:[^>"']|"[^"]*"|'[^']*')*?)?)\s*(?<!/)>""", re.IGNORECASE)
+
+    @classmethod
+    def _close_void_elements(cls, source):
+        """
+        Self-close HTML void elements (``<input ...>`` -> ``<input .../>``). `tostring` writes HTML, in which void
+        elements have no end tag, but the parser reads XML, where every element needs one.
+        """
+        return cls._void_tag_pattern.sub(lambda m: f"<{m.group(1)}{m.group(2)}/>", source)
+
     @classmethod
     def _parse_etree(cls, source, preserve_namespaces=False):
+        try:
+            return cls._parse_etree_xml(source, preserve_namespaces=preserve_namespaces)
+        except ElementTree.ParseError:
+            if not isinstance(source, str):
+                raise
+            closed = cls._close_void_elements(source)
+            if closed == source:
+                raise
+            try:
+                return cls._parse_etree_xml(closed, preserve_namespaces=preserve_namespaces)
+            except ElementTree.ParseError:
+                pass
+            raise
+
+    @classmethod
+    def _parse_etree_xml(cls, source, preserve_namespaces=False):
         if not preserve_namespaces:
             return ElementTree.fromstring(source), None
         stream = io.StringIO(source) if isinstance(source, str) else io.BytesIO(source)

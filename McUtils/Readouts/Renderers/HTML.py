@@ -246,7 +246,7 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         from ...Plots.X3DInterface import X3D
         path = self.x3dom_path
         local = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-                             "resources", "x3dom-full.js")
+                             "Jupyter", "resources", "x3dom-full.js")
         if path is None:
             return [H.Link(rel="stylesheet", href=X3D.X3DOM_CSS), H.Script(src=X3D.X3DOM_JS)]
         if path == "local":

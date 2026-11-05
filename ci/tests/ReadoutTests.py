@@ -10,7 +10,7 @@ import zipfile
 
 import numpy as np
 
-from McUtils.Jupyter import (
+from McUtils.Readouts import (
     Readout, ReadoutSection, ReadoutFields, ReadoutTable, ReadoutText, ReadoutScene, ReadoutGallery,
     ReadoutArray, ReadoutAdapter, readout_section, ReadoutSectionUnavailable, ReadoutUnits, ReadoutTheme,
     Field, FieldSet, Column, TabularData, ArrayData, SceneView, PosterRequest, MeshSceneSource,
