@@ -1,9 +1,24 @@
 import importlib
-from ...Parsers import FileStreamReader, FileStreamCheckPoint, FileStreamReaderException
+from ...Parsers import FileStreamReader, FileStreamCheckPoint, FileStreamReaderException, StringStreamReader
 
 __all__ = [
-    "ElectronicStructureLogReader"
+    "ElectronicStructureLogReader",
+    "get_last_molecule_info"
 ]
+
+def get_last_molecule_info(records):
+    """Return the last printed charge/multiplicity record, ignoring atom-count records.
+
+    Missing values stay unknown; in particular, an unresolved external geometry
+    must not inherit a different molecule's electronic state from earlier output.
+    """
+    for record in reversed(records or []):
+        if 'fragment' in record:
+            continue
+        if 'charge' in record or 'multiplicity' in record:
+            return {key: record[key] for key in ('charge', 'multiplicity')
+                    if record.get(key) is not None}
+    return {}
 
 class ElectronicStructureLogReader(FileStreamReader):
     """
@@ -17,6 +32,13 @@ class ElectronicStructureLogReader(FileStreamReader):
     components_name = None
     components_package = ".LogComponents"
     _comps = None
+    @classmethod
+    def from_string(cls, text):
+        """Create this log reader over an in-memory string, using the same components."""
+        reader = cls(None)
+        reader.stream = StringStreamReader(text).stream
+        return reader
+
     def to_readout(self, keys=None, **opts):
         """
         **LLM Docstring**

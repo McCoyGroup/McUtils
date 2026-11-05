@@ -466,11 +466,15 @@ class GaussianJob(ExternalProgramJob):
     @classmethod
     def parse_output(cls, text):
         """
-        :return: ``terminated_normally`` and, if present, the last SCF ``energy`` (Hartree)
+        :return: ``terminated_normally`` and, if present, the last SCF ``energy`` (Hartree),
+            ``charge`` and ``multiplicity`` from the standard log parser
         """
         import re
+        from ..Parsers import GaussianLogReader, get_last_molecule_info
         energies = [float(e) for e in re.findall(r"SCF Done:\s+E\([^)]*\)\s+=\s+(-?\d+\.\d+)", text)]
         res = {'terminated_normally': "Normal termination" in text}
+        with GaussianLogReader.from_string(text) as reader:
+            res.update(get_last_molecule_info(reader.parse('MoleculeInfo')['MoleculeInfo']))
         if len(energies) > 0:
             res['energy'] = energies[-1]
             res['energies'] = energies

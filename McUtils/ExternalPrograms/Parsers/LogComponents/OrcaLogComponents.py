@@ -2,6 +2,7 @@
 This lists the types of readers and things available to the GaussianLogReader
 """
 import numpy as np
+import re
 
 from ....Parsers import *
 from collections import namedtuple, OrderedDict
@@ -21,6 +22,32 @@ Components = OrderedDict()  # we'll register on this bit by bit
 #     "parser"      : parser, # function that'll parse the returned list of blocks (for "List") or block (for "Single")
 #     "mode"        : mode # "List" or "Single"
 # }
+
+def molecule_info_parser(blocks):
+    """Read the computed total charge and multiplicity, excluding populations/S**2."""
+    records = []
+    for block in blocks:
+        if block is None:
+            continue
+        record = {}
+        for key, label in [('charge', 'Total Charge'), ('multiplicity', 'Multiplicity')]:
+            match = re.search(r'(?m)^[ \t]*' + label + r'\b[^\n]*?\.{2,}[ \t]*([+-]?\d+)[ \t]*$', block)
+            if match:
+                record[key] = int(match[1])
+        if record:
+            records.append(record)
+    return records
+
+
+Components['MoleculeInfo'] = {
+    'description': 'computed total charge and spin multiplicity',
+    'tag_start': 'Total Charge',
+    'tag_end': '\n\n',
+    'preserve_tag': True,
+    'allow_terminal': True,
+    'parser': molecule_info_parser,
+    'mode': 'List'
+}
 
 ########################################################################################################################
 #
@@ -302,6 +329,7 @@ Components["NormalModes"] = {
 #
 # region Defaults
 Defaults = (
+    'MoleculeInfo',
 )
 # endregion
 

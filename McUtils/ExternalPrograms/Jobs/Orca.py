@@ -346,13 +346,17 @@ class OrcaJob(ExternalProgramJob):
     def parse_output(cls, text):
         """
         :return: ``terminated_normally``, ``optimized`` (a geometry optimization converged) and, if present,
-            the final ``energy`` (Hartree) and all ``energies``
+            the final ``energy`` (Hartree), all ``energies``, ``charge`` and ``multiplicity``
+            from the standard log parser
         """
+        from ..Parsers import OrcaLogReader, get_last_molecule_info
         energies = [float(e) for e in re.findall(r"FINAL SINGLE POINT ENERGY\s+(-?\d+\.\d+)", text)]
         res = {
             'terminated_normally': "ORCA TERMINATED NORMALLY" in text,
             'optimized': "THE OPTIMIZATION HAS CONVERGED" in text
         }
+        with OrcaLogReader.from_string(text) as reader:
+            res.update(get_last_molecule_info(reader.parse('MoleculeInfo')['MoleculeInfo']))
         if len(energies) > 0:
             res['energy'] = energies[-1]
             res['energies'] = energies

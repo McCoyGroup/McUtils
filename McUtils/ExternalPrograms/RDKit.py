@@ -76,6 +76,69 @@ class RDMolecule(ExternalMolecule):
         """
         mol = self.rdmol
         return [atom.GetSymbol() for atom in mol.GetAtoms()]
+
+    @property
+    def isotopes(self):
+        """Isotope mass numbers, parallel to atoms; 0 denotes an unlabeled atom."""
+        return [atom.GetIsotope() for atom in self.rdmol.GetAtoms()]
+
+    @property
+    def atom_labels(self):
+        """Atom labels with isotope identity, including D, T, C13 and explicit C12."""
+        return [self.from_rdkit_atom(atom) for atom in self.rdmol.GetAtoms()]
+
+    @property
+    def masses(self):
+        """AtomData masses with isotope identity preserved (in atomic mass units)."""
+        masses = []
+        for label, atom in zip(self.atom_labels, self.rdmol.GetAtoms()):
+            try:
+                mass = AtomData[label, 'Mass']
+            except KeyError:
+                mass = atom.GetMass()
+            masses.append(mass)
+        return masses
+
+    @classmethod
+    def to_rdkit_atom(cls, atom, isotope=None):
+        """Convert an element/isotope label, atomic number or RDKit atom to an Atom.
+
+        Explicit isotope values override the label: None retains/infers its isotope,
+        0 clears the isotope label, and positive integers specify a mass number.
+        Plain element symbols/names remain unlabeled.
+        """
+        Chem = cls.chem_api()
+        if isinstance(atom, str) and atom not in {'*', 'X'}:
+            data = AtomData[atom]
+            label = atom.casefold()
+            atom = Chem.Atom(max(0, int(data['Number'])))
+            if label not in {data['ElementSymbol'].casefold(), data['ElementName'].casefold()}:
+                atom.SetIsotope(int(data['MassNumber']))
+        elif isinstance(atom, str) and atom in {'*', 'X'}:
+            atom = Chem.Atom(0)
+        else:
+            atom = Chem.Atom(int(atom) if nput.is_int(atom) else atom)
+        if isotope is not None:
+            if isinstance(isotope, (bool, np.bool_)) or not nput.is_int(isotope) or isotope < 0:
+                raise ValueError('isotope mass numbers must be nonnegative integers or None')
+            atom.SetIsotope(int(isotope))
+        return atom
+
+    @staticmethod
+    def from_rdkit_atom(atom):
+        """Return an isotope-aware atom label without discarding explicit primary isotopes."""
+        symbol, isotope = atom.GetSymbol(), atom.GetIsotope()
+        if atom.GetAtomicNum() == 0:
+            return 'X'
+        if not isotope:
+            return symbol
+        label = symbol + str(isotope)
+        try:
+            canonical = AtomData[label, 'Symbol']
+        except KeyError:
+            return label
+        return label if canonical == symbol else canonical
+
     @classmethod
     def get_bonds(cls, mol):
         return [
@@ -539,6 +602,7 @@ class RDMolecule(ExternalMolecule):
                     confgen_opts=None,
                     sanitize=False,
                     rdmol=None,
+                    isotopes=None,
                     **opts
                     ):
         """
@@ -547,8 +611,11 @@ class RDMolecule(ExternalMolecule):
         Build an `RDMolecule` from atoms, coordinates, and (optional) bonds, optionally
         adding implicit hydrogens (placed by conformer generation) and guessing bonds.
 
-        :param atoms: the element symbols
-        :type atoms: Sequence[str]
+        :param atoms: element/isotope labels (including D/T), atomic numbers or RDKit atoms
+        :type atoms: Sequence[str | int | Chem.Atom]
+        :param isotopes: optional mass numbers parallel to atoms; None entries infer from the atom,
+            0 clears its isotope label, and positive integers override it
+        :type isotopes: Sequence[int | None] | None
         :param coords: the Cartesian coordinates
         :type coords: np.ndarray
         :param bonds: the bonds as `[i, j(, order)]`
@@ -583,13 +650,24 @@ class RDMolecule(ExternalMolecule):
         :rtype: RDMolecule | list
         """
         Chem = cls.allchem_api()
+        atoms = list(atoms)
+        if isotopes is None:
+            isotope_specs = [None] * len(atoms)
+        else:
+            isotope_specs = list(isotopes)
+            if len(isotope_specs) != len(atoms):
+                raise ValueError('isotopes must have one entry per atom')
+        atom_specs = [cls.to_rdkit_atom(atom, isotope) for atom, isotope in zip(atoms, isotope_specs)]
+        if formal_charges is not None:
+            formal_charges = list(formal_charges)
+            if len(formal_charges) != len(atoms):
+                raise ValueError('formal_charges must have one entry per atom')
         if rdmol is None:
             mol = Chem.EditableMol(Chem.Mol())
             mol.BeginBatchEdit()
             if formal_charges is None:
                 formal_charges = [None] * len(atoms)
-            for a,fc in zip(atoms, formal_charges):
-                a = Chem.Atom(a)
+            for a,fc in zip(atom_specs, formal_charges):
                 if fc is not None:
                     if nput.is_int(fc):
                         fc = int(fc)
@@ -617,8 +695,12 @@ class RDMolecule(ExternalMolecule):
             mol.RemoveAllConformers()
             if guess_bonds is None:
                 guess_bonds = False
-            if [a.GetSymbol() for a in mol.GetAtoms()] != [Chem.Atom(a).GetSymbol() for a in atoms]:
+            if [a.GetAtomicNum() for a in mol.GetAtoms()] != [a.GetAtomicNum() for a in atom_specs]:
                 raise ValueError("RDKit molecular template does not match the supplied ordered atoms")
+            for source, expected, isotope in zip(mol.GetAtoms(), atom_specs, isotope_specs):
+                # Plain element labels leave the template's existing isotope intact.
+                if (isotope is not None or expected.GetIsotope()) and source.GetIsotope() != expected.GetIsotope():
+                    raise ValueError('RDKit molecular template and supplied isotopes disagree')
             if formal_charges is not None:
                 if len(formal_charges) != mol.GetNumAtoms() or any(
                         value is not None and value != atom.GetFormalCharge()
@@ -770,6 +852,7 @@ class RDMolecule(ExternalMolecule):
             bonds=mol.bonds,
             charge=mol.charge,
             formal_charges=mol.formal_charges,
+            isotopes=getattr(mol, 'isotopes', None),
             guess_bonds=guess_bonds
         )
 
@@ -1920,8 +2003,8 @@ class RDMolecule(ExternalMolecule):
             extra.append((parent, idx))
         return reordering + [idx for _, idx in sorted(extra)]
 
-    @staticmethod
-    def _inchi_hydrogen_tag_graph(parsed_mol):
+    @classmethod
+    def _inchi_hydrogen_tag_graph(cls, parsed_mol):
         """
         The graph a hydrogen-containing InChI tag is defined on: the heavy atoms of an InChI-parsed mol, in
         InChI order, followed by one `H` per implicit hydrogen, grouped by the heavy atom InChI puts it on.
@@ -1930,7 +2013,7 @@ class RDMolecule(ExternalMolecule):
 
         :return: the element symbols and the `(i, j, order)` bonds
         """
-        symbols = [atom.GetSymbol() for atom in parsed_mol.GetAtoms()]
+        symbols = [cls.from_rdkit_atom(atom) for atom in parsed_mol.GetAtoms()]
         bonds = [
             (b.GetBeginAtomIdx(), b.GetEndAtomIdx(), b.GetBondTypeAsDouble())
             for b in parsed_mol.GetBonds()
