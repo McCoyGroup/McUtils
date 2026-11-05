@@ -422,6 +422,22 @@ class MeshGeometry:
     def surface_area(self, return_components=False):
         return nput.mesh_surface_area(self.verts, self.inds, return_components=return_components)
 
+    def distance_query(self, **options):
+        """Cached triangle-distance queries; geometry arrays are treated as a snapshot."""
+        key = tuple(sorted(options.items()))
+        if not hasattr(self, '_distance_query_cache'):
+            self._distance_query_cache = {}
+        if key not in self._distance_query_cache:
+            self._distance_query_cache[key] = nput.MeshDistanceQuery(self.verts, self.inds, **options)
+        return self._distance_query_cache[key]
+
+    def signed_distance(self, points, **query_options):
+        return self.distance_query(**query_options).signed_distance(points)
+
+    def to_scalar_field(self, **options):
+        from .MeshFields import MeshSignedDistanceField
+        return MeshSignedDistanceField(self, **options)
+
     def volume(self, return_components=False):
         return nput.mesh_volume(self.verts, self.inds, return_components=return_components)
 

@@ -46,6 +46,8 @@ __all__ += _all
 
 from .MeshOps import *; from .MeshOps import __all__ as _all
 __all__ += _all
+from .MeshDistance import *; from .MeshDistance import __all__ as _all
+__all__ += _all
 
 from .ExternalMemory import *; from .ExternalMemory import __all__ as _all
 __all__ += _all

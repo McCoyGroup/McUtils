@@ -51,6 +51,7 @@ recursive-include McUtils/Data/ *.json
 # graft css
 recursive-include McUtils/Jupyter/resource *.js
 recursive-include McUtils/Jupyter/resource *.css
+recursive-include McUtils/Zachary/Surfaces/resources *.js
 
 # Patterns to exclude from any directory
 global-exclude *~

@@ -41,7 +41,8 @@ The rest of the pipeline lives in this file too, in order:
 import ast, collections, contextlib, datetime, fnmatch, hashlib, html, importlib, inspect, io, json, linecache, os, \
     queue, random, re, shutil, signal, subprocess, sys, tempfile, threading, time, traceback
 
-from ..Devutils.FileHelpers import atomic_dir, atomic_write, atomic_write_json
+from ..Devutils.FileHelpers import atomic_write
+from ..Devutils.EntryStore import EntryStore
 
 __all__ = [
     "ExampleMarkerError",
@@ -456,7 +457,7 @@ class ExampleParser:
 # store
 # --------------------------------------------------------------------------------------------- #
 
-class ReadoutStore:
+class ReadoutStore(EntryStore):
     """
     The on-disk export point for generated example output.
 
@@ -471,100 +472,18 @@ class ReadoutStore:
     """
 
     manifest_name = "manifest.json"
+    # entries, keys, atomic writes and prune are `EntryStore`'s (sha256 hex keys, two-character shards)
     meta_name = "meta.json"
     format_version = 1
 
-    def __init__(self, root):
-        self.root = os.fspath(root)
-
-    # ---- entries ---- #
     @staticmethod
     def _check_key(key):
         if not re.fullmatch(r"[0-9a-f]{64}", key or ""):
             raise ValueError("not an example key: {!r}".format(key))
         return key
 
-    def entry_path(self, key, *parts):
-        self._check_key(key)
-        return os.path.join(self.root, key[:2], key, *parts)
-
-    def has(self, key):
-        return os.path.isfile(self.entry_path(key, self.meta_name))
-
-    def has_file(self, key, name):
-        return os.path.isfile(self.entry_path(key, self._check_filename(name)))
-
-    def read_meta(self, key):
-        path = self.entry_path(key, self.meta_name)
-        if not os.path.isfile(path):
-            return None
-        with open(path, encoding="utf-8") as f:
-            return json.load(f)
-
-    @staticmethod
-    def _check_filename(name):
-        parts = name.replace("\\", "/").split("/")
-        if name == "" or os.path.isabs(name) or ".." in parts or "" in parts:
-            raise ValueError("invalid entry file name: {!r}".format(name))
-        return name
-
-    def write(self, key, meta, files=None):
-        """
-        Writes (replacing) the entry for ``key``.
-
-        :param meta: JSON-able metadata; ``key``, ``written`` and ``store_version`` are added
-        :param files: mapping of relative file name (``/`` allowed for subdirectories) to ``str``/``bytes``
-        :return: the entry directory
-        """
-        self._check_key(key)
-        final = self.entry_path(key)
-        os.makedirs(self.root, exist_ok=True)
-        with atomic_dir(final) as tmp:
-            full_meta = dict(meta, key=key, store_version=self.format_version,
-                             written=datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"))
-            for name, data in (files or {}).items():
-                self._check_filename(name)
-                if name == self.meta_name:
-                    raise ValueError("`{}` is reserved".format(self.meta_name))
-                path = os.path.join(tmp, *name.split("/"))
-                os.makedirs(os.path.dirname(path), exist_ok=True)
-                atomic_write(path, data, fsync=False, keep_mode=False)
-            atomic_write_json(os.path.join(tmp, self.meta_name), full_meta, sort_keys=True, fsync=False)
-        return final
-
-    def read_file(self, key, name, binary=False):
-        self._check_filename(name)
-        path = self.entry_path(key, *name.split("/"))
-        with open(path, "rb" if binary else "r", **({} if binary else {"encoding": "utf-8"})) as f:
-            return f.read()
-
-    def keys(self):
-        """All keys present in the store."""
-        found = []
-        if os.path.isdir(self.root):
-            for shard in sorted(os.listdir(self.root)):
-                sp = os.path.join(self.root, shard)
-                if len(shard) == 2 and os.path.isdir(sp):
-                    for key in sorted(os.listdir(sp)):
-                        if key.startswith(shard) and os.path.isfile(os.path.join(sp, key, self.meta_name)):
-                            found.append(key)
-        return found
-
-    def prune(self, keep_keys, dry_run=False):
-        """
-        Removes entries whose key is not in ``keep_keys`` (and empty shard directories).
-
-        :return: the keys that were (or, with ``dry_run``, would be) removed
-        """
-        keep = set(keep_keys)
-        doomed = [k for k in self.keys() if k not in keep]
-        if not dry_run:
-            for k in doomed:
-                shutil.rmtree(self.entry_path(k))
-                shard = os.path.dirname(self.entry_path(k))
-                if not os.listdir(shard):
-                    os.rmdir(shard)
-        return doomed
+    def check_key(self, key):
+        return self._check_key(key)
 
     # ---- shared stylesheet ---- #
     stylesheet_name = "mcr.css"

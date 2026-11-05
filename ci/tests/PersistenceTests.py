@@ -14,7 +14,7 @@ import numpy as np
 
 import McUtils
 from McUtils.Scaffolding import (
-    Checkpointer, JSONCheckpointer, NumPyCheckpointer, HDF5Checkpointer,
+    Checkpointer, CheckpointerKeyError, JSONCheckpointer, NumPyCheckpointer, HDF5Checkpointer,
     PseudoPickler, ResourceManager, PersistenceLocation, PersistenceManager
 )
 
@@ -59,6 +59,20 @@ def _module_level_function(x):
 class _Cyclic:
     def __init__(self):
         self.me = self
+
+
+def _open(fn, **opts):
+    """Open a checkpoint by extension; `.legacy.npz` selects the whole-file NumPy backend, `.npz` the default"""
+    if fn.endswith('.legacy.npz'):
+        return NumPyCheckpointer(fn, backend='npz', **opts)
+    return Checkpointer.from_file(fn, **opts)
+
+
+def _open_dump(fn, **opts):
+    """Like `_open`, but `.npz` always means the whole-file backend (tests of whole-file write semantics)"""
+    if fn.endswith('.npz'):
+        return NumPyCheckpointer(fn, backend='npz', **opts)
+    return Checkpointer.from_file(fn, **opts)
 
 
 def _subprocess_env():
@@ -106,10 +120,10 @@ class PersistenceTests(unittest.TestCase):
         for ext in ['.npz', '.json']:
             fn = self.path('exc' + ext)
             with self.assertRaises(RuntimeError):
-                with Checkpointer.from_file(fn) as chk:
+                with _open_dump(fn) as chk:
                     chk['a'] = np.arange(3)
                     raise RuntimeError("fail mid-block")
-            with Checkpointer.from_file(fn) as chk:
+            with _open_dump(fn) as chk:
                 self.assertEqual(chk['a'].tolist() if hasattr(chk['a'], 'tolist') else list(chk['a']), [0, 1, 2])
 
     def _run_child(self, fn, mode):
@@ -118,9 +132,10 @@ class PersistenceTests(unittest.TestCase):
         """
         child = textwrap.dedent("""
             import sys, os, numpy as np
-            from McUtils.Scaffolding import Checkpointer
+            from McUtils.Scaffolding import Checkpointer, NumPyCheckpointer
             fn, mode = sys.argv[1:]
-            with Checkpointer.from_file(fn) as chk:
+            chk = NumPyCheckpointer(fn, backend='npz') if fn.endswith('.npz') else Checkpointer.from_file(fn)
+            with chk:
                 chk['b' if mode == 'k' else 'a'] = np.arange(5)
                 if mode == 'k':
                     os._exit(1)
@@ -135,7 +150,7 @@ class PersistenceTests(unittest.TestCase):
         self.assertGreater(before, 0)
         self.assertEqual(self._run_child(fn, 'k').returncode, 1)
         self.assertEqual(os.path.getsize(fn), before)
-        with Checkpointer.from_file(fn) as chk:
+        with _open_dump(fn) as chk:
             self.assertIn('a', list(chk.keys()))
 
     def test_NumPyCheckpointerCrashKeepsContents(self):
@@ -146,11 +161,11 @@ class PersistenceTests(unittest.TestCase):
 
     def _check_unchanged_block_leaves_file(self, ext):
         fn = self.path('same' + ext)
-        with Checkpointer.from_file(fn) as chk:
+        with _open_dump(fn) as chk:
             chk['a'] = np.arange(3)
         before = os.stat(fn).st_mtime_ns
         time.sleep(0.05)
-        with Checkpointer.from_file(fn) as chk:
+        with _open_dump(fn) as chk:
             chk['a']  # read only
         self.assertEqual(os.stat(fn).st_mtime_ns, before)
 
@@ -163,7 +178,7 @@ class PersistenceTests(unittest.TestCase):
     def test_DumpCheckpointerFlushAndAutoflush(self):
         for ext in ['.npz', '.json']:
             fn = self.path('flush' + ext)
-            chk = Checkpointer.from_file(fn)
+            chk = _open_dump(fn)
             with chk:
                 chk['a'] = np.arange(3)
                 self.assertFalse(os.path.exists(fn))  # nothing is written until the block exits...
@@ -173,34 +188,34 @@ class PersistenceTests(unittest.TestCase):
                 time.sleep(0.05)
                 chk.flush()                           # nothing new, so nothing rewritten
                 self.assertEqual(os.stat(fn).st_mtime_ns, mtime)
-            auto = Checkpointer.from_file(self.path('auto' + ext), autoflush=True)
+            auto = _open_dump(self.path('auto' + ext), autoflush=True)
             with auto:
                 auto['a'] = 1
-                with Checkpointer.from_file(self.path('auto' + ext)) as other:  # visible to a second reader mid-block
+                with _open_dump(self.path('auto' + ext)) as other:  # visible to a second reader mid-block
                     self.assertEqual(int(other['a']), 1)
                 del auto['a']
-                with Checkpointer.from_file(self.path('auto' + ext)) as other:
+                with _open_dump(self.path('auto' + ext)) as other:
                     self.assertNotIn('a', list(other.keys()))
 
     def test_DumpCheckpointerKeepsExistingKeysAndLeavesNoTempFiles(self):
         for ext in ['.npz', '.json']:
             fn = self.path('keys' + ext)
             for key in ['a', 'b']:
-                with Checkpointer.from_file(fn) as chk:
+                with _open_dump(fn) as chk:
                     chk[key] = np.arange(3)
-            with Checkpointer.from_file(fn) as chk:
+            with _open_dump(fn) as chk:
                 self.assertEqual(sorted(chk.keys()), ['a', 'b'])
         self.assertEqual([f for f in os.listdir(self._tmp) if f.endswith('.tmp')], [])
 
     def test_DumpCheckpointerNestedBlocksWriteOnce(self):
         fn = self.path('nested.json')
-        chk = Checkpointer.from_file(fn)
+        chk = _open_dump(fn)
         with chk:
             with chk:
                 chk['a'] = 1
             self.assertFalse(os.path.exists(fn))  # the inner exit doesn't write
         self.assertTrue(os.path.exists(fn))
-        with Checkpointer.from_file(fn) as other:
+        with _open_dump(fn) as other:
             self.assertEqual(other['a'], 1)
 
     def test_DumpCheckpointerFileLikeTarget(self):
@@ -216,34 +231,34 @@ class PersistenceTests(unittest.TestCase):
 
     def test_DumpCheckpointerKeepsPermissions(self):
         fn = self.path('perm.json')
-        with Checkpointer.from_file(fn) as chk:
+        with _open_dump(fn) as chk:
             chk['a'] = 1
         os.chmod(fn, 0o640)
-        with Checkpointer.from_file(fn) as chk:
+        with _open_dump(fn) as chk:
             chk['b'] = 2
         self.assertEqual(os.stat(fn).st_mode & 0o777, 0o640)
 
     def test_DumpCheckpointerFollowsSymlink(self):
         real = self.path('real.json')
         link = self.path('link.json')
-        with Checkpointer.from_file(real) as chk:
+        with _open_dump(real) as chk:
             chk['a'] = 1
         os.symlink(real, link)
-        with Checkpointer.from_file(link) as chk:
+        with _open_dump(link) as chk:
             chk['b'] = 2
         self.assertTrue(os.path.islink(link))
-        with Checkpointer.from_file(real) as chk:
+        with _open_dump(real) as chk:
             self.assertEqual(sorted(chk.keys()), ['a', 'b'])
 
     def test_CheckpointerCachedEval(self):
-        for ext in ['.json', '.npz', '.hdf5']:
+        for ext in ['.json', '.npz', '.legacy.npz', '.hdf5']:
             calls = []
             def gen():
                 calls.append(1)
                 return np.ones(3)
             fn = self.path('cached' + ext)
             for _ in range(2):
-                with Checkpointer.from_file(fn) as chk:
+                with _open(fn) as chk:
                     val = chk.cached_eval('x', gen)
             self.assertEqual(len(calls), 1, ext)
             self.assertEqual(np.asarray(val).tolist(), [1., 1., 1.])
@@ -329,11 +344,11 @@ class PersistenceTests(unittest.TestCase):
 
     def test_PseudoPickleSharedReferenceInFile(self):
         shared = _Versioned(np.arange(3))
-        for ext in ['.json', '.npz', '.hdf5']:
+        for ext in ['.json', '.npz', '.legacy.npz', '.hdf5']:
             fn = self.path('shared' + ext)
-            with Checkpointer.from_file(fn) as chk:
+            with _open(fn) as chk:
                 chk['pair'] = [shared, {'again': shared}, _Versioned(1, shared)]
-            with Checkpointer.from_file(fn) as chk:
+            with _open(fn) as chk:
                 pair = chk['pair']
             self.assertIs(pair[0], pair[1]['again'], ext)
             self.assertIs(pair[0], pair[2].y, ext)
@@ -403,13 +418,13 @@ class PersistenceTests(unittest.TestCase):
 
     #region Serializers (phase 4)
     def _roundtrip_all(self, value, check):
-        for ext in ['.json', '.npz', '.hdf5']:
+        for ext in ['.json', '.npz', '.legacy.npz', '.hdf5']:
             fn = self.path('rt' + ext)
             if os.path.exists(fn):
                 os.remove(fn)
-            with Checkpointer.from_file(fn) as chk:
+            with _open(fn) as chk:
                 chk['v'] = value
-            with Checkpointer.from_file(fn) as chk:
+            with _open(fn) as chk:
                 check(chk['v'], ext)
 
     def test_RoundTripObjectsWithNoneAndNesting(self):
@@ -449,6 +464,188 @@ class PersistenceTests(unittest.TestCase):
             self.assertTrue(np.allclose(loaded, coords), ext)
             self.assertEqual(type(loaded.system), type(coords.system), ext)
         self._roundtrip_all(coords, check)
+    #endregion
+
+    #region Indexed NumPy backend and HDF5 keep_open (phase 5)
+    def test_NumPyCheckpointerDefaultsToIndexed(self):
+        from McUtils.Scaffolding import IndexedNumPyCheckpointer
+        self.assertIsInstance(NumPyCheckpointer(self.path('new.npz')), IndexedNumPyCheckpointer)
+        self.assertIsInstance(Checkpointer.from_file(self.path('new2.npz')), IndexedNumPyCheckpointer)
+        self.assertIsInstance(Checkpointer.from_file(self.path('new.nptar')), IndexedNumPyCheckpointer)
+        legacy = NumPyCheckpointer(self.path('old.npz'), backend='npz')
+        self.assertIsInstance(legacy, NumPyCheckpointer)
+        self.assertNotIsInstance(legacy, IndexedNumPyCheckpointer)
+        with legacy:
+            legacy['a'] = np.arange(3)
+        # an existing whole-file archive keeps its backend
+        again = Checkpointer.from_file(self.path('old.npz'))
+        self.assertNotIsInstance(again, IndexedNumPyCheckpointer)
+        with again:
+            self.assertEqual(again['a'].tolist(), [0, 1, 2])
+        with self.assertRaises(ValueError):
+            NumPyCheckpointer(self.path('x.npz'), backend='nope')
+
+    def test_IndexedSaveOnlyAppendsOneKey(self):
+        fn = self.path('many.npz')
+        with Checkpointer.from_file(fn) as chk:
+            for i in range(50):
+                chk['key%d' % i] = np.full(1000, i, dtype=np.float64)
+        with open(fn, 'rb') as f:
+            before = f.read()
+        with Checkpointer.from_file(fn) as chk:
+            chk['key7'] = np.zeros(1000)
+        with open(fn, 'rb') as f:
+            after = f.read()
+        self.assertTrue(after.startswith(before[:len(before) - 10240]))  # earlier members are untouched (tar pads the end to 10 kB)
+        growth = len(after) - len(before)
+        self.assertLess(growth, 3 * 8000 + 4096)  # about one key (the tar end marker is rewritten), not the file
+        with Checkpointer.from_file(fn) as chk:
+            self.assertEqual(chk['key7'].tolist(), [0.] * 1000)
+            self.assertEqual(chk['key8'][0], 8.)
+            self.assertEqual(len(chk.keys()), 50)
+
+    def test_IndexedBlocksArePublishedTogether(self):
+        child = textwrap.dedent("""
+            import sys, os, numpy as np
+            from McUtils.Scaffolding import Checkpointer
+            fn, auto = sys.argv[1:]
+            with Checkpointer.from_file(fn, autoflush=(auto == '1')) as chk:
+                chk['b'] = np.arange(6)
+                chk['c'] = np.arange(7)
+                os._exit(1)
+        """)
+        for auto, expected in [('0', ['a']), ('1', ['a', 'b', 'c'])]:
+            fn = self.path('died%s.nptar' % auto)
+            with Checkpointer.from_file(fn) as chk:
+                chk['a'] = np.arange(5)
+            subprocess.run([sys.executable, '-c', child, fn, auto], env=_subprocess_env())
+            with Checkpointer.from_file(fn) as chk:
+                self.assertEqual(sorted(chk.keys()), expected, auto)
+
+    def test_IndexedReadsOwnPendingWritesAndErrorsStillPublish(self):
+        fn = self.path('pending.nptar')
+        with Checkpointer.from_file(fn) as chk:
+            chk['a'] = np.arange(3)
+        with self.assertRaises(RuntimeError):
+            with Checkpointer.from_file(fn) as chk:
+                chk['b'] = {'x': 1}
+                chk['a'] = np.arange(4)
+                self.assertEqual(chk['a'].tolist(), [0, 1, 2, 3])  # seen before it's published
+                self.assertEqual(int(chk['b']['x']), 1)
+                chk['gone'] = np.arange(2)
+                del chk['gone']
+                self.assertNotIn('gone', chk)
+                self.assertEqual(sorted(chk.keys()), ['a', 'b'])
+                raise RuntimeError("fail mid-block")
+        with Checkpointer.from_file(fn) as chk:  # like the whole-file backends, the block's changes are kept
+            self.assertEqual(sorted(chk.keys()), ['a', 'b'])
+            self.assertEqual(chk['a'].tolist(), [0, 1, 2, 3])
+
+    def test_IndexedUnchangedBlockLeavesFile(self):
+        fn = self.path('same.nptar')
+        with Checkpointer.from_file(fn) as chk:
+            chk['a'] = np.arange(3)
+        before = os.stat(fn).st_mtime_ns
+        time.sleep(0.05)
+        with Checkpointer.from_file(fn) as chk:
+            chk['a']
+        self.assertEqual(os.stat(fn).st_mtime_ns, before)
+
+    def test_IndexedConcurrentWriters(self):
+        fn = self.path('shared.nptar')
+        child = textwrap.dedent("""
+            import sys, numpy as np
+            from McUtils.Scaffolding import Checkpointer
+            fn, tag = sys.argv[1:]
+            chk = Checkpointer.from_file(fn)
+            for i in range(15):
+                chk[tag + str(i)] = np.arange(i + 1)
+        """)
+        procs = [subprocess.Popen([sys.executable, '-c', child, fn, tag], env=_subprocess_env()) for tag in 'xy']
+        for p in procs:
+            self.assertEqual(p.wait(), 0)
+        with Checkpointer.from_file(fn) as chk:
+            self.assertEqual(len(chk.keys()), 30)
+            self.assertEqual(chk['y14'].tolist(), list(range(15)))
+
+    def test_IndexedMemmapDeleteCompactAndOddKeys(self):
+        fn = self.path('ops.nptar')
+        keys = ['plain', 'with/slash', '..', 'a.b', 'ünï']
+        with Checkpointer.from_file(fn, mmap=True) as chk:
+            for i, k in enumerate(keys):
+                chk[k] = np.arange(100) + i
+            chk['obj'] = {'x': 1, 'y': [1, 2]}
+            chk['plain'] = np.arange(100000.)  # the old one is now dead weight
+            chk.flush()
+            self.assertEqual(sorted(chk.keys()), sorted(keys + ['obj']))
+            self.assertIsInstance(chk['plain'], np.memmap)
+            self.assertEqual(chk['with/slash'][5], 6)
+            self.assertEqual(chk['..'][0], 2)
+            self.assertEqual(int(chk['obj']['x']), 1)
+            self.assertIn('a.b', chk)
+            self.assertNotIn('missing', chk)
+            del chk['a.b']
+            self.assertNotIn('a.b', chk)
+            with self.assertRaises(KeyError):
+                chk['a.b']
+            with self.assertRaises(KeyError):
+                del chk['a.b']
+            chk.flush()
+            size = os.path.getsize(fn)
+            chk.compact()
+        with Checkpointer.from_file(fn) as chk:
+            self.assertEqual(sorted(chk.keys()), sorted(set(keys) - {'a.b'} | {'obj'}))
+            self.assertEqual(len(chk['plain']), 100000)
+        self.assertLessEqual(os.path.getsize(fn), size)
+
+    def test_IndexedAllowedKeysAndInitialCache(self):
+        fn = self.path('allowed.nptar')
+        chk = NumPyCheckpointer(fn, cache={'seed': np.arange(2)}, allowed_keys=['seed', 'ok'])
+        with chk:
+            self.assertEqual(chk['seed'].tolist(), [0, 1])
+            chk['ok'] = np.arange(3)
+            with self.assertRaises(CheckpointerKeyError):
+                chk['nope'] = np.arange(3)
+
+    def test_ConvertNumPyCheckpointFormats(self):
+        from McUtils.Scaffolding import IndexedNumPyCheckpointer
+        fn = self.path('conv.npz')
+        data = {'a': np.arange(4.), 'b': {'x': np.eye(2), 'name': 'hi'}, 'c': [1, 2, 3]}
+        with NumPyCheckpointer(fn, backend='npz') as chk:
+            for k, v in data.items():
+                chk[k] = v
+        NumPyCheckpointer.convert_file(fn, to='indexed')
+        self.assertEqual(NumPyCheckpointer.sniff_backend(fn), 'indexed')
+        self.assertFalse([f for f in os.listdir(self._tmp) if '.tmp' in f])
+        with Checkpointer.from_file(fn) as chk:
+            self.assertIsInstance(chk, IndexedNumPyCheckpointer)
+            self.assertEqual(chk['a'].tolist(), [0., 1., 2., 3.])
+            self.assertTrue(np.allclose(chk['b']['x'], np.eye(2)))
+            self.assertEqual(np.asarray(chk['c']).tolist(), [1, 2, 3])
+        NumPyCheckpointer.convert_file(fn, to='npz')
+        self.assertEqual(NumPyCheckpointer.sniff_backend(fn), 'npz')
+        with Checkpointer.from_file(fn) as chk:
+            self.assertEqual(chk['a'].tolist(), [0., 1., 2., 3.])
+            self.assertEqual(np.asarray(chk['c']).tolist(), [1, 2, 3])
+        NumPyCheckpointer.convert_file(fn, to='npz')  # already there: nothing to do
+
+    def test_HDF5KeepOpen(self):
+        fn = self.path('kept.hdf5')
+        chk = HDF5Checkpointer(fn, keep_open=True)
+        for i in range(3):
+            with chk:
+                chk['k%d' % i] = np.arange(i + 1)
+        self.assertFalse(chk._kept.closed)  # still open between blocks
+        with chk:
+            self.assertEqual(chk['k2'].tolist(), [0, 1, 2])
+        chk.close()
+        self.assertIsNone(chk._kept)
+        with HDF5Checkpointer(fn) as other:
+            self.assertEqual(sorted(other.keys()), ['k0', 'k1', 'k2'])
+        plain = HDF5Checkpointer(self.path('plain.hdf5'))
+        with plain:
+            plain['a'] = np.arange(2)
+        self.assertIsNone(plain._kept)
     #endregion
 
     #region ResourceManager / PersistenceLocation / PersistenceManager
@@ -627,6 +824,266 @@ class PersistenceTests(unittest.TestCase):
         self.assertNotEqual(fingerprint([shared, shared]), fingerprint([_Plain(1), _Plain(1)]))
         with self.assertRaises(TypeError):
             fingerprint(object())
+    #endregion
+
+    #region Entry store and object store (phase 6)
+    def test_EntryStoreWriteStageAliasAndKeys(self):
+        import hashlib, json
+        from McUtils.Devutils import EntryStore
+
+        k1, k2 = (hashlib.sha256(s).hexdigest() for s in (b'1', b'2'))
+        for shard in (2, 0):
+            class Store(EntryStore):
+                pass
+            Store.shard = shard
+            store = Store(self.path('entries%d' % shard))
+            store.write(k1, {'a': 1}, files={'x/y.txt': 'hi', 'b.bin': b'\x00\x01'})
+            self.assertTrue(store.has(k1) and not store.has(k2))
+            self.assertEqual(store.read_meta(k1)['a'], 1)
+            self.assertEqual(store.read_meta(k1)['key'], k1)
+            self.assertEqual(store.read_file(k1, 'x/y.txt'), 'hi')
+            self.assertEqual(store.read_file(k1, 'b.bin', binary=True), b'\x00\x01')
+            with store.stage(k2, {'b': 2}) as staged:
+                with open(staged.file('p.txt'), 'w') as f:
+                    f.write('payload')
+                self.assertFalse(store.has(k2))
+            self.assertEqual(store.keys(), sorted([k1, k2]))
+            self.assertEqual(store.read_file(k2, 'p.txt'), 'payload')
+            # a staged copy loses against an existing entry (a concurrent writer got there first)
+            with store.stage(k2, {'b': 3}):
+                pass
+            self.assertEqual(store.read_meta(k2)['b'], 2)
+            with store.stage(k2, {'b': 3}, replace=True):
+                pass
+            self.assertEqual(store.read_meta(k2)['b'], 3)
+            # an error in the block publishes nothing and leaves no temporary directory
+            with self.assertRaises(RuntimeError):
+                with store.stage(hashlib.sha256(b'3').hexdigest(), {}):
+                    raise RuntimeError
+            self.assertEqual(len(store.keys()), 2)
+            self.assertEqual([n for n in os.listdir(store.root) if n.startswith('.')], [])
+            # aliases
+            store.set_alias('latest', k1)
+            self.assertEqual(store.resolve_alias('latest'), k1)
+            self.assertIsNone(store.resolve_alias('missing'))
+            self.assertEqual(store.prune([k2]), [k1])
+            self.assertIsNone(store.resolve_alias('latest'))  # target is gone
+            self.assertEqual(store.keys(), [k2])
+
+    def test_EntryStoreRejectsBadKeysAndNames(self):
+        from McUtils.Devutils import EntryStore
+        store = EntryStore(self.path('bad'))
+        for key in ('../x', 'abc', '', None, 'G' * 64):
+            with self.assertRaises(ValueError):
+                store.entry_path(key)
+        key = 'a' * 64
+        for name in ('../x', '/abs', 'a//b', ''):
+            with self.assertRaises(ValueError):
+                store.write(key, {}, files={name: 'x'})
+        with self.assertRaises(ValueError):
+            store.write(key, {}, files={'meta.json': 'x'})
+        with self.assertRaises(ValueError):
+            store.set_alias('../up', key)
+
+    def test_EntryStoreGcLeastRecentlyUsedAndAge(self):
+        import hashlib
+        from McUtils.Devutils import EntryStore
+        store = EntryStore(self.path('gc'))
+        keys = [hashlib.sha256(bytes([i])).hexdigest() for i in range(4)]
+        for i, k in enumerate(keys):
+            store.write(k, {}, files={'d': b'x' * 1000})
+            os.utime(store.entry_path(k, 'meta.json'), (1000 + i, 1000 + i))
+        store.touch(keys[0])  # now the most recently used
+        size = store.entry_size(keys[0])
+        self.assertEqual(store.gc(max_bytes=2 * size, dry_run=True), [keys[1], keys[2]])
+        self.assertEqual(len(store.keys()), 4)
+        self.assertEqual(store.gc(max_bytes=2 * size, protect=[keys[1]]), [keys[2], keys[3]])
+        self.assertEqual(sorted(store.keys()), sorted([keys[0], keys[1]]))
+        os.utime(store.entry_path(keys[1], 'meta.json'), (1, 1))
+        self.assertEqual(store.gc(max_age=3600), [keys[1]])
+        self.assertEqual(store.keys(), [keys[0]])
+
+    def test_ObjectStoreExactRoundTrip(self):
+        from McUtils.Scaffolding import ObjectStore
+        from McUtils.Coordinerds import CoordinateSet
+        store = ObjectStore(self.path('os1'))
+        coords = CoordinateSet(np.random.rand(3, 3))
+        value = {'i': 1, 'f': 2.5, 's': 'text', 'n': None, 'l': [1, [2, 3]], 't': (1, (2, 3)),
+                 'a': np.arange(6.).reshape(2, 3), 'a16': np.arange(4, dtype=np.int16), 'cs': coords,
+                 'o': _Plain(np.ones(2)), 'v': _Versioned(1, (4, 5))}
+        key = store.put(value)
+        self.assertEqual(key, store.put(value))  # idempotent
+        loaded = store.get(key)
+        self.assertEqual(list(loaded), list(value))
+        for name in ('i', 'f', 's', 'n', 'l', 't'):
+            self.assertEqual(loaded[name], value[name])
+            self.assertIs(type(loaded[name]), type(value[name]))
+        self.assertEqual(loaded['a16'].dtype, np.int16)
+        self.assertTrue(np.array_equal(loaded['a'], value['a']))
+        self.assertIsInstance(loaded['cs'], CoordinateSet)
+        self.assertTrue(np.allclose(loaded['cs'], coords))
+        self.assertIsInstance(loaded['o'], _Plain)
+        self.assertTrue(np.array_equal(loaded['o'].a, np.ones(2)))
+        self.assertEqual(loaded['v'].y, (4, 5))
+        self.assertEqual(loaded['v'].loaded_version, 2)
+        # non-mapping values
+        for obj in (np.arange(5), coords, _Plain([1, 2]), 'just text', (1, 2)):
+            got = store.get(store.put(obj))
+            self.assertIs(type(got), type(obj))
+        with self.assertRaises(KeyError):
+            store.get('0' * 64)
+        self.assertIsNone(store.get('0' * 64, default=None))
+
+    def test_ObjectStoreLazyMmapAndMeta(self):
+        from McUtils.Scaffolding import ObjectStore
+        store = ObjectStore(self.path('os2'), provenance={'source': 'tests'})
+        big = np.arange(1000.)
+        key = store.put({'big': big, 'small': 3, 'name': 'x'}, meta={'step': 7})
+        meta = store.meta(key)
+        self.assertEqual(meta['class'], 'builtins:dict')
+        self.assertEqual(meta['provenance'], {'source': 'tests', 'step': 7})
+        self.assertEqual(meta['fields'], {'big': 'array', 'small': 'tree', 'name': 'tree'})
+        self.assertGreater(meta['payload_bytes'], big.nbytes)
+        self.assertIn('host', meta['created_by'])
+        lazy = store.get(key, lazy=True, mmap=True)
+        self.assertEqual(sorted(lazy), ['big', 'name', 'small'])
+        self.assertEqual(len(lazy), 3)
+        self.assertIsInstance(lazy['big'], np.memmap)
+        self.assertEqual(lazy['small'], 3)
+        with self.assertRaises(KeyError):
+            lazy['nope']
+        self.assertEqual(lazy.load()['name'], 'x')
+        vkey = store.put(_Versioned(1))
+        self.assertEqual(store.meta(vkey)['state_version'], 2)
+        self.assertTrue(store.meta(vkey)['class'].endswith(':_Versioned'))
+        with self.assertRaises(TypeError):
+            list(store.get(vkey, lazy=True))
+
+    def test_ObjectStoreKeysFindAndReplace(self):
+        from McUtils.Scaffolding import ObjectStore
+        from McUtils.Devutils import fingerprint
+        store = ObjectStore(self.path('os3'))
+        a = store.put({'x': 1}, meta={'kind': 'a', 'n': 1})
+        b = store.put({'x': 2}, meta={'kind': 'b', 'n': 2})
+        c = store.put(_Plain(1), meta={'kind': 'a', 'n': 3})
+        self.assertEqual(a, fingerprint({'x': 1}))
+        self.assertEqual(sorted(store.keys()), sorted([a, b, c]))
+        self.assertEqual(sorted(store.find(provenance__kind='a')), sorted([a, c]))
+        self.assertEqual(store.find(**{'provenance.n': lambda n: n == 2}), [b])
+        self.assertEqual(store.find(**{'class': 'builtins:dict', 'provenance__kind': 'b'}), [b])
+        self.assertEqual(store.put({'x': 99}, key=a), a)  # existing entries are kept
+        self.assertEqual(store.get(a)['x'], 1)
+        store.put({'x': 99}, key=a, replace=True)
+        self.assertEqual(store.get(a)['x'], 99)
+        self.assertEqual(store.prune([a]), sorted([b, c]))
+        self.assertEqual(store.keys(), [a])
+        with store.transaction():  # reentrant
+            with store.lock():
+                store.put([1, 2])
+        self.assertEqual(len(store.keys()), 2)
+
+    def test_ObjectStoreCachedEval(self):
+        from McUtils.Scaffolding import ObjectStore
+        store = ObjectStore(self.path('os4'))
+        calls = []
+        def generate():
+            calls.append(1)
+            return {'v': np.arange(4.), 'tag': 'made'}
+        first = store.cached_eval(('energy', 1, {'order': 2}), generate)
+        again = store.cached_eval(('energy', 1, {'order': 2}), generate)
+        self.assertEqual(len(calls), 1)
+        self.assertTrue(np.array_equal(first['v'], again['v']))
+        store.cached_eval(('energy', 1, {'order': 3}), generate)  # a changed part misses
+        store.cached_eval((1, 'energy', {'order': 2}), generate)  # so does a changed order
+        self.assertEqual(len(calls), 3)
+        self.assertEqual(store.cached_eval('single', generate, lazy=True)['tag'], 'made')
+        # a fresh store on the same directory (another process) hits too
+        self.assertEqual(len(ObjectStore(self.path('os4')).keys()), 4)
+        ObjectStore(self.path('os4')).cached_eval(('energy', 1, {'order': 2}), generate)
+        self.assertEqual(len(calls), 4)  # the fresh store hit the entry made earlier
+
+    def test_ObjectStoreSizePolicyAndSafety(self):
+        from McUtils.Scaffolding import ObjectStore
+        from McUtils.Scaffolding.ObjectStore import ObjectTooLarge
+        small = ObjectStore(self.path('os5'), max_entry_bytes=20000)
+        with self.assertRaises(ObjectTooLarge):
+            small.put(np.zeros(100000))
+        self.assertEqual(small.keys(), [])  # nothing half-written
+        self.assertEqual([n for n in os.listdir(small.root) if n.startswith('.stage')], [])
+        calls = []
+        value = small.cached_eval('big', lambda: calls.append(1) or np.zeros(100000))
+        self.assertEqual(value.shape, (100000,))
+        small.cached_eval('big', lambda: calls.append(1) or np.zeros(100000))
+        self.assertEqual(len(calls), 2)  # too large to cache, so it's recomputed
+        bounded = ObjectStore(self.path('os6'), max_bytes=25000)
+        keys = [bounded.put(np.full(100, i, dtype=float), key=ObjectStore.key_for(bounded, i)) for i in range(5)]
+        self.assertIn(keys[-1], bounded.keys())  # the newest entry is protected
+        self.assertLess(len(bounded.keys()), 5)
+        self.assertLessEqual(sum(bounded.entry_size(k) for k in bounded.keys()), 25000 + bounded.entry_size(keys[-1]))
+        with self.assertRaises(ValueError):  # the pseudopickler can't express a set, and pickle is off
+            ObjectStore(self.path('os7')).put({'bad': {1, 2}})
+
+    def test_ObjectStoreDefaultRoot(self):
+        from McUtils.Scaffolding import ObjectStore
+        old = os.environ.get('MCUTILS_STORE')
+        try:
+            os.environ['MCUTILS_STORE'] = self.path('envstore')
+            self.assertEqual(ObjectStore.default_root(), self.path('envstore'))
+            self.assertIs(ObjectStore.default(), ObjectStore.default())
+            key = ObjectStore.default().put([1, 2, 3])
+            self.assertTrue(os.path.isdir(os.path.join(self.path('envstore'), key[:2], key)))
+            del os.environ['MCUTILS_STORE']
+            self.assertTrue(ObjectStore.default_root().endswith(os.path.join('McUtils', 'store')))
+        finally:
+            if old is None:
+                os.environ.pop('MCUTILS_STORE', None)
+            else:
+                os.environ['MCUTILS_STORE'] = old
+
+    def test_ObjectStoreConcurrentWriters(self):
+        child = textwrap.dedent("""
+            import sys, numpy as np
+            from McUtils.Scaffolding import ObjectStore
+            root, tag = sys.argv[1:]
+            store = ObjectStore(root)
+            for i in range(10):
+                store.put({'v': np.arange(i + 1.)}, key=store.key_for('shared', i))   # same keys from both
+                store.put({'v': np.arange(i + 1.)}, key=store.key_for(tag, i))
+        """)
+        root = self.path('shared_store')
+        procs = [subprocess.Popen([sys.executable, '-c', child, root, tag], env=_subprocess_env()) for tag in 'xy']
+        for p in procs:
+            self.assertEqual(p.wait(), 0)
+        from McUtils.Scaffolding import ObjectStore
+        store = ObjectStore(root)
+        self.assertEqual(len(store.keys()), 30)
+        self.assertEqual(store.get(store.key_for('shared', 9))['v'].tolist(), list(range(10)))
+        self.assertEqual([n for n in os.listdir(root) if n.startswith('.stage')], [])
+
+    def test_ReadoutStoreSharesEntryStore(self):
+        from McUtils.Devutils import EntryStore
+        from McUtils.Docs.Examples import ReadoutStore
+        self.assertTrue(issubclass(ReadoutStore, EntryStore))
+        store = ReadoutStore(self.path('readouts'))
+        key = 'ab' * 32
+        store.write(key, {'status': 'ok'}, files={'fragment.html': '<p/>'})
+        self.assertTrue(os.path.isfile(os.path.join(store.root, 'ab', key, 'meta.json')))
+        self.assertEqual(sorted(store.read_meta(key)), ['key', 'status', 'store_version', 'written'])
+        with self.assertRaises(ValueError):
+            store.entry_path('short')
+
+    def test_ResourceManagerWritesAtomically(self):
+        manager = ResourceManager(name='res', location=self.path('resources'), write_metadata=True)
+        manager.json_resource, manager.binary_resource = True, False
+        loc = manager.get_resource_path('a.json')
+        manager.save_resource(loc, {'a': 1})
+        self.assertEqual(manager.load_resource(loc), {'a': 1})
+        class Unserializable:
+            pass
+        with self.assertRaises(TypeError):
+            manager.save_resource(loc, {'a': Unserializable()})
+        self.assertEqual(manager.load_resource(loc), {'a': 1})  # the failed write left the old content
+        self.assertEqual(os.listdir(os.path.dirname(loc)), ['a.json'])
     #endregion
 
 

@@ -19,3 +19,5 @@ from .SphereUnionSurface import *; from .SphereUnionSurface import __all__ as ex
 __all__ += exposed
 from .MarchingCubesSurface import *; from .MarchingCubesSurface import __all__ as exposed
 __all__ += exposed
+from .ScalarFieldIsosurface import *; from .ScalarFieldIsosurface import __all__ as exposed
+__all__ += exposed

@@ -23,6 +23,8 @@ from .Logging import *; from .Logging import __all__ as exposed
 __all__ += exposed
 from .Checkpointing import *; from .Checkpointing import __all__ as exposed
 __all__ += exposed
+from .ObjectStore import *; from .ObjectStore import __all__ as exposed
+__all__ += exposed
 from .Persistence import *; from .Persistence import __all__ as exposed
 __all__ += exposed
 from .Configurations import *; from .Configurations import __all__ as exposed
