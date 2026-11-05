@@ -14,6 +14,33 @@ from ....Parsers import *
 from collections import namedtuple, OrderedDict
 from ._common import strip_recursive
 
+import re as _re
+
+
+def molecule_info_parser(blocks):
+    """Read total charge/multiplicity from each echoed $molecule header.
+
+    Only the first non-comment line is the total-system header; subsequent
+    fragment headers are not the charge and multiplicity of the whole molecule.
+    A bare `read` inherits the preceding state, while `read filename` remains
+    unknown when the external molecule file is not part of this output.
+    """
+    records = []
+    for block in blocks:
+        if block is None:
+            continue
+        lines = [line.split('!', 1)[0].split('#', 1)[0].strip() for line in block.splitlines()]
+        header = next((line for line in lines if line), '')
+        match = _re.fullmatch(r'([+-]?\d+)\s+(\d+)', header)
+        if match:
+            records.append(dict(zip(('charge', 'multiplicity'), map(int, match.groups()))))
+        elif header.lower() == 'read' and records:
+            records.append(records[-1].copy())
+        else:
+            records.append({'charge': None, 'multiplicity': None})
+    return records
+
+
 #TODO: speed these parsers up, they're just whatever unoptimized code Claude came up with
 
 ########################################################################################################################
@@ -31,6 +58,14 @@ Components = OrderedDict()  # we'll register on this bit by bit
 #     "parser"      : parser, # function that'll parse the returned list of blocks ("List") or block ("Single")
 #     "mode"        : mode # "List" or "Single"
 # }
+
+Components['MoleculeInfo'] = {
+    'description': 'total charge and spin multiplicity from the echoed $molecule sections',
+    'tag_start': FileStreamerTag(('$molecule', '$MOLECULE')),
+    'tag_end': FileStreamerTag(('$end', '$END')),
+    'parser': molecule_info_parser,
+    'mode': 'List'
+}
 
 
 ########################################################################################################################
@@ -54,8 +89,6 @@ Components = OrderedDict()  # we'll register on this bit by bit
 # A coordinate row is `<index> <atom-label> <x> <y> <z>`. Q-Chem prints these blocks with
 # a variety of headers, footers, and trailing lines (basis info, multipole fields, ...),
 # so rather than a start-anchored combinator we scan each block for the rows that match.
-import re as _re
-
 _coord_row_re = _re.compile(
     r"^\s*\d+\s+([A-Za-z]{1,3})\s+"
     r"(-?\d+\.\d+)\s+(-?\d+\.\d+)\s+(-?\d+\.\d+)\s*$"
@@ -591,6 +624,7 @@ Components["VibrationalFrequencies"] = {
 # region Defaults
 Defaults = (
     "Header",
+    "MoleculeInfo",
     "CartesianCoordinates",
     "SCFEnergies"
 )

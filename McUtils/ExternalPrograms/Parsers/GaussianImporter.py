@@ -6,6 +6,7 @@ import numpy as np, re, math, io
 from .GaussianLogComponents import GaussianLogComponents, GaussianLogDefaults, GaussianLogOrdering
 from . import GaussianLogComponents as GaussianLogParsers
 from .GaussianFChkComponents import FormattedCheckpointComponents, FormattedCheckpointCommonNames
+from .Parsers import ElectronicStructureLogReader
 from ...Parsers import FileStreamReader, FileStreamCheckPoint, FileStreamReaderException, StringStreamReader
 
 __all__ = ["GaussianFChkReader", "GaussianLogReader", "GaussianLogReaderException", "GaussianFChkReaderException"]
@@ -21,7 +22,7 @@ class GaussianLogReaderException(FileStreamReaderException):
     """
     pass
 
-class GaussianLogReader(FileStreamReader):
+class GaussianLogReader(ElectronicStructureLogReader):
     """
     Implements a stream based reader for a Gaussian .log file.
     This is inherits from the `FileStreamReader` base, and takes a two pronged approach to getting data.

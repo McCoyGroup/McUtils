@@ -143,9 +143,10 @@ class QChemJob(ExternalProgramJob):
     def parse_output(cls, text):
         """
         :return: ``terminated_normally``, ``optimized`` (a geometry optimization converged) and, if present,
-            the final ``energy`` (Hartree)
+            the final ``energy`` (Hartree), ``charge`` and ``multiplicity`` from the standard log parser
         """
         import re
+        from ..Parsers import QChemLogReader, get_last_molecule_info
         energies = [float(e) for e in re.findall(r"Total energy in the final basis set =\s+(-?\d+\.\d+)", text)]
         if len(energies) == 0:  # newer versions label the SCF summary line `Total energy =`
             energies = [float(e) for e in re.findall(r"^\s*Total energy\s+=\s+(-?\d+\.\d+)", text, re.M)]
@@ -153,6 +154,8 @@ class QChemJob(ExternalProgramJob):
             'terminated_normally': "Thank you very much for using Q-Chem" in text,
             'optimized': "OPTIMIZATION CONVERGED" in text
         }
+        with QChemLogReader.from_string(text) as reader:
+            res.update(get_last_molecule_info(reader.parse('MoleculeInfo')['MoleculeInfo']))
         if len(energies) > 0:
             res['energy'] = energies[-1]
             res['energies'] = energies

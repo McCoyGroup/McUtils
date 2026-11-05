@@ -193,8 +193,12 @@ def parse_molecule_info(blocks):
     records = []
     for block in blocks:
         if "Multiplicity" in block:
-            charge, multiplicity = re.search(r"Charge\s*=\s*(-?\d+)\s+Multiplicity\s*=\s*(\d+)", block).groups()
-            records.append({"charge": int(charge), "multiplicity": int(multiplicity)})
+            charge, multiplicity = re.search(r"Charge\s*=\s*([+-]?\d+)\s+Multiplicity\s*=\s*(\d+)", block).groups()
+            record = {"charge": int(charge), "multiplicity": int(multiplicity)}
+            fragment = re.search(r'\bfragment[ \t=]*(\d+)', block, re.IGNORECASE)
+            if fragment:
+                record['fragment'] = int(fragment[1])
+            records.append(record)
         else:
             records.append({name: int(value) for name, value in re.findall(r"(NAtoms|NActive|NUniq)\s*=\s*(\d+)", block)})
     return records
@@ -787,7 +791,7 @@ def register_gaussian_components(components):
     register("ArchiveSummary", archive, parse_archive_summary)
     register("Header", r"\A[\s\S]*?(?:^[ \t]*#[^\n]*\n(?:[^\n]*\n)*?^[ \t]*-{5,}[^\n]*$|\Z)", gaussian_header_parser, "Single")
     register("Timing", r"^.*(?:Job cpu time|Elapsed time):[^\n]*", parse_timing)
-    register("MoleculeInfo", r"^.*(?:Charge\s*=\s*-?\d+\s+Multiplicity\s*=\s*\d+|NAtoms\s*=)[^\n]*", parse_molecule_info)
+    register("MoleculeInfo", r"^.*(?:Charge\s*=\s*[+-]?\d+\s+Multiplicity\s*=\s*\d+|NAtoms\s*=)[^\n]*", parse_molecule_info)
     register("BasisInfo", r"^.*(?:Standard basis:|\d+ basis functions,|NBasis\s*=|\d+ alpha electrons)[^\n]*", parse_basis_info)
     register("ElectronicEnergies", r"^.*(?:SCF Done:|EUMP[234]|E\(CORR\)|E\(CCSD\)|E\(QCISD\)|CCSD\(T\)\s*=|QCISD\(T\)\s*=|Total Energy, E\(TD-HF/TD-DFT\)|ONIOM: extrapolated energy)[^\n]*", parse_energy_records)
     register("Geometries", r"^.*(?:Standard|Input|Z-Matrix) orientation:[^\n]*\n[\s\S]*?Coordinates \(Angstroms\)[^\n]*\n[^\n]*\n[^\n]*\n(?:\s*\d+\s+-?\d+\s+-?\d+[^\n]*\n)+", parse_geometry_records)
