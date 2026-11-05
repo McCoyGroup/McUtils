@@ -7,8 +7,8 @@ Jupyter and exports to HTML, PowerPoint, plain text, ``.npz``, pandas and JSON, 
 reports the same values in the same (display) units.
 
 Nothing at import time depends on Jupyter or the plotting stack: the renderers load `McUtils.Jupyter` (HTML) and
-`McUtils.Plots` (scenes, PowerPoint) only when something is actually rendered. `McUtils.Jupyter.Readouts` remains as
-an alias of this package.
+`McUtils.Plots` (scenes, PowerPoint) only when something is actually rendered. Import readout
+objects directly from `McUtils.Readouts`.
 """
 
 __all__ = []

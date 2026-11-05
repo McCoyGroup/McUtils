@@ -50,11 +50,13 @@ class ReadoutLayeringTests(TestCase):
         self.assertEqual(offenders, [])
 
     @validationTest
-    def test_JupyterAliasIsSameObjects(self):
+    def test_CanonicalExportsAreSameObjects(self):
         import McUtils.Readouts as R
-        import McUtils.Jupyter.Readouts as J
-        import McUtils.Jupyter as Jup
-        for name in ("Readout", "ReadoutSection", "ReadoutAdapter", "to_readout", "register_readout"):
-            self.assertIs(getattr(J, name), getattr(R, name))
-            self.assertIs(getattr(Jup, name), getattr(R, name))
-        self.assertIs(J.Nodes, R.Nodes)
+        from McUtils.Readouts import Nodes, Interface, Views
+        for module, names in (
+            (Nodes, ("Readout", "ReadoutSection")),
+            (Interface, ("ReadoutAdapter", "to_readout", "register_readout")),
+            (Views, ("ReadoutHTML", "ReadoutWidget")),
+        ):
+            for name in names:
+                self.assertIs(getattr(R, name), getattr(module, name))

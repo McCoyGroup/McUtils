@@ -4,7 +4,7 @@ CIF/XYZ records, conformer ensembles and libraries, chemical records, external m
 wrappers, job specifications and execution status.
 
 Nothing here is imported by `McUtils.ExternalPrograms` itself; the data types' ``to_readout``
-methods (and `McUtils.Jupyter.to_readout`) import these adapters lazily.
+methods (and `McUtils.Readouts.to_readout`) import these adapters lazily.
 """
 
 __all__ = []
