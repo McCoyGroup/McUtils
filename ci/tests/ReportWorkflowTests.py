@@ -143,7 +143,7 @@ class TextChecksTests(unittest.TestCase):
         self.doc.add_text("a", status="manual")
         self.doc.add_text("b", status="grounded")
         self.doc.add_callout("not counted")
-        self.assertEqual(self.doc.text_status(), {"template": 2, "manual": 1, "grounded": 1})
+        self.assertEqual(self.doc.text_status(), {"template": 2, "manual": 1, "checked": 1})
 
     def test_check_text_against_cited_blocks(self):
         res = self.doc.check_text("The bend is at 1648.23 and the stretches at 3832.71.", ["r2"])
@@ -172,3 +172,112 @@ class TextChecksTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def sectioned():
+    """h1 [r1, p1] / h2 [r2, h3(level 3) [p2]] / h4 [p3]"""
+    doc = ReportDocument("S", toy_catalog(water=TemplatedToy("water")))
+    doc.add_heading("One")                                     # h1
+    doc.add_readout("water", include=["summary"])               # r1
+    doc.add_text("a")                                           # p1
+    doc.add_heading("Two")                                      # h2
+    doc.add_readout("water", include=["frequencies"])           # r2
+    doc.add_heading("Sub", level=3)                             # h3
+    doc.add_text("b")                                           # p2
+    doc.add_heading("Three")                                    # h4
+    doc.add_text("c")                                           # p3
+    return doc
+
+
+class SectionTests(unittest.TestCase):
+    def ids(self, doc):
+        return [b.id for b in doc.blocks]
+
+    def test_section_end_and_ids(self):
+        doc = sectioned()
+        self.assertEqual(doc.section_end("h1"), "p1")
+        self.assertEqual(doc.section_end("h2"), "p2")        # the level-3 subsection belongs to the level-2 section
+        self.assertEqual(doc.section_ids("h3"), ["h3", "p2"])
+        self.assertEqual(doc.section_end("h4"), "p3")
+        doc.add_heading("Empty")
+        self.assertEqual(doc.section_end("h5"), "h5")
+        with self.assertRaises(ReportOperationError) as e:
+            doc.section_end("r1")
+        self.assertEqual(e.exception.code, "bad_argument")
+        self.assertEqual(self.raises(lambda: doc.section_end("zz")), "unknown_block")
+
+    def raises(self, f):
+        with self.assertRaises(ReportOperationError) as e:
+            f()
+        return e.exception.code
+
+    def test_move_section_takes_the_contents_along(self):
+        doc = sectioned()
+        doc.move_section("h2", "start")
+        self.assertEqual(self.ids(doc), ["h2", "r2", "h3", "p2", "h1", "r1", "p1", "h4", "p3"])
+        doc.move_section("h2", "p3")
+        self.assertEqual(self.ids(doc), ["h1", "r1", "p1", "h4", "p3", "h2", "r2", "h3", "p2"])
+
+    def test_move_section_after_a_heading_goes_after_its_whole_section(self):
+        doc = sectioned()
+        doc.move_section("h1", "h2")
+        self.assertEqual(self.ids(doc), ["h2", "r2", "h3", "p2", "h1", "r1", "p1", "h4", "p3"])
+
+    def test_move_section_into_itself_is_refused_and_changes_nothing(self):
+        doc = sectioned()
+        before = self.ids(doc)
+        self.assertEqual(self.raises(lambda: doc.move_section("h2", "p2")), "bad_position")
+        self.assertEqual(self.raises(lambda: doc.move_section("h2", "h3")), "bad_position")
+        self.assertEqual(self.raises(lambda: doc.move_section("h2", "nope")), "bad_position")
+        self.assertEqual(self.raises(lambda: doc.move_section("r1", "start")), "bad_argument")
+        self.assertEqual(self.ids(doc), before)
+
+    def test_under_adds_at_the_end_of_a_section(self):
+        doc = sectioned()
+        doc.add_text("new", under="h1")
+        doc.add_readout("water", include=["summary"], under="h2")
+        doc.add_heading("Later", under="h4")
+        self.assertEqual(self.ids(doc), ["h1", "r1", "p1", "p4", "h2", "r2", "h3", "p2", "r3", "h4", "p3", "h5"])
+        self.assertEqual(self.raises(lambda: doc.add_text("x", after="h1", under="h1")), "bad_argument")
+        self.assertEqual(self.raises(lambda: doc.add_text("x", under="r1")), "bad_argument")
+
+    def test_legacy_grounded_status_reads_as_checked(self):
+        doc = sectioned()
+        doc.add_text("g", status="grounded")
+        self.assertEqual(doc.blocks[-1].status, "checked")
+        md = doc.to_markdown().replace('status="checked"', 'status="grounded"')
+        again = ReportDocument.from_markdown(md, doc.catalog)
+        self.assertEqual(again.blocks[-1].status, "checked")
+        doc.set_caption("r1", "c", status="grounded")
+        self.assertEqual(doc.get("r1").caption_status, "checked")
+        self.assertEqual(self.raises(lambda: doc.add_text("x", status="bogus")), "bad_argument")
+
+
+class SourceErrorTests(unittest.TestCase):
+    def test_source_errors_are_structured(self):
+        from McUtils.Readouts.Reports import ReportSourceError
+        cat = toy_catalog(water=TemplatedToy("water"))
+        with self.assertRaises(ReportSourceError) as e:
+            cat.get("nope")
+        self.assertEqual((e.exception.code, e.exception.info["choices"]), ("unknown_source", ["water"]))
+        with self.assertRaises(ReportSourceError) as e:
+            cat.peek("water", "nope")
+        self.assertEqual(e.exception.code, "unknown_section")
+        self.assertIn("frequencies", e.exception.info["choices"])
+        self.assertEqual(e.exception.to_dict()["section"], "nope")
+        with self.assertRaises(ValueError):                  # still a ValueError
+            cat.get("nope")
+
+    def test_dotted_parts_are_validated(self):
+        from ReportFixtures import NestedToy
+        doc = ReportDocument("N", toy_catalog(n=NestedToy()))
+        doc.add_readout("n", include=["parts.second"])
+        with self.assertRaises(ReportOperationError) as e:
+            doc.add_readout("n", include=["parts.bogus"])
+        self.assertEqual(e.exception.code, "unknown_section")
+        self.assertIn("bogus", e.exception.detail)
+        self.assertEqual(len(doc.blocks), 1)
+        self.assertIn("second part", doc.catalog.peek("n", "parts.second"))
+        from McUtils.Readouts.Reports import ReportSourceError
+        with self.assertRaises(ReportSourceError):
+            doc.catalog.peek("n", "parts.bogus")

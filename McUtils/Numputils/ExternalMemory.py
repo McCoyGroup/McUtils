@@ -4,6 +4,7 @@ import tempfile
 from ..Devutils.FileHelpers import atomic_file
 import os
 import functools
+from contextlib import ExitStack
 import numpy as np
 
 __all__ = ['external_unique', 'save_sparse_matrix', 'load_sparse_matrix']
@@ -48,17 +49,50 @@ def _close_mapping(array):
 
 
 def _sorted_runs(arrays, root, chunk_size, mappings):
-    runs=[];offset=0;width=None;ndim=None;buffer=None;filled=0
+    # One run per binary level. Merge equal-sized groups of input chunks as
+    # they arrive, so repeated keys are removed before every run is spilled.
+    pending=[];offset=0;width=None;ndim=None;buffer=None;filled=0;serial=0
+
+    def new_path(kind):
+        nonlocal serial
+        path=root/f'{kind}_{serial}';serial+=1
+        return path
+
+    def merge_runs(left, right):
+        (a,na),(b,nb)=left,right
+        path=new_path('merge')
+        with ExitStack() as opened:
+            def own(array):
+                opened.callback(_close_mapping,array)
+                return array
+            ak=own(np.load(str(a)+'_keys.npy',mmap_mode='r')[:na])
+            ap=own(np.load(str(a)+'_positions.npy',mmap_mode='r')[:na])
+            bk=own(np.load(str(b)+'_keys.npy',mmap_mode='r')[:nb])
+            bp=own(np.load(str(b)+'_positions.npy',mmap_mode='r')[:nb])
+            out=own(np.lib.format.open_memmap(str(path)+'_keys.npy',mode='w+',dtype=np.int64,shape=(na+nb,width)))
+            pos=own(np.lib.format.open_memmap(str(path)+'_positions.npy',mode='w+',dtype=np.int64,shape=(na+nb,)))
+            size=int(_merge_function()(ak,ap,bk,bp,out,pos));out.flush();pos.flush()
+        del ak,ap,bk,bp,out,pos
+        for old in [a,b]:
+            for suffix in ['_keys.npy','_positions.npy']:Path(str(old)+suffix).unlink()
+        return path,size
+
     def emit(block, origin):
         keys,positions=np.unique(block,axis=0,return_index=True)
-        path=root/f'run_{len(runs)}'
+        path=new_path('run')
         np.save(str(path)+'_keys.npy',keys)
         np.save(str(path)+'_positions.npy',positions+origin)
-        runs.append((path,len(keys)))
+        run=(path,len(keys));level=0
+        while level<len(pending) and pending[level] is not None:
+            run=merge_runs(pending[level],run)
+            pending[level]=None;level+=1
+        if level==len(pending):pending.append(run)
+        else:pending[level]=run
+
     for array in arrays:
         array=np.asanyarray(array)
-        # NumPy gives [] a floating dtype. Empty chunks contain no keys to
-        # validate; retain their vector/row shape without coercing any values.
+        # Empty chunks still establish the input row shape without keys to
+        # validate; preserve the existing integer-vector/row API.
         if array.ndim in [1,2] and len(array)==0:
             array=np.empty(array.shape,dtype=np.int64)
         if array.ndim not in [1,2] or array.dtype.kind not in 'iu':
@@ -79,32 +113,17 @@ def _sorted_runs(arrays, root, chunk_size, mappings):
                 emit(buffer,offset);offset+=filled;filled=0
     if filled:emit(buffer[:filled],offset)
     del buffer
-    generation=0
-    while len(runs)>1:
-        merged=[]
-        for pair in range(0,len(runs),2):
-            if pair+1==len(runs):merged.append(runs[pair]);continue
-            (a,na),(b,nb)=runs[pair:pair+2]
-            ak=np.load(str(a)+'_keys.npy',mmap_mode='r')[:na]
-            ap=np.load(str(a)+'_positions.npy',mmap_mode='r')[:na]
-            bk=np.load(str(b)+'_keys.npy',mmap_mode='r')[:nb]
-            bp=np.load(str(b)+'_positions.npy',mmap_mode='r')[:nb]
-            path=root/f'merge_{generation}_{pair}'
-            out=np.lib.format.open_memmap(str(path)+'_keys.npy',mode='w+',dtype=np.int64,shape=(na+nb,width))
-            pos=np.lib.format.open_memmap(str(path)+'_positions.npy',mode='w+',dtype=np.int64,shape=(na+nb,))
-            mappings.extend([ak,ap,bk,bp,out,pos])
-            size=int(_merge_function()(ak,ap,bk,bp,out,pos));out.flush();pos.flush()
-            for array in [ak,ap,bk,bp,out,pos]:_close_mapping(array)
-            del ak,ap,bk,bp,out,pos
-            for old in [a,b]:
-                for suffix in ['_keys.npy','_positions.npy']:Path(str(old)+suffix).unlink()
-            merged.append((path,size))
-        runs=merged;generation+=1
-    if not runs:return np.empty((0,width or 1),dtype=np.int64),np.empty(0,dtype=np.int64),ndim or 1
-    path,size=runs[0]
+    # Smaller levels are the newest tail chunks. Fold those first, putting
+    # each older level on the left: the same ragged balanced tree as before.
+    result=None
+    for run in pending:
+        if run is not None:result=run if result is None else merge_runs(run,result)
+    if result is None:return np.empty((0,width or 1),dtype=np.int64),np.empty(0,dtype=np.int64),ndim or 1
+    path,size=result
     keys=np.load(str(path)+'_keys.npy',mmap_mode='r')[:size]
+    mappings.append(keys)
     positions=np.load(str(path)+'_positions.npy',mmap_mode='r')[:size]
-    mappings.extend([keys,positions])
+    mappings.append(positions)
     return keys,positions,ndim
 
 

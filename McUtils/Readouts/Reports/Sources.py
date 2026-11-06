@@ -23,7 +23,20 @@ __all__ = [
 
 
 class ReportSourceError(ValueError):
-    """A source can't be added, found, loaded or matched to the digest a report recorded."""
+    """
+    A source can't be added, found, loaded or matched to the digest a report recorded.
+
+    :ivar code: ``bad_source`` (default), ``unknown_source``, ``unknown_section`` or ``source_changed``
+    :ivar detail: the message
+    :ivar info: extra fields (``handle``, ``section``, the valid ``choices``)
+    """
+
+    def __init__(self, detail, code="bad_source", **info):
+        super().__init__(detail)
+        self.code, self.detail, self.info = code, detail, info
+
+    def to_dict(self):
+        return {"code": self.code, "detail": self.detail, **self.info}
 
 
 def resolve_readout_interface(obj):
@@ -164,8 +177,20 @@ class ReportSource:
     def _section_readout(self, name):
         return self.readout(include=[name]) if not self.is_record else self.readout()
 
+    def check_section(self, name):
+        """Raise ``ReportSourceError(code="unknown_section")`` unless ``name`` is a section (or a dotted part of one)."""
+        names = self.section_names()
+        head = name.split(".", 1)[0]
+        if head not in names:
+            raise ReportSourceError(f"source {self.handle!r} has no section {name!r}; its sections are {names}",
+                                    code="unknown_section", handle=self.handle, section=name, choices=names)
+        if "." in name and not self.is_record and self.section_kind(name) == "unknown":
+            raise ReportSourceError(f"source {self.handle!r} has no section {name!r}: {self.kind_error(name)}",
+                                    code="unknown_section", handle=self.handle, section=name, choices=names)
+
     def section_text(self, name, max_chars=2400):
         """The text rendering of one section, cut at a line boundary."""
+        self.check_section(name)
         return _truncate(self._section_readout(name).to_text(), max_chars)
 
     def section_kind(self, name):
@@ -207,7 +232,8 @@ class SourceCatalog:
         try:
             return self._sources[handle]
         except KeyError:
-            raise ReportSourceError(f"unknown source {handle!r}; known sources: {self.handles()}") from None
+            raise ReportSourceError(f"unknown source {handle!r}; known sources: {self.handles()}",
+                                    code="unknown_source", handle=handle, choices=self.handles()) from None
 
     def handles(self):
         return list(self._sources)
@@ -238,7 +264,8 @@ class SourceCatalog:
         src = self.get(handle)
         if digest is not None and digest != src.digest:
             raise ReportSourceError(
-                f"source {handle!r} has changed: the report recorded digest {digest} but the catalog's is {src.digest}"
+                f"source {handle!r} has changed: the report recorded digest {digest} but the catalog's is {src.digest}",
+                code="source_changed", handle=handle
             )
         return src.obj
 

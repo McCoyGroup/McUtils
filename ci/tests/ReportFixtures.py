@@ -66,3 +66,32 @@ class ReasonQuirkReadout(ToyReadout):
     @readout_section(available=lambda i: (True, "informational note, not a problem"), description="Fine.")
     def readout_noted(self, ctx):
         return ReadoutFields(FieldSet([Field("x", 1.0, label="X")], title="Noted"))
+
+
+class NestedToy:
+    """A source whose section ``parts`` has two named parts (``parts.first``, ``parts.second``)."""
+
+
+def _register_nested():
+    from McUtils.Readouts import ReadoutSection, ReadoutText
+
+    class NestedSub(ReadoutAdapter):
+        @readout_section(description="First part.")
+        def readout_first(self, ctx):
+            return ReadoutText("first part 12.5")
+
+        @readout_section(description="Second part.")
+        def readout_second(self, ctx):
+            return ReadoutText("second part")
+
+    @register_readout(NestedToy)
+    class NestedToyReadout(ReadoutAdapter):
+        readout_id = "nested-toy-fixture"
+
+        @readout_section("parts", description="Two parts.")
+        def readout_parts(self, ctx, include=None, exclude=None, **opts):
+            return ReadoutSection(*NestedSub(self.obj).get_readout_sections(include=include, exclude=exclude,
+                                                                             ctx=ctx, **opts))
+
+
+_register_nested()

@@ -63,9 +63,9 @@ def ok(result):
 class ReadingTests(unittest.TestCase):
     def test_tool_names(self):
         _, _, tools = make()
-        self.assertEqual(tools.names(), ["list_sources", "describe_source", "peek", "outline", "compile", "diff", "apply_template",
-                                         "add_heading", "add_readout", "add_text", "set_caption", "edit_text", "move",
-                                         "remove"])
+        self.assertEqual(tools.names(), ["list_sources", "describe_source", "peek", "outline", "compile", "checkpoint", "diff",
+                                         "apply_template", "add_heading", "add_readout", "add_text", "set_caption",
+                                         "edit_text", "move", "move_section", "remove"])
         self.assertIn("render", make(renderer=True, out_dir="/tmp/x")[2].names())
         with self.assertRaises(ValueError):
             report_toolset(ReportDocument("x"), toy_catalog(), renderer=ReportRenderer(toy_catalog()))
@@ -98,7 +98,7 @@ class ReadingTests(unittest.TestCase):
         _, _, tools = make()
         self.assertIn("1648.23", ok(tools.call("peek", {"handle": "water", "section": "frequencies"})))
         r = tools.call("peek", {"handle": "water", "section": "frequencies", "max_chars": 99999})
-        self.assertEqual(r.error["code"], "bad_arguments")
+        self.assertEqual(r.error["code"], "invalid_arguments")
 
 
 class TemplateTests(unittest.TestCase):
@@ -171,17 +171,18 @@ class CompileAndDiffTests(unittest.TestCase):
         self.doc, _, self.tools = make()
         ok(self.tools.call("apply_template", {"handle": "water"}))
 
-    def test_compile_reads_back_checks_and_sets_a_checkpoint(self):
+    def test_compile_reads_back_and_checks_and_changes_nothing(self):
         c = ok(self.tools.call("compile"))
         self.assertEqual((c["revision"], c["n_blocks"], c["problems"]), (1, 4, []))
         self.assertEqual([b["id"] for b in c["blocks"]], ["h1", "r1", "h2", "r2"])
         self.assertEqual(c["text_status"], {"template": 2})
-        self.assertEqual(c["changes_since_last_compile"], 4)       # since the report was opened
+        self.assertEqual(c["baselines"], ["start", "template"])
+        self.assertNotIn("changes_since_last_compile", c)
         self.assertEqual(c["grounding"], {"policy": "grounded", "rel_tol": 1e-3, "small_int_max": 10, "year_range": [1900, 2100]})
         ok(self.tools.call("add_text", {"text": "Value 1648.23.", "cites": ["r2"]}))
         c = ok(self.tools.call("compile"))
-        self.assertEqual((c["changes_since_last_compile"], c["text_status"]), (1, {"template": 2, "grounded": 1}))
-        self.assertEqual(ok(self.tools.call("compile"))["changes_since_last_compile"], 0)
+        self.assertEqual(c["text_status"], {"template": 2, "checked": 1})
+        self.assertEqual(ok(self.tools.call("diff", {"since": "template"}))["n_changes"], 1)   # compile set no baseline
 
     def test_compile_full_text_does_not_clip(self):
         long = "word " * 40 + "end 1648.23"
@@ -207,7 +208,7 @@ class CompileAndDiffTests(unittest.TestCase):
         d = ok(self.tools.call("diff"))
         self.assertEqual(d["changes"], [{"op": "changed", "id": "r2", "fields": {
             "caption": {"from": "Harmonic frequencies.", "to": "Top mode 3943.88."},
-            "caption_status": {"from": "template", "to": "grounded"}}}])
+            "caption_status": {"from": "template", "to": "checked"}}}])
 
     def test_a_failed_request_does_not_change_the_diff(self):
         ok(self.tools.call("add_heading", {"text": "X"}))
@@ -215,13 +216,14 @@ class CompileAndDiffTests(unittest.TestCase):
         d = ok(self.tools.call("diff"))
         self.assertEqual([c["id"] for c in d["changes"]], ["h3"])
 
-    def test_diff_since_the_last_compile_combines_requests(self):
-        ok(self.tools.call("compile"))
+    def test_diff_since_a_checkpoint_combines_requests(self):
+        ok(self.tools.call("checkpoint"))
         ok(self.tools.call("add_heading", {"text": "Extra"}))
         ok(self.tools.call("move", {"block_id": "h2", "after": "start"}))
         ok(self.tools.call("remove", {"block_id": "r1"}))
         ok(self.tools.call("edit_text", {"block_id": "h1", "text": "Renamed"}))
-        d = ok(self.tools.call("diff", {"since": "compile"}))
+        d = ok(self.tools.call("diff", {"since": "checkpoint"}))
+        self.assertEqual(d["since"], "checkpoint")
         ops = {(c["op"], c["id"]) for c in d["changes"] if c["op"] != "moved"}
         self.assertEqual(ops, {("added", "h3"), ("removed", "r1"), ("changed", "h1")})
         moved = [c for c in d["changes"] if c["op"] == "moved"]       # h1/h2 swapped: either one is "the" move
@@ -230,8 +232,8 @@ class CompileAndDiffTests(unittest.TestCase):
         self.assertEqual([c for c in d["changes"] if c["op"] == "removed"][0]["block"]["include"], ["summary"])
         last = ok(self.tools.call("diff"))
         self.assertEqual([c["id"] for c in last["changes"]], ["h1"])
-        ok(self.tools.call("compile"))
-        self.assertEqual(ok(self.tools.call("diff", {"since": "compile"}))["n_changes"], 0)
+        ok(self.tools.call("checkpoint"))
+        self.assertEqual(ok(self.tools.call("diff", {"since": "checkpoint"}))["n_changes"], 0)
 
     def test_apply_template_is_one_change_set(self):
         d = ok(self.tools.call("diff"))
@@ -239,13 +241,39 @@ class CompileAndDiffTests(unittest.TestCase):
         self.assertEqual(d["from_revision"], 0)
 
     def test_moving_one_block_is_one_move(self):
-        ok(self.tools.call("compile"))
+        ok(self.tools.call("checkpoint"))
         ok(self.tools.call("move", {"block_id": "r2", "after": "start"}))
-        d = ok(self.tools.call("diff", {"since": "compile"}))
+        d = ok(self.tools.call("diff", {"since": "checkpoint"}))
         self.assertEqual([(c["op"], c["id"]) for c in d["changes"]], [("moved", "r2")])
 
-    def test_bad_since(self):
-        self.assertEqual(self.tools.call("diff", {"since": "yesterday"}).error["code"], "bad_arguments")
+    def test_bad_since_lists_the_baselines(self):
+        r = self.tools.call("diff", {"since": "yesterday"})
+        self.assertEqual(r.error["code"], "bad_argument")
+        self.assertEqual(r.error["choices"], ["last_change", "start", "template"])
+
+    def test_baselines_start_template_and_labels(self):
+        self.assertEqual(ok(self.tools.call("diff", {"since": "start"}))["n_changes"], 4)
+        self.assertEqual(ok(self.tools.call("diff", {"since": "template"}))["n_changes"], 0)
+        ok(self.tools.call("add_heading", {"text": "One"}))
+        r = ok(self.tools.call("checkpoint", {"label": "round1"}))
+        self.assertEqual(r["recorded"], ["checkpoint", "round1"])
+        ok(self.tools.call("add_heading", {"text": "Two"}))
+        ok(self.tools.call("checkpoint"))                       # moves 'checkpoint', keeps 'round1'
+        ok(self.tools.call("add_heading", {"text": "Three"}))
+        self.assertEqual([c["id"] for c in ok(self.tools.call("diff", {"since": "round1"}))["changes"]], ["h4", "h5"])
+        self.assertEqual([c["id"] for c in ok(self.tools.call("diff", {"since": "checkpoint"}))["changes"]], ["h5"])
+        self.assertEqual([c["id"] for c in ok(self.tools.call("diff", {"since": "template"}))["changes"]],
+                         ["h3", "h4", "h5"])
+        self.assertEqual(ok(self.tools.call("diff", {"since": "round1"}))["since"], "round1")
+
+    def test_checkpoint_labels_are_validated(self):
+        for bad in ("template", "start", "Last One", "1x"):
+            self.assertEqual(self.tools.call("checkpoint", {"label": bad}).error["code"], "bad_argument")
+
+    def test_apply_template_again_moves_the_template_baseline(self):
+        ok(self.tools.call("add_heading", {"text": "Mine"}))
+        ok(self.tools.call("apply_template", {"handle": "water"}))
+        self.assertEqual(ok(self.tools.call("diff", {"since": "template"}))["n_changes"], 0)
 
 
 class ToleranceTests(unittest.TestCase):
@@ -268,7 +296,8 @@ class ToleranceTests(unittest.TestCase):
         ok(tools.call("apply_template", {"handle": "water"}))
         self.assertEqual(tools.call("add_text", {"text": "There are 3 modes.", "cites": ["r2"]}).error["code"], "ungrounded")
         doc, _, tools = make()
-        ok(tools.call("add_text", {"text": "There are 3 modes."}))
+        ok(tools.call("apply_template", {"handle": "water"}))
+        ok(tools.call("add_text", {"text": "There are 3 modes.", "cites": ["r2"]}))
 
     def test_four_digit_numbers_in_the_year_range_are_exempt_unless_asked(self):
         # evidence has 1648.23 / 3832.71 / 3943.88: "2000" is not in the data but looks like a year
@@ -386,7 +415,7 @@ class WritingTests(unittest.TestCase):
     def test_grounded_text_is_accepted(self):
         v = ok(self.tools.call("add_text", {"text": "The bend is at 1648.23 and there are 3 modes.",
                                             "cites": [self.freq]}))
-        self.assertEqual(self.doc.get(v["block_id"]).status, "grounded")
+        self.assertEqual(self.doc.get(v["block_id"]).status, "checked")
 
     def test_an_ungrounded_number_is_rejected_and_nothing_is_written(self):
         n = len(self.doc.blocks)
@@ -396,17 +425,43 @@ class WritingTests(unittest.TestCase):
         self.assertEqual(r.error["unmatched"], ["1700.5"])
         self.assertEqual(len(self.doc.blocks), n)
 
-    def test_text_without_cites_cannot_state_numbers(self):
-        r = self.tools.call("add_text", {"text": "The energy is -76.02665."})
-        self.assertEqual(r.error["code"], "ungrounded")
-        self.assertIn("cites", r.error["detail"])
-        ok(self.tools.call("add_text", {"text": "A plain statement with no numbers."}))
+    def test_text_without_cites_is_refused_under_the_grounded_policy(self):
+        for text in ("The energy is -76.02665.", "A plain statement with no numbers."):
+            r = self.tools.call("add_text", {"text": text})
+            self.assertEqual(r.error["code"], "needs_citation")
+            self.assertIn("cites", r.error["detail"])
+        self.assertEqual(self.doc.blocks[-1].kind, "readout")      # nothing was written
+
+    def test_status_is_checked_when_a_number_was_verified_and_no_numbers_otherwise(self):
+        a = ok(self.tools.call("add_text", {"text": "The bend is at 1648.23.", "cites": [self.freq]}))
+        b = ok(self.tools.call("add_text", {"text": "The bend is the lowest mode.", "cites": [self.freq]}))
+        c = ok(self.tools.call("add_text", {"text": "There are 3 modes.", "cites": [self.freq]}))   # 3 is exempt
+        self.assertEqual([self.doc.get(x["block_id"]).status for x in (a, b, c)], ["checked", "no_numbers", "no_numbers"])
+        ok(self.tools.call("set_caption", {"block_id": self.freq, "text": "The top mode is a stretch."}))
+        self.assertEqual(self.doc.get(self.freq).caption_status, "no_numbers")
+        self.assertEqual(ok(self.tools.call("compile"))["text_status"]["no_numbers"], 3)
+
+    def test_edit_text_keeps_or_replaces_the_cites(self):
+        a = ok(self.tools.call("add_text", {"text": "The bend is at 1648.23.", "cites": [self.freq]}))["block_id"]
+        ok(self.tools.call("edit_text", {"block_id": a, "text": "The mode is at 3943.88."}))
+        self.assertEqual(self.doc.get(a).cites, [self.freq])
+        self.assertEqual(self.tools.call("edit_text", {"block_id": a, "text": "The mode is at 9999.9."}).error["code"],
+                         "ungrounded")
+        self.doc.get(a).cites = []                              # e.g. text a person wrote without citing
+        self.assertEqual(self.tools.call("edit_text", {"block_id": a, "text": "Fine."}).error["code"], "needs_citation")
+        ok(self.tools.call("edit_text", {"block_id": a, "text": "Fine 3943.88.", "cites": [self.freq]}))
+        self.assertEqual(self.doc.get(a).cites, [self.freq])
+
+    def test_unchecked_policy_needs_no_cites(self):
+        doc, _, tools = make(policy="unchecked")
+        v = ok(tools.call("add_text", {"text": "The energy is -76.02665."}))
+        self.assertEqual(doc.get(v["block_id"]).status, "unchecked")
 
     def test_captions_are_checked_against_their_block(self):
         self.assertFalse(self.tools.call("set_caption", {"block_id": self.freq, "text": "Peak at 9999.9."}).ok)
         ok(self.tools.call("set_caption", {"block_id": self.freq, "text": "The top mode is 3943.88."}))
         blk = self.doc.get(self.freq)
-        self.assertEqual((blk.caption, blk.caption_status), ("The top mode is 3943.88.", "grounded"))
+        self.assertEqual((blk.caption, blk.caption_status), ("The top mode is 3943.88.", "checked"))
 
     def test_a_refused_caption_on_add_readout_leaves_no_block(self):
         n = len(self.doc.blocks)
@@ -437,8 +492,8 @@ class WritingTests(unittest.TestCase):
         self.assertIn("frequencies", r.error["choices"])
 
     def test_bad_arguments(self):
-        self.assertEqual(self.tools.call("add_heading", {"text": "x", "level": 5}).error["code"], "bad_arguments")
-        self.assertEqual(self.tools.call("add_heading", {}).error["code"], "bad_arguments")
+        self.assertEqual(self.tools.call("add_heading", {"text": "x", "level": 5}).error["code"], "invalid_arguments")
+        self.assertEqual(self.tools.call("add_heading", {}).error["code"], "invalid_arguments")
         self.assertEqual(self.tools.call("nope").error["code"], "unknown_tool")
 
 
@@ -648,3 +703,114 @@ class SubprocessServerTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class StructuredErrorTests(unittest.TestCase):
+    def test_peek_and_describe_with_bad_names_are_not_internal(self):
+        _, _, tools = make()
+        r = tools.call("peek", {"handle": "hoh", "section": "frequencies"})
+        self.assertEqual((r.error["code"], r.error["choices"]), ("unknown_source", ["water"]))
+        r = tools.call("peek", {"handle": "water", "section": "nope"})
+        self.assertEqual(r.error["code"], "unknown_section")
+        self.assertIn("frequencies", r.error["choices"])
+        self.assertEqual(tools.call("describe_source", {"handle": "r1"}).error["code"], "unknown_source")
+
+    def test_unknown_dotted_part(self):
+        from ReportFixtures import NestedToy
+        doc = ReportDocument("N", toy_catalog(n=NestedToy()))
+        tools = report_toolset(doc, doc.catalog)
+        self.assertEqual(tools.call("peek", {"handle": "n", "section": "parts.bogus"}).error["code"], "unknown_section")
+        self.assertEqual(tools.call("add_readout", {"handle": "n", "include": ["parts.bogus"]}).error["code"],
+                         "unknown_section")
+        self.assertIn("second part", ok(tools.call("peek", {"handle": "n", "section": "parts.second"})))
+
+
+class SectionToolTests(unittest.TestCase):
+    def setUp(self):
+        self.doc, _, self.tools = make()
+        ok(self.tools.call("apply_template", {"handle": "water"}))      # h1 r1 h2 r2
+
+    def test_move_section_and_under(self):
+        v = ok(self.tools.call("add_text", {"text": "About 1648.23.", "cites": ["r2"], "under": "h1"}))
+        self.assertEqual([b.id for b in self.doc.blocks], ["h1", "r1", "p1", "h2", "r2"])
+        ok(self.tools.call("move_section", {"heading_id": "h2", "after": "start"}))
+        self.assertEqual([b.id for b in self.doc.blocks], ["h2", "r2", "h1", "r1", "p1"])
+        self.assertEqual(ok(self.tools.call("diff"))["n_changes"] >= 1, True)
+        r = self.tools.call("add_text", {"text": "x", "cites": ["r2"], "under": "h1", "after": "r1"})
+        self.assertEqual(r.error["code"], "bad_argument")
+
+    def test_move_section_is_refused_if_any_block_is_locked(self):
+        doc, _, tools = make(lock=LockedToy("water"))
+        ok(tools.call("apply_template", {"handle": "water"}))
+        before = doc.to_markdown()
+        r = tools.call("move_section", {"heading_id": "h1", "after": "start"})     # h1 is free but r1 (summary) is locked
+        self.assertEqual(r.error["code"], "locked")
+        self.assertEqual(doc.to_markdown(), before)
+
+    def test_move_does_not_take_a_headings_contents(self):
+        ok(self.tools.call("move", {"block_id": "h1", "after": "r2"}))
+        self.assertEqual([b.id for b in self.doc.blocks], ["r1", "h2", "r2", "h1"])
+
+
+class HintTests(unittest.TestCase):
+    def test_hints_are_attached_by_code(self):
+        doc = ReportDocument("H", toy_catalog(water=TemplatedToy("water")))
+        tools = report_toolset(doc, doc.catalog, hints={"unknown_block": "Call outline for block ids.",
+                                                         "invalid_arguments": "Fix the arguments."})
+        r = tools.call("remove", {"block_id": "zz"})
+        self.assertEqual(r.error["hint"], "Call outline for block ids.")
+        self.assertEqual(tools.call("add_heading", {}).error["hint"], "Fix the arguments.")
+        self.assertNotIn("hint", tools.call("peek", {"handle": "water", "section": "nope"}).error)
+
+    def test_a_tool_set_without_hints_adds_none(self):
+        _, _, tools = make(config={"hints": {}})
+        self.assertNotIn("hint", tools.call("remove", {"block_id": "zz"}).error)
+
+    def test_default_hints(self):
+        from McUtils.Readouts.Reports import REPORT_HINTS
+        doc, _, tools = make(lock=LockedToy("water"))
+        ok(tools.call("apply_template", {"handle": "water"}))
+        r = tools.call("remove", {"block_id": "r1"})
+        self.assertEqual(r.error["code"], "locked")
+        self.assertIn("stop", r.error["hint"])
+        self.assertEqual(r.error["hint"], REPORT_HINTS["locked"])
+        self.assertIn("outline", tools.call("remove", {"block_id": "zz"}).error["hint"])
+        self.assertIn("list_sources", tools.call("peek", {"handle": "hoh", "section": "x"}).error["hint"])
+        self.assertIn("cites", tools.call("add_text", {"text": "x"}).error["hint"])
+        r = tools.call("add_text", {"text": "At 9999.9.", "cites": ["r1"]})
+        self.assertEqual((r.error["code"], "hint" in r.error), ("ungrounded", True))
+
+    def test_every_error_code_the_tools_can_raise_has_a_hint(self):
+        from McUtils.Readouts.Reports import REPORT_HINTS
+        from McUtils.Readouts.Reports.Document import ERROR_CODES
+        for code in ERROR_CODES:
+            self.assertIn(code, REPORT_HINTS, code)
+
+    def test_instructions_name_the_tools_and_the_flow(self):
+        from McUtils.Readouts.Reports import REPORT_INSTRUCTIONS
+        _, _, tools = make(renderer=True, out_dir="/tmp/x")
+        for name in tools.names():
+            self.assertIn(name, REPORT_INSTRUCTIONS, name)
+        for phrase in ("not listed", "locked", "since='template'", "no_numbers", "under"):
+            self.assertIn(phrase, REPORT_INSTRUCTIONS, phrase)
+        self.assertNotIn("sets a checkpoint", REPORT_INSTRUCTIONS)
+
+
+class RenderDependencyTests(unittest.TestCase):
+    def test_a_missing_html_package_is_a_problem_not_an_internal_error(self):
+        from unittest import mock
+        import McUtils.Readouts.Reports.Render as R
+        doc, catalog, _ = make()
+        doc.add_heading("A")
+        err = ImportError("No module named 'markdown'")
+        err.name = "markdown"
+        with tempfile.TemporaryDirectory() as d, mock.patch.object(R.ReportRenderer, "render_html", side_effect=err):
+            res = ReportRenderer(catalog, strict=False).render(doc, d, formats=("md", "html"))
+            self.assertFalse(res.ok)
+            self.assertIn("markdown", res.problems[0])
+            self.assertIn("md", res.paths)
+            self.assertNotIn("html", res.paths)
+            tools = report_toolset(doc, catalog, renderer=ReportRenderer(catalog), out_dir=d)   # strict by default
+            r = tools.call("render", {"formats": ["html"]})
+            self.assertEqual(r.error["code"], "missing_dependency")
+            self.assertIn("pip install markdown", r.error["detail"])

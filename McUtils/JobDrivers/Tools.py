@@ -31,8 +31,14 @@ class ToolResult:
 
 
 class ToolSet:
-    def __init__(self):
+    """
+    :param hints: ``{error code: sentence}``; an error result with that code gets the sentence as ``hint`` (what to do
+        next: retry, stop, call another tool). Useful for models, which follow a hint more reliably than a bare code.
+    """
+
+    def __init__(self, hints=None):
         self._tools = {}
+        self.hints = dict(hints or {})
 
     def add(self, name, func, schema, description=""):
         if name in self._tools:
@@ -46,6 +52,12 @@ class ToolSet:
     def tools(self):
         return [t.to_dict() for t in self._tools.values()]
 
+    def _error(self, err):
+        hint = self.hints.get(err.get("code"))
+        if hint and "hint" not in err:
+            err = dict(err, hint=hint)
+        return ToolResult(False, error=err)
+
     def call(self, name, args=None):
         """
         Validate ``args`` against the tool's schema, then call it. Exceptions that carry ``code`` and ``detail``
@@ -54,15 +66,14 @@ class ToolSet:
         args = {} if args is None else args
         tool = self._tools.get(name)
         if tool is None:
-            return ToolResult(False, error={"code": "unknown_tool", "detail": f"no tool {name!r}; "
-                                                                           f"the tools are {self.names()}"})
+            return self._error({"code": "unknown_tool", "detail": f"no tool {name!r}; the tools are {self.names()}"})
         errors = validate_answer(tool.schema, args)
         if errors:
-            return ToolResult(False, error={"code": "bad_arguments", "detail": "; ".join(errors)})
+            return self._error({"code": "invalid_arguments", "detail": "; ".join(errors)})
         try:
             return ToolResult(True, tool.func(**args))
         except Exception as e:
             if hasattr(e, "code") and hasattr(e, "detail"):
                 err = e.to_dict() if hasattr(e, "to_dict") else {"code": e.code, "detail": e.detail}
-                return ToolResult(False, error=err)
-            return ToolResult(False, error={"code": "internal", "detail": repr(e)})
+                return self._error(err)
+            return self._error({"code": "internal", "detail": repr(e)})

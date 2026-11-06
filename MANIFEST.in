@@ -18,6 +18,7 @@ recursive-include McUtils/Docs *.html
 recursive-include McUtils/Docs *.md
 recursive-include McUtils/Docs *.yml
 recursive-include McUtils/Docs Gemfile
+recursive-include McUtils/Docs/resources *.css *.js
 
 # FFI libs
 recursive-include McUtils/Extensions/FFI *.hpp

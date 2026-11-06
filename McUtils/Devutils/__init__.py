@@ -21,3 +21,6 @@ from .Fingerprints import *; from .Fingerprints import __all__ as _all
 __all__ += _all
 from .EntryStore import *; from .EntryStore import __all__ as _all
 __all__ += _all
+
+from .Cascades import *; from .Cascades import __all__ as _all
+__all__ += _all

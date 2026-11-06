@@ -1,15 +1,22 @@
 import numpy as np, scipy.sparse as sp, itertools as ip, functools as fp, os, abc, gc
 import scipy.special
+import contextlib, errno, mmap, tempfile, time, weakref
+from pathlib import Path
 
 from ..Scaffolding import MaxSizeCache, Logger
 from .SetOps import contained, unique as nput_unique, find
-from .Misc import infer_inds_dtype, downcast_index_array
+from .Misc import infer_inds_dtype, downcast_index_array, infer_int_dtype
 
 __all__ = [
     "SparseArray",
     "ScipySparseArray",
     "TensorFlowSparseArray",
-    "sparse_tensordot"
+    "sparse_tensordot",
+    "matrix_dot_into",
+    "PackedIndexArray",
+    "CompactSparseRow",
+    "RowSparseArray",
+    "RowSpillStore"
 ]
 
 #   I should provide a general "ArrayWrapper" class that allows all these arrays to interact nicely
@@ -188,15 +195,12 @@ class SparseArray(metaclass=abc.ABCMeta):
         raise NotImplementedError("{}.{} is an abstract method".format(type(self).__name__, 'block_data'))
         ...
     @property
-    @abc.abstractmethod
     def block_inds(self):
-        """
-        Returns indices for the stored values
-        :return:
-        :rtype:
-        """
-        raise NotImplementedError("{}.{} is an abstract method".format(type(self).__name__, 'block_inds'))
-        ...
+        return self.block_data[1]
+
+    @property
+    def block_vals(self):
+        return self.block_data[0]
     @abc.abstractmethod
     def transpose(self, axes):
         """
@@ -225,6 +229,21 @@ class SparseArray(metaclass=abc.ABCMeta):
         :rtype: sp.csr_matrix
         """
         raise NotImplementedError("{}.{} is an abstract method".format(type(self).__name__, 'ascsr'))
+    def iter_nonzero_blocks(self, block_size=65536, value_filter=None):
+        """Yield bounded (values, coordinate-tuple) blocks of stored entries.
+
+        value_filter is applied before constructing coordinates where the
+        backend supports this. The generic fallback uses existing block data.
+        """
+        if not isinstance(block_size, (int, np.integer)) or block_size < 1:
+            raise ValueError('block_size must be a positive integer')
+        values, indices = self.block_data
+        for start in range(0,len(values),block_size):
+            stop = min(start+block_size,len(values))
+            selected = np.arange(start,stop)
+            if value_filter is not None:selected = selected[np.asarray(value_filter(values[start:stop]),dtype=bool)]
+            if len(selected):yield values[selected],tuple(index[selected] for index in indices)
+
     @abc.abstractmethod
     def asarray(self):
         """
@@ -396,6 +415,36 @@ class SparseArray(metaclass=abc.ABCMeta):
     #                 new = new.concatenate(self, axis=i)
     #
     #     return new
+
+    @property
+    def T(self):
+        if self.ndim == 2:
+            return self.transpose((1, 0))
+        raise ValueError("dunno what T means for high dimensional arrays")
+
+    @staticmethod
+    def _index_dtype(size):
+        # Reuse the package's signed range inference while retaining the
+        # int32 minimum required by native CSR kernels.
+        return np.promote_types(np.int32, infer_int_dtype(size))
+
+    def __matmul__(self, other):
+        return self.dot(other)
+
+    def __neg__(self):
+        return -1 * self
+
+    def __pos__(self):
+        return self
+
+    def __add__(self, other):
+        return self.plus(other)
+
+    def __iadd__(self, other):
+        return self.plus(other, inplace=True)
+
+    def __radd__(self, other):
+        return self.plus(other)
 
     def __truediv__(self, other):
         return self.true_multiply(1 / other)
@@ -1194,6 +1243,37 @@ class ScipySparseArray(SparseArray):
                 shape = (len(diags), block_size[0], len(diags), block_size[1])
             wat = cls(data, shape=shape, **kw).transpose((0, 2, 1, 3))
             return wat
+    def iter_nonzero_blocks(self, block_size=65536, value_filter=None):
+        """Scan CSR/CSC/COO storage without creating or caching full coordinates.
+
+        The predicate sees at most block_size values. Coordinates are expanded
+        only for its retained entries. No matrix conversion or global sort.
+        """
+        if not isinstance(block_size, (int, np.integer)) or block_size < 1:
+            raise ValueError('block_size must be a positive integer')
+        matrix = self.data
+        if matrix.format not in {'csr','csc','coo'}:
+            raise NotImplementedError('stored-entry blocks require CSR, CSC or COO storage')
+        for start in range(0,len(matrix.data),block_size):
+            stop = min(start+block_size,len(matrix.data))
+            values = matrix.data[start:stop]
+            selected = np.arange(start,stop)
+            if value_filter is not None:
+                keep = np.asarray(value_filter(values),dtype=bool)
+                if keep.shape != values.shape:raise ValueError('value_filter must return one boolean per value')
+                selected = selected[keep];values = values[keep]
+            if not len(selected):continue
+            if matrix.format == 'coo':rows,columns = matrix.row[selected],matrix.col[selected]
+            else:
+                major = np.searchsorted(matrix.indptr,selected,side='right')-1
+                minor = matrix.indices[selected]
+                rows,columns = (major,minor) if matrix.format == 'csr' else (minor,major)
+            if self.ndim == 2 and tuple(self.shape) == tuple(matrix.shape):indices = (rows,columns)
+            else:
+                flat = np.ravel_multi_index((rows,columns),matrix.shape)
+                indices = np.unravel_index(flat,self.shape)
+            yield values,indices
+
     def asarray(self):
         return np.reshape(self.data.toarray(), self.shape)
     def todense(self):
@@ -1518,6 +1598,10 @@ class ScipySparseArray(SparseArray):
             raise ValueError("transposition {} can't apply to shape {}".format(
                 transp, self.shape
             ))
+
+        if self.ndim == 2 and tuple(self.shape) == tuple(self.data.shape):
+            data = self.data.copy() if tuple(transp) == (0,1) else self.data.transpose(copy=True)
+            return type(self)(data,shape=tuple(shp[i] for i in transp),layout=type(data),initialize=False)
 
         track_data = self.get_caching_status()
         if self._block_vals is None:
@@ -2016,14 +2100,6 @@ class ScipySparseArray(SparseArray):
         #     cur_inds
         # )
 
-    @property
-    def T(self):
-        if len(self._shape) == 2:
-            return self.transpose((1, 0))
-        else:
-            raise ValueError("dunno what T means for high dimensional arrays")
-    def __matmul__(self, other):
-        return self.dot(other)
     def _tocs(self):
         if self.fmt not in [sp.csr_matrix, sp.csc_matrix]:
             a = self.data
@@ -2038,6 +2114,16 @@ class ScipySparseArray(SparseArray):
             self = self.copy()
         self._tocs()
         return self
+
+    @staticmethod
+    def _matrix_dot(a, b):
+        try:
+            return a.dot(b)
+        except ValueError as error:
+            if error.args and error.args[0] == 'dimension mismatch':
+                raise ValueError("dimensions of tensors not aligned {} and {} incompatible".format(
+                    a.shape, b.shape)) from error
+            raise
 
     def dot(self, b, reverse=False):
         self._tocs()
@@ -2058,21 +2144,15 @@ class ScipySparseArray(SparseArray):
                 b = b.reshape((b.shape[0], bcols)).data
             b = b.data
         elif isinstance(b, SparseArray):
+            # Opt-in row backends handle the right product without global CSR conversion.
+            if hasattr(b, '_right_dot'):
+                return b._right_dot(self)
             b = b.ascsr()
 
-        try:
-            woof = a.dot(b)
-        except ValueError as e:
-            if e.args[0] == 'dimension mismatch':
-                raise ValueError("dimensions of tensors not aligned {} and {} incompatible".format(
-                    a.shape,
-                    b.shape
-                ))
-            else:
-                raise
+        woof = self._matrix_dot(a, b)
 
         if isinstance(woof, sp.spmatrix):
-            return type(self)(a.dot(b))
+            return type(self)(woof)
         else:
             return woof
 
@@ -2093,16 +2173,6 @@ class ScipySparseArray(SparseArray):
             shape=self.shape + oshp
         )
 
-    def __neg__(self):
-        return -1 * self
-    def __pos__(self):
-        return self
-    def __add__(self, other):
-        return self.plus(other)
-    def __iadd__(self, other):
-        return self.plus(other, inplace=True)
-    def __radd__(self, other):
-        return self.plus(other)
     def plus(self, other, inplace=False):
         d = self.data
         if isinstance(other, (int, float, np.integer, np.floating)):
@@ -2250,6 +2320,48 @@ class ScipySparseArray(SparseArray):
 
         return data, inds
 
+    def _get_matrix_block(self, indices):
+        """Two-dimensional block slicing without full tensor coordinates.
+
+        Preserve the tensor API's singleton-axis removal and duplicate-index
+        checks. Unusual indexing falls back to its existing implementation.
+        """
+        if self.ndim != 2 or tuple(self.shape) != tuple(self.data.shape):return NotImplemented
+        if not isinstance(indices,tuple) or not 1 <= len(indices) <= 2:return NotImplemented
+        indices=indices+(slice(None),)*(2-len(indices))
+        selected=[];counts=[]
+        for index,size in zip(indices,self.shape):
+            if isinstance(index,(int,np.integer)):
+                if index < 0 or index >= size:return NotImplemented
+                selected.append(int(index));counts.append(1)
+            elif isinstance(index,slice):
+                counts.append(len(range(*index.indices(size))));selected.append(index)
+            else:
+                array=np.asarray(index)
+                if array.ndim!=1 or array.dtype.kind not in 'iub':return NotImplemented
+                if array.dtype.kind=='b':
+                    if len(array)!=size:return NotImplemented
+                    array=np.flatnonzero(array)
+                if len(array) and np.min(array)<0:return NotImplemented
+                if len(np.unique(array))!=len(array):raise ValueError("sparse array slicing can't duplicate indices")
+                selected.append(array);counts.append(len(array))
+        shape=tuple(count for count in counts if count>1)
+        if not shape:return NotImplemented
+        if 0 in counts:return NotImplemented
+        # SciPy block indexing copies the selected buffers. Transposing the
+        # one-row result below shares that private copy, never the source.
+        # Apply the axes separately: simultaneous fancy-row/strided-column
+        # indexing is inconsistent across supported SciPy versions.
+        data=self.data;copied=False
+        for axis,index in enumerate(selected):
+            if isinstance(index,slice) and index.indices(self.shape[axis])==(0,self.shape[axis],1):continue
+            data=data[index,:] if axis==0 else data[:,index]
+            copied=True
+        if not copied:data=data.copy()
+        if len(shape)==1 and counts[0]==1:data=data.transpose(copy=False)
+        return type(self)(data,shape=shape,layout=type(data),initialize=False)
+
+
     def _get_element(self, idx, pull_elements=None):
         """
         Convert idx into a 1D index or slice or whatever and then convert it back to the appropriate 2D shape
@@ -2272,6 +2384,10 @@ class ScipySparseArray(SparseArray):
                 if pull_elements:
                     e1 = len(idx[0])
                     pull_elements = all(len(x) == e1 for x in idx)
+
+        if not pull_elements:
+            block = self._get_matrix_block(idx)
+            if block is not NotImplemented:return block
 
         if pull_elements:
             # try:
@@ -2560,6 +2676,567 @@ class ScipySparseArray(SparseArray):
                                            ", ".join([str(x) for x in self.shape]),
                                           self.non_zero_count
                                            )
+
+class PackedIndexArray:
+    """Sorted positions represented by bits and small rank/select checkpoints."""
+    _popcount = np.array([int(i).bit_count() for i in range(256)], dtype=np.uint8)
+    ndim = 1
+    is_sorted = True
+    def __init__(self, bits, size, block_size=65536):
+        self.bits = np.asarray(bits, dtype=np.uint8)
+        self.size = int(size)
+        self.block_size = max(8, (int(block_size)+7)//8*8)
+        self.dtype = SparseArray._index_dtype(self.size)
+        if len(self.bits) != (self.size+7)//8:
+            raise ValueError("Incorrect packed support size")
+        if self.size % 8 and len(self.bits):
+            if self.bits[-1] & ((1 << (8-self.size%8))-1):
+                raise ValueError("Nonzero padding in packed support")
+        step = self.block_size//8
+        self.prefix = np.zeros((len(self.bits)+step-1)//step+1, dtype=np.int64)
+        for i, start in enumerate(range(0, len(self.bits), step)):
+            self.prefix[i+1] = self.prefix[i]+int(self._popcount[self.bits[start:start+step]].sum())
+        self.bits.flags.writeable = False
+        self.prefix.flags.writeable = False
+
+    @property
+    def nbytes(self): return self.bits.nbytes+self.prefix.nbytes
+    @property
+    def shape(self): return (len(self),)
+    def __len__(self): return int(self.prefix[-1])
+    def min(self): return self[0]
+    def max(self): return self[-1]
+    def view(self): return self
+
+    def __getitem__(self, selector):
+        scalar = np.isscalar(selector)
+        if isinstance(selector, slice):
+            start, stop, step = selector.indices(len(self))
+            requested = np.arange(start, stop, step, dtype=np.int64)
+        else:
+            requested = np.asarray(selector)
+            if requested.dtype.kind == "b":
+                if requested.shape != (len(self),): raise IndexError("Boolean support selector size")
+                requested = np.flatnonzero(requested)
+            if requested.size == 0: return np.empty(requested.shape, dtype=self.dtype)
+            if requested.dtype.kind not in "iu": raise IndexError("Integer support selector required")
+            requested = requested.astype(np.int64, copy=False)
+            requested = np.where(requested < 0, requested+len(self), requested)
+        shape = requested.shape
+        requested = np.atleast_1d(requested).reshape(-1)
+        if np.any((requested < 0) | (requested >= len(self))): raise IndexError(selector)
+        blocks = np.searchsorted(self.prefix, requested, side="right")-1
+        result = np.empty(len(requested), dtype=self.dtype)
+        for block in np.unique(blocks):
+            selected = np.flatnonzero(blocks == block)
+            start = int(block)*self.block_size
+            bits = np.unpackbits(self.bits[start//8:(start+self.block_size)//8])
+            positions = np.flatnonzero(bits)
+            result[selected] = start+positions[requested[selected]-self.prefix[block]]
+        return result[0] if scalar else result.reshape(shape)
+
+    def searchsorted(self, values, side="left"):
+        values = np.asarray(values)
+        scalar = values.ndim == 0
+        work = values.astype(np.int64, copy=False).reshape(-1)
+        if side == "right": work = work+1
+        elif side != "left": raise ValueError(side)
+        work = np.clip(work, 0, self.size)
+        result = np.empty(len(work), dtype=np.int64)
+        blocks = work//self.block_size
+        for block in np.unique(blocks):
+            selected = np.flatnonzero(blocks == block)
+            start = int(block)*self.block_size
+            stop = min(start+self.block_size, self.size)
+            bits = np.unpackbits(self.bits[start//8:(stop+7)//8])[:stop-start]
+            prefix = np.empty(len(bits)+1, dtype=np.int64)
+            prefix[0] = 0
+            np.cumsum(bits, out=prefix[1:])
+            result[selected] = self.prefix[min(int(block), len(self.prefix)-1)]+prefix[work[selected]-start]
+        return result[0] if scalar else result.reshape(values.shape)
+
+    def contains(self, positions):
+        positions = np.asarray(positions)
+        safe = np.clip(positions, 0, max(0, self.size-1)).astype(np.int64)
+        if self.size == 0: return np.zeros(positions.shape, dtype=bool)
+        return ((positions >= 0) & (positions < self.size)
+                & ((self.bits[safe//8] >> (7-safe%8)) & 1).astype(bool))
+
+    def __array__(self, dtype=None, copy=None):
+        result = self[:]
+        return result.astype(dtype, copy=False) if dtype is not None else result
+
+
+class CompactSparseRow:
+    """One immutable dense or sparse row, including its exact retained support."""
+    def __init__(self, values, columns, size):
+        self.values, self.columns, self.size = values, columns, int(size)
+    @property
+    def dense(self): return isinstance(self.columns, PackedIndexArray)
+    @property
+    def nnz(self): return len(self.columns)
+    @property
+    def nbytes(self): return self.values.nbytes+self.columns.nbytes
+    @classmethod
+    def from_dense(cls, vector, cutoff=0, block_size=65536):
+        vector = np.asarray(vector)
+        if vector.ndim != 1: raise ValueError("Row must be one dimensional")
+        size = len(vector)
+        dtype = SparseArray._index_dtype(size)
+        def mask(block):
+            return block != 0 if cutoff is None or cutoff < 0 else np.abs(block) > cutoff
+        counts = [int(np.count_nonzero(mask(vector[start:start+block_size])))
+                  for start in range(0, size, block_size)]
+        count = sum(counts)
+        support_bytes = (size+7)//8+8*((size+block_size-1)//block_size+1)
+        use_dense = size*vector.dtype.itemsize+support_bytes < count*(vector.dtype.itemsize+dtype.itemsize)
+        if use_dense:
+            values = vector.copy()
+            bits = np.zeros((size+7)//8, dtype=np.uint8)
+            # Byte aligned chunks avoid a whole-row boolean/coordinate temporary.
+            step = max(8, (block_size+7)//8*8)
+            for start in range(0, size, step):
+                keep = mask(values[start:start+step])
+                values[start:start+step][~keep] = 0
+                packed = np.packbits(keep)
+                bits[start//8:start//8+len(packed)] = packed
+            columns = PackedIndexArray(bits, size, block_size)
+        else:
+            values = np.empty(count, dtype=vector.dtype)
+            columns = np.empty(count, dtype=dtype)
+            offset = 0
+            for start, count in zip(range(0, size, block_size), counts):
+                block = vector[start:start+block_size]
+                keep = np.flatnonzero(mask(block))
+                values[offset:offset+count] = block[keep]
+                columns[offset:offset+count] = keep+start
+                offset += count
+        return cls(values, columns, size)
+
+    @classmethod
+    def from_native(cls, matrix, block_size=65536):
+        if sp.issparse(matrix):
+            row = matrix.tocsr()
+            row.sum_duplicates(); row.sort_indices(); row.eliminate_zeros()
+            # Only build a dense row when its actual byte cost is smaller.
+            size = row.shape[1]
+            dtype = SparseArray._index_dtype(size)
+            support = (size+7)//8+8*((size+block_size-1)//block_size+1)
+            if size*row.dtype.itemsize+support < row.nnz*(row.dtype.itemsize+np.dtype(dtype).itemsize):
+                return cls.from_dense(row.toarray().reshape(-1), None, block_size)
+            return cls(row.data.copy(), row.indices.astype(dtype, copy=True), size)
+        return cls.from_dense(np.asarray(matrix).reshape(-1), None, block_size)
+
+    def native(self):
+        if self.dense: return self.values.reshape(1, -1)
+        return sp.csr_matrix((self.values, self.columns, np.array([0, self.nnz], dtype=self.columns.dtype)),
+                             shape=(1, self.size), copy=False)
+
+    def entries(self, block_size=65536):
+        if self.dense:
+            for start in range(0, self.size, block_size):
+                block = self.values[start:start+block_size]
+                keep = np.flatnonzero(block != 0)
+                if len(keep): yield block[keep], (keep+start).astype(self.columns.dtype)
+        else:
+            for start in range(0, self.nnz, block_size):
+                yield self.values[start:start+block_size], self.columns[start:start+block_size]
+
+    def select(self, columns, block_size=65536):
+        columns = np.asarray(columns)
+        if self.dense: return type(self).from_dense(self.values[columns], None, block_size)
+        pos = np.searchsorted(self.columns, columns)
+        valid = pos < self.nnz
+        if self.nnz: valid &= self.columns[np.minimum(pos, self.nnz-1)] == columns
+        values = np.zeros(len(columns), dtype=self.values.dtype)
+        values[valid] = self.values[pos[valid]]
+        return type(self).from_dense(values, None, block_size)
+
+
+class RowSpillStore:
+    """Soft resident-payload target and capped, append-only mapped segments.
+
+    This does not cap process RSS. When the disk allowance is exhausted, rows
+    remain resident and the process/scheduler resource guard remains decisive.
+    ``allocation_check(bytes)`` can additionally enforce a shared scratch cap.
+    The store is opt in; no files are made until a completed row is spilled.
+    """
+    active_stores = weakref.WeakSet()
+
+    @staticmethod
+    def _remove_segment(path):
+        path = Path(path)
+        try: path.unlink()
+        except FileNotFoundError: pass
+        try: path.parent.rmdir()
+        except (FileNotFoundError, OSError): pass
+
+
+    def __init__(self, directory, resident_bytes, max_bytes, *,
+                 segment_bytes=512*1024**2, copy_block_bytes=64*1024**2,
+                 allocation_check=None):
+        for name, value in [('resident_bytes', resident_bytes), ('max_bytes', max_bytes),
+                            ('segment_bytes', segment_bytes), ('copy_block_bytes', copy_block_bytes)]:
+            if not isinstance(value, (int, np.integer)) or value < (0 if name == 'resident_bytes' else 1):
+                raise ValueError(name + ' must be an integer byte count')
+        self.directory = Path(directory)
+        self.resident_limit, self.max_bytes = int(resident_bytes), int(max_bytes)
+        self.segment_bytes, self.copy_block_bytes = int(segment_bytes), int(copy_block_bytes)
+        self.allocation_check = allocation_check
+        self._root = None
+        self._segments, self._positions, self._pins = [], [], {}
+        self._known = weakref.WeakSet()
+        self.resident_bytes = self.file_backed_bytes = self.reserved_bytes = 0
+        self.peak_resident_bytes = self.peak_file_backed_bytes = self.peak_reserved_bytes = 0
+        self.spilled_rows = self.budget_refusals = self.drop_calls = self.drop_failures = 0
+        self.write_seconds = self.drop_seconds = 0.
+        self.active_stores.add(self)
+
+    @staticmethod
+    def _align(value, alignment=64):
+        return (int(value)+alignment-1)//alignment*alignment
+
+    def _reserve(self, size):
+        size = self._align(size)
+        if self._segments:
+            segment = self._segments[-1]
+            offset = self._align(self._positions[-1])
+            if offset+size <= segment.nbytes:
+                self._positions[-1] = offset+size
+                return segment, offset
+        available = self.max_bytes-self.reserved_bytes
+        capacity = min(max(self.segment_bytes, size), available)
+        if capacity < size:
+            self.budget_refusals += 1
+            return None
+        if self.allocation_check is not None and not self.allocation_check(capacity):
+            capacity = size
+            if not self.allocation_check(capacity):
+                self.budget_refusals += 1
+                return None
+        if self._root is None:
+            self.directory.mkdir(parents=True, exist_ok=True)
+            self._root = Path(tempfile.mkdtemp(prefix='compact_rows_', dir=self.directory))
+        path = self._root / ('segment_%06d.bin' % len(self._segments))
+        try:
+            with path.open('xb') as stream:
+                try: os.posix_fallocate(stream.fileno(), 0, capacity)
+                except AttributeError: stream.truncate(capacity)
+                except OSError as error:
+                    if error.errno not in {errno.ENOSYS, errno.EOPNOTSUPP}: raise
+                    stream.truncate(capacity)
+            segment = np.memmap(path, dtype=np.uint8, mode='r+', shape=(capacity,))
+        except OSError as error:
+            try: path.unlink()
+            except FileNotFoundError: pass
+            if error.errno not in {errno.ENOSPC, errno.EDQUOT}: raise
+            self.budget_refusals += 1
+            return None
+        weakref.finalize(segment, self._remove_segment, str(path))
+        self._segments.append(segment)
+        self._positions.append(size)
+        self.reserved_bytes += capacity
+        self.peak_reserved_bytes = max(self.peak_reserved_bytes, self.reserved_bytes)
+        return segment, 0
+
+    def _copy_arrays(self, arrays):
+        offsets, size = [], 0
+        for array in arrays:
+            size = self._align(size)
+            offsets.append(size)
+            size += array.nbytes
+        allocation = self._reserve(size)
+        if allocation is None: return None
+        segment, offset = allocation
+        result = []
+        for array, start in zip(arrays, offsets):
+            # Slicing the memmap preserves its owning base through ndarray views.
+            view = segment[offset+start:offset+start+array.nbytes].view(array.dtype).reshape(array.shape)
+            flat, source = view.reshape(-1), np.asarray(array).reshape(-1)
+            step = max(1, self.copy_block_bytes//array.dtype.itemsize)
+            for at in range(0, len(source), step): flat[at:at+step] = source[at:at+step]
+            view.flags.writeable = False
+            result.append(np.asarray(view))
+        segment.flush()
+        return result, segment
+
+    def retain(self, row):
+        if row in self._known or getattr(row, '_storage_owner', None) is not None:
+            return row
+        tick = time.perf_counter()
+        file_bytes = 0
+        segment = None
+        if row.nbytes and self.resident_bytes+row.nbytes > self.resident_limit:
+            arrays = [row.values, row.columns.bits if row.dense else row.columns]
+            copied = self._copy_arrays(arrays)
+            if copied is not None:
+                buffers, segment = copied
+                columns = (PackedIndexArray(buffers[1], row.size, row.columns.block_size)
+                           if row.dense else buffers[1])
+                row = CompactSparseRow(buffers[0], columns, row.size)
+                file_bytes = sum(a.nbytes for a in buffers)
+                self.spilled_rows += 1
+        resident = row.nbytes-file_bytes
+        row._storage_owner = self
+        row._spill_segment = segment
+        row._file_backed_bytes = file_bytes
+        self._known.add(row)
+        self.resident_bytes += resident
+        self.file_backed_bytes += file_bytes
+        self.peak_resident_bytes = max(self.peak_resident_bytes, self.resident_bytes)
+        self.peak_file_backed_bytes = max(self.peak_file_backed_bytes, self.file_backed_bytes)
+        weakref.finalize(row, self._release_row, resident, file_bytes)
+        self.write_seconds += time.perf_counter()-tick
+        if segment is not None: self._drop(segment)
+        return row
+
+    def _release_row(self, resident, file_bytes):
+        self.resident_bytes -= resident
+        self.file_backed_bytes -= file_bytes
+
+    def _drop(self, segment):
+        if self._pins.get(id(segment), 0): return
+        tick = time.perf_counter()
+        try:
+            segment._mmap.madvise(mmap.MADV_DONTNEED)
+            self.drop_calls += 1
+        except (AttributeError, OSError, ValueError):
+            self.drop_failures += 1
+        self.drop_seconds += time.perf_counter()-tick
+
+    def snapshot(self):
+        return dict(resident_payload_bytes=self.resident_bytes,
+                    file_backed_payload_bytes=self.file_backed_bytes,
+                    reserved_file_bytes=self.reserved_bytes,
+                    peak_resident_payload_bytes=self.peak_resident_bytes,
+                    peak_file_backed_payload_bytes=self.peak_file_backed_bytes,
+                    peak_reserved_file_bytes=self.peak_reserved_bytes,
+                    resident_target_bytes=self.resident_limit, disk_limit_bytes=self.max_bytes,
+                    segment_bytes=self.segment_bytes, segment_count=len(self._segments),
+                    spilled_rows=self.spilled_rows, disk_budget_refusals=self.budget_refusals,
+                    write_seconds=self.write_seconds, drop_seconds=self.drop_seconds,
+                    drop_calls=self.drop_calls, drop_failures=self.drop_failures)
+
+    @staticmethod
+    @contextlib.contextmanager
+    def pin_rows(rows):
+        pairs = {}
+        for row in rows:
+            owner, segment = getattr(row, '_storage_owner', None), getattr(row, '_spill_segment', None)
+            if owner is not None and segment is not None: pairs[id(segment)] = owner, segment
+        for key, (owner, segment) in pairs.items(): owner._pins[key] = owner._pins.get(key, 0)+1
+        try:
+            yield
+        finally:
+            for key, (owner, segment) in pairs.items():
+                owner._pins[key] -= 1
+                if not owner._pins[key]:
+                    del owner._pins[key]
+                    owner._drop(segment)
+
+
+class RowSparseArray(SparseArray):
+    """Two-dimensional row-block backend. Views borrow immutable row storage."""
+    def __init__(self, rows, ncols, *, block_bytes=64*1024**2, block_size=65536, transposed=False, storage=None):
+        if not isinstance(block_bytes, (int, np.integer)) or block_bytes < 1:
+            raise ValueError("block_bytes must be a positive integer")
+        self.storage = storage
+        self.rows = tuple(rows) if storage is None else tuple(storage.retain(row) for row in rows)
+        self.ncols = int(ncols)
+        self.block_bytes, self.block_size = int(block_bytes), int(block_size)
+        self.transposed = transposed
+    def _new(self, rows, ncols, **opts):
+        return type(self)(rows, ncols, storage=self.storage, **opts)
+
+    def _retain(self, row):
+        return row if self.storage is None else self.storage.retain(row)
+
+    @property
+    def shape(self):
+        shape = (len(self.rows), self.ncols)
+        return shape[::-1] if self.transposed else shape
+    @property
+    def dtype(self): return np.result_type(*[r.values.dtype for r in self.rows]) if self.rows else np.dtype(float)
+    @property
+    def non_zero_count(self): return sum(r.nnz for r in self.rows)
+    @property
+    def nbytes(self): return sum(r.nbytes for r in self.rows)
+    def __len__(self): return self.shape[0]
+    def __repr__(self):
+        return "{}(shape={}, nonzero={}, retained_bytes={})".format(type(self).__name__, self.shape, self.non_zero_count, self.nbytes)
+    def copy(self): return self._new(self.rows, self.ncols, block_bytes=self.block_bytes, block_size=self.block_size, transposed=self.transposed)
+    def transpose(self, axes=None):
+        if axes is None or tuple(axes) == (1, 0):
+            result = self.copy(); result.transposed = not result.transposed; return result
+        if tuple(axes) == (0, 1): return self.copy()
+        raise ValueError(axes)
+
+    @classmethod
+    def from_native(cls, matrix, **opts):
+        if isinstance(matrix, cls): return matrix
+        if isinstance(matrix, SparseArray): matrix = matrix.ascsr()
+        if not hasattr(matrix, "shape") or len(matrix.shape) != 2: raise ValueError("Matrix required")
+        step = opts.get("block_size", 65536)
+        return cls((CompactSparseRow.from_native(matrix[i:i+1], step)
+                    for i in range(matrix.shape[0])), matrix.shape[1], **opts)
+
+    def __getitem__(self, item):
+        if not isinstance(item, tuple): item = (item, slice(None))
+        if len(item) != 2: raise IndexError("Two-dimensional row matrix")
+        if self.transposed: return self.T[item[::-1]].T
+        rsel, csel = item
+        if isinstance(rsel, tuple): rsel = list(rsel)
+        rows = np.arange(len(self.rows))[rsel]
+        scalar_row = np.ndim(rows) == 0
+        rows = np.atleast_1d(rows)
+        selected = [self.rows[int(i)] for i in rows]
+        if isinstance(csel, slice) and csel == slice(None):
+            return self._new(selected, self.ncols, block_bytes=self.block_bytes, block_size=self.block_size)
+        if isinstance(csel, slice):
+            columns = np.arange(*csel.indices(self.ncols), dtype=np.int64)
+        else:
+            columns = np.atleast_1d(np.asarray(csel))
+            if columns.dtype.kind == "b":
+                if columns.shape != (self.ncols,): raise IndexError("Boolean column selector size")
+                columns = np.flatnonzero(columns)
+            columns = columns.astype(np.int64, copy=False)
+            columns = np.where(columns < 0, columns+self.ncols, columns)
+            if np.any((columns < 0) | (columns >= self.ncols)): raise IndexError(csel)
+        selected = [row.select(columns, self.block_size) for row in selected]
+        result = self._new(selected, len(columns), block_bytes=self.block_bytes, block_size=self.block_size)
+        if scalar_row and np.isscalar(csel): return result.asarray()[0, 0]
+        return result
+
+    def iter_row_blocks(self, max_rows=None):
+        if self.transposed: raise ValueError("Use the base rows of a transpose view")
+        start, size, rows = 0, 0, []
+        for i, row in enumerate(self.rows):
+            if rows and (size+row.nbytes > self.block_bytes or (max_rows is not None and len(rows) >= max_rows)):
+                with RowSpillStore.pin_rows(rows):
+                    yield start, self._stack(rows)
+                start, size, rows = i, 0, []
+            rows.append(row); size += row.nbytes
+        if rows:
+            with RowSpillStore.pin_rows(rows):
+                yield start, self._stack(rows)
+    @staticmethod
+    def _stack(rows):
+        if len(rows) == 1: return rows[0].native()
+        if all(r.dense for r in rows): return np.vstack([r.values for r in rows])
+        return sp.vstack([sp.csr_matrix(r.native()) for r in rows], format="csr")
+    def iter_nonzero_blocks(self, block_size=65536, value_filter=None):
+        for i, row in enumerate(self.rows):
+            with RowSpillStore.pin_rows([row]):
+                for values, columns in row.entries(block_size):
+                    if value_filter is not None:
+                        keep = value_filter(values); values, columns = values[keep], columns[keep]
+                    if len(values):
+                        rows = np.full(len(values), i, dtype=np.int64)
+                        yield values, (columns, rows) if self.transposed else (rows, columns)
+
+    def _export_check(self, size):
+        if size > self.block_bytes:
+            raise MemoryError("Whole row-matrix export needs {} bytes; block_bytes={}. Use row/block iteration or explicitly increase the export/workspace target.".format(size, self.block_bytes))
+    def ascsr(self):
+        self._export_check(self.non_zero_count*(self.dtype.itemsize+8)+(len(self.rows)+1)*8)
+        base = sp.vstack([sp.csr_matrix(r.native()) for r in self.rows], format="csr") if self.rows else sp.csr_matrix((0,self.ncols))
+        return base.T.tocsr() if self.transposed else base
+    def ascoo(self): return self.ascsr().tocoo()
+    def asarray(self):
+        self._export_check(int(np.prod(self.shape, dtype=object))*self.dtype.itemsize)
+        base = np.zeros((len(self.rows), self.ncols), dtype=self.dtype)
+        for i, row in enumerate(self.rows):
+            if row.dense: base[i] = row.values
+            else: base[i, row.columns] = row.values
+        return base.T if self.transposed else base
+    toarray = asarray
+    todense = asarray
+    @property
+    def block_data(self):
+        coo = self.ascoo()
+        return coo.data, (coo.row, coo.col)
+
+    def dot(self, other):
+        if self.shape[1] != other.shape[0]: raise ValueError("Matrix dimensions do not align")
+        if self.transposed:
+            right = other.T if isinstance(other, SparseArray) else other.T
+            result = type(self).from_native(right, block_bytes=self.block_bytes, block_size=self.block_size, storage=self.storage).dot(self.T)
+            return result.T
+        if isinstance(other, RowSparseArray) and other.transposed:
+            output = []
+            max_rows = max(1, self.block_bytes//max(1, other.shape[1]*self.dtype.itemsize))
+            for start, left in self.iter_row_blocks(max_rows):
+                # The output, unlike the correction basis, is the requested state-pair block.
+                result = np.zeros((left.shape[0], other.shape[1]), dtype=np.result_type(self.dtype, other.dtype))
+                for stop, right in other.T.iter_row_blocks():
+                    part = ScipySparseArray._matrix_dot(sp.csr_matrix(left), sp.csr_matrix(right.T))
+                    if sp.issparse(part): part = part.toarray()
+                    result[:,stop:stop+right.shape[0]] = part
+                output.extend(self._retain(CompactSparseRow.from_dense(row, None, self.block_size)) for row in result)
+            return self._new(output, other.shape[1], block_bytes=self.block_bytes, block_size=self.block_size)
+        output = []
+        max_rows = max(1, self.block_bytes//max(1, other.shape[1]*self.dtype.itemsize))
+        for start, left in self.iter_row_blocks(max_rows):
+            if isinstance(other, RowSparseArray):
+                result = None
+                for inner, right in other.iter_row_blocks():
+                    part = ScipySparseArray._matrix_dot(sp.csr_matrix(left[:,inner:inner+right.shape[0]]), sp.csr_matrix(right))
+                    result = part if result is None else result+part
+                if result is None: result = sp.csr_matrix((left.shape[0], other.shape[1]))
+            else:
+                right = other.ascsr() if isinstance(other, SparseArray) else other
+                result = ScipySparseArray._matrix_dot(sp.csr_matrix(left), sp.csr_matrix(right))
+            output.extend(self._retain(CompactSparseRow.from_native(result[i:i+1], self.block_size)) for i in range(left.shape[0]))
+        return self._new(output, other.shape[1], block_bytes=self.block_bytes, block_size=self.block_size)
+    def _right_dot(self, left):
+        return type(self).from_native(left, block_bytes=self.block_bytes, block_size=self.block_size, storage=self.storage).dot(self)
+
+    def true_multiply(self, other):
+        if np.isscalar(other):
+            if self.transposed: return self.T.true_multiply(other).T
+            rows = (self._retain(CompactSparseRow.from_native(row.native()*other, self.block_size)) for row in self.rows)
+            return self._new(rows, self.ncols, block_bytes=self.block_bytes, block_size=self.block_size)
+        raise NotImplementedError("Elementwise row-matrix multiplication requires a scalar")
+    def plus(self, other, inplace=False):
+        if np.isscalar(other) and other == 0: return self.copy()
+        if self.transposed: return self.T.plus(other.T, inplace).T
+        other = type(self).from_native(other, block_bytes=self.block_bytes, block_size=self.block_size)
+        if other.shape != self.shape: raise ValueError("Row matrix addition shape mismatch")
+        rows = (self._retain(CompactSparseRow.from_native(a.native()+b.native(), self.block_size))
+                for a,b in zip(self.rows, other.rows))
+        return self._new(rows, self.ncols, block_bytes=self.block_bytes, block_size=self.block_size)
+    def reshape(self, newshape):
+        if tuple(newshape) == self.shape: return self.copy()
+        return SparseArray.from_data(self.asarray().reshape(newshape))
+    def concatenate(self, *others, axis=0):
+        if axis != 0 or self.transposed: raise NotImplementedError("Only row concatenation is supported")
+        rows = list(self.rows)
+        for other in others:
+            other = type(self).from_native(other, block_bytes=self.block_bytes, block_size=self.block_size)
+            if other.ncols != self.ncols or other.transposed: raise ValueError("Incompatible row blocks")
+            rows.extend(other.rows)
+        return self._new(rows, self.ncols, block_bytes=self.block_bytes, block_size=self.block_size)
+    def to_state(self, serializer=None):
+        return dict(rows=[dict(values=r.values,columns=r.columns.bits if r.dense else r.columns,dense=r.dense) for r in self.rows],
+                    ncols=self.ncols,block_bytes=self.block_bytes,block_size=self.block_size,transposed=self.transposed)
+    @classmethod
+    def from_state(cls, state, serializer=None):
+        state = dict(state); rows = state.pop("rows"); ncols = state["ncols"]
+        return cls([CompactSparseRow(r["values"], PackedIndexArray(r["columns"],ncols,state["block_size"]) if r["dense"] else r["columns"], ncols) for r in rows], **state)
+    @classmethod
+    def initialize_empty(cls, shp, shape=None, **kw):
+        shape = shp if shape is None else shape
+        return cls([CompactSparseRow.from_dense(np.zeros(shape[1])) for _ in range(shape[0])], shape[1], **kw)
+    @classmethod
+    def from_diagonal_data(cls, diags, **kw):
+        return cls.from_native(sp.diags(diags, format="csr"), **kw)
+    def resize(self, newsize): raise NotImplementedError("Row matrix resizing is explicit")
+    def pad_right(self, newshape): raise NotImplementedError("Row matrix padding is explicit")
+    def broadcast_to(self, shape): raise NotImplementedError("Row matrix broadcasting is explicit")
+    def expand_and_broadcast_to(self, expansion, new_shape): raise NotImplementedError("Two-dimensional backend")
+    def expand_and_pad(self, expansion, padding): raise NotImplementedError("Two-dimensional backend")
+    def outer(self, other): raise NotImplementedError("Outer products require an explicit output plan")
+
 
 # import tensorflow
 class TensorFlowSparseArray(SparseArray):
@@ -2970,3 +3647,98 @@ def sparse_tensordot(a, b, axes=2):
         res = res.reshape(olda + oldb)
 
     return res
+
+def matrix_dot_into(a, b, out, *, alpha=1, beta=0,
+                    working_memory=64*1024**2, block_callback=None):
+    """Accumulate ``alpha * a @ b + beta * out`` into an existing array.
+
+    Supports dense matrices and CSR matrices, including ScipySparseArray.
+    Products are consumed in bounded output blocks. Sparse products use
+    individual dense columns, avoiding a full C-order copy of a transposed
+    multi-vector. Inputs must not overlap the output. A block_callback, if
+    supplied, receives (row_slice, column_slice, unscaled_product); its product
+    is borrowed and must not be retained. working_memory is a temporary-buffer
+    target, excluding input storage and backend-private workspaces.
+    """
+    if not isinstance(working_memory, (int, np.integer)) or working_memory < 1:
+        raise ValueError('working_memory must be a positive integer byte count')
+    if isinstance(a, ScipySparseArray):
+        if len(a.shape) != 2 or a.shape != a.data.shape:
+            raise ValueError('matrix_dot_into requires a two-dimensional matrix')
+        a = a.data
+    b = np.asarray(b)
+    out = np.asarray(out)
+    vector = b.ndim == 1
+    if vector:
+        b = b[:, np.newaxis]
+        target = out[:, np.newaxis] if out.ndim == 1 else out
+    else:
+        target = out
+    if (getattr(a, 'ndim', None) != 2 or b.ndim != 2 or target.ndim != 2
+            or a.shape[1] != b.shape[0]
+            or target.shape != (a.shape[0], b.shape[1])):
+        raise ValueError('Incompatible matrix_dot_into shapes')
+    sparse = sp.issparse(a)
+    if sparse and a.format != 'csr':
+        raise ValueError('matrix_dot_into requires CSR sparse input')
+    if not sparse:
+        a = np.asarray(a)
+    if not target.flags.writeable:
+        raise ValueError('matrix_dot_into output is read-only')
+    if (np.shares_memory(target, b)
+            or np.shares_memory(target, a.data if sparse else a)):
+        raise ValueError('matrix_dot_into inputs must not overlap the output')
+    dtype = np.result_type(a.dtype, b.dtype)
+    if not np.can_cast(np.result_type(dtype, alpha, beta), target.dtype, casting='same_kind'):
+        raise TypeError('matrix_dot_into output dtype cannot hold the result')
+    if beta == 0:
+        target.fill(0)
+    elif beta != 1:
+        np.multiply(target, beta, out=target)
+    if not target.size or (alpha == 0 and block_callback is None):
+        return out
+
+    def consume(rows, columns, values):
+        if block_callback is not None:
+            block_callback(rows, columns, values)
+        dest = target[rows, columns]
+        if alpha == 1:
+            np.add(dest, values, out=dest)
+        elif alpha == -1:
+            np.subtract(dest, values, out=dest)
+        elif alpha != 0:
+            np.add(dest, alpha*values, out=dest)
+
+    itemsize = max(np.dtype(dtype).itemsize, target.dtype.itemsize)
+    if sparse:
+        ptr = a.indptr
+        max_rows = max(1, working_memory//(4*ptr.dtype.itemsize + 4*itemsize))
+        max_nnz = max(1, working_memory//(a.data.dtype.itemsize + a.indices.dtype.itemsize))
+        start = 0
+        while start < a.shape[0]:
+            last = int(np.searchsorted(ptr, int(ptr[start])+max_nnz, side='right'))-1
+            stop = max(start+1, min(a.shape[0], start+max_rows, last))
+            lo, hi = int(ptr[start]), int(ptr[stop])
+            rows = slice(start, stop)
+            # Values and indices are borrowed when their native dtype permits;
+            # only the row pointer needs rebasing. No full COO coordinates.
+            part = sp.csr_matrix((a.data[lo:hi], a.indices[lo:hi], ptr[start:stop+1]-lo),
+                                 shape=(stop-start, a.shape[1]), copy=False)
+            for column in range(b.shape[1]):
+                value = part.dot(b[:, column])
+                consume(rows, slice(column, column+1), value[:, np.newaxis])
+                del value
+            start = stop
+    else:
+        rows_per_block = min(a.shape[0], max(1, working_memory//(4*itemsize)))
+        columns_per_block = min(b.shape[1], max(1,
+            working_memory//(4*itemsize*max(1, rows_per_block+a.shape[1]))))
+        work = np.empty(rows_per_block*columns_per_block, dtype=dtype)
+        for start in range(0, a.shape[0], rows_per_block):
+            stop = min(a.shape[0], start+rows_per_block)
+            for first in range(0, b.shape[1], columns_per_block):
+                last = min(b.shape[1], first+columns_per_block)
+                value = work[:(stop-start)*(last-first)].reshape(stop-start, last-first)
+                np.dot(a[start:stop], b[:, first:last], out=value)
+                consume(slice(start, stop), slice(first, last), value)
+    return out
