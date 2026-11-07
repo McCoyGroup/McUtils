@@ -159,9 +159,11 @@ class TextChecksTests(unittest.TestCase):
         self.assertFalse(self.doc.check_text("There are 3 modes.", ["r2"], small_int_max=0).ok)
 
     def test_check_text_year_range(self):
-        self.assertTrue(self.doc.check_text("Roughly 2000 wavenumbers.", ["r2"]).ok)
-        self.assertFalse(self.doc.check_text("Roughly 2000 wavenumbers.", ["r2"], year_range=None).ok)
-        self.assertFalse(self.doc.check_text("Roughly 2000 wavenumbers.", ["r2"], year_range=(1990, 1999)).ok)
+        self.assertTrue(self.doc.check_text("Roughly 2000 of them.", ["r2"]).ok)
+        self.assertFalse(self.doc.check_text("Roughly 2000 of them.", ["r2"], year_range=None).ok)
+        self.assertFalse(self.doc.check_text("Roughly 2000 of them.", ["r2"], year_range=(1990, 1999)).ok)
+        # with a unit it is a measurement and always checked
+        self.assertFalse(self.doc.check_text("Roughly 2000 wavenumbers.", ["r2"]).ok)
 
     def test_check_text_needs_readout_blocks(self):
         with self.assertRaises(ReportOperationError):

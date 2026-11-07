@@ -21,9 +21,26 @@ def main(argv=None):
     p.add_argument("--unlock", nargs="+", default=(), metavar="ID", help="unlock these blocks")
     p.add_argument("--call-log", metavar="FILE", help="append one JSON line per tool call (tool, arguments, ok, error code)")
     p.add_argument("--title", help="title of a new report")
+    p.add_argument("--context-level", default="standard", choices=["1", "2", "3", "compact", "standard", "full"],
+                   help="how much the model is told and which conveniences it gets: 1/compact for small models "
+                        "(short instructions with the sources listed, block order in every receipt), 2/standard "
+                        "(default), 3/full (adds the reasons behind the rules); the checks are the same at every level")
+    p.add_argument("--tools", nargs="+", default=None, metavar="NAME", help="offer these tools on top of the level's")
+    p.add_argument("--no-tools", nargs="+", default=None, metavar="NAME", help="leave these tools out")
+    p.add_argument("--derived", action="store_true",
+                   help="allow computed values in text ({mean(r3.frequency[2], r3.frequency[3])}); off by default "
+                        "(single placeholders like {r3.frequency[2]} are always filled in)")
+    p.add_argument("--apply-edits", action="store_true",
+                   help="offer the apply_edits tool (several edits in one atomic call); off by default, at every "
+                        "context level")
+    p.add_argument("--unit-style", choices=["unicode", "ascii", "latex"], default=None,
+                   help="how filled values write their unit: unicode (3803.3 cm⁻¹), ascii (3803.3 cm-1) or latex "
+                        "($3803.3\\,\\mathrm{cm^{-1}}$); stored in the report (default: the UnitsData label style)")
     a = p.parse_args(argv)
     serve_report(a.report, a.sources, out_dir=a.out_dir, policy=a.policy, rel_tol=a.rel_tol, small_int_max=a.small_int_max,
-                 year_range=None if a.check_years else (1900, 2100), title=a.title, lock=a.lock, unlock=a.unlock, call_log=a.call_log)
+                 year_range=None if a.check_years else (1900, 2100), title=a.title, lock=a.lock, unlock=a.unlock, call_log=a.call_log,
+                 allow_derived=a.derived, apply_edits=a.apply_edits, context_level=a.context_level, include_tools=a.tools,
+                 exclude_tools=a.no_tools, unit_style=a.unit_style)
 
 
 if __name__ == "__main__":

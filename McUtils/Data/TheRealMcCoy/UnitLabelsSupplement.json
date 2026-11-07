@@ -1,0 +1,338 @@
+{
+ "about": "Short labels for UnitsData unit names, in three styles. 'units' holds base units only: names such as KilocaloriesPerMole, InverseAngstromsSquared, Kilometers/Mole or GigaElectronVolts are composed from them and from 'prefixes' by UnitsDataHandler.unit_label, following the same grammar as the unit conversions. An {'alias': name} entry makes one unit name mean another. Symbols follow NIST SP 811 / the NIST Fundamental Physical Constants listing where they exist there (check: tools/check_unit_labels_vs_nist.py).",
+ "units": {
+  "Meters": {
+   "unicode": "m",
+   "ascii": "m",
+   "latex": "\\mathrm{m}"
+  },
+  "Kilograms": {
+   "unicode": "kg",
+   "ascii": "kg",
+   "latex": "\\mathrm{kg}"
+  },
+  "Grams": {
+   "unicode": "g",
+   "ascii": "g",
+   "latex": "\\mathrm{g}"
+  },
+  "Seconds": {
+   "unicode": "s",
+   "ascii": "s",
+   "latex": "\\mathrm{s}"
+  },
+  "Amperes": {
+   "unicode": "A",
+   "ascii": "A",
+   "latex": "\\mathrm{A}"
+  },
+  "Kelvins": {
+   "unicode": "K",
+   "ascii": "K",
+   "latex": "\\mathrm{K}"
+  },
+  "Moles": {
+   "unicode": "mol",
+   "ascii": "mol",
+   "latex": "\\mathrm{mol}"
+  },
+  "Candelas": {
+   "unicode": "cd",
+   "ascii": "cd",
+   "latex": "\\mathrm{cd}"
+  },
+  "Hertz": {
+   "unicode": "Hz",
+   "ascii": "Hz",
+   "latex": "\\mathrm{Hz}"
+  },
+  "Herz": {
+   "alias": "Hertz"
+  },
+  "Joules": {
+   "unicode": "J",
+   "ascii": "J",
+   "latex": "\\mathrm{J}"
+  },
+  "Newtons": {
+   "unicode": "N",
+   "ascii": "N",
+   "latex": "\\mathrm{N}"
+  },
+  "Pascal": {
+   "unicode": "Pa",
+   "ascii": "Pa",
+   "latex": "\\mathrm{Pa}"
+  },
+  "Watts": {
+   "unicode": "W",
+   "ascii": "W",
+   "latex": "\\mathrm{W}"
+  },
+  "Coulombs": {
+   "unicode": "C",
+   "ascii": "C",
+   "latex": "\\mathrm{C}"
+  },
+  "Volts": {
+   "unicode": "V",
+   "ascii": "V",
+   "latex": "\\mathrm{V}"
+  },
+  "Farads": {
+   "unicode": "F",
+   "ascii": "F",
+   "latex": "\\mathrm{F}"
+  },
+  "Ohms": {
+   "unicode": "Ω",
+   "ascii": "Ohm",
+   "latex": "\\Omega"
+  },
+  "Henry": {
+   "unicode": "H",
+   "ascii": "H",
+   "latex": "\\mathrm{H}"
+  },
+  "Teslas": {
+   "unicode": "T",
+   "ascii": "T",
+   "latex": "\\mathrm{T}"
+  },
+  "Wb": {
+   "unicode": "Wb",
+   "ascii": "Wb",
+   "latex": "\\mathrm{Wb}"
+  },
+  "S": {
+   "unicode": "S",
+   "ascii": "S",
+   "latex": "\\mathrm{S}"
+  },
+  "Ergs": {
+   "unicode": "erg",
+   "ascii": "erg",
+   "latex": "\\mathrm{erg}"
+  },
+  "Calories": {
+   "unicode": "cal",
+   "ascii": "cal",
+   "latex": "\\mathrm{cal}"
+  },
+  "ElectronVolts": {
+   "unicode": "eV",
+   "ascii": "eV",
+   "latex": "\\mathrm{eV}"
+  },
+  "StandardAtmosphere": {
+   "unicode": "atm",
+   "ascii": "atm",
+   "latex": "\\mathrm{atm}"
+  },
+  "Angstroms": {
+   "unicode": "Å",
+   "ascii": "Ang",
+   "latex": "\\mathrm{\\AA}"
+  },
+  "BohrRadius": {
+   "unicode": "a₀",
+   "ascii": "a0",
+   "latex": "a_{0}"
+  },
+  "Hartrees": {
+   "unicode": "Eₕ",
+   "ascii": "Eh",
+   "latex": "E_{\\mathrm{h}}"
+  },
+  "ElectronMass": {
+   "unicode": "mₑ",
+   "ascii": "me",
+   "latex": "m_{\\mathrm{e}}"
+  },
+  "ProtonMass": {
+   "unicode": "mₚ",
+   "ascii": "mp",
+   "latex": "m_{\\mathrm{p}}"
+  },
+  "NeutronMass": {
+   "unicode": "mₙ",
+   "ascii": "mn",
+   "latex": "m_{\\mathrm{n}}"
+  },
+  "ElementaryCharge": {
+   "unicode": "e",
+   "ascii": "e",
+   "latex": "e"
+  },
+  "AtomicMassUnits": {
+   "unicode": "amu",
+   "ascii": "amu",
+   "latex": "\\mathrm{amu}"
+  },
+  "UnifiedAtomicMassUnits": {
+   "unicode": "u",
+   "ascii": "u",
+   "latex": "\\mathrm{u}"
+  },
+  "Debyes": {
+   "unicode": "D",
+   "ascii": "D",
+   "latex": "\\mathrm{D}"
+  },
+  "Degrees": {
+   "unicode": "°",
+   "ascii": "deg",
+   "latex": "^{\\circ}"
+  },
+  "Radians": {
+   "unicode": "rad",
+   "ascii": "rad",
+   "latex": "\\mathrm{rad}"
+  },
+  "Percent": {
+   "unicode": "%",
+   "ascii": "%",
+   "latex": "\\%"
+  },
+  "AtomicUnitOfEnergy": {
+   "alias": "Hartrees"
+  },
+  "AtomicUnitOfLength": {
+   "alias": "BohrRadius"
+  },
+  "AtomicUnitOfMass": {
+   "alias": "ElectronMass"
+  },
+  "AtomicUnitOfCharge": {
+   "alias": "ElementaryCharge"
+  },
+  "AtomicUnitOfTime": {
+   "unicode": "ħ/Eₕ",
+   "ascii": "hbar/Eh",
+   "latex": "\\hbar/E_{\\mathrm{h}}"
+  },
+  "Wavenumbers": {
+   "alias": "InverseCentimeters"
+  },
+  "EVSeconds": {
+   "unicode": "eV s",
+   "ascii": "eV s",
+   "latex": "\\mathrm{eV\\,s}"
+  },
+  "MegaElectronVoltsFm": {
+   "unicode": "MeV fm",
+   "ascii": "MeV fm",
+   "latex": "\\mathrm{MeV\\,fm}"
+  },
+  "AtomicUnitOfElectricDipoleMoment": {
+   "unicode": "e a₀",
+   "ascii": "e a0",
+   "latex": "e\\,a_{0}"
+  },
+  "Mole": {
+   "alias": "Moles"
+  }
+ },
+ "prefixes": {
+  "Yotta": {
+   "unicode": "Y",
+   "ascii": "Y",
+   "latex": "Y"
+  },
+  "Zetta": {
+   "unicode": "Z",
+   "ascii": "Z",
+   "latex": "Z"
+  },
+  "Exa": {
+   "unicode": "E",
+   "ascii": "E",
+   "latex": "E"
+  },
+  "Peta": {
+   "unicode": "P",
+   "ascii": "P",
+   "latex": "P"
+  },
+  "Tera": {
+   "unicode": "T",
+   "ascii": "T",
+   "latex": "T"
+  },
+  "Giga": {
+   "unicode": "G",
+   "ascii": "G",
+   "latex": "G"
+  },
+  "Mega": {
+   "unicode": "M",
+   "ascii": "M",
+   "latex": "M"
+  },
+  "Kilo": {
+   "unicode": "k",
+   "ascii": "k",
+   "latex": "k"
+  },
+  "Hecto": {
+   "unicode": "h",
+   "ascii": "h",
+   "latex": "h"
+  },
+  "Deka": {
+   "unicode": "da",
+   "ascii": "da",
+   "latex": "da"
+  },
+  "Deci": {
+   "unicode": "d",
+   "ascii": "d",
+   "latex": "d"
+  },
+  "Centi": {
+   "unicode": "c",
+   "ascii": "c",
+   "latex": "c"
+  },
+  "Milli": {
+   "unicode": "m",
+   "ascii": "m",
+   "latex": "m"
+  },
+  "Micro": {
+   "unicode": "µ",
+   "ascii": "u",
+   "latex": "\\mu"
+  },
+  "Nano": {
+   "unicode": "n",
+   "ascii": "n",
+   "latex": "n"
+  },
+  "Pico": {
+   "unicode": "p",
+   "ascii": "p",
+   "latex": "p"
+  },
+  "Femto": {
+   "unicode": "f",
+   "ascii": "f",
+   "latex": "f"
+  },
+  "Atto": {
+   "unicode": "a",
+   "ascii": "a",
+   "latex": "a"
+  },
+  "Zepto": {
+   "unicode": "z",
+   "ascii": "z",
+   "latex": "z"
+  },
+  "Yocto": {
+   "unicode": "y",
+   "ascii": "y",
+   "latex": "y"
+  }
+ }
+}

@@ -34,11 +34,14 @@ class ToolSet:
     """
     :param hints: ``{error code: sentence}``; an error result with that code gets the sentence as ``hint`` (what to do
         next: retry, stop, call another tool). Useful for models, which follow a hint more reliably than a bare code.
+    :param error_fields: ``{error code: {field: value}}`` added to error results with that code (fields the error
+        already has are kept), e.g. ``{"internal": {"retry": "no"}}``
     """
 
-    def __init__(self, hints=None):
+    def __init__(self, hints=None, error_fields=None):
         self._tools = {}
         self.hints = dict(hints or {})
+        self.error_fields = {k: dict(v) for k, v in (error_fields or {}).items()}
 
     def add(self, name, func, schema, description=""):
         if name in self._tools:
@@ -56,6 +59,9 @@ class ToolSet:
         hint = self.hints.get(err.get("code"))
         if hint and "hint" not in err:
             err = dict(err, hint=hint)
+        extra = self.error_fields.get(err.get("code"))
+        if extra:
+            err = dict(err, **{k: v for k, v in extra.items() if k not in err})
         return ToolResult(False, error=err)
 
     def call(self, name, args=None):

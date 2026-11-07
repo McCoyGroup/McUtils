@@ -3,7 +3,7 @@ import unittest
 import numpy as np
 
 from McUtils.Readouts.Reports.Grounding import (extract_numbers, evidence_numbers, check_grounding, WritingPolicy,
-                                                NumberToken)
+                                                NumberToken, evidence_items, EvidenceItem, EvidenceSet, canonical_unit)
 from ReportFixtures import toy_catalog
 
 
@@ -186,6 +186,94 @@ class EvidenceNumbersTests(unittest.TestCase):
         self.assertEqual(evidence_numbers(["1.5 2.5 3.5"], cap=2).size, 2)
 
 
+class UnitsTests(unittest.TestCase):
+    def test_units_after_numbers(self):
+        cases = {"1622.3 cm-1": "cm-1", "1622.3 cm⁻¹": "cm-1", "1622.3 cm^-1": "cm-1", "−76.26 Eh": "hartree",
+                 "−76.26 Eₕ": "hartree", "18.01 amu": "amu", "104.5°": "degree", "0.96 Å": "angstrom",
+                 "67.46 km/mol": "km/mol", "3 eV": "ev", "3 atoms": None, "12.5%": "percent"}
+        for text, unit in cases.items():
+            with self.subTest(text=text):
+                self.assertEqual(extract_numbers(text)[0].unit, unit)
+
+    def test_leading_minus_is_kept(self):
+        self.assertEqual(values("−76.26 Eh"), [-76.26])
+
+    def test_canonical_unit_of_metadata_names(self):
+        for name, unit in (("Wavenumbers", "cm-1"), ("cm^-1", "cm-1"), ("Hartrees", "hartree"),
+                           ("AtomicMassUnits", "amu"), ("KilometersPerMole", "km/mol"), ("Angstroms", "angstrom"),
+                           ("Degrees", "degree"), (None, None), ("Furlongs", None)):
+            self.assertEqual(canonical_unit(name), unit, name)
+
+
+class EvidenceItemsTests(unittest.TestCase):
+    """The water-like evidence of the Granite trial: mode indices, frequencies and intensities with units."""
+
+    def setUp(self):
+        self.ev = EvidenceSet([EvidenceItem(i, None, "index", "Mode", "r3", i) for i in (1, 2, 3)]
+                              + [EvidenceItem(v, "cm-1", "frequency", "Frequency", "r3", i + 1)
+                                 for i, v in enumerate((1622.30303, 3803.29958, 3937.52464))]
+                              + [EvidenceItem(v, "km/mol", "intensity", "Intensity", "r3", i + 1)
+                                 for i, v in enumerate((67.4562607, 4.14282716, 13.47))]
+                              + [EvidenceItem(0.4, None, None, "fraction", "r4")])
+
+    def check(self, text, **kw):
+        return check_grounding(text, self.ev, **kw)
+
+    def test_percent_never_matches_an_index_or_an_intensity(self):
+        r = self.check("a 3% and a 13% reduction")
+        self.assertFalse(r.ok)
+        self.assertEqual([t.text for t in r.unmatched], ["3%", "13%"])
+        self.assertIn("Mode", r.reasons["3%"])
+        self.assertIn("not a percentage", r.errors()[0])
+
+    def test_percent_of_a_plain_fraction(self):
+        self.assertTrue(self.check("40% of it").ok)
+
+    def test_a_unit_must_match(self):
+        self.assertTrue(self.check("at 1622.3 cm-1").ok)
+        r = self.check("at 1622.3 eV")
+        self.assertFalse(r.ok)
+        self.assertIn("ev", r.reasons["1622.3"])
+        self.assertFalse(self.check("a 3 cm-1 gap").ok, "3 equals a mode index, not a frequency")
+        self.assertTrue(self.check("an intensity of 67.46 km/mol").ok)
+        self.assertFalse(self.check("an intensity of 67.46 cm-1").ok)
+
+    def test_numbers_without_units_match_as_before(self):
+        self.assertTrue(self.check("mode 3 at 3937.5").ok)
+        self.assertTrue(self.check("about 13").ok)
+
+    def test_provenance(self):
+        r = self.check("The bend is at 1622.3 cm-1 with intensity 67.46 km/mol.")
+        self.assertEqual([p["number"] for p in r.provenance()], ["1622.3", "67.46"])
+        self.assertIn("r3 Frequency row 1", r.provenance()[0]["matched"])
+        self.assertIn("cm-1", r.provenance()[0]["matched"])
+
+    def test_skip_spans(self):
+        text = "average 3870.4 cm-1"
+        s = text.index("3870.4")
+        self.assertFalse(self.check(text).ok)
+        r = self.check(text, skip=[(s, s + 6)])
+        self.assertTrue(r.ok)
+        self.assertEqual(r.checked, 0)
+
+    def test_data_values_shadow_text_numbers(self):
+        ev = EvidenceSet(self.ev + [EvidenceItem(3, None, None, "text", "r3", origin="text")])
+        self.assertFalse(check_grounding("3%", ev).ok, "the text '3' is the mode index of the data")
+        ev = EvidenceSet([EvidenceItem(12.5, None, None, "text", "r1", origin="text")])
+        self.assertTrue(check_grounding("12.5 cm-1", ev).ok, "a text-only source still grounds")
+
+    def test_from_a_readout(self):
+        cat = toy_catalog()
+        ro = cat.get("water").readout(include=["frequencies"])
+        ev = evidence_items([("r2", "Frequency 1648.2")], [("r2", ro)])
+        freq = [e for e in ev if e.label == "frequency" or e.unit == "cm-1"]
+        self.assertTrue(freq and all(e.unit == "cm-1" for e in freq))
+        self.assertTrue(any(e.origin == "text" for e in ev))
+        r = check_grounding("1648.23 cm-1", ev)
+        self.assertTrue(r.ok)
+        self.assertEqual(r.matches[0][1].block, "r2")
+
+
 class WritingPolicyTests(unittest.TestCase):
     def test_values_and_coerce(self):
         self.assertEqual({p.value for p in WritingPolicy}, {"grounded", "structure_only", "unchecked"})
@@ -193,6 +281,36 @@ class WritingPolicyTests(unittest.TestCase):
         self.assertIs(WritingPolicy.coerce(WritingPolicy.UNCHECKED), WritingPolicy.UNCHECKED)
         with self.assertRaises(ValueError):
             WritingPolicy.coerce("bogus")
+
+
+class TextEvidenceAndPlaceholderTests(unittest.TestCase):
+    """String columns are evidence items too (for fills), and matches say which placeholder writes the value."""
+
+    def setUp(self):
+        from McUtils.Readouts.Reports import ReportDocument
+        self.cat = toy_catalog()
+        self.doc = ReportDocument("G", self.cat)
+        self.doc.add_readout("water", include=["frequencies"])
+        self.items = self.doc.evidence(["r1"])
+
+    def test_labels_are_text_items_that_never_match_numbers(self):
+        texts = [e for e in self.items if e.is_text]
+        self.assertEqual([e.text for e in texts], ["bend", "sym stretch", "asym stretch"])
+        self.assertEqual(texts[1].row, 2)
+        self.assertIn("'sym stretch'", texts[1].describe())
+        res = check_grounding("The bend is at 1648.23 cm-1.", self.items)
+        self.assertTrue(res.ok)
+        self.assertFalse(any(e.is_text for _, e in res.matches))
+
+    def test_numeric_items_keep_the_units_name(self):
+        freq = [e for e in self.items if e.origin == "data" and not e.is_text]
+        self.assertEqual({e.unit_name for e in freq}, {"cm^-1"})
+        self.assertEqual({e.unit for e in freq}, {"cm-1"})
+
+    def test_provenance_gives_the_placeholder(self):
+        res = check_grounding("At 3832.71 cm-1.", self.items)
+        self.assertEqual(res.provenance(self.items)[0]["use"], "{r1.frequency[2]}")
+        self.assertNotIn("use", res.provenance()[0])
 
 
 if __name__ == "__main__":

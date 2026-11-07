@@ -65,7 +65,7 @@ class ReadingTests(unittest.TestCase):
         _, _, tools = make()
         self.assertEqual(tools.names(), ["list_sources", "describe_source", "peek", "outline", "compile", "checkpoint", "diff",
                                          "apply_template", "add_heading", "add_readout", "add_text", "set_caption",
-                                         "edit_text", "move", "move_section", "remove"])
+                                         "edit_text", "move", "move_section", "remove", "move_source"])
         self.assertIn("render", make(renderer=True, out_dir="/tmp/x")[2].names())
         with self.assertRaises(ValueError):
             report_toolset(ReportDocument("x"), toy_catalog(), renderer=ReportRenderer(toy_catalog()))
@@ -178,7 +178,8 @@ class CompileAndDiffTests(unittest.TestCase):
         self.assertEqual(c["text_status"], {"template": 2})
         self.assertEqual(c["baselines"], ["start", "template"])
         self.assertNotIn("changes_since_last_compile", c)
-        self.assertEqual(c["grounding"], {"policy": "grounded", "rel_tol": 1e-3, "small_int_max": 10, "year_range": [1900, 2100]})
+        self.assertEqual(c["grounding"], {"policy": "grounded", "rel_tol": 1e-3, "small_int_max": 10, "year_range": [1900, 2100],
+                                       "derived": False, "apply_edits": False, "unit_style": "unicode"})
         ok(self.tools.call("add_text", {"text": "Value 1648.23.", "cites": ["r2"]}))
         c = ok(self.tools.call("compile"))
         self.assertEqual(c["text_status"], {"template": 2, "checked": 1})
@@ -303,16 +304,19 @@ class ToleranceTests(unittest.TestCase):
         # evidence has 1648.23 / 3832.71 / 3943.88: "2000" is not in the data but looks like a year
         doc, _, tools = make()
         ok(tools.call("apply_template", {"handle": "water"}))
-        ok(tools.call("add_text", {"text": "Roughly 2000 wavenumbers.", "cites": ["r2"]}))
+        ok(tools.call("add_text", {"text": "Measured in 2000.", "cites": ["r2"]}))
+        # with a unit it is a measurement, not a year, and is checked
+        self.assertEqual(tools.call("add_text", {"text": "Roughly 2000 wavenumbers.", "cites": ["r2"]}).error["code"],
+                         "ungrounded")
         self.assertEqual(ok(tools.call("compile"))["grounding"]["year_range"], [1900, 2100])
         doc, _, tools = make(config={"year_range": None})
         ok(tools.call("apply_template", {"handle": "water"}))
-        self.assertEqual(tools.call("add_text", {"text": "Roughly 2000 wavenumbers.", "cites": ["r2"]}).error["code"], "ungrounded")
+        self.assertEqual(tools.call("add_text", {"text": "Measured in 2000.", "cites": ["r2"]}).error["code"], "ungrounded")
         self.assertIsNone(ok(tools.call("compile"))["grounding"]["year_range"])
         doc, _, tools = make(config={"year_range": (1990, 2010)})
         ok(tools.call("apply_template", {"handle": "water"}))
-        self.assertEqual(tools.call("add_text", {"text": "About 1950 wavenumbers.", "cites": ["r2"]}).error["code"], "ungrounded")
-        ok(tools.call("add_text", {"text": "About 2000 wavenumbers.", "cites": ["r2"]}))
+        self.assertEqual(tools.call("add_text", {"text": "About 1950.", "cites": ["r2"]}).error["code"], "ungrounded")
+        ok(tools.call("add_text", {"text": "About 2000.", "cites": ["r2"]}))
 
     def test_bad_settings_are_refused(self):
         for cfg in ({"rel_tol": 0}, {"rel_tol": 1.5}, {"rel_tol": "x"}, {"small_int_max": -1}, {"small_int_max": 2.5},
@@ -416,6 +420,20 @@ class WritingTests(unittest.TestCase):
         v = ok(self.tools.call("add_text", {"text": "The bend is at 1648.23 and there are 3 modes.",
                                             "cites": [self.freq]}))
         self.assertEqual(self.doc.get(v["block_id"]).status, "checked")
+        self.assertEqual(v["numbers"][0]["number"], "1648.23")
+        self.assertIn(self.freq, v["numbers"][0]["matched"])
+
+    def test_a_percentage_cannot_match_a_mode_count_or_a_frequency(self):
+        # the Granite failure: "3%" matched a mode index; now the reason names what it equals
+        r = self.tools.call("add_text", {"text": "The shift is 3% and 1648.23%.", "cites": [self.freq]})
+        self.assertEqual(r.error["code"], "ungrounded")
+        self.assertIn("1648.23%", r.error["unmatched"])
+        self.assertIn("not a percentage", r.error["detail"])
+
+    def test_a_unit_must_match_the_data(self):
+        ok(self.tools.call("add_text", {"text": "The bend is at 1648.23 cm-1.", "cites": [self.freq]}))
+        r = self.tools.call("add_text", {"text": "The bend is at 1648.23 eV.", "cites": [self.freq]})
+        self.assertEqual(r.error["code"], "ungrounded")
 
     def test_an_ungrounded_number_is_rejected_and_nothing_is_written(self):
         n = len(self.doc.blocks)
@@ -663,7 +681,7 @@ class SubprocessServerTests(unittest.TestCase):
             self.assertFalse(by_id[5]["result"]["isError"], by_id[5])
             comp = json.loads(by_id[6]["result"]["content"][0]["text"])
             self.assertEqual(comp["grounding"], {"policy": "grounded", "rel_tol": 1e-5, "small_int_max": 3,
-                                                 "year_range": None})
+                                                 "year_range": None, "derived": False, "apply_edits": False, "unit_style": "unicode"})
             self.assertEqual(comp["revision"], 2)
             self.assertNotIn("outline", json.loads(by_id[3]["result"]["content"][0]["text"]))
             text = open(md).read()

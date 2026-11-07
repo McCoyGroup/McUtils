@@ -39,6 +39,9 @@ recursive-include McUtils/ExternalPrograms/ *.py
 # Data tempaltes
 recursive-include McUtils/Data/ *.json
 
+# Readout guidelines
+recursive-include McUtils/Readouts/resources *.md
+
 # Examples
 # graft examples
 
