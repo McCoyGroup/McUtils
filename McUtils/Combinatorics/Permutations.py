@@ -806,6 +806,332 @@ class UniquePermutations:
             multinomial *= int(factor)
         return multinomial
 
+    @staticmethod
+    def prepare_constraints(filters, dim):
+        """Normalize intersected multiset/coordinate/weighted-sum predicates.
+
+        This is numeric metadata, independent of molecular units and runners.
+        A prepared result can be reused by class tests, blocked explicit tests,
+        and the native index-range traversal.
+        """
+        if isinstance(filters, dict) and filters.get('_prepared_constraints'):
+            if len(filters['minimum']) != dim:
+                raise ValueError('constraint dimension mismatch')
+            return filters
+        if filters is None:
+            filters = ()
+        elif isinstance(filters, dict):
+            filters = (filters,)
+        minimum = np.zeros(dim, dtype=np.int64)
+        maximum = np.full(dim, np.iinfo(np.int64).max, dtype=np.int64)
+        partitions, parity, clauses = None, -1, []
+
+        def bound(value, lower):
+            raw = np.asarray(value)
+            if raw.ndim == 0:
+                raw = np.full(dim, raw)
+            if raw.shape != (dim,) or raw.dtype.kind not in 'biuf' or np.any(np.isnan(raw)):
+                raise ValueError('occupation bounds must be numeric scalars or mode vectors')
+            result = np.empty(dim, dtype=np.int64)
+            for i, v in enumerate(raw):
+                if v < 0 or (not lower and np.isposinf(v)):
+                    result[i] = 0 if lower else np.iinfo(np.int64).max
+                elif np.isposinf(v):
+                    result[i] = np.iinfo(np.int64).max
+                else:
+                    n = math.ceil(v) if lower else math.floor(v)
+                    if n > np.iinfo(np.int64).max:
+                        raise OverflowError('occupation bound exceeds signed64 range')
+                    result[i] = n
+            return result
+
+        for item in filters:
+            if item.get('_prepared_constraints'):
+                minimum = np.maximum(minimum, item['minimum'])
+                maximum = np.minimum(maximum, item['maximum'])
+                shapes, odd = item['partitions'], item['parity']
+                clauses.extend(zip(item['weights'], item['windows']))
+            else:
+                unknown = set(item)-{'minimum','maximum','partitions','parity','weights','windows'}
+                if unknown:
+                    raise ValueError('unknown permutation constraints: {}'.format(sorted(unknown)))
+                if item.get('minimum') is not None:
+                    minimum = np.maximum(minimum, bound(item['minimum'], True))
+                if item.get('maximum') is not None:
+                    maximum = np.minimum(maximum, bound(item['maximum'], False))
+                shapes = item.get('partitions')
+                if shapes is not None:
+                    if len(shapes) and all(np.ndim(x) == 0 for x in shapes):
+                        shapes = (shapes,)
+                    canonical = set()
+                    for shape in shapes:
+                        values = np.asarray(shape)
+                        if values.ndim != 1 or (len(values) and (values.dtype.kind not in 'iu' or np.any(values < 0))):
+                            raise ValueError('partitions must contain nonnegative integer occupations')
+                        shape = tuple(sorted((int(v) for v in values if v), reverse=True))
+                        if len(shape) <= dim:
+                            canonical.add(shape)
+                    shapes = tuple(sorted(canonical))
+                odd = item.get('parity', -1)
+                if odd is None:
+                    odd = -1
+                if isinstance(odd, str):
+                    if odd.lower() not in {'even','odd'}:
+                        raise ValueError("parity must be0/1 or 'even'/'odd'")
+                    odd = int(odd.lower() == 'odd')
+                if odd not in {-1,0,1}:
+                    raise ValueError("parity must be0/1 or 'even'/'odd'")
+                weights, windows = item.get('weights'), item.get('windows')
+                if (weights is None) != (windows is None):
+                    raise ValueError('weighted windows require both weights and windows')
+                if weights is not None:
+                    weights = np.asarray(weights, dtype=float)
+                    if weights.shape != (dim,) or not np.all(np.isfinite(weights)):
+                        raise ValueError('weights must be a finite mode vector')
+                    windows = np.asarray(windows, dtype=float)
+                    if windows.size == 0:
+                        windows = np.empty((0,2), dtype=float)
+                    elif windows.shape == (2,):
+                        windows = windows.reshape(1,2)
+                    if windows.ndim != 2 or windows.shape[1] != 2 or np.any(np.isnan(windows)) or np.any(windows[:,0] > windows[:,1]):
+                        raise ValueError('windows must contain inclusive [lower,upper] pairs')
+                    merged = []
+                    for low, high in sorted(windows.tolist()):
+                        if merged and low <= merged[-1][1]:
+                            merged[-1][1] = max(merged[-1][1], high)
+                        else:
+                            merged.append([low, high])
+                    clauses.append((weights, np.asarray(merged,dtype=float).reshape(-1,2)))
+            if shapes is not None:
+                partitions = tuple(sorted(set(shapes) if partitions is None else set(partitions).intersection(shapes)))
+            if odd != -1:
+                if parity != -1 and parity != odd:
+                    partitions = ()
+                parity = odd
+        weights = np.asarray([w for w,v in clauses],dtype=float).reshape(-1,dim)
+        windows = tuple(np.asarray(v,dtype=float).reshape(-1,2) for w,v in clauses)
+        signature = (tuple(map(int,minimum)),tuple(map(int,maximum)),partitions,parity,
+                     tuple((w.tobytes(),v.tobytes()) for w,v in zip(weights,windows)))
+        return dict(_prepared_constraints=True,minimum=minimum,maximum=maximum,
+                    partitions=partitions,parity=parity,weights=weights,windows=windows,signature=signature)
+
+    @staticmethod
+    def test_constraints(permutations, constraints):
+        """Pointwise reference predicate; sums use physical coordinate order."""
+        values = np.asarray(permutations)
+        if values.ndim != 2:
+            raise ValueError('permutations must be a matrix')
+        data = UniquePermutations.prepare_constraints(constraints, values.shape[1])
+        keep = np.all((values >= data['minimum']) & (values <= data['maximum']),axis=1)
+        if data['parity'] >= 0:
+            keep &= np.sum(values,axis=1)%2 == data['parity']
+        if data['partitions'] is not None:
+            canonical = np.sort(values,axis=1)[:,::-1]
+            shapes = np.zeros(len(values),dtype=bool)
+            for shape in data['partitions']:
+                padded = np.zeros(values.shape[1],dtype=int);padded[:len(shape)] = shape
+                shapes |= np.all(canonical == padded,axis=1)
+            keep &= shapes
+        for weights, windows in zip(data['weights'],data['windows']):
+            energy = np.zeros(len(values),dtype=float)
+            for axis, weight in enumerate(weights):
+                energy += values[:,axis]*weight
+            mask = np.zeros(len(values),dtype=bool)
+            for low,high in windows:
+                mask |= (energy >= low) & (energy <= high)
+            keep &= mask
+        return keep
+
+    @staticmethod
+    def class_constraints_possible(partition, constraints):
+        """Reject impossible classes without asserting full filter acceptance."""
+        partition = np.asarray(partition)
+        data = UniquePermutations.prepare_constraints(constraints,len(partition))
+        if np.any(data['minimum'] > data['maximum']):
+            return False
+        if data['parity'] >= 0 and int(np.sum(partition))%2 != data['parity']:
+            return False
+        shape = tuple(sorted((int(v) for v in partition if v),reverse=True))
+        if data['partitions'] is not None and shape not in data['partitions']:
+            return False
+        # Exact feasibility for upper-only or lower-only bounds; together these
+        # remain safe necessary conditions and never create missing targets.
+        ordered = np.sort(partition)
+        return bool(np.all(ordered <= np.sort(data['maximum']))
+                    and np.all(ordered >= np.sort(data['minimum'])))
+
+
+    @staticmethod
+    @jit(nopython=True, cache=True)
+    def _fill_constraint_ranges(output, values, counts, minimum, maximum,
+                                upper_capacity, lower_capacity, suffix_lower,
+                                suffix_upper, weights, weight_sums, windows,
+                                window_offsets, margins, choices, starts,
+                                totals, next_rank, occupation, energies, depth,
+                                statistics):
+        """Resumable DFS; accepting a subtree emits its exact native interval."""
+        dim = len(occupation)
+        used = 0
+        while depth[0] >= 0:
+            d = depth[0]
+            remaining = dim-d
+            if choices[d] < 0:
+                statistics[0] += 1
+                possible, all_caps = True, True
+                above = 0
+                for j in range(len(values)):
+                    above += counts[j]
+                    if above > upper_capacity[d,j]:
+                        possible = False
+                    if counts[j] and (values[j] < suffix_lower[d] or values[j] > suffix_upper[d]):
+                        all_caps = False
+                below = 0
+                for j in range(len(values)-1,-1,-1):
+                    below += counts[j]
+                    if below > lower_capacity[d,j]:
+                        possible = False
+                all_energy = True
+                for k in range(len(weights)):
+                    low_energy, high_energy = energies[k,d], energies[k,d]
+                    cursor = 0
+                    for j in range(len(values)):
+                        n = counts[j]
+                        if n:
+                            low_energy += values[j]*(weight_sums[k,d,cursor+n]-weight_sums[k,d,cursor])
+                            high_energy += values[j]*(weight_sums[k,d,remaining-cursor]-weight_sums[k,d,remaining-cursor-n])
+                            cursor += n
+                    if remaining:
+                        low_energy -= margins[k]
+                        high_energy += margins[k]
+                    intersects, contained = False, False
+                    for w in range(window_offsets[k],window_offsets[k+1]):
+                        low, high = windows[w,0], windows[w,1]
+                        if high_energy >= low and low_energy <= high:
+                            intersects = True
+                        if low_energy >= low and high_energy <= high:
+                            contained = True
+                    if not intersects:
+                        possible = False
+                    if not contained:
+                        all_energy = False
+                choices[d] = 0
+                if not remaining:
+                    statistics[3] += 1
+                if not possible or (all_caps and all_energy):
+                    if possible:
+                        low, high = starts[d], starts[d]+totals[d]
+                        if used and output[used-1,1] == low:
+                            output[used-1,1] = high
+                        else:
+                            output[used,0], output[used,1] = low, high
+                            used += 1
+                        statistics[1] += 1
+                    else:
+                        statistics[2] += 1
+                    if d == 0:
+                        depth[0] = -1
+                    else:
+                        depth[0] = d-1
+                        counts[choices[d-1]-1] += 1
+                    if used == len(output):
+                        return used
+                    continue
+            d = depth[0]
+            j = choices[d]
+            while j < len(values) and counts[j] == 0:
+                j += 1
+            if j == len(values):
+                if d == 0:
+                    depth[0] = -1
+                else:
+                    depth[0] = d-1
+                    counts[choices[d-1]-1] += 1
+                continue
+            remaining = dim-d
+            # Same subtree count as total*count/remaining, with no overflowing
+            # intermediate product when the native total fits signed64.
+            size = (totals[d]//remaining)*counts[j]+((totals[d]%remaining)*counts[j])//remaining
+            first = next_rank[d]
+            next_rank[d] += size
+            choices[d] = j+1
+            value = values[j]
+            if value < minimum[d] or value > maximum[d]:
+                statistics[2] += 1
+                continue
+            occupation[d] = value
+            counts[j] -= 1
+            for k in range(len(weights)):
+                energies[k,d+1] = energies[k,d]+value*weights[k,d]
+            depth[0] = d+1
+            choices[d+1] = -1
+            starts[d+1] = first
+            next_rank[d+1] = first
+            totals[d+1] = size
+        return used
+
+    def iter_index_ranges(self, constraints=None, block_size=65536, *, statistics=None):
+        """Yield native relative-ID intervals satisfying structured constraints.
+
+        Whole subtrees are accepted/rejected from occupation and weighted-sum
+        bounds. Uncertain branches descend in native coordinate order; leaves
+        use the same sequential weighted sums as test_constraints().
+        """
+        if block_size < 1:
+            raise ValueError('block_size must be positive')
+        data = self.prepare_constraints(constraints,self.dim)
+        if not self.class_constraints_possible(self.part,data):
+            return
+        total = int(self.num_permutations)
+        if total > np.iinfo(np.int64).max:
+            raise OverflowError('permutation intervals exceed signed64 native IDs')
+        values = self.vals.astype(np.int64)
+        counts = self.counts.astype(np.int64).copy()
+        minimum, maximum = data['minimum'], data['maximum']
+        upper_capacity = np.zeros((self.dim+1,len(values)),dtype=np.int64)
+        lower_capacity = np.zeros_like(upper_capacity)
+        suffix_lower = np.zeros(self.dim+1,dtype=np.int64)
+        suffix_upper = np.full(self.dim+1,np.iinfo(np.int64).max,dtype=np.int64)
+        for d in range(self.dim-1,-1,-1):
+            upper_capacity[d] = upper_capacity[d+1]+(maximum[d] >= values)
+            lower_capacity[d] = lower_capacity[d+1]+(minimum[d] <= values)
+            suffix_lower[d] = max(suffix_lower[d+1],minimum[d])
+            suffix_upper[d] = min(suffix_upper[d+1],maximum[d])
+        weights = data['weights']
+        weight_sums = np.zeros((len(weights),self.dim+1,self.dim+1),dtype=float)
+        for k,w in enumerate(weights):
+            for d in range(self.dim):
+                weight_sums[k,d,1:self.dim-d+1] = np.cumsum(np.sort(w[d:]))
+        offsets = np.concatenate(([0],np.cumsum([len(w) for w in data['windows']]))).astype(np.int64)
+        windows = np.concatenate(data['windows']) if len(weights) else np.empty((0,2),dtype=float)
+        # Conservative arithmetic enclosure for prefix sums, sorted suffix
+        # sums/differences, products and the reference sequential leaf sum.
+        eps = np.finfo(float).eps
+        gamma = ((4*self.dim+8)*eps)/(1-(4*self.dim+8)*eps)
+        magnitude = np.max(np.abs(weights),axis=1)*int(np.sum(self.part))*(self.dim+1) if len(weights) else np.empty(0)
+        margins = np.nextafter(gamma*magnitude,np.inf)
+        if not np.all(np.isfinite(margins)):
+            raise OverflowError('weighted-sum enclosure exceeds floating-point range')
+        choices = np.zeros(self.dim+1,dtype=np.int64);choices[0] = -1
+        starts = np.zeros(self.dim+1,dtype=np.int64)
+        totals = np.zeros(self.dim+1,dtype=np.int64);totals[0] = total
+        next_rank = np.zeros(self.dim+1,dtype=np.int64)
+        occupation = np.zeros(self.dim,dtype=np.int64)
+        energies = np.zeros((len(weights),self.dim+1),dtype=float)
+        depth = np.zeros(1,dtype=np.int64)
+        counters = np.zeros(4,dtype=np.int64)
+        while depth[0] >= 0:
+            output = np.empty((block_size,2),dtype=np.int64)
+            used = self._fill_constraint_ranges(output,values,counts,minimum,maximum,
+                upper_capacity,lower_capacity,suffix_lower,suffix_upper,weights,
+                weight_sums,windows,offsets,margins,choices,starts,totals,next_rank,
+                occupation,energies,depth,counters)
+            if used:
+                yield output[:used]
+        if statistics is not None:
+            for key,n in zip(('visited_nodes','accepted_subtrees','rejected_subtrees','leaf_checks'),counters):
+                statistics[key] = statistics.get(key,0)+int(n)
+
+
     def iter_permutations(self, block_size=65536):
         """Yield bounded blocks using the native compiled permutation fill."""
         if block_size < 1:
@@ -2089,6 +2415,69 @@ class IntegerPartitioner2D:
 
         self.partition_data[key] = np.concatenate([elems], axis=0)
         return self.partition_data[key]
+
+    @classmethod
+    def iter_partitions(cls, boxes, balls, *, allowed=None):
+        """Yield multiplicity tables without caching or collecting their tree.
+
+        Rows sum to ``boxes`` and columns to ``balls``. ``allowed`` can forbid
+        individual cells. Small margins are assigned first; the final row and
+        column are determined by the remaining capacities.
+        """
+        boxes = np.asarray(boxes)
+        balls = np.asarray(balls)
+        if (boxes.ndim != 1 or balls.ndim != 1
+                or boxes.dtype.kind not in 'iu' or balls.dtype.kind not in 'iu'
+                or np.any(boxes < 0) or np.any(balls < 0)):
+            raise ValueError('table margins must be nonnegative integer vectors')
+        if sum(map(int, boxes)) != sum(map(int, balls)):
+            raise ValueError('row and column margins must have the same sum')
+        if allowed is None:
+            allowed = np.ones((len(boxes), len(balls)), dtype=bool)
+        else:
+            allowed = np.asarray(allowed, dtype=bool)
+            if allowed.shape != (len(boxes), len(balls)):
+                raise ValueError('allowed cells must have shape (rows, columns)')
+        if not len(boxes) or not len(balls):
+            if not sum(map(int, boxes)):
+                yield np.zeros((len(boxes), len(balls)), dtype=np.int64)
+            return
+        row_order = np.argsort(boxes, kind='stable')
+        column_order = np.argsort(balls, kind='stable')
+        rows = boxes[row_order].astype(np.int64)
+        remaining = balls[column_order].astype(np.int64)
+        valid = allowed[row_order][:, column_order]
+        table = np.zeros(valid.shape, dtype=np.int64)
+        undo_rows, undo_columns = np.argsort(row_order), np.argsort(column_order)
+
+        def assign_row(i):
+            if i == len(rows)-1:
+                if int(remaining.sum()) == int(rows[i]) and np.all(valid[i] | (remaining == 0)):
+                    table[i] = remaining
+                    yield table[undo_rows][:, undo_columns].copy()
+                return
+
+            def assign_cell(j, left):
+                if j == len(remaining)-1:
+                    if left <= remaining[j] and (valid[i, j] or left == 0):
+                        table[i, j] = left
+                        remaining[j] -= left
+                        yield from assign_row(i+1)
+                        remaining[j] += left
+                    return
+                later = int(remaining[j+1:][valid[i, j+1:]].sum())
+                low = max(0, left-later)
+                high = min(left, int(remaining[j])) if valid[i, j] else 0
+                for value in range(low, high+1):
+                    table[i, j] = value
+                    remaining[j] -= value
+                    yield from assign_cell(j+1, left-value)
+                    remaining[j] += value
+
+            yield from assign_cell(0, int(rows[i]))
+
+        yield from assign_row(0)
+
 
     @classmethod
     def get_partitions(cls, boxes, balls):
@@ -3853,6 +4242,106 @@ class SymmetricGroupGenerator:
                 used[selected] = False
 
         yield from descend(0, 0)
+
+    def iter_index_classes(self, indices):
+        """Decompose canonical native IDs into partition classes and support views."""
+        indices = np.asanyarray(indices)
+        if indices.ndim != 1 or indices.dtype.kind not in 'iu':
+            raise ValueError('class decomposition requires canonical integer IDs')
+        if not len(indices):
+            return
+        self.load_to_size(int(indices[-1])+1)
+        position = 0
+        while position < len(indices):
+            rank = int(indices[position])
+            q = int(np.searchsorted(self._cumtotals,rank,side='right')-1)
+            generators, offsets = self._get_partition_perms([q])
+            data, offset = generators[0],int(offsets[0])
+            if q == 0:
+                low, high, partition = 0,1,np.zeros(self.dim,dtype=np.int64)
+            else:
+                i = int(np.searchsorted(data._cumtotals,rank-offset,side='right')-1)
+                low = offset+int(data._cumtotals[i])
+                high = low+int(data.partition_counts[i])
+                partition = data.partitions[i]
+            stop = int(np.searchsorted(indices,high))
+            yield partition,low,high,indices[position:stop]
+            position = stop
+
+    def iter_filtered_indices(self, indices, constraints, block_size=65536, *, statistics=None):
+        """Filter exact canonical support using native class/prefix intervals."""
+        data = UniquePermutations.prepare_constraints(constraints,self.dim)
+        for partition,low,high,support in self.iter_index_classes(indices):
+            if not UniquePermutations.class_constraints_possible(partition,data):
+                continue
+            generator = UniquePermutations(partition)
+            for ranges in generator.iter_index_ranges(data,block_size,statistics=statistics):
+                for first,last in ranges:
+                    start = int(np.searchsorted(support,low+first))
+                    stop = int(np.searchsorted(support,low+last))
+                    for pos in range(start,stop,block_size):
+                        yield support[pos:min(pos+block_size,stop)]
+
+
+    def get_direct_sum_class_ranges(self, partition, rules, *, constraints=None):
+        """Native ID intervals reached from a COMPLETE permutation class.
+
+        ``partition`` specifies the whole orbit of its occupations. Each rule
+        likewise denotes all permutations after zero padding. Partial source
+        support must be handled by the caller; it cannot be inferred from a
+        single representative. Signed rules and arbitrary rule order are
+        handled by the same multiplicity-table enumeration.
+        """
+        partition = np.asarray(partition)
+        if (partition.ndim != 1 or len(partition) != self.dim
+                or partition.dtype.kind not in 'iu' or np.any(partition < 0)):
+            raise ValueError('partition must contain dim nonnegative integers')
+        data_filter = None if constraints is None else UniquePermutations.prepare_constraints(constraints,self.dim)
+        values, counts = UniquePermutations.get_permutation_class_counts(partition)
+        targets = set()
+        signatures = {tuple(sorted(int(x) for x in rule if x)) for rule in rules}
+        for rule in signatures:
+            if len(rule) > self.dim:
+                continue
+            if data_filter is not None and data_filter['parity'] >= 0:
+                if (int(np.sum(partition))+sum(rule))%2 != data_filter['parity']:
+                    continue
+            padded = np.zeros(self.dim, dtype=np.int64)
+            padded[:len(rule)] = rule
+            increments, multiplicities = UniquePermutations.get_permutation_class_counts(padded)
+            sums = values[:, None]+increments[None, :]
+            allowed = sums >= 0
+            if data_filter is not None:
+                allowed &= ((sums >= np.min(data_filter['minimum']))
+                            & (sums <= np.max(data_filter['maximum'])))
+            for table in IntegerPartitioner2D.iter_partitions(counts, multiplicities, allowed=allowed):
+                target = tuple(sorted((int(value) for value, n in zip(sums.flat, table.flat)
+                                       for _ in range(int(n))), reverse=True))
+                if data_filter is None or UniquePermutations.class_constraints_possible(target,data_filter):
+                    targets.add(target)
+        intervals = []
+        for target in sorted(targets, key=lambda p:(sum(p), tuple(-x for x in p))):
+            q = sum(target)
+            if q == 0:
+                intervals.append([0, 1])
+                continue
+            partitioners, offsets = self._get_partition_perms([q])
+            data = partitioners[0]
+            index = int(IntegerPartitioner.partition_indices(np.array([target], dtype=np.int64),
+                                                             sums=np.array([q]))[0])
+            start = int(offsets[0])+int(data._cumtotals[index])
+            stop = start+int(data.partition_counts[index])
+            if stop > np.iinfo(np.int64).max:
+                raise OverflowError('class ID intervals must fit signed int64')
+            intervals.append([start, stop])
+        merged = []
+        for start, stop in sorted(intervals):
+            if merged and start <= merged[-1][1]:
+                merged[-1][1] = max(stop, merged[-1][1])
+            else:
+                merged.append([start, stop])
+        return np.asarray(merged, dtype=np.int64).reshape(-1, 2)
+
 
     def iter_permutation_rule_direct_sum(self, perms, rules, block_size=65536, *, return_indices=False):
         """Yield bounded (source positions, occupations or native indices) blocks.
