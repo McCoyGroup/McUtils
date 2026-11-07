@@ -3,7 +3,7 @@ A small JSON-schema subset for validating model answers and tool arguments (no `
 
 Supported keywords: ``type``, ``enum``, ``const``, ``properties``, ``required``, ``additionalProperties`` (a bool),
 ``items``, ``minItems``, ``maxItems``, ``uniqueItems``, ``minLength``, ``maxLength``, ``minimum``, ``maximum``
-(plus the annotation keywords ``description``, ``title`` and ``default``, which are ignored). Any other keyword is a
+(plus the annotation keywords ``description``, ``title``, ``default`` and ``examples``, which are ignored). Any other keyword is a
 ``ValueError`` when the schema is checked, so an unsupported schema fails loudly instead of validating nothing.
 """
 
@@ -12,7 +12,7 @@ import json
 __all__ = ["validate_answer", "check_schema", "parse_json_answer", "describe_schema"]
 
 _TYPES = ("object", "array", "string", "integer", "number", "boolean", "null")
-_ANNOTATIONS = ("description", "title", "default")
+_ANNOTATIONS = ("description", "title", "default", "examples")
 _KEYWORDS = ("type", "enum", "const", "properties", "required", "additionalProperties", "items", "minItems",
              "maxItems", "uniqueItems", "minLength", "maxLength", "minimum", "maximum")
 

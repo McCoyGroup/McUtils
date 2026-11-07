@@ -9,10 +9,16 @@ def main(argv=None):
     p.add_argument("report", help="the report's Markdown file (created if missing, rewritten after every change)")
     p.add_argument("--sources", required=True, help="a .py file or module defining build_catalog() -> SourceCatalog")
     p.add_argument("--out-dir", help="where the render tool writes (default: <report>_out beside the file)")
-    p.add_argument("--policy", default="grounded", choices=["grounded", "unchecked", "structure_only"])
+    p.add_argument("--policy", default="unchecked", choices=["grounded", "unchecked", "structure_only"],
+                   help="unchecked (default): typed numbers are accepted, counted and commented on; grounded: a typed "
+                        "number must be in the cited data and text must cite; structure_only: the model writes no text")
+    p.add_argument("--autolink", action="store_true",
+                   help="rewrite typed numbers that are exactly a value of the data into placeholders (off by default)")
+    p.add_argument("--no-advice", action="store_true",
+                   help="leave the notes about typed numbers out of text results (on by default)")
     p.add_argument("--rel-tol", type=float, default=1e-3,
-                   help="relative tolerance of the number check (default 1e-3; a number also matches within half a "
-                        "unit of its last written digit)")
+                   help="relative tolerance of the number check and the notes (default 1e-3; a number also matches "
+                        "within half a unit of its last written digit)")
     p.add_argument("--small-int-max", type=int, default=10, help="integers up to this are not checked (default 10)")
     p.add_argument("--check-years", action="store_true",
                    help="also check four-digit numbers between 1900 and 2100 (by default they are taken to be years; "
@@ -40,7 +46,7 @@ def main(argv=None):
     serve_report(a.report, a.sources, out_dir=a.out_dir, policy=a.policy, rel_tol=a.rel_tol, small_int_max=a.small_int_max,
                  year_range=None if a.check_years else (1900, 2100), title=a.title, lock=a.lock, unlock=a.unlock, call_log=a.call_log,
                  allow_derived=a.derived, apply_edits=a.apply_edits, context_level=a.context_level, include_tools=a.tools,
-                 exclude_tools=a.no_tools, unit_style=a.unit_style)
+                 exclude_tools=a.no_tools, unit_style=a.unit_style, autolink=a.autolink, advice=not a.no_advice)
 
 
 if __name__ == "__main__":

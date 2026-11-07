@@ -20,9 +20,29 @@ Nothing else counts. A value that is only in the object, or only in a figure, ca
 
 The report tells a model, at every context level, to write a **placeholder** instead of a number:
 `{r3.frequency[2]}` is "block `r3`, column `frequency`, row 2 (1-based, as `peek` shows)". The server replaces it with
-the value and its unit label (`3803.3 cm⁻¹`). A person can do the same with `ReportDocument.add_text`. Typed
-numbers are accepted too, but only if they match a cited value in the same unit; a refusal names the placeholder that
-matches. So the better a readout's data serves placeholders, the less a report depends on that safety net.
+the value and its unit label (`3803.3 cm⁻¹`). A person can do the same with `ReportDocument.add_text`.
+
+Typed numbers are **allowed**: there are good reasons to state a number that is not in a readout (a temperature the
+user gave, a literature value), and the number check is off by default (`--policy unchecked`). The report encourages
+placeholders instead of requiring them:
+
+- Readout data is shown to the model as placeholders, not expanded. `peek(handle, section)` lists a section's columns,
+  the placeholder of each (`{r3.frequency[ROW]}`), its rows and one example value; `peek(..., expand=true)` gives the
+  text with the values, and `values(block_id, column)` lists every row with its placeholder. The receipts of
+  `add_readout` / `apply_template` list the placeholders of the blocks they add.
+- A paragraph reads back as it was written (`compile(full_text=true)`; `ReportDocument.written_text`), so the model
+  sees the pattern it should keep writing.
+- A number that is not in the data is marked `{=300 K}` (or listed in `literals`): the report writes it as given and
+  records it as a *given value*, so it is distinguishable from a number someone typed and forgot to check.
+- A text result carries `notes` about the numbers it typed: a value of the data gets its placeholder; any other is
+  pointed at the `{=...}` marker. Notes never refuse a text. `autolink` (off by default, `--autolink`) rewrites a typed
+  number that is exactly one value of the data into its placeholder.
+- A paragraph can say what it is about (`basis`: `data`, `background`, `user_input`), and `compile` reports the
+  `coverage`: placeholders, given values and typed numbers (and how many typed ones were values of the data).
+
+The strict mode is opt-in (`--policy grounded`): text must cite readouts and every typed number must match a cited value
+in the same unit; a refusal names the placeholder that matches. So the better a readout's data serves placeholders, the
+more a report is made of values the server wrote, and the less it depends on any check.
 
 **Write the readout for the placeholder.** Concretely:
 
@@ -123,11 +143,15 @@ should state no numbers.
 
 ## 7. What the checker does not do
 
-V4 checks **numbers and units only**. It does not check words: a paragraph can still call a mode a "stretch" next to a
+The number check (opt-in, `--policy grounded`) checks **numbers and units only**. It does not check words: a paragraph can still call a mode a "stretch" next to a
 correct number, and nothing refuses it. (V3 had a word-list claims check; V4 removed it.) What protects a report from
 unsupported interpretation is therefore (a) the data you provide, (b) the instructions telling the model to describe
 only what the data shows, and (c) a human reading the result. Write readouts so that the statements a report needs are
 in the data (section 2, point 4) and review any interpretation the data does not contain.
+
+Even then it is a matcher, not a proof: a number is compared with the values of the cited blocks pooled together, so a
+right value attached to the wrong quantity passes; small integers, years and numbers in backticks are exempt; and
+spelled-out numbers are not seen. Placeholders are the only exact way to state a value.
 
 Computed values (`{mean(r3.frequency[2], r3.frequency[3])}`) are **off by default** and enabled by the person running
 the server (`--derived`, `allow_derived=True`). The multi-edit tool `apply_edits` is off by default as well and enabled
@@ -142,4 +166,5 @@ with `--apply-edits` (`apply_edits=True`).
 - [ ] Section `description` is one sentence with the unit; heavy or optional sections are `default=False`.
 - [ ] Values are converted when the readout is built.
 - [ ] If the source has a standard report, it has a `ReportTemplate` with captions that state no numbers.
-- [ ] Tried it: `peek` shows what you expect, and `{r1.<column>[1]}` fills with the unit you expect.
+- [ ] Tried it: `peek` lists the placeholders you expect, `peek(expand=true)` shows the text, and `{r1.<column>[1]}` fills with
+  the unit you expect.

@@ -26,6 +26,7 @@ __all__ = [
     "Heading",
     "ReadoutBlock",
     "Prose",
+    "PROSE_BASES",
     "Callout",
     "RawMarkdown",
     "ReportDocument",
@@ -40,6 +41,9 @@ PROSE_STATUSES = ("checked", "no_numbers", "unchecked", "manual")
 # the number check but has nothing to check; ``grounded`` is the older
 # name of ``checked`` and is still read and accepted.
 LEGACY_STATUSES = {"grounded": "checked"}
+# what a paragraph says it is about: ``data`` (the readouts it cites), ``background`` (general context, no data) or
+# ``user_input`` (values the user gave); ``None`` is unspecified
+PROSE_BASES = ("data", "background", "user_input")
 
 
 def _status(status):
@@ -200,17 +204,21 @@ class ReadoutBlock(_Block):
 
 
 class Prose(_Block):
-    """A paragraph. ``fills`` records the values the server wrote into it (see `McUtils.Readouts.Reports.Fill`)."""
+    """
+    A paragraph. ``fills`` records the values the server wrote into it (placeholders and given values, see
+    `McUtils.Readouts.Reports.Fill`); ``basis`` is what it says it is about (`PROSE_BASES`) or ``None``.
+    """
     kind, prefix = "prose", "p"
 
-    def __init__(self, id, text, cites=(), status="manual", role="body", fills=None):
+    def __init__(self, id, text, cites=(), status="manual", role="body", fills=None, basis=None):
         super().__init__(id)
         self.text, self.cites, self.status, self.role = text, list(cites), _status(status), role
         self.fills = list(fills) if fills else None
+        self.basis = basis
 
     def to_markdown(self, doc):
         marker = _call("block", self.id, role=self.role, status=self.status, cites=self.cites or None,
-                       fills=self.fills or None)
+                       fills=self.fills or None, basis=self.basis)
         return f"{marker}\n{self.text}"
 
 
@@ -448,9 +456,16 @@ class ReportDocument:
         self.sources[handle] = {"type": src.type_name, "digest": src.digest}
         return self._insert(block, after)
 
-    def add_text(self, text, cites=(), after=None, status="manual", role="body", under=None, fills=None):
+    @staticmethod
+    def _check_basis(basis):
+        if basis is not None and basis not in PROSE_BASES:
+            raise ReportOperationError("bad_argument", f"basis must be one of {PROSE_BASES} or left out, got {basis!r}")
+        return basis
+
+    def add_text(self, text, cites=(), after=None, status="manual", role="body", under=None, fills=None, basis=None):
         after = self._where(after, under)
         text = self._check_text(text, "text")
+        basis = self._check_basis(basis)
         status = _status(status)
         if status not in PROSE_STATUSES:
             raise ReportOperationError("bad_argument", f"status must be one of {PROSE_STATUSES}, got {status!r}")
@@ -462,7 +477,7 @@ class ReportDocument:
                 raise ReportOperationError("unknown_block", f"cited block {c!r} is not a readout block of this "
                                            f"document", block_id=c)
         self._position(after)
-        return self._insert(Prose(self._mint(Prose), text, cites, status, role, fills), after)
+        return self._insert(Prose(self._mint(Prose), text, cites, status, role, fills, basis), after)
 
     def add_callout(self, text, kind="note", after=None, under=None):
         after = self._where(after, under)
@@ -484,9 +499,11 @@ class ReportDocument:
         block.caption, block.caption_status = text, status
         return Receipt(block_id, self.outline())
 
-    def edit_text(self, block_id, text, status="manual", cites=None, fills=None):
+    def edit_text(self, block_id, text, status="manual", cites=None, fills=None, basis=None):
         block = self.blocks[self._index(block_id)]
         if isinstance(block, Prose):
+            if basis is not None:
+                block.basis = self._check_basis(basis)
             if cites is not None:
                 cites = list(cites)
                 for c in cites:
@@ -638,6 +655,8 @@ class ReportDocument:
                     row["caption"] = _clip(b.caption)
             elif isinstance(b, Prose):
                 row.update(role=b.role, text=_clip(b.text))
+                if b.basis:
+                    row["basis"] = b.basis
             elif isinstance(b, Callout):
                 row.update(callout=b.callout_kind, text=_clip(b.text))
             else:
@@ -889,7 +908,8 @@ class ReportDocument:
         Write the values of ``{r3.frequency[2]}``-style references into ``text`` (see
         `McUtils.Readouts.Reports.Fill`): each value is written with its unit label, and a unit typed after the
         reference is replaced by it (a different unit is an error). Blocks a reference names are added to ``cites``.
-        Computed values (``{mean(...)}``) are refused unless ``allow_derived``.
+        Computed values (``{mean(...)}``) are refused unless ``allow_derived``. ``{=300 K}`` marks a value given from
+        outside the data: it is written as given and recorded as a literal.
 
         :return: ``(text, cites, fills)``: the filled text, the cites (with the referenced blocks), the `Fill`s
         """
@@ -900,14 +920,32 @@ class ReportDocument:
                 if m.group("block") not in cites:
                     self.get(m.group("block"))
                     cites.append(m.group("block"))
-        if not cites:
-            return text, cites, []
         style = self.unit_style
         if style is None:
             from ...Data import UnitsData
             style = UnitsData.label_style
         filled, fills = fill_text(text, self.evidence(cites), allow_derived=allow_derived, style=style)
         return filled, cites, fills
+
+    def written_text(self, block_id):
+        """
+        A paragraph as it was written: the values the server filled in are shown as the placeholders (``{r3.frequency[1]}``)
+        or given-value markers (``{=300 K}``) that wrote them. The stored text (``Prose.text``) has the values.
+        """
+        from .Fill import unfill
+        blk = self.get(block_id)
+        if not isinstance(blk, Prose):
+            raise ReportOperationError("bad_argument", f"block {block_id!r} is not a paragraph", block_id=block_id)
+        return unfill(blk.text, blk.fills)
+
+    def number_coverage(self, rel_tol=1e-3, small_int_max=10, year_range=(1900, 2100), match=True):
+        """
+        How the numbers of the paragraphs were written: ``placeholders`` (filled in from the data), ``literals``
+        (given from outside it), ``typed`` and, with ``match``, ``typed_in_data`` (typed numbers that are values of the
+        data, so could have been placeholders); see `McUtils.Readouts.Reports.Advice.coverage`.
+        """
+        from .Advice import coverage
+        return coverage(self, rel_tol=rel_tol, small_int_max=small_int_max, year_range=year_range, match=match)
 
     def check_prose(self, block_id, rel_tol=1e-3, small_int_max=10, year_range=(1900, 2100)):
         """
@@ -1112,7 +1150,8 @@ class ReportDocument:
                     keep = lines_p if cut is None else lines_p[:cut]
                     rest = "" if cut is None else "\n".join(lines_p[cut:])
                     doc.blocks.append(Prose(ident, "\n".join(keep).strip(), kw.get("cites") or (),
-                                            kw.get("status", "manual"), kw.get("role", "body"), kw.get("fills")))
+                                            kw.get("status", "manual"), kw.get("role", "body"), kw.get("fills"),
+                                            kw.get("basis")))
                 elif ident.startswith("c"):
                     first, _, rest = content.partition("\n")
                     m = re.match(r"^> \*\*(?:Flag|Note):\*\* ?(.*)$", first, re.S)

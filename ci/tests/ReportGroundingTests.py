@@ -74,6 +74,11 @@ class ExtractNumbersTests(unittest.TestCase):
     def test_version_like_strings_dont_split(self):
         self.assertEqual(len(extract_numbers("version 1.2.3")), 1)
 
+    def test_digits_glued_to_a_following_name_are_not_numbers(self):
+        # basis sets and the like: "31" of 6-31G, "311" of 6-311++G, "3" of 3D; units written without a space still count
+        text = "B3LYP/6-31G* and 6-311++G(d,p), a 3D view, at 300K, 3.8eV, 1648.23 cm-1, 12 Å, 50%."
+        self.assertEqual([t.text for t in extract_numbers(text)], ["6", "6", "300", "3.8", "1648.23", "12", "50%"])
+
 
 class CheckGroundingTests(unittest.TestCase):
     EV = evidence_numbers(["Frequency 1648.23, 3832.71, 3943.88. Energy -76.02665. Shift -12.34. Fraction 0.125"])

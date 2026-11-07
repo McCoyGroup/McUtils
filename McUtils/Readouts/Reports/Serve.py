@@ -48,14 +48,16 @@ def _save(doc, path):
     os.replace(tmp, path)
 
 
-def serve_report(md_path, sources, out_dir=None, policy="grounded", rel_tol=1e-3, small_int_max=10, year_range=(1900, 2100), title=None, lock=(), unlock=(), call_log=None, stdin=None, stdout=None,
-                 allow_derived=False, apply_edits=False, context_level=2, include_tools=None, exclude_tools=None, unit_style=None):
+def serve_report(md_path, sources, out_dir=None, policy="unchecked", rel_tol=1e-3, small_int_max=10, year_range=(1900, 2100), title=None, lock=(), unlock=(), call_log=None, stdin=None, stdout=None,
+                 allow_derived=False, apply_edits=False, context_level=2, include_tools=None, exclude_tools=None, unit_style=None, autolink=False, advice=True):
     """
     Load (or start) the report at ``md_path`` against the catalog of ``sources`` and serve its tools on stdio.
     ``context_level`` (1 compact, 2 standard, 3 full) sets the tools and instructions the model gets (see
     `report_toolset`). ``allow_derived`` (computed values in text) and ``apply_edits`` (the multi-edit tool) are off
     unless the owner switches them on. ``unit_style`` (``unicode``, ``ascii`` or ``latex``) is how filled values write
-    their unit; it is stored in the report.
+    their unit; it is stored in the report. ``policy`` is ``unchecked`` (the default: typed numbers are accepted and
+    counted, ``advice`` adds notes to them), ``grounded`` (typed numbers must be in the cited data) or
+    ``structure_only``; ``autolink`` rewrites typed numbers that are exactly a value of the data into placeholders.
     """
     from ...JobDrivers.MCP import MCPServer
     md_path = os.path.abspath(md_path)
@@ -78,7 +80,7 @@ def serve_report(md_path, sources, out_dir=None, policy="grounded", rel_tol=1e-3
     tools = report_toolset(doc, catalog, renderer=ReportRenderer(catalog), policy=policy, rel_tol=rel_tol,
                            small_int_max=small_int_max, year_range=year_range, out_dir=out_dir, on_change=lambda d: _save(d, md_path),
                            allow_derived=allow_derived, apply_edits=apply_edits, context_level=context_level, include_tools=include_tools,
-                           exclude_tools=exclude_tools, unit_style=unit_style)
+                           exclude_tools=exclude_tools, unit_style=unit_style, autolink=autolink, advice=advice)
     MCPServer(tools, name="mcutils-report", instructions=tools.instructions,
               call_log=call_log).serve(stdin, stdout)
     return doc

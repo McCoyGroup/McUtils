@@ -255,10 +255,10 @@ class FillToolTests(unittest.TestCase):
 
 
 class LiteralNumberTests(unittest.TestCase):
-    """Typed numbers are allowed; the unit-aware check is the safety net and the refusal shows the placeholder."""
+    """Under the grounded policy typed numbers are checked, unit-aware, and the refusal shows the placeholder."""
 
     def setUp(self):
-        self.doc, self.cat, self.tools = make()
+        self.doc, self.cat, self.tools = make(policy="grounded")
 
     def test_a_correct_literal_is_accepted_and_the_receipt_shows_the_placeholder(self):
         v = ok(self.tools.call("add_text", {"text": "The bend is at 1648.23 cm-1.", "cites": ["r2"]}))
@@ -287,7 +287,7 @@ class LiteralNumberTests(unittest.TestCase):
         self.assertNotIn("mean", r.error["hint"])
 
     def test_the_hint_mentions_expressions_only_when_derived_is_on(self):
-        doc, cat, tools = make(allow_derived=True)
+        doc, cat, tools = make(allow_derived=True, policy="grounded")
         r = tools.call("add_text", {"text": "At 1650.5 cm-1.", "cites": ["r2"]})
         self.assertIn("mean(", r.error["hint"])
 

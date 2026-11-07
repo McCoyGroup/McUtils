@@ -12,19 +12,22 @@ The instructions a report server gives a model (the MCP ``initialize`` text), at
 3. ``full`` — everything in ``standard`` plus the reasons behind the rules, for models that plan several steps
    ahead.
 
-Every level tells the model, strongly, to write values as placeholders (``{r3.frequency[2]}``): the server writes the
-number and its unit, so nothing is mistyped or given in the wrong unit. Two things are switched on by the owner, not
-by the level: computed values (``derived``) and the ``apply_edits`` tool; the instructions mention them only when
-they are on.
+Every level tells the model, strongly, to write values from the data as placeholders (``{r3.frequency[2]}``): the
+server writes the number and its unit, so nothing is mistyped or given in the wrong unit. Readout data is shown as
+placeholders too (``peek`` lists a section's columns and their placeholders; ``expand=true`` gives the text with the
+values), and a number that does not come from the data is written ``{=300 K}``. Typing numbers is allowed by default:
+the number check is opt-in (``policy="grounded"``) and the instructions describe it only then. Things switched on by the
+owner, not by the level: computed values (``derived``), the ``apply_edits`` tool, ``autolink`` and the grounded policy;
+the instructions mention them only when they are on.
 
-The guards (numbers checked against the data, citations, locks) are the same at every level: a level changes what
-the model is shown and which conveniences it gets, never what the server accepts.
+The guards (the number check when it is on, citations, locks) are the same at every level: a level changes what the
+model is shown and which conveniences it gets, never what the server accepts.
 """
 
 from .Templates import find_report_template
 
 __all__ = ["CONTEXT_LEVELS", "context_level", "REPORT_INSTRUCTIONS", "report_instructions", "catalog_summary",
-           "DERIVED_NOTE", "APPLY_EDITS_NOTE"]
+           "DERIVED_NOTE", "APPLY_EDITS_NOTE", "GROUNDED_NOTE", "AUTOLINK_NOTE"]
 
 CONTEXT_LEVELS = {"compact": 1, "standard": 2, "full": 3}
 
@@ -40,6 +43,11 @@ def context_level(level):
         raise ValueError(f"context_level must be 1, 2, 3 or one of {list(CONTEXT_LEVELS)}, got {level!r}")
     return level
 
+
+# the mentions of the ``values`` tool in REPORT_INSTRUCTIONS (left out when the tool is not offered)
+_VALUES_A = ("; values(block_id) lists a block's placeholders again, and values(block_id, column) gives every row of a "
+             "column with its placeholder")
+_VALUES_B = " (or values(block_id, column) for one column's rows)"
 
 REPORT_INSTRUCTIONS = """\
 You are building a report from readouts of named sources. You choose and order content and write short captions and
@@ -70,26 +78,35 @@ add supplementary text around it only if the user separately asks for that.
 
 Never write Markdown headings, code or markers; give plain text only.
 
-WRITE EVERY NUMBER AS A PLACEHOLDER. To state a value from a block, write {BLOCK.COLUMN[ROW]}: the readout block id
-(from outline or compile), the column or field name, and the 1-based row as peek shows it, for example
-{r3.frequency[2]}. The server replaces it with the value and its unit exactly as the data has them (3803.3 cm⁻¹), so
-you never copy a digit, round, convert or choose a unit. Do not type the unit after a placeholder: the server adds it
-(a different unit is refused). Text columns work too: {r3.mode[2]} writes the label in that row. If you do not know
-the column names, peek shows them. Typing a number yourself is allowed, but it is the risky way: it is checked
-against the cited blocks' data, a number with a unit must match a value in that unit, a percentage only matches a
-percentage, and a number that is not in the data of the blocks you cite is rejected (ungrounded) with the placeholder
-that matches it, and nothing is written. Text under the grounded policy must cite blocks (`cites`; blocks named by
-placeholders are cited for you). Statuses: checked means a number in the text was verified against the cited data (or
-filled in by the server); no_numbers means the text had nothing to verify. The checker verifies numbers only, so
-describe what the data shows and leave out interpretation the source does not give. compile reports the tolerance in
-force.
+WRITE VALUES AS PLACEHOLDERS. To state a value from a block, write {BLOCK.COLUMN[ROW]}: the readout block id (from
+outline or compile), the column or field name, and the 1-based row, for example {r3.frequency[2]}. The server replaces
+it with the value and its unit exactly as the data has them (3803.3 cm⁻¹), so you never copy a digit, round, convert or
+choose a unit, the value follows the report's unit style, and it stays right if the data changes. Before: "The OH
+stretch is at 3803.3 cm-1." After: "The OH stretch is at {r3.frequency[1]}." Do not type the unit after a placeholder:
+the server adds it (a different unit is refused). Text columns work too: {r3.mode[2]} writes the label in that row.
+
+Readout data is shown to you as placeholders, not expanded: peek(handle, section) lists a section's columns, the
+placeholder for each, its rows and one example value, and add_readout and apply_template list the placeholders of the
+blocks they add{VALUES_A}. When you need the numbers themselves to describe the data, ask for them:
+peek(handle, section, expand=true) gives the section as text{VALUES_B}. Then write the placeholders rather than the
+numbers you read.
+
+A number that does not come from the data is fine to write: a setup value from the user's request, a literature value, a
+count you state. Mark it {=300 K} (or list it in `literals`) so the report records it as given from outside the data.
+A result may carry `notes` on numbers you typed: which is a value of the data (use its placeholder) and which is not
+(mark it {=...} if it is meant to come from outside the data, else leave it out). Notes are advice; they never refuse a
+text. Set `basis` on a paragraph to 'data' (about the readouts it cites), 'background' (general context) or
+'user_input' (values the user gave). Text is saved with its values filled in; compile(full_text=True) shows each
+paragraph as it was written, placeholders included (expand=True shows the values), and the `coverage` in compile counts
+how many numbers are placeholders, given values or typed. A paragraph's status is checked when the server wrote its
+numbers, no_numbers when it has none and unchecked when it typed a number nothing verified.
 
 Errors carry a `hint` and `retry`: "no" means tell the user instead of repeating the request, "once" means one
 corrected attempt. The report file is saved after every change. A successful compile is enough to finish a
 report-writing request (compile(full_text=True) reads the saved prose). Use render only when the user asks for
 exported files; when it succeeds, report the paths and finish rather than rendering or inspecting the same output
 again.
-"""
+""".replace("{VALUES_A}", _VALUES_A).replace("{VALUES_B}", _VALUES_B)
 
 COMPACT_INSTRUCTIONS = """\
 You build a report from the sources listed below; the server renders it. Use as few tool calls as you can and answer
@@ -101,11 +118,12 @@ builds a source's standard report in one call. peek(handle, section) shows a sec
 cites, move_section and remove. under=<heading id> adds at the end of that section; after=<block id> adds right after
 that block.
 
-add_text writes a paragraph: plain sentences (no Markdown) with cites = readout ids. WRITE EVERY NUMBER AS A
-PLACEHOLDER, {r3.frequency[2]} (readout id, column, row): the server fills in the number and its unit (3803.3 cm⁻¹).
-Never type a number or a unit yourself; do not add a unit after a placeholder. {r3.mode[2]} writes a text column's
-label. peek shows the columns. If you type a number anyway it must be in the cited data in that unit, or the text is
-refused (the error shows the matching placeholder) and not saved.
+add_text writes a paragraph: plain sentences (no Markdown) with cites = readout ids. WRITE VALUES FROM THE DATA AS
+PLACEHOLDERS, {r3.frequency[2]} (readout id, column, row): the server fills in the number and its unit (3803.3 cm⁻¹), so
+it is never mistyped. Do not add a unit after a placeholder. {r3.mode[2]} writes a text column's label.
+add_readout and apply_template list each block's placeholders; peek(handle, section) shows a section as placeholders
+and peek(..., expand=true) as text with its values. A number that is not in the data (from the user's request, a
+literature value) is written {=300 K}. `notes` in a result are advice, not errors.
 
 move_section(heading_id, after) moves one section; move_source(handle, after) moves all sections of a source. Locked
 blocks can't be changed: tell the user and stop. Errors have a `hint`; if `retry` is "no", tell the user instead of
@@ -114,11 +132,25 @@ when the user asks for files; then give the paths and stop.
 """
 
 FULL_EXTRA = """\
-Why the rules: the report is checked against its sources, so every number must be traceable to a cited block, and a
-placeholder is the one way to state a value that cannot be wrong: it is read from the block when the text is saved
-and again whenever the report is checked, so a later change to the data is noticed. Typed numbers are the exception
-that needs checking, which is why they can be refused. Say only what the data shows; the checker cannot tell a correct
-interpretation from an invented one.
+Why the rules: a placeholder is read from the block when the text is saved and again whenever the report is checked, so
+it cannot be mistyped, rounded differently or given in the wrong unit, and a later change to the data is noticed. A
+typed number is only as good as the copy, which is why the report counts the typed ones (coverage), notes the ones that
+are values of the data, and records the ones you declare as given ({=300 K}). Say only what the data shows; nothing can
+tell a correct interpretation from an invented one.
+"""
+
+GROUNDED_NOTE = """\
+This report is checked. Text must cite the readout blocks it is about (`cites`; blocks named by placeholders are cited
+for you) unless its basis is 'background' or 'user_input'. A number you type must be in the data of the blocks you cite,
+in the unit it is written in (a percentage only matches a percentage); otherwise the text is refused (ungrounded) with
+the placeholder that matches, and nothing is written. Placeholders and numbers marked {=...} are not checked. The
+checker verifies numbers only, so describe what the data shows and leave out interpretation the source does not give.
+compile reports the tolerance in force.
+"""
+
+AUTOLINK_NOTE = """\
+A typed number that is exactly a value of the data (rounded to the digits you typed, with its unit) is rewritten into
+the placeholder that writes it; `autolinked` in the result lists them. Writing the placeholder yourself is still best.
 """
 
 DERIVED_NOTE = """\
@@ -160,12 +192,14 @@ def catalog_summary(catalog, level=2, inline_max=8):
     return "\n".join(lines)
 
 
-def report_instructions(catalog=None, level=2, inline_max=8, derived=False, apply_edits=False, unit_style=None):
+def report_instructions(catalog=None, level=2, inline_max=8, derived=False, apply_edits=False, unit_style=None,
+                        policy="unchecked", autolink=False, values_tool=True):
     """
     The instructions for ``context_level`` ``level``, with the catalog listed when it is small (see
     `catalog_summary`). ``derived`` / ``apply_edits`` add the notes for computed values and the ``apply_edits`` tool,
     which the owner switches on. ``unit_style`` (``"unicode"``, ``"ascii"``, ``"latex"``) sets how the examples
-    show a filled value (default `UnitsData.label_style`).
+    show a filled value (default `UnitsData.label_style`). ``policy`` is the writing policy: the number check is only
+    described under ``"grounded"``; ``autolink`` adds its note; ``values_tool`` says whether the ``values`` tool exists.
     """
     level = context_level(level)
     summary = catalog_summary(catalog, level, inline_max)
@@ -183,6 +217,12 @@ def report_instructions(catalog=None, level=2, inline_max=8, derived=False, appl
                                 "sections and what\neach contains.")
         if level >= 3:
             text = text + "\n" + FULL_EXTRA
+    if level != 1 and not values_tool:
+        text = text.replace(_VALUES_A, "").replace(_VALUES_B, "")
+    if policy == "grounded":
+        text = text + "\n" + GROUNDED_NOTE
+    if autolink:
+        text = text + "\n" + AUTOLINK_NOTE
     if derived:
         text = text + "\n" + DERIVED_NOTE
     if apply_edits:

@@ -162,7 +162,8 @@ def extract_numbers(text):
     """
     The numbers ``text`` states, as `NumberToken`s in order. Ranges ``a–b`` give both ends; ``−`` is read as a minus;
     a hyphen before a digit that follows a digit is a range, not a sign. Digits glued to a preceding letter
-    (``H2O``, ``cm-1``, ``C2v``, ``r1``) and anything in inline code are skipped.
+    (``H2O``, ``cm-1``, ``C2v``, ``r1``), digits glued to a following word that is not a unit (``6-31G``, ``6-311++G``,
+    ``3D``) and anything in inline code are skipped.
     """
     clean = _blank_code(text)
     taken = [False] * len(clean)
@@ -194,6 +195,8 @@ def extract_numbers(text):
                 start = s - 1
         elif prev.isalpha() or prev == "_":
             continue                                       # "H2O", "C2v", "r1"
+        if re.match(r"\+*[A-Za-z]", clean[e:e + 3]) and _unit_after(clean, e) is None:
+            continue                                       # "6-31G", "6-311++G", "3D": part of a name
         end = e
         percent = clean[e:e + 1] == "%"
         if percent:

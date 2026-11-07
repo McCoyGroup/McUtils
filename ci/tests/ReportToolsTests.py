@@ -63,7 +63,7 @@ def ok(result):
 class ReadingTests(unittest.TestCase):
     def test_tool_names(self):
         _, _, tools = make()
-        self.assertEqual(tools.names(), ["list_sources", "describe_source", "peek", "outline", "compile", "checkpoint", "diff",
+        self.assertEqual(tools.names(), ["list_sources", "describe_source", "peek", "values", "outline", "compile", "checkpoint", "diff",
                                          "apply_template", "add_heading", "add_readout", "add_text", "set_caption",
                                          "edit_text", "move", "move_section", "remove", "move_source"])
         self.assertIn("render", make(renderer=True, out_dir="/tmp/x")[2].names())
@@ -141,7 +141,7 @@ class ReceiptTests(unittest.TestCase):
         v = ok(tools.call("add_heading", {"text": "A"}))
         self.assertEqual(v, {"ok": True, "block_id": "h1", "n_blocks": 1, "revision": 1})
         v = ok(tools.call("apply_template", {"handle": "water"}))
-        self.assertEqual(sorted(v), ["added", "locked", "n_blocks", "ok", "revision", "skipped_unavailable"])
+        self.assertEqual(sorted(v), ["added", "locked", "n_blocks", "ok", "placeholders", "revision", "skipped_unavailable"])
         self.assertEqual((v["n_blocks"], v["revision"]), (5, 2))
         for name, args in (("move", {"block_id": "h2", "after": "start"}), ("remove", {"block_id": "h2"}),
                            ("edit_text", {"block_id": "h1", "text": "B"})):
@@ -669,7 +669,7 @@ class SubprocessServerTests(unittest.TestCase):
                      self.call(4, "remove", block_id="zzz"),
                      self.call(5, "add_text", text="The bend is 1648.23.", cites=["r2"]),
                      self.call(6, "compile")]
-            md, replies, p = self.run_server(tmp, lines, extra=("--rel-tol", "1e-5", "--small-int-max", "3", "--check-years"))
+            md, replies, p = self.run_server(tmp, lines, extra=("--policy", "grounded", "--rel-tol", "1e-5", "--small-int-max", "3", "--check-years"))
             self.assertEqual(p.returncode, 0, p.stderr)
             by_id = {r["id"]: r for r in replies}
             self.assertEqual(sorted(by_id), [1, 2, 3, 4, 5, 6])
