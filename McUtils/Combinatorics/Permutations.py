@@ -801,8 +801,9 @@ class UniquePermutations:
         cumsums = np.cumsum(counts, dtype=int)[1:]
         binoms = cls.get_binoms(cumsums[-1]+1)
 
-        multinomial = np.prod(binoms[cumsums, counts[1:]], dtype=int)
-
+        multinomial = 1
+        for factor in binoms[cumsums, counts[1:]]:
+            multinomial *= int(factor)
         return multinomial
 
     def iter_permutations(self, block_size=65536):
@@ -1205,7 +1206,8 @@ class UniquePermutations:
             counts: np.ndarray,
             dim: int,
             num_permutations: int,
-            block_size:int
+            block_size:int,
+            permutation_maps=None
     ):
         """
         JIT compiled
@@ -1241,14 +1243,15 @@ class UniquePermutations:
         ndim = dim
 
         # back track the initial number of states
-        n_steps = int(np.ceil(len(perms)/block_size))
-        block_counts = np.zeros((n_steps, len(counts)))#, dtype=counts.dtype)
+        nrows = len(inds)
+        n_steps = (nrows + block_size - 1)//block_size
+        block_counts = np.zeros((n_steps, len(counts)), dtype=np.uint64)
         for i in range(n_steps):
             block_counts[i] = counts
 
-        block_tree_datas = np.zeros((n_steps, dim, 2))#, dtype=counts.dtype)
+        block_tree_datas = np.zeros((n_steps, dim, 2), dtype=np.uint64)
         cur_dims = np.full(n_steps, dim - 1)
-        block_tree_datas[:, cur_dims[0], 1] = num_permutations
+        block_tree_datas[:, cur_dims[0], 1] = np.uint64(num_permutations)
 
         half_dim = ndim // 2
         for _ in prange(n_steps): # we iterate over initial states
@@ -1258,16 +1261,28 @@ class UniquePermutations:
             tree_data = block_tree_datas[_]
             cts = block_counts[_]
 
-            rem_els = block_size if idx_start + block_size < len(perms) else len(perms) - idx_start
+            if permutation_maps is not None:
+                state_buffer = np.empty(dim, dtype=perms.dtype)
+                previous = np.empty(dim, dtype=perms.dtype)
+            rem_els = min(block_size, nrows - idx_start)
             for sn in range(rem_els):
                 idx = idx_start + sn
-                state = perms[idx]
+                if permutation_maps is None:
+                    full_state = perms[idx]
+                else:
+                    base_row = idx//len(permutation_maps)
+                    map_row = idx%len(permutation_maps)
+                    for coordinate in range(dim):
+                        state_buffer[coordinate] = perms[base_row, permutation_maps[map_row, coordinate]]
+                    full_state = state_buffer
+                state = full_state
 
                 if sn > 0:
+                    prev = perms[idx-1] if permutation_maps is None else previous
                     # we reuse as much work as we can by only backtracking where we need to
                     agree_pos = 0
                     for i in range(ndim):
-                        if perms[idx, i] != perms[idx-1, i]:
+                        if full_state[i] != prev[i]:
                             break
                         agree_pos += 1
 
@@ -1285,14 +1300,13 @@ class UniquePermutations:
                            cts[i] = init_counts[i]
                         # counts_mask[:] = True
                     else:
-                        prev = perms[idx-1]
                         # at this point cur_dim gives us the number of trailing
                         # digits that are equivalent in the previous permutation
                         # so we only need to back-track to where the new state begins to
                         # differ from the old one,
                         for i in range(start_pos, agree_pos - 1, -1):
                             j = class_map[prev[i]]
-                            cts[j] += 1
+                            cts[j] += np.uint64(1)
                             cur_dim += 1
                         tree_data[cur_dim, 0] = tree_data[cur_dim + 1, 0]
 
@@ -1308,11 +1322,15 @@ class UniquePermutations:
                     for j in range(nterms):
                         if cts[j] == 0:
                             continue
-                        mprod = tree_data[cur_dim, 1] * cts[j]
-                        subtotal = mprod // (cur_dim + 1)  # , dtype=int)
+                        # Exact integer subtree count, without overflowing the
+                        # intermediate product when the quotient is representable.
+                        denominator = np.uint64(cur_dim + 1)
+                        total = tree_data[cur_dim, 1]
+                        subtotal = ((total//denominator)*cts[j]
+                                    + ((total%denominator)*cts[j])//denominator)
                         if classes[j] == el:
                             cur_dim -= 1
-                            cts[j] -= 1
+                            cts[j] -= np.uint64(1)
                             tree_data[cur_dim, 1] = subtotal
                             tree_data[cur_dim, 0] = tree_data[cur_dim + 1, 0]
                             break
@@ -1326,16 +1344,21 @@ class UniquePermutations:
                         break
 
                 inds[idx] = tree_data[cur_dim, 0]
+                if permutation_maps is not None:
+                    previous[:] = full_state
 
         return inds#, sn
 
     @classmethod
     def get_permutation_indices(cls, perms, classes=None, counts=None, assume_sorted=False,
                                 preserve_ordering=True, dim=None, num_permutations=None, dtype=None,
-                                block_size=100
+                                block_size=100, permutation_maps=None
                                 ):
         """
-        Classmethod interface to get indices for permutations
+        Classmethod interface to get indices for permutations.
+        Optional coordinate ``permutation_maps`` ranks virtual rows
+        ``perms[row, permutation_maps[k]]`` and returns a (rows, maps) array,
+        using the same native multiset rank kernel.
         :param perms:
         :type perms:
         :param assume_sorted:
@@ -1345,6 +1368,33 @@ class UniquePermutations:
         """
 
         perms = np.asanyarray(perms)
+        if permutation_maps is not None:
+            if perms.ndim == 1:
+                perms = perms[None]
+            maps = np.asarray(permutation_maps, dtype=np.intp)
+            if (maps.ndim != 2 or maps.shape[1] != perms.shape[1]
+                    or not np.all(np.sort(maps, axis=1) == np.arange(perms.shape[1]))):
+                raise ValueError("permutation_maps must contain coordinate permutations")
+            if len(perms) == 0:
+                return np.empty((0,len(maps)),dtype=int if dtype is None else dtype)
+            if classes is None or counts is None:
+                classes, counts = cls.get_permutation_class_counts(perms[0])
+            if dim is None:
+                dim = int(np.sum(counts))
+            if num_permutations is None:
+                num_permutations = cls.count_permutations(counts)
+            num_permutations = int(num_permutations)
+            if not 0 < num_permutations < 2**64:
+                raise OverflowError("permutation counts must fit uint64")
+            if dtype is None:
+                dtype = _infer_dtype(num_permutations)
+            classes = np.asarray(classes, dtype=perms.dtype)
+            output = np.empty(len(perms)*len(maps), dtype=dtype)
+            if len(output):
+                cls._fill_permutation_indices(output, perms, np.asarray(classes),
+                    np.asarray(counts, dtype=np.uint64), dim, num_permutations,
+                    block_size, permutation_maps=maps)
+            return output.reshape(len(perms), len(maps))
 
         if classes is None or counts is None:
             classes, counts = cls.get_permutation_class_counts(perms[0])
@@ -1366,9 +1416,12 @@ class UniquePermutations:
             dim = int(np.sum(counts))
         if num_permutations is None:
             num_permutations = cls.count_permutations(counts)
+        num_permutations = int(num_permutations)
+        if not 0 < num_permutations < 2**64:
+            raise OverflowError("permutation counts must fit uint64")
         if dtype is None:
             dtype = _infer_dtype(num_permutations)
-        counts = counts.astype(dtype)
+        counts = counts.astype(np.uint64)
 
         # set up storage for indices
         inds = np.full((len(perms),), 0, dtype=dtype)
@@ -2528,7 +2581,7 @@ class IntegerPartitionPermutations:
                                           assume_standard=False,
                                           check_partition_counts=True,
                                           dtype=None,
-                                          split_method='direct'
+                                          split_method='direct', permutation_maps=None
                                           ):
         """
         Assumes the perms all add up to the stored int
@@ -2551,14 +2604,14 @@ class IntegerPartitionPermutations:
                                                                                                                 assume_standard=assume_standard,
                                                                                                                 check_partition_counts=check_partition_counts,
                                                                                                                 split_method=split_method)
-        if assume_standard:
+        if assume_standard and permutation_maps is None:
             subinds = [
                 np.full(len(g), s, dtype=int)
                 for d, g, s in zip(partition_data, groups, totals)
             ]
         else:
             ushifts = [
-                UniquePermutations.get_permutation_indices(g, d[0], d[1], self.dim)
+                UniquePermutations.get_permutation_indices(g, d[0], d[1], self.dim, permutation_maps=permutation_maps)
                 for d, g in zip(partition_data, groups)
             ]
             if dtype is None:
@@ -2682,7 +2735,7 @@ class EmptyIntegerPartitionPermutations(IntegerPartitionPermutations):
                                           assume_standard=None,
                                           check_partition_counts=None,
                                           dtype=None,
-                                          split_method=None
+                                          split_method=None, permutation_maps=None
                                           ):
         """
 
@@ -2694,6 +2747,9 @@ class EmptyIntegerPartitionPermutations(IntegerPartitionPermutations):
         :rtype:
         """
         woof = np.asanyarray(perms)
+        if permutation_maps is not None:
+            return np.zeros((1 if woof.ndim == 1 else len(woof), len(permutation_maps)),
+                            dtype=int if dtype is None else dtype)
         if woof.ndim == 1:
             return 0
         else:
@@ -2853,18 +2909,30 @@ class SymmetricGroupGenerator:
     def to_indices(self, perms, sums=None, assume_sorted=False, assume_standard=False,
                    check_partition_counts=True,
                    preserve_ordering=True,
-                   dtype=None):
+                   dtype=None, permutation_maps=None):
         """
-        Gets the indices for the given permutations.
-        First splits by sum then allows the held integer partitioners to do the rest
+        Gets native global indices using quanta, partition and permutation offsets.
+        First splits by sum, then delegates to the held integer partitioners.
+        With ``permutation_maps`` of shape (K, dim), rank virtual rows
+        ``perms[row, permutation_maps[k]]`` without constructing their Cartesian
+        product. The result shape is ``perms.shape[:-1] + (K,)``.
         :param perms:
         :type perms:
         :return:
         :rtype:
         """
 
+        if permutation_maps is not None:
+            permutation_maps = np.asarray(permutation_maps,dtype=np.intp)
+            if (permutation_maps.ndim != 2 or permutation_maps.shape[1] != self.dim
+                    or not np.all(np.sort(permutation_maps,axis=1) == np.arange(self.dim))):
+                raise ValueError("permutation_maps must contain coordinate permutations")
+            if not len(permutation_maps):
+                shape = np.shape(perms)
+                prefix = shape[:-1] if len(shape)>1 else ((1,) if len(perms) else (0,))
+                return np.empty(prefix+(0,),dtype=int if dtype is None else dtype)
         if len(perms) == 0:
-            return np.array([], dtype='int8')
+            return np.empty((0,) if permutation_maps is None else (0,len(permutation_maps)), dtype='int8')
 
         perms = np.asanyarray(perms)
         smol = perms.ndim == 1
@@ -2893,7 +2961,8 @@ class SymmetricGroupGenerator:
         perms_inds = [p.get_partition_permutation_indices(g,
                                                  assume_standard=assume_standard,
                                                  preserve_ordering=preserve_ordering,
-                                                 check_partition_counts=check_partition_counts) for p, g in zip(partitioners, groups) ]
+                                                 check_partition_counts=check_partition_counts,
+                                                 permutation_maps=permutation_maps) for p, g in zip(partitioners, groups) ]
         if dtype is None:
             # for i,p in enumerate(perms_inds):
             #     min_p = np.min(p)
@@ -2907,7 +2976,8 @@ class SymmetricGroupGenerator:
             indices = indices[np.argsort(sorting)]
 
         if len(big_shp) > 1:
-            indices = np.reshape(indices, big_shp)
+            indices = np.reshape(indices, big_shp if permutation_maps is None
+                                 else big_shp + (len(permutation_maps),))
 
         return indices
 
@@ -3784,8 +3854,13 @@ class SymmetricGroupGenerator:
 
         yield from descend(0, 0)
 
-    def iter_permutation_rule_direct_sum(self, perms, rules, block_size=65536):
-        """Yield bounded (source positions, output occupations) blocks.
+    def iter_permutation_rule_direct_sum(self, perms, rules, block_size=65536, *, return_indices=False):
+        """Yield bounded (source positions, occupations or native indices) blocks.
+
+        ``return_indices=True`` yields one-dimensional global IDs in the same
+        convention as ``to_indices``. Ranking uses bounded representatives and
+        per-row scratch, without a restored full output-vector table. The
+        default continues to yield occupation vectors.
 
         As in ``take_permutation_rule_direct_sum``, equivalent source
         occupations share a standard representative, and rules share native
@@ -3821,7 +3896,7 @@ class SymmetricGroupGenerator:
                 source = perms[start:start+block_size].astype(np.int64, copy=False)
                 valid = np.all(source >= 0, axis=1)
                 if np.any(valid):
-                    yield start+np.flatnonzero(valid), source[valid]
+                    yield (start+np.flatnonzero(valid), self.to_indices(source[valid]) if return_indices else source[valid])
             signatures.remove(())
             if not signatures:
                 return
@@ -3889,8 +3964,15 @@ class SymmetricGroupGenerator:
                                 if len(outputs):
                                     # The representative sum is shared across
                                     # all equivalent input permutations.
-                                    yield (np.tile(rows, len(outputs)),
-                                           outputs[:, mapping].reshape(-1, self.dim))
+                                    if return_indices:
+                                        # Keep representative vectors only; rank their
+                                        # physical coordinate maps in the native kernel.
+                                        values = self.to_indices(outputs,
+                                            sums=np.full(len(outputs), int(np.sum(representative))+sum(int(x) for x in changes)+int(np.sum(positive[0]))),
+                                            assume_sorted=True, permutation_maps=mapping).reshape(-1)
+                                    else:
+                                        values = outputs[:, mapping].reshape(-1, self.dim)
+                                    yield np.tile(rows, len(outputs)), values
 
 
     def take_permutation_rule_direct_sum(self,

@@ -97,7 +97,7 @@ class ZacharyTests(TestCase):
         a_1 = 2.175 * cm2borh
         De_2 = 8.84e-12 * erg2h
         a_2 = 2.175 * cm2borh
-        hz2h = UnitsData.convert('Hertz', 'Hartrees')
+        hz2h = UnitsData.convert('Hertz', 'Hartrees', equivalences=('frequency',))
         kb = 729160000000000.0 / (2 * np.pi) * hz2h
         morse = self.harmonically_coupled_morse(De_1, a_1, re_1, De_2, a_2, re_2, kb, b_e)
         deriv_gen = FiniteDifferenceDerivative(morse, function_shape=((None, None), 0), mesh_spacing=0.001, stencil=9, logger=Logger(), parallelizer=MultiprocessingParallelizer()).derivatives(coords)
