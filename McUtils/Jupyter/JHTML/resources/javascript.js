@@ -1,8 +1,14 @@
 /* Portable McUtils state and binding adapters; no widget or notebook dependency. */
 (() => {
   'use strict';
-  if (globalThis.McUtilsJS) return;
   const entryURL = document.currentScript?.src || null;
+  const runtimeTag = document.currentScript?.dataset.mcuiRuntime ||
+    entryURL?.match(/@(mcui-[1-9][0-9]*-[0-9a-f]{64})\//)?.[1] || null;
+  if (globalThis.McUtilsJS) {
+    if(runtimeTag && McUtilsJS.runtimeTag && runtimeTag!==McUtilsJS.runtimeTag)
+      throw new Error('Different McUtils UI runtimes require separate documents');
+    return;
+  }
   const documentReady = document.readyState === 'loading' ? new Promise(resolve =>
     document.addEventListener('DOMContentLoaded', resolve, {once:true})) : Promise.resolve();
   const scopes = new WeakMap();
@@ -315,6 +321,7 @@
   const stylesheets = new Map();
   const api = {
     version: 1,
+    runtimeTag,
     webComponents: true,
     mount,
     state: root => scopes.get(root),

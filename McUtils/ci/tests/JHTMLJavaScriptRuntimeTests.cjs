@@ -186,12 +186,36 @@ function cdnAssets() {
   };
 }
 
+test('shared widget loader declares its runtime identity and rejects a different installed runtime',async()=>{
+  const dom=new JSDOM('',{runScripts:'outside-only',pretendToBeVisual:true}),w=dom.window;
+  try{
+    const api=await w.eval(fixtures.widget_inline_loader);
+    assert.equal(api.runtimeTag,fixtures.identity.tag);
+    assert.equal(await w.eval(fixtures.widget_inline_loader),api);
+    const conflicting=fixtures.widget_inline_loader.replaceAll(fixtures.identity.tag,'mcui-1-'+'0'.repeat(64));
+    assert.throws(()=>w.eval(conflicting),/Different McUtils UI runtimes/);
+  }finally{w.close();}
+});
+
+test('concurrent widget CDN requests share one versioned entry and await its dependencies',async()=>{
+  const {w,requests,errors}=automatic('<mcui-root></mcui-root>',cdnAssets());
+  try{
+    const [a,b]=await Promise.all([w.eval(fixtures.widget_cdn_loader),w.eval(fixtures.widget_cdn_loader)]);
+    assert.equal(a,b);assert.equal(a.runtimeTag,fixtures.identity.tag);
+    assert.equal(requests.filter(url=>url===cdn+'JHTML/resources/javascript.js').length,1);
+    assert.equal(requests.filter(url=>url===cdn+'Apps/resources/native.js').length,1);
+    assert.deepEqual(errors,[]);
+  }finally{w.close();}
+});
+
 test('one footer bundle automatically mounts independent WebComponents and owns their lifetime',async()=>{
   const {w,requests,errors}=automatic(fixtures.inline_multiple);
   try{
     await until(()=>[...w.document.querySelectorAll('mcui-state')].every(root=>root.controller));
     const [a,b]=w.document.querySelectorAll('mcui-state');
     assert.ok(a&&b);assert.equal(w.document.querySelectorAll('#mcutils-apps-native-js').length,1);
+    assert.equal(w.McUtilsJS.version,fixtures.identity.interface);
+    assert.equal(w.McUtilsJS.runtimeTag,fixtures.identity.tag);
     assert.equal(w.document.querySelectorAll('script').length,1);
     const slider=a.querySelector('input[type=range]');slider.value='2';
     slider.dispatchEvent(new w.Event('input',{bubbles:true}));
@@ -209,6 +233,7 @@ test('a single CDN entry activates the existing native UI and dynamically insert
   try{
     await until(()=>w.document.querySelector('mcui-state')?.controller);
     const scope=w.document.querySelector('mcui-state');
+    assert.equal(w.McUtilsJS.runtimeTag,fixtures.identity.tag);
     const tabs=scope.querySelectorAll('[data-mcui-toggle=tab]');
     assert.equal(tabs.length,2);
     tabs[1].dispatchEvent(new w.MouseEvent('click',{bubbles:true}));

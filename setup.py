@@ -18,7 +18,7 @@ except:
 
 def get_version():
     import subprocess
-    run_out = subprocess.run(['git', 'describe', '--tags', '--abbrev=0'], capture_output=True)
+    run_out = subprocess.run(['git', 'describe', '--tags', '--match', 'v*', '--abbrev=0'], capture_output=True)
     return run_out.stdout.decode().strip().strip("v")
 
 setup(

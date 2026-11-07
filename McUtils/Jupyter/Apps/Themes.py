@@ -28,8 +28,8 @@ class AppTheme:
     """
     names = ('native', 'bootstrap')
     _apis = {}
-    bootstrap_css = 'https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css'
-    bootstrap_js = 'https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js'
+    bootstrap_css = JSState.runtime_metadata()['dependencies']['bootstrap_stylesheet']
+    bootstrap_js = JSState.runtime_metadata()['dependencies']['bootstrap_script']
 
     def __init__(self, name='native'):
         if isinstance(name, AppTheme):
@@ -113,7 +113,7 @@ return widget;
 });'''.replace('PREPARE',prepare)
 
     def javascript_api(self):
-        key = (self.name,JSState.current_javascript_path())
+        key = (self.name,JSState.runtime_path(),JSState.runtime_info()['tag'])
         if key not in self._apis:
             self._apis[key] = _JHTML.JavascriptAPI(
                 mcui_mount=self.initializer(),
