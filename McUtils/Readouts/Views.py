@@ -59,9 +59,10 @@ class ReadoutPlot(ReadoutNode):
     """
     kind = "plot"
 
-    def __init__(self, graphics, caption=None, data=None, dpi=150, **opts):
+    def __init__(self, graphics, caption=None, data=None, dpi=150, interactive=None, **opts):
         super().__init__(**opts)
         self._graphics = graphics
+        self.interactive = interactive
         self.caption = caption
         if isinstance(data, dict):
             data = TabularData(data) if len({len(np.atleast_1d(v)) for v in data.values()}) == 1 \
@@ -313,7 +314,8 @@ def as_readout_node(obj, caption=None, dispatch=True, **opts):
         children = obj.children
         if len(children) == 1 and isinstance(children[0], ReadoutSection):  # e.g. a one-section view readout
             children = children[0].children
-        return ReadoutSection(*children, id=opts.get("id", obj.id), title=opts.get("title", obj.title))
+        return ReadoutSection(*children, id=opts.get("id", obj.id), title=opts.get("title", obj.title),
+                              state=obj.state,bind=obj.bind,javascript_path=obj.javascript_path)
     if isinstance(obj, ReadoutNode):
         return obj
     if isinstance(obj, (TabularData,)):

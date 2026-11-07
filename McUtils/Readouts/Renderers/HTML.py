@@ -1,8 +1,8 @@
 """
 HTML rendering for Jupyter and standalone pages.
 
-* ``mode='static'``: plain elements, with the X3DOM runtime loaded once in the document head
-  (`render_document`); good for files and for sharing.
+* ``mode='static'``: plain elements with shared scripts collected once after the
+  interface (`render_document`); good for files and for sharing.
 * ``mode='widget'``: each scene uses `X3D.to_widget()` (dynamic runtime loading), which is what
   displays reliably in Jupyter outputs.
 
@@ -12,6 +12,7 @@ Theme tokens become CSS custom properties scoped to ``.mcr-root``.
 import base64
 import html as _html
 import os
+import json
 
 from ..Nodes import (ReadoutNode, ReadoutSection, ReadoutText, ReadoutFields, ReadoutTable,
                      ReadoutArray, ReadoutImage, ReadoutScene, ReadoutGallery, Readout,
@@ -94,6 +95,8 @@ table.mcr-table th{{position:sticky;top:0;background:var(--mcr-header-fill);colo
  font-weight:600;padding:5px 12px;white-space:nowrap}}
 table.mcr-table td{{padding:3px 12px;border-top:1px solid var(--mcr-rule);white-space:nowrap}}
 table.mcr-table tbody tr:nth-child(even){{background:var(--mcr-stripe)}}
+table.mcr-table tbody tr.mcjs-selected{{outline:2px solid var(--mcr-accent);outline-offset:-2px}}
+table.mcr-table tbody tr[data-mcjs-key]{{cursor:pointer}}
 .mcr-r{{text-align:right}} .mcr-l{{text-align:left}} .mcr-c{{text-align:center}}
 .mcr-gallery{{display:flex;flex-wrap:wrap;gap:12px;margin:6px 0}}
 figure.mcr-scene{{margin:6px 0;display:inline-block;border:1px solid var(--mcr-rule);border-radius:6px;
@@ -149,8 +152,29 @@ class FragmentResult:
 class HTMLReadoutRenderer(ReadoutRenderer):
     hook_name = "readout_html"
 
+    def render(self, node, ctx):
+        from ...Jupyter.JHTML.JavaScript import JSState
+        path = getattr(node,'javascript_path',None)
+        with JSState.rendering(javascript_path=path):
+            result = super().render(node, ctx)
+        bindings = getattr(node, 'bind', None)
+        if result is not None and bindings and not isinstance(node, (ReadoutTable, ReadoutPlot, ReadoutScene)):
+            items = result if isinstance(result, list) else [result]
+            result = JSState.bind_element(self.H.Div(*items), bindings)
+        state = getattr(node, 'state', None)
+        if state is not None:
+            if not isinstance(state, JSState):
+                raise TypeError('Readout state must be a JSState')
+            items = result if isinstance(result, list) else ([] if result is None else [result])
+            result = state.to_widget(*items, mode='widget' if self.mode == 'widget' else 'html',javascript_path=path)
+        elif path is not None and result is not None:
+            items = result if isinstance(result,list) else [result]
+            result = self.H.Div(*items,data_mcjs_runtime=path)
+        return result
+
     def __init__(self, style=None, mode="static", x3dom_path=None, collapsible=None, scene_size=None,
-                 gallery_scene_size=None, css="inline", header=True):
+                 gallery_scene_size=None, css="inline", header=True, javascript_path=None,
+                 offline=False, asset_paths=None):
         """
         :param css: ``'inline'`` puts the theme ``<style>`` in the markup (the default);
             ``'stylesheet'`` leaves it out so the host page can load one shared ``mcr.css``
@@ -169,6 +193,12 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         self.css_mode = css
         self.header = header
         self.x3dom_path = x3dom_path
+        from ...Jupyter.JHTML.JavaScript import JSState
+        self.javascript_path = JSState.check_javascript_path(javascript_path)
+        self.offline = bool(offline)
+        self.asset_paths = asset_paths
+        if self.offline and mode!='static':
+            raise ValueError('offline is an HTML export option; live widgets need a transport')
         self.collapsible = self.theme.get("html.collapsible") if collapsible is None else collapsible
         self.scene_size = scene_size or self.theme.get("html.scene_size")
         self.gallery_scene_size = gallery_scene_size or self.theme.get("html.gallery_scene_size")
@@ -192,17 +222,30 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         )
 
     def render_readout(self, readout):
-        self._has_scenes = False
-        self._head = []
-        return self.render(readout, RenderContext())
+        from ...Jupyter.JHTML.JavaScript import JSState
+        with JSState.rendering(self.javascript_path,offline=self.offline,asset_paths=self.asset_paths):
+            self._has_scenes = False
+            self._head = []
+            body = self.render(readout, RenderContext())
+            return self._widget_runtime(body)
 
     def render_fragment(self, node):
-        self._has_scenes = False
-        self._head = []
-        body = self.render(node, RenderContext())
-        items = body if isinstance(body,list) else [body]
-        style = [] if self.css_mode == "stylesheet" else [self.H.Style(self.css())]
-        return self.H.Div(*style, *items, cls='mcr-root')
+        from ...Jupyter.JHTML.JavaScript import JSState
+        with JSState.rendering(self.javascript_path,offline=self.offline,asset_paths=self.asset_paths):
+            self._has_scenes = False
+            self._head = []
+            body = self.render(node, RenderContext())
+            items = body if isinstance(body,list) else [body]
+            style = [] if self.css_mode == "stylesheet" else [self.H.Style(self.css())]
+            return self._widget_runtime(self.H.Div(*style,*items,cls='mcr-root'))
+
+    def _widget_runtime(self, element):
+        if self.mode=='widget':
+            from ...Jupyter.JHTML.JavaScript import JSState
+            if any('data-mcjs-state' in getattr(child,'attrs',{}) for child in JSState._walk_elements(element)):
+                from ...Jupyter.Apps import AppTheme
+                return AppTheme.current().decorate(element)
+        return element
 
     def runtime_info(self):
         """
@@ -231,13 +274,17 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         runtime = {}
         if self._has_scenes:
             needs.add("x3dom")
-            runtime["x3dom"] = self.runtime_info()
-        head, seen = [], set()
-        for el in self._head:
-            text = el if isinstance(el, str) else el.tostring()
-            if text not in seen:
-                seen.add(text)
-                head.append(text)
+            runtime["x3dom"] = {'script':None,'stylesheet':None,'inline':True} if self.offline else self.runtime_info()
+        from ...Jupyter.JHTML.JavaScript import JSState
+        with JSState.rendering(self.javascript_path,offline=self.offline,asset_paths=self.asset_paths):
+            path = JSState.runtime_path(element,self.javascript_path)
+            shared = JSState.resource_elements(element,javascript_path=path)
+            replace = {getattr(el,'attrs',{}).get('id') for el in shared} - {None}
+            resources = JSState.unique_resources([el for el in self._head if getattr(el,'attrs',{}).get('id') not in replace]+shared)
+        if any(getattr(el,'attrs',{}).get('id')=='mcutils-apps-native-js' for el in resources):
+            needs.add('mcutils-ui')
+            runtime['mcutils-ui'] = {'script':None if path=='inline' else path,'inline':path=='inline'}
+        head = [el if isinstance(el,str) else el.tostring() for el in resources]
         css = self.css() if self.css_mode == "stylesheet" else None
         return FragmentResult(element.tostring(), needs, runtime, head, css)
 
@@ -257,6 +304,12 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         return [H.Script(src=path)]
 
     def render_document(self, readout):
+        from ...Jupyter.JHTML.JavaScript import JSState
+        with JSState.rendering(self.javascript_path,offline=self.offline,asset_paths=self.asset_paths):
+            return self._render_document(readout)
+
+    def _render_document(self, readout):
+        from ...Jupyter.JHTML.JavaScript import JSState
         H = self.H
         body = self.render_readout(readout)
         viewport=H.Meta(name='viewport')
@@ -265,15 +318,19 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         head = [H.Meta(charset="utf-8"), viewport,
                 H.Title(readout.title or "Readout"),
                 H.Style("html,body{margin:0;background:#F6F8FA} body{padding:16px 0}")]
-        if self._has_scenes and self.mode == "static":
-            head.extend(self.runtime_elements())
-        seen = set()
-        for el in self._head:
-            key = el if isinstance(el, str) else el.tostring()
-            if key not in seen:
-                seen.add(key)
-                head.append(H.RawHTML(el) if isinstance(el, str) else el)
-        return "<!DOCTYPE html>\n" + H.Html(H.Head(*head), H.Body(body), lang="en").tostring()
+        path = JSState.runtime_path(body,self.javascript_path)
+        shared = JSState.resource_elements(body,javascript_path=path)
+        replace = {getattr(el,'attrs',{}).get('id') for el in shared} - {None}
+        resources = [el for el in self._head if getattr(el,'attrs',{}).get('id') not in replace]+shared
+        if self._has_scenes and self.mode=='static' and not self.offline:
+            resources += self.runtime_elements()
+        footer = []
+        for el in JSState.unique_resources(resources):
+            if getattr(el,'tag',None)=='script' or (isinstance(el,str) and el.lstrip().startswith('<script')):
+                footer.append(H.RawHTML(el) if isinstance(el,str) else el)
+            else:
+                head.append(H.RawHTML(el) if isinstance(el,str) else el)
+        return "<!DOCTYPE html>\n" + H.Html(H.Head(*head),H.Body(body,*footer),lang='en').tostring()
 
     # ---- nodes ------------------------------------------------------------------------- #
     def _children(self, node, ctx):
@@ -341,6 +398,18 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         head = H.Thead(H.Tr(*[H.Th(h, cls=a) for h, a in zip(data.headers(self.theme), aligns)]))
         rows = [H.Tr(*[H.Td(v, cls=a) for v, a in zip(r, aligns)]) for r in data.format_rows(self.theme)]
         table = H.Table(head, H.Tbody(*rows), cls="mcr-table")
+        if node.bind:
+            from ...Jupyter.JHTML.JavaScript import JSState, _json_value
+            if not node.row_key:
+                raise ValueError('A bound ReadoutTable requires row_key for stable row identity')
+            keys = [_json_value(value) for value in data[node.row_key].values]
+            if any(key is None or isinstance(key, (dict, list, bool)) for key in keys):
+                raise ValueError('Table row keys must be non-null strings or numbers')
+            if len(set(keys)) != len(keys):
+                raise ValueError('Table row keys must be unique')
+            for row, key in zip(rows, keys):
+                row.attrs = dict(row.attrs, **{'data-mcjs-key': json.dumps(key), 'tabindex': '0'})
+            table = JSState.bind_element(table, node.bind, adapter='table')
         return self._block_title(node) + [H.Div(table, cls="mcr-table-wrap")]
 
     @handles(ReadoutArray)
@@ -391,7 +460,11 @@ class HTMLReadoutRenderer(ReadoutRenderer):
         cap = node.format_caption(self.theme)
         if cap:
             kids.append(H.Figcaption(cap))
-        return H.Figure(*kids, cls="mcr-scene", style=f"width:{w + 2}px")
+        result = H.Figure(*kids, cls="mcr-scene", style=f"width:{w + 2}px")
+        if node.bind:
+            from ...Jupyter.JHTML.JavaScript import JSState
+            result = JSState.bind_element(result, node.bind, adapter='x3d')
+        return result
 
     @handles(ReadoutScene)
     def render_scene(self, node, ctx):
@@ -400,6 +473,16 @@ class HTMLReadoutRenderer(ReadoutRenderer):
     @handles(ReadoutPlot)
     def render_plot(self, node, ctx):
         H = self.H
+        graphics = node.get_graphics()
+        figure = getattr(graphics, 'figure', graphics)
+        if node.interactive is not False and getattr(figure, '_js_adapter', None) == 'plotly':
+            body = figure.to_jhtml(bind=node.bind)
+            kids = [body]
+            if node.caption:
+                kids.append(H.Figcaption(node.caption))
+            return self._block_title(node) + [H.Figure(*kids, cls='mcr-plot')]
+        if node.bind:
+            raise ValueError('Bound ReadoutPlot requires an interactive Plotly figure')
         try:
             body = H.RawHTML(node.to_svg())
         except Exception:

@@ -18,6 +18,7 @@
 
     connectedCallback() {
       if (this._events) return;
+      globalThis.McUtilsJS?.ensureNativeStyles?.(this)?.catch(error=>console.error(error));
       this._events = new AbortController();
       this.connect();
       if (this.constructor.watchChildren) {

@@ -3,6 +3,8 @@ Provides access to the JHTML interface for building quality Jupyter interfaces
 """
 
 __all__ = []
+from .JavaScript import *; from .JavaScript import __all__ as exposed
+__all__ += exposed
 from .JHTML import *; from .JHTML import __all__ as exposed
 __all__ += exposed
 from .WidgetTools import *; from .WidgetTools import __all__ as exposed

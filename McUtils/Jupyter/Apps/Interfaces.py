@@ -11,6 +11,7 @@ from ..JHTML.HTMLWidgets import HTMLWidgets
 from .Themes import AppTheme, AppHTML as JHTML
 import functools
 from ..JHTML.WidgetTools import JupyterAPIs, frozendict
+from ..JHTML.JavaScript import JSState
 
 class JHTMLConversionError(Exception):
     """
@@ -157,27 +158,40 @@ class WidgetInterface(metaclass=abc.ABCMeta):
         """Compatibility entry point; Bootstrap is an explicit presentation choice."""
         return AppTheme('bootstrap').resources()
 
-    def to_static_html(self, include_bootstrap=None, create_body=True, ui_theme=None):
+    def to_static_html(self, include_bootstrap=None, create_body=True, ui_theme=None,
+                       javascript_path=None, offline=False, asset_paths=None):
         """Export using the selected Apps theme, with no Bootstrap by default.
 
         Python-only actions are disabled in static exports; notebook widgets keep
         their live callbacks. Explicit ``include_bootstrap=True`` selects that UI.
+        ``javascript_path`` selects one inline or external shared WebComponent
+        library; ``offline=True`` embeds its supported view dependencies too.
         """
         selected = 'bootstrap' if include_bootstrap is True else ui_theme
-        with AppTheme.rendering(selected or getattr(self, 'ui_theme', None), mode='static') as (theme, _):
+        path = javascript_path if javascript_path is not None else getattr(self,'javascript_path',None)
+        with AppTheme.rendering(selected or getattr(self, 'ui_theme', None), mode='static',
+                                javascript_path=path,offline=offline,asset_paths=asset_paths) as (theme, _):
             if hasattr(self,'to_jhtml'):
                 body=self.to_jhtml()
             else:
                 body=self.to_widget()
                 if not isinstance(body,JHTML.HTML.XMLElement):
                     raise ValueError('This widget requires a live Python kernel')
-            resources = theme.resources()
+            body = theme.component('root',body,mode='static',cls=['mcui-root','mcui-'+theme.name])
+            path = JSState.runtime_path(body,path)
+            resources = theme.resources(javascript_path=path)+JSState.resource_elements(body,javascript_path=path)
             if include_bootstrap is False and theme.name == 'bootstrap':
-                resources = []
+                resources = [element for element in resources if not element.attrs.get('id','').startswith('mcutils-bootstrap')]
+                for element in JSState._walk_elements(body):
+                    if getattr(element,'tag',None)=='mcui-bootstrap':
+                        element.attrs=dict(element.attrs,**{'data-mcui-bootstrap-load':'false'})
+            resources = JSState.unique_resources(resources)
+            styles = [element for element in resources if getattr(element,'tag',None)!='script']
+            scripts = [element for element in resources if getattr(element,'tag',None)=='script']
             if create_body:
-                return JHTML.HTML.Html(JHTML.HTML.Head(*resources),
-                                       JHTML.HTML.Body(body, cls=['mcui-root','mcui-'+theme.name]))
-            return JHTML.HTML.Div(*resources, body, cls=['mcui-root','mcui-'+theme.name])
+                return JHTML.HTML.Html(JHTML.HTML.Head(*styles),
+                                       JHTML.HTML.Body(body,*scripts, cls=['mcui-root','mcui-'+theme.name]))
+            return JHTML.HTML.Div(*styles,body,*scripts,cls=['mcui-root','mcui-'+theme.name])
 
     _display_locks = set()
     def display(self):
@@ -225,11 +239,25 @@ class Component(WidgetInterface):
         if method is not None:
             @functools.wraps(method)
             def themed(self, *args, **kw):
-                with AppTheme.rendering(getattr(self, 'ui_theme', None)):
-                    return method(self, *args, **kw)
+                depth = getattr(self, '_js_render_depth', 0)
+                self._js_render_depth = depth + 1
+                try:
+                    with AppTheme.rendering(getattr(self, 'ui_theme', None),javascript_path=getattr(self,'javascript_path',None)):
+                        result = method(self, *args, **kw)
+                        if depth == 0:
+                            if getattr(self, 'js_bind', None):
+                                result = JSState.bind_element(result, self.js_bind)
+                            if getattr(self, 'js_state', None) is not None:
+                                result = self.js_state.to_widget(result,mode='html' if AppTheme.mode() == 'static' else 'widget',
+                                                                 javascript_path=getattr(self,'javascript_path',None))
+                            elif getattr(self,'javascript_path',None) is not None:
+                                result.attrs=dict(result.attrs,**{'data-mcjs-runtime':self.javascript_path})
+                        return result
+                finally:
+                    self._js_render_depth = depth
             cls.to_jhtml = themed
 
-    def __init__(self, dynamic=True, debug_pane=None, ui_theme=None, **attrs):
+    def __init__(self, dynamic=True, debug_pane=None, ui_theme=None, state=None, bind=None, javascript_path=None, **attrs):
         """
         **LLM Docstring**
 
@@ -248,7 +276,15 @@ class Component(WidgetInterface):
         self._widget_root = None
         attrs['dynamic'] = dynamic
         self._attrs = attrs
-        self.debug_pane = DefaultOutputWidget.get_default() if debug_pane is None else debug_pane
+        self.debug_pane = debug_pane  # Output widgets are allocated only on the widget path.
+        if state is not None and not isinstance(state, JSState):
+            raise TypeError('state must be a JSState')
+        self.js_state, self.js_bind = state, bind
+        self.javascript_path = JSState.check_javascript_path(javascript_path)
+
+    def to_html(self, **opts):
+        """Standalone HTML, including JSState bindings, without a widget transport."""
+        return self.to_static_html(**opts).tostring()
     @property
     def attrs(self):
         """
@@ -564,15 +600,18 @@ class Component(WidgetInterface):
         ...
     def _prepare_widget_theme(self):
         name = AppTheme(self.ui_theme).name if self.ui_theme is not None else AppTheme.current().name
-        if getattr(self, '_widget_theme', None) != name:
+        path = JSState.current_javascript_path()
+        if getattr(self, '_widget_theme', None) != name or getattr(self,'_widget_javascript_path',None)!=path:
             self._widget_cache = None
             self._widget_root = None
             self._widget_theme = name
+            self._widget_javascript_path = path
 
-    def to_widget(self, parent=None):
+    def to_widget(self, parent=None, javascript_path=None):
         if parent is not None:
             self._parents.add(parent)
-        with AppTheme.rendering(self.ui_theme) as (theme, outermost):
+        path = javascript_path if javascript_path is not None else self.javascript_path
+        with AppTheme.rendering(self.ui_theme,javascript_path=path) as (theme, outermost):
             self._prepare_widget_theme()
             if self._widget_cache is None:
                 with DefaultOutputWidget(self.debug_pane):
@@ -645,6 +684,8 @@ class WrapperComponent(Component):
         :param attrs: extra attributes (merged into the outer wrapper's theme)
         """
 
+        js_state, js_bind = attrs.pop('state', None), attrs.pop('bind', None)
+        javascript_path = attrs.pop('javascript_path',None)
         self.items, attrs = self.manage_items(items, attrs)
 
         if wrappers is None:
@@ -668,7 +709,7 @@ class WrapperComponent(Component):
             self.wrapper = wrappers[0][1]
         if is_dynamic is not None:
             attrs['dynamic'] = is_dynamic
-        super().__init__(ui_theme=ui_theme, **attrs) # delegate attribute updates to the theme
+        super().__init__(ui_theme=ui_theme,state=js_state,bind=js_bind,javascript_path=javascript_path,**attrs) # delegate attribute updates to the theme
 
         # self.item_attrs = theme.get(item[0], {})
         # self.item = item[-1]
@@ -2065,6 +2106,9 @@ class Card(ComponentContainer):
 
     def to_readout(self, **opts):
         from ...Readouts import ReadoutPanel
+        opts.setdefault('state',self.js_state)
+        opts.setdefault('bind',self.js_bind)
+        opts.setdefault('javascript_path',self.javascript_path)
         parts = self.create_components()
         opts.setdefault('ui_theme',self.ui_theme or AppTheme.selected())
         attrs = dict(self.attrs)
@@ -2857,6 +2901,9 @@ class Layout(Component):
         return None, [self.wrap_item(e, item_attrs) for e in elements]
     def to_readout(self, **opts):
         from ...Readouts import ReadoutGrid, ReadoutFlex
+        opts.setdefault('state',self.js_state)
+        opts.setdefault('bind',self.js_bind)
+        opts.setdefault('javascript_path',self.javascript_path)
         if isinstance(self, Grid):
             return ReadoutGrid.from_layout(self, **opts)
         if isinstance(self, Flex):

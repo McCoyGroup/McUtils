@@ -7,6 +7,7 @@ from .Themes import AppTheme, AppHTML as JHTML
 
 from .Interfaces import Component, ListGroup, Dropdown, Progress
 from .Variables import Var, InterfaceVars
+from ..JHTML.JavaScript import JSVar, JSState
 
 __all__ = [
     "Control",
@@ -53,6 +54,8 @@ class Control(Component):
         :param parent: the parent component
         :return: the widget
         """
+        if isinstance(self.var, JSVar):
+            return super().to_widget(parent=parent)
         self._prepare_widget_theme()
         needs_link = self._widget_cache is None
         widg = super().to_widget(parent=parent)
@@ -90,6 +93,8 @@ class Control(Component):
 
         :return: the value
         """
+        if isinstance(self.var, JSVar):
+            raise AttributeError('A JSVar control has no current Python value; use an explicit VarBridge')
         return self.get_value()
     @value.setter
     def value(self, v):
@@ -101,6 +106,8 @@ class Control(Component):
 
         :return: the value
         """
+        if isinstance(self.var, JSVar):
+            raise AttributeError('A JSVar control has no current Python value; use an explicit VarBridge')
         self.var.set_value(v, caller=self)
         self.set_value()
     def observe(self, fn, names=None):
@@ -145,6 +152,8 @@ class Control(Component):
         :return: the control
         :rtype: Control
         """
+        if isinstance(var, JSVar) and value is None:
+            value = var.initial
         if control_type is None:
             control_type = cls.infer_control(field_type=field_type, value=value, **attrs)
         if isinstance(control_type, str):
@@ -196,6 +205,8 @@ class ValueWidget(Control):
         :param namespace: the variable namespace
         """
         super().__init__(var, namespace=namespace)
+        if isinstance(self.var, JSVar):
+            return
         if value is not None:
             self.var.value = value
         if self.var.value is None:
@@ -273,6 +284,15 @@ class InputField(ValueWidget):
         # if value is not None and not isinstance(value, str):
         #     value = str(value)
         # self._attrs['value'] = value
+        if isinstance(self.var, JSVar):
+            attrs = {key: value for key, value in self.attrs.items()
+                     if key not in ('tag', 'track_value', 'continuous_update', 'dynamic')}
+            initial = self.var.initial
+            attrs['value'] = '' if initial is None else str(initial)
+            prop = 'checked' if attrs.get('type') in ('checkbox', 'radio') else 'value'
+            if prop == 'checked' and initial:
+                attrs['checked'] = True
+            return JSState.bind_element(JHTML.Input(**attrs), {prop: self.var})
         attrs = dict(self.attrs, value=str(self.var.value) if self.var.value is not None else '')
         field = JHTML.Input(**attrs)
         return field
@@ -480,6 +500,10 @@ class TextArea(InputField):
 
         :return: the JHTML element
         """
+        if isinstance(self.var, JSVar):
+            attrs = {key: value for key, value in self.attrs.items()
+                     if key not in ('tag', 'track_value', 'continuous_update', 'dynamic')}
+            return JSState.bind_element(JHTML.Textarea(self.var.initial or '', **attrs), {'value': self.var})
         field = JHTML.Textarea(**self.attrs)
         return field
 Control.control_types['TextArea'] = TextArea
@@ -616,14 +640,14 @@ class Selector(ChangeTracker):
         :rtype: list
         """
         if self.multiple:
-            vals = self.var.value
+            vals = self.var.initial if isinstance(self.var, JSVar) else self.var.value
             if vals is None:
                 vals = []
             elif isinstance(vals, str):
                 vals = vals.split("&&")
             opts = [JHTML.Option(k, value=v, selected="true") if v in vals else JHTML.Option(k, value=v) for k,v in self._options]
         else:
-            val = self.var.value
+            val = self.var.initial if isinstance(self.var, JSVar) else self.var.value
             opts = [JHTML.Option(k, value=v, selected=(val is not None and v == val)) for k,v in self._options]
         return opts
     def to_jhtml(self):
@@ -634,6 +658,13 @@ class Selector(ChangeTracker):
 
         :return: the JHTML element
         """
+        if isinstance(self.var, JSVar):
+            import json
+            attrs = {key: value for key, value in self.attrs.items()
+                     if key not in ('track_value', 'continuous_update', 'dynamic')}
+            options = [JHTML.HTML.Option(label, value=str(value),
+                         **{'data-mcjs-value': json.dumps(value)}) for label, value in self._options]
+            return JSState.bind_element(JHTML.Select(*options, **attrs), {'value': self.var})
         field = self.base(*self._build_options_list(), **self.attrs)
         return field
 Control.control_types['Selector'] = Selector
@@ -653,6 +684,12 @@ class VariableDisplay(Control):
         :param attrs: extra pane attributes
         """
         super().__init__(var, namespace=namespace)
+        if isinstance(self.var, JSVar):
+            if pane is not None:
+                raise ValueError('JSVar VariableDisplay renders HTML; an output pane requires Python Var')
+            self.attrs = attrs
+            self.out = None
+            return
         if pane is None:
             pane = JHTML.OutputArea(autoclear=autoclear, **attrs)
         self.out = pane
@@ -695,6 +732,8 @@ class VariableDisplay(Control):
 
         :return: the output pane
         """
+        if isinstance(self.var, JSVar):
+            return JSState.bind_element(JHTML.Span(**self.attrs), {'text': self.var})
         with self.out:
             self.set_value()
         return self.out
@@ -718,6 +757,9 @@ class FunctionDisplay(Component):
         :param namespace: the variable namespace
         :param attrs: extra pane attributes
         """
+        vars = vars if isinstance(vars, InterfaceVars) else tuple(vars)
+        if any(isinstance(variable, JSVar) for variable in vars):
+            raise TypeError('FunctionDisplay executes Python; connect JSVar through VarBridge to a Python Var')
         super().__init__()
         if pane is None:
             pane = JHTML.OutputArea(autoclear=autoclear, **attrs)

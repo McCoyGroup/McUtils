@@ -43,7 +43,7 @@ class ThemeTests(unittest.TestCase):
         self.assertNotIn('cdn.jsdelivr',native);self.assertNotIn('context.bootstrap',native)
         explicit=layout.to_static_html(ui_theme='bootstrap').tostring()
         self.assertIn('bootstrap@5.1.3',explicit);self.assertIn('class="card"',explicit)
-        self.assertNotIn('mcutils-apps-native-css',explicit)
+        self.assertFalse(any(attrs.get('id')=='mcutils-apps-native-css' for tag,attrs in Markup(explicit).elements if tag in ('style','link')))
         self.assertNotIn('jquery',explicit)
     def test_theme_scope_is_restored_on_exception(self):
         with self.assertRaises(RuntimeError):
@@ -72,7 +72,9 @@ class ThemeTests(unittest.TestCase):
     def test_native_navigation_descriptors(self):
         for component in [Dropdown('Menu',{'Item':None}),Tabs({'One':'First','Two':'Second'}),Accordion({'Section':'Content'})]:
             html=component.to_static_html().tostring()
-            self.assertNotIn('data-bs-',html);self.assertIn('data-mcui-',html)
+            attrs=[attrs for _,attrs in Markup(html).elements]
+            self.assertFalse(any(key.startswith('data-bs-') for item in attrs for key in item))
+            self.assertTrue(any(key.startswith('data-mcui-') for item in attrs for key in item))
             self.assertNotIn('context.bootstrap',html)
     def test_grid_spans_infer_exact_tracks(self):
         grid=Grid([[Grid.Item('Span',row_span=2,col_span=2)]])
@@ -270,7 +272,7 @@ class WebComponentTests(unittest.TestCase):
             self.assertTrue({'mcui-grid','mcui-flex','mcui-panel','mcui-panel-header',
                              'mcui-panel-body','mcui-panel-footer'} <= tags)
         bootstrap=Markup(layout.to_static_html(ui_theme='bootstrap').tostring())
-        self.assertFalse(any(tag.startswith('mcui-') for tag,attrs in bootstrap.elements))
+        self.assertEqual({tag for tag,attrs in bootstrap.elements if tag.startswith('mcui-')},{'mcui-bootstrap'})
 
     def test_interactive_components_emit_their_own_custom_elements(self):
         from McUtils.Jupyter import Opener,Carousel,Tooltip,Popover
