@@ -6167,6 +6167,7 @@ class PlotlyAxes(GraphicsAxes):
 
 class PlotlyFigure(GraphicsFigure):
     Axes = PlotlyAxes
+    _js_adapter = 'plotly'
     default_export_format = 'svg'
     def __init__(self, axes=None, layout=None, export_format=None,
                  width=500,
@@ -6546,6 +6547,36 @@ class PlotlyFigure(GraphicsFigure):
             footer = footer.replace("</script>",  "})()'></script>", 1)
             html = header + tag + footer
         return html
+    def to_jhtml(self, bind=None):
+        """An interactive HTML element using the shared JavaScript state runtime.
+
+        Bound figures inherit a containing JSState. Unbound figures own an empty
+        scope, so ordinary plotting retains hover/pan/zoom without a kernel.
+        The runtime de-duplicates Plotly loading and disposes removed figures.
+        """
+        from ..Jupyter.JHTML import HTML, JSState
+        spec = self.prep_dict()
+        annotations = spec.pop('annotations', None)
+        if annotations:
+            spec['layout']['annotations'] = annotations
+        # Plot data may contain NaN gaps; unlike state values, Plotly encodes
+        # those as null. Use its existing serializer before the finite manifest.
+        import json
+        from plotly.utils import PlotlyJSONEncoder
+        encoded = json.dumps(spec, cls=PlotlyJSONEncoder)
+        spec = json.loads(encoded)
+        spec['layout'].pop('width', None)
+        # A percentage width inside Readouts' inline-block figure has no
+        # independent intrinsic width. Plotly alternates its paper div between
+        # pixels and percentages as it remeasures that container, collapsing it
+        # on redraw. Preserve the authored width and clamp it to smaller hosts.
+        element = HTML.Div(style='width:{}px;max-width:100%;min-width:0;height:{}px;'.format(self.width, self.height))
+        element = JSState.bind_element(element, bind, adapter='plotly',
+                    options=dict(figure=spec, script=None if JSState.is_offline() else self.plotly_cdn,
+                                 mathjax=self.mathjax_cdn if self.embed_mathjax and '$' in encoded else None,
+                                 config=dict(responsive=True, displaylogo=False)))
+        return element if bind else JSState().to_widget(element)
+
     def to_html(self):
         """
         **LLM Docstring**

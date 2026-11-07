@@ -95,15 +95,18 @@ class LevelTests(unittest.TestCase):
         for lvl in (1, 2, 3):
             _, tools = make(lvl)
             text = " ".join(tools.instructions.split())
-            self.assertIn("WRITE EVERY NUMBER AS A PLACEHOLDER", text, lvl)
+            lead = "WRITE VALUES FROM THE DATA AS PLACEHOLDERS" if lvl == 1 else "WRITE VALUES AS PLACEHOLDERS"
+            self.assertIn(lead, text, lvl)
             self.assertIn("{r3.frequency[2]}", text, lvl)
-            self.assertIn("unit", text.split("WRITE EVERY NUMBER AS A PLACEHOLDER", 1)[1][:600], lvl)
-            self.assertIn("Never type" if lvl == 1 else "you never copy a digit", text, lvl)
+            self.assertIn("unit", text.split(lead, 1)[1][:600], lvl)
+            self.assertIn("never mistyped" if lvl == 1 else "you never copy a digit", text, lvl)
+            self.assertIn("{=300 K}", text, lvl)               # a number from outside the data has its own marker
+            self.assertNotIn("ungrounded", text, lvl)           # the number check is only described when it is on
             desc = {t["name"]: t["description"] for t in tools.tools()}
             for name in ("add_text", "set_caption"):
                 self.assertIn("placeholder", desc[name], (lvl, name))
             if lvl > 1:
-                self.assertIn("WRITE EVERY NUMBER AS A PLACEHOLDER", desc["add_text"])
+                self.assertIn("WRITE VALUES FROM THE DATA AS PLACEHOLDERS", desc["add_text"])
 
     def test_derived_values_are_mentioned_only_when_on(self):
         for lvl in (1, 2, 3):
@@ -139,17 +142,17 @@ class LevelTests(unittest.TestCase):
 
     def test_compact_peek_and_compile(self):
         doc, tools = make(1)
-        text = ok(tools.call("peek", {"handle": "s0", "section": "frequencies"}))
+        text = ok(tools.call("peek", {"handle": "s0", "section": "frequencies", "expand": True}))
         self.assertFalse(text.startswith("Toy s0"), text[:40])
         _, tools2 = make(2)
-        self.assertTrue(ok(tools2.call("peek", {"handle": "s0", "section": "frequencies"})).startswith("Toy s0"))
+        self.assertTrue(ok(tools2.call("peek", {"handle": "s0", "section": "frequencies", "expand": True})).startswith("Toy s0"))
         ok(tools.call("apply_template", {"handle": "s0"}))
         self.assertIn("answer the user now", ok(tools.call("compile"))["next"])
         self.assertNotIn("next", ok(tools2.call("compile")))
 
     def test_errors_say_whether_to_retry(self):
         for lvl in (1, 2, 3):
-            doc, tools = make(lvl)
+            doc, tools = make(lvl, policy="grounded")
             ok(tools.call("apply_template", {"handle": "s0"}))
             self.assertEqual(tools.call("apply_template", {"handle": "nope"}).error["retry"], "no")
             self.assertEqual(tools.call("add_text", {"text": "At 1700.5.", "cites": ["r2"]}).error["retry"], "once")
@@ -164,7 +167,7 @@ class LevelTests(unittest.TestCase):
 
 class ApplyEditsTests(unittest.TestCase):
     def setUp(self):
-        self.doc, self.tools = make(2, apply_edits=True)
+        self.doc, self.tools = make(2, apply_edits=True, policy="grounded")
         ok(self.tools.call("apply_template", {"handle": "s0"}))      # h1 r1 | h2 r2, revision 1
 
     def test_several_steps_one_revision(self):

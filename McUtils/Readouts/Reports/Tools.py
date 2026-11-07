@@ -18,16 +18,28 @@ builds for them can't be edited, captioned, moved or removed by the tools (``cod
 text and other blocks around them. The locked block ids are kept in ``doc.meta["locked"]`` (saved with the report), and
 the owner can change them with `ReportDocument.lock` / `unlock`.
 
-Under the ``grounded`` policy text must cite readout blocks (``code="needs_citation"``), and a number in it that does
-not appear in the cited blocks' data is rejected with ``code="ungrounded"`` and the unmatched numbers, and nothing is
-written. Accepted text is marked ``checked`` (a number was verified) or ``no_numbers`` (nothing to verify); the
-receipt of an accepted text lists ``numbers``: which cited value (block, label, row, unit) each number matched, and
-the placeholder (``use``) that would have written it. The match is unit-aware (see `check_grounding`). ``unchecked``
-accepts the text and marks it as unchecked. ``structure_only`` turns the text tools off (``code="writing_disabled"``).
-
+The default policy is ``unchecked``: text is accepted as written and the report says how its numbers were written.
 Values should be written as placeholders (``{r3.frequency[2]}``): the server writes the number and its unit label from
-the data, so nothing is mistyped or given in the wrong unit (`McUtils.Readouts.Reports.Fill`). Typing the number is
-allowed, and then the unit-aware check is the safety net; an ``ungrounded`` refusal shows the placeholder that matches.
+the data, so nothing is mistyped, given in the wrong unit or left behind when the data changes
+(`McUtils.Readouts.Reports.Fill`). The tools encourage that without requiring it (`McUtils.Readouts.Reports.Advice`):
+the receipts of ``add_readout`` / ``apply_template``, the ``values`` tool and the footer of ``peek`` list each block's
+placeholders; ``compile(full_text=True)`` shows a paragraph as it was written, placeholders included; a text's result
+carries ``notes`` on the numbers it typed (a value of the data gets its placeholder, any other is offered the literal
+marker ``{=300 K}`` for a number that comes from outside the data); with ``autolink`` the server rewrites typed numbers
+that are exactly a value of the data into placeholders; a paragraph can declare its ``basis`` (``data``,
+``background``, ``user_input``); and ``compile`` reports the ``coverage`` (placeholders, literals, typed). None of
+that refuses a text.
+
+Under the ``grounded`` policy (opt-in: ``--policy grounded``) text must cite readout blocks (``code="needs_citation"``,
+unless its ``basis`` says it is not about the data), and a number in it that does not appear in the cited blocks' data
+is rejected with ``code="ungrounded"`` and the unmatched numbers, and nothing is written; literals (``{=300 K}``) and
+placeholders are not checked. Accepted text is marked ``checked`` (a number was verified) or ``no_numbers`` (nothing to
+verify); the receipt of an accepted text lists ``numbers``: which cited value (block, label, row, unit) each number
+matched, and the placeholder (``use``) that would have written it. The match is unit-aware (see `check_grounding`).
+Under ``unchecked`` a text is marked ``unchecked`` if it types a number (other than a small integer or a year) and
+``checked`` or ``no_numbers`` if the server wrote every number. ``structure_only`` turns the text tools off
+(``code="writing_disabled"``).
+
 Computed values (``{mean(...)}``) are off unless ``allow_derived``; ``apply_edits`` (several edits in one atomic call)
 exists only with ``apply_edits=True``.
 """
@@ -37,8 +49,10 @@ import re
 from ...Data import UnitsData
 from ...JobDrivers.Tools import ToolSet
 from ...JobDrivers.Answers import validate_answer
-from .Document import ReportOperationError, Prose, Heading
-from .Grounding import WritingPolicy
+from .Document import ReportOperationError, Prose, Heading, ReadoutBlock, PROSE_BASES
+from .Grounding import WritingPolicy, extract_numbers
+from . import Advice as _adv
+from .Fill import find_markers
 from .Templates import find_report_template, template_menu
 from .Instructions import context_level as _level_of, report_instructions
 
@@ -50,8 +64,9 @@ REPORT_HINTS = {
               "recreate it, rewrite it somewhere else or add text next to it to stand in for the edit, unless the "
               "user separately asks for supplementary text.",
     "ungrounded": "Do not type the number: write the placeholder the error shows (such as {r3.frequency[2]}) and the "
-                  "server writes the value with its unit, or leave the number out, and try once more. If it is "
-                  "refused again, tell the user.",
+                  "server writes the value with its unit. A number that comes from outside the data (a setup value, a "
+                  "literature value) is marked {=300 K}; otherwise leave it out. Try once more. If it is refused "
+                  "again, tell the user.",
     "bad_reference": "A placeholder is {BLOCK.COLUMN[ROW]} with a readout block id, a column from the error's "
                      "`choices` and a 1-based row, such as {r3.frequency[2]}. Correct it and try once more.",
     "unit_mismatch": "Write the placeholder alone, such as {r3.frequency[2]}, with no unit after it: the server adds "
@@ -59,7 +74,8 @@ REPORT_HINTS = {
     "derived_disabled": "This report only takes values as the data shows them: use single placeholders like "
                         "{r3.frequency[2]}, and leave the computation to the reader.",
     "needs_citation": "Pass `cites`: the ids of the readout blocks the text is about (from outline or compile), then "
-                      "try again.",
+                      "try again. Text that is not about the data can say so with basis='background' (or "
+                      "'user_input'); a number in it that comes from outside the data is written {=300 K}.",
     "unknown_block": "Block ids (h1, r2, p1, ...) come from outline or compile; a source handle or a section name is "
                      "not a block id.",
     "unknown_source": "Call list_sources for the handles. If the source the user asked about is not listed, tell "
@@ -94,7 +110,7 @@ REPORT_RETRY.update({code: "after_fix" for code in ("needs_citation", "unknown_b
 # which tools each context level offers (see `McUtils.Readouts.Reports.Instructions`); ``render`` is added whenever
 # there is a renderer. At level 1 ``list_sources`` / ``describe_source`` are added back when the catalog is too large
 # to list in the instructions.
-_ALL = ("list_sources", "describe_source", "peek", "outline", "compile", "checkpoint", "diff", "apply_template",
+_ALL = ("list_sources", "describe_source", "peek", "values", "outline", "compile", "checkpoint", "diff", "apply_template",
         "add_heading", "add_readout", "add_text", "set_caption", "edit_text", "move", "move_section", "remove",
         "move_source", "apply_edits", "render")
 # ``apply_edits`` is never part of a level: the owner turns it on with ``apply_edits=True`` (``--apply-edits``).
@@ -103,21 +119,26 @@ LEVEL_TOOLS = {
         "edit_text", "move_section", "remove", "move_source", "render"),
     2: tuple(t for t in _ALL if t != "apply_edits"),
     3: tuple(t for t in _ALL if t != "apply_edits"),
+    # level 1 has no ``values``: its receipts and ``peek`` footers list the placeholders (``include_tools`` adds it)
 }
 
 # one-sentence descriptions for level 1 (the instructions carry the rest)
 _SHORT = {
     "list_sources": "The sources: handle, title and template.",
     "describe_source": "A source's sections and its template.",
-    "peek": "The data of one section of a source (handle + section name), as the report shows it.",
+    "peek": "One section (handle + section name) as placeholders: a line per column with its placeholder, rows and an "
+            "example. expand=true gives the text with the values.",
     "compile": "Reads the whole report back (blocks, text statuses, problems, warnings). Changes nothing.",
     "diff": "What changed since a baseline: 'last_change', 'start' or 'template'.",
     "apply_template": "Builds the source's standard report (headings and tables) in one call.",
     "add_heading": "Adds a section heading.",
     "add_readout": "Adds a table/figure of one source's sections (include: section names).",
-    "add_text": "Adds a paragraph. cites: readout ids. Write every number as a placeholder like {r3.frequency[2]} "
-                "(the server fills in number and unit); do not type numbers.",
-    "set_caption": "Sets a readout block's caption; write numbers as placeholders like {r3.frequency[2]}.",
+    "values": "A block's placeholders (block id; column for every row).",
+    "add_text": "Adds a paragraph. cites: readout ids. Write values from the data as placeholders like "
+                "{r3.frequency[2]} (the server fills in number and unit); a number from outside the data is "
+                "{=300 K}.",
+    "set_caption": "Sets a readout block's caption; write values from the data as placeholders like "
+                   "{r3.frequency[2]}.",
     "edit_text": "Replaces the text of a paragraph or heading.",
     "move_section": "Moves a heading and everything under it to after a block (or 'start').",
     "move_source": "Moves all sections of one source together to after a block (or 'start').",
@@ -137,18 +158,19 @@ _AFTER = {"type": "string", "minLength": 1, "maxLength": 40,
 _NAMES = {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 80}, "maxItems": 40}
 
 
-def report_toolset(doc, catalog, renderer=None, policy="grounded", rel_tol=1e-3, small_int_max=10, year_range=(1900, 2100), out_dir=None,
+def report_toolset(doc, catalog, renderer=None, policy="unchecked", rel_tol=1e-3, small_int_max=10, year_range=(1900, 2100), out_dir=None,
                    on_change=None, hints=None, allow_derived=False, apply_edits=False, context_level=2,
-                   include_tools=None, exclude_tools=None, inline_max=8, unit_style=None):
+                   include_tools=None, exclude_tools=None, inline_max=8, unit_style=None, autolink=False, advice=True):
     """
     The tools for editing ``doc`` (a `ReportDocument` built against ``catalog``).
 
     :param renderer: a `ReportRenderer`; the ``render`` tool is only defined when one is given
-    :param policy: a `WritingPolicy` (or its value): ``grounded`` (default), ``unchecked`` or ``structure_only``
+    :param policy: a `WritingPolicy` (or its value): ``unchecked`` (default: text is accepted, its numbers are not
+        checked against the data), ``grounded`` (numbers must be in the cited data, text must cite) or ``structure_only``
     :param out_dir: where ``render`` writes (required with ``renderer``)
-    :param rel_tol: relative tolerance of the number check under ``grounded`` (a number also matches within half a unit
-        of its last written digit); ``small_int_max``: integers up to this are not checked; ``year_range``: four-digit
-        integers in this range are taken to be years and not checked (``None`` checks them)
+    :param rel_tol: relative tolerance of the number check under ``grounded`` and of the notes (a number also matches
+        within half a unit of its last written digit); ``small_int_max``: integers up to this are not checked or
+        commented on; ``year_range``: four-digit integers in this range are taken to be years (``None`` includes them)
     :param hints: ``{error code: sentence}`` attached to error results as ``hint`` (see `ToolSet`); the default is
         `REPORT_HINTS`, ``{}`` turns them off
     :param on_change: ``callable(doc)`` called after every successful mutating tool (the MCP server saves the file here)
@@ -167,9 +189,15 @@ def report_toolset(doc, catalog, renderer=None, policy="grounded", rel_tol=1e-3,
     :param unit_style: how filled values write their unit: ``"unicode"`` (``3803.3 cm⁻¹``), ``"ascii"``
         (``3803.3 cm-1``) or ``"latex"`` (``$3803.3\\,\\mathrm{cm^{-1}}$``); stored in the report, default
         `UnitsData.label_style`
+    :param autolink: whether a text's typed numbers that are exactly a value of the data are rewritten into the
+        placeholders that write them (see `McUtils.Readouts.Reports.Advice.autolink`); off by default, and a call to
+        ``add_text`` / ``edit_text`` can switch it on or off for itself
+    :param advice: whether text results carry ``notes`` on the numbers the text typed (a value of the data gets its
+        placeholder; any other is pointed to the literal marker ``{=300 K}``); notes never refuse a text
     :return: a `ToolSet`; results are plain JSON values
     """
     policy = WritingPolicy.coerce(policy)
+    advice_on = bool(advice)
     if unit_style is not None:
         doc.unit_style = unit_style
     from .Fill import example_value
@@ -188,7 +216,8 @@ def report_toolset(doc, catalog, renderer=None, policy="grounded", rel_tol=1e-3,
             hints["ungrounded"] = ("Do not type the number: write the placeholder the error shows (such as "
                                    "{r3.frequency[2]}) and the server writes the value with its unit; a computed "
                                    "value is an expression of placeholders, like {mean(r3.frequency[2], "
-                                   "r3.frequency[3])}. Or leave the number out, and try once more. If it is refused "
+                                   "r3.frequency[3])}. A number that comes from outside the data is marked "
+                                   "{=300 K}; otherwise leave it out, and try once more. If it is refused "
                                    "again, tell the user.")
             hints["derived_disabled"] = "Use only +, -, *, / and mean, sum, min, max, abs, diff, ratio of placeholders."
     tools = ToolSet(hints=hints, error_fields={k: {"retry": v} for k, v in REPORT_RETRY.items()})
@@ -277,10 +306,66 @@ def report_toolset(doc, catalog, renderer=None, policy="grounded", rel_tol=1e-3,
         d["template"] = template_menu(catalog.get(handle))
         return d
 
-    def peek(handle, section, max_chars=None):
+    def _style():
+        return doc.unit_style or UnitsData.label_style
+
+    def _shown_by(handle, section):
+        """The readout blocks of the report that show ``section`` of source ``handle``."""
+        src = catalog.get(handle)
+        head = section.split(".", 1)[0]
+        return [b for b in doc.blocks if isinstance(b, ReadoutBlock) and b.handle == handle
+                and head in (b.include or src.default_sections()) and head not in (b.exclude or ())]
+
+    def _lines(block_id, section=None, limit=8):
+        """The placeholders of a readout block, one line per column (see `Advice.column_summary`)."""
+        cols = _adv.column_summary(doc.evidence([block_id], max_chars=MAX_PEEK), block_id, _style(),
+                                     section=section, limit=limit + 1)
+        lines = [c["line"] for c in cols[:limit]]
+        if len(cols) > limit:
+            lines.append("... more columns" + (f": values('{block_id}') lists them all" if "values" in enabled else ""))
+        return lines
+
+    def _placeholder_view(handle, section):
+        """
+        A section as placeholders, without its data: one line per column with the placeholder, the rows and one
+        example. ``None`` if the section has no data columns (it is then shown as text).
+        """
+        src = catalog.get(handle)
+        src.check_section(section)
+        shown = _shown_by(handle, section)
+        if shown:
+            bid, items = shown[0].id, doc.evidence([shown[0].id], max_chars=MAX_PEEK)
+        else:
+            from .Grounding import evidence_items
+            bid, items = "r0", evidence_items([], [("r0", src._section_readout(section))])
+        cols = _adv.column_summary(items, bid, _style(), section=section, limit=13)
+        if not cols:
+            return None
+        lines = [c["line"] for c in cols[:12]]
+        if len(cols) > 12:
+            lines.append("... more columns")
+        if not shown:
+            lines = [ln.replace("{r0.", "{BLOCK.") for ln in lines]
+        head = f"{handle} / {section} ({src.section_kind(section)}): values are placeholders, not expanded"
+        where = (f"In the report as {shown[0].id}: write the placeholders above." if shown else
+                 "Not in the report yet: add_readout it, and replace BLOCK with the block id it returns.")
+        more = ("peek(handle, section, expand=true) shows the section as text with its values"
+                + ("; values(block_id, column) lists every row of a column" if "values" in enabled else ""))
+        return "\n".join([head] + ["  " + ln for ln in lines] + [where, more + "."])
+
+    def peek(handle, section, max_chars=None, expand=False):
+        if not expand:
+            view = _placeholder_view(handle, section)
+            if view is not None:
+                return view
         if max_chars is None:
             max_chars = 1500 if level == 1 else 2400
         text = catalog.peek(handle, section, max_chars=min(int(max_chars), MAX_PEEK))
+        shown = _shown_by(handle, section)
+        if shown:
+            lines = _lines(shown[0].id, section=section, limit=6)
+            if lines:
+                text += (f"\n\nPlaceholders in the report ({shown[0].id}):\n" + "\n".join("  " + ln for ln in lines))
         if level == 1:
             lines = text.split("\n")
             if len(lines) > 2 and lines[1] and set(lines[1]) == {"="}:      # the readout's title block
@@ -306,28 +391,67 @@ def report_toolset(doc, catalog, renderer=None, policy="grounded", rel_tol=1e-3,
               "default) and its report template: the fixed outline (`template.outline`: headings with the sections "
               "under each) and the optional sections it suggests adding (`template.optional`). Section names can name "
               "a part with a dot, like `normal_modes.frequencies`. Use `apply_template` to build the outline.")
+    def values(block_id, column=None):
+        blk = doc.get(block_id)
+        if not isinstance(blk, ReadoutBlock):
+            raise ReportOperationError("bad_argument", f"block {block_id!r} is a {blk.kind} block; only readout "
+                                       f"blocks have values", block_id=block_id)
+        items = doc.evidence([block_id], max_chars=MAX_PEEK)
+        if column is None:
+            return {"block_id": block_id, "placeholders": [c["line"] for c in
+                                                           _adv.column_summary(items, block_id, _style(), limit=40)],
+                    "next": "values(block_id, column) lists every row of a column"}
+        rows, total = _adv.column_values(items, block_id, column, _style())
+        out = {"block_id": block_id, "column": column, "n_rows": total, "rows": rows}
+        if total > len(rows):
+            out["truncated"] = f"the first {len(rows)} of {total} rows"
+        return out
+
     add("peek", peek,
               {"type": "object", "properties": {"handle": _HANDLE, "section": {"type": "string", "minLength": 1,
                                                                                 "maxLength": 80},
+                                                "expand": {"type": "boolean", "description": "Show the section as text "
+                                                           "with its values instead of as placeholders."},
                                                 "max_chars": {"type": "integer", "minimum": 80, "maximum": MAX_PEEK}},
                "required": ["handle", "section"], "additionalProperties": False},
-              "The text of one section of a source (numbers as they will appear), to read before writing about it. "
-              f"Cut at {MAX_PEEK} characters.")
+              "One section of a source as placeholders: a line per column with the placeholder to write "
+              "({r3.frequency[ROW]}), its rows and one example value. The data is not expanded, so reading a section "
+              "costs little; write values as the placeholders shown (for a section that is not in the report yet, "
+              "`add_readout` it first and use the block id it returns). Pass `expand=true` to read the section as "
+              f"text with its values, cut at {MAX_PEEK} characters, when you need to describe what the data shows.")
+    add("values", values,
+              {"type": "object", "properties": {"block_id": _ID, "column": {"type": "string", "minLength": 1,
+                                                                             "maxLength": 80}},
+               "required": ["block_id"], "additionalProperties": False},
+              "A readout block's values as placeholders. Without `column`: one line per column with the placeholder "
+              "to write, its rows and an example. With `column`: every row of that column as {row, use, value}, the "
+              "value as the server will write it. Use it to read the numbers you are writing about, then write the "
+              "`use` placeholders.")
     add("outline", outline, {"type": "object", "properties": {}, "additionalProperties": False},
               "The report so far: one row per block (id, kind, text or handle/sections, caption; `locked` if the block "
               "can't be changed). Mutating tools only return a receipt; use this, `compile` or `diff` to see the result.")
 
-    def compile(full_text=False):
-        """The whole document, checked, as the model should read it. Read-only: it changes no baseline."""
+    def compile(full_text=False, expand=False):
+        """
+        The whole document, checked, as the model should read it. Read-only: it changes no baseline. With
+        ``full_text`` a paragraph's ``text`` is shown as it was written (placeholders, not the values they wrote)
+        unless ``expand``.
+        """
         if full_text:
-            blocks = flagged([{"id": b.id, "kind": b.kind, **{k: v for k, v in vars(b).items()
-                                                               if k != "id" and v not in (None, [], False)}}
-                              for b in doc.blocks])
+            blocks = []
+            for b in doc.blocks:
+                row = {"id": b.id, "kind": b.kind, **{k: v for k, v in vars(b).items()
+                                                      if k != "id" and v not in (None, [], False)}}
+                if isinstance(b, Prose) and b.fills and not expand:
+                    row["text"] = doc.written_text(b.id)
+                blocks.append(row)
+            blocks = flagged(blocks)
         else:
             blocks = flagged(doc.outline())
         return {"revision": track["revision"], "title": doc.title, "n_blocks": len(doc.blocks), "blocks": blocks,
                 "locked": doc.locked, "text_status": doc.text_status(), "problems": [e.to_dict() for e in doc.validate()],
                 "warnings": doc.grouping_warnings(),
+                "coverage": doc.number_coverage(rel_tol=rel_tol, small_int_max=small_int_max, year_range=year_range),
                 "baselines": list(track["baselines"]),
                 "grounding": {"policy": policy.value, "rel_tol": rel_tol, "small_int_max": small_int_max,
                               "year_range": None if year_range is None else list(year_range),
@@ -370,12 +494,17 @@ def report_toolset(doc, catalog, renderer=None, policy="grounded", rel_tol=1e-3,
         return {"since": since, "from_revision": rev, "revision": track["revision"], "n_changes": len(changes),
                 "changes": changes}
 
-    add("compile", compile, {"type": "object", "properties": {"full_text": {"type": "boolean"}},
+    add("compile", compile, {"type": "object", "properties": {"full_text": {"type": "boolean"},
+                                                              "expand": {"type": "boolean", "description": "With "
+                                                                         "`full_text`: show the values the server "
+                                                                         "filled in instead of the placeholders."}},
                                    "additionalProperties": False},
               "Reads the whole report back (it changes nothing): every block in order (text clipped to 80 characters "
-              "unless `full_text`), how many captions and paragraphs are checked / no_numbers / unchecked / manual / "
-              "from the template, any problems found (unknown sources, changed sources), which blocks are locked, "
-              "the baselines `diff` can compare with, and the number-check settings in force.")
+              "unless `full_text`, which shows a paragraph as it was written, with its placeholders; `expand` shows "
+              "the filled-in values), how many captions and paragraphs are checked / no_numbers / unchecked / manual "
+              "/ from the template, any problems found (unknown sources, changed sources), which blocks are locked, "
+              "the baselines `diff` can compare with, the number-check settings in force and the `coverage`: how "
+              "many numbers are placeholders, given values ({=300 K}) or typed.")
     add("checkpoint", checkpoint,
               {"type": "object", "properties": {"label": {"type": "string", "minLength": 1, "maxLength": 30}},
                "additionalProperties": False},
@@ -391,7 +520,9 @@ def report_toolset(doc, catalog, renderer=None, policy="grounded", rel_tol=1e-3,
 
     # ---- building ---------------------------------------------------------------------------------- #
     def apply_template(handle, after=None, optional=None):
-        return {"ok": True, **doc.apply_template(handle, after=after, optional=optional or ())}
+        out = {"ok": True, **doc.apply_template(handle, after=after, optional=optional or ())}
+        out["placeholders"] = {bid: _lines(bid, limit=6) for bid in out["added"] if bid.startswith("r")}
+        return out
 
     def apply_template_tool(**kw):
         out = mutating(apply_template)(**kw)
@@ -403,24 +534,33 @@ def report_toolset(doc, catalog, renderer=None, policy="grounded", rel_tol=1e-3,
 
     def add_readout(handle, include=None, exclude=None, caption=None, after=None, under=None):
         if caption is None:
-            return doc.add_readout(handle, include=include, exclude=exclude, after=after, under=under).to_dict()
-        _text_allowed()
-        return _add_readout_with_caption(handle, include, exclude, caption, after, under)
+            out = doc.add_readout(handle, include=include, exclude=exclude, after=after, under=under).to_dict()
+        else:
+            _text_allowed()
+            out = _add_readout_with_caption(handle, include, exclude, caption, after, under)
+        out["placeholders"] = _lines(out["block_id"], limit=8)
+        return out
 
     def _text_allowed():
         if policy is WritingPolicy.STRUCTURE_ONLY:
             raise ReportOperationError("writing_disabled", "this report is structure-only: text and captions are "
                                        "not written by the model", policy=policy.value)
 
-    def _check(text, block_ids, fills=()):
+    def _check(text, block_ids, fills=(), items=None):
         """
-        Raise ``ungrounded`` if the numbers of ``text`` aren't in the data of the readout blocks ``block_ids``;
-        otherwise the status to record: ``checked`` (a number was verified), ``no_numbers`` (nothing to verify) or,
-        for a policy that doesn't check, ``unchecked``.
+        Raise ``ungrounded`` if the numbers of ``text`` aren't in the data of the readout blocks ``block_ids`` (under the
+        grounded policy); otherwise the status to record: ``checked`` (a number was verified, or the server wrote it),
+        ``no_numbers`` (nothing to verify) or ``unchecked`` (a policy that doesn't check, and the text typed a number
+        other than a small integer or a year).
         """
         if policy is not WritingPolicy.GROUNDED:
-            return "unchecked"
-        items = doc.evidence(block_ids, max_chars=MAX_PEEK)
+            if fills:
+                last_check["filled"] = [f.to_dict() for f in fills]
+            if _adv.typed_numbers(text, [f.span for f in fills], small_int_max, year_range):
+                return "unchecked"
+            return "checked" if any(f.kind not in ("text", "literal") for f in fills) else "no_numbers"
+        if items is None:
+            items = doc.evidence(block_ids, max_chars=MAX_PEEK)
         res = doc.check_text(text, block_ids, rel_tol=rel_tol, small_int_max=small_int_max, max_chars=MAX_PEEK,
                             year_range=year_range, skip=[f.span for f in fills], items=items)
         if not res.ok:
@@ -437,13 +577,14 @@ def report_toolset(doc, catalog, renderer=None, policy="grounded", rel_tol=1e-3,
                 next((v.split(" = ")[0] for v in _values(items, 1)), "{r3.frequency[2]}")
             raise ReportOperationError(
                 "ungrounded", "; ".join(parts) + f". Write placeholders such as {example} instead of typing "
-                "numbers: the server fills in the value and its unit. Nothing was written.",
+                "numbers: the server fills in the value and its unit. A number that comes from outside the data is "
+                "marked {=300 K}. Nothing was written.",
                 unmatched=[t.text for t in res.unmatched], cited=list(block_ids),
                 placeholders={k: v for k, v in nearest.items() if v}, values=_values(items))
         last_check["numbers"] = res.provenance(items)
         if fills:
             last_check["filled"] = [f.to_dict() for f in fills]
-        return "checked" if (res.checked or any(f.kind != "text" for f in fills)) else "no_numbers"
+        return "checked" if (res.checked or any(f.kind not in ("text", "literal") for f in fills)) else "no_numbers"
 
     def _numeric(items):
         return [e for e in items if e.origin == "data" and e.key and not e.is_text
@@ -482,17 +623,23 @@ def report_toolset(doc, catalog, renderer=None, policy="grounded", rel_tol=1e-3,
     def verified(out):
         """Adds ``numbers`` (which cited value each number matched) to a text tool's result."""
         nums, filled = last_check.pop("numbers", None), last_check.pop("filled", None)
+        notes, auto = last_check.pop("notes", None), last_check.pop("autolinked", None)
         if nums:
             out["numbers"] = nums
         if filled:
             out["filled"] = filled
+        if auto:
+            out["autolinked"] = auto
+        if notes:
+            out["notes"] = notes
         return out
 
-    def _need_cites(cites, what):
-        if policy is WritingPolicy.GROUNDED and not cites:
+    def _need_cites(cites, what, basis=None):
+        if policy is WritingPolicy.GROUNDED and not cites and basis in (None, "data"):
             raise ReportOperationError(
                 "needs_citation", f"{what} must cite the readout blocks it is about (`cites`): the report only "
-                f"accepts text that can be checked against data. Nothing was written.")
+                f"accepts text that can be checked against data. Text that is not about the data says so with "
+                f"basis='background' or 'user_input'. Nothing was written.")
 
     def _add_readout_with_caption(handle, include, exclude, caption, after, under):
         # validate the block first, then the caption against it; roll back if the caption is refused
@@ -506,16 +653,60 @@ def report_toolset(doc, catalog, renderer=None, policy="grounded", rel_tol=1e-3,
             raise
         return verified({"ok": True, "block_id": rec.block_id, "outline": doc.outline()})
 
-    def add_text(text, cites=None, after=None, under=None):
+    def _mark_literals(text, literals):
+        """Wrap each of ``literals`` (numbers as the text writes them) in the given-value marker ``{=...}``."""
+        for lit in literals or ():
+            lit = lit.strip()
+            if not lit or "{" in lit or "}" in lit:
+                raise ReportOperationError("bad_argument", f"a literal is the number as the text writes it, "
+                                           f"like '300 K'; got {lit!r}")
+            spans = [s for s, _, _ in find_markers(text)]
+            i = text.find(lit)
+            while i >= 0 and any(s < i + len(lit) and i < e for s, e in spans):
+                i = text.find(lit, i + 1)
+            if i < 0:
+                raise ReportOperationError("bad_argument", f"the literal {lit!r} does not appear in the text; "
+                                           f"`literals` lists numbers exactly as the text writes them", literal=lit)
+            text = text[:i] + "{=" + lit + "}" + text[i + len(lit):]
+        return text
+
+    def _prepare(text, cites, literals, autolink_on):
+        """Mark the literals, rewrite typed numbers into placeholders if asked, fill in: ``(text, cites, fills, auto)``."""
+        text, auto = _mark_literals(text, literals), []
+        if autolink_on if autolink_on is not None else autolink:
+            text, auto = _adv.autolink(text, doc.evidence(_adv.default_cites(doc, cites), max_chars=MAX_PEEK),
+                                         small_int_max, year_range)
+        text, cites, fills = _fill(text, cites)
+        return text, cites, fills, auto
+
+    def _judge(text, cites, fills, auto, basis=None):
+        """The status of a prepared text (raising ``ungrounded`` under the grounded policy) and its notes."""
+        items = None
+        if cites and (advice_on or policy is WritingPolicy.GROUNDED):
+            items = doc.evidence(cites, max_chars=MAX_PEEK)
+        status = _check(text, cites, fills, items=items)
+        if advice_on:
+            if items is None:
+                items = doc.evidence(_adv.default_cites(doc, cites), max_chars=MAX_PEEK)
+            notes = _adv.advise(text, items, cites, skip=[f.span for f in fills], rel_tol=rel_tol,
+                                  small_int_max=small_int_max, year_range=year_range)
+            if notes:
+                last_check["notes"] = notes
+        if auto:
+            last_check["autolinked"] = auto
+        return status
+
+    def add_text(text, cites=None, after=None, under=None, literals=None, autolink=None, basis=None):
         _text_allowed()
+        doc._check_basis(basis)
         cites = list(cites or [])
         for c in cites:
             doc.get(c)
-        text, cites, fills = _fill(text, cites)
-        _need_cites(cites, "a paragraph")
-        status = _check(text, cites, fills)
+        text, cites, fills, auto = _prepare(text, cites, literals, autolink)
+        _need_cites(cites, "a paragraph", basis)
+        status = _judge(text, cites, fills, auto, basis)
         return verified(doc.add_text(text, cites=cites, after=after, under=under, status=status,
-                                     fills=[f.record() for f in fills] or None).to_dict())
+                                     fills=[f.record() for f in fills] or None, basis=basis).to_dict())
 
     def set_caption(block_id, text):
         doc.check_unlocked(block_id)
@@ -524,21 +715,23 @@ def report_toolset(doc, catalog, renderer=None, policy="grounded", rel_tol=1e-3,
         text, fills = _fill_caption(text, block_id)
         return verified(doc.set_caption(block_id, text, status=_check(text, [block_id], fills)).to_dict())
 
-    def edit_text(block_id, text, cites=None):
+    def edit_text(block_id, text, cites=None, literals=None, autolink=None, basis=None):
         blk = doc.get(block_id)
         doc.check_unlocked(block_id)
         if isinstance(blk, Heading):
             return doc.edit_text(block_id, text).to_dict()
         _text_allowed()
         if isinstance(blk, Prose):
+            doc._check_basis(basis)
+            basis = blk.basis if basis is None else basis
             cites = list(blk.cites if cites is None else cites)
             for c in cites:
                 doc.get(c)
-            text, cites, fills = _fill(text, cites)
-            _need_cites(cites, "a paragraph")
-            status = _check(text, cites, fills)
+            text, cites, fills, auto = _prepare(text, cites, literals, autolink)
+            _need_cites(cites, "a paragraph", basis)
+            status = _judge(text, cites, fills, auto, basis)
             return verified(doc.edit_text(block_id, text, status=status, cites=cites,
-                                          fills=[f.record() for f in fills] or None).to_dict())
+                                          fills=[f.record() for f in fills] or None, basis=basis).to_dict())
         return doc.edit_text(block_id, text).to_dict()
 
     def move(block_id, after):
@@ -583,34 +776,60 @@ def report_toolset(doc, catalog, renderer=None, policy="grounded", rel_tol=1e-3,
                    "under": _UNDER},
                   ["handle"]),
               "Adds a readout block (a table, figure or fields of one source). The report renders it itself: you only "
-              "name the source and sections. A caption is written and checked like `set_caption` (numbers as "
-              "placeholders).")
+              "name the source and sections. The result lists the block's `placeholders`. A caption is written like "
+              "`set_caption` (values as placeholders).")
     derived_note = (" A computed value is an expression of placeholders, {mean(r3.frequency[2], r3.frequency[3])} "
                     "(+ - * / and mean, sum, min, max, abs, diff, ratio)." if allow_derived else "")
+    grounded_note = (" This report is checked: a paragraph must cite readout blocks (unless its `basis` is "
+                     "'background' or 'user_input'), and a typed number that is not in the cited blocks' data, or is "
+                     "given in another unit, is rejected (`ungrounded`, with the matching placeholder) and nothing is "
+                     "written. The result lists `numbers` (which value each typed number matched)."
+                     if policy is WritingPolicy.GROUNDED else "")
+    text_schema = {"type": "string", "minLength": 1, "maxLength": 1500, "examples": [
+        "The OH stretch is at {r3.frequency[1]}, about {r3.frequency[2]} above the bend. The run used {=300 K}."],
+        "description": "Plain prose. Write a value from the data as a placeholder, {r3.frequency[2]}; a number that "
+                       "comes from outside the data as {=300 K}."}
+    literals_schema = {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 60}, "maxItems": 10,
+                       "description": "Numbers in the text that do not come from the data, exactly as the text "
+                                      "writes them ('300 K'); the report records them as given. The same as writing "
+                                      "{=300 K} in the text."}
+    autolink_schema = {"type": "boolean", "description": "Rewrite typed numbers that are exactly a value of the data "
+                                                          "into placeholders (the server's setting if omitted)."}
+    basis_schema = {"type": "string", "enum": list(PROSE_BASES), "description": "What the paragraph is about: 'data' "
+                    "(the readouts it cites), 'background' (general context) or 'user_input' (values the user "
+                    "gave). Optional."}
     add("add_text", mutating(add_text),
-              obj({"text": {"type": "string", "minLength": 1, "maxLength": 1500},
+              obj({"text": text_schema,
                    "cites": {"type": "array", "items": _ID, "maxItems": 20, "description": "Readout block ids from "
-                             "`outline` or `compile` (required under the grounded policy). Every number in the text "
-                             "must appear in their data."}, "after": _AFTER, "under": _UNDER}, ["text"]),
-              "Adds a paragraph. Plain prose only (no Markdown headings, code or markers). WRITE EVERY NUMBER AS A "
-              "PLACEHOLDER, {r3.frequency[2]} (block id, column, 1-based row): the server writes the number and its "
-              f"unit from the data ({example}), so do not type the number or the unit; a text column works the "
-              "same way ({r3.mode[2]}). Referenced blocks are cited automatically." + derived_note + " Typing a "
-              "number is allowed but risky: under the grounded policy a paragraph must cite readout blocks, and a "
-              "typed number that is not in the cited blocks' data, or is given in another unit, is rejected "
-              "(`ungrounded`, with the matching placeholder) and nothing is written. The result lists `numbers` "
-              "(which value each typed number matched) and `filled` (the values the server wrote).")
+                             "`outline` or `compile`; blocks the placeholders name are cited for you. Required only "
+                             "under the grounded policy."},
+                   "after": _AFTER, "under": _UNDER, "literals": literals_schema, "autolink": autolink_schema,
+                   "basis": basis_schema}, ["text"]),
+              "Adds a paragraph. Plain prose only (no Markdown headings, code or markers). WRITE VALUES FROM THE "
+              "DATA AS PLACEHOLDERS, {r3.frequency[2]} (block id, column, 1-based row): the server writes the number "
+              f"and its unit from the data ({example}), so it is never mistyped or in the wrong unit and stays right "
+              "if the data changes; do not type the number or the unit after it. `values`, the receipts of "
+              "`add_readout` and `apply_template` and `peek` list the placeholders of a block; a text column works "
+              "the same way ({r3.mode[2]}). Before: 'The OH stretch is at 3803.3 cm-1.' After: 'The OH stretch is at "
+              "{r3.frequency[1]}.' A number that does not come from the data (a setup value, a literature value, "
+              "something the user gave) is fine to write: mark it {=300 K} (or list it in `literals`) so the report "
+              "records it as given. Referenced blocks are cited automatically." + derived_note + " The result lists "
+              "`filled` (the values the server wrote) and `notes` when you typed a number: a value of the data gets "
+              "its placeholder, any other the marker for a given value. Notes never refuse the text." + grounded_note)
     add("set_caption", mutating(set_caption), obj({"block_id": _ID, "text": {"type": "string", "minLength": 1,
                                                                                     "maxLength": 300}},
                                                          ["block_id", "text"]),
-              "Sets one line of caption on a readout block. Write numbers as placeholders, {r2.frequency[1]}, "
-              "which the server fills in with their unit; typed numbers are checked against that block's data.")
+              "Sets one line of caption on a readout block. Write values as placeholders, {r2.frequency[1]}, which "
+              "the server fills in with their unit.")
     add("edit_text", mutating(edit_text),
-              obj({"block_id": _ID, "text": {"type": "string", "minLength": 1, "maxLength": 1500},
+              obj({"block_id": _ID, "text": text_schema,
                    "cites": {"type": "array", "items": _ID, "maxItems": 20, "description": "Replace the paragraph's "
-                             "cited blocks (default: keep them)."}},
+                             "cited blocks (default: keep them)."},
+                   "literals": literals_schema, "autolink": autolink_schema, "basis": basis_schema},
                   ["block_id", "text"]),
-              "Replaces the text of a paragraph, callout or heading (paragraphs are re-checked against what they cite).")
+              "Replaces the text of a paragraph, callout or heading. Write a paragraph the way `add_text` says: values "
+              "from the data as placeholders, given numbers as {=300 K}; `compile(full_text=true)` shows a paragraph "
+              "as it was written.")
     add("move", mutating(move), obj({"block_id": _ID, "after": dict(_AFTER, description="'start' or a block id")},
                                           ["block_id", "after"]), "Moves one block after another block (or to 'start'). Moving a heading does not move "
                                           "the blocks below it: use `move_section` to move a whole section.")
@@ -691,5 +910,6 @@ def report_toolset(doc, catalog, renderer=None, policy="grounded", rel_tol=1e-3,
                   "returns the paths and any problems.")
     tools.context_level = level
     tools.instructions = report_instructions(catalog, level, inline_max=inline_max, derived=allow_derived,
-                                             apply_edits=apply_edits, unit_style=doc.unit_style)
+                                             apply_edits=apply_edits, unit_style=doc.unit_style,
+                                             policy=policy.value, autolink=autolink, values_tool="values" in enabled)
     return tools

@@ -6,6 +6,7 @@ __all__ = [
 ]
 
 import types, typing
+from contextlib import nullcontext
 
 import numpy as np
 
@@ -213,6 +214,9 @@ class App(Component):
                  capture_output=None,
                  namespace=None,
                  vars=None,
+                 state=None,
+                 bind=None,
+                 javascript_path=None,
                  **attrs
                  ):
         """
@@ -240,7 +244,7 @@ class App(Component):
         self._parent = None if len(self._app_stack) == 0 else self._app_stack[-1]
         if isinstance(theme,str) and theme in AppTheme.names:
             ui_theme, theme = theme, 'primary'
-        super().__init__(ui_theme=ui_theme)
+        super().__init__(ui_theme=ui_theme,state=state,bind=bind,javascript_path=javascript_path)
         self.vars = DefaultVars.resolve() if vars is None else vars
         self._output_area = output
         self.capture_output = self._parent is None if capture_output is None else capture_output
@@ -277,11 +281,11 @@ class App(Component):
         :rtype: App
         """
         if self._stack_depth == 0:
-            self._presentation=AppTheme.rendering(self.ui_theme)
+            self._presentation=AppTheme.rendering(self.ui_theme,javascript_path=self.javascript_path)
             self._presentation.__enter__()
             self._vv = DefaultVars(self.vars)
             self._vv.__enter__()
-            self._out = DefaultOutputWidget(self.output)
+            self._out = nullcontext() if AppTheme.mode() == 'static' else DefaultOutputWidget(self.output)
             self._out.__enter__()
             self._app_stack.append(self)
         self._stack_depth += 1
@@ -793,6 +797,9 @@ class App(Component):
         """
         return self.construct_layout().to_jhtml()
     def to_readout(self, **opts):
+        opts.setdefault('state',self.js_state)
+        opts.setdefault('bind',self.js_bind)
+        opts.setdefault('javascript_path',self.javascript_path)
         with AppTheme.rendering(self.ui_theme):
             return self.construct_layout().to_readout(**opts)
 

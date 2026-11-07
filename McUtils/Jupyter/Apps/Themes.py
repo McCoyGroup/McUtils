@@ -10,6 +10,7 @@ from pathlib import Path
 from functools import lru_cache
 import re
 from ..JHTML import JHTML as _JHTML
+from ..JHTML.JavaScript import JSState
 
 __all__ = ['AppTheme']
 
@@ -60,7 +61,7 @@ class AppTheme:
 
     @classmethod
     @contextmanager
-    def rendering(cls, theme=None, mode=None):
+    def rendering(cls, theme=None, mode=None, javascript_path=None, offline=None, asset_paths=None):
         tokens = []
         if theme is not None:
             name=cls(theme).name
@@ -71,48 +72,54 @@ class AppTheme:
         depth = _depth.get()
         tokens.append((_depth, _depth.set(depth+1)))
         try:
-            yield cls.current(), depth == 0
+            with JSState.rendering(javascript_path=javascript_path,offline=offline,asset_paths=asset_paths):
+                yield cls.current(), depth == 0
         finally:
             for variable, token in reversed(tokens):
                 variable.reset(token)
 
-    def resources(self):
-        """Static document dependencies; callers can deduplicate these elements."""
-        H = _JHTML.HTML
-        if self.name == 'bootstrap':
-            return [H.Link(rel='stylesheet', href=self.bootstrap_css), H.Script(src=self.bootstrap_js),
-                    H.Script("document.addEventListener('DOMContentLoaded',()=>{for(const el of document.querySelectorAll('[data-bs-toggle=tooltip],[data-bs-toggle=popover]')){const C=el.dataset.bsToggle==='tooltip'?window.bootstrap.Tooltip:window.bootstrap.Popover;C.getOrCreateInstance(el);}});")]
-        return [H.Style(self.native_css(), id='mcutils-apps-native-css'),
-                H.Script(self.native_script(), id='mcutils-apps-native-js')]
+    def resources(self, javascript_path=None):
+        """Shared WebComponent resources; Bootstrap remains an explicit choice.
+
+        HTML exporters de-duplicate these resources and place scripts after the
+        interface. javascript_path='inline' assembles the existing native UI and
+        JSState sources once; a URL loads the same entry point from a CDN.
+        """
+        return JSState.resource_elements(javascript_path=javascript_path,force=True,
+                                         native_styles=self.name=='native',bootstrap=self.name=='bootstrap')
 
     @staticmethod
     def native_css():
-        return Path(__file__).with_name('resources').joinpath('native.css').read_text()
+        return JSState.native_css()
 
     @staticmethod
     def native_script():
-        return Path(__file__).with_name('resources').joinpath('native.js').read_text()
+        return JSState.javascript_source()
 
     def initializer(self):
-        if self.name == 'native':
-            import json
-            return ("if(!document.getElementById('mcutils-apps-native-css')){const s=document.createElement('style');"
-                    "s.id='mcutils-apps-native-css';s.textContent="+json.dumps(self.native_css())+";document.head.append(s);}\n"
-                    +self.native_script()+"\nreturn window.McUtilsApps.mount(widget);")
         import json
-        return """const css=%s,js=%s;
-if(!document.querySelector('link[data-mcutils-bootstrap]')){const s=document.createElement('link');s.rel='stylesheet';s.href=css;s.dataset.mcutilsBootstrap='';document.head.append(s);}
-if(!window.__mcutilsBootstrapReady)window.__mcutilsBootstrapReady=window.bootstrap?Promise.resolve(window.bootstrap):new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=js;s.onload=()=>resolve(window.bootstrap);s.onerror=reject;document.head.append(s);});
-return window.__mcutilsBootstrapReady.then(b=>{for(const el of widget.el.querySelectorAll('[data-bs-toggle="tooltip"],[data-bs-toggle="popover"]')){const C=el.dataset.bsToggle==='tooltip'?b.Tooltip:b.Popover;C.getOrCreateInstance(el);}});
-""" % (json.dumps(self.bootstrap_css), json.dumps(self.bootstrap_js))
+        prefix = ''
+        if self.name=='native' and JSState.current_javascript_path()=='inline':
+            prefix = ("if(!document.getElementById('mcutils-apps-native-css')){const style=document.createElement('style');"
+                      "style.id='mcutils-apps-native-css';style.textContent="+json.dumps(self.native_css())+";document.head.append(style);}\n")
+        prepare = 'await runtime.ensureNativeStyles(widget.el);' if self.name=='native' else (
+            "widget.el.setAttribute('data-mcui-bootstrap-css',"+json.dumps(self.bootstrap_css)+");"
+            "widget.el.setAttribute('data-mcui-bootstrap-js',"+json.dumps(self.bootstrap_js)+");await runtime.ensureBootstrap(widget.el);")
+        return prefix + 'return '+JSState.runtime_loader()+'''.then(async runtime=>{
+PREPARE
+window.McUtilsApps.mount(widget);
+await Promise.all([...widget.el.querySelectorAll('mcui-state')].map(root=>root.ready));
+return widget;
+});'''.replace('PREPARE',prepare)
 
     def javascript_api(self):
-        if self.name not in self._apis:
-            self._apis[self.name] = _JHTML.JavascriptAPI(
+        key = (self.name,JSState.current_javascript_path())
+        if key not in self._apis:
+            self._apis[key] = _JHTML.JavascriptAPI(
                 mcui_mount=self.initializer(),
                 mcui_refresh="widget.el.refresh?.();",
                 mcui_remove="if(window.McUtilsApps)window.McUtilsApps.dispose(widget.el);")
-        return self._apis[self.name]
+        return self._apis[key]
 
     def decorate(self, element):
         """Notebook mount: retain the rendered child object and its callbacks."""
@@ -128,7 +135,12 @@ return window.__mcutilsBootstrapReady.then(b=>{for(const el of widget.el.querySe
         Their browser lifecycle owns behavior; this Python boundary owns markup.
         """
         mode = self.mode() if mode is None else mode
-        if self.name == 'bootstrap':
+        if self.name == 'bootstrap' and name=='root':
+            name = 'bootstrap'
+            attrs.setdefault('data_mcui_bootstrap_css',self.bootstrap_css)
+            attrs.setdefault('data_mcui_bootstrap_js',self.bootstrap_js)
+            attrs.setdefault('style',{'display':'block'})
+        if self.name == 'bootstrap' and name not in ('state','bootstrap'):
             return getattr(_JHTML.HTML if mode == 'static' else _JHTML, fallback)(*elements, **attrs)
         plain, widget = _component_classes('mcui-'+name)
         if mode == 'static':
@@ -193,9 +205,14 @@ return window.__mcutilsBootstrapReady.then(b=>{for(const el of widget.el.querySe
         handles = attrs.get('javascript_handles')
         if isinstance(handles, dict) and any(isinstance(v,str) and 'context.bootstrap' in v for v in handles.values()):
             if self.name == 'bootstrap':
-                import json
-                loader = ("if(!window.__mcutilsBootstrapReady)window.__mcutilsBootstrapReady=window.bootstrap?Promise.resolve(window.bootstrap):new Promise((resolve,reject)=>{const s=document.createElement('script');s.src="+json.dumps(self.bootstrap_js)+";s.onload=()=>resolve(window.bootstrap);s.onerror=reject;document.head.append(s);});\n")
-                attrs['javascript_handles'] = {key:loader+"return window.__mcutilsBootstrapReady.then(()=>{\n"+value.replace('context.bootstrap','window.bootstrap')+"\n});" if isinstance(value,str) else value for key,value in handles.items()}
+                # Reuse the common widget API, including its single-flight
+                # dependency loader; plugin handlers contain no runtime copies.
+                attrs['javascript_handles'] = {
+                    key:"return widget.callHandler('mcui_mount',event).then(()=>{\n"+value.replace('context.bootstrap','window.bootstrap')+"\n});"
+                    if isinstance(value,str) else value for key,value in handles.items()}
+                attrs['javascript_handles']['api'] = self.javascript_api()
+                if _mode.get() != 'static':
+                    attrs['data_mcui_widget_plugin'] = 'true'
             else:
                 attrs.pop('javascript_handles', None)
                 attrs.pop('onevents', None)

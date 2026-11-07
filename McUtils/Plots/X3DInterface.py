@@ -431,6 +431,8 @@ class X3D(X3DObject):
                  onload_scripts=None,
                  components=None,
                  playback=None,
+                 bind=None,
+                 state=None,
                  **opts):
         """
         **LLM Docstring**
@@ -506,6 +508,7 @@ class X3D(X3DObject):
         if use_xite and (playback is True or isinstance(playback, dict)):
             raise NotImplementedError("X3D playback controls currently require X3DOM")
         self.playback = playback
+        self.js_bind, self.js_state = bind, state
         self._widg = None
         self._widget_cache = {}
 
@@ -1066,6 +1069,9 @@ document.head.append(frag{i});
         :type include_resources: bool
         :return: the widget
         """
+        from ..Jupyter.JHTML import JSState
+        if JSState.is_offline():
+            dynamic_loading, include_resources = False, False
         if dynamic_loading is None:
             dynamic_loading = self.dynamic_loading
         if include_export_button is None:
@@ -1181,6 +1187,11 @@ document.head.append(frag{i});
         else:
             self._widg = elems[0]
 
+        if self.js_bind:
+            from ..Jupyter.JHTML import JSState
+            self._widg = JSState.bind_element(self._widg, self.js_bind, adapter='x3d')
+        if self.js_state is not None:
+            self._widg = self.js_state.to_widget(self._widg)
         self._widget_cache[cache_key] = self._widg
         return self._widg
 

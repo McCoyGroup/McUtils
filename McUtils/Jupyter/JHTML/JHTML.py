@@ -6,6 +6,7 @@ from .HTMLWidgets import ActiveHTMLWrapper, HTMLWidgets
 from .BootstrapWidgets import BootstrapWidgets
 from .WidgetTools import JupyterAPIs, DefaultOutputWidget
 from .JupyterMarkdownElements import JupyterMarkdownElement
+from .JavaScript import JSVar, JSState, JSBinding
 
 import json
 import functools
@@ -15,6 +16,9 @@ __reload_hook__ = [".HTML", ".HTMLWidgets", ".Bootstrap", ".BootstrapWidgets", "
 
 
 class JHTML:
+    JSVar = JSVar
+    JSState = JSState
+    JSBinding = JSBinding
     HTML = HTML
     SVGContext = SVG
     HTMLManager = HTMLManager
@@ -308,11 +312,30 @@ class JHTML:
                 return plain
     @classmethod
     def _dispatch(jhtml, plain, widget, *elements, event_handlers=None, dynamic=None, **styles):
+        state = styles.pop('state', None)
+        bindings = styles.pop('bind', None)
+        javascript_path = styles.pop('javascript_path',None)
         src = jhtml._resolve_source(plain, widget, *elements, event_handlers=event_handlers, dynamic=dynamic, **styles)
         if src is plain:
-            return src(*elements, activator=widget.from_HTML, **styles)
+            result = src(*elements, activator=widget.from_HTML, **styles)
         else:
-            return src(*elements, event_handlers=event_handlers, **styles)
+            result = src(*elements, event_handlers=event_handlers, **styles)
+        if bindings:
+            result = JSState.bind_element(result, bindings)
+        if state is not None:
+            if not isinstance(state, JSState):
+                raise TypeError('state must be a JSState')
+            result = state.to_widget(result,mode='widget' if src is widget else 'html',javascript_path=javascript_path)
+        return result
+
+    @classmethod
+    def to_html(cls, *elements, javascript_path=None, offline=False, asset_paths=None, ui_theme=None):
+        """Export general JHTML/Apps content with one shared WebComponent runtime."""
+        from ..Apps.Themes import AppTheme, _materialize
+        with AppTheme.rendering(ui_theme,mode='static',javascript_path=javascript_path,
+                                offline=offline,asset_paths=asset_paths) as (theme,_):
+            body=theme.component('root',*_materialize(elements),mode='static',cls=['mcui-root','mcui-'+theme.name])
+            return JSState.render_html(body,javascript_path=javascript_path,offline=offline,asset_paths=asset_paths)
 
     def dispatcher(fn):
         name = fn.__name__

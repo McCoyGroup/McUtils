@@ -22,13 +22,16 @@ def _merge(left, lp, right, rp, out, positions):
                 if left[i,col]>right[j,col]:which=1;break
         if which<0:
             for col in range(out.shape[1]):out[k,col]=left[i,col]
-            positions[k]=min(lp[i],rp[j]);i+=1;j+=1
+            if positions is not None:positions[k]=min(lp[i],rp[j])
+            i+=1;j+=1
         elif which==0:
             for col in range(out.shape[1]):out[k,col]=left[i,col]
-            positions[k]=lp[i];i+=1
+            if positions is not None:positions[k]=lp[i]
+            i+=1
         else:
             for col in range(out.shape[1]):out[k,col]=right[j,col]
-            positions[k]=rp[j];j+=1
+            if positions is not None:positions[k]=rp[j]
+            j+=1
         k+=1
     return k
 
@@ -48,7 +51,7 @@ def _close_mapping(array):
     if mapping is not None and not mapping.closed:mapping.close()
 
 
-def _sorted_runs(arrays, root, chunk_size, mappings):
+def _sorted_runs(arrays, root, chunk_size, mappings, *, track_positions=True):
     # One run per binary level. Merge equal-sized groups of input chunks as
     # they arrive, so repeated keys are removed before every run is spilled.
     pending=[];offset=0;width=None;ndim=None;buffer=None;filled=0;serial=0
@@ -66,22 +69,31 @@ def _sorted_runs(arrays, root, chunk_size, mappings):
                 opened.callback(_close_mapping,array)
                 return array
             ak=own(np.load(str(a)+'_keys.npy',mmap_mode='r')[:na])
-            ap=own(np.load(str(a)+'_positions.npy',mmap_mode='r')[:na])
+            ap=own(np.load(str(a)+'_positions.npy',mmap_mode='r')[:na]) if track_positions else None
             bk=own(np.load(str(b)+'_keys.npy',mmap_mode='r')[:nb])
-            bp=own(np.load(str(b)+'_positions.npy',mmap_mode='r')[:nb])
+            bp=own(np.load(str(b)+'_positions.npy',mmap_mode='r')[:nb]) if track_positions else None
             out=own(np.lib.format.open_memmap(str(path)+'_keys.npy',mode='w+',dtype=np.int64,shape=(na+nb,width)))
-            pos=own(np.lib.format.open_memmap(str(path)+'_positions.npy',mode='w+',dtype=np.int64,shape=(na+nb,)))
-            size=int(_merge_function()(ak,ap,bk,bp,out,pos));out.flush();pos.flush()
+            pos=(own(np.lib.format.open_memmap(str(path)+'_positions.npy',mode='w+',dtype=np.int64,shape=(na+nb,)))
+                 if track_positions else None)
+            size=int(_merge_function()(ak,ap,bk,bp,out,pos));out.flush()
+            if pos is not None:pos.flush()
         del ak,ap,bk,bp,out,pos
         for old in [a,b]:
-            for suffix in ['_keys.npy','_positions.npy']:Path(str(old)+suffix).unlink()
+            for suffix in (['_keys.npy','_positions.npy'] if track_positions else ['_keys.npy']):
+                Path(str(old)+suffix).unlink()
         return path,size
 
     def emit(block, origin):
-        keys,positions=np.unique(block,axis=0,return_index=True)
+        if track_positions:
+            keys,positions=np.unique(block,axis=0,return_index=True)
+        elif width == 1:
+            # Scalar IDs need neither structured row sorting nor stable argsort.
+            keys=np.unique(block[:,0]).reshape(-1,1)
+        else:
+            keys=np.unique(block,axis=0)
         path=new_path('run')
         np.save(str(path)+'_keys.npy',keys)
-        np.save(str(path)+'_positions.npy',positions+origin)
+        if track_positions:np.save(str(path)+'_positions.npy',positions+origin)
         run=(path,len(keys));level=0
         while level<len(pending) and pending[level] is not None:
             run=merge_runs(pending[level],run)
@@ -118,12 +130,16 @@ def _sorted_runs(arrays, root, chunk_size, mappings):
     result=None
     for run in pending:
         if run is not None:result=run if result is None else merge_runs(run,result)
-    if result is None:return np.empty((0,width or 1),dtype=np.int64),np.empty(0,dtype=np.int64),ndim or 1
+    if result is None:
+        return (np.empty((0,width or 1),dtype=np.int64),
+                np.empty(0,dtype=np.int64) if track_positions else None,ndim or 1)
     path,size=result
     keys=np.load(str(path)+'_keys.npy',mmap_mode='r')[:size]
     mappings.append(keys)
-    positions=np.load(str(path)+'_positions.npy',mmap_mode='r')[:size]
-    mappings.append(positions)
+    positions=None
+    if track_positions:
+        positions=np.load(str(path)+'_positions.npy',mmap_mode='r')[:size]
+        mappings.append(positions)
     return keys,positions,ndim
 
 
@@ -142,13 +158,15 @@ def external_unique(arrays, *, sort=True, return_index=False, return_values=True
         mappings=[]
         try:
             root=Path(work)
-            keys,positions,ndim=_sorted_runs(arrays,root,int(chunk_size),mappings)
+            keys,positions,ndim=_sorted_runs(arrays,root,int(chunk_size),mappings,
+                                             track_positions=not sort or return_index)
             if not sort and len(keys):
                 ordered=root/'stable';ordered.mkdir()
                 records=((np.column_stack((positions[i:i+chunk_size],keys[i:i+chunk_size]))
                           if return_values else positions[i:i+chunk_size,None])
                          for i in range(0,len(keys),chunk_size))
-                stable,_,_=_sorted_runs(records,ordered,int(chunk_size),mappings)
+                stable,_,_=_sorted_runs(records,ordered,int(chunk_size),mappings,
+                                         track_positions=False)
                 positions=stable[:,0]
                 if return_values:keys=stable[:,1:]
             shape=(len(keys),) if ndim==1 else keys.shape

@@ -53,8 +53,8 @@ recursive-include McUtils/Readouts/resources *.md
 # graft ActiveHTMLWidget/nbextension
 # graft src
 # graft css
-recursive-include McUtils/Jupyter/resource *.js
-recursive-include McUtils/Jupyter/resource *.css
+recursive-include McUtils/Jupyter/resources *.js
+recursive-include McUtils/Jupyter/resources *.css
 recursive-include McUtils/Zachary/Surfaces/resources *.js
 
 # Patterns to exclude from any directory
@@ -67,3 +67,6 @@ global-exclude .ipynb_checkpoints
 
 # Optional native Apps presentation backend
 recursive-include McUtils/Jupyter/Apps/resources *.css *.js
+
+# Shared standalone JavaScript interaction runtime
+recursive-include McUtils/Jupyter/JHTML/resources *.js

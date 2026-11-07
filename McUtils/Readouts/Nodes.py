@@ -36,10 +36,17 @@ def _slug(text):
 
 
 class ReadoutNode:
+    """Scientific content with optional HTML interaction annotations.
+
+    ``state`` is a JSState scope and ``bind`` maps view properties to JSVar or
+    JSBinding declarations. HTML renderers consume them; other renderers retain
+    their ordinary content and data exports. Bindings do not create Python Vars.
+    """
     kind = "node"
     _counter = 0
 
-    def __init__(self, *children, id=None, title=None, role=None, style=None, meta=None, description=None):
+    def __init__(self, *children, id=None, title=None, role=None, style=None, meta=None, description=None,
+                 state=None, bind=None, javascript_path=None):
         if len(children) == 1 and isinstance(children[0], (list, tuple)):
             children = children[0]
         self.children = [c for c in children if c is not None]
@@ -55,6 +62,12 @@ class ReadoutNode:
         self.style = dict(style or {})
         self.meta = dict(meta or {})
         self.description = description
+        self.state = state
+        self.bind = dict(bind or {})
+        if javascript_path is not None:
+            from ..Jupyter.JHTML.JavaScript import JSState
+            javascript_path = JSState.check_javascript_path(javascript_path)
+        self.javascript_path = javascript_path
 
     def to_widget(self, style=None, **opts):
         from .Renderers.HTML import HTMLReadoutRenderer
@@ -133,7 +146,7 @@ class ReadoutFields(ReadoutNode):
 class ReadoutTable(ReadoutNode):
     kind = "table"
 
-    def __init__(self, data, **opts):
+    def __init__(self, data, row_key=None, **opts):
         if not isinstance(data, TabularData):
             data = TabularData(data)
         opts.setdefault("title", data.title)
@@ -141,6 +154,7 @@ class ReadoutTable(ReadoutNode):
             opts["id"] = data.name
         super().__init__(**opts)
         self.data = data
+        self.row_key = row_key
 
 
 class ReadoutArray(ReadoutNode):
@@ -396,7 +410,13 @@ class Readout(ReadoutSection):
         return HTMLReadoutRenderer(style, mode=mode, **opts).render_readout(self)
 
     def to_html(self, file=None, style=None, x3dom_path=None, **opts):
-        """Standalone HTML document (string), optionally written to ``file``."""
+        """Standalone HTML document (string), optionally written to ``file``.
+
+        ``javascript_path='inline'`` collects one UI/state library after all
+        content; a URL loads the WebComponent entry point instead. ``offline=True``
+        embeds supported plot/scene/UI dependencies as well. ``asset_paths`` can
+        supply local bundles when exporting without network access.
+        """
         from .Renderers.HTML import HTMLReadoutRenderer
         html = HTMLReadoutRenderer(style, mode="static", x3dom_path=x3dom_path, **opts).render_document(self)
         if file is not None:

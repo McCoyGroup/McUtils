@@ -72,6 +72,11 @@ class ValidateAnswerTests(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     check_schema(bad)
 
+    def test_examples_is_an_annotation(self):
+        schema = {"type": "string", "description": "d", "examples": ["a {r3.x[1]} b"]}
+        check_schema(schema)
+        self.assertEqual(validate_answer(schema, "x"), [])
+
     def test_annotations_are_ignored(self):
         self.assertEqual(validate_answer({"type": "string", "description": "d", "title": "t", "default": "x"}, "a"), [])
 

@@ -9,7 +9,8 @@ __all__ = [
     "InterfaceVars",
     "VariableSynchronizer",
     "VariableNamespace",
-    "WidgetControl"
+    "WidgetControl",
+    "VarBridge"
 ]
 
 __reload_hook__ = ['..JHTML']
@@ -624,6 +625,94 @@ def Var(name, namespace=None, **opts):
             return VariableSynchronizer.create_var(name, namespace=ns, **opts)
     else:
         return VariableSynchronizer.create_var(name, **opts)
+class VarBridge:
+    """Explicit ActiveHTMLWidgets transport between Python Var and JSVar state.
+
+    Nothing is synchronized until the containing JSState is mounted in widget
+    mode. HTML exports serialize initialization but omit transport and callbacks.
+    Direction is python_to_js, js_to_python, or both. Browser writes are echoed
+    with a Python origin so they do not create a feedback loop.
+    """
+    def __init__(self, python_var, js_var, *, direction='both', initialize_from='python'):
+        from ..JHTML.JavaScript import JSVar
+        if not isinstance(python_var, VariableSynchronizer) or not isinstance(js_var, JSVar):
+            raise TypeError('VarBridge requires a Python Var and a JSVar')
+        if direction not in ('python_to_js', 'js_to_python', 'both'):
+            raise ValueError('Unknown VarBridge direction')
+        if initialize_from not in ('python', 'javascript'):
+            raise ValueError('initialize_from must be python or javascript')
+        self.python_var, self.js_var = python_var, js_var
+        self.direction, self.initialize_from = direction, initialize_from
+
+    @classmethod
+    def mount(cls, state, element):
+        import json
+        from ..JHTML.JavaScript import JSState
+        from .Themes import AppTheme
+        bridges = {bridge.js_var.name: bridge for bridge in state.bridges}
+        if len(bridges) != len(state.bridges):
+            raise ValueError('Only one VarBridge may target a JSVar in a state')
+        settings = {name: dict(direction=bridge.direction, initialize=bridge.initialize_from)
+                    for name, bridge in bridges.items()}
+        init = '''
+const root = widget.el.querySelector('[data-mcjs-state]');
+return widget.callHandler('mcui_mount',event).then(()=>customElements.whenDefined('mcui-state')).then(()=>root.ready).then(state=>{
+if(!state)return;
+const model = widget.model;
+const settings = SETTINGS;
+model.__mcjs_states ||= new Set();
+model.__mcjs_states.add(state);
+for (const [name, value] of Object.entries(model.__mcjs_pending || {})) state.set(name, value, 'python');
+const send = (name, value) => model.send({type:'mcjs:bridge', detail:{name, value}});
+const remove = state.subscribe(changes => {
+  for (const change of changes) if (change.origin !== 'python' && settings[change.name] && settings[change.name].direction !== 'python_to_js') {
+    send(change.name, change.value);
+  }
+});
+for (const [name, config] of Object.entries(settings)) {
+  if (config.initialize === 'javascript' && config.direction !== 'python_to_js') send(name, state.get(name));
+}
+state.onDispose(() => {remove();model.__mcjs_states.delete(state);});
+widget.__mcjs_dispose = () => state.dispose();
+});
+'''.replace('SETTINGS', json.dumps(settings))
+        update = '''
+widget.__mcjs_pending ||= Object.create(null);
+widget.__mcjs_pending[event.content.name] = event.content.value;
+for (const state of widget.__mcjs_states || []) if (!state.disposed) state.set(event.content.name, event.content.value, 'python');
+'''
+        def receive(event, wrapper):
+            detail = event.get('detail', {})
+            bridge = bridges.get(detail.get('name'))
+            if bridge is not None and bridge.direction != 'python_to_js':
+                bridge.python_var.value = bridge.js_var.validate(detail.get('value'))
+        wrapper = JHTML.Div(element, dynamic=True,
+                            javascript_handles={'api':AppTheme.current().javascript_api(),'mcjs_init': init, 'mcjs_set': update,
+                                                'mcjs_remove': 'widget.__mcjs_dispose?.();'},
+                            onevents={'initialize': 'mcjs_init', 'remove': 'mcjs_remove'},
+                            event_handlers={'mcjs:bridge': {'callback': receive, 'fields': ['type', 'detail']}})
+        wrapper_ref = weakref.ref(wrapper)
+        callbacks = []
+        for name, bridge in bridges.items():
+            if bridge.direction == 'js_to_python':
+                continue
+            def publish(event, name=name, bridge=bridge):
+                target = wrapper_ref()
+                if target is not None and not target.elem._active_html_closed:
+                    value = bridge.js_var.validate(event['new'])
+                    target.call('mcjs_set', name=name, value=value)
+            bridge.python_var.callbacks.add(publish)
+            callbacks.append((bridge.python_var, publish))
+        def close(change):
+            if change['new'] is None:
+                for variable, callback in callbacks:
+                    variable.callbacks.discard(callback)
+                callbacks.clear()
+        wrapper.elem.observe(close, names='comm')
+        wrapper._mcjs_bridge_callbacks = callbacks
+        return wrapper
+
+
 class WidgetControl:
     def __init__(self, var, control_type=None, widget=None, **settings):
         """

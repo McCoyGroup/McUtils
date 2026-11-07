@@ -17,6 +17,11 @@ typed after a value that has none, is an error (``unit_mismatch``). A trailing f
 (``{r3.frequency[2]:.0f}``) changes the number's format. By default a single value is written with the decimals the
 data's text shows.
 
+A value that does not come from the data (a temperature or basis set the user gave, a literature value) is marked
+``{=300 K}``: the server writes ``300 K`` as given and records it as a *literal* (a `Fill` of kind ``literal``), so the
+report says which numbers were given from outside the data and the number check leaves them alone. `unfill` gives a
+stored paragraph back in the form it was written, with the placeholders and literal markers instead of the values.
+
 Derived values (``{mean(r3.frequency[2], r3.frequency[3])}``: ``+ - * /`` and `FUNCTIONS`) are off unless the caller
 opts in (``allow_derived=True``; ``--derived`` on the server): a sum/difference/mean is written with the most
 decimals of its inputs and the inputs' unit, a product or ratio with four significant digits and no unit.
@@ -34,7 +39,8 @@ import re
 from .Document import ReportOperationError
 from .Grounding import unit_after, unit_shorthand
 
-__all__ = ["Fill", "FUNCTIONS", "find_references", "fill_text", "refill", "column_names", "ref_for"]
+__all__ = ["Fill", "FUNCTIONS", "find_references", "find_markers", "fill_text", "refill", "fill_spans", "unfill",
+           "column_names", "ref_for"]
 
 _REF = re.compile(r"\b(?P<block>[a-z]\d+)\.(?P<name>[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*)"
                   r"(?:\[(?P<row>\d+)\])?")
@@ -77,10 +83,12 @@ class Fill:
     :ivar number: the number or text part of ``text`` (``3803.3``)
     :ivar unit: the unit label written after the number (``cm⁻¹``), or ``None``
     :ivar value: its value (a string for a text column)
-    :ivar derived: ``True`` unless the expression is a single reference
+    :ivar derived: ``True`` unless the expression is a single reference (``False`` for a literal)
     :ivar inputs: the `EvidenceItem`s it used
     :ivar span: ``(start, end)`` of ``text`` in the filled text
     :ivar style: the unit label style it was written in (``None``: `UnitsData`'s default), stored by `record`
+    :ivar kind: ``single``, ``additive``, ``multiplicative``, ``text`` or ``literal`` (a number given from outside the
+        data, written ``{=300 K}``; its ``expr`` starts with ``=``)
     """
 
     def __init__(self, expr, spec, text, value, derived, inputs, span, number=None, unit=None, kind="single", style=None):
@@ -89,10 +97,17 @@ class Fill:
         self.number, self.unit, self.kind = text if number is None else number, unit, kind
         self.style = style
 
+    @property
+    def is_literal(self):
+        return self.kind == "literal"
+
     def to_dict(self):
-        """What the tools report: ``{expr, value, derived, inputs}``."""
-        return {"expr": self.expr, "value": self.text, "derived": self.derived,
-                "inputs": [e.describe() for e in self.inputs]}
+        """What the tools report: ``{expr, value, derived, inputs}`` (``literal: True`` for a given value)."""
+        out = {"expr": self.expr, "value": self.text, "derived": self.derived,
+               "inputs": [e.describe() for e in self.inputs]}
+        if self.is_literal:
+            out["literal"] = True
+        return out
 
     def record(self):
         """What a report stores with its paragraph: ``{"expr": ..., "text": ...}`` (plus ``spec`` if given)."""
@@ -107,6 +122,22 @@ class Fill:
 def find_references(text):
     """The ``{...}`` groups of ``text`` that contain at least one block reference: ``[(span, inner)]``."""
     return [(m.span(), m.group(1)) for m in _BRACE.finditer(text) if _REF.search(m.group(1))]
+
+
+def find_markers(text):
+    """
+    The ``{...}`` groups the server fills in, in order: ``[(span, inner, kind)]`` where ``kind`` is ``"ref"`` (contains a
+    block reference) or ``"literal"`` (``{=300 K}``: a value given from outside the data).
+    """
+    out = []
+    for m in _BRACE.finditer(text):
+        inner = m.group(1)
+        if inner.startswith("="):
+            if inner[1:].strip():
+                out.append((m.span(), inner, "literal"))
+        elif _REF.search(inner):
+            out.append((m.span(), inner, "ref"))
+    return out
 
 
 def column_names(items, block):
@@ -355,7 +386,8 @@ def _render(inner, items, allow_derived, style=None):
 
 def fill_text(text, items, allow_derived=False, style=None):
     """
-    Write the values of the ``{...}`` references of ``text`` into it, each with its unit label (``3803.3 cm⁻¹``).
+    Write the values of the ``{...}`` references of ``text`` into it, each with its unit label (``3803.3 cm⁻¹``);
+    ``{=300 K}`` writes ``300 K`` as given (a literal: a number that does not come from the data).
 
     A unit typed right after a reference is swallowed (the label replaces it); a different unit than the data's is an
     error. Derived expressions need ``allow_derived=True``. ``style`` is the unit label style (``"unicode"``,
@@ -366,12 +398,21 @@ def fill_text(text, items, allow_derived=False, style=None):
     :raises ReportOperationError: ``bad_reference`` (unknown block, column or row, or a bad expression),
         ``unit_mismatch`` or ``derived_disabled``
     """
-    refs = find_references(text)
+    refs = find_markers(text)
     if not refs:
         return text, []
     out, fills, pos, length = [], [], 0, 0
-    for (s, e), inner in refs:
+    for (s, e), inner, marker in refs:
         if s < pos:
+            continue
+        if marker == "literal":
+            given = inner[1:].strip()
+            out.append(text[pos:s])
+            length += s - pos
+            fills.append(Fill("=" + given, None, given, given, False, [], (length, length + len(given)), kind="literal"))
+            out.append(given)
+            length += len(given)
+            pos = e
             continue
         expr, spec, value, derived, used, kind, number, label, written = _render(inner, items, allow_derived, style)
         end = e
@@ -415,6 +456,14 @@ def refill(text, records, items, style=None):
     """
     spans, problems, pos = [], [], 0
     for r in records or ():
+        if r["expr"].startswith("="):          # a literal: nothing to recompute, only to locate
+            i = text.find(r["text"], pos)
+            if i < 0:
+                problems.append(f"{{{r['expr']}}} is no longer in the text")
+                continue
+            spans.append((i, i + len(r["text"])))
+            pos = i + len(r["text"])
+            continue
         try:
             written = _render(r["expr"] + (":" + r["spec"] if r.get("spec") else ""), items, True, r.get("style") or style)[-1]
         except ReportOperationError as e:
@@ -429,3 +478,32 @@ def refill(text, records, items, style=None):
         spans.append((i, i + len(r["text"])))
         pos = i + len(r["text"])
     return spans, problems
+
+
+def fill_spans(text, records):
+    """``[(start, end)]`` of the recorded fills (placeholders and literals) in ``text``, without recomputing them."""
+    spans, pos = [], 0
+    for r in records or ():
+        i = text.find(r["text"], pos)
+        if i >= 0:
+            spans.append((i, i + len(r["text"])))
+            pos = i + len(r["text"])
+    return spans
+
+
+def unfill(text, records):
+    """
+    ``text`` as it was written: each recorded fill replaced by its placeholder (``{r3.frequency[1]}``, with the format
+    spec if there was one) or literal marker (``{=300 K}``). A stored paragraph holds the values; this is the form a
+    model should write and read back.
+    """
+    out, pos = [], 0
+    for r in records or ():
+        i = text.find(r["text"], pos)
+        if i < 0:
+            continue
+        out.append(text[pos:i])
+        out.append("{" + r["expr"] + (":" + r["spec"] if r.get("spec") else "") + "}")
+        pos = i + len(r["text"])
+    out.append(text[pos:])
+    return "".join(out)
