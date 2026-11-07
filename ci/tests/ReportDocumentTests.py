@@ -298,7 +298,7 @@ class MarkdownTests(unittest.TestCase):
         lines = md.split("\n")
         self.assertTrue(lines[0].startswith("<!-- report-meta {"))
         self.assertEqual(lines[2], "# Water & friends")
-        self.assertIn('<!-- block(p1, role="summary", status="grounded") -->', md)
+        self.assertIn('<!-- block(p1, role="summary", status="checked") -->', md)
         self.assertIn('<!-- readout(id="r1", include=["summary"], header=False, show_code=False, isolated=True) -->', md)
         self.assertIn('header=True, show_code=False, isolated=True) -->', md)      # r3 asked for its title block
         self.assertIn('report_source("water", digest="%s")' % cat.get("water").digest, md)

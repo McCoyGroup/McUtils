@@ -18,7 +18,11 @@ from .History import *; from .History import __all__ as exposed
 __all__ += exposed
 from .Grounding import *; from .Grounding import __all__ as exposed
 __all__ += exposed
+from .Fill import *; from .Fill import __all__ as exposed
+__all__ += exposed
 from .Templates import *; from .Templates import __all__ as exposed
+__all__ += exposed
+from .Instructions import *; from .Instructions import __all__ as exposed
 __all__ += exposed
 from .Harness import *; from .Harness import __all__ as exposed
 __all__ += exposed

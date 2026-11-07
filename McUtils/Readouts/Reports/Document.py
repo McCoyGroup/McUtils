@@ -34,10 +34,19 @@ __all__ = [
 FORMAT = "mcr-report-v1"
 HEADING_CHARS = 80
 CAPTION_CHARS = 300
-CAPTION_STATUSES = ("grounded", "unchecked", "manual", "template")
-PROSE_STATUSES = ("grounded", "unchecked", "manual")
+CAPTION_STATUSES = ("checked", "no_numbers", "unchecked", "manual", "template")
+PROSE_STATUSES = ("checked", "no_numbers", "unchecked", "manual")
+# ``checked``: at least one number in the text was verified against the cited data; ``no_numbers``: the text passed
+# the number check but has nothing to check; ``grounded`` is the older
+# name of ``checked`` and is still read and accepted.
+LEGACY_STATUSES = {"grounded": "checked"}
+
+
+def _status(status):
+    return LEGACY_STATUSES.get(status, status)
 ERROR_CODES = ("unknown_block", "unknown_source", "unknown_section", "unavailable_section",
-               "bad_argument", "bad_position", "invalid_document")
+               "bad_argument", "bad_position", "invalid_document", "locked", "needs_citation", "bad_reference",
+               "derived_disabled", "unit_mismatch")
 
 
 class ReportOperationError(ValueError):
@@ -175,7 +184,7 @@ class ReadoutBlock(_Block):
         super().__init__(id)
         self.handle, self.include, self.exclude = handle, include, exclude
         self.units, self.style, self.display = units, style, display
-        self.caption, self.caption_status = caption, caption_status
+        self.caption, self.caption_status = caption, _status(caption_status)
         self.header = bool(header)    # show the readout's own title block (title, subtitle, units)?
 
     def to_markdown(self, doc):
@@ -191,14 +200,17 @@ class ReadoutBlock(_Block):
 
 
 class Prose(_Block):
+    """A paragraph. ``fills`` records the values the server wrote into it (see `McUtils.Readouts.Reports.Fill`)."""
     kind, prefix = "prose", "p"
 
-    def __init__(self, id, text, cites=(), status="manual", role="body"):
+    def __init__(self, id, text, cites=(), status="manual", role="body", fills=None):
         super().__init__(id)
-        self.text, self.cites, self.status, self.role = text, list(cites), status, role
+        self.text, self.cites, self.status, self.role = text, list(cites), _status(status), role
+        self.fills = list(fills) if fills else None
 
     def to_markdown(self, doc):
-        marker = _call("block", self.id, role=self.role, status=self.status, cites=self.cites or None)
+        marker = _call("block", self.id, role=self.role, status=self.status, cites=self.cites or None,
+                       fills=self.fills or None)
         return f"{marker}\n{self.text}"
 
 
@@ -325,6 +337,36 @@ class ReportDocument:
         raise ReportOperationError("bad_position", f"after={after!r} is not 'start' or the id of a block; the "
                                    f"blocks are {[b.id for b in self.blocks]}", after=after)
 
+    def _where(self, after, under):
+        """The ``after`` to use: ``under`` (a heading id) means after the last block of that heading's section."""
+        if under is None:
+            return after
+        if after is not None:
+            raise ReportOperationError("bad_argument", "give either `after` or `under`, not both")
+        return self.section_end(under)
+
+    def section_end(self, heading_id):
+        """
+        The id of the last block of the section that starts at heading ``heading_id``: the blocks that follow it up to
+        (not including) the next heading of the same or a higher level. A heading with nothing under it returns
+        its own id.
+        """
+        i = self._index(heading_id)
+        head = self.blocks[i]
+        if not isinstance(head, Heading):
+            raise ReportOperationError("bad_argument", f"block {heading_id!r} is a {head.kind} block, not a heading; "
+                                       f"sections start at headings", block_id=heading_id)
+        j = i + 1
+        while j < len(self.blocks) and not (isinstance(self.blocks[j], Heading) and self.blocks[j].level <= head.level):
+            j += 1
+        return self.blocks[j - 1].id
+
+    def section_ids(self, heading_id):
+        """The ids of the heading and every block in its section, in order."""
+        end = self.section_end(heading_id)
+        i, j = self._index(heading_id), self._index(end)
+        return [b.id for b in self.blocks[i:j + 1]]
+
     def _insert(self, block, after):
         pos = self._position(after)
         self.blocks.insert(pos, block)
@@ -339,7 +381,8 @@ class ReportDocument:
         raise ReportOperationError("unknown_source", f"no recorded source {handle!r}", handle=handle)
 
     # ---- operations ------------------------------------------------------------------------- #
-    def add_heading(self, text, level=2, after=None):
+    def add_heading(self, text, level=2, after=None, under=None):
+        after = self._where(after, under)
         text = self._check_heading(text)
         if level not in (2, 3):
             raise ReportOperationError("bad_argument", f"heading level must be 2 or 3, got {level!r}")
@@ -366,6 +409,11 @@ class ReportDocument:
                 if head not in rows:
                     raise ReportOperationError("unknown_section", f"source {handle!r} has no section {name!r}; "
                                                f"its sections are {names}", handle=handle, section=name, choices=names)
+                if "." in name and rows[head]["available"] and not src.is_record:
+                    if src.section_kind(name) == "unknown":
+                        raise ReportOperationError("unknown_section", f"source {handle!r} has no section {name!r}: "
+                                                   f"{src.kind_error(name)}", handle=handle, section=name,
+                                                   choices=names)
                 if what == "include" and not rows[head]["available"]:
                     raise ReportOperationError("unavailable_section", f"section {name!r} of {handle!r} is not "
                                                f"available: {rows[head].get('reason') or 'required data is missing'}",
@@ -373,7 +421,8 @@ class ReportDocument:
         return src
 
     def add_readout(self, handle, include=None, exclude=None, units=None, style=None, caption=None, after=None,
-                    header=None):
+                    header=None, under=None):
+        after = self._where(after, under)
         src = self._check_sections(handle, include, exclude)
         include = None if include is None else list(include)
         exclude = None if exclude is None else list(exclude)
@@ -399,8 +448,10 @@ class ReportDocument:
         self.sources[handle] = {"type": src.type_name, "digest": src.digest}
         return self._insert(block, after)
 
-    def add_text(self, text, cites=(), after=None, status="manual", role="body"):
+    def add_text(self, text, cites=(), after=None, status="manual", role="body", under=None, fills=None):
+        after = self._where(after, under)
         text = self._check_text(text, "text")
+        status = _status(status)
         if status not in PROSE_STATUSES:
             raise ReportOperationError("bad_argument", f"status must be one of {PROSE_STATUSES}, got {status!r}")
         if role not in ("body", "summary"):
@@ -411,9 +462,10 @@ class ReportDocument:
                 raise ReportOperationError("unknown_block", f"cited block {c!r} is not a readout block of this "
                                            f"document", block_id=c)
         self._position(after)
-        return self._insert(Prose(self._mint(Prose), text, cites, status, role), after)
+        return self._insert(Prose(self._mint(Prose), text, cites, status, role, fills), after)
 
-    def add_callout(self, text, kind="note", after=None):
+    def add_callout(self, text, kind="note", after=None, under=None):
+        after = self._where(after, under)
         text = self._check_line(text, "callout text", 600)
         if kind not in ("flag", "note"):
             raise ReportOperationError("bad_argument", f"callout kind must be 'flag' or 'note', got {kind!r}")
@@ -425,19 +477,29 @@ class ReportDocument:
         if not isinstance(block, ReadoutBlock):
             raise ReportOperationError("bad_argument", f"block {block_id!r} is a {block.kind} block; only "
                                        f"readout blocks have captions", block_id=block_id)
+        status = _status(status)
         if status not in CAPTION_STATUSES:
             raise ReportOperationError("bad_argument", f"status must be one of {CAPTION_STATUSES}, got {status!r}")
         text = self._check_line(text, "caption", CAPTION_CHARS)
         block.caption, block.caption_status = text, status
         return Receipt(block_id, self.outline())
 
-    def edit_text(self, block_id, text, status="manual"):
+    def edit_text(self, block_id, text, status="manual", cites=None, fills=None):
         block = self.blocks[self._index(block_id)]
         if isinstance(block, Prose):
+            if cites is not None:
+                cites = list(cites)
+                for c in cites:
+                    if not any(b.id == c and isinstance(b, ReadoutBlock) for b in self.blocks):
+                        raise ReportOperationError("unknown_block", f"cited block {c!r} is not a readout block of "
+                                                   f"this document", block_id=c)
+                block.cites = cites
+            status = _status(status)
             if status not in PROSE_STATUSES:
                 raise ReportOperationError("bad_argument", f"status must be one of {PROSE_STATUSES}, got {status!r}")
             block.text = self._check_text(text, "text")
             block.status = status
+            block.fills = list(fills) if fills else None
         elif isinstance(block, Callout):
             block.text = self._check_line(text, "callout text", 600)
         elif isinstance(block, Heading):
@@ -459,6 +521,98 @@ class ReportDocument:
             raise
         self.blocks.insert(pos, block)
         return Receipt(block_id, self.outline())
+
+    def move_section(self, heading_id, after):
+        """
+        Move a heading together with the blocks of its section (see `section_end`). ``after`` is ``"start"`` or a
+        block id; if it is a heading, the section goes after that heading's whole section. Moving a section into
+        itself is an error.
+        """
+        ids = self.section_ids(heading_id)
+        if after in ids:
+            raise ReportOperationError("bad_position", f"a section can't be moved into itself (after={after!r})",
+                                       after=after)
+        if after != "start" and after is not None:
+            self._position(after)
+            if isinstance(self.get(after), Heading):
+                after = self.section_end(after)
+        i, j = self._index(heading_id), self._index(ids[-1])
+        moving = self.blocks[i:j + 1]
+        del self.blocks[i:j + 1]
+        try:
+            pos = self._position(after)
+        except ReportOperationError:
+            self.blocks[i:i] = moving
+            raise
+        self.blocks[pos:pos] = moving
+        return Receipt(heading_id, self.outline())
+
+    # ---- source groups: the sections that show one source -------------------------------------- #
+    def _top_sections(self):
+        """``[(heading id, [block ids of its section])]`` for every level-2 heading, in order."""
+        return [(b.id, self.section_ids(b.id)) for b in self.blocks if isinstance(b, Heading) and b.level == 2]
+
+    def section_sources(self, heading_id):
+        """The handles of the readout blocks in the section of ``heading_id``, in order of appearance."""
+        return list(dict.fromkeys(self.get(i).handle for i in self.section_ids(heading_id)
+                                  if isinstance(self.get(i), ReadoutBlock)))
+
+    def source_sections(self, handle):
+        """The level-2 heading ids whose sections show only ``handle`` (at least one readout of it), in order."""
+        return [h for h, ids in self._top_sections() if self.section_sources(h) == [handle]]
+
+    def move_source(self, handle, after):
+        """
+        Move every level-2 section that shows only source ``handle`` (`source_sections`) together, in their current
+        order, to ``after`` (``"start"`` or a block id; a heading id means after that heading's whole section).
+        This is how two sources' parts of a report are swapped: one call per source.
+        """
+        heads = self.source_sections(handle)
+        if not heads:
+            raise ReportOperationError("bad_argument", f"no section of the report shows only source {handle!r}",
+                                       handle=handle, choices=self.handles_shown())
+        ids = [i for h in heads for i in self.section_ids(h)]
+        if after in ids:
+            raise ReportOperationError("bad_position", f"after={after!r} is inside the sections being moved",
+                                       after=after)
+        if after != "start" and after is not None:
+            self._position(after)
+            if isinstance(self.get(after), Heading):
+                after = self.section_end(after)
+        keep = set(ids)
+        moving = [b for b in self.blocks if b.id in keep]
+        before = list(self.blocks)
+        self.blocks = [b for b in self.blocks if b.id not in keep]
+        try:
+            pos = self._position(after)
+        except ReportOperationError:
+            self.blocks = before
+            raise
+        self.blocks[pos:pos] = moving
+        return Receipt(heads[0], self.outline())
+
+    def handles_shown(self):
+        """The sources the report's readout blocks show, in order of first appearance."""
+        return list(dict.fromkeys(b.handle for b in self.blocks if isinstance(b, ReadoutBlock)))
+
+    def grouping_warnings(self):
+        """
+        Sources whose sections are split up by another source's sections (for example HOD Structure, HOH Structure,
+        HOH Vibrations, HOD Vibrations): ``[{"code": "interleaved", "handle", "sections", "detail"}]``. Only
+        sections that show a single source count.
+        """
+        seq = [(h, self.section_sources(h)) for h, _ in self._top_sections()]
+        seq = [(h, srcs[0]) for h, srcs in seq if len(srcs) == 1]
+        out = []
+        for handle in dict.fromkeys(src for _, src in seq):
+            pos = [i for i, (_, src) in enumerate(seq) if src == handle]
+            if pos[-1] - pos[0] + 1 != len(pos):
+                heads = [seq[i][0] for i in pos]
+                between = sorted({seq[i][1] for i in range(pos[0], pos[-1]) if seq[i][1] != handle})
+                out.append({"code": "interleaved", "handle": handle, "sections": heads,
+                            "detail": f"the sections of {handle!r} ({', '.join(heads)}) are split by sections of "
+                                      f"{between}; move_source({handle!r}, ...) moves them together"})
+        return out
 
     def remove(self, block_id):
         i = self._index(block_id)
@@ -620,6 +774,20 @@ class ReportDocument:
         present = {b.id for b in self.blocks}
         return [i for i in self.meta.get("locked", []) if i in present]
 
+    @property
+    def unit_style(self):
+        """The unit label style filled values are written in (``"unicode"``, ``"ascii"``, ``"latex"``), stored in the
+        report's ``report-meta``; ``None`` means `UnitsData.label_style`. Fills already written keep their own style."""
+        return self.meta.get("unit_style")
+
+    @unit_style.setter
+    def unit_style(self, style):
+        if style is None:
+            self.meta.pop("unit_style", None)
+        else:
+            from ...Data import UnitsData
+            self.meta["unit_style"] = UnitsData.check_label_style(style)
+
     def is_locked(self, block_id):
         return block_id in self.meta.get("locked", ())
 
@@ -671,7 +839,7 @@ class ReportDocument:
 
     # ---- text checks ------------------------------------------------------------------------ #
     def text_status(self):
-        """How many captions and paragraphs have each status: ``{"grounded": n, "template": n, ...}``."""
+        """How many captions and paragraphs have each status: ``{"checked": n, "no_numbers": n, "template": n, ...}``."""
         counts = {}
         for b in self.blocks:
             st = b.caption_status if isinstance(b, ReadoutBlock) and b.caption else b.status if isinstance(b, Prose) else None
@@ -679,14 +847,28 @@ class ReportDocument:
                 counts[st] = counts.get(st, 0) + 1
         return counts
 
-    def check_text(self, text, cites=(), rel_tol=1e-3, small_int_max=10, max_chars=4000, year_range=(1900, 2100)):
+    def check_text(self, text, cites=(), rel_tol=1e-3, small_int_max=10, max_chars=4000, year_range=(1900, 2100),
+                   skip=(), extra=(), items=None):
         """
         Check the numbers of ``text`` against the data of the readout blocks ``cites``
-        (see `McUtils.Readouts.Reports.check_grounding`). Returns a `GroundingResult` (``ok``, ``unmatched``).
-        Four-digit integers inside ``year_range`` are taken to be years and not checked; pass ``None`` to check them
-        (they overlap vibrational frequencies such as 1948 or 2000 cm-1).
+        (see `McUtils.Readouts.Reports.check_grounding`). Returns a `GroundingResult` (``ok``, ``unmatched``, and
+        ``matches``: which cited value each number matched). The match is unit- and quantity-aware: a number written
+        with a unit only matches a value in that unit, and a percentage never matches an index, a count or a value
+        with a unit. Four-digit integers inside ``year_range`` are taken to be years and not checked unless they carry
+        a unit; pass ``None`` to check them (they overlap vibrational frequencies such as 1948 or 2000 cm-1).
+        ``skip`` are spans of ``text`` not to check; ``extra`` are more `EvidenceItem`s (values the server derived);
+        ``items`` is the `EvidenceSet` of ``cites`` if the caller has it already (`evidence`).
         """
-        from .Grounding import evidence_numbers, check_grounding
+        from .Grounding import evidence_items, check_grounding
+        if items is None:
+            items = self.evidence(cites, max_chars=max_chars)
+        items.extend(extra)
+        return check_grounding(text, items, rel_tol=rel_tol, small_int_max=small_int_max,
+                               year_range=(1, 0) if year_range is None else year_range, skip=skip)
+
+    def evidence(self, cites, max_chars=4000):
+        """The `EvidenceSet` of the readout blocks ``cites``: their data (with units and labels) and their section text."""
+        from .Grounding import evidence_items
         texts, readouts = [], []
         for c in cites:
             blk = self.get(c)
@@ -694,14 +876,59 @@ class ReportDocument:
                 raise ReportOperationError("bad_argument", f"block {c!r} is a {blk.kind} block; only readout blocks "
                                            f"have data to check against", block_id=c)
             src = self.catalog.get(blk.handle)
-            readouts.append(src.readout(include=blk.include, exclude=blk.exclude))
+            readouts.append((c, src.readout(include=blk.include, exclude=blk.exclude)))
             for name in (blk.include or src.default_sections()):
                 try:
-                    texts.append(src.section_text(name, max_chars=max_chars))
+                    texts.append((c, src.section_text(name, max_chars=max_chars)))
                 except Exception:  # noqa: BLE001 - a section that can't render has no text evidence
                     pass
-        return check_grounding(text, evidence_numbers(texts, readouts), rel_tol=rel_tol, small_int_max=small_int_max,
-                               year_range=(1, 0) if year_range is None else year_range)
+        return evidence_items(texts, readouts)
+
+    def fill_text(self, text, cites=(), allow_derived=False):
+        """
+        Write the values of ``{r3.frequency[2]}``-style references into ``text`` (see
+        `McUtils.Readouts.Reports.Fill`): each value is written with its unit label, and a unit typed after the
+        reference is replaced by it (a different unit is an error). Blocks a reference names are added to ``cites``.
+        Computed values (``{mean(...)}``) are refused unless ``allow_derived``.
+
+        :return: ``(text, cites, fills)``: the filled text, the cites (with the referenced blocks), the `Fill`s
+        """
+        from .Fill import find_references, fill_text, _REF
+        cites = list(cites or ())
+        for _, inner in find_references(text):
+            for m in _REF.finditer(inner):
+                if m.group("block") not in cites:
+                    self.get(m.group("block"))
+                    cites.append(m.group("block"))
+        if not cites:
+            return text, cites, []
+        style = self.unit_style
+        if style is None:
+            from ...Data import UnitsData
+            style = UnitsData.label_style
+        filled, fills = fill_text(text, self.evidence(cites), allow_derived=allow_derived, style=style)
+        return filled, cites, fills
+
+    def check_prose(self, block_id, rel_tol=1e-3, small_int_max=10, year_range=(1900, 2100)):
+        """
+        Re-check a stored paragraph: its recorded fills are recomputed from the current data (a changed or missing
+        value is reported as unmatched) and its other numbers are checked against what it cites.
+        Returns a `GroundingResult`.
+        """
+        from .Fill import refill
+        from .Grounding import NumberToken
+        blk = self.get(block_id)
+        if not isinstance(blk, Prose):
+            raise ReportOperationError("bad_argument", f"block {block_id!r} is not a paragraph", block_id=block_id)
+        spans, problems = refill(blk.text, blk.fills, self.evidence(blk.cites), self.unit_style) if blk.fills else ([], [])
+        res = self.check_text(blk.text, blk.cites, rel_tol=rel_tol, small_int_max=small_int_max,
+                              year_range=year_range, skip=spans)
+        for p in problems:
+            tok = NumberToken(p, float("nan"), 0, (0, 0))
+            res.unmatched.append(tok)
+            res.reasons[p] = "(a filled value) no longer follows from the data"
+        res.ok = not res.unmatched
+        return res
 
     # ---- Markdown --------------------------------------------------------------------------- #
     def to_markdown(self):
@@ -885,7 +1112,7 @@ class ReportDocument:
                     keep = lines_p if cut is None else lines_p[:cut]
                     rest = "" if cut is None else "\n".join(lines_p[cut:])
                     doc.blocks.append(Prose(ident, "\n".join(keep).strip(), kw.get("cites") or (),
-                                            kw.get("status", "manual"), kw.get("role", "body")))
+                                            kw.get("status", "manual"), kw.get("role", "body"), kw.get("fills")))
                 elif ident.startswith("c"):
                     first, _, rest = content.partition("\n")
                     m = re.match(r"^> \*\*(?:Flag|Note):\*\* ?(.*)$", first, re.S)

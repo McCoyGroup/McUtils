@@ -9,6 +9,7 @@ from __future__ import annotations
 import abc
 import base64
 import collections
+import enum
 from collections import OrderedDict
 import importlib
 import inspect
@@ -285,6 +286,8 @@ class PseudoPickler:
             return type(obj)(self._walk(v, memo) for v in obj)
         if isinstance(obj, self._dict_types):
             return type(obj)((self._sanitize_key(k), self._walk(v, memo)) for k, v in obj.items())
+        if isinstance(obj, enum.Enum):
+            return self._spec(enum=self._class_spec(type(obj)), name=obj.name)
         if isinstance(obj, type):
             return self._spec(type=self._class_spec(obj))
         if isinstance(obj, (bytes, bytearray, memoryview)):
@@ -482,6 +485,8 @@ class PseudoPickler:
                 return obj
             else:
                 raise NotImplementedError("don't know how to rebuild {} from state {}".format(cls, type(state)))
+        elif 'enum' in spec:
+            return self._load_class(spec['enum'])[spec['name']]
         elif 'type' in spec:
             return self._load_class(spec['type'])
         elif 'bytes' in spec:

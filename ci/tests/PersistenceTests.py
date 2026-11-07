@@ -9,7 +9,7 @@ phase of the persistence plan (`claude_drafts/persistence/PLAN.md`) that fixes t
 should be removed in that same patch.
 """
 
-import os, sys, shutil, subprocess, tempfile, textwrap, time, unittest
+import enum, os, sys, shutil, subprocess, tempfile, textwrap, time, unittest
 import numpy as np
 
 import McUtils
@@ -50,6 +50,11 @@ class _Legacy:
     @classmethod
     def from_state(cls, state, serializer=None):
         return cls(state['a'])
+
+
+class _Color(enum.Enum):
+    RED = 1
+    GREEN = 'g'
 
 
 def _module_level_function(x):
@@ -824,6 +829,21 @@ class PersistenceTests(unittest.TestCase):
         self.assertNotEqual(fingerprint([shared, shared]), fingerprint([_Plain(1), _Plain(1)]))
         with self.assertRaises(TypeError):
             fingerprint(object())
+
+    def test_EnumMembersRoundTrip(self):
+        from McUtils.Scaffolding import ObjectStore
+        pp = PseudoPickler()
+        self.assertIs(pp.deserialize(pp.serialize(_Color.GREEN)), _Color.GREEN)
+        holder = _Plain([_Color.RED, {'c': _Color.GREEN}])
+        again = pp.deserialize(pp.serialize(holder))
+        self.assertEqual(again.a, [_Color.RED, {'c': _Color.GREEN}])
+        for fn in ('enum.json', 'enum.nptar'):
+            with Checkpointer.from_file(self.path(fn)) as chk:
+                chk['holder'] = holder
+            with Checkpointer.from_file(self.path(fn)) as chk:
+                self.assertEqual(chk['holder'].a, [_Color.RED, {'c': _Color.GREEN}])
+        store = ObjectStore(self.path('enum_store'))
+        self.assertIs(store.get(store.put(_Color.RED)), _Color.RED)
     #endregion
 
     #region Entry store and object store (phase 6)
@@ -1084,6 +1104,40 @@ class PersistenceTests(unittest.TestCase):
             manager.save_resource(loc, {'a': Unserializable()})
         self.assertEqual(manager.load_resource(loc), {'a': 1})  # the failed write left the old content
         self.assertEqual(os.listdir(os.path.dirname(loc)), ['a.json'])
+    #endregion
+
+    #region 7e: ConformerLibrary object store backend
+    def test_ConformerLibraryObjectStoreBackend(self):
+        from McUtils.ExternalPrograms.ConformerLibrary import ConformerLibrary, ObjectStoreBackend
+        rng = np.random.default_rng(3)
+        tree = {
+            '33': {'smi': 'CCO', 'coord': [rng.normal(size=(9, 3)) for _ in range(3)]},
+            '68': {'smi': 'CC=O', 'coord': [rng.normal(size=(7, 3))]},
+        }
+        source = ConformerLibrary(tree)
+        root = self.path('conformer_store')
+        lib = source.to_object_store(root)
+        self.assertEqual(len(lib), 2)
+        self.assertIn('33', lib)
+        self.assertNotIn('99', lib)
+        self.assertEqual(sorted(lib.keys()), ['33', '68'])
+        self.assertEqual(lib.get_smiles('68'), 'CC=O')
+        record = lib['33']
+        self.assertEqual(record['smi'], 'CCO')
+        for a, b in zip(record['coord'], tree['33']['coord']):
+            self.assertTrue(np.array_equal(a, b))
+        # a fresh handle (another process) sees the same library; other namespaces are separate
+        again = ConformerLibrary.from_object_store(root)
+        self.assertEqual(sorted(again.keys()), ['33', '68'])
+        self.assertEqual(len(ConformerLibrary.from_object_store(root, namespace='other')), 0)
+        # adding a record is one atomic put, and identical records share an entry
+        backend = ObjectStoreBackend(root)
+        entry = backend.put_record('copy', lib['33'])
+        self.assertEqual(entry, backend.store.resolve_alias('conformers.33'))
+        with self.assertRaises(KeyError):
+            backend.put_record('copy', tree['68'], replace=False)
+        with self.assertRaises(KeyError):
+            lib['99']
     #endregion
 
 

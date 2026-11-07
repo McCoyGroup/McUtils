@@ -146,13 +146,10 @@ class ReadoutTheme:
             "mass": "{:.5f}", "intensity": "{:.2f}", "charge": "{:d}", "index": "{:d}",
             "float": "{:.6g}", "int": "{:d}",
         },
-        "unit_labels": {
-            "Angstroms": "Å", "BohrRadius": "a₀", "Degrees": "°", "Radians": "rad",
-            "Wavenumbers": "cm⁻¹", "Hartrees": "Eₕ", "ElectronVolts": "eV",
-            "KilocaloriesPerMole": "kcal/mol", "KilojoulesPerMole": "kJ/mol",
-            "AtomicMassUnits": "amu", "ElectronMass": "mₑ", "KilometersPerMole": "km/mol",
-            "Seconds": "s",
-        },
+        # unit labels come from `UnitsData.unit_label`; "unit_labels" holds overrides ({unit name: label} or
+        # {unit name: {style: label}}) and "unit_style" ("unicode", "ascii", "latex") the style (None: UnitsData's)
+        "unit_labels": {},
+        "unit_style": None,
         "slide": {
             "size": (960, 540), "units": "pt",
             "margin": (28, 40, 24, 40),           # top, right, bottom, left
@@ -244,8 +241,16 @@ class ReadoutTheme:
             return fmts.get("float", "{:.6g}")
         return "{}"
 
-    def get_unit_label(self, unit):
-        return self.tokens["unit_labels"].get(unit, unit)
+    def get_unit_label(self, unit, style=None):
+        """The label for a `UnitsData` unit name: a theme override if there is one, else `UnitsData.unit_label`"""
+        from ..Data import UnitsData
+        style = style or self.tokens.get("unit_style")
+        over = self.tokens.get("unit_labels", {}).get(unit)
+        if isinstance(over, dict):
+            over = over.get(style or UnitsData.label_style)
+        if over is not None:
+            return over
+        return UnitsData.unit_label(unit, style)
 
     def color(self, name):
         return self.tokens["colors"].get(name, name)

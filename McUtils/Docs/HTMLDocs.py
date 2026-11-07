@@ -19,9 +19,13 @@ embedded directly into the page (using `JHTML.Style`/`JHTML.Script`, whose
 text children pass through unescaped), so the output is a single portable
 `.html` file with no external dependencies (besides an optional CDN jQuery
 needed by the baked-in `init.js`), explorable via native `<details>`
-elements -- no live kernel, no ipywidgets, works fine on mobile.
+elements -- no live kernel, no ipywidgets, works fine on mobile. The finx
+files come from a copy vendored with McUtils (``Docs/resources/finx``), so
+building a page needs no network; ``finx_assets="link"`` or ``"fetch"`` load
+them from the web instead.
 """
 
+import os
 import re
 import io
 import contextlib
@@ -36,49 +40,116 @@ from ..Formatters.TemplateEngine.TemplateEngine import (
 __all__ = ["JHTMLDocumentationEngine", "static_doc", "static_markdown"]
 
 # --------------------------------------------------------------------------
-# finx (https://github.com/McCoyGroup/finx) assets, baked in verbatim
+# finx (https://github.com/McCoyGroup/finx) assets
 # --------------------------------------------------------------------------
+#
+# Pages use the finx styles by default, from a copy vendored with McUtils (``Docs/resources/finx``), so building a
+# page never needs the network. ``finx_assets`` selects where they come from:
+#
+#   "vendored"  (default) inline the packaged copy
+#   "link"      emit <link>/<script src> tags to a pinned CDN copy; the *browser* loads them when the page is viewed
+#   "fetch"     download the current files from GitHub while building (cached per process); if that fails, warn
+#               and use the vendored copy
+#   a directory a finx checkout (its root or its ``assets`` directory), inlined like the vendored copy
 
+FINX_VENDORED_REF = "d8837eb946bffe544e5c4f41932bb4f1bbd05b82"   # the finx commit the vendored files come from
 _FINX_RAW = "https://raw.githubusercontent.com/McCoyGroup/finx/master/assets"
+_FINX_CDN = "https://cdn.jsdelivr.net/gh/McCoyGroup/finx@{ref}/assets"
+_FINX_VENDORED = os.path.join(os.path.dirname(os.path.abspath(__file__)), "resources", "finx")
 _FINX_CSS_FILES = ["style.css", "docs.css", "pygment_trac.css"]
 _FINX_JS_FILES = ["init.js"]  # sidebar-toggle behavior; safe to skip if unwanted
+_JQUERY_URL = "https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"
+_FINX_MODES = ("vendored", "link", "fetch")
+default_finx_assets = "vendored"
 _FINX_ASSET_CACHE = {}
 
 
-def _fetch_finx_asset(kind, name):
+def _read_text(path):
+    with open(path, encoding="utf-8") as f:
+        return f.read()
+
+
+def _vendored_finx_asset(kind, name, root=None):
     """
-    Downloads (and caches) one file from the finx assets/ directory.
+    Reads one finx asset from the vendored copy, or from ``root`` (a finx checkout or its ``assets`` directory).
+    `kind` is 'css' or 'js'.
+    """
+    if root is None:
+        return _read_text(os.path.join(_FINX_VENDORED, kind, name))
+    for base in (os.path.join(root, "assets"), root):
+        path = os.path.join(base, kind, name)
+        if os.path.isfile(path):
+            return _read_text(path)
+    raise FileNotFoundError(f"finx asset {kind}/{name} not found under {root!r} (expected <root>/assets/{kind}/{name})")
+
+
+def _fetch_finx_asset(kind, name, timeout=10):
+    """
+    Downloads (and caches) one file from the finx assets/ directory on GitHub.
     `kind` is 'css' or 'js'.
     """
     key = (kind, name)
     if key not in _FINX_ASSET_CACHE:
         import urllib.request
         url = f"{_FINX_RAW}/{kind}/{name}"
-        with urllib.request.urlopen(url) as r:
+        with urllib.request.urlopen(url, timeout=timeout) as r:
             _FINX_ASSET_CACHE[key] = r.read().decode("utf-8")
     return _FINX_ASSET_CACHE[key]
 
 
-def _bake_finx_assets(extra_css="", include_js=True):
+def _resolve_finx_mode(assets):
+    if assets is None:
+        assets = default_finx_assets
+    if assets in _FINX_MODES:
+        return assets, None
+    if isinstance(assets, (str, os.PathLike)) and os.path.isdir(assets):
+        return "directory", os.fspath(assets)
+    raise ValueError(f"finx_assets must be one of {_FINX_MODES} or an existing directory, got {assets!r}")
+
+
+def _finx_asset_texts(kind, names, mode, root=None):
+    if mode == "fetch":
+        try:
+            return [_fetch_finx_asset(kind, n) for n in names]
+        except Exception as e:  # noqa: BLE001 - any download failure falls back to the packaged copy
+            import warnings
+            warnings.warn(f"could not download the finx {kind} assets ({type(e).__name__}: {e}); "
+                          f"using the copy vendored with McUtils (finx {FINX_VENDORED_REF[:7]})", RuntimeWarning,
+                          stacklevel=4)
+            root = None
+    return [_vendored_finx_asset(kind, n, root=root) for n in names]
+
+
+def _bake_finx_assets(extra_css="", include_js=True, assets=None):
     """
-    **LLM Docstring**
+    Builds the ``<head>`` elements that give a page the finx styles (and, optionally, its JavaScript).
 
-    Builds JHTML style and script elements containing the configured finx assets.
-
-    :param extra_css: additional CSS appended after the bundled styles
+    :param extra_css: additional CSS appended after the finx styles
     :type extra_css: str
-
     :param include_js: whether to include jQuery and the finx JavaScript assets
     :type include_js: bool
-    :return: style elements and, optionally, script elements
+    :param assets: ``"vendored"`` (default, see `default_finx_assets`), ``"link"``, ``"fetch"`` or a finx directory;
+        see the comment above `FINX_VENDORED_REF`
+    :return: style/link elements and, optionally, script elements
     :rtype: list
     """
-    css = "\n".join(_fetch_finx_asset("css", f) for f in _FINX_CSS_FILES)
+    mode, root = _resolve_finx_mode(assets)
+    elems = []
+    if mode == "link":
+        base = _FINX_CDN.format(ref=FINX_VENDORED_REF)
+        elems.extend(JHTML.Link(rel="stylesheet", href=f"{base}/css/{f}") for f in _FINX_CSS_FILES)
+        if extra_css:
+            elems.append(JHTML.Style(extra_css))
+        if include_js:
+            elems.append(JHTML.Script(src=_JQUERY_URL))
+            elems.extend(JHTML.Script(src=f"{base}/js/{f}") for f in _FINX_JS_FILES)
+        return elems
+    css = "\n".join(_finx_asset_texts("css", _FINX_CSS_FILES, mode, root))
     css += "\n" + extra_css
-    elems = [JHTML.Style(css)]
+    elems.append(JHTML.Style(css))
     if include_js:
-        js = "\n".join(_fetch_finx_asset("js", f) for f in _FINX_JS_FILES)
-        elems.append(JHTML.Script(src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"))
+        js = "\n".join(_finx_asset_texts("js", _FINX_JS_FILES, mode, root))
+        elems.append(JHTML.Script(src=_JQUERY_URL))
         elems.append(JHTML.Script(js))
     return elems
 
@@ -615,7 +686,7 @@ def _x3dom_runtime(embedder):
     return runtime
 
 
-def _static_page(content, title, runtime=(), include_finx_js=True):
+def _static_page(content, title, runtime=(), include_finx_js=True, finx_assets=None):
     """
     Wraps `content` in the single-file page `static_doc` and `static_markdown` share.
 
@@ -623,6 +694,7 @@ def _static_page(content, title, runtime=(), include_finx_js=True):
     :param title: the page title
     :param runtime: extra ``<head>`` elements (e.g. the X3DOM runtime)
     :param include_finx_js: whether to bake in finx's ``init.js``
+    :param finx_assets: where the finx styles come from (see `_bake_finx_assets`); default the vendored copy
     :return: the JHTML page
     """
     viewport_meta = JHTML.Meta(name="viewport")
@@ -633,7 +705,7 @@ def _static_page(content, title, runtime=(), include_finx_js=True):
             JHTML.Meta(charset="utf-8"),
             viewport_meta,
             JHTML.Title(title),
-            *_bake_finx_assets(include_js=include_finx_js),
+            *_bake_finx_assets(include_js=include_finx_js, assets=finx_assets),
             *CodeHighlighter.head_elements(),
             *runtime,
             JHTML.Style(
@@ -657,7 +729,7 @@ def _page_string(page):
 
 
 def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True, verbose=False, return_string=False,
-               readouts=None, strict_readouts=False, frame=None, **walker_kwargs):
+               readouts=None, strict_readouts=False, frame=None, finx_assets=None, **walker_kwargs):
     """
     The static-HTML sibling of `McUtils.Docs.jdoc`.
 
@@ -678,6 +750,10 @@ def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True
         otherwise the HTML string itself is returned
     :param include_finx_js: whether to bake in finx's `init.js` (+ a CDN jQuery) for
         the sidebar-toggle behavior; the CSS is always included
+    :param finx_assets: where the finx styles come from: ``"vendored"`` (default; the copy packaged with McUtils,
+        no network), ``"link"`` (``<link>`` tags to a pinned CDN copy, loaded by the browser), ``"fetch"``
+        (download from GitHub while building, falling back to the vendored copy with a warning) or a finx
+        checkout directory
     :param verbose: how much `DocWalker` prints, as in `jdoc` (``False``: nothing; ``True``: a line per module;
         ``"Debug"``: also each module's source and member table)
     :param readouts: the store of example output made by ``ci/build_readouts.py`` (a directory or
@@ -732,7 +808,7 @@ def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True
 
     name = title or getattr(obj, "__name__", str(obj))
 
-    page = _static_page(content, name, runtime=runtime, include_finx_js=include_finx_js)
+    page = _static_page(content, name, runtime=runtime, include_finx_js=include_finx_js, finx_assets=finx_assets)
     if frame:
         style = {"width": "100%", "height": "500px", "border": "1px solid rgba(0,0,0,.2)"}
         if isinstance(frame, dict):
@@ -753,7 +829,7 @@ def static_doc(obj, max_depth=1, title=None, out_file=None, include_finx_js=True
 
 
 def static_markdown(text, title=None, out_file=None, readouts=None, strict_readouts=False,
-                    include_finx_js=False, return_string=True, owner=None):
+                    include_finx_js=False, return_string=True, owner=None, finx_assets=None):
     """
     Markdown text (with readout markers) -> one self-contained HTML page. Nothing is executed.
 
@@ -770,6 +846,8 @@ def static_markdown(text, title=None, out_file=None, readouts=None, strict_reado
     :param include_finx_js: whether to bake in finx's ``init.js`` (the sidebar toggles; not needed here)
     :param return_string: return the HTML string (otherwise the JHTML page)
     :param owner: the name attached to the examples in warnings
+    :param finx_assets: where the finx styles come from (see `static_doc`); default the vendored copy, so building
+        the page needs no network
     :return: the HTML string, the path written to if `out_file` was given, or the JHTML page
     """
     embedder = None
@@ -786,7 +864,7 @@ def static_markdown(text, title=None, out_file=None, readouts=None, strict_reado
     html = re.sub(r"<!--.*?-->", "", html, flags=re.DOTALL)     # markers and metadata comments aren't page content
     body = HTML.RawHTML(html)
     page = _static_page(body, title or "Document", runtime=_x3dom_runtime(embedder),
-                        include_finx_js=include_finx_js)
+                        include_finx_js=include_finx_js, finx_assets=finx_assets)
     if out_file is not None:
         with open(out_file, "w", encoding="utf-8") as f:
             f.write(_page_string(page))

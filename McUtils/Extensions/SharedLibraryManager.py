@@ -3,13 +3,71 @@ Defines a SharedLibrary object that makes it relatively straightforward to use
 extensions direclty from .so files
 """
 
-import os, ctypes
+import os, sys, ctypes, platform
 from .ArgumentSignature import FunctionSignature, Argument
 
 __all__ = [
     "SharedLibrary",
-    "SharedLibraryFunction"
+    "SharedLibraryFunction",
+    "platform_tag",
+    "platform_library_candidates",
+    "resolve_platform_library"
 ]
+
+_ARCH_ALIASES = {'amd64': 'x86_64', 'x64': 'x86_64', 'arm64e': 'arm64'}
+
+def platform_tag():
+    """
+    Returns a tag like `darwin-arm64`, `darwin-x86_64`, `linux-aarch64`, `linux-x86_64`, or `windows-x86_64`
+    identifying the OS and CPU the interpreter is running on. The environment variable
+    `MCUTILS_PLATFORM_TAG` overrides the detected value (useful for containers and cross-builds).
+
+    :return: the platform tag
+    :rtype: str
+    """
+    override = os.environ.get('MCUTILS_PLATFORM_TAG')
+    if override:
+        return override
+    system = platform.system().lower() or sys.platform
+    machine = platform.machine().lower()
+    return "{}-{}".format(system, _ARCH_ALIASES.get(machine, machine))
+
+def platform_library_candidates(path, tag=None):
+    """
+    Lists the file names that can stand in for the library `path`, most specific first.
+    `libfoo.so` yields `libfoo.<tag>.so` (and `libfoo.<tag>.dylib` on macOS), then `libfoo.so` itself.
+    This allows several binaries (e.g. a mac and a linux build) to live side by side in one folder.
+
+    :param path: the plain library path
+    :type path: str
+    :param tag: platform tag, `platform_tag()` by default
+    :type tag: str | None
+    :return: candidate paths
+    :rtype: list[str]
+    """
+    if tag is None:
+        tag = platform_tag()
+    root, ext = os.path.splitext(path)
+    exts = [ext] if ext else ['.so']
+    if tag.startswith('darwin'):
+        exts = exts + [e for e in ('.dylib', '.so') if e not in exts]
+    cands = ["{}.{}{}".format(root, tag, e) for e in exts]
+    return cands + [path]
+
+def resolve_platform_library(path, tag=None):
+    """
+    Returns the first existing candidate from `platform_library_candidates`,
+    falling back to `path` unchanged so that existing single-binary layouts keep working.
+
+    :param path: the plain library path
+    :type path: str
+    :return: the path to load
+    :rtype: str
+    """
+    for cand in platform_library_candidates(path, tag=tag):
+        if os.path.isfile(cand):
+            return cand
+    return path
 
 class SharedLibraryLoader:
 
@@ -32,7 +90,7 @@ class SharedLibraryLoader:
             if not os.path.isfile(lib_file):
                 lib_file = None
         else:
-            lib_file = shared_library
+            lib_file = resolve_platform_library(shared_library)
             shared_library = None
         self._lib = shared_library
         self._lib_file = lib_file

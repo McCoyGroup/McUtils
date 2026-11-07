@@ -253,6 +253,71 @@ class GEOMBackend(ConformerLibraryBackend):
         return self._ensure_loaded()[int(key)]
 
 
+class ObjectStoreBackend(ConformerLibraryBackend):
+    """
+    Keeps each `{'smi':.., 'coord':..}` record as one entry of an `ObjectStore` (a store or a path to
+    one), under the record's own fingerprint, with an alias ``<namespace>.<key>`` so records are found by
+    name. Records can be added one at a time, which is atomic per record (a library built over hours
+    survives a crash), identical records are stored once, and `get_smiles` reads only the SMILES field.
+    Keys are strings made of letters, digits, ``.``, ``_`` and ``-``.
+    """
+
+    def __init__(self, store, namespace='conformers'):
+        from ..Scaffolding.ObjectStore import ObjectStore
+        self.store = store if isinstance(store, ObjectStore) else ObjectStore(store)
+        if not namespace or '.' in namespace:
+            raise ValueError("namespace must be non-empty and contain no '.'")
+        self.namespace = namespace
+
+    def _alias(self, key):
+        return "{}.{}".format(self.namespace, key)
+
+    def put_record(self, key, record, replace=True):
+        """Stores `record` under `key` (replacing what the name pointed at, unless ``replace=False``)"""
+        key = str(key)
+        if not replace and key in self:
+            raise KeyError("{} is already in the library".format(key))
+        entry = self.store.put(dict(record), meta={'kind': 'conformer', 'conformer_key': key,
+                                                   'namespace': self.namespace})
+        self.store.set_alias(self._alias(key), entry)
+        return entry
+
+    @classmethod
+    def from_records(cls, store, records, namespace='conformers'):
+        """Builds a backend in `store` from a ``{key: record}`` mapping (or any `ConformerLibraryBackend`)"""
+        self = cls(store, namespace=namespace)
+        for key in records.keys():
+            self.put_record(key, records[key])
+        return self
+
+    def __len__(self):
+        return sum(1 for _ in self.keys())
+
+    def __contains__(self, key):
+        try:
+            return self.store.resolve_alias(self._alias(key)) is not None
+        except ValueError:
+            return False
+
+    def keys(self):
+        prefix = self.namespace + '.'
+        folder = os.path.join(self.store.root, self.store.aliases_name)
+        names = sorted(f[:-5] for f in os.listdir(folder) if f.endswith('.json')) if os.path.isdir(folder) else []
+        return [n[len(prefix):] for n in names if n.startswith(prefix) and n[len(prefix):] in self]
+
+    def _entry(self, key):
+        entry = self.store.resolve_alias(self._alias(key))
+        if entry is None:
+            raise KeyError(key)
+        return entry
+
+    def get_smiles(self, key):
+        return self.store.get(self._entry(key), lazy=True)['smi']
+
+    def get_record(self, key):
+        return self.store.get(self._entry(key))
+
+
 class ConformerLibrary:
     """
     A backend-agnostic reader for conformer ensembles stored as
@@ -347,6 +412,17 @@ class ConformerLibrary:
         """Builds a library over the default `NumpyTreeArchive` backend
         (a path, an open `NumpyTreeArchive`, or a raw nested tree/dict)."""
         return cls(NumpyTreeArchiveBackend(archive, **opts), loader=loader)
+
+    @classmethod
+    def from_object_store(cls, store, loader=None, namespace='conformers'):
+        """Builds a library over an `ObjectStore` (or a path to one); see `ObjectStoreBackend`."""
+        return cls(ObjectStoreBackend(store, namespace=namespace), loader=loader)
+
+    def to_object_store(self, store, namespace='conformers'):
+        """Copies every record into an `ObjectStore` and returns a library over it (resumable: records
+        already present are rewritten with identical content, which costs nothing)."""
+        backend = ObjectStoreBackend.from_records(store, self.backend, namespace=namespace)
+        return type(self)(backend, loader=self.loader)
 
     @classmethod
     def from_smidb(cls, smiles_file, loader=None, coord_key='coord', **opts):

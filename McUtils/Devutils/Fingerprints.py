@@ -8,6 +8,7 @@ exclude runtime-only attributes or add handlers for types they know about.
 """
 from __future__ import annotations
 
+import enum
 import functools
 import hashlib
 import inspect
@@ -81,6 +82,8 @@ def freeze(value, *, seen=None, handlers=(), pre_handlers=(), exclude_attrs=()):
             return fn(value, rec)
     if value is None or isinstance(value, (str, bool, int, float)):
         return value
+    if isinstance(value, enum.Enum):
+        return ['enum', '{}.{}'.format(type(value).__module__, type(value).__qualname__), value.name]
     if isinstance(value, np.generic):
         return rec(value.item())
     if isinstance(value, Path):

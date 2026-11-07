@@ -210,10 +210,10 @@ class ComposeCallCountTests(unittest.TestCase):
         doc = h.compose("Grounded").doc
         kinds = [b.kind for b in doc.blocks]
         self.assertEqual(kinds, ["prose", "heading", "prose", "readout", "readout"])
-        self.assertEqual((doc.blocks[0].role, doc.blocks[0].status), ("summary", "grounded"))
+        self.assertEqual((doc.blocks[0].role, doc.blocks[0].status), ("summary", "checked"))
         section_text = doc.blocks[2]
         self.assertEqual(section_text.cites, ["r1", "r2"])
-        self.assertTrue(all(b.caption_status == "grounded" for b in doc.blocks if b.kind == "readout"))
+        self.assertTrue(all(b.caption_status == "checked" for b in doc.blocks if b.kind == "readout"))
         self.assertEqual(doc.meta["prompt_version"], ReportHarness.PROMPT_VERSION)
         self.assertEqual(doc.validate(), [])
 

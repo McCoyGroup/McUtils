@@ -5,6 +5,7 @@ Simple utilities that support constructing Regex patterns
 import re
 from collections import OrderedDict
 from .StructuredType import StructuredType, DisappearingType
+from ..Devutils import CascadingPropertyManager, cascading_property
 __reload_hook__ = [".StructuredType"]
 
 __all__ = [
@@ -55,6 +56,12 @@ class RegexPattern:
     into the expression structure... that way we can define a sort-of Regex calculus that we can use to build up higher
     order regexes but still be able to recursively inspect subparts?
     """
+    # the built/compiled pattern depends on how the children are joined; changing any of these also invalidates the parents
+    cascade_dependencies = {
+        'pattern': dict(depends_on=['joiner', 'join_function', 'prefix', 'suffix'],
+                        reset=lambda self: self.invalidate_cache())
+    }
+
     def __init__(self,
                  pat,
                  name=None,
@@ -107,6 +114,7 @@ class RegexPattern:
         :param allow_inner_captures:
         :type allow_inner_captures:
         """
+        self._cascade_manager = CascadingPropertyManager(self)
 
         if isinstance(pat, (tuple, list)) and children is None:
             children = pat
@@ -260,7 +268,7 @@ class RegexPattern:
         :rtype: tuple[RegexPattern]
         """
         return tuple(self._parents)
-    @property
+    @cascading_property
     def joiner(self):
         """
 
@@ -282,9 +290,8 @@ class RegexPattern:
         :rtype: object
         """
         self._joiner = j
-        self._cached = None
 
-    @property
+    @cascading_property
     def join_function(self):
         """
 
@@ -307,8 +314,7 @@ class RegexPattern:
         :rtype: object
         """
         self._join_function = j
-        self._cached = None
-    @property
+    @cascading_property
     def suffix(self):
         """
 
@@ -330,8 +336,7 @@ class RegexPattern:
         :rtype: object
         """
         self._suffix = e
-        self._cached = None
-    @property
+    @cascading_property
     def prefix(self):
         """
 
@@ -353,7 +358,6 @@ class RegexPattern:
         :rtype: object
         """
         self._prefix = s
-        self._cached = None
     @property
     def dtype(self):
         """Returns the StructuredType for the matched object

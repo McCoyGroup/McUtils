@@ -5,6 +5,20 @@ from .CommonData import DataHandler
 from collections import OrderedDict, deque
 
 __all__ = [ "UnitsData", "UnitsDataHandler" ]
+
+import re
+
+# characters for building the unicode / ascii / latex label styles of `UnitsDataHandler`
+_SUP = {"⁰": "0", "¹": "1", "²": "2", "³": "3", "⁴": "4", "⁵": "5", "⁶": "6", "⁷": "7", "⁸": "8", "⁹": "9",
+        "⁻": "-", "⁺": "+"}
+_SUB = {"₀": "0", "₁": "1", "₂": "2", "₃": "3", "₄": "4", "₅": "5", "₆": "6", "₇": "7", "₈": "8", "₉": "9",
+        "ₕ": "h", "ₑ": "e", "ₐ": "a", "ₙ": "n", "ₘ": "m"}
+_ASCII_WORDS = {"Å": "Ang", "°": "deg", "µ": "u", "μ": "u", "Ω": "Ohm"}
+_SUP_CHARS = "".join(_SUP)
+_SUB_CHARS = "".join(_SUB)
+_SUP_OF = {v: k for k, v in _SUP.items()}
+_PER = re.compile(r"(?<=[a-z])Per(?=[A-Z])")
+_MATHRM = re.compile(r"\\mathrm\{([^{}]*)\}")
 __reload_hook__ = [".CommonData"]
 
 class ConversionError(Exception):
@@ -98,6 +112,226 @@ class UnitsDataHandler(DataHandler):
     def __init__(self):
         super().__init__("ConstantsData")
         self._unit_graph=UnitGraph()
+        self._unit_labels = None
+        self._prefix_labels = None
+        self._label_cache = {}
+        self._label_style = "unicode"
+        self._label_version = 0
+
+    #region Unit Labels
+    # Short labels for units ("cm⁻¹", "cm-1", "\\mathrm{cm^{-1}}") in three styles. The data is the supplement
+    # TheRealMcCoy/UnitLabelsSupplement.json (base units and prefixes); other names are composed from it by `_label_factors`
+    label_supplement = "UnitLabelsSupplement.json"
+
+    label_styles = ("unicode", "ascii", "latex")
+
+    @classmethod
+    def check_label_style(cls, style):
+        """``style`` if it is one of `label_styles`, else a ``ValueError``"""
+        if style not in cls.label_styles:
+            raise ValueError(f"unit label style must be one of {list(cls.label_styles)}, got {style!r}")
+        return style
+
+    @staticmethod
+    def ascii_label(label):
+        """An ASCII spelling of a unicode label: ``cm⁻¹`` -> ``cm-1``, ``Eₕ`` -> ``Eh``, ``Å`` -> ``Ang``, ``°`` -> ``deg``"""
+        return "".join(_ASCII_WORDS.get(ch) or _SUP.get(ch) or _SUB.get(ch) or ch for ch in label)
+
+    @staticmethod
+    def latex_label(label):
+        r"""A LaTeX (math mode, no ``$``) spelling of a unicode label: ``cm⁻¹`` -> ``\mathrm{cm^{-1}}``, ``Eₕ`` -> ``E_{\mathrm{h}}``"""
+        if not label:
+            return label
+        if label == "°":
+            return r"^{\circ}"
+        if label == "%":
+            return r"\%"
+        m = re.match(rf"^(.*?)([{re.escape(_SUP_CHARS)}]+)$", label)
+        base, power = (m.group(1), "".join(_SUP[c] for c in m.group(2))) if m else (label, None)
+        m = re.match(rf"^(.*?)([{re.escape(_SUB_CHARS)}]+)$", base)
+        if m and len(m.group(1)) == 1:               # a symbol with a subscript: E_h, a_0, m_e
+            sub = "".join(_SUB[c] for c in m.group(2))
+            body = f"{m.group(1)}_{{{sub}}}" if sub.isdigit() else f"{m.group(1)}_{{\\mathrm{{{sub}}}}}"
+            return body if power is None else f"{body}^{{{power}}}"
+        text = base.replace("Å", r"\AA ").replace("µ", r"\mu ").replace("μ", r"\mu ").replace("Ω", r"\Omega ")
+        return f"\\mathrm{{{text}}}" if power is None else f"\\mathrm{{{text}^{{{power}}}}}"
+
+    @classmethod
+    def _label_row(cls, row):
+        """``row`` with all three styles (a missing one is built from the unicode label)"""
+        uni = row.get("unicode")
+        if uni is None:
+            raise ValueError(f"a unit label needs at least a unicode entry: {row!r}")
+        return {"unicode": uni, "ascii": row.get("ascii") or cls.ascii_label(uni),
+                "latex": row.get("latex") or cls.latex_label(uni)}
+
+    @staticmethod
+    def _prefixed_label(prefix, base):
+        pl, bl = prefix["latex"], base["latex"]
+        text = _MATHRM.fullmatch(bl)
+        if pl.isalpha():
+            latex = r"\mathrm{%s%s}" % (pl, text.group(1)) if text else r"\mathrm{%s}%s" % (pl, bl)
+        else:
+            latex = pl + (r"\mathrm{%s}" % text.group(1) if text else bl)
+        return {"unicode": prefix["unicode"] + base["unicode"], "ascii": prefix["ascii"] + base["ascii"], "latex": latex}
+
+    def _label_factors(self, name, _depth=0):
+        """
+        The factors ``[(label row, power), ...]`` a unit name stands for, or ``None`` if some part of it has no label.
+        The grammar is the one the conversions use: ``A/B``, ``A B``, ``Inverse``, ``Squared``..., ``APerB``, prefixes.
+        """
+        name = name.strip()
+        if not name or _depth > 8:
+            return None
+        table, prefixes = self._unit_labels, self._prefix_labels
+        sub = lambda n: self._label_factors(n, _depth + 1)
+        if "/" in name:
+            top, bottom = name.split("/", 1)
+            a, b = sub(top), sub(bottom)
+            return None if a is None or b is None else a + [(r, -p) for r, p in b]
+        if len(name.split()) > 1:
+            out = []
+            for part in name.split():
+                f = sub(part)
+                if f is None:
+                    return None
+                out += f
+            return out
+        row = table.get(name)
+        if row is not None:
+            return sub(row["alias"]) if "alias" in row else [(self._label_row(row), 1)]
+        if name.startswith("Inverse") and len(name) > 7:
+            f = sub(name[7:])
+            return None if f is None else [(r, -p) for r, p in f]
+        for post, n in self.postfix_map.items():
+            if name.endswith(post) and len(name) > len(post):
+                f = sub(name[:-len(post)])
+                return None if f is None else [(r, p * n) for r, p in f]
+        m = _PER.search(name)
+        if m:
+            a, b = sub(name[:m.start()]), sub(name[m.end():])
+            return None if a is None or b is None else a + [(r, -p) for r, p in b]
+        for pre, prow in prefixes.items():
+            if name.startswith(pre) and len(name) > len(pre):
+                rest = name[len(pre):]
+                f = sub(rest[0].upper() + rest[1:])
+                if f is not None and len(f) == 1 and f[0][1] == 1:
+                    return [(self._prefixed_label(self._label_row(prow), f[0][0]), 1)]
+        return None
+
+    @staticmethod
+    def _label_power(sym, p, style):
+        if p == 1:
+            return sym
+        if style == "unicode":
+            return sym + "".join(_SUP_OF[c] for c in str(p))
+        return sym + ("^" if sym[-1:].isdigit() else "") + str(p)
+
+    @classmethod
+    def _render_label_factors(cls, factors, style):
+        """The label of ``factors`` in ``style``: ``kcal/mol``, ``cm⁻¹``, ``m·s⁻²``; LaTeX never uses ``/``"""
+        if len(factors) == 1 and factors[0][1] == 1:
+            return factors[0][0][style]
+        if style == "latex":
+            groups = []                                 # consecutive upright-text factors share one \\mathrm{...}
+            for row, p in factors:
+                frag = row["latex"]
+                text = _MATHRM.fullmatch(frag)
+                exp = "" if p == 1 else "^{%d}" % p
+                if text:
+                    if groups and groups[-1][0] == "text":
+                        groups[-1][1].append(text.group(1) + exp)
+                    else:
+                        groups.append(("text", [text.group(1) + exp]))
+                else:
+                    groups.append(("math", [frag + exp]))
+            return r"\,".join(r"\mathrm{%s}" % r"\,".join(g) if kind == "text" else g[0] for kind, g in groups)
+        num = [(r, p) for r, p in factors if p > 0]
+        den = [(r, p) for r, p in factors if p < 0]
+        joiner = "·" if style == "unicode" else " "
+        if num and len(den) == 1 and den[0][1] == -1:
+            return joiner.join(cls._label_power(r[style], p, style) for r, p in num) + "/" + den[0][0][style]
+        return joiner.join(cls._label_power(r[style], p, style) for r, p in factors)
+
+    def _load_label_data(self):
+        if self._unit_labels is None:
+            import json, os
+            path = os.path.join(self._dir, self._pkg, self.label_supplement)
+            data = {}
+            if os.path.exists(path):
+                with open(path, encoding="utf-8") as f:
+                    data = json.load(f)
+            self._unit_labels = {k: dict(v) for k, v in data.get("units", {}).items()}
+            self._prefix_labels = {k: dict(v) for k, v in data.get("prefixes", {}).items()}
+            self._label_cache = {}
+
+    def _label_table(self):
+        """``{unit name: {style: label}}`` for the base units that have a label of their own (or ``{"alias": name}``)"""
+        self._load_label_data()
+        return self._unit_labels
+
+    @property
+    def label_style(self):
+        """The style `unit_label` uses when none is given: ``"unicode"``, ``"ascii"`` or ``"latex"``"""
+        return self._label_style
+
+    @property
+    def label_version(self):
+        """Increases whenever labels or the default style change (so callers can invalidate caches)"""
+        return self._label_version
+
+    def _labels_changed(self):
+        self._label_version += 1
+        self._label_cache = {}
+
+    def set_label_style(self, style):
+        """Sets the default label style (``"unicode"``, ``"ascii"`` or ``"latex"``)"""
+        self._label_style = self.check_label_style(style)
+        self._labels_changed()
+
+    def unit_labels(self, style=None):
+        """``{unit name: label}`` for the units that have a label listed (not the composed ones), in ``style``"""
+        return {k: self.unit_label(k, style) for k in self._label_table()}
+
+    def unit_label(self, unit, style=None):
+        """
+        The short label of a unit, in ``style`` (default `label_style`). Base units and prefixes come from the label
+        data; any other name is composed from them with the grammar the conversions use (``Kilo``..., ``Inverse``...,
+        ``...Squared``, ``A/B``, ``A B``, ``APerB``): ``KilocaloriesPerMole`` -> ``kcal/mol``. A name with a part that
+        has no label gives the name back.
+        """
+        style = self._label_style if style is None else self.check_label_style(style)
+        self._load_label_data()
+        if unit not in self._label_cache:
+            self._label_cache[unit] = self._label_factors(unit)
+        factors = self._label_cache[unit]
+        return unit if factors is None else self._render_label_factors(factors, style)
+
+    def update_unit_labels(self, table, styles=None, overwrite=True):
+        """
+        Merges ``{unit name: {style: label}}`` (or ``{unit name: {"alias": other name}}``) into the base-unit labels
+        (other keys are ignored). ``styles`` limits which styles are taken; ``overwrite=False`` only fills labels that
+        are missing.
+        """
+        styles = self.label_styles if styles is None else [self.check_label_style(s) for s in styles]
+        labels = self._label_table()
+        for name, row in table.items():
+            cur = labels.setdefault(name, {})
+            if "alias" in row and (overwrite or not cur):
+                cur.clear()
+                cur["alias"] = row["alias"]
+            for st in styles:
+                if st in row and row[st] and (overwrite or st not in cur):
+                    cur.pop("alias", None)
+                    cur[st] = row[st]
+        self._labels_changed()
+
+    def load_unit_labels(self, path, **kw):
+        """Merges a JSON label table (``{unit name: {style: label}}``) with `update_unit_labels`"""
+        import json
+        with open(path, encoding="utf-8") as f:
+            self.update_unit_labels(json.load(f), **kw)
+    #endregion
 
     def load(self):
         super().load()
@@ -573,7 +807,7 @@ class UnitsDataHandler(DataHandler):
     AtomicMassUnits = "AtomicMassUnits"
     ElectronVolts = "ElectronVolts"
     KilocaloriesPerMole = "Kilocalories/Mole"
-    KilojoulesPerMole = "Kilocalories/Mole"
+    KilojoulesPerMole = "Kilojoules/Mole"
     @property
     def hartrees_to_wavenumbers(self): # soooo common
         return self.convert("Hartrees", "Wavenumbers")

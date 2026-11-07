@@ -222,8 +222,8 @@ _COLOR = "#1F4E79"
 def _label(label, unit, theme_labels=None):
     if not unit:
         return label
-    from .Styles import ReadoutTheme
-    return f"{label} ({ReadoutTheme.default_tokens['unit_labels'].get(unit, unit)})"
+    from ..Data import UnitsData
+    return f"{label} ({UnitsData.unit_label(unit)})"
 
 
 def _columns(x, ys, x_name, x_label, x_unit, y_names, y_label, y_unit, x_quantity=None, y_quantity=None):

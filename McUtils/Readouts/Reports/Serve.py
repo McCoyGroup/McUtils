@@ -15,27 +15,9 @@ from .Document import ReportDocument
 from .Render import ReportRenderer
 from .Tools import report_toolset
 
-__all__ = ["load_catalog", "serve_report", "REPORT_INSTRUCTIONS"]
+__all__ = ["load_catalog", "serve_report"]
 
-REPORT_INSTRUCTIONS = """\
-You are building a report from readouts of named sources. You choose and order content and write short captions and
-prose; the server renders everything.
-
-Start with list_sources, then describe_source for each source you use: it shows the sections, what each contains, and
-the source's report template. If the template has an outline, apply_template builds it in one call (optionally with
-some of the template's optional sections); then adjust with add_readout, add_heading, move and remove. Read a block
-with peek before writing about it.
-
-Mutating tools only return a receipt (block id, block count, revision). Call compile to read the whole report back
-(it also checks it, lists the locked blocks and sets a checkpoint) and diff to see what changed: since the last change, or since the last compile.
-
-Blocks marked locked (by the report's template) can't be edited, moved or removed; add text around them.
-
-Never write Markdown headings, code or markers; give plain text only. Numbers in captions and paragraphs must be
-quoted as peek shows them, not computed: a number that is not in the data of the blocks you cite is rejected
-(ungrounded) and nothing is written, so pass the ids of the blocks in `cites`; compile reports the tolerance in force.
-The report file is saved after every change. Use render to produce HTML and PowerPoint.
-"""
+from .Instructions import REPORT_INSTRUCTIONS     # noqa: E402  (kept importable from here)
 
 
 def load_catalog(sources):
@@ -66,8 +48,15 @@ def _save(doc, path):
     os.replace(tmp, path)
 
 
-def serve_report(md_path, sources, out_dir=None, policy="grounded", rel_tol=1e-3, small_int_max=10, year_range=(1900, 2100), title=None, lock=(), unlock=(), call_log=None, stdin=None, stdout=None):
-    """Load (or start) the report at ``md_path`` against the catalog of ``sources`` and serve its tools on stdio."""
+def serve_report(md_path, sources, out_dir=None, policy="grounded", rel_tol=1e-3, small_int_max=10, year_range=(1900, 2100), title=None, lock=(), unlock=(), call_log=None, stdin=None, stdout=None,
+                 allow_derived=False, apply_edits=False, context_level=2, include_tools=None, exclude_tools=None, unit_style=None):
+    """
+    Load (or start) the report at ``md_path`` against the catalog of ``sources`` and serve its tools on stdio.
+    ``context_level`` (1 compact, 2 standard, 3 full) sets the tools and instructions the model gets (see
+    `report_toolset`). ``allow_derived`` (computed values in text) and ``apply_edits`` (the multi-edit tool) are off
+    unless the owner switches them on. ``unit_style`` (``unicode``, ``ascii`` or ``latex``) is how filled values write
+    their unit; it is stored in the report.
+    """
     from ...JobDrivers.MCP import MCPServer
     md_path = os.path.abspath(md_path)
     catalog = sources if isinstance(sources, SourceCatalog) else load_catalog(sources)
@@ -87,7 +76,9 @@ def serve_report(md_path, sources, out_dir=None, policy="grounded", rel_tol=1e-3
         _save(doc, md_path)
     out_dir = os.path.abspath(out_dir or os.path.join(os.path.dirname(md_path), os.path.splitext(os.path.basename(md_path))[0] + "_out"))
     tools = report_toolset(doc, catalog, renderer=ReportRenderer(catalog), policy=policy, rel_tol=rel_tol,
-                           small_int_max=small_int_max, year_range=year_range, out_dir=out_dir, on_change=lambda d: _save(d, md_path))
-    MCPServer(tools, name="mcutils-report", instructions=REPORT_INSTRUCTIONS,
+                           small_int_max=small_int_max, year_range=year_range, out_dir=out_dir, on_change=lambda d: _save(d, md_path),
+                           allow_derived=allow_derived, apply_edits=apply_edits, context_level=context_level, include_tools=include_tools,
+                           exclude_tools=exclude_tools, unit_style=unit_style)
+    MCPServer(tools, name="mcutils-report", instructions=tools.instructions,
               call_log=call_log).serve(stdin, stdout)
     return doc

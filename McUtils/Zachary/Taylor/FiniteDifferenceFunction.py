@@ -4,6 +4,7 @@ Provides a general, convenient FiniteDifferenceFunction class to handle all of o
 import numpy as np, scipy.sparse as sparse, math
 from ... import Numputils as nput
 from ..Mesh import PointMesh, MeshType
+from ...Devutils import CascadingPropertyManager, cascading_property, derived_property
 __reload_hook__ = [ '..Mesh' ]
 
 __all__ = [
@@ -852,6 +853,7 @@ class FiniteDifferenceMatrix:
         :param mode:
         :type mode:
         """
+        self._cascade_manager = CascadingPropertyManager(self)
         self.data = finite_difference_data
         self._npts = npts
         self._mesh_spacing = mesh_spacing
@@ -884,7 +886,7 @@ class FiniteDifferenceMatrix:
         :rtype: int
         """
         return self.data.order
-    @property
+    @cascading_property(always=False)
     def npts(self):
         """
         **LLM Docstring**
@@ -907,10 +909,8 @@ class FiniteDifferenceMatrix:
         :return: the number of points
         :rtype: int
         """
-        if val != self._npts:
-            self._mat = None
-            self._npts = val
-    @property
+        self._npts = val
+    @cascading_property(always=False)
     def mesh_spacing(self):
         """
         **LLM Docstring**
@@ -931,10 +931,8 @@ class FiniteDifferenceMatrix:
         :return: the mesh spacing
         :rtype: float
         """
-        if val != self._mesh_spacing:
-            self._mat = None
-            self._mesh_spacing = val
-    @property
+        self._mesh_spacing = val
+    @cascading_property(always=False)
     def only_core(self):
         """
         **LLM Docstring**
@@ -957,10 +955,8 @@ class FiniteDifferenceMatrix:
         :return: the flag
         :rtype: bool
         """
-        if val != self._only_core:
-            self._mat = None
-            self._only_core = val
-    @property
+        self._only_core = val
+    @cascading_property(always=False)
     def only_center(self):
         """
         **LLM Docstring**
@@ -983,10 +979,8 @@ class FiniteDifferenceMatrix:
         :return: the flag
         :rtype: bool
         """
-        if val != self._only_center:
-            self._mat = None
-            self._only_center = val
-    @property
+        self._only_center = val
+    @cascading_property(always=False)
     def mode(self):
         """
         **LLM Docstring**
@@ -1009,10 +1003,8 @@ class FiniteDifferenceMatrix:
         :return: the mode
         :rtype: str
         """
-        if val != self._mode:
-            self._mat = None
-            self._mode = val
-    @property
+        self._mode = val
+    @cascading_property(always=False)
     def dtype(self):
         """
         **LLM Docstring**
@@ -1031,10 +1023,8 @@ class FiniteDifferenceMatrix:
 
         :return: the dtype
         """
-        if val != self._dtype:
-            self._mat = None
-            self._dtype = val
-    @property
+        self._dtype = val
+    @derived_property(slot='_mat', depends_on=['npts', 'mesh_spacing', 'only_core', 'only_center', 'mode', 'dtype'], settable=False)
     def matrix(self):
         """
         **LLM Docstring**
@@ -1044,9 +1034,7 @@ class FiniteDifferenceMatrix:
         :return: the matrix
         :rtype: np.ndarray | sparse matrix
         """
-        if self._mat is None:
-            self._mat = self.fd_matrix()
-        return self._mat
+        return self.fd_matrix()
     #endregion
 
     def fd_matrix(self):
