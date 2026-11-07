@@ -10,6 +10,7 @@ import json
 
 from .. import Devutils as dev
 from ..Jupyter import JHTML, X3DHTML
+from ..Jupyter.JHTML.JavaScript import JSState
 from .. import Numputils as nput
 
 __all__ = [
@@ -513,9 +514,9 @@ class X3D(X3DObject):
         self._widget_cache = {}
 
     X_ITE_JS = "https://cdn.jsdelivr.net/npm/x_ite@11.5.11/dist/x_ite.min.js"
-    X3DOM_JS = 'https://www.x3dom.org/download/1.8.3/x3dom-full.js'
-    X3DOM_CSS = 'https://www.x3dom.org/download/x3dom.css'
-    MATHJAX_CDN = 'https://cdn.jsdelivr.net/npm/mathjax@4/tex-svg.js'
+    X3DOM_JS = JSState.runtime_metadata()['dependencies']['x3dom_script']
+    X3DOM_CSS = JSState.runtime_metadata()['dependencies']['x3dom_stylesheet']
+    MATHJAX_CDN = JSState.runtime_metadata()['dependencies']['x3d_mathjax']
 
     @staticmethod
     def get_playback_controls():

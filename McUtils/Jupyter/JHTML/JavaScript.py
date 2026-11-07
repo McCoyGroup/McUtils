@@ -13,9 +13,10 @@ Readouts. Scene-specific field resolution remains in the X3D adapter.
 """
 
 import copy
+import hashlib
 import json
 import math
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import re
 from contextlib import contextmanager
 from contextvars import ContextVar
@@ -28,6 +29,34 @@ __all__ = ["JSVar", "JSState", "JSBinding"]
 _runtime_path = ContextVar('mcutils_javascript_path', default='inline')
 _offline = ContextVar('mcutils_html_offline', default=False)
 _asset_paths = ContextVar('mcutils_html_asset_paths', default=None)
+_runtime_manifest_path = 'McUtils/Jupyter/JHTML/resources/runtime.json'
+
+
+def _runtime_read(path):
+    return Path(__file__).resolve().parents[3].joinpath(path).read_bytes()
+
+
+def _runtime_manifest(read=_runtime_read):
+    return json.loads(read(_runtime_manifest_path))
+
+
+def _runtime_bytes(source):
+    # Git's checkout line-ending settings must not produce different CDN IDs.
+    return source.replace(b'\r\n',b'\n')
+
+
+@lru_cache(maxsize=16)
+def _verify_runtime_assets(base, expected):
+    for path, digest in expected:
+        try:
+            source = _fetch_asset(base+path)
+        except Exception as error:
+            raise RuntimeError('UI runtime has not been published or cannot be reached; '
+                               "use javascript_path='inline' for local edits: "+base) from error
+        data = (json.dumps(json.loads(source),ensure_ascii=True,allow_nan=False,sort_keys=True,separators=(',',':')).encode('utf-8') if path == _runtime_manifest_path
+                else _runtime_bytes(source.encode('utf-8')))
+        if hashlib.sha256(data).hexdigest() != digest:
+            raise RuntimeError('Published UI runtime does not match the installed assets: '+path)
 
 
 @lru_cache(maxsize=16)
@@ -155,17 +184,14 @@ class JSState:
     Scopes serialize as ``mcui-state`` WebComponents. Load the shared UI entry
     point once; its lifecycle mounts and disposes scopes automatically. Full
     HTML/Readout exports collect that library once after the interface.
-    ``javascript_path`` accepts ``'inline'`` (the default) or a script URL/path
-    to JHTML/resources/javascript.js and its sibling Apps resources. ``offline``
-    on an exporter also embeds supported view dependencies such as Plotly.
+    ``javascript_path`` accepts ``'inline'`` (the default), ``'cdn'`` (the
+    verified content tag for the installed assets), or a script URL/path to
+    JHTML/resources/javascript.js and its sibling Apps resources. ``offline``
+    embeds supported view dependencies such as Plotly without contacting a CDN.
+    CI publishes content tags automatically; only breaking interface changes
+    require changing the generation in resources/runtime.json.
     """
-    _capabilities = {
-        "dom": {"value": "both", "checked": "both", "text": "in", "visible": "in", "enabled": "in"},
-        "table": {"selection": "both", "visible": "in"},
-        "plotly": {"selection": "both", "data": "in", "layout": "in", "visible": "in"},
-        "x3d": {"mode": "both", "sample": "both", "fraction": "both", "running": "both",
-                "speed": "both", "loop": "both", "scale": "both", "visible": "in"},
-    }
+    _capabilities = copy.deepcopy(_runtime_manifest()['bindings'])
 
     def __init__(self, *variables, bridges=(), script=None, javascript_path=None):
         if len(variables) == 1 and isinstance(variables[0], (list, tuple)):
@@ -213,18 +239,69 @@ class JSState:
         for bridge in self.bridges:
             if bridge.initialize_from == "python":
                 values[bridge.js_var.name]["initial"] = bridge.js_var.validate(bridge.python_var.value)
-        return dict(version=1, variables=variables, script=self.script)
+        return dict(version=self.runtime_metadata()['interface'], variables=variables, script=self.script)
+
+    @staticmethod
+    def runtime_metadata():
+        """The shared interface contract and dependency defaults, without Git."""
+        return _runtime_manifest()
+
+    @staticmethod
+    def runtime_info(read=None):
+        """Identify only browser assets/contract, independently of repo commits.
+
+        ``read`` is an optional repository-relative path-to-bytes reader used by
+        release tooling to validate an existing Git tree without checking it out.
+        This method uses only the standard library and works in installed wheels.
+        """
+        read = _runtime_read if read is None else read
+        metadata = _runtime_manifest(read)
+        interface = metadata.get('interface')
+        if type(interface) is not int or interface < 1:
+            raise ValueError('UI interface generation must be a positive integer')
+        repository = metadata.get('repository','')
+        if not re.fullmatch(r'[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+',repository):
+            raise ValueError('UI runtime repository must be a GitHub owner/repository')
+        assets = metadata.get('assets',[])
+        if not assets or len(set(assets)) != len(assets) or metadata.get('entry') not in assets or _runtime_manifest_path in assets:
+            raise ValueError('UI runtime must declare unique assets including its entry point')
+        for path in assets:
+            parts=PurePosixPath(path)
+            if parts.is_absolute() or '..' in parts.parts or str(parts)!=path or not path.startswith('McUtils/'):
+                raise ValueError('Invalid UI runtime asset path: '+path)
+        canonical=json.dumps(metadata,ensure_ascii=True,allow_nan=False,sort_keys=True,separators=(',',':')).encode('utf-8')
+        hashes={_runtime_manifest_path:hashlib.sha256(canonical).hexdigest()}
+        for path in sorted(assets):
+            hashes[path]=hashlib.sha256(_runtime_bytes(read(path))).hexdigest()
+        # Include paths and lengths through canonical JSON; no dates/Git SHAs.
+        fingerprint=hashlib.sha256(json.dumps(hashes,sort_keys=True,separators=(',',':')).encode('ascii')).hexdigest()
+        tag='mcui-{}-{}'.format(interface,fingerprint)
+        base='https://cdn.jsdelivr.net/gh/{}@{}/'.format(repository,tag)
+        return dict(interface=interface,fingerprint=fingerprint,tag=tag,base=base,
+                    script=base+metadata['entry'],assets=hashes)
+
+    @classmethod
+    def cdn_url(cls, *, verify=True):
+        """Resolve an exact content tag; unpublished edits require inline output.
+
+        CDN export verifies the manifest and all core assets once per process.
+        ``verify=False`` returns the prospective URL for release tooling only.
+        """
+        info=cls.runtime_info()
+        if verify:
+            _verify_runtime_assets(info['base'],tuple(sorted(info['assets'].items())))
+        return info['script']
 
     @staticmethod
     def check_javascript_path(path):
         if path is None:
             return None
         path = str(path)
-        if path == 'inline':
+        if path in ('inline','cdn'):
             return path
         parsed = urlsplit(path)
         if not path.strip() or any(ord(char) < 32 for char in path) or parsed.scheme not in ('','http','https','file'):
-            raise ValueError('javascript_path must be inline or a script URL/path')
+            raise ValueError('javascript_path must be inline, cdn, or a script URL/path')
         if parsed.scheme in ('http','https') and not parsed.netloc:
             raise ValueError('javascript_path requires a complete HTTP(S) URL')
         return path
@@ -295,12 +372,14 @@ class JSState:
         if cls.is_offline():
             return 'inline'
         if javascript_path is not None:
-            return cls.check_javascript_path(javascript_path)
+            path = cls.check_javascript_path(javascript_path)
+            return cls.cdn_url() if path=='cdn' else path
         explicit = {getattr(element,'attrs',{}).get('data-mcjs-runtime')
                     for element in cls._walk_elements(elements)} - {None}
         if len(explicit)>1:
             raise ValueError('One interface cannot request multiple JavaScript runtime versions')
-        return next(iter(explicit)) if explicit else cls.current_javascript_path()
+        path = next(iter(explicit)) if explicit else cls.current_javascript_path()
+        return cls.cdn_url() if path=='cdn' else path
 
     @classmethod
     def resource_elements(cls, elements=(), *, javascript_path=None, force=False,
@@ -365,10 +444,13 @@ class JSState:
                 source = Path(__file__).parent.parent/'resources/x3dom-full.js'
                 resources.append(cls._script_element(cls.asset_source('x3dom_script',source),id='mcutils-x3dom-js'))
         if needed:
+            identity=cls.runtime_info()
+            attrs={'id':'mcutils-apps-native-js','data-mcui-runtime':identity['tag'],
+                   'data-mcui-interface':str(identity['interface'])}
             if path == 'inline':
-                resources.append(cls._script_element(cls.javascript_source(),id='mcutils-apps-native-js'))
+                resources.append(cls._script_element(cls.javascript_source(),**attrs))
             else:
-                resources.append(HTML.Script(src=path,id='mcutils-apps-native-js'))
+                resources.append(HTML.Script(src=path,**attrs))
         return resources
 
     @staticmethod
@@ -389,19 +471,31 @@ class JSState:
     def runtime_loader(cls, javascript_path=None):
         """A Promise expression used only by the shared ActiveHTMLWidgets API."""
         path = cls.runtime_path(javascript_path=javascript_path)
+        identity=cls.runtime_info()
+        check=r'''
+const expected=EXPECTED;
+function checked(){
+  const api=globalThis.McUtilsJS;
+  if(!api || api.version!==expected.interface)throw new Error('Incompatible McUtils UI interface');
+  if(api.runtimeTag && api.runtimeTag!==expected.tag)throw new Error('Different McUtils UI runtimes require separate documents');
+  api.runtimeTag ||= expected.tag;
+  return Promise.resolve(api.ready).then(()=>api);
+}
+'''.replace('EXPECTED',_json({'interface':identity['interface'],'tag':identity['tag']}))
         if path == 'inline':
-            return '(function(){\n'+cls.javascript_source()+"\nreturn Promise.resolve(McUtilsJS.ready).then(()=>McUtilsJS);\n})()"
-        return r'''(function(){
-if(globalThis.McUtilsJS) return Promise.resolve(McUtilsJS.ready).then(()=>McUtilsJS);
+            return '(function(){\n'+check+cls.javascript_source()+"\nreturn checked();\n})()"
+        return '(function(){\n'+check+r'''
+if(globalThis.McUtilsJS)return Promise.resolve().then(checked);
 const url=URL;
 const loads=globalThis.__mcutilsUIRuntimeLoads ||= new Map();
 if(!loads.has(url)) loads.set(url,new Promise((resolve,reject)=>{
   const script=document.createElement('script');script.src=url;
-  script.onload=()=>globalThis.McUtilsJS ? Promise.resolve(McUtilsJS.ready).then(()=>resolve(McUtilsJS),reject) : reject(new Error('McUtils UI runtime did not initialize'));
+  script.dataset.mcuiRuntime=expected.tag;script.dataset.mcuiInterface=String(expected.interface);
+  script.onload=()=>resolve();
   script.onerror=()=>{loads.delete(url);reject(new Error('Failed to load McUtils UI runtime: '+url));};
   document.head.append(script);
 }));
-return loads.get(url);
+return loads.get(url).then(checked);
 })()'''.replace('URL',_json(path),1)
 
     @classmethod

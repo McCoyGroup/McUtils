@@ -7,6 +7,7 @@ from html.parser import HTMLParser
 import subprocess
 import sys
 import unittest
+from unittest import mock
 
 from McUtils.Jupyter.JHTML import HTML, JHTML, JSVar, JSState, JSBinding
 from McUtils.Jupyter.Apps import App, Card, Slider, Selector, Checkbox, VariableDisplay, FunctionDisplay, Tabs, Accordion
@@ -196,6 +197,18 @@ class RuntimeExportTests(unittest.TestCase):
                 self.assertEqual([a.get('src') for a in scripts],[self.url])
                 self.assertNotIn('class McuiState',html)
 
+    def test_cdn_selector_uses_installed_identity_and_offline_never_verifies(self):
+        identity=JSState.runtime_info()
+        with mock.patch.object(JSState,'cdn_url',return_value=identity['script']) as resolve:
+            html=Readout(self.panel()).to_html(javascript_path='cdn')
+            self.assertIn('src="'+identity['script']+'"',html)
+            self.assertIn('data-mcui-runtime="'+identity['tag']+'"',html)
+            self.assertTrue(resolve.called)
+        with mock.patch.object(JSState,'cdn_url',side_effect=AssertionError('offline must not contact CDN')):
+            html=Readout(self.panel(javascript_path='cdn')).to_html(javascript_path='cdn',offline=True)
+            self.assertIn('class McuiState',html)
+            self.assertNotIn('src="'+identity['script']+'"',html)
+
     def test_per_scope_url_and_export_override(self):
         value=JSVar('value',initial=1)
         scope=JSState(value,javascript_path=self.url).to_widget()
@@ -291,6 +304,9 @@ def runtime_fixtures():
                   plot=HTMLReadoutRenderer().render_fragment_result(panel).html,
                   scene=JSState(mode,fraction).to_html(scene),
                   runtime=JSState.javascript_source(),
+                  identity=JSState.runtime_info(),
+                  widget_inline_loader=JSState.runtime_loader(),
+                  widget_cdn_loader=JSState.runtime_loader(RuntimeExportTests.url),
                   entry=JSState.javascript_source(include_ui=False),
                   native_js=Path(__import__('McUtils').__file__).parent.joinpath('Jupyter/Apps/resources/native.js').read_text(),
                   native_css=JSState.native_css())

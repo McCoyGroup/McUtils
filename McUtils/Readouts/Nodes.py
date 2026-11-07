@@ -413,7 +413,8 @@ class Readout(ReadoutSection):
         """Standalone HTML document (string), optionally written to ``file``.
 
         ``javascript_path='inline'`` collects one UI/state library after all
-        content; a URL loads the WebComponent entry point instead. ``offline=True``
+        content; ``'cdn'`` selects the installed assets' verified content tag,
+        and a URL loads an explicit WebComponent entry point. ``offline=True``
         embeds supported plot/scene/UI dependencies as well. ``asset_paths`` can
         supply local bundles when exporting without network access.
         """

@@ -30,6 +30,7 @@ from . import X3DInterface as x3d
 from . import SVG as svg
 from .SceneJSON import SceneJSON as sceneJSON
 from .Colors import ColorPalette
+from ..Jupyter.JHTML.JavaScript import JSState
 
 DPI_SCALING = 72
 
@@ -6440,8 +6441,8 @@ class PlotlyFigure(GraphicsFigure):
     split_plot_fragment = True
     embed_mathjax = True
     preload_plotly = True
-    mathjax_cdn = "https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.min.js"
-    plotly_cdn = "https://cdn.plot.ly/plotly-3.4.0.min.js"
+    mathjax_cdn = JSState.runtime_metadata()['dependencies']['plotly_mathjax']
+    plotly_cdn = JSState.runtime_metadata()['dependencies']['plotly']
     def get_core_body(self, html):
         """
         **LLM Docstring**

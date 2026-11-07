@@ -69,4 +69,4 @@ global-exclude .ipynb_checkpoints
 recursive-include McUtils/Jupyter/Apps/resources *.css *.js
 
 # Shared standalone JavaScript interaction runtime
-recursive-include McUtils/Jupyter/JHTML/resources *.js
+recursive-include McUtils/Jupyter/JHTML/resources *.js *.json
