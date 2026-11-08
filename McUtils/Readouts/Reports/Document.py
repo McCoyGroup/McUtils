@@ -631,6 +631,78 @@ class ReportDocument:
                                       f"{between}; move_source({handle!r}, ...) moves them together"})
         return out
 
+    def display_warnings(self):
+        """
+        Sections of readout blocks that hold only arrays that are not displayed:
+        ``[{"code": "not_displayed", "block_id", "handle", "section", "detail"}]``. HTML and PowerPoint write a one-line
+        "data only" stub for them (never nothing), but a report that means to show the numbers should state them
+        with placeholders.
+        """
+        out = []
+        for b in self.blocks:
+            if not isinstance(b, ReadoutBlock) or self.catalog is None or b.handle not in self.catalog:
+                continue
+            src = self.catalog.get(b.handle)
+            try:
+                names = list(b.include) if b.include is not None else list(src.default_sections())
+            except Exception:  # noqa: BLE001
+                continue
+            for n in names:
+                if n in (b.exclude or ()):
+                    continue
+                try:
+                    stub = src.section_stub(n)
+                except Exception:  # noqa: BLE001
+                    stub = None
+                if stub:
+                    out.append({"code": "not_displayed", "block_id": b.id, "handle": b.handle, "section": n,
+                                "detail": f"section {n!r} of {b.handle!r} (block {b.id}) holds only arrays that are not "
+                                          f"displayed, so the report shows a one-line 'data only' stub there; state "
+                                          f"the values you want shown with placeholders, or leave the section out"})
+        return out
+
+    def duplicate_readouts(self):
+        """
+        Readout blocks that show the same sections of the same source in the same units and style:
+        ``[{"code": "duplicate_selection", "handle", "sections", "blocks", "detail"}]``. A repeat is sometimes meant, so this
+        is advice, never an error.
+        """
+        groups = {}
+        for b in self.blocks:
+            if not isinstance(b, ReadoutBlock):
+                continue
+            try:
+                src = self.catalog.get(b.handle)
+                names = set(b.include) if b.include is not None else set(src.default_sections())
+            except Exception:
+                names = set(b.include or ())
+            names -= set(b.exclude or ())
+            groups.setdefault((b.handle, tuple(sorted(names)), str(b.units), str(b.style)), []).append(b.id)
+        out = []
+        for (handle, names, _, _), ids in groups.items():
+            if len(ids) > 1:
+                out.append({"code": "duplicate_selection", "handle": handle, "sections": list(names), "blocks": ids,
+                            "detail": f"{', '.join(ids)} show the same sections of {handle!r} ({', '.join(names) or 'none'}); "
+                                      f"keep one (cite and place text around it) unless the repeat is intended"})
+        return out
+
+    def template_blocks(self, handle, optional=()):
+        """
+        The blocks that already carry a source's template: ``({section: block id}, [missing sections])`` for the sections
+        `apply_template` would build (unavailable ones are not counted).
+        """
+        from .Templates import find_report_template
+        src = self.catalog.get(handle)
+        tmpl = find_report_template(src)
+        rows = {r["name"]: r for r in src.sections()}
+        plan = [n for _, ns in tmpl.sections for n in ns] + list(optional or ())
+        usable = [n for n in plan if rows.get(n.split(".", 1)[0], {}).get("available", False)]
+        have = {}
+        for b in self.blocks:
+            if isinstance(b, ReadoutBlock) and b.handle == handle and b.include and len(b.include) == 1:
+                have.setdefault(b.include[0], b.id)
+        return {n: have[n] for n in usable if n in have}, [n for n in usable if n not in have]
+
     def remove(self, block_id):
         i = self._index(block_id)
         block = self.blocks.pop(i)

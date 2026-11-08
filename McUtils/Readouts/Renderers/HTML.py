@@ -19,7 +19,7 @@ from ..Nodes import (ReadoutNode, ReadoutSection, ReadoutText, ReadoutFields, Re
                      ReadoutGrid, ReadoutFlex, ReadoutPanel)
 from ..Views import ReadoutPlot, ReadoutEquation, ReadoutCode, ReadoutHTML, ReadoutPresML, ReadoutWidget
 from ..Scenes import SceneView
-from .Base import ReadoutRenderer, RenderContext, handles, is_visible
+from .Base import ReadoutRenderer, RenderContext, handles, is_visible, hidden_stub
 
 __all__ = ["HTMLReadoutRenderer", "FragmentResult", "resolve_scene_view", "resolve_gallery_views"]
 
@@ -362,11 +362,13 @@ class HTMLReadoutRenderer(ReadoutRenderer):
     @handles(ReadoutSection)
     def render_section(self, node, ctx):
         H = self.H
-        if not is_visible(node):
+        stub = hidden_stub(node, self.theme)
+        if not is_visible(node) and stub is None:
             return None
         level = min(max(ctx.depth, 1), 3)
         heading = H.Span(node.title or node.id, cls=f"mcr-h mcr-h{level}")
-        body = H.Div(*self._children(node, ctx), cls="mcr-body")
+        kids = [H.P(stub, cls="mcr-text mcr-note mcr-stub")] if stub else self._children(node, ctx)
+        body = H.Div(*kids, cls="mcr-body")
         cls = "mcr-section" if level == 1 else "mcr-section mcr-subsection"
         if self.collapsible:
             return H.Details(H.Summary(heading), body, cls=cls, open=True, id=f"mcr-{ctx.path_string.replace('/', '-')}")

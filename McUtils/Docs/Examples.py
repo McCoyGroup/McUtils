@@ -753,10 +753,11 @@ class ExampleView:
             return bool(self.show_trivial)
         return str(self.block.options.get("show_trivial", False)).lower() in ("1", "true", "yes", "on")
 
-    def node(self, include_code=False):
+    def node(self, include_code=False, style=None):
         """
         The `Readout` for this example according to its ``display`` option; ``None`` for
-        ``display="none"``. With ``include_code`` the example's source is shown first.
+        ``display="none"``. With ``include_code`` the example's source is shown first. ``style`` is the theme the node
+        will be rendered with: a readout that is trivial in it (see `is_trivial`) is suppressed.
 
         :raises ExampleError: if the display mode needs a value or output and the block has neither
         """
@@ -789,7 +790,8 @@ class ExampleView:
             return Readout(*lead, *extra, id="example-" + self.block.key[:8])
         if not (lead or extra or self.shows_trivial):
             from ..Readouts.Renderers.Base import is_trivial
-            if is_trivial(base):
+            from ..Readouts.Styles import ReadoutTheme
+            if is_trivial(base, None if style is None else ReadoutTheme.resolve(style)):
                 return None
         if lead or extra:
             return Readout(*lead, *base.get_children(), *extra, title=base.title, subtitle=base.subtitle,
@@ -798,7 +800,7 @@ class ExampleView:
 
     def to_fragment(self, style=None, x3dom_path=None, css="inline"):
         """The embeddable `FragmentResult` for the site, or ``None`` for ``display="none"``."""
-        node = self.node()
+        node = self.node(style=style)
         return None if node is None else node.to_html_fragment(style=style, x3dom_path=x3dom_path, css=css,
                                                                header=self.block.options.get("header", "auto"))
 
@@ -809,7 +811,7 @@ class ExampleView:
         ``display="none"``), for hosts that already show the code.
         """
         from ..Readouts.Renderers.HTML import HTMLReadoutRenderer
-        node = self.node(include_code=include_code)
+        node = self.node(include_code=include_code, style=style)
         if node is None:
             return None
         return HTMLReadoutRenderer(style, mode=mode, css=css, header="auto", **opts).render_readout(node)
@@ -1098,7 +1100,7 @@ class ExampleRunner:
         files = {}
         warnings = []
         view = ExampleView(block, outcome["value"], outcome["stdout"], self.to_readout, self.max_output)
-        node = view.node()
+        node = view.node(style=block.options.get("style", self.style))
         if node is not None:
             css = block.options.get("css", self.css)
             fragment = node.to_html_fragment(

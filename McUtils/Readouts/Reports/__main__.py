@@ -34,8 +34,10 @@ def main(argv=None):
     p.add_argument("--tools", nargs="+", default=None, metavar="NAME", help="offer these tools on top of the level's")
     p.add_argument("--no-tools", nargs="+", default=None, metavar="NAME", help="leave these tools out")
     p.add_argument("--derived", action="store_true",
-                   help="allow computed values in text ({mean(r3.frequency[2], r3.frequency[3])}); off by default "
-                        "(single placeholders like {r3.frequency[2]} are always filled in)")
+                   help="allow computed values in text (the default; kept so existing commands work)")
+    p.add_argument("--no-derived", action="store_true",
+                   help="refuse computed values ({mean(r3.frequency[2], r3.frequency[3])}); single placeholders like "
+                        "{r3.frequency[2]} are always filled in")
     p.add_argument("--apply-edits", action="store_true",
                    help="offer the apply_edits tool (several edits in one atomic call); off by default, at every "
                         "context level")
@@ -45,7 +47,7 @@ def main(argv=None):
     a = p.parse_args(argv)
     serve_report(a.report, a.sources, out_dir=a.out_dir, policy=a.policy, rel_tol=a.rel_tol, small_int_max=a.small_int_max,
                  year_range=None if a.check_years else (1900, 2100), title=a.title, lock=a.lock, unlock=a.unlock, call_log=a.call_log,
-                 allow_derived=a.derived, apply_edits=a.apply_edits, context_level=a.context_level, include_tools=a.tools,
+                 allow_derived=not a.no_derived, apply_edits=a.apply_edits, context_level=a.context_level, include_tools=a.tools,
                  exclude_tools=a.no_tools, unit_style=a.unit_style, autolink=a.autolink, advice=not a.no_advice)
 
 

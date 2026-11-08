@@ -11,6 +11,7 @@ __all__ = [
     "is_visible",
     "is_trivial",
     "array_preview",
+    "hidden_stub",
     "ReadoutRenderer",
     "RenderContext",
     "handles",
@@ -35,12 +36,37 @@ def is_visible(node):
     return True
 
 
+def hidden_stub(node, theme=None, limit=3, force=False):
+    """
+    One line for a section that shows nothing because everything in it is an export-only array, or ``None`` (the node
+    shows something, or holds no such array). A renderer writes it in place of the section's content so that a block a
+    format can't show is never silently left out: it names each array with its shape and range and says the values
+    are in the data export.
+
+    Plain readouts keep export-only arrays out of sight (that is what they are for), so the stub is written only when the
+    theme has the token ``stub_hidden`` (a report sets it) or ``force`` is true.
+    """
+    if not force and not (theme is not None and theme.get("stub_hidden")):
+        return None
+    if is_visible(node):
+        return None
+    arrays = [n for _, n in node.walk() if isinstance(n, ReadoutArray) and not n.display]
+    if not arrays:
+        return None
+    parts = [f"{a.title or a.data.label or a.id}: {array_preview(a.data, theme)[1]}" for a in arrays[:limit]]
+    more = f" and {len(arrays) - limit} more" if len(arrays) > limit else ""
+    return "Not displayed (data only): " + "; ".join(parts) + more + ". The values are in the data export."
+
+
 _CONTAINER_KINDS = ("section", "readout", "gallery", "grid", "flex", "panel")
 
 
-def is_trivial(node):
+def is_trivial(node, theme=None):
     """
     Whether a node is not worth showing on its own: it says (almost) nothing a plain ``repr`` wouldn't.
+
+    With ``theme`` (``stub_hidden`` set, as a report does) an export-only array is not trivial: a renderer writes a stub
+    line for it (see `hidden_stub`).
 
     A leaf is trivial if it is empty text, a hidden (export-only) array, or marked ``meta["trivial"] = True`` by
     whatever made it (a bare number or string wrapped in a one-field record is marked so; a record that merely has
@@ -51,13 +77,13 @@ def is_trivial(node):
     if kind not in _CONTAINER_KINDS and "trivial" in node.meta:
         return bool(node.meta["trivial"])
     if kind in _CONTAINER_KINDS:
-        return all(is_trivial(c) for c in node.get_children())
+        return all(is_trivial(c, theme) for c in node.get_children())
     if kind == "text":
         return not str(node.text).strip()
     if kind == "fields":
         return bool(node.meta.get("trivial", False))
     if kind == "array":
-        return not node.display
+        return not node.display and not (theme is not None and theme.get("stub_hidden"))   # a stub is something to show
     return False
 
 
@@ -217,7 +243,14 @@ class TextReadoutRenderer(ReadoutRenderer):
 
     @handles(ReadoutPlot)
     def render_plot(self, node, ctx):
-        return [f"[plot{': ' + node.caption if node.caption else ''}]", ""]
+        """A plot as text: its caption and, when it carries its data, what is plotted (so a peek at it is not blank)."""
+        from ..Data import TabularData
+        d = getattr(node, "data", None)
+        what = ""
+        if isinstance(d, TabularData) and d.nrows:
+            names = ", ".join(str(getattr(c, "label", None) or c.name) for c in d.columns[:6])
+            what = f" ({d.nrows} points of {names})"
+        return [f"[plot{what}{': ' + node.caption if node.caption else ''}]", ""]
 
     @handles(ReadoutEquation)
     def render_equation(self, node, ctx):

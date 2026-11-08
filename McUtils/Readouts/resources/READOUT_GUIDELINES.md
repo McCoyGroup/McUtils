@@ -130,6 +130,9 @@ to. Use them honestly for identifiers too (`identifier` for labels, `path` for f
 - Sections that are expensive to build should say so (`cost=`): `describe_source` builds each section to classify it.
 - Name a part with a dot (`normal_modes.frequencies`) when a section bundles a table with heavy parts, so a template
   can take the table alone.
+- A model may name a section by its key, its `title`, or a heading of the report template (a heading stands for the
+  sections under it); the tool says which section it matched. Keep titles and template headings distinct from the keys of
+  other sections so that a name means one thing.
 
 ## 6. Report templates
 
@@ -153,9 +156,28 @@ Even then it is a matcher, not a proof: a number is compared with the values of 
 right value attached to the wrong quantity passes; small integers, years and numbers in backticks are exempt; and
 spelled-out numbers are not seen. Placeholders are the only exact way to state a value.
 
-Computed values (`{mean(r3.frequency[2], r3.frequency[3])}`) are **off by default** and enabled by the person running
-the server (`--derived`, `allow_derived=True`). The multi-edit tool `apply_edits` is off by default as well and enabled
-with `--apply-edits` (`apply_edits=True`).
+Computed values (`{mean(r3.frequency[2], r3.frequency[3])}`) are **on by default** (`--no-derived` or
+`allow_derived=False` turns them off). They exist so that a number the user asks for (a difference, a mean) is written by
+the server; the instructions tell the model not to add comparisons nobody asked for. The multi-edit tool `apply_edits` is
+off by default and enabled with `--apply-edits` (`apply_edits=True`).
+
+A row can be named by a selector instead of a number: `{r5.y[max]}`, `[min]`, `[first]`, `[last]`, and `{r5.x[max:y]}` for
+the x where `y` is largest. A selector is one reference, not a computed value, so it works with derived values off. It
+suits long columns (a curve, a convergence history), where "the peak" or "the final value" should not need the model to
+find the row; keep the quantity you want to rank numeric and give both columns of a series short, stable names (`x`, `y`).
+
+Long columns (more than 12 rows) are summarised wherever the placeholders are listed (`peek`, `values`, the receipts of
+`add_readout`): the line adds the minimum, maximum and last row with the selector placeholder and the row each is in, so
+a model can state "the peak is X at row N" without paging through the series. `values(block, column)` lists rows in pages
+(`start`, `limit`). The report loads at most 20000 values of a readout; a column cut short by that has no `[min]`, `[max]`
+or `[last]` (they would describe part of the data), and the summary says so.
+
+A section that holds only export-only arrays (`ReadoutArray` without `display=True`) shows nothing in a plain readout. In a
+report it shows one line instead (`Not displayed (data only): Displacements: shape (2, 4, 3), float64; min 0, max 23. The
+values are in the data export.`) and `compile`, and the receipt of `add_readout`, carry a `not_displayed` note, so a block
+is never silently missing from the HTML or PowerPoint. If the values matter to the reader, put them in a table, or in a
+plot built with `data=` (the numbers of a plot enter the evidence and can be written with placeholders; its text form says
+how many points of which columns it plots).
 
 ## 8. Checklist
 

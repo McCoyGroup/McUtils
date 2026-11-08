@@ -184,7 +184,7 @@ class CompileAndDiffTests(unittest.TestCase):
         self.assertEqual(c["baselines"], ["start", "template"])
         self.assertNotIn("changes_since_last_compile", c)
         self.assertEqual(c["grounding"], {"policy": "grounded", "rel_tol": 1e-3, "small_int_max": 10, "year_range": [1900, 2100],
-                                       "derived": False, "apply_edits": False, "unit_style": "unicode"})
+                                       "derived": True, "apply_edits": False, "unit_style": "unicode"})
         ok(self.tools.call("add_text", {"text": "Value 1648.23.", "cites": ["r2"]}))
         c = ok(self.tools.call("compile"))
         self.assertEqual(c["text_status"], {"template": 2, "checked": 1})
@@ -278,7 +278,7 @@ class CompileAndDiffTests(unittest.TestCase):
 
     def test_apply_template_again_moves_the_template_baseline(self):
         ok(self.tools.call("add_heading", {"text": "Mine"}))
-        ok(self.tools.call("apply_template", {"handle": "water"}))
+        ok(self.tools.call("apply_template", {"handle": "water", "again": True}))
         self.assertEqual(ok(self.tools.call("diff", {"since": "template"}))["n_changes"], 0)
 
 
@@ -687,7 +687,7 @@ class SubprocessServerTests(unittest.TestCase):
             self.assertFalse(by_id[5]["result"]["isError"], by_id[5])
             comp = json.loads(by_id[6]["result"]["content"][0]["text"])
             self.assertEqual(comp["grounding"], {"policy": "grounded", "rel_tol": 1e-5, "small_int_max": 3,
-                                                 "year_range": None, "derived": False, "apply_edits": False, "unit_style": "unicode"})
+                                                 "year_range": None, "derived": True, "apply_edits": False, "unit_style": "unicode"})
             self.assertEqual(comp["revision"], 2)
             self.assertNotIn("outline", json.loads(by_id[3]["result"]["content"][0]["text"]))
             text = open(md).read()

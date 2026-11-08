@@ -17,13 +17,41 @@ simply typed. This module is what makes the placeholder the easy path:
 """
 
 from .Document import ReadoutBlock, Prose
-from .Fill import ref_for, fill_text, find_markers, fill_spans, _column
+from .Fill import ref_for, fill_text, find_markers, fill_spans, _column, _select, _truncation, _by_row
 from .Grounding import (extract_numbers, unit_after, unit_shorthand, _is_exempt, _skipped, _near, _compatible)
 
-__all__ = ["column_summary", "column_values", "typed_numbers", "matching_items", "advise", "autolink", "coverage",
+__all__ = ["column_summary", "column_values", "column_stats", "LONG_ROWS", "typed_numbers", "matching_items", "advise", "autolink", "coverage",
            "default_cites"]
 
 _NOT_VALUES = ("index", "int", "count")
+LONG_ROWS = 12     # a numeric column of more rows than this is summarised (min, max, last) next to its placeholder
+
+
+def column_stats(items, block, name, style=None):
+    """
+    The summary of a long numeric column of ``block``: ``{"rows", "stats": [{"which", "row", "use", "value"}], "truncated"}``.
+
+    ``stats`` has the ``min``, ``max`` and ``last`` rows, each as the selector placeholder that writes it
+    (``{r3.y[max]}``), the row it is in and the value as the server will write it. ``None`` for a column that is
+    short, holds text or has no finite values. If the evidence cut the column short (`EvidenceSet.truncated`) there
+    are no statistics (they would describe only part of the column): ``truncated`` is then ``(rows loaded, total or
+    None)``.
+    """
+    col = _by_row(_column(items, block, name))
+    if len(col) <= LONG_ROWS or any(e.is_text for e in col):
+        return None
+    cut, total = _truncation(items, block, col)
+    if cut:
+        return {"rows": len(col), "stats": [], "truncated": (len(col), total)}
+    stats = []
+    for which in ("min", "max", "last"):
+        try:
+            e = _select(items, block, name, col, which, None)
+        except Exception:  # noqa: BLE001 - no finite value: nothing to summarise
+            return None
+        ref = f"{block}.{name}[{which}]"
+        stats.append({"which": which, "row": e.row or 1, "use": "{" + ref + "}", "value": _value_text(ref, items, style)})
+    return {"rows": len(col), "stats": stats, "truncated": None}
 
 
 def default_cites(doc, cites, limit=8):
@@ -73,19 +101,27 @@ def column_summary(items, block, style=None, section=None, limit=10):
             line = f"{{{block}.{name}[ROW]}} ({tag}): {{{ref}}} = {shown}"
         else:
             line = f"{{{ref}}} = {shown}"
+        stats = column_stats(items, block, name, style) if many else None
+        if stats and stats["truncated"]:
+            n, total = stats["truncated"]
+            line += (f"; only the first {n} of {total if total else 'more'} rows are loaded, so [min], [max] and [last] "
+                     f"are not available")
+        elif stats:
+            line += "; " + ", ".join(f"{s['which']} {s['use']} = {s['value']} (row {s['row']})" for s in stats["stats"])
         out.append({"column": name, "rows": len(es) if many else None, "unit": unit, "use": "{" + ref + "}",
-                    "example": example, "line": line})
+                    "example": example, "line": line, **({"stats": stats} if stats else {})})
     return out
 
 
-def column_values(items, block, column, style=None, limit=60):
+def column_values(items, block, column, style=None, limit=60, start=1):
     """
-    Every row of one column of ``block`` as ``[{"row", "use", "value"}]``, and the number of rows: ``(rows, total)``.
-    ``column`` is a name as `column_summary` lists it (``bad_reference`` otherwise).
+    ``limit`` rows of one column of ``block`` from row ``start`` as ``[{"row", "use", "value"}]``, and the number of
+    rows: ``(rows, total)``. ``column`` is a name as `column_summary` lists it (``bad_reference`` otherwise).
     """
     col = _column(items, block, column)
     rows = []
-    for e in col[:limit]:
+    first = max(int(start), 1) - 1
+    for e in col[first:first + limit]:
         ref = ref_for(e, items)
         row = {"use": "{" + ref + "}", "value": _value_text(ref, items, style)}
         if e.row is not None:

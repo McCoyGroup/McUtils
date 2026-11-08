@@ -305,7 +305,17 @@ class EvidenceItem:
 
 
 class EvidenceSet(list):
-    """A list of `EvidenceItem`s (what `evidence_items` returns); `check_grounding` matches against it unit-aware."""
+    """
+    A list of `EvidenceItem`s (what `evidence_items` returns); `check_grounding` matches against it unit-aware.
+
+    :ivar truncated: ``{(block id, column key): total rows or None}`` for each column the ``cap`` of `evidence_items` cut
+        short (``None`` when the full length is not known, or the column was left out). Anything that needs the whole
+        column (``[min]``, ``[max]``, ``[last]``) must not be answered from a truncated one.
+    """
+
+    def __init__(self, *args):
+        super().__init__(*args)
+        self.truncated = {}
 
     def values(self):
         return np.array([e.value for e in self], dtype=float)
@@ -330,9 +340,20 @@ def _strings(value, cap):
     return None
 
 
-def evidence_items(texts=(), readouts=(), cap=20000):
+def _total(value):
+    try:
+        return int(np.asarray(value).size)
+    except Exception:  # noqa: BLE001 - ragged data: the length is not known
+        return None
+
+
+def evidence_items(texts=(), readouts=(), cap=20000, max_total=None):
     """
     Like `evidence_numbers`, but an `EvidenceSet` that keeps each value's unit, quantity, label and position.
+
+    A column keeps at most ``cap`` values, so that one very long column does not leave the others out (they are cut at
+    the same row); ``max_total`` (default ``10 * cap``) bounds all of them, and columns past it are left out. Both
+    are recorded in `EvidenceSet.truncated`.
 
     :param texts: strings, or ``(block id, string)`` pairs (numbers read from text keep the unit written after them)
     :param readouts: `Readout`s, or ``(block id, Readout)`` pairs; their ``to_flat_data()`` metadata gives each
@@ -341,16 +362,18 @@ def evidence_items(texts=(), readouts=(), cap=20000):
     if isinstance(texts, str):
         texts = (texts,)
     out = EvidenceSet()
+    max_total = 10 * cap if max_total is None else max_total
 
     def room():
-        return cap - len(out)
+        return min(cap, max_total - len(out))
 
     for ro in readouts:
         block, ro = ro if isinstance(ro, tuple) else (None, ro)
         data, meta = ro.to_flat_data()
         for key, v in data.items():
             if room() <= 0:
-                break
+                out.truncated[(block, key)] = None
+                continue
             m = meta.get(key) or {}
             label = m.get("label") or key.rsplit("/", 1)[-1]
             strings = _strings(v, room())
@@ -367,13 +390,17 @@ def evidence_items(texts=(), readouts=(), cap=20000):
                 continue
             unit, quantity = canonical_unit(m.get("unit")), m.get("quantity")
             many = flat.size > 1
-            for j, x in enumerate(flat[:room()]):
+            taken = flat[:room()]
+            total = _total(v)
+            if total is not None and total > taken.size:
+                out.truncated[(block, key)] = total
+            for j, x in enumerate(taken):
                 out.append(EvidenceItem(x, unit, quantity, label, block, j + 1 if many else None, "data",
                                         unit == "percent", key, unit_name=m.get("unit") or None))
     for t in texts:
         block, t = t if isinstance(t, tuple) else (None, t)
         for n in extract_numbers(t):
-            if room() <= 0:
+            if len(out) >= max_total:
                 break
             out.append(EvidenceItem(n.value, None if n.percent else n.unit, None, "text", block, None, "text",
                                     n.percent, decimals=n.decimals))
