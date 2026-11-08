@@ -118,15 +118,16 @@ def parse_pol_derivs(pol_array, tril=np.tril_indices(3), reader=None):
     return full_array
 FormattedCheckpointComponents["Polarizability Derivatives"] = parse_pol_derivs
 def parse_pol_num_derivs(pol_array, tril=np.tril_indices(3), reader=None):
+    # Gaussian stores all first derivatives, followed by all diagonal second
+    # derivatives, with six lower-triangle tensor components per mode.
+    if len(pol_array) == 0 or len(pol_array) % 12:
+        raise ValueError("Polarizability num derivs must contain 12 values per mode")
     n_modes = len(pol_array) // 12
-    firsts = np.zeros((n_modes, 3, 3))
+    firsts = parse_pol_derivs(pol_array[:6*n_modes], tril=tril)
+    seconds = parse_pol_derivs(pol_array[6*n_modes:], tril=tril)
     second_diag = np.zeros((n_modes, n_modes, 3, 3))
-    r, c = tril
-    for i,block in enumerate(np.array_split(pol_array, n_modes)):
-        firsts[i, r,c] = block[:6]
-        firsts[i, c, r] = block[:6]
-        second_diag[i, i, r,c] = block[6:]
-        second_diag[i, i, c, r] = block[6:]
+    idx = np.arange(n_modes)
+    second_diag[idx, idx] = seconds
     return firsts, second_diag
 FormattedCheckpointComponents["Polarizability num derivs"] = parse_pol_num_derivs
 
