@@ -1,4 +1,9 @@
 """Readout adapters in the per-module ``Readouts`` packages, reached through ``to_readout`` hooks."""
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 from McUtils.ExternalPrograms import *
 from McUtils.ExternalPrograms.Conformers import ConformerRecord
 import io
@@ -55,6 +60,7 @@ class _Exports:
 
 
 class ElectronicStructureReadoutTests(unittest.TestCase, _Exports):
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_gaussian_log_hook(self):
         r = GaussianLogReader(data("water_freq.log")).to_readout()
         for s in ("summary", "structure", "vibrations"):
@@ -73,6 +79,7 @@ class ElectronicStructureReadoutTests(unittest.TestCase, _Exports):
 
 
 class StructureReadoutTests(unittest.TestCase, _Exports):
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_cube(self):
         r = CubeFileParser(data("samp.cube")).to_readout()
         self.assertEqual(section_ids(r)[:2], ["grid", "atoms"])
@@ -109,6 +116,7 @@ class RunReadoutTests(unittest.TestCase, _Exports):
     def tearDown(self):
         shutil.rmtree(self.dir, ignore_errors=True)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_log_series(self):
         from McUtils.Scaffolding import Logger, LogParser
         lf = os.path.join(self.dir, "run.log")
@@ -155,6 +163,7 @@ class RunReadoutTests(unittest.TestCase, _Exports):
 
 
 class OptimizationReadoutTests(unittest.TestCase, _Exports):
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_minimize_and_polyfit(self):
         from McUtils.Numputils.Optimization import iterative_step_minimize, NewtonStepFinder, polyfit_minima
         from McUtils.Numputils.Readouts import OptimizationRun
@@ -190,6 +199,7 @@ class ProfilerReadoutTests(unittest.TestCase):
 
 
 class ViewReadoutTests(unittest.TestCase):
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_graphics_and_composition(self):
         import McUtils.Plots as plt
         from McUtils.Jupyter import JHTML

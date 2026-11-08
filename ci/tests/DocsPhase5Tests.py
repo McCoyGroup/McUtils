@@ -1,5 +1,10 @@
 """Phase 5: method examples on class pages, the layout fix, interactive (`jdoc`) examples, and `static_doc`."""
 
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
+
 import contextlib
 import importlib.util
 import io
@@ -37,8 +42,12 @@ def block(id, code, **options):
 
 
 def have_widgets():
+    if not _RUN_EXTRAS:
+        return False
     try:
-        import ipywidgets, markdown  # noqa: F401
+        import importlib.util
+        return all(importlib.util.find_spec(name) is not None
+                   for name in ("ipywidgets", "markdown"))
     except ImportError:
         return False
     return True
@@ -215,6 +224,7 @@ class LiveExamplePageTests(unittest.TestCase):
         other = self.page(block("a", "'out' in globals()"))
         self.assertIs(other.run("a").value, False)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_user_namespace_needs_ipython(self):
         page = self.page(block("a", "1"), namespace="user")
         try:
@@ -321,6 +331,7 @@ class JdocExamplesTests(unittest.TestCase):
         from McUtils.Docs.DocWalker import DocWalker, FunctionWriter
         return DocWalker(description="").get_handler(obj, cls=FunctionWriter, name=name)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_marker_free_examples_are_still_a_markdown_view(self):
         from McUtils.Jupyter import JHTML
         text = "Prose\n\n```python\nplain(1)\n```\n"
@@ -329,6 +340,7 @@ class JdocExamplesTests(unittest.TestCase):
         self.assertEqual(self.engine().format_examples("raw", markdown=False), "raw")
         self.assertIsNone(self.engine().format_examples(None))
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_marked_examples_become_prose_code_and_controls(self):
         engine = self.engine()
         text = ExampleParser.parse(  # round trip through the parser to get the same text jdoc sees
@@ -339,6 +351,7 @@ class JdocExamplesTests(unittest.TestCase):
         self.assertEqual([b.id for b in page.blocks], ["first", "second"])
         self.assertTrue(hasattr(out, "get_mime_bundle") or hasattr(out, "tostring"))
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_the_same_text_reuses_one_page_and_so_one_namespace(self):
         engine = self.engine()
         text = block("a", "x = 5", display="none") + block("b", "x")
@@ -348,6 +361,7 @@ class JdocExamplesTests(unittest.TestCase):
         (page,) = engine._example_pages.values()
         self.assertEqual(page.run("b").value, 5)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_live_examples_can_be_turned_off(self):
         from McUtils.Jupyter import JHTML
         engine = self.engine(live_examples=False)
@@ -356,6 +370,7 @@ class JdocExamplesTests(unittest.TestCase):
         self.assertEqual(out.tostring(), JHTML.Markdown(text).tostring())
         self.assertEqual(engine._example_pages, {})
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_engine_settings_reach_the_pages(self):
         ns = {"seed": 3}
         engine = self.engine(readouts=self._tmp.name, example_namespace=ns)
@@ -364,6 +379,7 @@ class JdocExamplesTests(unittest.TestCase):
         self.assertIs(page.namespace, ns)
         self.assertEqual(page.store.root, self._tmp.name)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_jdoc_builds_the_view_and_registers_the_pages(self):
         from McUtils.Docs import jdoc
         from McUtils.Docs.DocWalker import InteractiveTemplateEngine
@@ -372,6 +388,7 @@ class JdocExamplesTests(unittest.TestCase):
         self.assertIsNotNone(view)
         self.assertEqual(len(engine._example_pages), 1)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_jdoc_builds_an_engine_for_the_new_options(self):
         from McUtils.Docs import jdoc
         dw = importlib.import_module("McUtils.Docs.DocWalker")   # `McUtils.Docs.DocWalker` the attribute is the class
@@ -436,6 +453,7 @@ class StaticDocTests(unittest.TestCase):
     def doc(self, **kw):
         return self.hd.static_doc(self.mod.shown, return_string=True, **kw)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_stored_output_is_written_into_the_page(self):
         out = self.doc(readouts=self.store)
         self.assertIn("mcr-inline", out)
@@ -447,11 +465,13 @@ class StaticDocTests(unittest.TestCase):
         self.assertIn("Prose before.", out)
         self.assertIn("Prose after.", out)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_without_a_store_the_page_is_as_before(self):
         out = self.doc()
         self.assertNotIn("mcr-inline", out)
         self.assertNotIn("mcr-root", out)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_a_missing_entry_leaves_a_note_and_strict_raises(self):
         empty = ReadoutStore(os.path.join(self._tmp.name, "empty"))
         self.assertIn("Readout not generated yet", self.doc(readouts=empty))

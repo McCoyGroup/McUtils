@@ -1,5 +1,10 @@
 """Telling an outdated ActiveHTMLWidget extension from a current one, and replacing it with JHTML.load."""
 
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
+
 import json
 import os
 import shutil
@@ -11,13 +16,18 @@ from unittest import mock
 
 
 def have_widgets():
+    if not _RUN_EXTRAS:
+        return False
     try:
-        import ipywidgets, markdown  # noqa: F401
+        import importlib.util
+        return all(importlib.util.find_spec(name) is not None
+                   for name in ("ipywidgets", "markdown"))
     except ImportError:
         return False
     return True
 
 
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
 class ExtensionTestBase(unittest.TestCase):
     def setUp(self):
         from McUtils.Jupyter.JHTML.HTMLWidgets import HTMLWidgets
@@ -64,6 +74,7 @@ class ExtensionTestBase(unittest.TestCase):
                 os.rename(os.path.join(static, name), os.path.join(static, "remoteEntry.0123456789abcdef0123.js"))
 
 
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
 class VersionTests(unittest.TestCase):
     def test_caret_ranges(self):
         from McUtils.Jupyter.JHTML.HTMLWidgets import HTMLWidgets as W

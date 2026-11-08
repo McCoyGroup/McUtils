@@ -1,4 +1,9 @@
 """Readout trees, section selection, units, renderers and poster rasterizers."""
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import io
 import json
 import os
@@ -136,7 +141,7 @@ class ReadoutExportTests(unittest.TestCase):
     def setUp(self):
         self.readout = _RecordReadout(_Record()).to_readout(include=["summary", "geometry", "hidden"])
 
-    def test_npz_json_pandas(self):
+    def test_npz_json(self):
         with tempfile.TemporaryDirectory() as tmp:
             f = os.path.join(tmp, "r.npz")
             self.readout.to_npz(f)
@@ -148,6 +153,8 @@ class ReadoutExportTests(unittest.TestCase):
             self.assertEqual(meta["record/geometry/bond"]["unit"], "Angstroms")
         doc = json.loads(self.readout.to_json())
         self.assertEqual(doc["data"]["summary"]["label"], "test")
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
+    def test_pandas(self):
         frames = self.readout.to_pandas()
         self.assertEqual(frames["record/geometry"].attrs["units"]["bond"], "Angstroms")
 
@@ -197,6 +204,7 @@ class SceneTests(unittest.TestCase):
         np.testing.assert_allclose(axis_angle[:3], np.ones(3) / np.sqrt(3), atol=1e-6)
         self.assertAlmostEqual(axis_angle[3], 2 * np.pi / 3)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_software_and_placeholder_posters(self):
         src = _triangle_source()
         view = SceneView.fit(src.vertices(), aspect=2)
@@ -223,6 +231,7 @@ class SceneTests(unittest.TestCase):
             png = ReadoutRasterizer.resolve((fail, "placeholder")).rasterize(req)
         self.assertTrue(png.startswith(b"\x89PNG"))
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_static_scene_exports_model_and_poster(self):
         src = _triangle_source()
         ro = Readout(ReadoutSection(ReadoutScene(model=lambda: src.figure, caption="tri"), id="s", title="S"))

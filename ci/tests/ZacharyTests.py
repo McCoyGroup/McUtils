@@ -1,4 +1,9 @@
 
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
+
 # because of the way multiprocessing works we need this to avoid crashes
 try:
     from Peeves.TestUtils import *
@@ -20,7 +25,7 @@ from McUtils.Parallelizers import *
 from McUtils.Scaffolding import Logger
 
 import numpy.testing
-import sys, h5py, math, numpy as np, itertools
+import sys, math, numpy as np, itertools
 
 class ZacharyTests(TestCase):
 
@@ -153,6 +158,7 @@ class ZacharyTests(TestCase):
 
     #region FD
     # @dataGenTest
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_finite_difference(self):
 
@@ -165,6 +171,7 @@ class ZacharyTests(TestCase):
         sin_d3_vals = -np.cos(sin_grid)
 
         if self.save_data:
+            import h5py
             f = h5py.File(TestManager.test_data('fd_data_1D.hdf5'),'w')
             f.create_dataset("vals", data=sin_vals)
             f.create_dataset("ref", data=sin_d3_vals)
@@ -218,6 +225,7 @@ class ZacharyTests(TestCase):
                 self.print_error(n, ord, errs)
             self.assertLess(errs[1], .05 / ord)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_FD2D(self):
 
@@ -337,6 +345,7 @@ class ZacharyTests(TestCase):
                     self.print_error(n, ord, errs)
                 self.assertLess(errs[1], .5)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_FD2D_multi(self):
 
@@ -979,6 +988,7 @@ class ZacharyTests(TestCase):
 
     #region Function expansions
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_ExpandFunction(self):
         dtype = np.float32
@@ -1548,6 +1558,7 @@ class ZacharyTests(TestCase):
         interp_vals = interp(test_points)
         self.assertTrue(np.allclose(interp_vals, test_vals, atol=5e-5))
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_InterpolatorExtrapolator2D(self):
 
@@ -2091,6 +2102,7 @@ class ZacharyTests(TestCase):
             with BlockProfiler(name="{} pts:".format(len(interp.grid))):
                 interp(interp.grid[:25] + .2, deriv_order=0, neighbors=5)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_RBFForms(self):
 
@@ -2237,6 +2249,7 @@ class ZacharyTests(TestCase):
         # plt.TriContourPlot(*new.T, dinterp(new)-dinterp2(new), colorbar=True).show()
         # raise Exception(dinterp(new) - morse(new))
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_Symbolics(self):
 
@@ -2369,6 +2382,7 @@ class ZacharyTests(TestCase):
             np.allclose(dexpr_res, comp_res)
         )
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_CoordinateFunctions(self):
 
@@ -2463,6 +2477,7 @@ class ZacharyTests(TestCase):
 
         raise Exception(new_surf)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @debugTest
     def test_FittedMixtureModels(self):
         import matplotlib as mpl
@@ -3107,6 +3122,7 @@ class ZacharyTests(TestCase):
         # signs, so the old sum of their absolute values is far too large
         self.assertGreater(np.sum(np.abs(m.volume(return_components=True))), 2 * skin_mesh.volume())
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_SphereUnionSurfaceMeshCurvatures(self):
         # mesh estimates on a sphere (H = 1/r, K = 1/r^2): the quadric fit is

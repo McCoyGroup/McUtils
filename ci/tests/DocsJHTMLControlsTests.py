@@ -1,5 +1,10 @@
 """The jdoc Run control is built from JHTML elements, and the ActiveHTMLWidget extension check."""
 
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
+
 import json
 import os
 import re
@@ -15,8 +20,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 
 def have_widgets():
+    if not _RUN_EXTRAS:
+        return False
     try:
-        import ipywidgets, markdown  # noqa: F401
+        import importlib.util
+        return all(importlib.util.find_spec(name) is not None
+                   for name in ("ipywidgets", "markdown"))
     except ImportError:
         return False
     return True
@@ -204,6 +213,7 @@ class RunControlTests(unittest.TestCase):
         self.assertNotIn("IPython.display", source)
         self.assertNotIn("set_output", source)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_the_engine_composes_the_controls_into_the_doc_tree(self):
         from McUtils.Docs.DocWalker import InteractiveTemplateEngine
         out = InteractiveTemplateEngine().format_examples(BLOCKS)
@@ -360,6 +370,7 @@ class HighlightedCodeTests(unittest.TestCase):
         self.assertTrue(html.startswith("<pre"))
         self.assertNotIn("language-", self.static(HighlightedCode("plain", language=None, load=False)))
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_it_displays_as_a_widget(self):
         from McUtils.Jupyter import HighlightedCode
         self.assertTrue(hasattr(HighlightedCode("1", load=False).to_widget(), "children"))
@@ -419,6 +430,7 @@ class VerbosityTests(unittest.TestCase):
         mine = Logger(log_level=LogLevel.Debug)
         self.assertIs(doc_logger(mine), mine)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_each_level_prints_what_it_should(self):
         quiet = self.run_doc(verbose=False)
         normal = self.run_doc(verbose=True)
@@ -429,6 +441,7 @@ class VerbosityTests(unittest.TestCase):
         self.assertIn("members:", debug)
         self.assertIn("{", debug)                       # braces in a member table are written as they are
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @unittest.skipUnless(have_widgets(), "ipywidgets/markdown not installed")
     def test_jdoc_prints_nothing_by_default(self):
         import contextlib, io
@@ -446,6 +459,7 @@ class VerbosityTests(unittest.TestCase):
         self.assertIn("documenting module", out.getvalue())
 
 
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
 class ExtensionCheckTests(unittest.TestCase):
     def setUp(self):
         from McUtils.Jupyter.JHTML.HTMLWidgets import HTMLWidgets
@@ -552,11 +566,13 @@ class StaticFrameTests(unittest.TestCase):
         sys.modules["controls_static"] = self.mod
         self.addCleanup(sys.modules.pop, "controls_static", None)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_the_page_is_a_jhtml_element(self):
         page = self.hd.static_doc(self.mod.shown)
         self.assertEqual(page.tag.lower(), "html")
         self.assertTrue(hasattr(page, "_ipython_display_"))
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_static_doc_passes_walker_arguments_like_jdoc(self):
         seen = {}
         real = self.hd.DocWalker
@@ -568,6 +584,7 @@ class StaticFrameTests(unittest.TestCase):
             self.hd.static_doc(self.mod.shown, examples_directory=tempfile.gettempdir())
         self.assertEqual(seen.get("examples_directory"), tempfile.gettempdir())
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_frame_returns_a_self_displaying_iframe(self):
         frame = self.hd.static_doc(self.mod.shown, frame={"height": "300px"})
         self.assertEqual(frame.tag.lower(), "iframe")

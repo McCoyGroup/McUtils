@@ -9,6 +9,11 @@ phase of the persistence plan (`claude_drafts/persistence/PLAN.md`) that fixes t
 should be removed in that same patch.
 """
 
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
+
 import enum, os, sys, shutil, subprocess, tempfile, textwrap, time, unittest
 import numpy as np
 
@@ -256,7 +261,7 @@ class PersistenceTests(unittest.TestCase):
             self.assertEqual(sorted(chk.keys()), ['a', 'b'])
 
     def test_CheckpointerCachedEval(self):
-        for ext in ['.json', '.npz', '.legacy.npz', '.hdf5']:
+        for ext in ['.json', '.npz', '.legacy.npz'] + (['.hdf5'] if _RUN_EXTRAS else []):
             calls = []
             def gen():
                 calls.append(1)
@@ -291,6 +296,7 @@ class PersistenceTests(unittest.TestCase):
     def test_ToStateObjectJSON(self):
         self._roundtrip_sparse('.json')
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_ToStateObjectHDF5(self):
         self._roundtrip_sparse('.hdf5')
 
@@ -349,7 +355,7 @@ class PersistenceTests(unittest.TestCase):
 
     def test_PseudoPickleSharedReferenceInFile(self):
         shared = _Versioned(np.arange(3))
-        for ext in ['.json', '.npz', '.legacy.npz', '.hdf5']:
+        for ext in ['.json', '.npz', '.legacy.npz'] + (['.hdf5'] if _RUN_EXTRAS else []):
             fn = self.path('shared' + ext)
             with _open(fn) as chk:
                 chk['pair'] = [shared, {'again': shared}, _Versioned(1, shared)]
@@ -411,11 +417,11 @@ class PersistenceTests(unittest.TestCase):
     def test_AllowPickleDefaultsToFalse(self):
         from McUtils.Scaffolding import JSONSerializer, NumPySerializer, HDF5Serializer, PicklingSerializer
         self.assertFalse(PseudoPickler().allow_pickle)
-        for ser in [JSONSerializer(), NumPySerializer(), HDF5Serializer(), PicklingSerializer()]:
+        for ser in [JSONSerializer(), NumPySerializer(), PicklingSerializer()] + ([HDF5Serializer()] if _RUN_EXTRAS else []):
             self.assertFalse(ser.pickler.allow_pickle if hasattr(ser, 'pickler') else ser.pseudopickler.allow_pickle
                              if hasattr(ser, 'pseudopickler') else ser.psuedopickler.allow_pickle, type(ser).__name__)
         # unsupported objects are refused rather than silently pickled
-        for ext in ['.json', '.npz', '.hdf5']:
+        for ext in ['.json', '.npz'] + (['.hdf5'] if _RUN_EXTRAS else []):
             with self.assertRaises(ValueError):
                 with Checkpointer.from_file(self.path('nopickle' + ext)) as chk:
                     chk['f'] = _module_level_function
@@ -423,7 +429,7 @@ class PersistenceTests(unittest.TestCase):
 
     #region Serializers (phase 4)
     def _roundtrip_all(self, value, check):
-        for ext in ['.json', '.npz', '.legacy.npz', '.hdf5']:
+        for ext in ['.json', '.npz', '.legacy.npz'] + (['.hdf5'] if _RUN_EXTRAS else []):
             fn = self.path('rt' + ext)
             if os.path.exists(fn):
                 os.remove(fn)
@@ -451,6 +457,7 @@ class PersistenceTests(unittest.TestCase):
             self.assertEqual([str(v) for v in np.atleast_1d(loaded['strs'])], ['x', 'yy'], ext)
         self._roundtrip_all(value, check)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_HDF5ReturnsStrings(self):
         fn = self.path('str.hdf5')
         with Checkpointer.from_file(fn) as chk:
@@ -634,6 +641,7 @@ class PersistenceTests(unittest.TestCase):
             self.assertEqual(np.asarray(chk['c']).tolist(), [1, 2, 3])
         NumPyCheckpointer.convert_file(fn, to='npz')  # already there: nothing to do
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_HDF5KeepOpen(self):
         fn = self.path('kept.hdf5')
         chk = HDF5Checkpointer(fn, keep_open=True)

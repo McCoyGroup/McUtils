@@ -21,6 +21,11 @@ this suite is deliberately scoped to what can be validated headlessly:
 
 Plain `unittest` is used, matching the rest of this batch.
 """
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 from McUtils.ExternalPrograms import *
 
 import unittest
@@ -96,6 +101,7 @@ class ExternalProgramsTests(unittest.TestCase):
 
     # region RDKit.py: RDMolecule (a concrete ExternalMolecule)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_RDMoleculeFromSmilesRequiresExplicitHydrogenRequest(self):
         """
         `RDMolecule.from_smiles` defaults to `add_implicit_hydrogens=False`, so a bare
@@ -108,6 +114,7 @@ class ExternalProgramsTests(unittest.TestCase):
         self.assertEqual(list(mol.atoms), ['O'])
         self.assertEqual(list(mol.bonds), [])
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_RDMoleculeFromSmilesWithHydrogens(self):
         """`RDMolecule.from_smiles(..., add_implicit_hydrogens=True, num_confs=1)` builds a complete, embedded water molecule."""
         mol = RDMolecule.from_smiles('O', add_implicit_hydrogens=True, num_confs=1, optimize=True)
@@ -120,6 +127,7 @@ class ExternalProgramsTests(unittest.TestCase):
             self.assertEqual({i, j} & {0}, {0})  # every bond touches the oxygen (index 0)
             self.assertAlmostEqual(order, 1.0)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_RDMoleculeForceFieldEnergyAndGradient(self):
         """An MMFF-optimized `RDMolecule` sits at (near) a force-field energy minimum: tiny energy and near-zero gradient."""
         mol = RDMolecule.from_smiles('O', add_implicit_hydrogens=True, num_confs=1, optimize=True)
@@ -129,6 +137,7 @@ class ExternalProgramsTests(unittest.TestCase):
         self.assertEqual(gradient.shape, (9,))  # 3 atoms x 3 Cartesian components, flattened
         self.assertLess(np.max(np.abs(gradient)), 1e-2)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_RDMoleculeForceFieldHessianSymmetric(self):
         """`RDMolecule.calculate_hessian` returns a symmetric `(3N, 3N)` Cartesian Hessian."""
         mol = RDMolecule.from_smiles('O', add_implicit_hydrogens=True, num_confs=1, optimize=True)

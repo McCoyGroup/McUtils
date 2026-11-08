@@ -38,7 +38,7 @@ from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.Combinatorics import *
 #TODO: get rid of dirty check
-import McUtils.McUtils.Combinatorics.Sequences as _Sequences
+import McUtils.Combinatorics.Sequences as _Sequences
 
 
 class ClaudeCombinatoricsTests(TestCase):

@@ -1,6 +1,11 @@
 """Where single-file pages get the finx styles from: the vendored copy (default, no network), CDN links, a fetch
 with a vendored fallback, or a local finx checkout."""
 
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
+
 import os
 import tempfile
 import unittest
@@ -48,6 +53,7 @@ class FinxAssetTests(unittest.TestCase):
                 self.assertTrue(os.path.isfile(path), path)
                 self.assertGreater(os.path.getsize(path), 0, path)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_default_is_vendored_and_needs_no_network(self):
         with mock.patch.object(urllib.request, "urlopen", _no_network):
             html = static_markdown("# Heading\n\ntext\n", title="Offline")
@@ -62,6 +68,7 @@ class FinxAssetTests(unittest.TestCase):
         self.assertIn("finxJS", text)                          # init.js inlined
         self.assertIn(HTMLDocs._JQUERY_URL, text)              # jQuery stays a browser-side script
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_link_mode_points_the_browser_at_a_pinned_copy(self):
         with mock.patch.object(urllib.request, "urlopen", _no_network):
             html = static_markdown("text", finx_assets="link")
@@ -75,11 +82,13 @@ class FinxAssetTests(unittest.TestCase):
         self.assertIn(f'src="{base}/js/init.js"', text)
         self.assertIn(".x{color:red}", text)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_fetch_mode_uses_the_download(self):
         with mock.patch.object(urllib.request, "urlopen", lambda url, timeout=None: _Response(f"/* from {url} */")):
             html = static_markdown("text", finx_assets="fetch")
         self.assertIn("/* from https://raw.githubusercontent.com/McCoyGroup/finx/master/assets/css/style.css */", html)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_fetch_mode_falls_back_to_vendored_when_offline(self):
         with mock.patch.object(urllib.request, "urlopen", _offline), warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter("always")
@@ -88,6 +97,7 @@ class FinxAssetTests(unittest.TestCase):
         self.assertTrue(any("vendored" in str(w.message) and issubclass(w.category, RuntimeWarning) for w in caught),
                         [str(w.message) for w in caught])
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_local_checkout_directory(self):
         with tempfile.TemporaryDirectory() as root:
             for kind, names in (("css", HTMLDocs._FINX_CSS_FILES), ("js", HTMLDocs._FINX_JS_FILES)):
@@ -101,16 +111,19 @@ class FinxAssetTests(unittest.TestCase):
                     self.assertIn("/* local style.css */", html)
                     self.assertIn("/* local pygment_trac.css */", html)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_missing_file_in_directory(self):
         with tempfile.TemporaryDirectory() as root:
             with self.assertRaises(FileNotFoundError):
                 static_markdown("text", finx_assets=root)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_bad_mode(self):
         for bad in ("remote", 3, "/no/such/finx/dir"):
             with self.assertRaises(ValueError):
                 static_markdown("text", finx_assets=bad)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_module_default_can_be_changed(self):
         old = HTMLDocs.default_finx_assets
         self.addCleanup(setattr, HTMLDocs, "default_finx_assets", old)

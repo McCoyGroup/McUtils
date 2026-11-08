@@ -1,12 +1,16 @@
 """Apps presentation isolation and Readout widget/layout regression tests."""
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import os
 os.environ.setdefault('MPLBACKEND','Agg')
 import unittest,json
 from html.parser import HTMLParser
-try:
-    import ipywidgets as widgets
-except ImportError:
-    widgets=None
+import importlib.util
+HAVE_WIDGETS = _RUN_EXTRAS and importlib.util.find_spec("ipywidgets") is not None
+widgets = None
 from McUtils.Jupyter import (JHTML,AppTheme,App,Card,Grid,Flex,Button,Dropdown,Tabs,Accordion)
 from McUtils.Readouts import (Readout,ReadoutText,ReadoutFields,ReadoutSection,ReadoutGrid,
                              ReadoutPanel,ReadoutFlex,ReadoutWidget,as_readout_node)
@@ -34,8 +38,14 @@ def models(root):
         for child in getattr(obj,'children',()):visit(child)
     visit(root);return result
 
-@unittest.skipIf(widgets is None,'live widget tests need ipywidgets')
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
+@unittest.skipUnless(HAVE_WIDGETS,'live widget tests need ipywidgets')
 class ThemeTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        global widgets
+        import ipywidgets as widgets
+
     def test_native_default_and_explicit_bootstrap(self):
         layout=Grid([[Card('Body',header='Header'),Button('Go')]],column_width=['2fr','1fr'])
         native=layout.to_static_html().tostring()
@@ -82,8 +92,14 @@ class ThemeTests(unittest.TestCase):
         html=grid.to_static_html().tostring()
         self.assertIn('grid-row-end:span 2',html);self.assertIn('repeat(2, auto)',html)
 
-@unittest.skipIf(widgets is None,'live widget tests need ipywidgets')
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
+@unittest.skipUnless(HAVE_WIDGETS,'live widget tests need ipywidgets')
 class ReadoutTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        global widgets
+        import ipywidgets as widgets
+
     def test_arbitrary_html_widget_is_lazy_and_cached(self):
         obj=HTMLWidget();readout=Readout(obj)
         self.assertIsInstance(readout.children[0],ReadoutWidget);self.assertEqual(obj.calls,0)
@@ -140,8 +156,14 @@ from McUtils.Jupyter import (AppTheme,Button,Card,Grid,Flex,Slider,VariableNames
 from McUtils.Readouts import (Readout,ReadoutFields,ReadoutPanel,ReadoutWidget,ReadoutGrid,
                             as_readout_node,ReadoutScene)
 
-@unittest.skipIf(widgets is None,'live widget tests need ipywidgets')
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
+@unittest.skipUnless(HAVE_WIDGETS,'live widget tests need ipywidgets')
 class ProtocolTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        global widgets
+        import ipywidgets as widgets
+
     def test_raw_ipywidgets_are_accepted(self):
         widget=widgets.Button(description='Raw')
         readout=Readout(widget)
@@ -265,6 +287,7 @@ class ProtocolTests(unittest.TestCase):
 
 
 class WebComponentTests(unittest.TestCase):
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_apps_and_readouts_emit_native_custom_elements(self):
         layout=Grid([[Card('Body',header='Header',footer='Footer'),Flex(['A','B'])]])
         for html in (layout.to_static_html().tostring(),Readout(layout).to_html()):
@@ -274,6 +297,7 @@ class WebComponentTests(unittest.TestCase):
         bootstrap=Markup(layout.to_static_html(ui_theme='bootstrap').tostring())
         self.assertEqual({tag for tag,attrs in bootstrap.elements if tag.startswith('mcui-')},{'mcui-bootstrap'})
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_interactive_components_emit_their_own_custom_elements(self):
         from McUtils.Jupyter import Opener,Carousel,Tooltip,Popover
         cases=[(Tabs({'One':'A'}),'mcui-tabs'),(Accordion({'One':'A'}),'mcui-accordion'),
@@ -284,8 +308,11 @@ class WebComponentTests(unittest.TestCase):
             with self.subTest(expected=expected):
                 self.assertIn(expected,{tag for tag,attrs in Markup(component.to_static_html().tostring()).elements})
 
-    @unittest.skipIf(widgets is None,'live widgets need ipywidgets')
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
+    @unittest.skipUnless(HAVE_WIDGETS,'live widgets need ipywidgets')
     def test_tooltip_keeps_the_original_callback_model(self):
+        global widgets
+        import ipywidgets as widgets
         from McUtils.Jupyter import Tooltip
         calls=[]
         button=Button('Action',action=lambda *args:calls.append('called'))
@@ -297,8 +324,11 @@ class WebComponentTests(unittest.TestCase):
         raw._handle(None,{'type':'click'},[])
         self.assertEqual(calls,['called'])
 
-    @unittest.skipIf(widgets is None,'live widgets need ipywidgets')
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
+    @unittest.skipUnless(HAVE_WIDGETS,'live widgets need ipywidgets')
     def test_custom_events_use_the_existing_python_callback_bridge(self):
+        global widgets
+        import ipywidgets as widgets
         events=[]
         tabs=Tabs({'One':'A','Two':'B'},event_handlers={'mcui:select':lambda event,widget:events.append(event)})
         root=tabs.to_widget()

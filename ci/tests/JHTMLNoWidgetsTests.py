@@ -1,13 +1,16 @@
 """JHTML parsing (`JHTML.Markdown`, `JHTML.parse`) must not need ipywidgets unless a widget is actually used."""
 
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
+
 import unittest
 from unittest import mock
 
-try:
-    import markdown  # noqa: F401
-    HAVE_MARKDOWN = True
-except ImportError:
-    HAVE_MARKDOWN = False
+import importlib.util
+
+HAVE_MARKDOWN = _RUN_EXTRAS and importlib.util.find_spec("markdown") is not None
 
 
 class JHTMLNoWidgetsTests(unittest.TestCase):
@@ -25,6 +28,7 @@ class JHTMLNoWidgetsTests(unittest.TestCase):
         self.assertIn("<b>bold</b>", text)
         self.assertIn("two", text)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @unittest.skipUnless(HAVE_MARKDOWN, "markdown not installed")
     def test_markdown_without_widgets(self):
         element = self.JHTML.Markdown("# Title\n\nSome *emphasis* and `code`.\n\n```python\nx = 1\n```\n")

@@ -1,5 +1,10 @@
 """`McUtils.Docs.static_markdown`: Markdown (+ stored readouts) -> one self-contained page, and `static_doc`'s shared page assembly."""
 
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
+
 import os
 import tempfile
 import textwrap
@@ -19,6 +24,7 @@ class StaticMarkdownTests(unittest.TestCase):
         self.addCleanup(self._tmp.cleanup)
         self.store = ReadoutStore(os.path.join(self._tmp.name, "readouts"))
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_plain_markdown_without_markers(self):
         html = static_markdown("# Heading\n\nSome *emphasis* and `code`.\n\n```python\nx = 1\n```\n", title="Plain")
         self.assertTrue(html.startswith("<!DOCTYPE html>"))
@@ -28,6 +34,7 @@ class StaticMarkdownTests(unittest.TestCase):
         self.assertIn('class="language-python"', html)
         self.assertIn('class="main-content"', html)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_default_title_and_return_forms(self):
         self.assertIn("<title>Document</title>", static_markdown("text"))
         page = static_markdown("text", return_string=False)
@@ -37,6 +44,7 @@ class StaticMarkdownTests(unittest.TestCase):
         with open(path, encoding="utf-8") as f:
             self.assertIn("<!DOCTYPE html>", f.read())
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_stored_readouts_are_inlined(self):
         text = "# Report\n\n" + block("water", "{'energy': -76.0266}") + "After.\n"
         ExampleRunner(self.store, timeout=20).run_text(text, owner="doc")
@@ -47,6 +55,7 @@ class StaticMarkdownTests(unittest.TestCase):
         self.assertNotIn("data-src=", html)       # inline, not a lazy placeholder
         self.assertNotIn("Open readout", html)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_missing_output_is_flagged_and_strict_raises(self):
         text = block("never_run", "{'k': 1}")
         html = static_markdown(text, readouts=self.store, owner="doc")

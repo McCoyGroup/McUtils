@@ -1,3 +1,8 @@
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import tempfile
 from contextlib import closing
 from pathlib import Path
@@ -269,6 +274,7 @@ class ExternalProgramsTest(TestCase):
     def test_ServerPackage(self):
         SLURMClient.create_server_package("/Users/Mark/Desktop", overwrite=True)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_CubeParser(self):
         from Psience.Molecools import Molecule
@@ -299,6 +305,7 @@ class ExternalProgramsTest(TestCase):
                  transparency=.5)
         fig.show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_OBGen3D(self):
         from Psience.Molecools import Molecule
@@ -308,6 +315,7 @@ class ExternalProgramsTest(TestCase):
         # Molecule.from_openbabel(mol).plot().show()
         mol.draw(use_coords=True).show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_SMILESManip(self):
         from Psience.Molecools import Molecule
@@ -329,6 +337,7 @@ class ExternalProgramsTest(TestCase):
 
         Molecule.from_string(prod).plot().show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_SMILESScaffoldGenerator(self):
         from Psience.Molecools import Molecule
@@ -352,6 +361,7 @@ class ExternalProgramsTest(TestCase):
         # Molecule.from_string(base_scaff).plot().show()
         Molecule.from_string(prod).plot().show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_RandomSMILESManip(self):
         from Psience.Molecools import Molecule
@@ -371,6 +381,7 @@ class ExternalProgramsTest(TestCase):
         Molecule.from_string(smi).plot(highlight_atoms=[0, 1]).show()
         return
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_AromaticSMILESManip(self):
         from Psience.Molecools import Molecule
@@ -391,6 +402,7 @@ class ExternalProgramsTest(TestCase):
 
         Molecule.from_string(template).plot(highlight_atoms=[0, 1, 2, 3]).show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_SMILESBipy(self):
         from Psience.Molecools import Molecule
@@ -494,6 +506,7 @@ class ExternalProgramsTest(TestCase):
             )
         )
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_SmilesTokens(self):
         from Psience.Molecools import Molecule
@@ -549,6 +562,7 @@ class ExternalProgramsTest(TestCase):
                     vendor.find_smi(88)
                 )
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_QChemJob(self):
         samp = TestManager.test_data('a2bbb-substances.smi')
@@ -570,6 +584,7 @@ class ExternalProgramsTest(TestCase):
             huh.format()
         )
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_TemplatedSmilesIterator(self):
         BASE_DIENES = {
@@ -898,6 +913,7 @@ class ExternalProgramsTest(TestCase):
 
     # -- the "mostly SMILES" paradigm ----------------------------------------
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_ConformerLibraryFromSMILESDatabase(self):
         from Psience.Molecools import Molecule

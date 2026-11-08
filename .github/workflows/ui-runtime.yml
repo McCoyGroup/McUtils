@@ -8,8 +8,8 @@ on:
       - 'McUtils/Readouts/**'
       - 'McUtils/Plots/Backends.py'
       - 'McUtils/Plots/X3DInterface.py'
-      - 'McUtils/ci/tests/JHTMLJavaScript*'
-      - 'McUtils/ci/tests/UIRuntimeReleaseTests.py'
+      - 'ci/tests/JHTMLJavaScript*'
+      - 'ci/tests/UIRuntimeReleaseTests.py'
       - 'ci/tests/AppsReadoutLayoutTests.py'
       - 'ci/publish_ui_runtime.py'
       - '.github/workflows/ui-runtime.yml'
@@ -20,8 +20,8 @@ on:
       - 'McUtils/Readouts/**'
       - 'McUtils/Plots/Backends.py'
       - 'McUtils/Plots/X3DInterface.py'
-      - 'McUtils/ci/tests/JHTMLJavaScript*'
-      - 'McUtils/ci/tests/UIRuntimeReleaseTests.py'
+      - 'ci/tests/JHTMLJavaScript*'
+      - 'ci/tests/UIRuntimeReleaseTests.py'
       - 'ci/tests/AppsReadoutLayoutTests.py'
       - 'ci/publish_ui_runtime.py'
       - '.github/workflows/ui-runtime.yml'
@@ -44,6 +44,7 @@ jobs:
       runtime_tag: ${{ steps.identity.outputs.tag }}
     env:
       PYTHONDONTWRITEBYTECODE: '1'
+      MCUTILS_TEST_EXTRAS: '1'
       NUMBA_DISABLE_JIT: '1'
       MPLBACKEND: Agg
       PYTHONPATH: '.'
@@ -64,8 +65,8 @@ jobs:
           npm install --prefix "$RUNNER_TEMP/mcutils-ui" --no-save --package-lock=false jsdom@26.1.0 plotly.js-dist-min@3.4.0 bootstrap@5.1.3
       - name: Validate declarations, exports, and publication behavior
         run: |
-          python -m unittest discover -s McUtils/ci/tests -p JHTMLJavaScriptTests.py
-          python -m unittest discover -s McUtils/ci/tests -p UIRuntimeReleaseTests.py
+          python -m unittest discover -s ci/tests -p JHTMLJavaScriptTests.py
+          python -m unittest discover -s ci/tests -p UIRuntimeReleaseTests.py
           python ci/tests/AppsReadoutLayoutTests.py
       - name: Validate automatic WebComponents and offline assets
         run: |
@@ -73,14 +74,14 @@ jobs:
           export MCUTILS_BOOTSTRAP_ASSETS="$NODE_PATH/bootstrap/dist"
           export MCUTILS_PLOTLY_JS="$NODE_PATH/plotly.js-dist-min/plotly.min.js"
           export MCUTILS_JS_FIXTURES="$RUNNER_TEMP/mcutils-ui-fixtures.json"
-          python McUtils/ci/tests/JHTMLJavaScriptTests.py --fixtures "$MCUTILS_JS_FIXTURES"
+          python ci/tests/JHTMLJavaScriptTests.py --fixtures "$MCUTILS_JS_FIXTURES"
           node --check McUtils/Jupyter/JHTML/resources/javascript.js
           node --check McUtils/Jupyter/Apps/resources/native.js
-          node --test McUtils/ci/tests/JHTMLJavaScriptRuntimeTests.cjs
+          node --test ci/tests/JHTMLJavaScriptRuntimeTests.cjs
       - name: Validate in Chromium
         run: |
           python -m playwright install --with-deps chromium
-          python -m unittest discover -s McUtils/ci/tests -p JHTMLJavaScriptBrowserTests.py
+          python -m unittest discover -s ci/tests -p JHTMLJavaScriptBrowserTests.py
       - name: Record the validated runtime identity
         id: identity
         run: python ci/publish_ui_runtime.py

@@ -1,3 +1,8 @@
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.Plots import *
@@ -5,16 +10,13 @@ import sys, os, numpy as np
 
 class PlotsTests(TestCase):
 
-    @classmethod
-    def tearDownClass(cls):
-        import matplotlib.pyplot as plt
-        # plt.show()
 
     def result_file(self, fname):
         if not os.path.isdir(os.path.join(TestManager.test_dir, "test_results")):
             os.mkdir(os.path.join(TestManager.test_dir, "test_results"))
         return os.path.join(TestManager.test_dir, "test_results", fname)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_Plot(self):
         grid = np.linspace(0, 2*np.pi, 100)
@@ -25,6 +27,7 @@ class PlotsTests(TestCase):
         plot.close()
         # plot.show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_Plot3D(self):
         import matplotlib.cm as colormaps
@@ -45,6 +48,7 @@ class PlotsTests(TestCase):
         plot.savefig(self.result_file("test_Plot3D.png"))
         plot.close()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_GraphicsGrid(self):
 
@@ -59,6 +63,7 @@ class PlotsTests(TestCase):
         main.savefig(self.result_file("test_GraphicsGrid.png"))
         main.close()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_PlotStyling(self):
         grid = np.linspace(0, 2 * np.pi, 100)
@@ -76,6 +81,7 @@ class PlotsTests(TestCase):
         # plot.savefig(self.result_file("test_PlotStyling.png"))
         plot.close()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_PlotGridStyling(self):
         main = GraphicsGrid(ncols=3, nrows=1, theme='Solarize_Light2', figure_label='my beuatufil triptych',
@@ -99,6 +105,7 @@ class PlotsTests(TestCase):
         # main.savefig(self.result_file("test_PlotGridStyling.png"))
         main.close()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_Scatter(self):
         pts = np.random.rand(50, 2)
@@ -110,6 +117,7 @@ class PlotsTests(TestCase):
         # plot.savefig(self.result_file("test_Scatter.pdf"), format='pdf')
         plot.close()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_ListContourPlot(self):
         pts = np.pi*np.random.rand(150, 2)
@@ -132,6 +140,7 @@ class PlotsTests(TestCase):
         plot.savefig(self.result_file("test_ListTriPlot3D.png"))
         plot.close()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_ListTriDensityPlot(self):
         pts = np.pi*np.random.rand(150, 2)
@@ -143,6 +152,7 @@ class PlotsTests(TestCase):
         plot.savefig(self.result_file("test_ListTriDensityPlot.png"))
         plot.close()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_ListTriContourPlot(self):
         pts = np.pi*np.random.rand(150, 2)
@@ -155,6 +165,7 @@ class PlotsTests(TestCase):
         plot.savefig(self.result_file("test_ListTriContourPlot.png"))
         plot.close()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @inactiveTest
     def test_Animation(self):
         "Currently broken"
@@ -177,12 +188,14 @@ class PlotsTests(TestCase):
         plot.savefig(self.result_file("test_ListTriContourPlot.gif"))
         plot.close()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_X3D(self):
         plot = Graphics3D(backend="x3d", image_size=[1500, 500], background='white')
         Sphere(color='red').plot(plot)
         plot.show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_ColorPalettes(self):
         rgb_code = np.array([255, 255, 255])
@@ -292,6 +305,7 @@ class PlotsTests(TestCase):
         #         color=palette.blend(i / 9)
         #     )
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_ColorMaps(self):
         print(
@@ -324,6 +338,7 @@ class PlotsTests(TestCase):
     #     plot = Plot3D(f, [0, 2*np.pi], [0, 2*np.pi])
     #     plot.show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_PropertySetting(self):
         StickPlot(
@@ -334,6 +349,7 @@ class PlotsTests(TestCase):
             plot_legend=True
         ).show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_PlotDelayed(self):
         p = Plot(background = 'black')
@@ -344,6 +360,7 @@ class PlotsTests(TestCase):
         p.savefig(self.result_file("test_PlotDelayed.gif"))
         p.close()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_Plot3DDelayed(self):
         p = Plot3D(background = 'black')
@@ -360,6 +377,7 @@ class PlotsTests(TestCase):
         p.savefig(self.result_file("test_Plot3DDelayed.gif"))
         p.close()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_PlotlyBackend(self):
         g = np.linspace(0, 2*np.pi, 25)
@@ -371,6 +389,7 @@ class PlotsTests(TestCase):
              aspect_ratio=1/1.16
              ).show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_X3DMathText(self):
         fig = Graphics3D(backend='x3d', view_settings={'view_distance':5})
@@ -385,6 +404,7 @@ class PlotsTests(TestCase):
         # fig.to_widget().write("/Users/Mark/Desktop/new_text2.html")
         fig.show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_Plotly3D(self):
         fig = Graphics3D(backend='plotly3D', frame=False, subplot_kw={'include_save_buttons':True})
@@ -392,6 +412,7 @@ class PlotsTests(TestCase):
         # print(fig.to_widget().tostring(prettify=True))
         fig.show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_BaseSVG(self):
         fig = SVGFigure(height=800)#, view_box=[[0, 100], [0, 100]])
@@ -411,6 +432,7 @@ class PlotsTests(TestCase):
         )
         fig.to_svg().display()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_SVGBackend2D(self):
         fig = Graphics(backend='svg')
@@ -440,6 +462,7 @@ class PlotsTests(TestCase):
         # )
         fig.show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_SVGBackend3D(self):
 
@@ -719,6 +742,7 @@ class PlotsTests(TestCase):
             self.assertIn('scale(1 -1)', source)
             self.assertIn('radialGradient', source)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_MPLPath(self):
         fig = Graphics(backend='svg')
@@ -737,6 +761,7 @@ class PlotsTests(TestCase):
         ], stroke='pink', use_polyline=True).plot(fig)
         fig.show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_MeshBackend(self):
         from Psience.Molecools import Molecule
@@ -755,6 +780,7 @@ class PlotsTests(TestCase):
         # Sphere([1, 0, 0], .1, color='red', transparency=.2).plot(fig)
         # fig.show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @debugTest
     def test_InvertAxes(self):
         import matplotlib as mpl

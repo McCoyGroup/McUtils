@@ -1,5 +1,10 @@
 """Finding the Python that launched Jupyter, installing the extension with it, and the static fallback display."""
 
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
+
 import json
 import os
 import subprocess
@@ -12,8 +17,12 @@ from unittest import mock
 
 
 def have_widgets():
+    if not _RUN_EXTRAS:
+        return False
     try:
-        import ipywidgets, markdown  # noqa: F401
+        import importlib.util
+        return all(importlib.util.find_spec(name) is not None
+                   for name in ("ipywidgets", "markdown"))
     except ImportError:
         return False
     return True
@@ -235,6 +244,7 @@ class StaticFallbackTests(unittest.TestCase):
         from McUtils.Jupyter import JHTML
         return JHTML.Div(JHTML.Button("Run", event_handlers={"click": lambda *a: None}), "some text")
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_an_outdated_extension_shows_a_static_view_not_the_widget(self):
         self.W._extension_state = "outdated"
         self.widget().display()
@@ -245,18 +255,21 @@ class StaticFallbackTests(unittest.TestCase):
         self.assertIn("some text", text)
         self.assertIn("<button", text)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_a_current_extension_shows_the_widget(self):
         self.W._extension_state = "current"
         self.widget().display()
         (shown,) = self.shown
         self.assertFalse(hasattr(shown, "tostring"))     # the ipywidget itself
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_the_fallback_can_be_turned_off(self):
         self.W._extension_state = "missing"
         self.W.static_fallback = False
         self.widget().display()
         self.assertFalse(hasattr(self.shown[0], "tostring"))
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_an_apps_interface_without_a_static_form_says_so_instead_of_failing(self):
         from McUtils.Jupyter import Button
         self.W._extension_state = "missing"
@@ -265,6 +278,7 @@ class StaticFallbackTests(unittest.TestCase):
         (shown,) = self.shown
         self.assertIn("no static view", shown.tostring())
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_jdoc_returns_the_static_page_when_the_extension_is_unusable(self):
         import McUtils.Docs.HTMLDocs as hd
         from McUtils.Docs import jdoc

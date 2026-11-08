@@ -1,4 +1,4 @@
-from McUtils.McUtils.Parsers.TeXParser import BibItemParser
+from McUtils.Parsers.TeXParser import BibItemParser
 from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.Parsers import *

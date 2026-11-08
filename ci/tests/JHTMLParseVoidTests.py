@@ -1,3 +1,8 @@
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import unittest
 from xml.etree import ElementTree
 
@@ -17,6 +22,7 @@ class JHTMLParseVoidTests(unittest.TestCase):
                 self.assertEqual(el.elems[0].attrs["min"], "0")
                 self.assertEqual(el.elems[2].attrs["src"], "a.png")
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_markdown_with_raw_void_elements_is_not_a_fallback_span(self):
         el = JHTML.Markdown('<div class="x"><label>Speed <input type="number" value="1"></label></div>')
         self.assertEqual(type(el).__name__, "Div")

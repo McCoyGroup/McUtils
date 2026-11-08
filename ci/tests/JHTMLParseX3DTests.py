@@ -1,3 +1,8 @@
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import re
 import unittest
 
@@ -14,7 +19,7 @@ class JHTMLParseX3DTests(unittest.TestCase):
         return re.search(r"<%s[^>]*>" % name, s).group(0)
 
     def test_x3d_attributes_stay_attributes(self):
-        for parse in (JHTML.parse, JHTML.Markdown):
+        for parse in ((JHTML.parse, JHTML.Markdown) if _RUN_EXTRAS else (JHTML.parse,)):
             with self.subTest(parse=parse.__name__):
                 s = parse(self.MARKUP).tostring()
                 vp = self._tag(s, "Viewpoint")

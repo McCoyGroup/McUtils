@@ -1,3 +1,8 @@
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import collections
 import itertools
 import math
@@ -1502,6 +1507,7 @@ class NumputilsTests(TestCase):
             ugh[0, 1]
         ))
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @inactiveTest
     def test_MatrixProductDeriv(self):
 
@@ -2625,6 +2631,7 @@ class NumputilsTests(TestCase):
         )
         print(rm)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_Bezier(self):
         import McUtils.Plots as plt
@@ -2674,6 +2681,7 @@ class NumputilsTests(TestCase):
         )
         fig.show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_Arc(self):
         import McUtils.Plots as plt
@@ -2693,6 +2701,7 @@ class NumputilsTests(TestCase):
                  image_size=500,
                  aspect_ratio=1).show()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_ParametricPath(self):
         import McUtils.Plots as plt
@@ -2733,6 +2742,7 @@ class NumputilsTests(TestCase):
         uuuh = dist_vec(coords, [0, 0], [1, 1], order=1, raise_on_failure=False)
         print([u.shape for u in uuuh])
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @debugTest
     def test_SimpleMeshes(self):
         from McUtils.Zachary import SphereUnionSurfaceMesh
