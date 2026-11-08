@@ -1,4 +1,9 @@
 """Independent checks of Wigner, FICT and Smith/Young averages."""
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import itertools
 from fractions import Fraction
 import unittest
@@ -178,6 +183,7 @@ class RotationalAveragingTests(unittest.TestCase):
             self.assertAlmostEqual(intensity(pure3, (2, 0, 0), method), 8/21)
             self.assertAlmostEqual(intensity(pure2, (2, 0, 0), method), 4/5)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_clebsch_gordan_spin1_coefficients_against_symbolic_oracle(self):
         try:
             from sympy.physics.wigner import clebsch_gordan

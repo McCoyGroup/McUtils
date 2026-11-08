@@ -14,6 +14,11 @@ pip) to make that possible; `Peeves.TestUtils` is not used, matching the rest
 of this batch.
 """
 
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
+
 import unittest
 
 from McUtils.Jupyter import (
@@ -34,6 +39,7 @@ from McUtils.Jupyter import (
 )
 
 
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
 class JupyterAppsFrameworkTests(unittest.TestCase):
     """Exercises the reactive `Var` machinery and confirms every core component builds a real widget."""
 

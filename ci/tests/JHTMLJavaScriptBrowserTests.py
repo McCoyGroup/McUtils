@@ -1,4 +1,9 @@
 """Browser integration tests; Playwright and Plotly are optional test dependencies."""
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import json
 import os
 from pathlib import Path
@@ -10,6 +15,7 @@ from McUtils.Readouts import ReadoutSection, ReadoutTable, ReadoutPlot
 from McUtils.Readouts.Renderers.HTML import HTMLReadoutRenderer
 
 
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
 class JavaScriptBrowserTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):

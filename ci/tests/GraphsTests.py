@@ -1,3 +1,8 @@
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import unittest
 
 import numpy as np
@@ -34,6 +39,7 @@ class GraphsTests(unittest.TestCase):
         inferred = EdgeGraph(['a', 'b'], [(0, 1)], graph=symmetric)
         self.assertFalse(inferred.directed)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_directed_graph_edges(self):
         graph = EdgeGraph.stacked_graph([2, 2], neighbors=2)
         self.assertTrue(graph.directed)
@@ -68,6 +74,7 @@ class GraphsTests(unittest.TestCase):
         self.assertTrue(all(isinstance(edge, Line) for edge in objects['edges'][::2]))
         self.assertTrue(all(isinstance(edge, Arrow) for edge in objects['edges'][1::2]))
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_graph_node_edge_offsets_and_arrowhead_defaults(self):
         graph = EdgeGraph.stacked_graph([2, 2], neighbors=2)
         objects = graph.plot(
@@ -108,6 +115,7 @@ class GraphsTests(unittest.TestCase):
         self.assertEqual(SVGAxes.default_arrowhead['markerUnits'], 'strokeWidth')
         self.assertEqual(SVGAxes.default_arrowhead['overflow'], 'visible')
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_callable_graph_labels_build_graphics_and_svg_primitives(self):
         graph = EdgeGraph.stacked_graph([2, 1], neighbors=1)
 
@@ -198,6 +206,7 @@ class GraphsTests(unittest.TestCase):
         )
         self.assertEqual(graph.graph[unspecified], 1.0)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_stacked_graph_weights_set_plot_widths(self):
         graph = EdgeGraph.stacked_graph(
             [3, 2],

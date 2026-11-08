@@ -1,4 +1,9 @@
 """`RDMolecule.to_inchi(include_tag=True, remove_implicit_hydrogens=False)` keeps hydrogens in the conformer tag"""
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import unittest
 import numpy as np
 from McUtils.ExternalPrograms import RDMolecule
@@ -23,6 +28,7 @@ def moved(rd, atom, dz=.5):
     return rd
 
 
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
 class ConformerTagHydrogenTests(unittest.TestCase):
     def setUp(self):
         self.rd = embedded("CCO")
@@ -77,6 +83,7 @@ def kabsch_rmsd(a, b):
     return float(np.sqrt(((a @ r - b) ** 2).sum(1).mean()))
 
 
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
 class ConformerTagRoundTripTests(unittest.TestCase):
     """`to_inchi(include_tag=True, ...)` -> `from_inchi(...)` recovers the encoded geometry"""
     SMILES = ["CCO", "CC(=O)O", "CC(=O)N", "c1ccccc1", "C[C@H](N)C(=O)O", "CC.O", "N#N", "CO"]

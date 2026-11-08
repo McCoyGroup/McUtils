@@ -3,6 +3,11 @@ Conformer tags (`RDMolecule.to_inchi/to_smiles(include_tag=True)`) for molecules
 is degenerate: a single heavy atom (water, methane), a heavy-atom pair, and disconnected heavy atoms
 (ion pairs, mixtures)
 """
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import unittest
 
 import numpy as np
@@ -22,6 +27,7 @@ def tagged(rd, **opts):
     return RDMolecule(rd.GetConformer()).to_inchi(include_tag=True, **opts).partition("_")[2]
 
 
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
 class SmallConformerTagTests(unittest.TestCase):
     def test_tags_exist(self):
         for smiles in ["O", "C", "N#N", "CO", "C=C", "[Na+].[Cl-]", "CC.O", "CCO"]:

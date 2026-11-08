@@ -1,4 +1,9 @@
 
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
+
 from Peeves.TestUtils import *
 from unittest import TestCase
 from McUtils.Jupyter import *
@@ -25,6 +30,7 @@ a {
 }
         """)[0].tostring()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_WidgetConstruction(self):
         from Psience.Molecools import Molecule
@@ -32,6 +38,7 @@ a {
         widg = interactive.JHTML.Div(water.plot(backend='x3d').figure.to_x3d(), dynamic=True)
         print(widg.elem.children[0].children)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_WidgetInteractivity(self):
         import McUtils.Jupyter as interactive
@@ -53,6 +60,7 @@ a {
             ], dynamic=False).to_jhtml()
         ))
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_SVG(self):
         SVG = JHTML.SVGContext

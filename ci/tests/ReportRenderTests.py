@@ -1,5 +1,10 @@
 """Rendering reports: HTML through the docs pipeline (with caching), PowerPoint, and the Markdown copy."""
 
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
+
 import io
 import os
 import re
@@ -34,6 +39,7 @@ def outside_code(html):
     return re.sub(r"<code[^>]*>.*?</code>", "", html, flags=re.S)
 
 
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
 class RenderTestBase(unittest.TestCase):
     def setUp(self):
         self._tmp = tempfile.TemporaryDirectory()

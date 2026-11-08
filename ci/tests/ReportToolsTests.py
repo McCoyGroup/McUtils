@@ -1,4 +1,9 @@
 """Tool mode: `report_toolset` (the report operations as tools) and the stdio MCP server around it."""
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import json
 import os
 import re
@@ -544,6 +549,7 @@ class ChangeHookTests(unittest.TestCase):
 
 
 class RenderToolTests(unittest.TestCase):
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_render_writes_the_report(self):
         with tempfile.TemporaryDirectory() as d:
             doc, _, tools = make(renderer=True, out_dir=d)
@@ -815,6 +821,7 @@ class HintTests(unittest.TestCase):
 
 
 class RenderDependencyTests(unittest.TestCase):
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_a_missing_html_package_is_a_problem_not_an_internal_error(self):
         from unittest import mock
         import McUtils.Readouts.Reports.Render as R

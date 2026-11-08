@@ -1,4 +1,9 @@
 """Portable state, existing controls, and explicit widget-transport integration."""
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import importlib.abc
 import json
 import os
@@ -91,6 +96,7 @@ assert not any(name.split('.')[0] in ('IPython','ipywidgets','ipyevents') for na
             with self.assertRaises(ValueError):
                 HTMLReadoutRenderer().render_fragment(table)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_readout_keeps_plotly_interactive(self):
         from McUtils.Plots import Plot
         sample = JSVar('sample', initial=1)
@@ -108,6 +114,7 @@ assert not any(name.split('.')[0] in ('IPython','ipywidgets','ipyevents') for na
             HTMLReadoutRenderer().render_fragment(ReadoutPlot(plot, interactive=False, bind={'selection': sample}))
 
 
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
 class VarBridgeTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -176,6 +183,7 @@ class RuntimeExportTests(unittest.TestCase):
         value=JSVar('value',initial=1)
         return Card(Slider(value,range=(0,2,1)),state=JSState(value),**options)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_scopes_are_declarative_and_readout_inlines_one_footer_library(self):
         scope=JSState(JSVar('value',initial=1)).to_widget()
         self.assertEqual(scope.tag,'mcui-state')
@@ -209,6 +217,7 @@ class RuntimeExportTests(unittest.TestCase):
             self.assertIn('class McuiState',html)
             self.assertNotIn('src="'+identity['script']+'"',html)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_per_scope_url_and_export_override(self):
         value=JSVar('value',initial=1)
         scope=JSState(value,javascript_path=self.url).to_widget()
@@ -231,7 +240,7 @@ class RuntimeExportTests(unittest.TestCase):
         self.assertTrue(any('bootstrap@' in a.get('src','') for _,a in explicit_tags))
         self.assertTrue(any(tag=='mcui-bootstrap' for tag,_ in explicit_tags))
 
-    @unittest.skipUnless(importlib.util.find_spec('ipywidgets'),'ipywidgets is optional')
+    @unittest.skipUnless(_RUN_EXTRAS and importlib.util.find_spec('ipywidgets'),'ipywidgets is optional')
     def test_widget_api_is_shared_per_theme_and_runtime_path(self):
         from McUtils.Jupyter.Apps import AppTheme
         with AppTheme.rendering(javascript_path=self.url):
@@ -241,7 +250,8 @@ class RuntimeExportTests(unittest.TestCase):
             self.assertIn(self.url,AppTheme.current().initializer())
         self.assertIsNot(one,AppTheme.current().javascript_api())
 
-    @unittest.skipUnless(importlib.util.find_spec('ipywidgets'),'ipywidgets is optional')
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
+    @unittest.skipUnless(_RUN_EXTRAS and importlib.util.find_spec('ipywidgets'),'ipywidgets is optional')
     def test_direct_widget_scope_attaches_existing_shared_ui_api(self):
         value=JSVar('value',initial=1)
         widget=JSState(value,javascript_path=self.url).to_widget(mode='widget')
@@ -251,6 +261,7 @@ class RuntimeExportTests(unittest.TestCase):
         finally:
             widget.elem.close()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_offline_plotly_is_embedded_once_and_forces_inline_ui(self):
         from McUtils.Plots import ScatterPlot
         plot=ScatterPlot([0,1],[0,1],backend='plotly')

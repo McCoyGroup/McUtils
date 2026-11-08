@@ -1,3 +1,8 @@
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 # import itertools
 #
 # import scipy.linalg
@@ -305,6 +310,7 @@ class SymmetryTests(TestCase):
         new_pg = pg.align(np.eye(3))
         print(new_pg.get_axes())
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     @validationTest
     def test_Visualization(self):
         pg = PointGroup.from_name("Dd", 3)

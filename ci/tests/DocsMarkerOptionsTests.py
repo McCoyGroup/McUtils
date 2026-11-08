@@ -1,5 +1,10 @@
 """The ``show_code`` and ``header`` readout-marker options."""
 
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
+
 import os
 import tempfile
 import unittest
@@ -40,6 +45,7 @@ class MarkerOptionTests(unittest.TestCase):
         self.assertEqual(key(show_code=True), key(show_code=False))
         self.assertNotEqual(key(), key(header=False))      # hiding the title block changes the stored fragment
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_the_code_is_shown_by_default_and_hidden_on_request(self):
         shown = self.html()
         self.assertIn("n_atoms", shown.split("mcr-root")[0])         # the fence comes before the fragment
@@ -58,6 +64,7 @@ class MarkerOptionTests(unittest.TestCase):
         self.assertNotIn("readout(", out)
         self.assertIn("After.", out)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_header_option(self):
         code = ("from McUtils.Readouts import Readout, ReadoutText\n"
                 "Readout(ReadoutText('body text'), title='My Title', subtitle='my subtitle')")

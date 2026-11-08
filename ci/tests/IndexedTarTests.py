@@ -12,7 +12,10 @@ from collections.abc import Mapping
 import numpy as np
 import tarfile
 
-import pytest
+if "pytest" not in sys.modules:
+    import unittest
+    raise unittest.SkipTest("IndexedTarTests requires the pytest runner")
+pytest = sys.modules["pytest"]
 
 from McUtils.Scaffolding.Storage import FileStoreLock, IndexedTarStore, JSONLSupplier, NPZLSupplier
 from McUtils.Scaffolding.Serializers import NumpyTreeArchive

@@ -1,4 +1,9 @@
 """Content identity, verified CDN selection, and publication against local Git."""
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import ast
 import contextlib
 import io
@@ -12,7 +17,7 @@ import tempfile
 import unittest
 from unittest import mock
 
-ROOT=Path(__file__).resolve().parents[3]
+ROOT=Path(__file__).resolve().parents[2]
 STATE=runpy.run_path(str(ROOT/'McUtils/Jupyter/JHTML/JavaScript.py'))['JSState']
 PUBLISHER=runpy.run_path(str(ROOT/'ci/publish_ui_runtime.py'))
 MANIFEST='McUtils/Jupyter/JHTML/resources/runtime.json'
@@ -167,6 +172,7 @@ class PublicationTests(unittest.TestCase):
 
 
 class WorkflowTests(unittest.TestCase):
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_publication_requires_validation_and_default_branch_with_isolated_write_permission(self):
         try:import yaml
         except ImportError:self.skipTest('PyYAML is optional for local workflow checks')

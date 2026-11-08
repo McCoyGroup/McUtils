@@ -9,6 +9,11 @@ Plotly layout/data, rather than trusting only McUtils's cached property value.
 Plotly tests use native dictionary serialization; no browser, renderer, network,
 Kaleido or image-export dependency is required.
 """
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import os
 from pathlib import Path
 import platform
@@ -37,7 +42,6 @@ if DEPS.is_dir():
     else:
         sys.path.append(str(DEPS))
 
-import matplotlib
 import numpy as np
 import McUtils
 from McUtils.Plots import Graphics, Graphics3D, GraphicsGrid, Plot, Plot3D, Styled
@@ -48,9 +52,12 @@ def mpl_supports_nonlinear_3d():
     return (major, minor) >= (3, 11)
 
 
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
 class AxesScalesTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
+        global matplotlib
+        import matplotlib
         if os.environ.get("MCUTILS_AXES_REQUIRE_ARM") == "1" and platform.machine() != "arm64":
             raise RuntimeError("Use the native ARM Python environment")
         if SOURCE is not None and SOURCE not in Path(McUtils.__file__).resolve().parents:

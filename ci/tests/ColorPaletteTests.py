@@ -1,15 +1,21 @@
 """Regression checks for color conversions and the palette quality dashboard."""
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import contextlib
 import io
 import unittest
 import numpy as np
-import matplotlib.pyplot as plt
 from McUtils.Plots import ColorPalette
 
 
 class ColorPaletteTests(unittest.TestCase):
     def tearDown(self):
-        plt.close('all')
+        import sys
+        if 'matplotlib.pyplot' in sys.modules:
+            sys.modules['matplotlib.pyplot'].close('all')
 
     def test_standard_xyz_primaries_and_lab_white(self):
         # Reference values, rather than a round trip that masks transposed matrices.
@@ -82,6 +88,7 @@ class ColorPaletteTests(unittest.TestCase):
         # Replacing a profile must leave the base class's profile untouched.
         self.assertAlmostEqual(ColorPalette.relative_luminance(255, 0, 0), .212671)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_dashboard_renders_all_conditions(self):
         palette = ColorPalette(['#AD590C', '#2B5900', '#007CB5', '#AF333C', '#663166', '#887100'])
         with contextlib.redirect_stdout(io.StringIO()):
@@ -97,6 +104,7 @@ class ColorPaletteTests(unittest.TestCase):
                 self.assertTrue(output.startswith(b'\x89PNG\r\n\x1a\n'))
                 self.assertGreater(len(output), 1000)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_dashboard_empty_cvd_list_and_singleton(self):
         with contextlib.redirect_stdout(io.StringIO()) as output:
             figures = ColorPalette(['#663166']).run_palette_quality_dashboard(cvd_types=[])
@@ -107,6 +115,7 @@ class ColorPaletteTests(unittest.TestCase):
         for fig in figures.values():
             fig.to_png()
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_dashboard_accepts_cvd_generator(self):
         with contextlib.redirect_stdout(io.StringIO()):
             figures = ColorPalette(['#AD590C', '#007CB5']).run_palette_quality_dashboard(
@@ -114,6 +123,7 @@ class ColorPaletteTests(unittest.TestCase):
         self.assertIn('line_protanopia', figures)
         self.assertIn('line_original', figures)
 
+    @_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
     def test_swatch_rows_remain_visible_after_layout(self):
         grid = ColorPalette(['#AD590C', '#2B5900', '#007CB5']).plot_swatch_grid()
         for _ in range(2):

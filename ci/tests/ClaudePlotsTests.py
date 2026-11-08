@@ -22,13 +22,16 @@ is never called; figures are instead rendered with `.savefig`/`.to_image`
 into a scratch directory and then closed).
 """
 
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
+
 import os
 import shutil
 import tempfile
 import unittest
 
-import matplotlib
-matplotlib.use("Agg")  # headless: no display is available in this environment
 
 import numpy as np
 
@@ -36,6 +39,7 @@ import McUtils.Numputils as nput
 import McUtils.Plots as plt
 
 
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
 class ClaudePlotsTests(unittest.TestCase):
     """
     Exercises the `McUtils.Plots` plotting classes: the 1D `Plot` family,
@@ -47,6 +51,8 @@ class ClaudePlotsTests(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
+        import matplotlib
+        matplotlib.use("Agg")
         cls.out_dir = tempfile.mkdtemp(prefix="McUtils_PlotsTests_")
 
     @classmethod

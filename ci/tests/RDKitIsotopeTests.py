@@ -1,14 +1,25 @@
 """Element/isotope conversion at the RDMolecule boundary."""
+
+import os as _test_os
+import unittest as _test_unittest
+_RUN_EXTRAS = _test_os.environ.get("MCUTILS_TEST_EXTRAS") == "1"
+
 import unittest
 
 import numpy as np
-from rdkit import Chem
 
 from McUtils.Data import AtomData
 from McUtils.ExternalPrograms import RDMolecule
 
 
+@_test_unittest.skipUnless(_RUN_EXTRAS, "optional dependencies; set MCUTILS_TEST_EXTRAS=1")
 class RDKitIsotopeTests(unittest.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        global Chem, AllChem
+        from rdkit import Chem
+
     coords = np.array([[0., 0., 0.], [.96, 0., 0.], [-.24, .93, 0.]])
     bonds = [[0, 1, 1], [0, 2, 1]]
 
