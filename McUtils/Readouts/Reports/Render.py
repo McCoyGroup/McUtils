@@ -62,6 +62,22 @@ class RenderResult:
         return f"RenderResult(ok={self.ok}, paths={self.paths}, problems={len(self.problems)})"
 
 
+def report_style(style=None):
+    """
+    ``style`` with the token ``stub_hidden`` on: a report writes a one-line "data only" stub for a section that holds only
+    export-only arrays instead of leaving it out. A theme name, a token dict, a `ReadoutTheme` or ``None`` is accepted; a
+    token dict that sets ``stub_hidden`` itself is kept as it is.
+    """
+    from ..Styles import ReadoutTheme
+    if isinstance(style, ReadoutTheme):
+        return style if style.get("stub_hidden") is not None else style.updated(stub_hidden=True)
+    if style is None or isinstance(style, str):
+        return {"preset": style or os.environ.get("MCUTILS_READOUT_THEME", "default"), "stub_hidden": True}
+    out = dict(style)
+    out.setdefault("stub_hidden", True)
+    return out
+
+
 def _slug(text):
     return re.sub(r"[^0-9a-zA-Z]+", "-", str(text)).strip("-").lower() or "report"
 
@@ -84,7 +100,7 @@ class ReportRenderer:
     def __init__(self, catalog, store=None, style=None, css="inline", timeout=120, strict=True, finx_assets=None):
         self.catalog = catalog
         self.store = store
-        self.style = style
+        self.style = report_style(style)
         self.css = css
         self.timeout = timeout
         self.strict = strict

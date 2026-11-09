@@ -10,6 +10,7 @@ from .Misc import infer_inds_dtype, downcast_index_array, infer_int_dtype
 __all__ = [
     "SparseArray",
     "ScipySparseArray",
+    "EvaluatedSparseMatrix",
     "TensorFlowSparseArray",
     "sparse_tensordot",
     "matrix_dot_into",
@@ -764,6 +765,411 @@ class lowmem_csr(sp.csr_matrix):
         #                             check_contents=True)
         #
         # return idx_dtype
+
+class EvaluatedSparseMatrix(SparseArray):
+    """Two-dimensional sparse matrix backend with on-demand element evaluation.
+
+    This is a matrix-only specialization of the n-dimensional SparseArray
+    interface. Its two axes are rows and columns; support, products and
+    bilinear projections are matrix operations. It does not provide lazy
+    evaluation of arbitrary-rank tensors. SparseArray and ScipySparseArray
+    retain their existing n-dimensional interfaces. Reshaping to another
+    rank explicitly materializes a bounded ordinary sparse tensor.
+
+    ``evaluate(rows, columns)`` evaluates paired coordinates. Either provide
+    canonical CSC ``positions=(indices, indptr)`` without values, or a
+    ``pair_generator(row_slice, columns, block_size)`` yielding unique paired
+    coordinates for the requested output rows and sorted input columns.
+    The generator must not cache a global graph. An explicit diagonal vector
+    is also supported, without CSR/CSC index arrays.
+
+    This backend is immutable. Whole-array exports are explicit and bounded
+    by ``block_bytes``; products do not export the matrix. Callbacks and their
+    bound state spaces must outlive the matrix and all borrowed views.
+    """
+    def __init__(self, shape, evaluate=None, *, positions=None,
+                 pair_generator=None, diagonal=None, dtype=float,
+                 block_size=65536, block_bytes=64*1024**2):
+        shape = tuple(shape)
+        if len(shape) != 2 or any(not isinstance(n, (int, np.integer)) or n < 0 for n in shape):
+            raise ValueError('EvaluatedSparseMatrix requires a two-dimensional nonnegative shape')
+        if any(not isinstance(n, (int, np.integer)) or n < 1 for n in (block_size, block_bytes)):
+            raise ValueError('block_size and block_bytes must be positive integer byte/count limits')
+        if sum(x is not None for x in (positions, pair_generator, diagonal)) != 1:
+            raise ValueError('Provide exactly one of positions, pair_generator or diagonal')
+        self._shape = shape
+        self.block_size, self.block_bytes = int(block_size), int(block_bytes)
+        self.positions = positions
+        self.pair_generator, self.evaluate = pair_generator, evaluate
+        self.diagonal_data = None if diagonal is None else np.asarray(diagonal)
+        if diagonal is not None:
+            if shape[0] != shape[1] or self.diagonal_data.shape != (shape[0],):
+                raise ValueError('Diagonal data must match a square matrix')
+            dtype = self.diagonal_data.dtype
+        elif not callable(evaluate):
+            raise TypeError('An element evaluator is required')
+        self._dtype = np.dtype(dtype)
+        if positions is not None:
+            indices, indptr = positions
+            if (np.ndim(indices) != 1 or np.ndim(indptr) != 1
+                    or len(indptr) != shape[1]+1 or indptr[0] != 0 or indptr[-1] != len(indices)
+                    or indices.dtype.kind not in 'iu' or indptr.dtype.kind not in 'iu'):
+                raise ValueError('Invalid CSC support')
+            # Validate in chunks; do not create nnz-sized temporary arrays.
+            for start in range(0, len(indptr)-1, self.block_size):
+                part = indptr[start:start+self.block_size+1]
+                if np.any(part[1:] < part[:-1]):
+                    raise ValueError('CSC pointers must be monotone')
+            for column in range(shape[1]):
+                lo, hi = int(indptr[column]), int(indptr[column+1])
+                previous = -1
+                for start in range(lo, hi, self.block_size):
+                    rows = indices[start:min(start+self.block_size, hi)]
+                    if len(rows) and (rows[0] <= previous or rows[-1] >= shape[0]
+                                     or np.any(rows[1:] <= rows[:-1])):
+                        raise ValueError('CSC row positions must be sorted, unique and in range')
+                    if len(rows): previous = int(rows[-1])
+
+    @property
+    def shape(self): return self._shape
+    @property
+    def dtype(self): return self._dtype
+    @property
+    def evaluation_mode(self):
+        return 'diagonal' if self.diagonal_data is not None else 'positions' if self.positions is not None else 'runtime'
+    @property
+    def nbytes(self):
+        """Owned/borrowed numerical storage, excluding callback-owned state spaces."""
+        return (self.diagonal_data.nbytes if self.diagonal_data is not None else
+                sum(a.nbytes for a in self.positions) if self.positions is not None else 0)
+    def __len__(self): return self.shape[0]
+    def __repr__(self):
+        return '{}(shape={}, evaluation_mode={!r}, storage_bytes={})'.format(
+            type(self).__name__, self.shape, self.evaluation_mode, self.nbytes)
+
+    def _iter_pairs(self, rows, columns, block_size):
+        if self.diagonal_data is not None:
+            selected = columns[(columns >= rows.start) & (columns < rows.stop)]
+            for start in range(0, len(selected), block_size):
+                block = selected[start:start+block_size]
+                yield block, block
+        elif self.positions is not None:
+            indices, indptr = self.positions
+            for column in columns:
+                lo, hi = int(indptr[column]), int(indptr[column+1])
+                values = indices[lo:hi]
+                first, last = np.searchsorted(values, [rows.start, rows.stop])
+                for start in range(int(first), int(last), block_size):
+                    selected = values[start:min(start+block_size, int(last))]
+                    yield selected, np.full(len(selected), column, dtype=np.int64)
+        else:
+            yield from self.pair_generator(rows, columns, block_size)
+
+    def iter_evaluated_blocks(self, rows=None, columns=None, block_size=None):
+        """Yield values and global coordinates; retain no computed values."""
+        rows = slice(0, self.shape[0]) if rows is None else rows
+        size = min(self.block_size, block_size or self.block_size)
+        if columns is None:
+            for start in range(0, self.shape[1], size):
+                yield from self.iter_evaluated_blocks(rows, np.arange(start, min(start+size, self.shape[1])), size)
+            return
+        columns = np.asarray(columns)
+        for r, c in self._iter_pairs(rows, columns, size):
+            r, c = np.asarray(r), np.asarray(c)
+            if r.shape != c.shape or r.ndim != 1 or len(r) > size:
+                raise ValueError('Pair provider violated its bounded coordinate contract')
+            if (np.any(r < rows.start) or np.any(r >= rows.stop)
+                    or np.any(~np.isin(c, columns))):
+                raise ValueError('Pair provider returned coordinates outside the request')
+            values = self.diagonal_data[r] if self.diagonal_data is not None else np.asarray(self.evaluate(r, c))
+            if values.shape != r.shape:
+                raise ValueError('Element evaluator must return one scalar per pair')
+            if not np.can_cast(values.dtype, self.dtype, casting='same_kind'):
+                raise TypeError('Element evaluator returned an incompatible dtype')
+            yield values, (r, c)
+
+    def iter_nonzero_blocks(self, block_size=65536, value_filter=None):
+        for values, indices in self.iter_evaluated_blocks(block_size=block_size):
+            keep = values != 0
+            if value_filter is not None: keep &= value_filter(values)
+            if np.any(keep): yield values[keep], tuple(i[keep] for i in indices)
+
+    def dot_into(self, b, out, *, alpha=1, beta=0, working_memory=64*1024**2, block_callback=None):
+        """Bounded product accumulation, sharing matrix_dot_into's callback contract.
+
+        Each callback receives a COMPLETE unscaled product tile once, including
+        zero tiles. Active input support is detected in bounded scans. A target
+        is not modified until its current tile has been fully evaluated.
+        """
+        if not isinstance(working_memory, (int, np.integer)) or working_memory < 1:
+            raise ValueError('working_memory must be a positive integer')
+        b = b if isinstance(b, SparseArray) or sp.issparse(b) else np.asarray(b)
+        out = np.asarray(out)
+        right = b[:, None] if len(b.shape) == 1 else b
+        target = out[:, None] if out.ndim == 1 else out
+        if (len(b.shape) not in (1, 2) or target.ndim != 2 or right.shape[0] != self.shape[1]
+                or target.shape != (self.shape[0], right.shape[1])
+                or (len(b.shape) == 1) != (out.ndim == 1)):
+            raise ValueError('Incompatible matrix_dot_into shapes')
+        if not target.flags.writeable: raise ValueError('matrix_dot_into output is read-only')
+        storage = (() if self.diagonal_data is None else (self.diagonal_data,))
+        storage += () if self.positions is None else tuple(self.positions)
+        native_right = b.data if isinstance(b, ScipySparseArray) else b
+        right_buffers = ([native_right.data, native_right.indices, native_right.indptr]
+                         if sp.issparse(native_right) else
+                         [v for row in b.rows for v in (row.values, row.columns.bits if row.dense else row.columns)]
+                         if isinstance(b, RowSparseArray) else [native_right])
+        if any(np.shares_memory(target, a) for a in right_buffers+list(storage)):
+            raise ValueError('matrix_dot_into inputs must not overlap the output')
+        dtype = np.result_type(self.dtype, right.dtype)
+        if not np.can_cast(np.result_type(dtype, alpha, beta), target.dtype, casting='same_kind'):
+            raise TypeError('matrix_dot_into output dtype cannot hold the result')
+        if alpha == 0 and block_callback is None:
+            if beta == 0: target.fill(0)
+            elif beta != 1: np.multiply(target, beta, out=target)
+            return out
+        for rows, columns, product in self.iter_dot_blocks(right, working_memory=working_memory):
+            if block_callback is not None: block_callback(rows, columns, product)
+            dest = target[rows, columns]
+            if beta == 0: dest.fill(0)
+            elif beta != 1: np.multiply(dest, beta, out=dest)
+            if alpha == 1: np.add(dest, product, out=dest)
+            elif alpha == -1: np.subtract(dest, product, out=dest)
+            elif alpha != 0: np.add(dest, alpha*product, out=dest)
+        return out
+
+    @staticmethod
+    def _vector_block(matrix, index, start, stop, *, axis):
+        """Borrow/decode a bounded row or column, including compact corrections."""
+        if isinstance(matrix, RowSparseArray) and (axis == 1) == matrix.transposed:
+            row = matrix.rows[index]
+            with RowSpillStore.pin_rows([row]):
+                if row.dense:
+                    values = np.asarray(row.values[start:stop])
+                    return values.copy() if getattr(row, '_spill_segment', None) is not None else values
+                native = row.select(np.arange(start, stop), matrix.block_size).native()
+                return native.toarray().reshape(-1) if sp.issparse(native) else np.asarray(native).reshape(-1)
+        if isinstance(matrix, ScipySparseArray): matrix = matrix.data
+        part = matrix[index, start:stop] if axis == 0 else matrix[start:stop, index]
+        if isinstance(part, SparseArray): part = part.asarray()
+        elif sp.issparse(part): part = part.toarray()
+        return np.asarray(part).reshape(-1)
+
+    def iter_dot_blocks(self, right, *, working_memory=None):
+        """Yield complete product tiles without retaining a full H@right result."""
+        budget = self.block_bytes if working_memory is None else working_memory
+        if not isinstance(budget, (int, np.integer)) or budget < 1:
+            raise ValueError('working_memory must be a positive integer')
+        if not isinstance(right, SparseArray) and not sp.issparse(right): right = np.asarray(right)
+        if len(right.shape) == 1: right = right[:, None]
+        if len(right.shape) != 2 or right.shape[0] != self.shape[1]:
+            raise ValueError('Incompatible matrix product shapes')
+        dtype = np.result_type(self.dtype, right.dtype)
+        itemsize = np.dtype(dtype).itemsize
+        size = max(1, min(self.block_size, budget//max(128, 16*itemsize)))
+        row_size = max(1, min(self.shape[0], budget//max(1, 8*itemsize)))
+        for first in range(0, self.shape[0], row_size):
+            last = min(first+row_size, self.shape[0]); rows = slice(first, last)
+            for column in range(right.shape[1]):
+                product = np.zeros(last-first, dtype=dtype)
+                if self.diagonal_data is not None:
+                    values = self._vector_block(right, column, first, last, axis=1)
+                    np.multiply(self.diagonal_data[rows], values, out=product)
+                else:
+                    for start in range(0, self.shape[1], size):
+                        values = self._vector_block(right, column, start, min(start+size, self.shape[1]), axis=1)
+                        active = np.flatnonzero(values != 0)+start
+                        if not len(active): continue
+                        for elements, (r, c) in self.iter_evaluated_blocks(rows, active, size):
+                            np.add.at(product, r-first, elements*values[c-start])
+                yield rows, slice(column, column+1), product[:, None]
+
+    def bilinear(self, left, right, *, working_memory=None):
+        """Return left@self@right without either large intermediate product.
+
+        Compact/file-backed correction rows are consumed directly in bounded
+        slices. This is a transpose algebraic contraction, not a conjugation.
+        """
+        if not hasattr(left, 'shape'): left = np.asarray(left)
+        if not hasattr(right, 'shape'): right = np.asarray(right)
+        if len(left.shape) != 2 or len(right.shape) != 2 or left.shape[1] != self.shape[0]:
+            raise ValueError('Incompatible bilinear product shapes')
+        result = np.zeros((left.shape[0], right.shape[1]), dtype=np.result_type(left.dtype, self.dtype, right.dtype))
+        for rows, columns, product in self.iter_dot_blocks(right, working_memory=working_memory):
+            for i in range(left.shape[0]):
+                values = self._vector_block(left, i, rows.start, rows.stop, axis=0)
+                result[i, columns] += values @ product
+        return result
+
+    def _right_dot(self, left):
+        """Binary left products retain their explicitly requested row output."""
+        if len(left.shape) != 2 or left.shape[1] != self.shape[0]:
+            raise ValueError('Matrix dimensions do not align')
+        transposed = self.T
+        rows = []
+        for i in range(left.shape[0]):
+            right = left[i:i+1, :].T
+            result = np.empty(self.shape[1], dtype=np.result_type(left.dtype, self.dtype))
+            for selected, _, product in transposed.iter_dot_blocks(right):
+                result[selected] = product[:, 0]
+            rows.append(CompactSparseRow.from_dense(result, None, self.block_size))
+        return RowSparseArray(rows, self.shape[1], block_bytes=self.block_bytes, block_size=self.block_size)
+
+    def dot(self, other):
+        if not hasattr(other, 'shape'): other = np.asarray(other)
+        if len(other.shape) not in (1, 2): raise ValueError('Vector or matrix required')
+        vector = len(other.shape) == 1
+        shape = (self.shape[0],) if vector else (self.shape[0], other.shape[1])
+        result = np.empty(shape, dtype=np.result_type(self.dtype, other.dtype))
+        for rows, columns, product in self.iter_dot_blocks(other):
+            if vector: result[rows] = product[:, 0]
+            else: result[rows, columns] = product
+        return result
+
+    def _export_check(self, size):
+        if size > self.block_bytes:
+            raise MemoryError('Explicit evaluated-matrix export exceeds block_bytes; use dot_into or block iteration')
+    def asarray(self):
+        self._export_check(self.shape[0]*self.shape[1]*self.dtype.itemsize)
+        out = np.zeros(self.shape, dtype=self.dtype)
+        for values, indices in self.iter_nonzero_blocks(): out[indices] = values
+        return out
+    toarray = asarray
+    todense = asarray
+    def ascsr(self):
+        # A conservative dense bound prevents an unknown-size implicit export.
+        self._export_check(self.shape[0]*self.shape[1]*(self.dtype.itemsize+16)+(self.shape[0]+1)*8)
+        values, rows, columns = [], [], []
+        for data, (r, c) in self.iter_nonzero_blocks():
+            values.append(data); rows.append(r); columns.append(c)
+        if not values: return sp.csr_matrix(self.shape, dtype=self.dtype)
+        return sp.csr_matrix((np.concatenate(values), (np.concatenate(rows), np.concatenate(columns))), shape=self.shape)
+    def ascoo(self): return self.ascsr().tocoo()
+    @property
+    def block_data(self):
+        coo = self.ascoo(); return coo.data, (coo.row, coo.col)
+
+    def get_elements(self, rows, columns):
+        rows, columns = np.broadcast_arrays(np.asarray(rows), np.asarray(columns))
+        if rows.dtype.kind not in 'iu' or columns.dtype.kind not in 'iu': raise IndexError('Integer coordinates required')
+        rows = np.where(rows < 0, rows+self.shape[0], rows)
+        columns = np.where(columns < 0, columns+self.shape[1], columns)
+        if (np.any(rows < 0) or np.any(rows >= self.shape[0])
+                or np.any(columns < 0) or np.any(columns >= self.shape[1])):
+            raise IndexError('Matrix coordinate outside shape')
+        self._export_check(rows.size*self.dtype.itemsize)
+        result = np.zeros(rows.size, dtype=self.dtype)
+        rflat, cflat = rows.reshape(-1), columns.reshape(-1)
+        for start in range(0, rows.size, self.block_size):
+            r, c = rflat[start:start+self.block_size], cflat[start:start+self.block_size]
+            if not len(r): continue
+            if self.diagonal_data is not None:
+                result[start:start+len(r)] = np.where(r == c, self.diagonal_data[r], 0)
+            else:
+                # Small indexed reads preserve broadcasting, order and duplicates.
+                locations = {}
+                for i, pair in enumerate(zip(r.tolist(), c.tolist())): locations.setdefault(pair, []).append(start+i)
+                for values, (br, bc) in self.iter_evaluated_blocks(slice(int(r.min()), int(r.max())+1), np.unique(c)):
+                    for rr, cc, value in zip(br, bc, values):
+                        for i in locations.get((int(rr), int(cc)), ()): result[i] = value
+        return result.reshape(rows.shape)[()] if rows.ndim == 0 else result.reshape(rows.shape)
+    @property
+    def diag(self):
+        if self.diagonal_data is not None: return self.diagonal_data
+        n = min(self.shape); out = np.empty(n, dtype=self.dtype)
+        for start in range(0, n, self.block_size):
+            inds = np.arange(start, min(start+self.block_size, n)); out[start:start+len(inds)] = self.get_elements(inds, inds)
+        return out
+
+    def __getitem__(self, item):
+        if not isinstance(item, tuple): item = (item, slice(None))
+        if len(item) != 2: raise IndexError('Two-dimensional matrix required')
+        if not any(isinstance(i, slice) for i in item): return self.get_elements(*item)
+        selectors = []
+        for i, n in zip(item, self.shape):
+            if isinstance(i, slice): selectors.append(range(*i.indices(n)))
+            else:
+                arr = np.atleast_1d(i)
+                if arr.dtype.kind == 'b':
+                    if arr.shape != (n,): raise IndexError('Boolean selector shape')
+                    arr = np.flatnonzero(arr)
+                if arr.dtype.kind not in 'iu': raise IndexError('Integer selector required')
+                arr = np.where(arr < 0, arr+n, arr)
+                if np.any((arr < 0) | (arr >= n)): raise IndexError('Selector outside shape')
+                selectors.append(arr)
+        rsel, csel = selectors
+        def pairs(rows, columns, size):
+            selected_rows = np.array(rsel[rows], dtype=np.int64)
+            selected_cols = np.array([csel[int(i)] for i in columns], dtype=np.int64)
+            if not len(selected_rows) or not len(selected_cols): return
+            row_map, col_map = {}, {}
+            for i, r in enumerate(selected_rows): row_map.setdefault(int(r), []).append(rows.start+i)
+            for i, c in zip(columns, selected_cols): col_map.setdefault(int(c), []).append(int(i))
+            rr, cc = [], []
+            for br, bc in self._iter_pairs(
+                    slice(int(selected_rows.min()), int(selected_rows.max())+1), np.unique(selected_cols), size):
+                for r, c in zip(br, bc):
+                    for ri in row_map.get(int(r), ()):
+                        for ci in col_map.get(int(c), ()):
+                            rr.append(ri); cc.append(ci)
+                            if len(rr) == size:
+                                yield np.array(rr), np.array(cc); rr, cc = [], []
+            if rr: yield np.array(rr), np.array(cc)
+        def evaluate(r, c):
+            return self.get_elements(np.array([rsel[int(i)] for i in r]), np.array([csel[int(i)] for i in c]))
+        return type(self)((len(rsel), len(csel)), evaluate, pair_generator=pairs,
+                          dtype=self.dtype, block_size=self.block_size, block_bytes=self.block_bytes)
+
+    def copy(self):
+        return type(self)(self.shape, self.evaluate, positions=self.positions, pair_generator=self.pair_generator,
+                          diagonal=self.diagonal_data, dtype=self.dtype, block_size=self.block_size, block_bytes=self.block_bytes)
+    def transpose(self, axes=None):
+        if axes is not None and tuple(axes) == (0, 1): return self.copy()
+        if axes is not None and tuple(axes) != (1, 0): raise ValueError(axes)
+        if self.diagonal_data is not None: return self.copy()
+        def pairs(rows, columns, size):
+            if not len(columns): return
+            for start in range(rows.start, rows.stop, size):
+                query = np.arange(start, min(start+size, rows.stop))
+                for r, c in self._iter_pairs(slice(int(columns.min()), int(columns.max())+1), query, size):
+                    keep = np.isin(r, columns)
+                    if np.any(keep): yield c[keep], r[keep]
+        return type(self)(self.shape[::-1], lambda r, c: self.get_elements(c, r), pair_generator=pairs,
+                          dtype=self.dtype, block_size=self.block_size, block_bytes=self.block_bytes)
+    def true_multiply(self, other):
+        if not np.isscalar(other): raise NotImplementedError('Only scalar multiplication is implicit')
+        if self.diagonal_data is not None:
+            return type(self).from_diagonal_data(self.diagonal_data*other, block_bytes=self.block_bytes, block_size=self.block_size)
+        return type(self)(self.shape, lambda r, c: self.evaluate(r, c)*other, positions=self.positions,
+                          pair_generator=self.pair_generator, dtype=np.result_type(self.dtype, other),
+                          block_bytes=self.block_bytes, block_size=self.block_size)
+    def plus(self, other, inplace=False):
+        if np.isscalar(other) and other == 0: return self.copy()
+        raise NotImplementedError('Implicit matrix addition requires an operator representation')
+    def reshape(self, newshape):
+        if tuple(newshape) == self.shape: return self.copy()
+        return SparseArray.from_data(self.asarray().reshape(newshape))
+    def to_state(self, serializer=None):
+        if self.diagonal_data is None:
+            raise TypeError('Runtime operator bindings must be rebuilt, not serialized as sparse values')
+        return dict(diagonal=self.diagonal_data, block_size=self.block_size, block_bytes=self.block_bytes)
+    @classmethod
+    def from_state(cls, state, serializer=None): return cls.from_diagonal_data(**state)
+    @classmethod
+    def from_diagonal_data(cls, diagonal, **opts):
+        diagonal = np.asarray(diagonal)
+        return cls((len(diagonal), len(diagonal)), diagonal=diagonal, **opts)
+    @classmethod
+    def initialize_empty(cls, shp, shape=None, **opts):
+        shape = shp if shape is None else shape
+        return cls(shape, lambda r, c: np.zeros(len(r)), pair_generator=lambda *args: iter(()), **opts)
+    def resize(self, newsize): raise NotImplementedError('Rebind the operator to the new state space')
+    def pad_right(self, newshape): raise NotImplementedError('Rebind the operator to the new state space')
+    def broadcast_to(self, shape): raise NotImplementedError('Two-dimensional operator backend')
+    def expand_and_broadcast_to(self, expansion, new_shape): raise NotImplementedError('Two-dimensional operator backend')
+    def expand_and_pad(self, expansion, padding): raise NotImplementedError('Two-dimensional operator backend')
+    def concatenate(self, *others, axis=0): raise NotImplementedError('Concatenate explicit state spaces before binding')
+    def outer(self, other): raise NotImplementedError('Outer products need an explicit output plan')
 
 class ScipySparseArray(SparseArray):
     """
@@ -2998,7 +3404,9 @@ class RowSpillStore:
         if self._pins.get(id(segment), 0): return
         tick = time.perf_counter()
         try:
-            segment._mmap.madvise(mmap.MADV_DONTNEED)
+            from .ExternalMemory import release_mapped_pages
+            if not release_mapped_pages(segment, writeback=False):
+                raise OSError('Mapped-page advice is unavailable')
             self.drop_calls += 1
         except (AttributeError, OSError, ValueError):
             self.drop_failures += 1
@@ -3157,6 +3565,7 @@ class RowSparseArray(SparseArray):
         return coo.data, (coo.row, coo.col)
 
     def dot(self, other):
+        if isinstance(other, EvaluatedSparseMatrix): return other._right_dot(self)
         if self.shape[1] != other.shape[0]: raise ValueError("Matrix dimensions do not align")
         if self.transposed:
             right = other.T if isinstance(other, SparseArray) else other.T
@@ -3652,7 +4061,7 @@ def matrix_dot_into(a, b, out, *, alpha=1, beta=0,
                     working_memory=64*1024**2, block_callback=None):
     """Accumulate ``alpha * a @ b + beta * out`` into an existing array.
 
-    Supports dense matrices and CSR matrices, including ScipySparseArray.
+    Supports dense/CSR left and dense/sparse right matrices, including ScipySparseArray.
     Products are consumed in bounded output blocks. Sparse products use
     individual dense columns, avoiding a full C-order copy of a transposed
     multi-vector. Inputs must not overlap the output. A block_callback, if
@@ -3660,15 +4069,22 @@ def matrix_dot_into(a, b, out, *, alpha=1, beta=0,
     is borrowed and must not be retained. working_memory is a temporary-buffer
     target, excluding input storage and backend-private workspaces.
     """
+    if isinstance(a, EvaluatedSparseMatrix):
+        return a.dot_into(b, out, alpha=alpha, beta=beta,
+                          working_memory=working_memory, block_callback=block_callback)
     if not isinstance(working_memory, (int, np.integer)) or working_memory < 1:
         raise ValueError('working_memory must be a positive integer byte count')
     if isinstance(a, ScipySparseArray):
         if len(a.shape) != 2 or a.shape != a.data.shape:
             raise ValueError('matrix_dot_into requires a two-dimensional matrix')
         a = a.data
-    b = np.asarray(b)
+    if isinstance(b, ScipySparseArray):
+        b = b.data
+    sparse_right = sp.issparse(b)
+    original_b = b.data if sparse_right else b
+    b = b.tocsc(copy=False) if sparse_right else np.asarray(b)
     out = np.asarray(out)
-    vector = b.ndim == 1
+    vector = not sparse_right and b.ndim == 1
     if vector:
         b = b[:, np.newaxis]
         target = out[:, np.newaxis] if out.ndim == 1 else out
@@ -3679,13 +4095,17 @@ def matrix_dot_into(a, b, out, *, alpha=1, beta=0,
             or target.shape != (a.shape[0], b.shape[1])):
         raise ValueError('Incompatible matrix_dot_into shapes')
     sparse = sp.issparse(a)
+    if sparse and sparse_right:
+        # Convert once per product, rather than once per output column/tile.
+        # The right CSR row pointer is sparse storage, never a dense C1 copy.
+        b = b.tocsr(copy=False)
     if sparse and a.format != 'csr':
         raise ValueError('matrix_dot_into requires CSR sparse input')
     if not sparse:
         a = np.asarray(a)
     if not target.flags.writeable:
         raise ValueError('matrix_dot_into output is read-only')
-    if (np.shares_memory(target, b)
+    if (np.shares_memory(target, original_b)
             or np.shares_memory(target, a.data if sparse else a)):
         raise ValueError('matrix_dot_into inputs must not overlap the output')
     dtype = np.result_type(a.dtype, b.dtype)
@@ -3712,7 +4132,8 @@ def matrix_dot_into(a, b, out, *, alpha=1, beta=0,
     itemsize = max(np.dtype(dtype).itemsize, target.dtype.itemsize)
     if sparse:
         ptr = a.indptr
-        max_rows = max(1, working_memory//(4*ptr.dtype.itemsize + 4*itemsize))
+        width = max(1, b.shape[1]) if sparse_right else 1
+        max_rows = max(1, working_memory//(4*ptr.dtype.itemsize + 4*itemsize*width))
         max_nnz = max(1, working_memory//(a.data.dtype.itemsize + a.indices.dtype.itemsize))
         start = 0
         while start < a.shape[0]:
@@ -3724,10 +4145,15 @@ def matrix_dot_into(a, b, out, *, alpha=1, beta=0,
             # only the row pointer needs rebasing. No full COO coordinates.
             part = sp.csr_matrix((a.data[lo:hi], a.indices[lo:hi], ptr[start:stop+1]-lo),
                                  shape=(stop-start, a.shape[1]), copy=False)
-            for column in range(b.shape[1]):
-                value = part.dot(b[:, column])
-                consume(rows, slice(column, column+1), value[:, np.newaxis])
+            if sparse_right:
+                value = part.dot(b).toarray()
+                consume(rows, slice(0, b.shape[1]), value)
                 del value
+            else:
+                for column in range(b.shape[1]):
+                    value = part.dot(b[:, column])
+                    consume(rows, slice(column, column+1), value[:, np.newaxis])
+                    del value
             start = stop
     else:
         rows_per_block = min(a.shape[0], max(1, working_memory//(4*itemsize)))
@@ -3739,6 +4165,9 @@ def matrix_dot_into(a, b, out, *, alpha=1, beta=0,
             for first in range(0, b.shape[1], columns_per_block):
                 last = min(b.shape[1], first+columns_per_block)
                 value = work[:(stop-start)*(last-first)].reshape(stop-start, last-first)
-                np.dot(a[start:stop], b[:, first:last], out=value)
+                if sparse_right:
+                    value[:] = b[:, first:last].T.dot(a[start:stop].T).T
+                else:
+                    np.dot(a[start:stop], b[:, first:last], out=value)
                 consume(slice(start, stop), slice(first, last), value)
     return out

@@ -84,6 +84,8 @@ it with the value and its unit exactly as the data has them (3803.3 cm⁻¹), so
 choose a unit, the value follows the report's unit style, and it stays right if the data changes. Before: "The OH
 stretch is at 3803.3 cm-1." After: "The OH stretch is at {r3.frequency[1]}." Do not type the unit after a placeholder:
 the server adds it (a different unit is refused). Text columns work too: {r3.mode[2]} writes the label in that row.
+To state the largest, smallest, first or last value of a column without finding its row, write {r3.frequency[max]}
+([min], [first], [last]); {r5.x[max:y]} is the x where column y is largest.
 
 Readout data is shown to you as placeholders, not expanded: peek(handle, section) lists a section's columns, the
 placeholder for each, its rows and one example value, and add_readout and apply_template list the placeholders of the
@@ -121,6 +123,7 @@ that block.
 add_text writes a paragraph: plain sentences (no Markdown) with cites = readout ids. WRITE VALUES FROM THE DATA AS
 PLACEHOLDERS, {r3.frequency[2]} (readout id, column, row): the server fills in the number and its unit (3803.3 cm⁻¹), so
 it is never mistyped. Do not add a unit after a placeholder. {r3.mode[2]} writes a text column's label.
+{r3.frequency[max]} is the largest value of a column ([min], [first], [last] too).
 add_readout and apply_template list each block's placeholders; peek(handle, section) shows a section as placeholders
 and peek(..., expand=true) as text with its values. A number that is not in the data (from the user's request, a
 literature value) is written {=300 K}. `notes` in a result are advice, not errors.
@@ -154,9 +157,10 @@ the placeholder that writes it; `autolinked` in the result lists them. Writing t
 """
 
 DERIVED_NOTE = """\
-Computed values are switched on for this report: a value computed from the data is written as an expression of
-placeholders, {mean(r3.frequency[2], r3.frequency[3])} (+ - * / and mean, sum, min, max, abs, diff, ratio); the server
-computes it and writes it with the inputs' unit. Never compute a value yourself.
+A number the user asks you to compute (a difference, a mean, a ratio) is written as an expression of placeholders,
+{mean(r3.frequency[2], r3.frequency[3])} (+ - * / and mean, sum, min, max, abs, diff, ratio); the server computes it and
+writes it with the inputs' unit. Never compute a value yourself, and do not add comparisons or statistics the user did
+not ask for.
 """
 
 APPLY_EDITS_NOTE = """\
@@ -192,7 +196,7 @@ def catalog_summary(catalog, level=2, inline_max=8):
     return "\n".join(lines)
 
 
-def report_instructions(catalog=None, level=2, inline_max=8, derived=False, apply_edits=False, unit_style=None,
+def report_instructions(catalog=None, level=2, inline_max=8, derived=True, apply_edits=False, unit_style=None,
                         policy="unchecked", autolink=False, values_tool=True):
     """
     The instructions for ``context_level`` ``level``, with the catalog listed when it is small (see

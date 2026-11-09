@@ -238,3 +238,141 @@ class ExternalUniqueTests(unittest.TestCase):
                     self.assertEqual(result.shape,shape)
 
 if __name__=='__main__':unittest.main()
+
+
+class SparseRightAccumulationTests(unittest.TestCase):
+    def test_real_correction_sparse_right_products(self):
+        from McUtils.Numputils import matrix_dot_into
+        values=np.asarray(json.loads((Path(__file__).parent/'TestData/hno3_vpt2_rows.json').read_text())['rows'][1]['values'])
+        rows=np.asarray([r['values'] for r in json.loads((Path(__file__).parent/'TestData/hno3_vpt2_rows.json').read_text())['rows']])
+        a=sp.csr_matrix(rows)
+        for left,right in [(a,sp.csc_matrix(rows.T)),(rows,sp.csr_matrix(rows.T)),(np.eye(len(rows)),a)]:
+            expected=left @ right
+            if sp.issparse(expected):expected=expected.toarray()
+            out=np.full(expected.shape,.25);blocks=[]
+            matrix_dot_into(left,right,out,alpha=-1,beta=2,working_memory=1024,
+                block_callback=lambda r,c,v:blocks.append(v.nbytes))
+            np.testing.assert_allclose(out,.5-expected,rtol=2e-11,atol=2e-12)
+            self.assertTrue(blocks)
+            self.assertLessEqual(max(blocks),1024)
+        with self.assertRaises(ValueError):
+            matrix_dot_into(rows,sp.eye(rows.shape[1],format='csr'),rows)
+
+    def test_real_rows_page_release_preserves_borrowed_views(self):
+        from McUtils.Numputils import release_mapped_pages
+        rows=np.asarray([r['values'] for r in json.loads((Path(__file__).parent/'TestData/hno3_vpt2_rows.json').read_text())['rows']])
+        with tempfile.TemporaryDirectory() as directory:
+            array=np.lib.format.open_memmap(Path(directory)/'rows.npy',mode='w+',dtype=float,shape=rows.shape)
+            array[:]=rows;view=np.asarray(array)[1:]
+            self.assertTrue(release_mapped_pages(view))
+            np.testing.assert_array_equal(view,rows[1:])
+            del view
+            array._mmap.close()
+
+
+class EvaluatedSparseMatrixTests(unittest.TestCase):
+    """Product and storage contracts on the existing actual HNO3 row fixture."""
+    @staticmethod
+    def _fixture():
+        path = Path(__file__).parent/'TestData/hno3_vpt2_rows.json'
+        return np.asarray([r['values'] for r in json.loads(path.read_text())['rows']])[:, :96]
+
+    def test_matrix_scope_preserves_n_dimensional_sparse_backend(self):
+        from McUtils.Numputils import EvaluatedSparseMatrix, SparseArray
+        for shape in [(6,), (2, 3, 4)]:
+            with self.assertRaisesRegex(ValueError, 'two-dimensional'):
+                EvaluatedSparseMatrix(shape, lambda r, c: r*0., pair_generator=lambda *args: iter(()))
+        values = self._fixture()[:2, :12].reshape(2, 3, 4)
+        tensor = SparseArray.from_data(values)
+        self.assertEqual(tensor.ndim, 3)
+        np.testing.assert_array_equal(tensor.asarray(), values)
+        matrix = EvaluatedSparseMatrix.from_diagonal_data(np.arange(4.))
+        reshaped = matrix.reshape((2, 2, 4))
+        self.assertNotIsInstance(reshaped, EvaluatedSparseMatrix)
+        self.assertEqual(reshaped.ndim, 3)
+        np.testing.assert_array_equal(reshaped.asarray(), np.diag(np.arange(4.)).reshape(2, 2, 4))
+
+    def test_evaluated_positions_and_runtime_products(self):
+        from McUtils.Numputils import EvaluatedSparseMatrix, matrix_dot_into
+        values = self._fixture()
+        support = sp.csc_matrix(values)
+        calls = []
+        def pairs(rows, columns, size):
+            calls.append(columns.copy())
+            r, c = np.nonzero(values[rows][:, columns]); r += rows.start; c = columns[c]
+            for start in range(0, len(r), size): yield r[start:start+size], c[start:start+size]
+        runtime = EvaluatedSparseMatrix(values.shape, lambda r, c: values[r, c], pair_generator=pairs, block_size=7)
+        positions = EvaluatedSparseMatrix(values.shape, lambda r, c: values[r, c],
+                                        positions=(support.indices, support.indptr), block_size=7)
+        self.assertEqual(runtime.nbytes, 0)
+        self.assertEqual(positions.nbytes, support.indices.nbytes+support.indptr.nbytes)
+        for matrix in [runtime, positions]:
+            right = np.zeros((values.shape[1], 3)); right[[0, 2, 5], :] = [[1, .2, 0], [.7, 0, -1], [0, .4, 2]]
+            out = np.full((values.shape[0], 3), .25)
+            complete = np.zeros_like(out); covered = np.zeros(out.shape, dtype=int)
+            def callback(rows, columns, product):
+                complete[rows, columns] = product; covered[rows, columns] += 1
+            returned = matrix_dot_into(matrix, right, out, alpha=-.5, beta=.7,
+                                       working_memory=256, block_callback=callback)
+            self.assertIs(returned, out)
+            np.testing.assert_allclose(out, -.5*values.dot(right)+.175, rtol=2e-14, atol=2e-14)
+            np.testing.assert_allclose(complete, values.dot(right), rtol=2e-14, atol=2e-14)
+            np.testing.assert_array_equal(covered, 1)
+            np.testing.assert_array_equal(matrix.asarray(), values)
+            np.testing.assert_array_equal(matrix.T.asarray(), values.T)
+            np.testing.assert_array_equal(matrix[[2, 0, 2], [3, 1, 3]], values[[2, 0, 2], [3, 1, 3]])
+            np.testing.assert_array_equal(matrix[1].asarray(), values[1:2])
+            with self.assertRaises(TypeError): matrix.to_state()
+        calls.clear(); runtime.dot(np.zeros(values.shape[1])); self.assertEqual(calls, [])
+
+    def test_evaluated_diagonal_alias_and_export_guards(self):
+        from McUtils.Numputils import EvaluatedSparseMatrix, matrix_dot_into
+        diagonal = self._fixture()[0].copy()
+        matrix = EvaluatedSparseMatrix.from_diagonal_data(diagonal, block_size=7)
+        self.assertIs(matrix.diag, diagonal)
+        self.assertIsNone(matrix.positions)
+        np.testing.assert_array_equal(matrix.dot(diagonal), diagonal**2)
+        np.testing.assert_array_equal(EvaluatedSparseMatrix.from_state(matrix.to_state()).diag, diagonal)
+        with self.assertRaises(ValueError): matrix_dot_into(matrix, diagonal, diagonal)
+        readonly = np.zeros_like(diagonal); readonly.flags.writeable = False
+        with self.assertRaises(ValueError): matrix_dot_into(matrix, diagonal, readonly)
+        guarded = EvaluatedSparseMatrix.from_diagonal_data(diagonal, block_bytes=1)
+        with self.assertRaises(MemoryError): guarded.ascsr()
+        with self.assertRaises(MemoryError): guarded.asarray()
+        with self.assertRaises(ValueError):
+            EvaluatedSparseMatrix((2, 2), lambda r, c: r*0., positions=(np.array([1, 1]), np.array([0, 2, 2])))
+
+    def test_evaluated_bilinear_uses_compact_and_spilled_rows_without_export(self):
+        from McUtils.Numputils import EvaluatedSparseMatrix, RowSparseArray, RowSpillStore
+        from unittest.mock import patch
+        values = self._fixture()
+        support = sp.csc_matrix(values)
+        matrix = EvaluatedSparseMatrix(values.shape, lambda r, c: values[r, c],
+            positions=(support.indices, support.indptr), block_size=7, block_bytes=512)
+        left_values, right_values = values[:3, :values.shape[0]], values[:4, :]
+        expected = left_values @ values @ right_values.T
+        left = RowSparseArray.from_native(left_values)
+        right = RowSparseArray.from_native(right_values)
+        with patch.object(matrix, 'ascsr', side_effect=AssertionError('No operator export')):
+            np.testing.assert_allclose(matrix.bilinear(left, right.T), expected, rtol=2e-13, atol=2e-14)
+            binary = left.dot(matrix)
+            actual = np.zeros((left_values.shape[0], values.shape[1]))
+            for data, indices in binary.iter_nonzero_blocks(): actual[indices] = data
+            np.testing.assert_allclose(actual, left_values @ values, rtol=2e-13, atol=2e-14)
+        with tempfile.TemporaryDirectory() as temp:
+            store = RowSpillStore(temp, 0, 2**24, segment_bytes=2**20)
+            spilled = RowSparseArray.from_native(right_values, storage=store)
+            self.assertGreater(store.snapshot()['file_backed_payload_bytes'], 0)
+            np.testing.assert_allclose(matrix.bilinear(left, spilled.T), expected, rtol=2e-13, atol=2e-14)
+
+    def test_evaluated_accumulation_accepts_existing_sparse_right_inputs(self):
+        from McUtils.Numputils import EvaluatedSparseMatrix, matrix_dot_into, RowSparseArray
+        values = self._fixture(); support = sp.csc_matrix(values)
+        matrix = EvaluatedSparseMatrix(values.shape, lambda r, c: values[r, c],
+            positions=(support.indices, support.indptr), block_size=7)
+        right = np.zeros((values.shape[1], 2)); right[[0, 2, 5]] = [[1., .2], [.5, 0.], [0., -.3]]
+        for operand in [sp.csr_matrix(right), SparseArray.from_data(sp.csr_matrix(right)),
+                        RowSparseArray.from_native(right.T).T]:
+            out = np.full((values.shape[0], 2), .25)
+            matrix_dot_into(matrix, operand, out, alpha=-.5, beta=.7, working_memory=512)
+            np.testing.assert_allclose(out, -.5*values.dot(right)+.175, rtol=2e-13, atol=2e-14)

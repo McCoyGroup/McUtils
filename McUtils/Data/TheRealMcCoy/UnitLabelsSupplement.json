@@ -189,6 +189,11 @@
    "ascii": "rad",
    "latex": "\\mathrm{rad}"
   },
+  "Steradians": {
+   "unicode": "sr",
+   "ascii": "sr",
+   "latex": "\\mathrm{sr}"
+  },
   "Percent": {
    "unicode": "%",
    "ascii": "%",

@@ -4,10 +4,157 @@ import tempfile
 from ..Devutils.FileHelpers import atomic_file
 import os
 import functools
+import time
 from contextlib import ExitStack
 import numpy as np
 
-__all__ = ['external_unique', 'save_sparse_matrix', 'load_sparse_matrix']
+__all__ = ['MappedArrayFlushBuffer', 'external_unique', 'save_sparse_matrix', 'load_sparse_matrix', 'release_mapped_pages']
+
+
+class MappedArrayFlushBuffer:
+    """Bound pending writeback of disposable mapped files, without owning maps.
+
+    ``defer(array)`` records its file identity and closes no mappings. Call
+    ``discard(path)`` before deleting a consumed temporary file. Remaining
+    files are synced oldest first when either queue limit is exceeded, or
+    all at once by ``flush()``. No descriptors, arrays or mappings are retained.
+
+    Limits count file sizes, not dirty pages or resident memory. The OS can
+    write pages independently; this is not a RAM limit. Caller-owned final
+    outputs should still be flushed explicitly at their persistence boundary.
+    """
+    def __init__(self, max_bytes=256*1024**2, max_files=64):
+        for name, value in [('max_bytes', max_bytes), ('max_files', max_files)]:
+            if (value is None and name == 'max_bytes'):
+                continue
+            if isinstance(value, (bool, np.bool_)) or not isinstance(value, (int, np.integer)) or value < 1:
+                raise ValueError('{} must be positive integer{}'.format(name, ' bytes or None' if name == 'max_bytes' else ''))
+        import threading
+        self.max_bytes = None if max_bytes is None else int(max_bytes)
+        self.max_files = int(max_files)
+        self._pending = {}
+        self._pending_bytes = 0
+        self._lock = threading.RLock()
+        self._closed = False
+        self._metrics = dict(enqueued_files=0, enqueued_bytes=0, flushed_files=0,
+                             flushed_bytes=0, discarded_files=0, discarded_bytes=0,
+                             flush_seconds=0., peak_pending_bytes=0, peak_pending_files=0)
+
+    @staticmethod
+    def _path(array_or_path):
+        return Path(os.path.abspath(os.fspath(getattr(array_or_path, 'filename', array_or_path))))
+
+    def defer(self, array):
+        """Queue a shared writable file mapping before its owner closes it."""
+        if not isinstance(array, np.memmap) or array.mode not in ('r+', 'w+'):
+            raise TypeError('deferred writeback requires a shared writable NumPy memmap')
+        with self._lock:
+            if self._closed:
+                raise RuntimeError('flush buffer is closed')
+            path = self._path(array)
+            stat = path.stat()
+            identity = (stat.st_dev, stat.st_ino)
+            previous = self._pending.get(path)
+            if previous is not None:
+                if previous[:2] != identity:
+                    raise RuntimeError('pending mapped file was replaced: {}'.format(path))
+                self._pending_bytes -= previous[2]
+            else:
+                self._metrics['enqueued_files'] += 1
+                self._metrics['enqueued_bytes'] += stat.st_size
+            self._pending[path] = identity + (stat.st_size,)
+            self._pending_bytes += stat.st_size
+            self._metrics['peak_pending_bytes'] = max(self._metrics['peak_pending_bytes'], self._pending_bytes)
+            self._metrics['peak_pending_files'] = max(self._metrics['peak_pending_files'], len(self._pending))
+            while (len(self._pending) > self.max_files or
+                   (self.max_bytes is not None and self._pending_bytes > self.max_bytes)):
+                self._flush_one(next(iter(self._pending)))
+
+    def _flush_one(self, path):
+        device, inode, size = self._pending[path]
+        started = time.perf_counter()
+        try:
+            with open(path, 'rb') as stream:
+                stat = os.fstat(stream.fileno())
+                if (stat.st_dev, stat.st_ino) != (device, inode):
+                    raise RuntimeError('pending mapped file was replaced: {}'.format(path))
+                # A whole-file sync includes pages from already-closed shared
+                # mappings, without recreating mappings or retaining buffers.
+                getattr(os, 'fdatasync', os.fsync)(stream.fileno())
+        finally:
+            self._metrics['flush_seconds'] += time.perf_counter() - started
+        del self._pending[path]
+        self._pending_bytes -= size
+        self._metrics['flushed_files'] += 1
+        self._metrics['flushed_bytes'] += size
+
+    def flush(self):
+        """Synchronously write back every still-pending file; propagate errors."""
+        with self._lock:
+            for path in list(self._pending):
+                self._flush_one(path)
+
+    def discard(self, path, *, recursive=False):
+        """Forget consumed temporary files; never unlink or close their owners."""
+        path = self._path(path)
+        with self._lock:
+            paths = ([p for p in self._pending if p == path or path in p.parents]
+                     if recursive else [path] if path in self._pending else [])
+            for p in paths:
+                size = self._pending.pop(p)[2]
+                self._pending_bytes -= size
+                self._metrics['discarded_files'] += 1
+                self._metrics['discarded_bytes'] += size
+
+    def snapshot(self):
+        with self._lock:
+            return dict(self._metrics, pending_files=len(self._pending), pending_bytes=self._pending_bytes,
+                        max_bytes=self.max_bytes, max_files=self.max_files, closed=self._closed)
+
+    def close(self):
+        with self._lock:
+            if not self._closed:
+                self.flush()
+                self._closed = True
+
+    def __enter__(self):
+        if self._closed:
+            raise RuntimeError('flush buffer is closed')
+        return self
+
+    def __exit__(self, *exc):
+        self.close()
+
+    def __getstate__(self):
+        with self._lock:
+            if self._pending:
+                raise TypeError('cannot serialize pending mapped-file writeback')
+            return dict(max_bytes=self.max_bytes, max_files=self.max_files, closed=self._closed)
+
+    def __setstate__(self, state):
+        self.__init__(state['max_bytes'], state['max_files'])
+        self._closed = state['closed']
+
+
+def release_mapped_pages(array, *, writeback=True):
+    """Release resident pages without closing a mapping or invalidating views.
+
+    Flush writable data first unless the caller has already done so. This is
+    OS advice, not a hard RAM/cache cap; unsupported platforms return False.
+    """
+    import mmap
+    current = array
+    while current is not None and not isinstance(current, mmap.mmap):
+        mapping = getattr(current, '_mmap', None)
+        current = mapping if mapping is not None else getattr(current, 'base', None)
+    if current is None or current.closed:
+        return False
+    if not hasattr(current, 'madvise') or not hasattr(mmap, 'MADV_DONTNEED'):
+        return False
+    if writeback:
+        current.flush()
+    current.madvise(mmap.MADV_DONTNEED)
+    return True
 
 
 def _merge(left, lp, right, rp, out, positions):
@@ -51,7 +198,7 @@ def _close_mapping(array):
     if mapping is not None and not mapping.closed:mapping.close()
 
 
-def _sorted_runs(arrays, root, chunk_size, mappings, *, track_positions=True):
+def _sorted_runs(arrays, root, chunk_size, mappings, *, track_positions=True, flush_buffer=None):
     # One run per binary level. Merge equal-sized groups of input chunks as
     # they arrive, so repeated keys are removed before every run is spilled.
     pending=[];offset=0;width=None;ndim=None;buffer=None;filled=0;serial=0
@@ -75,8 +222,18 @@ def _sorted_runs(arrays, root, chunk_size, mappings, *, track_positions=True):
             out=own(np.lib.format.open_memmap(str(path)+'_keys.npy',mode='w+',dtype=np.int64,shape=(na+nb,width)))
             pos=(own(np.lib.format.open_memmap(str(path)+'_positions.npy',mode='w+',dtype=np.int64,shape=(na+nb,)))
                  if track_positions else None)
-            size=int(_merge_function()(ak,ap,bk,bp,out,pos));out.flush()
-            if pos is not None:pos.flush()
+            size=int(_merge_function()(ak,ap,bk,bp,out,pos))
+            if flush_buffer is None:
+                out.flush()
+                if pos is not None:pos.flush()
+            else:
+                # Both consumed runs can be forgotten before a size-triggered
+                # writeback. Their contents have already reached the new run.
+                for old in [a,b]:
+                    flush_buffer.discard(str(old)+'_keys.npy')
+                    if track_positions:flush_buffer.discard(str(old)+'_positions.npy')
+                flush_buffer.defer(out)
+                if pos is not None:flush_buffer.defer(pos)
         del ak,ap,bk,bp,out,pos
         for old in [a,b]:
             for suffix in (['_keys.npy','_positions.npy'] if track_positions else ['_keys.npy']):
@@ -144,12 +301,15 @@ def _sorted_runs(arrays, root, chunk_size, mappings, *, track_positions=True):
 
 
 def external_unique(arrays, *, sort=True, return_index=False, return_values=True, chunk_size=262144,
-                    directory=None, output_file=None):
+                    directory=None, output_file=None, flush_buffer=None):
     """Deduplicate integer inputs using sorted disk runs and pairwise merges.
 
     ``sort=False`` preserves first-occurrence order across the input stream.
     The final output is an ordinary array, or a mapped .npy when output_file
     is supplied. No inverse array or concatenated copy of all inputs is made.
+    With ``flush_buffer`` intermediate disposable merge files defer writeback;
+    consumed files are removed from its queue. The final ``output_file`` is
+    always flushed before return. None preserves immediate intermediate flushes.
     """
     if chunk_size<1:raise ValueError('chunk_size must be positive')
     if isinstance(arrays,np.ndarray):arrays=[arrays]
@@ -159,14 +319,14 @@ def external_unique(arrays, *, sort=True, return_index=False, return_values=True
         try:
             root=Path(work)
             keys,positions,ndim=_sorted_runs(arrays,root,int(chunk_size),mappings,
-                                             track_positions=not sort or return_index)
+                                             track_positions=not sort or return_index,flush_buffer=flush_buffer)
             if not sort and len(keys):
                 ordered=root/'stable';ordered.mkdir()
                 records=((np.column_stack((positions[i:i+chunk_size],keys[i:i+chunk_size]))
                           if return_values else positions[i:i+chunk_size,None])
                          for i in range(0,len(keys),chunk_size))
                 stable,_,_=_sorted_runs(records,ordered,int(chunk_size),mappings,
-                                         track_positions=False)
+                                         track_positions=False,flush_buffer=flush_buffer)
                 positions=stable[:,0]
                 if return_values:keys=stable[:,1:]
             shape=(len(keys),) if ndim==1 else keys.shape
@@ -183,6 +343,10 @@ def external_unique(arrays, *, sort=True, return_index=False, return_values=True
             first=np.array(positions,copy=True) if return_index else None
             return (values,first) if return_index else values
         finally:
+            if flush_buffer is not None:
+                # Only our owned disposable directory is retired. A shared
+                # caller buffer may still own unrelated pending files.
+                flush_buffer.discard(root,recursive=True)
             # Close before removing files: unlinking an open mmap leaves NFS
             # .nfs files that can prevent TemporaryDirectory from cleaning up.
             for array in mappings:_close_mapping(array)

@@ -40,7 +40,7 @@ Under ``unchecked`` a text is marked ``unchecked`` if it types a number (other t
 ``checked`` or ``no_numbers`` if the server wrote every number. ``structure_only`` turns the text tools off
 (``code="writing_disabled"``).
 
-Computed values (``{mean(...)}``) are off unless ``allow_derived``; ``apply_edits`` (several edits in one atomic call)
+Computed values (``{mean(...)}``) are on unless ``allow_derived=False``; ``apply_edits`` (several edits in one atomic call)
 exists only with ``apply_edits=True``.
 """
 
@@ -68,7 +68,8 @@ REPORT_HINTS = {
                   "literature value) is marked {=300 K}; otherwise leave it out. Try once more. If it is refused "
                   "again, tell the user.",
     "bad_reference": "A placeholder is {BLOCK.COLUMN[ROW]} with a readout block id, a column from the error's "
-                     "`choices` and a 1-based row, such as {r3.frequency[2]}. Correct it and try once more.",
+                     "`choices` and a 1-based row, such as {r3.frequency[2]} (rows start at 1; [first], [last], [min] "
+                     "and [max] pick a row for you). Correct it and try once more.",
     "unit_mismatch": "Write the placeholder alone, such as {r3.frequency[2]}, with no unit after it: the server adds "
                      "the data's unit. Correct it and try once more.",
     "derived_disabled": "This report only takes values as the data shows them: use single placeholders like "
@@ -159,7 +160,7 @@ _NAMES = {"type": "array", "items": {"type": "string", "minLength": 1, "maxLengt
 
 
 def report_toolset(doc, catalog, renderer=None, policy="unchecked", rel_tol=1e-3, small_int_max=10, year_range=(1900, 2100), out_dir=None,
-                   on_change=None, hints=None, allow_derived=False, apply_edits=False, context_level=2,
+                   on_change=None, hints=None, allow_derived=True, apply_edits=False, context_level=2,
                    include_tools=None, exclude_tools=None, inline_max=8, unit_style=None, autolink=False, advice=True):
     """
     The tools for editing ``doc`` (a `ReportDocument` built against ``catalog``).
@@ -175,7 +176,7 @@ def report_toolset(doc, catalog, renderer=None, policy="unchecked", rel_tol=1e-3
         `REPORT_HINTS`, ``{}`` turns them off
     :param on_change: ``callable(doc)`` called after every successful mutating tool (the MCP server saves the file here)
     :param allow_derived: whether text may contain computed values the server fills in
-        (``{mean(r3.frequency[2], r3.frequency[3])}``); off by default. Single placeholders
+        (``{mean(r3.frequency[2], r3.frequency[3])}``); on by default. Single placeholders
         (``{r3.frequency[2]}``) are always allowed
     :param apply_edits: whether to offer the ``apply_edits`` tool (several edits in one atomic call); off by default
         (the owner decides), at every context level
@@ -210,6 +211,7 @@ def report_toolset(doc, catalog, renderer=None, policy="unchecked", rel_tol=1e-3
         raise ValueError(f"year_range must be (low, high) or None, got {year_range!r}")
     if renderer is not None and out_dir is None:
         raise ValueError("a renderer needs out_dir")
+    default_hints = hints is None
     if hints is None:
         hints = dict(REPORT_HINTS)
         if allow_derived:
@@ -233,6 +235,19 @@ def report_toolset(doc, catalog, renderer=None, policy="unchecked", rel_tol=1e-3
     if level == 1 and not inlined:
         enabled |= {"list_sources", "describe_source"}
     enabled -= set(exclude_tools or ())
+    if default_hints and "describe_source" not in enabled:
+        tools.hints["unknown_section"] = ("The error's `choices` lists the section names (dotted parts like "
+                                          "normal_modes.frequencies also work); a heading of the report is not a "
+                                          "section name unless it is one of those.")
+    if default_hints and "list_sources" not in enabled:
+        tools.hints["unknown_source"] = ("The sources are listed in your instructions and in the error's `choices`. If "
+                                         "the source the user asked about is not listed, tell the user which sources "
+                                         "are available and stop; do not substitute another source.")
+    if default_hints and "outline" not in enabled:
+        for code in ("needs_citation", "unknown_block", "bad_position"):
+            if code in tools.hints:
+                tools.hints[code] = (tools.hints[code].replace("outline or compile", "compile or the `order` of a receipt")
+                                     .replace("from outline", "from compile or the `order` of a receipt"))
     unknown = named - set(_ALL)
     if unknown:
         raise ValueError(f"unknown tool names {sorted(unknown)}; the tools are {list(_ALL)}")
@@ -353,7 +368,23 @@ def report_toolset(doc, catalog, renderer=None, policy="unchecked", rel_tol=1e-3
                 + ("; values(block_id, column) lists every row of a column" if "values" in enabled else ""))
         return "\n".join([head] + ["  " + ln for ln in lines] + [where, more + "."])
 
+    def _peek_section(handle, section):
+        names, how = catalog.get(handle).resolve_sections(section)
+        if how == "heading" and len(names) > 1:
+            raise ReportOperationError("unknown_section", f"{section!r} is a heading of the standard report; it covers "
+                                       f"the sections {names}: peek one of them", handle=handle, section=section,
+                                       choices=names)
+        return names[0], how
+
     def peek(handle, section, max_chars=None, expand=False):
+        asked = section
+        section, how = _peek_section(handle, section)
+        text = _peek(handle, section, max_chars, expand)
+        if how:
+            text = f"(Showing section {section!r}: {asked!r} matched it as its {how}.)\n" + text
+        return text
+
+    def _peek(handle, section, max_chars=None, expand=False):
         if not expand:
             view = _placeholder_view(handle, section)
             if view is not None:
@@ -391,7 +422,7 @@ def report_toolset(doc, catalog, renderer=None, policy="unchecked", rel_tol=1e-3
               "default) and its report template: the fixed outline (`template.outline`: headings with the sections "
               "under each) and the optional sections it suggests adding (`template.optional`). Section names can name "
               "a part with a dot, like `normal_modes.frequencies`. Use `apply_template` to build the outline.")
-    def values(block_id, column=None):
+    def values(block_id, column=None, start=1, limit=60):
         blk = doc.get(block_id)
         if not isinstance(blk, ReadoutBlock):
             raise ReportOperationError("bad_argument", f"block {block_id!r} is a {blk.kind} block; only readout "
@@ -401,10 +432,21 @@ def report_toolset(doc, catalog, renderer=None, policy="unchecked", rel_tol=1e-3
             return {"block_id": block_id, "placeholders": [c["line"] for c in
                                                            _adv.column_summary(items, block_id, _style(), limit=40)],
                     "next": "values(block_id, column) lists every row of a column"}
-        rows, total = _adv.column_values(items, block_id, column, _style())
+        rows, total = _adv.column_values(items, block_id, column, _style(), limit=limit, start=start)
         out = {"block_id": block_id, "column": column, "n_rows": total, "rows": rows}
-        if total > len(rows):
-            out["truncated"] = f"the first {len(rows)} of {total} rows"
+        stats = _adv.column_stats(items, block_id, column, _style())
+        if stats and stats["stats"]:
+            out["summary"] = stats["stats"]
+        elif stats:
+            n, tot = stats["truncated"]
+            out["data_truncated"] = (f"only the first {n} of {tot if tot else 'more'} rows are loaded, so [min], [max] "
+                                     f"and [last] are not available for this column")
+        if rows and (start > 1 or total > start - 1 + len(rows)):
+            last = rows[-1].get("row", start - 1 + len(rows))
+            out["truncated"] = (f"rows {start} to {last} of {total}" if start > 1 else
+                                f"the first {len(rows)} of {total} rows")
+            if last < total:
+                out["next"] = f"values('{block_id}', '{column}', start={last + 1}) lists the next rows"
         return out
 
     add("peek", peek,
@@ -421,12 +463,17 @@ def report_toolset(doc, catalog, renderer=None, policy="unchecked", rel_tol=1e-3
               f"text with its values, cut at {MAX_PEEK} characters, when you need to describe what the data shows.")
     add("values", values,
               {"type": "object", "properties": {"block_id": _ID, "column": {"type": "string", "minLength": 1,
-                                                                             "maxLength": 80}},
+                                                                             "maxLength": 80},
+                                       "start": {"type": "integer", "minimum": 1, "description": "First row to list."},
+                                       "limit": {"type": "integer", "minimum": 1, "maximum": 100,
+                                                 "description": "Rows to list (default 60)."}},
                "required": ["block_id"], "additionalProperties": False},
               "A readout block's values as placeholders. Without `column`: one line per column with the placeholder "
               "to write, its rows and an example. With `column`: every row of that column as {row, use, value}, the "
-              "value as the server will write it. Use it to read the numbers you are writing about, then write the "
-              "`use` placeholders.")
+              "value as the server will write it. A long column (more than 12 rows) also gets a `summary` "
+              "(its min, max and last row as the placeholders that write them, like {r3.y[max]}) and is listed in pages "
+              "(`start`, `limit`). Use it to read the numbers you are writing about, then write the `use` "
+              "placeholders.")
     add("outline", outline, {"type": "object", "properties": {}, "additionalProperties": False},
               "The report so far: one row per block (id, kind, text or handle/sections, caption; `locked` if the block "
               "can't be changed). Mutating tools only return a receipt; use this, `compile` or `diff` to see the result.")
@@ -450,7 +497,8 @@ def report_toolset(doc, catalog, renderer=None, policy="unchecked", rel_tol=1e-3
             blocks = flagged(doc.outline())
         return {"revision": track["revision"], "title": doc.title, "n_blocks": len(doc.blocks), "blocks": blocks,
                 "locked": doc.locked, "text_status": doc.text_status(), "problems": [e.to_dict() for e in doc.validate()],
-                "warnings": doc.grouping_warnings(),
+                "warnings": (doc.grouping_warnings() + doc.duplicate_readouts()
+                             + doc.display_warnings()),
                 "coverage": doc.number_coverage(rel_tol=rel_tol, small_int_max=small_int_max, year_range=year_range),
                 "baselines": list(track["baselines"]),
                 "grounding": {"policy": policy.value, "rel_tol": rel_tol, "small_int_max": small_int_max,
@@ -519,20 +567,73 @@ def report_toolset(doc, catalog, renderer=None, policy="unchecked", rel_tol=1e-3
               "follows), removed, changed (field: from, to) or moved. The result says which baseline was used.")
 
     # ---- building ---------------------------------------------------------------------------------- #
-    def apply_template(handle, after=None, optional=None):
+    def apply_template(handle, after=None, optional=None, again=False):
+        if not again:
+            have, missing = doc.template_blocks(handle, optional or ())
+            if have:
+                blocks = list(have.values())
+                holds = {"placeholders": {bid: _lines(bid, limit=6) for bid in blocks if bid.startswith("r")}}
+                if not missing:
+                    return {"ok": True, "added": [], "already_applied": True, "blocks": have, **holds,
+                            "note": f"{handle!r} already has its standard report here (blocks {', '.join(blocks)}); "
+                                    f"nothing was added. Use add_readout for a section it does not show, or "
+                                    f"again=true to build a second copy."}
+                return {"ok": True, "added": [], "partly_applied": True, "blocks": have, "missing": missing, **holds,
+                        "note": f"{handle!r} already has part of its standard report here (blocks {', '.join(blocks)}); "
+                                f"nothing was added so that nothing is repeated. add_readout(handle, include=[...]) "
+                                f"adds the missing sections ({', '.join(missing)}), or again=true builds the whole "
+                                f"report a second time."}
         out = {"ok": True, **doc.apply_template(handle, after=after, optional=optional or ())}
         out["placeholders"] = {bid: _lines(bid, limit=6) for bid in out["added"] if bid.startswith("r")}
+        dups = doc.duplicate_readouts()
+        if dups and again:
+            out["notes"] = [d["detail"] for d in dups]
         return out
 
     def apply_template_tool(**kw):
         out = mutating(apply_template)(**kw)
-        track["baselines"]["template"] = (doc.snapshot(), track["revision"])
+        if out.get("added"):
+            track["baselines"]["template"] = (doc.snapshot(), track["revision"])
         return out
 
     def add_heading(text, level=2, after=None, under=None):
         return doc.add_heading(text, level=level, after=after, under=under).to_dict()
 
+    def _resolve_names(handle, include, exclude):
+        """Section names as the source knows them: ``(include, exclude, {asked: matched})`` (see `resolve_sections`)."""
+        matched = {}
+        try:
+            src = catalog.get(handle)
+            usable = {r["name"] for r in src.sections() if r.get("available", True)}
+        except Exception:      # an unknown source is reported by the document
+            return include, exclude, matched
+
+        def one(group):
+            if not isinstance(group, (list, tuple)) or not all(isinstance(n, str) for n in group):
+                return group
+            out = []
+            for n in group:
+                names, how = src.resolve_sections(n)
+                if how == "heading":
+                    names = [x for x in names if x.split(".", 1)[0] in usable] or names
+                if how:
+                    matched[n] = names if len(names) > 1 else names[0]
+                out += names
+            return list(dict.fromkeys(out))
+        return one(include), one(exclude), matched
+
     def add_readout(handle, include=None, exclude=None, caption=None, after=None, under=None):
+        include, exclude, matched = _resolve_names(handle, include, exclude)
+        out = _add_readout(handle, include, exclude, caption, after, under)
+        if matched:
+            out["matched"] = matched
+        dups = [d["detail"] for d in doc.duplicate_readouts() if out["block_id"] in d["blocks"]]
+        dups += [d["detail"] for d in doc.display_warnings() if d["block_id"] == out["block_id"]]
+        if dups:
+            out["notes"] = dups
+        return out
+
+    def _add_readout(handle, include, exclude, caption, after, under):
         if caption is None:
             out = doc.add_readout(handle, include=include, exclude=exclude, after=after, under=under).to_dict()
         else:
@@ -757,14 +858,17 @@ def report_toolset(doc, catalog, renderer=None, policy="unchecked", rel_tol=1e-3
                                  "additionalProperties": False}
     add("apply_template", apply_template_tool,
               obj({"handle": _HANDLE, "after": _AFTER, "optional": dict(_NAMES, description="Optional template sections "
-                                                                       "to add under 'Additional detail' (see `describe_source`).")},
+                                                                       "to add under 'Additional detail' (see `describe_source`)."),
+                   "again": {"type": "boolean", "description": "Build the template again even though this source's "
+                             "standard report is already in the report (a second copy)."}},
                   ["handle"]),
               "Builds the source's template outline in one step: headings and readout blocks in the template's order, "
               "with its fixed captions. Sections that are unavailable for this source are skipped and listed. Add "
               "template-suggested extras with `optional`. Errors with `no_template` if the source has no fixed outline. "
               "Blocks the template locks are listed in `locked` and can't be edited, captioned, moved or removed "
               "afterwards (error `locked`); you can still add text and other blocks around them. Records the "
-              "baseline 'template' for `diff`.")
+              "baseline 'template' for `diff`. If the source's standard report is already in the report, nothing is added "
+              "(`already_applied`, with the existing blocks); `again=true` builds a second copy.")
     add("add_heading", mutating(add_heading),
               obj({"text": {"type": "string", "minLength": 1, "maxLength": 120}, "level": {"type": "integer", "enum": [2, 3]},
                    "after": _AFTER, "under": _UNDER}, ["text"]),

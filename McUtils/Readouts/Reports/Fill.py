@@ -6,8 +6,11 @@ or given in the wrong unit.
 
 A reference is ``BLOCK.NAME`` or ``BLOCK.NAME[ROW]``: ``BLOCK`` a readout block id, ``NAME`` a column or field of its
 data (the last part of its flat-data key, its label in lower case with ``_`` for spaces, or a dotted tail such as
-``bonds.value`` when the last part is ambiguous), ``ROW`` a 1-based row as in the tables `peek` shows. A reference
-without a row is the whole column (only useful inside a function when derived values are on). Text columns work the
+``bonds.value`` when the last part is ambiguous), ``ROW`` a 1-based row as in the tables `peek` shows, or a selector that picks the row
+for you: ``[first]``, ``[last]``, ``[min]`` (the row with the smallest value) and ``[max]``; ``[max:y]`` is the row where
+column ``y`` is largest, read in this column (``{r5.x[max:y]}`` is where the curve peaks, ``{r5.y[max]}`` its height).
+A selector is a single reference, not a computed value, so it works with derived values off, and it is evaluated again
+when the report is refreshed. Ties give the first row. A reference without a row is the whole column (only useful inside a function when derived values are on). Text columns work the
 same way: ``{r3.mode[2]}`` writes the label in that row.
 
 Units. The unit is the shorthand label of the data's unit (`unit_shorthand`: the readout theme's label for the
@@ -22,8 +25,8 @@ A value that does not come from the data (a temperature or basis set the user ga
 report says which numbers were given from outside the data and the number check leaves them alone. `unfill` gives a
 stored paragraph back in the form it was written, with the placeholders and literal markers instead of the values.
 
-Derived values (``{mean(r3.frequency[2], r3.frequency[3])}``: ``+ - * /`` and `FUNCTIONS`) are off unless the caller
-opts in (``allow_derived=True``; ``--derived`` on the server): a sum/difference/mean is written with the most
+Derived values (``{mean(r3.frequency[2], r3.frequency[3])}``: ``+ - * /`` and `FUNCTIONS`) are on by default (turn them off
+with ``allow_derived=False``; ``--no-derived`` on the server; they are for a value the user asked for, not for analysis): a sum/difference/mean is written with the most
 decimals of its inputs and the inputs' unit, a product or ratio with four significant digits and no unit.
 
 `fill_text` returns the text with the values written in and a `Fill` per value (its expression, the text written,
@@ -42,8 +45,10 @@ from .Grounding import unit_after, unit_shorthand
 __all__ = ["Fill", "FUNCTIONS", "find_references", "find_markers", "fill_text", "refill", "fill_spans", "unfill",
            "column_names", "ref_for"]
 
-_REF = re.compile(r"\b(?P<block>[a-z]\d+)\.(?P<name>[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*)"
-                  r"(?:\[(?P<row>\d+)\])?")
+_NAME = r"[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*"
+_REF = re.compile(r"\b(?P<block>[a-z]\d+)\.(?P<name>" + _NAME + r")"
+                  r"(?:\[(?P<row>\d+|first|last|min|max)(?::(?P<by>" + _NAME + r"))?\])?")
+_SELECTORS = ("first", "last", "min", "max")
 _BRACE = re.compile(r"\{([^{}\n]{1,300})\}")
 
 
@@ -184,22 +189,83 @@ def _column(items, block, name):
         hits = list(dict.fromkeys(e.key for e in data if _norm(e.label) == _norm(name)))
     if len(hits) != 1:
         choices = column_names(items, block)
+        cut = [k for (b, k), total in (getattr(items, "truncated", None) or {}).items()
+               if b == block and total is None and k.split("/")[-len(want):] == want]
+        if cut and not hits:
+            raise ReportOperationError("bad_reference", f"{name!r} of block {block!r} is left out: the report loads at "
+                                       f"most a limited number of values of a block, and this block has more than "
+                                       f"that", block_id=block, choices=choices)
         what = "is ambiguous" if hits else "is not a column of"
         raise ReportOperationError("bad_reference", f"{name!r} {what} block {block!r}; its columns are {choices}",
                                    block_id=block, choices=choices)
     return [e for e in data if e.key == hits[0]]
 
 
-def _resolve(items, block, name, row):
+def _by_row(col):
+    return sorted(col, key=lambda e: e.row or 1)
+
+
+def _truncation(items, block, col):
+    """``(True, total or None)`` if the evidence cut the column ``col`` short (see `EvidenceSet.truncated`)."""
+    cut = getattr(items, "truncated", None) or {}
+    key = (block, col[0].key) if col else None
+    return (True, cut[key]) if key in cut else (False, None)
+
+
+def _truncated_note(items, block, col):
+    cut, total = _truncation(items, block, col)
+    return f" (only the first {len(col)} of {total if total else 'more'} rows are loaded)" if cut else ""
+
+
+def _select(items, block, name, col, how, by):
+    """The item of ``col`` a selector (``first``, ``last``, ``min``, ``max``; ``by`` names the column that is ranked) picks."""
+    col = _by_row(col)
+    if how != "first":
+        for c in ([col] + ([_column(items, block, by)] if by else [])):
+            cut, total = _truncation(items, block, c)
+            if cut:
+                raise ReportOperationError(
+                    "bad_reference", f"[{how}] of {block}.{by or name} is not available: the report loads only the "
+                    f"first {len(c)} of {total if total else 'its'} rows, so the {how} could be wrong. Use [first] or a "
+                    f"row number below {len(c) + 1}, or take the {how} from a summary the data's source gives.",
+                    block_id=block, rows=len(c), total=total)
+    if how in ("first", "last"):
+        if by:
+            raise ReportOperationError("bad_reference", f"[{how}] takes no column: write {block}.{name}[{how}]",
+                                       block_id=block)
+        return col[0] if how == "first" else col[-1]
+    ranked = _by_row(_column(items, block, by)) if by else col
+    if any(e.is_text for e in ranked):
+        raise ReportOperationError("bad_reference", f"[{how}] needs a numeric column; {by or name!r} of block "
+                                   f"{block!r} holds text", block_id=block)
+    target = {(e.row or 1): e for e in col}
+    cand = [(e.value, e.row or 1) for e in ranked if math.isfinite(e.value) and (e.row or 1) in target]
+    if not cand:
+        raise ReportOperationError("bad_reference", f"{block}.{by or name} has no numeric values to take the {how} of",
+                                   block_id=block)
+    pick = (min if how == "min" else max)(cand, key=lambda t: t[0])
+    return target[pick[1]]
+
+
+def _resolve(items, block, name, row, by=None):
     col = _column(items, block, name)
     if row is None:
+        if by:
+            raise ReportOperationError("bad_reference", f"[:{by}] goes inside a selector, like {block}.{name}[max:{by}]",
+                                       block_id=block)
         return col if len(col) > 1 else col[0]
+    if row in _SELECTORS:
+        return _select(items, block, name, col, row, by)
+    if by:
+        raise ReportOperationError("bad_reference", f"a column after ':' goes with [min] or [max], like "
+                                   f"{block}.{name}[max:{by}]", block_id=block)
     row = int(row)
     for e in col:
         if (e.row or 1) == row:
             return e
-    raise ReportOperationError("bad_reference", f"{block}.{name} has rows 1 to {len(col)}, not {row}",
-                               block_id=block, rows=len(col))
+    raise ReportOperationError("bad_reference", f"{block}.{name} has rows 1 to {len(col)}, not {row}"
+                               f"{_truncated_note(items, block, col)} (rows start at "
+                               f"1; [first], [last], [min] and [max] pick a row for you)", block_id=block, rows=len(col))
 
 
 class _Eval(ast.NodeVisitor):
@@ -334,7 +400,7 @@ def _evaluate(inner, items, allow_derived):
     def sub(m):
         key = m.group(0)
         if key not in refs:
-            val = _resolve(items, m.group("block"), m.group("name"), m.group("row"))
+            val = _resolve(items, m.group("block"), m.group("name"), m.group("row"), m.group("by"))
             name = f"_v{len(refs)}"
             refs[key] = name
             vals = val if isinstance(val, list) else [val]

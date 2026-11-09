@@ -17,6 +17,8 @@ __all__ = [
     "ReportSourceError",
     "resolve_readout_interface",
     "source_digest",
+    "merge_readout_options",
+    "ConfiguredSource",
     "ReportSource",
     "SourceCatalog",
 ]
@@ -63,16 +65,64 @@ def resolve_readout_interface(obj):
     return RecordReadout(obj)
 
 
-def source_digest(obj):
+_CALL_OPTIONS = ("include", "exclude", "units", "strict", "title")
+
+
+def merge_readout_options(defaults, opts):
+    """
+    ``opts`` (what one readout call asks for) over ``defaults`` (a source's ``readout_options``): ``include``, ``exclude``,
+    ``units``, ``strict`` and ``title`` are the call's; a section's options (``spectrum={"broadened": {...}}``) are merged
+    key by key, the call's winning.
+    """
+    out = dict(defaults or {})
+    for key, val in opts.items():
+        if key not in _CALL_OPTIONS and isinstance(val, dict) and isinstance(out.get(key), dict):
+            out[key] = _merge_dicts(out[key], val)
+        else:
+            out[key] = val
+    return out
+
+
+def _merge_dicts(a, b):
+    out = dict(a)
+    for k, v in b.items():
+        out[k] = _merge_dicts(out[k], v) if isinstance(v, dict) and isinstance(out.get(k), dict) else v
+    return out
+
+
+class ConfiguredSource:
+    """
+    An object together with the options its readout is built with (a catalog entry's ``readout_options``). It is what
+    ``report_source(handle)`` returns in a report's readout blocks, so that the HTML page shows the same readout the tools
+    describe: ``to_readout(include=..., **opts)`` builds the object's readout with the options as defaults.
+    """
+
+    def __init__(self, obj, options):
+        self.obj, self.options = obj, dict(options)
+
+    def to_readout(self, **opts):
+        return to_readout(self.obj, **merge_readout_options(self.options, opts))
+
+    def __repr__(self):
+        return f"ConfiguredSource({type(self.obj).__name__}, options={sorted(self.options)})"
+
+
+def source_digest(obj, options=None):
     """
     A short fingerprint of the data a source would report: ``obj.__report_digest__()`` if the object defines one,
-    else the MD5 of its default readout's JSON export (first 16 hex characters).
+    else the MD5 of its default readout's JSON export (first 16 hex characters). With ``options`` (a source's
+    ``readout_options``) the readout is built with them and they are part of the fingerprint.
     """
     custom = getattr(obj, "__report_digest__", None)
     if callable(custom):
-        return str(custom())[:16]
-    text = to_readout(obj).to_json()
+        text = str(custom())[:16]
+        return text if not options else hashlib.md5((text + repr(sorted(options.items()))).encode()).hexdigest()[:16]
+    text = to_readout(obj, **(options or {})).to_json()
     return hashlib.md5(text.encode("utf-8")).hexdigest()[:16]
+
+
+def _slug(text):
+    return re.sub(r"[^a-z0-9]+", "_", str(text).lower()).strip("_")
 
 
 _FIGURE_KINDS = {"scene", "image", "plot", "gallery", "html", "presml"}
@@ -110,14 +160,16 @@ class ReportSource:
     :ivar type_name: ``module.QualName`` of the object's type
     """
 
-    def __init__(self, handle, obj, digest, title=None):
+    def __init__(self, handle, obj, digest, title=None, readout_options=None):
         self.handle = handle
         self.obj = obj
+        self.readout_options = dict(readout_options or {})
         self.digest = digest
         self.title = title
         self.type_name = f"{type(obj).__module__}.{type(obj).__qualname__}"
         self._interface = None
         self._kinds = {}
+        self._stubs = {}
 
     # ---- structure ---- #
     def interface(self):
@@ -172,10 +224,48 @@ class ReportSource:
             opts["include"] = list(include)
         if exclude is not None:
             opts["exclude"] = list(exclude)
-        return to_readout(self.obj, **opts)
+        return self._to_readout(**opts)
+
+    def _to_readout(self, **opts):
+        """The object's readout with this source's ``readout_options`` as defaults."""
+        return to_readout(self.obj, **merge_readout_options(self.readout_options, opts))
+
+    def configured(self):
+        """What ``report_source(handle)`` returns: the object, wrapped with its ``readout_options`` if it has any."""
+        return ConfiguredSource(self.obj, self.readout_options) if self.readout_options else self.obj
 
     def _section_readout(self, name):
         return self.readout(include=[name]) if not self.is_record else self.readout()
+
+    def resolve_sections(self, name):
+        """
+        The section names a name stands for, and how it matched: ``([names], how)`` where ``how`` is ``None`` for an exact
+        name, ``"name"`` (different case or separators), ``"title"`` (the section's title) or ``"heading"`` (a heading of the
+        source's report template, which stands for every section under it). An unknown name returns ``([name], None)``
+        so that the caller's own check raises the error with the valid names.
+        """
+        from .Templates import find_report_template
+        rows = self.sections()
+        names = [r["name"] for r in rows]
+        head, _, tail = name.partition(".")
+        if head in names:
+            return [name], None
+        key = _slug(head)
+        suffix = ("." + tail) if tail else ""
+        for how, field in (("name", "name"), ("title", "title")):
+            hits = [r["name"] for r in rows if _slug(r.get(field) or "") == key]
+            if len(hits) == 1:
+                return [hits[0] + suffix], how
+        if not tail:
+            try:
+                tmpl = find_report_template(self)
+            except Exception:
+                tmpl = None
+            if tmpl is not None:
+                for heading, secs in list(tmpl.sections) + [("Additional detail", list(tmpl.optional))]:
+                    if _slug(heading) == key and secs:
+                        return list(secs), "heading"
+        return [name], None
 
     def check_section(self, name):
         """Raise ``ReportSourceError(code="unknown_section")`` unless ``name`` is a section (or a dotted part of one)."""
@@ -200,11 +290,21 @@ class ReportSource:
                 if self.is_record:
                     node = self.readout()
                 else:
-                    node = to_readout(self.obj, include=[name], strict=True)
+                    node = self._to_readout(include=[name], strict=True)
                 self._kinds[name] = (_classify(node), None)
             except Exception as e:  # noqa: BLE001 - the reason is the point
                 self._kinds[name] = ("unknown", f"{type(e).__name__}: {e}")
         return self._kinds[name][0]
+
+    def section_stub(self, name):
+        """The one-line stub a renderer writes for a section that holds only arrays that are not displayed, or ``None``."""
+        if name not in self._stubs:
+            from ..Renderers.Base import hidden_stub
+            try:
+                self._stubs[name] = hidden_stub(self._section_readout(name), force=True)
+            except Exception:  # noqa: BLE001 - a section that can't be built is reported elsewhere
+                self._stubs[name] = None
+        return self._stubs[name]
 
     def kind_error(self, name):
         self.section_kind(name)
@@ -218,13 +318,14 @@ class SourceCatalog:
     def __init__(self):
         self._sources = {}
 
-    def add(self, handle, obj, digest=None, title=None):
+    def add(self, handle, obj, digest=None, title=None, readout_options=None):
         if not isinstance(handle, str) or not self.HANDLE_RE.match(handle):
             raise ReportSourceError(f"bad source handle {handle!r}: use lower-case letters, digits and "
                                     f"underscores, starting with a letter (at most 40 characters)")
         if handle in self._sources:
             raise ReportSourceError(f"source handle {handle!r} is already in the catalog")
-        src = ReportSource(handle, obj, digest if digest is not None else source_digest(obj), title=title)
+        src = ReportSource(handle, obj, digest if digest is not None else source_digest(obj, readout_options),
+                           title=title, readout_options=readout_options)
         self._sources[handle] = src
         return src
 
@@ -253,8 +354,10 @@ class SourceCatalog:
             if r.get("reason"):
                 row["reason"] = r["reason"]
             rows.append(row)
-        return {"handle": handle, "type": src.type_name, "title": src.title, "digest": src.digest,
-                "sections": rows}
+        out = {"handle": handle, "type": src.type_name, "title": src.title, "digest": src.digest, "sections": rows}
+        if src.readout_options:
+            out["readout_options"] = src.readout_options
+        return out
 
     def peek(self, handle, section, max_chars=2400):
         return self.get(handle).section_text(section, max_chars=max_chars)
@@ -267,7 +370,7 @@ class SourceCatalog:
                 f"source {handle!r} has changed: the report recorded digest {digest} but the catalog's is {src.digest}",
                 code="source_changed", handle=handle
             )
-        return src.obj
+        return src.configured()
 
     def namespace(self):
         """What a readout block's code needs to resolve ``report_source(...)``."""

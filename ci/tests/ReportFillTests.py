@@ -187,7 +187,10 @@ class DerivedValueTests(unittest.TestCase):
         import McUtils.Readouts.Reports.Fill as F
         self.assertFalse(hasattr(R, "suggest_derivations") or hasattr(F, "suggest_derivations"))
 
-    def test_the_tools_refuse_derived_values_by_default(self):
+    def test_the_tools_accept_derived_values_by_default_and_refuse_them_when_off(self):
+        doc, cat, tools = make()
+        self.assertEqual(ok(tools.call("add_text", {"text": "Mean {mean(r2.frequency[2], r2.frequency[3])}."}))["filled"][0]["derived"], True)
+        doc, cat, self.tools = make(allow_derived=False)
         r = self.tools.call("add_text", {"text": "Mean {mean(r2.frequency)}."})
         self.assertEqual(r.error["code"], "derived_disabled")
         self.assertEqual(r.error["retry"], "no")
@@ -282,6 +285,7 @@ class LiteralNumberTests(unittest.TestCase):
         self.assertIn("matching placeholder", r.error["detail"])
 
     def test_the_hint_points_at_placeholders(self):
+        doc, cat, self.tools = make(policy="grounded", allow_derived=False)
         r = self.tools.call("add_text", {"text": "At 1650.5 cm-1.", "cites": ["r2"]})
         self.assertIn("placeholder", r.error["hint"])
         self.assertNotIn("mean", r.error["hint"])

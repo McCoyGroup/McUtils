@@ -49,12 +49,12 @@ def _save(doc, path):
 
 
 def serve_report(md_path, sources, out_dir=None, policy="unchecked", rel_tol=1e-3, small_int_max=10, year_range=(1900, 2100), title=None, lock=(), unlock=(), call_log=None, stdin=None, stdout=None,
-                 allow_derived=False, apply_edits=False, context_level=2, include_tools=None, exclude_tools=None, unit_style=None, autolink=False, advice=True):
+                 allow_derived=True, apply_edits=False, context_level=2, include_tools=None, exclude_tools=None, unit_style=None, autolink=False, advice=True):
     """
     Load (or start) the report at ``md_path`` against the catalog of ``sources`` and serve its tools on stdio.
     ``context_level`` (1 compact, 2 standard, 3 full) sets the tools and instructions the model gets (see
-    `report_toolset`). ``allow_derived`` (computed values in text) and ``apply_edits`` (the multi-edit tool) are off
-    unless the owner switches them on. ``unit_style`` (``unicode``, ``ascii`` or ``latex``) is how filled values write
+    `report_toolset`). ``allow_derived`` (computed values in text) is on by default (``--no-derived`` turns it off); ``apply_edits``
+    (the multi-edit tool) is off unless the owner switches it on. ``unit_style`` (``unicode``, ``ascii`` or ``latex``) is how filled values write
     their unit; it is stored in the report. ``policy`` is ``unchecked`` (the default: typed numbers are accepted and
     counted, ``advice`` adds notes to them), ``grounded`` (typed numbers must be in the cited data) or
     ``structure_only``; ``autolink`` rewrites typed numbers that are exactly a value of the data into placeholders.

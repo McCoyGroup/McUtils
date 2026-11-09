@@ -20,7 +20,7 @@ import struct
 from ..Nodes import (ReadoutNode, ReadoutSection, ReadoutText, ReadoutFields, ReadoutTable,
                      ReadoutArray, ReadoutImage, ReadoutScene, ReadoutGallery, Readout)
 from ..Scenes import ReadoutRasterizer, PosterRequest
-from .Base import ReadoutRenderer, RenderContext, handles, is_visible
+from .Base import ReadoutRenderer, RenderContext, handles, is_visible, hidden_stub
 from .HTML import resolve_scene_view, resolve_gallery_views
 from ..Views import ReadoutPlot, ReadoutEquation, ReadoutCode, ReadoutHTML, ReadoutPresML, _png_size
 
@@ -177,7 +177,7 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
         rh, gap = t.get("slide.row_height"), t.get("slide.gap")
         title_h = t.get("sizes.caption") * 1.6
         if not is_visible(node):
-            return 0
+            return self.text_height(hidden_stub(node, t), t.get("sizes.body"), width) + gap if hidden_stub(node, t) else 0
         if isinstance(node, ReadoutText):
             return self.text_height(node.text, t.get("sizes.body"), width) + gap
         if isinstance(node, ReadoutFields):
@@ -253,7 +253,8 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
     @handles(ReadoutSection)
     def render_section(self, node, ctx):
         flow = ctx.extra["flow"]
-        if not is_visible(node):
+        stub = hidden_stub(node, self.theme)
+        if not is_visible(node) and stub is None:
             return
         if ctx.depth <= 1:
             title = node.title or node.id
@@ -277,7 +278,10 @@ class PowerPointReadoutRenderer(ReadoutRenderer):
                 self.draw_text(flow.slide, node.title or node.id, flow.x0, flow.y, flow.width, h, "subsection",
                                "primary", bold=True, name="Subheading")
                 flow.advance(h - flow.gap / 2)
-        self._children(node, ctx)
+        if stub:
+            self.render_text(ReadoutText(stub, role="note"), ctx)
+        else:
+            self._children(node, ctx)
 
     # ---- blocks ------------------------------------------------------------------------- #
     @handles(ReadoutText)

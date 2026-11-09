@@ -84,7 +84,7 @@ class LevelTests(unittest.TestCase):
         self.assertNotIn("Why the rules", t2.instructions)
         self.assertIn("listed below", t2.instructions)
         self.assertIn("Start with list_sources", report_instructions(None, 2))
-        self.assertEqual(report_instructions(None, 2), REPORT_INSTRUCTIONS)
+        self.assertEqual(report_instructions(None, 2, derived=False), REPORT_INSTRUCTIONS)
         for lvl, tools in ((1, t1), (2, t2), (3, t3)):
             for name in tools.names():
                 if name not in ("compile", "list_sources", "describe_source", "add_heading", "add_readout",
@@ -110,8 +110,8 @@ class LevelTests(unittest.TestCase):
 
     def test_derived_values_are_mentioned_only_when_on(self):
         for lvl in (1, 2, 3):
-            _, off = make(lvl)
-            _, on = make(lvl, allow_derived=True)
+            _, off = make(lvl, allow_derived=False)
+            _, on = make(lvl)          # on by default
             self.assertNotIn("mean(", off.instructions, lvl)
             self.assertIn("mean(", on.instructions, lvl)
             self.assertNotIn("mean(", {t["name"]: t["description"] for t in off.tools()}["add_text"], lvl)

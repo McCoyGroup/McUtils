@@ -32,6 +32,7 @@ __all__ = [
     "line_chart",
     "stick_chart",
     "bar_chart",
+    "level_chart",
     "matrix_chart",
 ]
 
@@ -301,6 +302,42 @@ def bar_chart(labels, values, y_label="value", y_unit=None, caption=None, image_
             ax.set_xticks(range(len(values)), short, rotation=45, ha="right", fontsize=8)
             ax.set_ylabel(_label(y_label, y_unit))
         for s in ("top", "right"):
+            ax.spines[s].set_visible(False)
+        fig.tight_layout()
+        return fig
+
+    return ReadoutPlot(build, caption=caption, data=data, id=id, title=title)
+
+
+def level_chart(values, labels=None, y_label="value", y_unit=None, caption=None, image_size=(300, 320), id=None,
+                title=None, value_name="value"):
+    """
+    A level ladder: one horizontal line per value, at the value's height, numbered from 1 (or named by ``labels``).
+    Its data is a ``level`` column (the numbers) and ``value_name`` (the heights), plus a ``label`` column if
+    ``labels`` is given.
+    """
+    values = np.asarray(values, dtype=float)
+    cols = [Column("level", np.arange(1, len(values) + 1), label="Level", quantity="index")]
+    if labels is not None:
+        labels = [str(l) for l in labels]
+        cols.append(Column("label", np.array(labels), label="Label"))
+    cols.append(Column(value_name, values, label=y_label, unit=y_unit))
+    data = TabularData(cols, name="series")
+
+    def build():
+        from matplotlib.figure import Figure
+        from matplotlib.backends.backend_agg import FigureCanvasAgg
+        fig = Figure(figsize=(image_size[0] / 100, image_size[1] / 100), dpi=100)
+        FigureCanvasAgg(fig)
+        ax = fig.add_subplot(111)
+        names = labels if labels is not None else [str(i + 1) for i in range(len(values))]
+        for v, n in zip(values, names):
+            ax.hlines(v, 0.15, 0.7, color=_COLOR, linewidth=2)
+            ax.annotate(n, (0.74, v), va="center", fontsize=8)
+        ax.set_xlim(0, 1)
+        ax.set_xticks([])
+        ax.set_ylabel(_label(y_label, y_unit))
+        for s in ("top", "right", "bottom"):
             ax.spines[s].set_visible(False)
         fig.tight_layout()
         return fig

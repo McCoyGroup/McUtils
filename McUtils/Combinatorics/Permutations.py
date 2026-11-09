@@ -4343,6 +4343,46 @@ class SymmetricGroupGenerator:
         return np.asarray(merged, dtype=np.int64).reshape(-1, 2)
 
 
+
+    @staticmethod
+    def _get_direct_sum_rule_prefixes(rules, dim):
+        """Compile signed rule multisets into shared deterministic prefixes.
+
+        A coordinate advances one counter, or takes the zero-change self edge.
+        Accepting counters identify complete rules. Distinct rules share their
+        prefixes, so a target has exactly one path and needs no deduplication.
+        Plans depend on rules/dimension only, not on generated target rows.
+        """
+        signatures = {tuple(sorted(int(x) for x in r if x))
+                      for r in rules if len(r) <= dim}
+        alphabet = np.array(sorted({x for r in signatures for x in r}|{0},
+                                   reverse=True), dtype=np.int64)
+        nonzero = [int(x) for x in alphabet if x]
+        groups = {}
+        for rule in signatures:
+            groups.setdefault(sum(rule), []).append(rule)
+        plans = {}
+        for total, patterns in sorted(groups.items()):
+            counts = [dict(zip(*UniquePermutations.get_permutation_class_counts(
+                np.asarray(r,dtype=np.int64)))) for r in patterns]
+            complete = {tuple(int(c.get(x,0)) for x in nonzero) for c in counts}
+            prefixes = {counts for pattern in complete
+                        for counts in itertools.product(*(range(c+1) for c in pattern))}
+            ordered = sorted(prefixes, key=lambda p:(sum(p),p))
+            indices = {p:i for i,p in enumerate(ordered)}
+            transitions = np.full((len(ordered),len(alphabet)), -1, dtype=np.int64)
+            for i, counts in enumerate(ordered):
+                for j, change in enumerate(alphabet):
+                    if change == 0:
+                        transitions[i,j] = i
+                    else:
+                        next_counts = list(counts)
+                        next_counts[nonzero.index(int(change))] += 1
+                        transitions[i,j] = indices.get(tuple(next_counts), -1)
+            plans[total] = (alphabet, transitions,
+                           np.array([p in complete for p in ordered],dtype=bool))
+        return plans
+
     def iter_permutation_rule_direct_sum(self, perms, rules, block_size=65536, *, return_indices=False):
         """Yield bounded (source positions, occupations or native indices) blocks.
 
