@@ -2998,7 +2998,9 @@ class RowSpillStore:
         if self._pins.get(id(segment), 0): return
         tick = time.perf_counter()
         try:
-            segment._mmap.madvise(mmap.MADV_DONTNEED)
+            from .ExternalMemory import release_mapped_pages
+            if not release_mapped_pages(segment, writeback=False):
+                raise OSError('Mapped-page advice is unavailable')
             self.drop_calls += 1
         except (AttributeError, OSError, ValueError):
             self.drop_failures += 1
@@ -3652,7 +3654,7 @@ def matrix_dot_into(a, b, out, *, alpha=1, beta=0,
                     working_memory=64*1024**2, block_callback=None):
     """Accumulate ``alpha * a @ b + beta * out`` into an existing array.
 
-    Supports dense matrices and CSR matrices, including ScipySparseArray.
+    Supports dense/CSR left and dense/sparse right matrices, including ScipySparseArray.
     Products are consumed in bounded output blocks. Sparse products use
     individual dense columns, avoiding a full C-order copy of a transposed
     multi-vector. Inputs must not overlap the output. A block_callback, if
@@ -3666,9 +3668,13 @@ def matrix_dot_into(a, b, out, *, alpha=1, beta=0,
         if len(a.shape) != 2 or a.shape != a.data.shape:
             raise ValueError('matrix_dot_into requires a two-dimensional matrix')
         a = a.data
-    b = np.asarray(b)
+    if isinstance(b, ScipySparseArray):
+        b = b.data
+    sparse_right = sp.issparse(b)
+    original_b = b.data if sparse_right else b
+    b = b.tocsc(copy=False) if sparse_right else np.asarray(b)
     out = np.asarray(out)
-    vector = b.ndim == 1
+    vector = not sparse_right and b.ndim == 1
     if vector:
         b = b[:, np.newaxis]
         target = out[:, np.newaxis] if out.ndim == 1 else out
@@ -3679,13 +3685,17 @@ def matrix_dot_into(a, b, out, *, alpha=1, beta=0,
             or target.shape != (a.shape[0], b.shape[1])):
         raise ValueError('Incompatible matrix_dot_into shapes')
     sparse = sp.issparse(a)
+    if sparse and sparse_right:
+        # Convert once per product, rather than once per output column/tile.
+        # The right CSR row pointer is sparse storage, never a dense C1 copy.
+        b = b.tocsr(copy=False)
     if sparse and a.format != 'csr':
         raise ValueError('matrix_dot_into requires CSR sparse input')
     if not sparse:
         a = np.asarray(a)
     if not target.flags.writeable:
         raise ValueError('matrix_dot_into output is read-only')
-    if (np.shares_memory(target, b)
+    if (np.shares_memory(target, original_b)
             or np.shares_memory(target, a.data if sparse else a)):
         raise ValueError('matrix_dot_into inputs must not overlap the output')
     dtype = np.result_type(a.dtype, b.dtype)
@@ -3712,7 +3722,8 @@ def matrix_dot_into(a, b, out, *, alpha=1, beta=0,
     itemsize = max(np.dtype(dtype).itemsize, target.dtype.itemsize)
     if sparse:
         ptr = a.indptr
-        max_rows = max(1, working_memory//(4*ptr.dtype.itemsize + 4*itemsize))
+        width = max(1, b.shape[1]) if sparse_right else 1
+        max_rows = max(1, working_memory//(4*ptr.dtype.itemsize + 4*itemsize*width))
         max_nnz = max(1, working_memory//(a.data.dtype.itemsize + a.indices.dtype.itemsize))
         start = 0
         while start < a.shape[0]:
@@ -3724,10 +3735,15 @@ def matrix_dot_into(a, b, out, *, alpha=1, beta=0,
             # only the row pointer needs rebasing. No full COO coordinates.
             part = sp.csr_matrix((a.data[lo:hi], a.indices[lo:hi], ptr[start:stop+1]-lo),
                                  shape=(stop-start, a.shape[1]), copy=False)
-            for column in range(b.shape[1]):
-                value = part.dot(b[:, column])
-                consume(rows, slice(column, column+1), value[:, np.newaxis])
+            if sparse_right:
+                value = part.dot(b).toarray()
+                consume(rows, slice(0, b.shape[1]), value)
                 del value
+            else:
+                for column in range(b.shape[1]):
+                    value = part.dot(b[:, column])
+                    consume(rows, slice(column, column+1), value[:, np.newaxis])
+                    del value
             start = stop
     else:
         rows_per_block = min(a.shape[0], max(1, working_memory//(4*itemsize)))
@@ -3739,6 +3755,9 @@ def matrix_dot_into(a, b, out, *, alpha=1, beta=0,
             for first in range(0, b.shape[1], columns_per_block):
                 last = min(b.shape[1], first+columns_per_block)
                 value = work[:(stop-start)*(last-first)].reshape(stop-start, last-first)
-                np.dot(a[start:stop], b[:, first:last], out=value)
+                if sparse_right:
+                    value[:] = b[:, first:last].T.dot(a[start:stop].T).T
+                else:
+                    np.dot(a[start:stop], b[:, first:last], out=value)
                 consume(slice(start, stop), slice(first, last), value)
     return out

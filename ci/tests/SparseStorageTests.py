@@ -238,3 +238,33 @@ class ExternalUniqueTests(unittest.TestCase):
                     self.assertEqual(result.shape,shape)
 
 if __name__=='__main__':unittest.main()
+
+
+class SparseRightAccumulationTests(unittest.TestCase):
+    def test_real_correction_sparse_right_products(self):
+        from McUtils.Numputils import matrix_dot_into
+        values=np.asarray(json.loads((Path(__file__).parent/'TestData/hno3_vpt2_rows.json').read_text())['rows'][1]['values'])
+        rows=np.asarray([r['values'] for r in json.loads((Path(__file__).parent/'TestData/hno3_vpt2_rows.json').read_text())['rows']])
+        a=sp.csr_matrix(rows)
+        for left,right in [(a,sp.csc_matrix(rows.T)),(rows,sp.csr_matrix(rows.T)),(np.eye(len(rows)),a)]:
+            expected=left @ right
+            if sp.issparse(expected):expected=expected.toarray()
+            out=np.full(expected.shape,.25);blocks=[]
+            matrix_dot_into(left,right,out,alpha=-1,beta=2,working_memory=1024,
+                block_callback=lambda r,c,v:blocks.append(v.nbytes))
+            np.testing.assert_allclose(out,.5-expected,rtol=2e-11,atol=2e-12)
+            self.assertTrue(blocks)
+            self.assertLessEqual(max(blocks),1024)
+        with self.assertRaises(ValueError):
+            matrix_dot_into(rows,sp.eye(rows.shape[1],format='csr'),rows)
+
+    def test_real_rows_page_release_preserves_borrowed_views(self):
+        from McUtils.Numputils import release_mapped_pages
+        rows=np.asarray([r['values'] for r in json.loads((Path(__file__).parent/'TestData/hno3_vpt2_rows.json').read_text())['rows']])
+        with tempfile.TemporaryDirectory() as directory:
+            array=np.lib.format.open_memmap(Path(directory)/'rows.npy',mode='w+',dtype=float,shape=rows.shape)
+            array[:]=rows;view=np.asarray(array)[1:]
+            self.assertTrue(release_mapped_pages(view))
+            np.testing.assert_array_equal(view,rows[1:])
+            del view
+            array._mmap.close()
