@@ -120,6 +120,11 @@ def freeze(value, *, seen=None, handlers=(), pre_handlers=(), exclude_attrs=()):
     for test, fn in handlers:
         if test(value):
             return fn(value, kind, rec)
+    if type(value) is bytes:
+        # Preserve custom hooks/handlers and bytes-subclass identities. Plain
+        # immutable bytes are a content value, not a shared-object reference.
+        seen.pop(identity)
+        return ['bytes', len(value), hashlib.sha256(value).hexdigest()]
     skip = exclude_attrs.union(getattr(type(value), '__fingerprint_exclude__', ()))
     attrs = getattr(value, '__dict__', None)
     if attrs is not None:

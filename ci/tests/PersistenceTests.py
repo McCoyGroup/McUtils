@@ -818,6 +818,32 @@ class PersistenceTests(unittest.TestCase):
         self.assertNotEqual(fingerprint(a), fingerprint(b))
         self.assertEqual(len(fingerprint(a)), 64)
 
+    def test_FingerprintImmutableBytesByContent(self):
+        from McUtils.Devutils import fingerprint, freeze
+        value = b'\\x00condition\\xff'
+        copy = bytes(bytearray(value))
+        self.assertEqual(fingerprint(value), fingerprint(copy))
+        self.assertNotEqual(fingerprint(value), fingerprint(value + b'!'))
+        self.assertNotEqual(fingerprint(value), fingerprint(value.hex()))
+        self.assertNotEqual(fingerprint(value), fingerprint(np.frombuffer(value, dtype=np.uint8)))
+        self.assertEqual(fingerprint({value: [copy]}), fingerprint({copy: [value]}))
+        frozen = freeze(value)
+        self.assertEqual(frozen[:2], ['bytes', len(value)])
+        self.assertEqual(len(frozen[2]), 64)
+        self.assertEqual(fingerprint(b''), fingerprint(bytes()))
+        class BinaryTag(bytes, enum.Enum):
+            ONE = b'one'
+        self.assertEqual(freeze(BinaryTag.ONE)[0], 'enum')
+        self.assertNotEqual(fingerprint(BinaryTag.ONE), fingerprint(b'one'))
+        custom = [(lambda v: type(v) is bytes,
+                   lambda v, kind, rec: ['custom-bytes', v.hex()])]
+        self.assertEqual(freeze(value, handlers=custom)[0], 'custom-bytes')
+        class Payload(bytes):
+            pass
+        a, b = Payload(b'x'), Payload(b'x')
+        a.mode, b.mode = 1, 2
+        self.assertNotEqual(fingerprint(a), fingerprint(b))
+
     def test_FingerprintHookExcludeAndSharedRefs(self):
         from McUtils.Devutils import fingerprint
 
