@@ -4,7 +4,6 @@ import multiprocessing
 import os
 from pathlib import Path
 import pickle
-import sqlite3
 import subprocess
 import sys
 from collections.abc import Mapping
@@ -12,10 +11,11 @@ from collections.abc import Mapping
 import numpy as np
 import tarfile
 
-if "pytest" not in sys.modules:
+try:
+    import pytest
+except ImportError:
     import unittest
     raise unittest.SkipTest("IndexedTarTests requires the pytest runner")
-pytest = sys.modules["pytest"]
 
 from McUtils.Scaffolding.Storage import FileStoreLock, IndexedTarStore, JSONLSupplier, NPZLSupplier
 from McUtils.Scaffolding.Serializers import NumpyTreeArchive
@@ -71,7 +71,6 @@ def test_indexed_reads_seek_without_scanning_tar_and_survive_reopening(tmp_path,
             assert stream.read(6) == bytes(range(256))[44:50]
             stream.seek(-2, io.SEEK_END)
             assert stream.read() == b"\xfe\xff"
-    Path(store.index_path).unlink()
     assert IndexedTarStore(path).read(name + "/results.json") == b'{"value":1}'
 
 
@@ -83,14 +82,14 @@ def test_replacement_rebuild_and_compaction_preserve_only_current_members(tmp_pa
         assert store.read("job/value") == b"after"
         with pytest.raises(FileNotFoundError):
             store.open("job/old")
-        Path(store.index_path).unlink()
+        store = IndexedTarStore(store.path)
         assert "job/old" not in store.names()
         size = os.path.getsize(store.path)
         store.compact()
         assert os.path.getsize(store.path) < size
         assert old_reader.read() == b"before"
     store.discard("job")
-    Path(store.index_path).unlink()
+    store = IndexedTarStore(store.path)
     with pytest.raises(FileNotFoundError):
         store.open("job/value")
 
@@ -125,6 +124,9 @@ def test_process_death_rolls_back_unpublished_append(tmp_path):
     assert store.read("complete/value") == b"saved"
     with pytest.raises(FileNotFoundError):
         store.open("unfinished/value")
+    store.write_trees([("next", None, {"value": b"subsequent write"})])
+    assert store.read("next/value") == b"subsequent write"
+    assert store.names("unfinished") == []
 
 
 def test_concurrent_processes_do_not_lose_members(tmp_path):
@@ -176,7 +178,7 @@ def test_hardlinks_do_not_cross_independently_replaceable_records(tmp_path):
     assert store.read("second/value") == b"original"
     store.discard("second")
     assert store.names("second") == []
-    Path(store.index_path).unlink()
+    store = IndexedTarStore(store.path)
     assert store.names("second") == []
 
 @pytest.mark.parametrize("module,name", [
@@ -235,7 +237,7 @@ def test_tar_saved_snapshot_excludes_superseded_members(tmp_path):
     original_size = os.path.getsize(archive.path)
     archive.save(tmp_path / "snapshot.tar")
     with tarfile.open(tmp_path / "snapshot.tar", "r:") as plain:
-        assert plain.getnames() == ["job", "job/new"]
+        assert plain.getnames() == [archive._LOCATOR_NAME, "job", "job/new", archive._INDEX_NAME]
     assert os.path.getsize(tmp_path / "snapshot.tar") < original_size
     assert archive["job"] == {"new": b"latest"}
 

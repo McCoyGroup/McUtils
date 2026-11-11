@@ -9,6 +9,7 @@ from __future__ import annotations
 import collections
 import contextlib
 from collections.abc import Mapping
+import hashlib
 import io
 import json
 import operator
@@ -16,7 +17,6 @@ import os
 import posixpath
 import re
 import shutil
-import sqlite3
 import tarfile
 import tempfile
 import threading
@@ -1036,17 +1036,29 @@ class _MemberReader(io.RawIOBase):
 class IndexedTarStore(ArchiveMapping):
     """Append file trees and seek directly to individual live members.
 
-    ``path`` is an uncompressed tar; ``path + '.index.sqlite3'`` is its jump
-    table and ``path + '.lock'`` serializes readers/writers during publication.
+    ``path`` is an uncompressed tar containing its own JSONL jump table.
+    A fixed first member locates the published table without scanning headers.
+    ``path + '.lock'`` serializes readers/writers during publication.
     Reads of a missing store do not create any files. Overwriting a prefix
     supersedes its old members; :meth:`compact` reclaims their physical bytes.
-    A missing or stale index is rebuilt from tar headers, never from payloads.
+    Ordinary tars are indexed from headers in memory and gain an embedded
+    index on their next write. Internal metadata is hidden from the mapping.
+    Publication appends changed index entries and replaced prefixes, linked
+    to the previous committed index. Save/compaction consolidate that history.
+    Readers cache the live index in memory until the archive changes. Older
+    embedded JSON index snapshots remain readable.
     """
 
-    def __init__(self, path, index_path=None):
+    _METADATA_PREFIX = ".__mcutils_index__"
+    _LOCATOR_NAME = _METADATA_PREFIX + "/locator"
+    _INDEX_NAME = _METADATA_PREFIX + "/index.jsonl"
+    _LEGACY_INDEX_NAME = _METADATA_PREFIX + "/index.json"
+    _SLOT_SIZE = 512
+
+    def __init__(self, path):
         self.path = os.path.abspath(os.fspath(path))
-        self.index_path = os.fspath(index_path) if index_path is not None else self.path + ".index.sqlite3"
         self.lock = FileStoreLock(self.path + ".lock")
+        self._index_cache = None
 
     @classmethod
     def from_tree(cls, tree, file=None, **options):
@@ -1096,10 +1108,8 @@ class IndexedTarStore(ArchiveMapping):
                 archive.write_trees(trees)
             else:
                 with archive.lock():
-                    with tarfile.open(archive.path, "w"):
-                        pass
-                    with archive._index():
-                        pass
+                    with atomic_file(archive.path, "wb", keep_mode=False) as stream:
+                        archive._write_snapshot({"members": {}}, stream)
             archive._owned_directory = owned
             return archive
         except BaseException:
@@ -1123,8 +1133,8 @@ class IndexedTarStore(ArchiveMapping):
     def __len__(self):
         if not os.path.exists(self.path):
             return 0
-        with self.lock(), self._index() as db:
-            return db.execute("SELECT count(*) FROM members").fetchone()[0]
+        with self.lock():
+            return len(self._index()["members"])
 
     def __contains__(self, path):
         return bool(self.names(path))
@@ -1134,11 +1144,11 @@ class IndexedTarStore(ArchiveMapping):
         path = self.normalize_name(path)
         if not os.path.exists(self.path):
             raise KeyError(path)
-        with self.lock(), self._index() as db:
-            row = db.execute("SELECT header, offset FROM members WHERE name=?", (path,)).fetchone()
+        with self.lock():
+            row = self._index()["members"].get(path)
             if row is None:
                 raise KeyError(path)
-            info = self._info(row[0])
+            info = self._info(row[3])
             info.offset_data = row[1]
             return info
 
@@ -1189,14 +1199,16 @@ class IndexedTarStore(ArchiveMapping):
                 node[pieces[-1]] = self.read(name)
         return tree
 
-    @staticmethod
-    def normalize_name(name):
+    @classmethod
+    def normalize_name(cls, name):
         name = os.fspath(name).replace(os.sep, "/")
         if name.startswith("/") or "\x00" in name or ".." in name.split("/"):
             raise ValueError("archive member must be a relative path without '..'")
         name = posixpath.normpath(name)
         if name in ("", "."):
             raise ValueError("empty archive member name")
+        if name == cls._METADATA_PREFIX or name.startswith(cls._METADATA_PREFIX + "/"):
+            raise ValueError("reserved indexed tar metadata path: " + name)
         return name
 
     def _fingerprint(self):
@@ -1204,16 +1216,6 @@ class IndexedTarStore(ArchiveMapping):
             return None
         stat = os.stat(self.path)
         return [stat.st_dev, stat.st_ino, stat.st_size, stat.st_mtime_ns]
-
-    @staticmethod
-    def _state(db, key, default=None):
-        row = db.execute("SELECT value FROM state WHERE key=?", (key,)).fetchone()
-        return default if row is None else json.loads(row[0])
-
-    @staticmethod
-    def _set_state(db, **items):
-        db.executemany("INSERT OR REPLACE INTO state VALUES (?, ?)",
-                       [(key, json.dumps(value)) for key, value in items.items()])
 
     @staticmethod
     def _header(member):
@@ -1235,41 +1237,180 @@ class IndexedTarStore(ArchiveMapping):
     def _row(cls, member, offset):
         return (member.name.rstrip("/"), offset, member.size, cls._header(member))
 
-    @contextlib.contextmanager
     def _index(self):
-        os.makedirs(os.path.dirname(os.path.abspath(self.index_path)), exist_ok=True)
-        db = sqlite3.connect(self.index_path, timeout=60)
-        try:
-            db.execute("CREATE TABLE IF NOT EXISTS members (name TEXT PRIMARY KEY, offset INTEGER, size INTEGER, header TEXT)")
-            db.execute("CREATE TABLE IF NOT EXISTS state (key TEXT PRIMARY KEY, value TEXT)")
-            pending = self._state(db, "pending_end")
-            if pending is not None:
-                if os.path.exists(self.path):
-                    self._rollback_append(pending)
-                self._rebuild(db)
-            elif self._state(db, "fingerprint") != self._fingerprint():
-                self._rebuild(db)
-            yield db
-        finally:
-            db.close()
+        fingerprint = self._fingerprint()
+        if self._index_cache is not None and self._index_cache[0] == fingerprint:
+            return self._index_cache[1]
+        index = self._load_index() if fingerprint is not None else {
+            "members": {}, "end": 0, "generation": 0, "embedded": False
+        }
+        self._index_cache = (fingerprint, index)
+        return index
 
-    def _rebuild(self, db):
+    def _load_index(self):
+        with open(self.path, "rb") as stream:
+            header = stream.read(512)
+            if not header:
+                return {"members": {}, "end": 0, "generation": 0, "embedded": False}
+            if not header.strip(b"\0"):
+                return self._rebuild()
+            first = tarfile.TarInfo.frombuf(header, "utf-8", "surrogateescape")
+            if first.name != self._LOCATOR_NAME:
+                return self._rebuild()
+            if not first.isfile() or first.size != 2 * self._SLOT_SIZE:
+                raise ValueError("invalid indexed tar locator")
+            slots = [stream.read(self._SLOT_SIZE) for _ in range(2)]
+            candidates = []
+            for slot in slots:
+                try:
+                    digest, payload = slot.rstrip(b"\0").split(b"\n", 1)
+                    if hashlib.sha256(payload).hexdigest().encode("ascii") == digest:
+                        pointer = json.loads(payload)
+                        if (pointer["version"] != 1 or not isinstance(pointer["generation"], int)
+                                or pointer["generation"] < 1):
+                            raise ValueError("unsupported indexed tar version")
+                        candidates.append(pointer)
+                except (ValueError, KeyError, TypeError):
+                    continue
+            for pointer in sorted(candidates, key=lambda item: item["generation"], reverse=True):
+                try:
+                    members = {}
+                    replaced = set()
+                    current = pointer
+                    while current is not None:
+                        records = self._read_index(stream, current)
+                        meta = next(records)
+                        prefixes = [self.normalize_name(name) for name in meta["replace"]]
+                        seen = set()
+                        for row in records:
+                            name, member_offset, member_size, header = row
+                            if (self.normalize_name(name) != name or name in seen
+                                    or member_offset < 3 * 512 or member_offset % 512
+                                    or member_size < 0 or member_offset + member_size > current["offset"] - 512
+                                    or not isinstance(header, str)):
+                                raise ValueError("invalid indexed tar member")
+                            seen.add(name)
+                            pieces = name.split("/")
+                            if name not in members and not any("/".join(pieces[:end]) in replaced
+                                                             for end in range(1, len(pieces) + 1)):
+                                members[name] = tuple(row)
+                        # Replacements hide older records, not this segment's entries.
+                        replaced.update(prefixes)
+                        previous = meta["previous"]
+                        if previous is not None and (previous["end"] > current["offset"] - 512
+                                                     or previous["generation"] >= current["generation"]):
+                            raise ValueError("invalid indexed tar history")
+                        current = previous
+                    return {"members": members, "end": pointer["end"], "pointer": pointer,
+                            "generation": pointer["generation"], "embedded": True}
+                except (ValueError, KeyError, TypeError, StopIteration, tarfile.HeaderError):
+                    continue
+        # Header replay here could expose an append which never published.
+        raise ValueError("no valid published index in indexed tar")
+
+    def _read_index(self, stream, pointer):
+        """Yield one segment's metadata and rows, checking its bounded payload."""
+        offset, size, end = pointer["offset"], pointer["size"], pointer["end"]
+        if (pointer["version"] != 1 or not isinstance(pointer["generation"], int)
+                or pointer["generation"] < 1 or offset < 4 * 512 or offset % 512 or size < 0
+                or end != offset + ((size + 511) // 512) * 512
+                or end > os.fstat(stream.fileno()).st_size):
+            raise ValueError("invalid indexed tar pointer")
+        stream.seek(offset - 512)
+        member = tarfile.TarInfo.frombuf(stream.read(512), "utf-8", "surrogateescape")
+        if member.name not in (self._INDEX_NAME, self._LEGACY_INDEX_NAME) or member.size != size or not member.isfile():
+            raise ValueError("invalid indexed tar index member")
+        if member.name == self._LEGACY_INDEX_NAME:
+            payload = stream.read(size)
+            if hashlib.sha256(payload).hexdigest() != pointer["sha256"]:
+                raise ValueError("invalid indexed tar checksum")
+            data = json.loads(payload)
+            if data["version"] != 1:
+                raise ValueError("unsupported indexed tar JSON version")
+            yield {"replace": [], "previous": None}
+            yield from data["members"]
+            return
+        digest = hashlib.sha256()
+        remaining = size
+        first = True
+        while remaining:
+            line = stream.readline(remaining)
+            if not line or not line.endswith(b"\n"):
+                raise ValueError("incomplete indexed tar JSONL record")
+            remaining -= len(line)
+            digest.update(line)
+            record = json.loads(line)
+            if first:
+                if record["version"] != 2 or not isinstance(record["replace"], list):
+                    raise ValueError("unsupported indexed tar JSONL version")
+                first = False
+            yield record
+        if first or digest.hexdigest() != pointer["sha256"]:
+            raise ValueError("invalid indexed tar checksum")
+
+    def _rebuild(self):
+        """Read an ordinary/legacy tar without creating any index files."""
+        members = {}
         end = 0
-        with db:
-            db.execute("DELETE FROM members")
-            if os.path.exists(self.path):
-                with tarfile.open(self.path, "r:") as archive:
-                    for member in archive:
-                        name = self.normalize_name(member.name)
-                        if member.pax_headers.get("mcutils.replace_tree") == "1":
-                            db.execute("DELETE FROM members WHERE name=? OR (name>=? AND name<?)",
-                                       (name, name + "/", name + "0"))
-                        if member.pax_headers.get("mcutils.deleted_tree") != "1":
-                            db.execute("INSERT OR REPLACE INTO members VALUES (?, ?, ?, ?)",
-                                       self._row(member, member.offset_data))
-                        end = member.offset_data + ((member.size + 511) // 512) * 512
-                        archive.members.clear()
-            self._set_state(db, fingerprint=self._fingerprint(), end=end, pending_end=None)
+        with tarfile.open(self.path, "r:") as archive:
+            for member in archive:
+                name = self.normalize_name(member.name)
+                if member.pax_headers.get("mcutils.replace_tree") == "1":
+                    for row in self._prefix_rows(members, name):
+                        members.pop(row[0])
+                if member.pax_headers.get("mcutils.deleted_tree") != "1":
+                    members[name] = self._row(member, member.offset_data)
+                end = member.offset_data + ((member.size + 511) // 512) * 512
+                archive.members.clear()
+        return {"members": members, "end": end, "generation": 0, "embedded": False}
+
+    @classmethod
+    def _write_locator(cls, archive):
+        if archive.offset != 0:
+            raise ValueError("indexed tar requires a fixed first member; global PAX headers are unsupported")
+        member = tarfile.TarInfo(cls._LOCATOR_NAME)
+        member.size = 2 * cls._SLOT_SIZE
+        archive.addfile(member, io.BytesIO(b"\0" * member.size))
+
+    @classmethod
+    def _write_index(cls, archive, members, generation, *, previous=None, prefixes=()):
+        meta = {"version": 2, "previous": previous, "replace": list(prefixes)}
+        digest = hashlib.sha256()
+        # Tar needs the size before its member header. Spool large snapshots
+        # instead of constructing another complete index-sized string.
+        with tempfile.SpooledTemporaryFile(max_size=1024 * 1024, mode="w+b") as payload:
+            for records in ((meta,), members.values()):
+                for record in records:
+                    line = (json.dumps(record, ensure_ascii=True, separators=(",", ":")) + "\n").encode("utf-8")
+                    payload.write(line)
+                    digest.update(line)
+            member = tarfile.TarInfo(cls._INDEX_NAME)
+            member.size = payload.tell()
+            payload.seek(0)
+            offset = archive.offset + 512
+            archive.addfile(member, payload)
+        return {"version": 1, "generation": generation, "offset": offset,
+                "size": member.size, "end": archive.offset, "sha256": digest.hexdigest()}
+
+    @classmethod
+    def _publish_index(cls, stream, pointer, *, sync=True):
+        # Persist all new members before changing either published pointer.
+        # Alternating checksummed slots preserve the previous generation if
+        # this write tears. Unpublished tail bytes are ignored on reopening.
+        stream.flush()
+        if sync:
+            os.fsync(stream.fileno())
+        payload = json.dumps(pointer, separators=(",", ":")).encode("ascii")
+        slot = hashlib.sha256(payload).hexdigest().encode("ascii") + b"\n" + payload
+        if len(slot) > cls._SLOT_SIZE:
+            raise ValueError("indexed tar locator overflow")
+        end = stream.tell()
+        stream.seek(512 + (pointer["generation"] % 2) * cls._SLOT_SIZE)
+        stream.write(slot.ljust(cls._SLOT_SIZE, b"\0"))
+        stream.flush()
+        if sync:
+            os.fsync(stream.fileno())
+        stream.seek(end)
 
     def _rollback_append(self, end):
         with open(self.path, "r+b") as stream:
@@ -1280,10 +1421,9 @@ class IndexedTarStore(ArchiveMapping):
             os.fsync(stream.fileno())
 
     @staticmethod
-    def _prefix_rows(db, prefix):
-        return db.execute(
-            "SELECT name, offset, size, header FROM members WHERE name=? OR (name>=? AND name<?) ORDER BY offset",
-            (prefix, prefix + "/", prefix + "0")).fetchall()
+    def _prefix_rows(members, prefix):
+        return sorted((row for name, row in members.items()
+                       if name == prefix or name.startswith(prefix + "/")), key=lambda row: row[1])
 
     @staticmethod
     def _add(archive, member, stream, rows):
@@ -1344,8 +1484,17 @@ class IndexedTarStore(ArchiveMapping):
         mode = "w" if compression is None else "w:" + compression
         with open(out_file, "wb") as stream:
             with tarfile.open(fileobj=stream, mode=mode, dereference=False, **options) as archive:
+                rows = []
+                if compression is None:
+                    cls._write_locator(archive)
                 for prefix, directory, files in trees:
-                    cls._write_tree(archive, cls.normalize_name(prefix), directory, files or {}, [])
+                    prefix = cls.normalize_name(prefix)
+                    rows = [row for row in rows if row[0] != prefix and not row[0].startswith(prefix + "/")]
+                    cls._write_tree(archive, prefix, directory, files or {}, rows)
+                if compression is None:
+                    pointer = cls._write_index(archive, {row[0]: row for row in rows}, 1)
+            if compression is None:
+                cls._publish_index(stream, pointer)
             stream.flush()
             os.fsync(stream.fileno())
 
@@ -1366,44 +1515,56 @@ class IndexedTarStore(ArchiveMapping):
         ordered = sorted(prefixes)
         if any(right.startswith(left + "/") for left, right in zip(ordered, ordered[1:])):
             raise ValueError("overlapping tree prefixes")
-        with self.lock(), self._index() as db:
-            end = self._state(db, "end", 0)
-            with db:
-                self._set_state(db, pending_end=end)
-            rows = []
+        with self.lock():
+            index = self._index()
+            if not index["embedded"]:
+                # Installing the first locator changes offsets, so upgrade an
+                # ordinary tar through the existing atomic replacement helper.
+                with atomic_file(self.path, "wb", keep_mode=False) as stream:
+                    self._write_snapshot(index, stream, trees=trees, deleted=deleted)
+                return
+            end = index["end"]
             try:
-                with open(self.path, "r+b" if os.path.exists(self.path) else "w+b") as stream:
+                with open(self.path, "r+b") as stream:
                     stream.seek(end)
                     with tarfile.open(fileobj=stream, mode="w", dereference=False) as archive:
-                        for prefix, directory, extra_files in trees:
-                            self._write_tree(archive, prefix, directory, extra_files, rows, deleted=deleted)
-                        next_end = archive.offset
+                        members, changes = self._append_trees(archive, index["members"], trees, deleted=deleted)
+                        pointer = self._write_index(archive, changes, index["generation"] + 1,
+                                                    previous=index["pointer"], prefixes=prefixes)
                     stream.truncate()
-                    stream.flush()
-                    os.fsync(stream.fileno())
-                with db:
-                    for prefix in prefixes:
-                        db.execute("DELETE FROM members WHERE name=? OR (name>=? AND name<?)",
-                                   (prefix, prefix + "/", prefix + "0"))
-                    db.executemany("INSERT OR REPLACE INTO members VALUES (?, ?, ?, ?)", rows)
-                    self._set_state(db, end=next_end, pending_end=None, fingerprint=self._fingerprint())
+                    self._publish_index(stream, pointer)
             except BaseException:
-                if os.path.exists(self.path):
-                    self._rollback_append(end)
-                self._rebuild(db)
+                self._rollback_append(end)
                 raise
+            self._index_cache = (self._fingerprint(), {
+                "members": members, "end": pointer["end"], "pointer": pointer,
+                "generation": pointer["generation"], "embedded": True
+            })
+
+    def _append_trees(self, archive, members, trees, *, deleted=False):
+        members = members.copy()
+        changes = {}
+        for prefix, directory, extra_files in trees:
+            rows = []
+            self._write_tree(archive, prefix, directory, extra_files, rows, deleted=deleted)
+            for row in self._prefix_rows(members, prefix):
+                members.pop(row[0])
+            members.update((row[0], row) for row in rows)
+            changes.update((row[0], row) for row in rows)
+        return members, changes
 
     def open(self, name):
         """Open one member in binary mode without scanning the tar or loading it."""
         name = self.normalize_name(name)
         if not os.path.exists(self.path):
             raise FileNotFoundError(name)
-        with self.lock(), self._index() as db:
+        with self.lock():
+            members = self._index()["members"]
             for _ in range(40):
-                row = db.execute("SELECT offset, size, header FROM members WHERE name=?", (name,)).fetchone()
+                row = members.get(name)
                 if row is None:
                     raise FileNotFoundError(name)
-                offset, size, header = row
+                _, offset, size, header = row
                 info = self._info(header)
                 if info.isfile():
                     return io.BufferedReader(_MemberReader(self.path, offset, size))
@@ -1426,49 +1587,51 @@ class IndexedTarStore(ArchiveMapping):
     def names(self, prefix=None):
         if not os.path.exists(self.path):
             return []
-        with self.lock(), self._index() as db:
+        with self.lock():
+            members = self._index()["members"]
             if prefix is None:
-                return [row[0] for row in db.execute("SELECT name FROM members ORDER BY name")]
-            return [row[0] for row in self._prefix_rows(db, self.normalize_name(prefix))]
+                return sorted(members)
+            return [row[0] for row in self._prefix_rows(members, self.normalize_name(prefix))]
 
     def compact(self):
         """Rewrite live members only, publishing with an atomic file replacement."""
         if not os.path.exists(self.path):
             return
-        with self.lock(), self._index() as db:
-            rows = db.execute("SELECT name, offset, size, header FROM members ORDER BY offset").fetchall()
+        with self.lock():
+            index = self._index()
             with atomic_file(self.path, "wb", keep_mode=False) as stream:
-                with tarfile.open(fileobj=stream, mode="w") as archive:
-                    for _, offset, size, header in rows:
-                        info = self._info(header)
-                        with _MemberReader(self.path, offset, size) if info.isfile() else contextlib.nullcontext() as source:
-                            archive.addfile(info, source)
-            self._rebuild(db)
+                self._write_snapshot(index, stream)
 
-    def _write_snapshot(self, db, stream):
-        rows = db.execute("SELECT offset, size, header FROM members ORDER BY offset").fetchall()
+    def _write_snapshot(self, index, stream, *, trees=(), deleted=False, sync=True):
+        if stream.tell() != 0:
+            raise ValueError("an indexed tar must start at offset zero in a seekable stream")
+        rows = []
         with tarfile.open(fileobj=stream, mode="w") as archive:
-            for offset, size, header in rows:
+            self._write_locator(archive)
+            for _, offset, size, header in sorted(index["members"].values(), key=lambda row: row[1]):
                 info = self._info(header)
                 with _MemberReader(self.path, offset, size) if info.isfile() else contextlib.nullcontext() as source:
-                    archive.addfile(info, source)
+                    self._add(archive, info, source, rows)
+            members, _ = self._append_trees(archive, {row[0]: row for row in rows}, trees, deleted=deleted)
+            pointer = self._write_index(archive, members, 1)
+        self._publish_index(stream, pointer, sync=sync)
 
-    def save(self, file, index_path=None):
-        """Save the current live view; saving to this store also compacts it."""
+    def save(self, file):
+        """Save the live view; saving to this store also compacts it.
+
+        File objects must be seekable and positioned at offset zero.
+        """
         if hasattr(file, "write"):
-            with self.lock(), self._index() as db:
-                self._write_snapshot(db, file)
+            with self.lock():
+                self._write_snapshot(self._index(), file, sync=False)
             return file
-        target = type(self)(file, index_path=index_path)
+        target = type(self)(file)
         if target.path == self.path:
             self.compact()
             return file
         with contextlib.ExitStack() as stack:
             for lock in sorted((self.lock, target.lock), key=lambda item: item.path):
                 stack.enter_context(lock())
-            db = stack.enter_context(self._index())
-            target_db = stack.enter_context(target._index())
             with atomic_file(target.path, "wb", keep_mode=False) as stream:
-                self._write_snapshot(db, stream)
-            target._rebuild(target_db)
+                self._write_snapshot(self._index(), stream)
         return file

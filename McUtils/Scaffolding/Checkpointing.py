@@ -1107,12 +1107,9 @@ class NumPyCheckpointer(DumpCheckpointer):
                 target.compact()
             os.replace(temp, path)
         finally:
-            for extra in (temp, temp + ".index.sqlite3", temp + ".lock"):
+            for extra in (temp, temp + ".lock"):
                 if os.path.exists(extra):
                     os.remove(extra)
-        for stale in (path + ".index.sqlite3",): # the index is rebuilt from the tar when it's needed
-            if os.path.exists(stale):
-                os.remove(stale)
         return path
 
     def __init__(self, file, cache=None, serializer=None, open_kwargs=None,

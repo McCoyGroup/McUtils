@@ -498,19 +498,28 @@ class PersistenceTests(unittest.TestCase):
             NumPyCheckpointer(self.path('x.npz'), backend='nope')
 
     def test_IndexedSaveOnlyAppendsOneKey(self):
+        import io, tarfile
+        from McUtils.Scaffolding.Storage import IndexedTarStore
         fn = self.path('many.npz')
         with Checkpointer.from_file(fn) as chk:
             for i in range(50):
                 chk['key%d' % i] = np.full(1000, i, dtype=np.float64)
         with open(fn, 'rb') as f:
             before = f.read()
+        with tarfile.open(fileobj=io.BytesIO(before), mode='r:') as archive:
+            previous_index = archive.getmember(IndexedTarStore._INDEX_NAME)
+            previous_end = previous_index.offset_data + ((previous_index.size + 511) // 512) * 512
         with Checkpointer.from_file(fn) as chk:
             chk['key7'] = np.zeros(1000)
         with open(fn, 'rb') as f:
             after = f.read()
-        self.assertTrue(after.startswith(before[:len(before) - 10240]))  # earlier members are untouched (tar pads the end to 10 kB)
+        # Publication updates the fixed locator; all earlier member bytes,
+        # including the previous embedded index, remain untouched.
+        self.assertEqual(after[1536:previous_end], before[1536:previous_end])
         growth = len(after) - len(before)
-        self.assertLess(growth, 3 * 8000 + 4096)  # about one key (the tar end marker is rewritten), not the file
+        with tarfile.open(fileobj=io.BytesIO(after), mode='r:') as archive:
+            index_size = archive.getmember(IndexedTarStore._INDEX_NAME).size
+        self.assertLess(growth, 3 * 8000 + 4096 + index_size)  # one key plus the current jump table
         with Checkpointer.from_file(fn) as chk:
             self.assertEqual(chk['key7'].tolist(), [0.] * 1000)
             self.assertEqual(chk['key8'][0], 8.)
