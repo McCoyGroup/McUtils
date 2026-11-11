@@ -1055,10 +1055,20 @@ class IndexedTarStore(ArchiveMapping):
     _LEGACY_INDEX_NAME = _METADATA_PREFIX + "/index.json"
     _SLOT_SIZE = 512
 
-    def __init__(self, path):
+    def __init__(self, path, *, read_only=False):
         self.path = os.path.abspath(os.fspath(path))
-        self.lock = FileStoreLock(self.path + ".lock")
+        self.read_only = bool(read_only)
+        self._read_guard = threading.RLock() if self.read_only else None
+        self.lock = self._read_lock if self.read_only else FileStoreLock(self.path + ".lock")
         self._index_cache = None
+
+    def _read_lock(self):
+        """Keep immutable readers thread-safe without a filesystem lock."""
+        return self._read_guard
+
+    def _check_writable(self):
+        if self.read_only:
+            raise PermissionError("cannot modify a read-only indexed tar")
 
     @classmethod
     def from_tree(cls, tree, file=None, **options):
@@ -1241,6 +1251,8 @@ class IndexedTarStore(ArchiveMapping):
         fingerprint = self._fingerprint()
         if self._index_cache is not None and self._index_cache[0] == fingerprint:
             return self._index_cache[1]
+        if self.read_only and self._index_cache is not None:
+            raise ValueError("read-only indexed tar changed while open")
         index = self._load_index() if fingerprint is not None else {
             "members": {}, "end": 0, "generation": 0, "embedded": False
         }
@@ -1505,6 +1517,7 @@ class IndexedTarStore(ArchiveMapping):
         files. Symlinks are stored as links, never followed while archiving.
         Source directories are left untouched; callers remove them after success.
         """
+        self._check_writable()
         trees = [(self.normalize_name(prefix), directory, {} if files is None else files)
                  for prefix, directory, files in trees]
         if not trees:
@@ -1581,6 +1594,7 @@ class IndexedTarStore(ArchiveMapping):
 
     def discard(self, prefix):
         """Forget a tree; compact later to reclaim superseded physical bytes."""
+        self._check_writable()
         if self.names(prefix):
             self.write_trees([(prefix, None, {})], deleted=True)
 
@@ -1595,6 +1609,7 @@ class IndexedTarStore(ArchiveMapping):
 
     def compact(self):
         """Rewrite live members only, publishing with an atomic file replacement."""
+        self._check_writable()
         if not os.path.exists(self.path):
             return
         with self.lock():
@@ -1628,6 +1643,11 @@ class IndexedTarStore(ArchiveMapping):
         target = type(self)(file)
         if target.path == self.path:
             self.compact()
+            return file
+        if self.read_only:
+            with self.lock(), target.lock():
+                with atomic_file(target.path, "wb", keep_mode=False) as stream:
+                    self._write_snapshot(self._index(), stream)
             return file
         with contextlib.ExitStack() as stack:
             for lock in sorted((self.lock, target.lock), key=lambda item: item.path):
