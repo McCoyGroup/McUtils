@@ -96,6 +96,8 @@ class Functionlike(metaclass=abc.ABCMeta):
     #     return cls.ast_np('array', ast.List(elts=[*args], ctx=ast.Load()))
 
     def compile(self, mode='numba'):
+        if mode == 'program':
+            return _FunctionProgram.from_function(self)
         self.reset_var()
         expr = eval(
             compile(
@@ -267,6 +269,124 @@ class Functionlike(metaclass=abc.ABCMeta):
 
     def tree_repr(self, sep="", indent=""):
         return "{}()".format(type(self).__name__)
+
+class _FunctionProgram(Functionlike):
+    """Portable numerical instructions for an existing elementary-function tree.
+
+    Unlike generated Python/Numba code this data program can be serialized using
+    primitive records, then evaluated without compilation on the destination.
+    The original function remains the symbolic/differentiation representation.
+    """
+    version = 1
+
+    def __init__(self, instructions, signature, elementary=False, idx=None):
+        self.instructions, self.signature = tuple(instructions), signature
+        self.elementary, self.idx = bool(elementary), idx
+
+    def __fingerprint__(self): return ('elementary-function-program', self.version, self.signature)
+
+    @classmethod
+    def from_function(cls, function):
+        from ...Devutils import fingerprint
+        instructions = [('input', (), None)]
+        compiled, selections = {}, {}
+        def select(data, index):
+            key = data, index
+            if key not in selections:
+                selections[key] = len(instructions)
+                instructions.append(('take', (data,), index))
+            return selections[key]
+        def describe(value, data):
+            kind = type(value)
+            if kind in {Variable, Identity}: return 'identity', (), data
+            if kind is Scalar: return 'constant', (), value.scalar
+            for constructor, operation, field in ((Power, 'power', 'power'), (Exponent, 'exponent', 'base'),
+                                                   (Logarithm, 'log', 'base')):
+                if kind is constructor:
+                    parameter = getattr(value, field)
+                    if isinstance(parameter, Functionlike):
+                        raise TypeError('function-valued power/base is not supported by numeric programs')
+                    return operation, (), parameter
+            for constructor, operation in ((Exp, 'exp'), (Ln, 'ln'), (Sin, 'sin'), (Cos, 'cos')):
+                if kind is constructor: return operation, (), None
+            if kind in {ElementarySummation, ElementaryProduct, Summation, Product}:
+                children = tuple((child, select(data, 0 if child.idx is None else child.idx)
+                                  if kind in {Summation, Product} and isinstance(child, ElementaryFunction)
+                                  else data) for child in value.functions)
+                return ('sum' if kind in {ElementarySummation, Summation} else 'product'), children, None
+            if kind in {ElementaryComposition, Composition}:
+                return 'composition', (), None
+            raise TypeError('unsupported function program: ' + kind.__name__)
+
+        # Composition changes the input reference for each child. This explicit
+        # work stack also handles deep nested sums/products without recursion.
+        pending = [('function', function, 0, False)]
+        while pending:
+            task = pending.pop()
+            if task[0] == 'composition':
+                _, value, original, remaining, data = task
+                if not remaining:
+                    compiled[id(value), original] = data
+                    continue
+                child = remaining[0]
+                argument = (select(data, 0 if child.idx is None else child.idx)
+                            if type(value) is Composition else data)
+                if (id(child), argument) not in compiled:
+                    pending.append(task)
+                    pending.append(('function', child, argument, False))
+                else:
+                    pending.append(('composition', value, original, remaining[1:], compiled[id(child), argument]))
+                continue
+            _, value, data, ready = task
+            key = id(value), data
+            if key in compiled: continue
+            operation, children, parameter = describe(value, data)
+            if operation == 'composition':
+                pending.append(('composition', value, data, tuple(reversed(value.functions)), data))
+                continue
+            if children and not ready:
+                pending.append(('function', value, data, True))
+                pending.extend(('function', child, argument, False) for child, argument in reversed(children))
+                continue
+            dependencies = (tuple(compiled[id(child), argument] for child, argument in children)
+                            if children or operation in {'sum', 'product'} else (data,))
+            compiled[key] = len(instructions)
+            instructions.append((operation, dependencies, parameter))
+        output = compiled[id(function), 0]
+        if output != len(instructions)-1:
+            instructions.append(('identity', (output,), None))
+        signature = fingerprint((cls.version, instructions, isinstance(function, ElementaryFunction),
+                                 getattr(function, 'idx', None)))
+        return cls(instructions, signature, isinstance(function, ElementaryFunction), getattr(function, 'idx', None))
+
+    def eval(self, r):
+        values = []
+        for operation, dependencies, parameter in self.instructions:
+            if operation == 'input': value = r
+            elif operation == 'take': value = values[dependencies[0]][..., parameter]
+            elif operation == 'identity': value = values[dependencies[0]]
+            elif operation == 'constant':
+                source = values[dependencies[0]]
+                value = np.broadcast_to(np.full(1, parameter, dtype=source.dtype), source.shape)
+            elif operation in {'sum', 'product'}:
+                arrays = [values[index] for index in dependencies]
+                value = np.sum(arrays, axis=0) if operation == 'sum' else np.prod(arrays, axis=0)
+            else:
+                source = values[dependencies[0]]
+                if operation == 'power': value = source**parameter
+                elif operation == 'exponent': value = parameter**source
+                elif operation == 'log': value = np.log(source)/np.log(parameter)
+                elif operation == 'exp': value = np.exp(source)
+                elif operation == 'ln': value = np.log(source)
+                elif operation == 'sin': value = np.sin(source)
+                elif operation == 'cos': value = np.cos(source)
+                else: raise ValueError('unsupported function program operation: ' + operation)
+            values.append(value)
+        return values[-1]
+
+    def deriv(self, *which, **options):
+        raise TypeError('differentiate the symbolic function before compiling its numeric program')
+
 
 class ElementaryFunction(Functionlike):
     """
