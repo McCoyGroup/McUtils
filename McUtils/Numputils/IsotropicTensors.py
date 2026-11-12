@@ -207,7 +207,7 @@ def isotropic_tensor_array(rank, tensor_terms, dtype=float):
 def rational_matrix_pivots(matrix):
     a = [list(map(Fraction, row)) for row in matrix]
     pivot_row, pivots = 0, []
-    for col in range(len(a)):
+    for col in range(len(a[0]) if a else 0):
         pivot = next((i for i in range(pivot_row, len(a)) if a[i][col]), None)
         if pivot is None:
             continue
